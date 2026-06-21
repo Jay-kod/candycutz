@@ -150,6 +150,10 @@ npm install
 
 ### 5. Start the servers
 
+**For Windows Users:**
+Simply double-click the `start.bat` file in the root directory! It will automatically open two terminal windows and boot up both the API and the Frontend.
+
+**For Mac/Linux Users (or manual startup):**
 Open **two terminals**:
 
 ```bash
@@ -170,6 +174,29 @@ npm run dev
 ### 6. Open the app
 
 Navigate to **http://localhost:5173** 🎉
+
+---
+
+## 🔑 Test Credentials (Default Users)
+
+If you imported the dummy data (`seed_data.sql`), you can use these accounts to demo the system:
+
+| Role         | Email                     | Password      |
+| ------------ | ------------------------- | ------------- |
+| **Customer** | `customer@candycutz.com`  | `customer123` |
+| **Super Admin**| `superadmin@candycutz.com`| *(See Database)* |
+| **Admin**    | `admin@candycutz.com`     | *(See Database)* |
+| **Barber**   | `marcus@candycutz.com`    | *(See Database)* |
+
+*(You can also register a new account directly from the frontend to test the customer flow).*
+
+---
+
+## 🛠 Troubleshooting
+
+- **500 Database Connection Failed**: Check your `barbing-saloon-api/.env` file. Ensure `DB_DATABASE` is set to `candycutz_db` (or whatever you named it in step 2) and that your MySQL server is running.
+- **CORS Issues / Blank Pages**: Ensure the API is running on `port 8000` as the frontend (`barbing-saloon-web/.env`) is strictly configured to communicate with `http://localhost:8000/api`.
+- **Changes not showing**: Run `npm run dev` again, or perform a hard refresh (`Ctrl + F5`) in your browser to clear Vite's cache.
 
 ---
 
