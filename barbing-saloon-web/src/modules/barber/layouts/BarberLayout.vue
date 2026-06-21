@@ -1,0 +1,32 @@
+<template>
+  <DashboardLayout
+    portalName="Barber"
+    homeRoute="/barber/dashboard"
+    profileRoute="/barber/profile"
+    :navItems="navItems"
+  >
+    <slot />
+  </DashboardLayout>
+</template>
+
+<script setup>
+import DashboardLayout from '../../../core/layouts/DashboardLayout.vue';
+import {
+  HomeIcon,
+  CalendarIcon,
+  ClipboardDocumentCheckIcon,
+  UserIcon,
+  ScissorsIcon,
+  PhotoIcon,
+  PencilSquareIcon
+} from '@heroicons/vue/24/outline';
+
+const navItems = [
+  { name: 'Dashboard', to: '/barber/dashboard', icon: HomeIcon },
+  { name: 'Schedule', to: '/barber/schedule', icon: CalendarIcon },
+  { name: 'Appointments', to: '/barber/appointments', icon: ClipboardDocumentCheckIcon },
+  { name: 'Services', to: '/barber/services', icon: ScissorsIcon },
+  { name: 'Gallery', to: '/barber/gallery', icon: PhotoIcon },
+  { name: 'Blog', to: '/barber/blog', icon: PencilSquareIcon },
+];
+</script>

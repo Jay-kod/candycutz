@@ -1,0 +1,1 @@
+var e=`/images/logo-icon.png`;export{e as t};

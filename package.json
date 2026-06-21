@@ -1,0 +1,10 @@
+{
+  "name": "candycutz-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "cd barbing-saloon-api && C:\\xampp\\php\\php.exe -S localhost:8000 -t public",
+    "dev:web": "cd barbing-saloon-web && npm run dev",
+    "dev": "start cmd /k \"npm run dev:api\" && start cmd /k \"npm run dev:web\""
+  }
+}

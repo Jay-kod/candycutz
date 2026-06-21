@@ -1,0 +1,92 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────
+  # MySQL 8.0 Database
+  # ─────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: candycutz-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: candycutz_db
+      MYSQL_USER: candycutz
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      # Auto-run migration & seed SQL on first boot
+      - ./barbing-saloon-api/database/migrations/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+      - ./barbing-saloon-api/database/migrations/fix_gallery_schema.sql:/docker-entrypoint-initdb.d/02_fix_gallery_schema.sql:ro
+      - ./barbing-saloon-api/database/migrations/add_images_update.sql:/docker-entrypoint-initdb.d/03_add_images_update.sql:ro
+      - ./barbing-saloon-api/database/migrations/seed_data.sql:/docker-entrypoint-initdb.d/04_seed_data.sql:ro
+      - ./barbing-saloon-api/database/migrations/seed_data_additional.sql:/docker-entrypoint-initdb.d/05_seed_data_additional.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - candycutz-net
+
+  # ─────────────────────────────────────────────
+  # PHP API (port 8000)
+  # ─────────────────────────────────────────────
+  api:
+    build:
+      context: ./barbing-saloon-api
+      dockerfile: Dockerfile
+    container_name: candycutz-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Live-reload: mount source so edits reflect immediately
+      - ./barbing-saloon-api:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: candycutz_db
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/public/settings || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - candycutz-net
+
+  # ─────────────────────────────────────────────
+  # Vue / Vite Frontend (port 5173)
+  # ─────────────────────────────────────────────
+  web:
+    build:
+      context: ./barbing-saloon-web
+      dockerfile: Dockerfile
+    container_name: candycutz-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      # Live-reload: mount source (exclude node_modules)
+      - ./barbing-saloon-web:/app
+      - /app/node_modules
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+    depends_on:
+      - api
+    networks:
+      - candycutz-net
+
+volumes:
+  db-data:
+
+networks:
+  candycutz-net:
+    driver: bridge
