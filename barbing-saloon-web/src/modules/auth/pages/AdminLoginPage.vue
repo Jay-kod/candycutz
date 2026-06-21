@@ -57,7 +57,7 @@
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> superadmin@salon.com</p>
+            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> superadmin@candycutz.com</p>
             <p class="text-theme-text"><span class="text-theme-muted">Password:</span> password</p>
           </div>
         </div>
@@ -176,7 +176,7 @@ import { useAuth } from '../composables/useAuth';
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
-const email = ref('superadmin@salon.com');
+const email = ref('superadmin@candycutz.com');
 const password = ref('password');
 const showPassword = ref(false);
 const rememberMe = ref(false);
@@ -190,7 +190,7 @@ const schema = object({
 });
 
 const demoAdminLogin = async () => {
-  email.value = 'superadmin@salon.com';
+  email.value = 'superadmin@candycutz.com';
   password.value = 'password';
   rememberMe.value = true;
   await submitForm();

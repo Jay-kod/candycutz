@@ -57,8 +57,8 @@
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> barber@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> barber123</p>
+            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> marcus@candycutz.com</p>
+            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> password</p>
           </div>
         </div>
 
@@ -176,8 +176,8 @@ import { useAuth } from '../composables/useAuth';
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
-const email = ref('barber@candycutz.com');
-const password = ref('barber123');
+const email = ref('marcus@candycutz.com');
+const password = ref('password');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -192,8 +192,8 @@ const schema = object({
 
 
 const demoBarberLogin = async () => {
-  email.value = 'barber@candycutz.com';
-  password.value = 'barber123';
+  email.value = 'marcus@candycutz.com';
+  password.value = 'password';
   rememberMe.value = true;
   await submitForm();
 };
