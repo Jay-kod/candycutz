@@ -7,7 +7,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Manage</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Services</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -30,18 +30,18 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="services.length === 0" class="rounded-2xl border border-white/[0.06] bg-charcoal/80 py-20 text-center">
+      <div v-else-if="services.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
         <ScissorsIcon class="mx-auto h-12 w-12 text-ivory/20" />
-        <h3 class="mt-4 font-display text-xl text-ivory">No services yet</h3>
+        <h3 class="mt-4 font-display text-xl text-theme-text">No services yet</h3>
         <p class="mt-2 text-sm text-ivory/50">Add your first service to start getting bookings.</p>
       </div>
 
       <!-- Services Table/Grid -->
-      <div v-else class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden">
+      <div v-else class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
-              <tr class="border-b border-white/[0.06]">
+              <tr class="border-b border-theme-border">
                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Service</th>
                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Price (₦)</th>
                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Duration</th>
@@ -53,16 +53,16 @@
               <tr
                 v-for="service in services"
                 :key="service.id"
-                class="border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]"
+                class="border-b border-theme-border transition-colors hover:bg-theme-surface/50"
               >
                 <td class="px-6 py-4">
-                  <p class="font-semibold text-ivory">{{ service.name }}</p>
+                  <p class="font-semibold text-theme-text">{{ service.name }}</p>
                   <p class="mt-0.5 text-xs text-ivory/40 line-clamp-1">{{ service.description || 'No description' }}</p>
                 </td>
                 <td class="px-6 py-4">
                   <span class="font-bold text-gold text-lg">₦{{ Number(service.price).toLocaleString() }}</span>
                 </td>
-                <td class="px-6 py-4 text-sm text-ivory/60">{{ service.duration_minutes }} min</td>
+                <td class="px-6 py-4 text-sm text-theme-muted">{{ service.duration_minutes }} min</td>
                 <td class="px-6 py-4">
                   <span
                     class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
@@ -91,26 +91,26 @@
       <!-- Modal Form -->
       <Teleport to="body">
         <div v-if="showForm" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showForm = false">
-          <div class="w-full max-w-lg rounded-2xl border border-gold/20 bg-charcoal p-8 shadow-2xl animate-fade-in">
-            <h2 class="font-display text-2xl text-ivory">{{ editingId ? 'Edit Service' : 'New Service' }}</h2>
+          <div class="w-full max-w-lg rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl animate-fade-in">
+            <h2 class="font-display text-2xl text-theme-text">{{ editingId ? 'Edit Service' : 'New Service' }}</h2>
             <form class="mt-6 space-y-5" @submit.prevent="saveService">
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Service Name</label>
-                <input v-model="form.name" type="text" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="e.g. Classic Fade" />
+                <input v-model="form.name" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="e.g. Classic Fade" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                   <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Price (₦)</label>
-                  <input v-model="form.price" type="number" min="0" step="100" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="5000" />
+                  <input v-model="form.price" type="number" min="0" step="100" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="5000" />
                 </div>
                 <div class="space-y-2">
                   <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Duration (min)</label>
-                  <input v-model="form.duration_minutes" type="number" min="5" step="5" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="30" />
+                  <input v-model="form.duration_minutes" type="number" min="5" step="5" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="30" />
                 </div>
               </div>
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Description</label>
-                <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Briefly describe this service..."></textarea>
+                <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Briefly describe this service..."></textarea>
               </div>
               <div class="flex items-center gap-3">
                 <input v-model="form.is_available" type="checkbox" id="available" class="h-4 w-4 rounded accent-gold" />
@@ -120,7 +120,7 @@
                 <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50">
                   {{ saving ? 'Saving...' : (editingId ? 'Update Service' : 'Create Service') }}
                 </button>
-                <button type="button" @click="showForm = false" class="rounded-xl border border-white/[0.08] px-6 py-3 text-sm font-medium text-ivory/60 hover:bg-white/5 transition-colors">
+                <button type="button" @click="showForm = false" class="rounded-xl border border-theme-border px-6 py-3 text-sm font-medium text-theme-muted hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>

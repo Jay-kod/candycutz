@@ -7,7 +7,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Customer Dashboard</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Reviews</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -18,12 +18,12 @@
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <form class="rounded-2xl border border-white/[0.06] bg-charcoal/80 p-8 backdrop-blur-sm" @submit.prevent="submit">
-          <h2 class="font-display text-2xl text-ivory">Write a <span class="text-gold">Review</span></h2>
+        <form class="rounded-2xl border border-theme-border bg-theme-surface/80 p-8 backdrop-blur-sm" @submit.prevent="submit">
+          <h2 class="font-display text-2xl text-theme-text">Write a <span class="text-gold">Review</span></h2>
           <div class="mt-6 space-y-5">
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Barber</label>
-              <select v-model="form.barber_id" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50">
+              <select v-model="form.barber_id" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50">
                 <option value="">Select barber</option>
                 <option v-for="barber in barbers" :key="barber.id" :value="barber.id">{{ barber.name }}</option>
               </select>
@@ -46,7 +46,7 @@
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Review</label>
-              <textarea v-model="form.comment" rows="5" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Tell us about your experience..."></textarea>
+              <textarea v-model="form.comment" rows="5" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Tell us about your experience..."></textarea>
             </div>
           </div>
           <button class="mt-8 w-full rounded-xl bg-gradient-to-r from-gold to-gold-dark py-4 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02]">
@@ -55,9 +55,9 @@
           <p v-if="status" class="mt-4 text-center text-sm font-medium text-emerald-400 bg-emerald-400/10 py-2 rounded-lg">{{ status }}</p>
         </form>
 
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 p-8 backdrop-blur-sm">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 p-8 backdrop-blur-sm">
           <div class="flex items-center justify-between">
-            <h2 class="font-display text-2xl text-ivory">Your <span class="text-gold">History</span></h2>
+            <h2 class="font-display text-2xl text-theme-text">Your <span class="text-gold">History</span></h2>
             <button class="rounded-lg p-2 text-ivory/40 hover:bg-gold/10 hover:text-gold transition-colors" @click="loadReviews" title="Refresh">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
             </button>
@@ -68,7 +68,7 @@
           </div>
 
           <div v-else class="mt-6 space-y-4">
-            <article v-for="item in reviews.data || reviews" :key="item.id" class="rounded-xl border border-white/[0.04] bg-obsidian/50 p-5 transition-all hover:border-gold/30 hover:bg-white/[0.02]">
+            <article v-for="item in reviews.data || reviews" :key="item.id" class="rounded-xl border border-theme-border bg-theme-bg/50 p-5 transition-all hover:border-gold/30 hover:bg-theme-surface/50">
               <div class="flex items-center gap-1 mb-2">
                 <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" :class="i <= item.rating ? 'text-gold' : 'text-white/10'">
                   <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clip-rule="evenodd" />
@@ -77,7 +77,7 @@
               <p class="text-sm text-ivory/80 italic">"{{ item.comment }}"</p>
             </article>
             
-            <div v-if="(reviews.data || reviews).length === 0" class="rounded-xl border border-dashed border-white/10 p-8 text-center">
+            <div v-if="(reviews.data || reviews).length === 0" class="rounded-xl border border-dashed border-theme-border p-8 text-center">
               <p class="text-sm text-ivory/40">You haven't left any reviews yet.</p>
             </div>
           </div>

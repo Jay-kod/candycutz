@@ -60,7 +60,7 @@
             <!-- Barber Details -->
             <div class="p-8 md:p-12 md:w-1/2 flex flex-col justify-center">
               <span class="text-xs uppercase tracking-[0.2em] font-semibold text-gold mb-2">Master Barber</span>
-              <h3 class="font-display text-4xl text-obsidian dark:text-ivory">{{ barber.name }}</h3>
+              <h3 class="font-display text-4xl text-obsidian dark:text-theme-text">{{ barber.name }}</h3>
               
               <div class="mt-4 flex items-center gap-4 text-sm font-medium">
                 <div class="flex items-center gap-1 text-gold">

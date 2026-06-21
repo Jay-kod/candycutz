@@ -22,7 +22,7 @@
              <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
           </div>
           <!-- Smart Hover Content -->
-          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-white translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-theme-text translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
             <p class="text-xs uppercase tracking-[0.25em] text-gold-light font-semibold opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">{{ item.category }}</p>
             <h2 class="mt-2 font-display text-2xl font-semibold">{{ item.title }}</h2>
             <p class="mt-3 text-sm text-white/80 line-clamp-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">{{ item.description }}</p>
@@ -36,21 +36,21 @@
     </section>
 
     <!-- Lightbox Overlay -->
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-obsidian/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
+    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-theme-bg/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
       <!-- Close Button -->
-      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-theme-surface/10 p-2 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors">
+      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-theme-surface/10 p-2 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
 
       <!-- Previous Button -->
-      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-theme-surface/10 p-3 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
+      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
       </button>
 
       <!-- Main Image -->
       <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
         <img v-if="gallery[currentIdx]?.image_path" :src="gallery[currentIdx].image_path" :alt="gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
-        <div class="mt-6 text-center text-white">
+        <div class="mt-6 text-center text-theme-text">
           <p class="text-sm font-semibold uppercase tracking-widest text-gold-light">{{ gallery[currentIdx]?.category }}</p>
           <h2 class="mt-2 font-display text-2xl md:text-3xl">{{ gallery[currentIdx]?.title }}</h2>
           <p class="mt-2 text-theme-muted max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Next Button -->
-      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-theme-surface/10 p-3 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === gallery.length - 1 }" :disabled="currentIdx === gallery.length - 1">
+      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === gallery.length - 1 }" :disabled="currentIdx === gallery.length - 1">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
       </button>
     </div>

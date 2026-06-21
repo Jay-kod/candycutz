@@ -39,7 +39,7 @@
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
             
-            <h1 class="font-display text-5xl md:text-7xl font-bold text-ivory leading-tight drop-shadow-2xl">
+            <h1 class="font-display text-5xl md:text-7xl font-bold text-theme-text leading-tight drop-shadow-2xl">
               {{ post.title }}
             </h1>
           </div>
@@ -57,11 +57,11 @@
               </div>
               
               <!-- Reactions & Sharing -->
-              <div class="mt-20 pt-10 border-t border-theme-border/50 flex flex-col md:flex-row items-center justify-between gap-8" data-reveal>
+              <div class="mt-20 pt-10 border-t border-theme-border flex flex-col md:flex-row items-center justify-between gap-8" data-reveal>
                 
                 <!-- Reaction Button -->
                 <div class="flex items-center gap-4">
-                  <button @click="toggleReaction" class="group flex items-center gap-3 rounded-full border border-theme-border bg-theme-surface px-6 py-3 transition-all duration-300 hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]" :class="{ 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-gold': isLiked, 'text-ivory': !isLiked }">
+                  <button @click="toggleReaction" class="group flex items-center gap-3 rounded-full border border-theme-border bg-theme-surface px-6 py-3 transition-all duration-300 hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]" :class="{ 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-gold': isLiked, 'text-theme-text': !isLiked }">
                     <svg xmlns="http://www.w3.org/2000/svg" :fill="isLiked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="1.5" :stroke="isLiked ? 'currentColor' : 'currentColor'" class="w-6 h-6 transition-transform group-hover:scale-125" :class="{'scale-125': isLiked}">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                     </svg>
@@ -74,10 +74,10 @@
                 <div class="flex items-center gap-4">
                   <span class="text-xs uppercase tracking-[0.2em] text-theme-muted">Share</span>
                   <!-- Dummy share buttons -->
-                  <button class="w-10 h-10 rounded-full border border-theme-border bg-theme-surface flex items-center justify-center text-ivory hover:text-gold hover:border-gold transition-colors">
+                  <button class="w-10 h-10 rounded-full border border-theme-border bg-theme-surface flex items-center justify-center text-theme-text hover:text-gold hover:border-gold transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
                   </button>
-                  <button class="w-10 h-10 rounded-full border border-theme-border bg-theme-surface flex items-center justify-center text-ivory hover:text-gold hover:border-gold transition-colors">
+                  <button class="w-10 h-10 rounded-full border border-theme-border bg-theme-surface flex items-center justify-center text-theme-text hover:text-gold hover:border-gold transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"/></svg>
                   </button>
                 </div>
@@ -105,7 +105,7 @@
                     </RouterLink>
                     <div>
                       <p class="text-[10px] uppercase tracking-widest text-gold-light mb-1">{{ formatDate(recent.created_at) }}</p>
-                      <RouterLink :to="`/blog/${recent.slug}`" class="block text-sm font-semibold text-ivory leading-snug group-hover:text-gold transition-colors line-clamp-2">
+                      <RouterLink :to="`/blog/${recent.slug}`" class="block text-sm font-semibold text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">
                         {{ recent.title }}
                       </RouterLink>
                     </div>

@@ -1,16 +1,16 @@
 <template>
   <AdminLayout>
     <section class="space-y-6">
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Services</p>
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
+        <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Services</p>
         <h1 class="mt-3 font-display text-4xl text-admin">Service catalog</h1>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <article v-for="service in services" :key="service.id" class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <article v-for="service in services" :key="service.id" class="rounded-3xl border border-theme-border bg-theme-surface p-6">
           <p class="text-xs uppercase tracking-[0.25em] text-admin-dark">{{ service.category?.name }}</p>
           <h2 class="mt-3 font-display text-2xl text-obsidian">{{ service.name }}</h2>
-          <p class="mt-3 text-sm text-[var(--color-text-muted)]">₦{{ service.price }} | {{ service.duration_minutes }} mins</p>
+          <p class="mt-3 text-sm text-theme-muted">₦{{ service.price }} | {{ service.duration_minutes }} mins</p>
         </article>
       </div>
     </section>

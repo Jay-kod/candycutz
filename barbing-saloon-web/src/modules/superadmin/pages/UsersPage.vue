@@ -1,18 +1,18 @@
 <template>
   <SuperAdminLayout>
     <section class="space-y-6">
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Users</p>
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
+        <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Users</p>
         <h1 class="mt-3 font-display text-4xl text-gold">Staff management</h1>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <article v-for="user in users.data || users" :key="user.id" class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <article v-for="user in users.data || users" :key="user.id" class="rounded-3xl border border-theme-border bg-theme-surface p-6">
           <div class="flex items-center justify-between gap-4">
             <div>
               <h2 class="font-display text-2xl text-obsidian">{{ user.name }}</h2>
               <p class="text-xs uppercase tracking-[0.25em] text-gold-dark">{{ user.role }}</p>
-              <p class="mt-2 text-sm text-[var(--color-text-muted)]">{{ user.email }}</p>
+              <p class="mt-2 text-sm text-theme-muted">{{ user.email }}</p>
             </div>
             <span :class="user.is_active ? 'bg-green-500' : 'bg-red-500'" class="h-3 w-3 rounded-full"></span>
           </div>

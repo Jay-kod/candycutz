@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center bg-[var(--color-bg)] text-[var(--color-text)]">
+  <div class="flex min-h-screen flex-col items-center justify-center bg-theme-bg text-theme-text">
     <section class="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
       <!-- Decorative background elements -->
       <div class="pointer-events-none absolute inset-0 overflow-hidden">

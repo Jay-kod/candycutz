@@ -102,14 +102,14 @@
             </div>
             
             <!-- Category Badge -->
-            <span class="absolute left-4 top-4 rounded-full bg-obsidian/80 backdrop-blur-md px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold shadow-sm">
+            <span class="absolute left-4 top-4 rounded-full bg-theme-bg/80 backdrop-blur-md px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold shadow-sm">
               {{ service.category?.name || 'Service' }}
             </span>
 
             <!-- Wishlist Button -->
             <button 
               @click="toggleWishlist(service.id)"
-              class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-obsidian/80 backdrop-blur-md text-white shadow-sm transition-all hover:bg-obsidian hover:scale-110 focus:outline-none"
+              class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-theme-bg/80 backdrop-blur-md text-theme-text shadow-sm transition-all hover:bg-theme-bg hover:scale-110 focus:outline-none"
               :class="{ 'text-danger': wishlist.includes(service.id) }"
               aria-label="Add to wishlist"
             >

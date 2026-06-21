@@ -7,7 +7,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Customer Dashboard</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Bookings</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -18,30 +18,30 @@
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <form class="rounded-2xl border border-white/[0.06] bg-charcoal/80 p-8 backdrop-blur-sm" @submit.prevent="submit">
-          <h2 class="font-display text-2xl text-ivory">Create <span class="text-gold">Booking</span></h2>
+        <form class="rounded-2xl border border-theme-border bg-theme-surface/80 p-8 backdrop-blur-sm" @submit.prevent="submit">
+          <h2 class="font-display text-2xl text-theme-text">Create <span class="text-gold">Booking</span></h2>
           <div class="mt-6 space-y-5">
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Barber</label>
-              <select v-model="form.barber_id" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50" @change="loadSlots">
+              <select v-model="form.barber_id" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50" @change="loadSlots">
                 <option value="">Select barber</option>
                 <option v-for="barber in barbers" :key="barber.id" :value="barber.id">{{ barber.name }}</option>
               </select>
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Service</label>
-              <select v-model="form.service_id" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50" @change="loadSlots">
+              <select v-model="form.service_id" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50" @change="loadSlots">
                 <option value="">Select service</option>
                 <option v-for="service in services" :key="service.id" :value="service.id">{{ service.name }} - ₦{{ service.price }}</option>
               </select>
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Date</label>
-              <input v-model="form.appointment_date" type="date" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50 [color-scheme:dark]" @change="loadSlots" />
+              <input v-model="form.appointment_date" type="date" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50 [color-scheme:dark]" @change="loadSlots" />
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Time</label>
-              <select v-model="form.appointment_time" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50" :disabled="!slots.length">
+              <select v-model="form.appointment_time" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50" :disabled="!slots.length">
                 <option value="">Select time</option>
                 <option v-for="slot in slots" :key="slot" :value="slot">{{ slot }}</option>
               </select>
@@ -49,7 +49,7 @@
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Notes</label>
-              <textarea v-model="form.notes" rows="3" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Any special requests?"></textarea>
+              <textarea v-model="form.notes" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Any special requests?"></textarea>
             </div>
           </div>
           <button class="mt-8 w-full rounded-xl bg-gradient-to-r from-gold to-gold-dark py-4 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02]">
@@ -57,9 +57,9 @@
           </button>
         </form>
 
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 p-8 backdrop-blur-sm">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 p-8 backdrop-blur-sm">
           <div class="flex items-center justify-between">
-            <h2 class="font-display text-2xl text-ivory">Your <span class="text-gold">History</span></h2>
+            <h2 class="font-display text-2xl text-theme-text">Your <span class="text-gold">History</span></h2>
             <button class="rounded-lg p-2 text-ivory/40 hover:bg-gold/10 hover:text-gold transition-colors" @click="loadBookings" title="Refresh">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
             </button>
@@ -70,10 +70,10 @@
           </div>
 
           <div v-else class="mt-6 space-y-4">
-            <article v-for="booking in bookings.data || bookings" :key="booking.id" class="rounded-xl border border-white/[0.04] bg-obsidian/50 p-5 transition-all hover:border-gold/30 hover:bg-white/[0.02]">
+            <article v-for="booking in bookings.data || bookings" :key="booking.id" class="rounded-xl border border-theme-border bg-theme-bg/50 p-5 transition-all hover:border-gold/30 hover:bg-theme-surface/50">
               <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                  <p class="font-display text-lg text-ivory">{{ booking.service?.name }}</p>
+                  <p class="font-display text-lg text-theme-text">{{ booking.service?.name }}</p>
                   <p class="mt-1 text-sm text-ivory/50">{{ booking.appointment_date }} at {{ booking.appointment_time }}</p>
                   <p class="text-sm text-ivory/50 mt-1">Barber: <span class="text-ivory/80 font-medium">{{ booking.barber?.name }}</span></p>
                 </div>
@@ -94,7 +94,7 @@
                     <button v-if="booking.status === 'pending'" class="rounded-lg bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold hover:bg-gold hover:text-obsidian transition-colors" @click="pay(booking)">
                       Pay Now
                     </button>
-                    <button v-if="booking.status === 'pending' || booking.status === 'confirmed'" class="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500 hover:text-white transition-colors" @click="cancel(booking.id)">
+                    <button v-if="booking.status === 'pending' || booking.status === 'confirmed'" class="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500 hover:text-theme-text transition-colors" @click="cancel(booking.id)">
                       Cancel
                     </button>
                   </div>
@@ -102,7 +102,7 @@
               </div>
             </article>
             
-            <div v-if="(bookings.data || bookings).length === 0" class="rounded-xl border border-dashed border-white/10 p-8 text-center">
+            <div v-if="(bookings.data || bookings).length === 0" class="rounded-xl border border-dashed border-theme-border p-8 text-center">
               <p class="text-sm text-ivory/40">No bookings found.</p>
             </div>
           </div>

@@ -6,7 +6,7 @@
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10">
           <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Profile</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
             Barber <span class="text-gold">Profile</span>
           </h1>
         </div>
@@ -15,14 +15,14 @@
       <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <!-- Profile Form -->
         <form
-          class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden"
+          class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden"
           @submit.prevent="submit"
         >
-          <div class="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
+          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
               <UserIcon class="h-5 w-5 text-gold" />
             </div>
-            <h2 class="font-display text-lg text-ivory">Personal Details</h2>
+            <h2 class="font-display text-lg text-theme-text">Personal Details</h2>
           </div>
 
           <div class="p-6 space-y-5">
@@ -30,7 +30,7 @@
               <span class="text-xs uppercase tracking-wider text-ivory/40 font-semibold">Name</span>
               <input
                 v-model="form.name"
-                class="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-ivory placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
+                class="mt-1.5 w-full rounded-xl border border-theme-border bg-white/[0.04] px-4 py-3 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
                 placeholder="Your full name"
               />
             </label>
@@ -38,7 +38,7 @@
               <span class="text-xs uppercase tracking-wider text-ivory/40 font-semibold">Phone</span>
               <input
                 v-model="form.phone"
-                class="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-ivory placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
+                class="mt-1.5 w-full rounded-xl border border-theme-border bg-white/[0.04] px-4 py-3 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
                 placeholder="Phone number"
               />
             </label>
@@ -47,7 +47,7 @@
               <textarea
                 v-model="form.bio"
                 rows="4"
-                class="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-ivory placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06] resize-none"
+                class="mt-1.5 w-full rounded-xl border border-theme-border bg-white/[0.04] px-4 py-3 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06] resize-none"
                 placeholder="Tell clients about yourself..."
               ></textarea>
             </label>
@@ -55,7 +55,7 @@
               <span class="text-xs uppercase tracking-wider text-ivory/40 font-semibold">Instagram</span>
               <input
                 v-model="form.instagram_url"
-                class="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-ivory placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
+                class="mt-1.5 w-full rounded-xl border border-theme-border bg-white/[0.04] px-4 py-3 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-colors focus:border-gold/30 focus:bg-white/[0.06]"
                 placeholder="https://instagram.com/..."
               />
             </label>
@@ -73,12 +73,12 @@
         </form>
 
         <!-- Specialties Card -->
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden h-fit">
-          <div class="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden h-fit">
+          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-400/10">
               <SparklesIcon class="h-5 w-5 text-emerald-400" />
             </div>
-            <h2 class="font-display text-lg text-ivory">Specialties</h2>
+            <h2 class="font-display text-lg text-theme-text">Specialties</h2>
           </div>
 
           <div class="p-6">

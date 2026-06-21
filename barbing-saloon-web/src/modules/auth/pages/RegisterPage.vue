@@ -4,7 +4,7 @@
     <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
     <div class="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
       <!-- Background Effects -->
-      <div class="absolute inset-0 bg-obsidian z-0"></div>
+      <div class="absolute inset-0 bg-theme-bg z-0"></div>
       <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent z-0"></div>
       <div class="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent z-0"></div>
       
@@ -14,7 +14,7 @@
       
       <!-- Content -->
       <div class="relative z-10">
-        <a href="/" class="text-2xl font-display font-bold text-ivory tracking-widest uppercase flex flex-col items-center gap-2">
+        <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
           <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-36 w-36 object-contain drop-shadow-[0_0_16px_rgba(212,175,55,0.5)] rounded-full" />
           <span><span class="text-gold">Candy</span>Cutz</span>
         </a>
@@ -22,7 +22,7 @@
       
       <div class="relative z-10 max-w-lg">
         <div class="w-12 h-1 bg-gold mb-8 mx-auto"></div>
-        <h2 class="font-display text-5xl text-ivory leading-tight mb-6">
+        <h2 class="font-display text-5xl text-theme-text leading-tight mb-6">
           Join the<br />CandyCutz family.
         </h2>
         <p class="text-lg text-theme-muted font-light leading-relaxed">
@@ -38,11 +38,11 @@
     </div>
 
     <!-- Right Section: Register Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border/30 overflow-y-auto">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border overflow-y-auto">
       
       <!-- Mobile Logo -->
       <div class="absolute top-8 left-8 lg:hidden">
-        <a href="/" class="text-xl font-display font-bold text-ivory tracking-widest uppercase flex flex-col gap-1 w-fit">
+        <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col gap-1 w-fit">
           <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-8 w-8 object-contain rounded-full" />
           <span><span class="text-gold">Candy</span>Cutz</span>
         </a>
@@ -71,7 +71,7 @@
             <input 
               v-model="name" 
               id="reg-name"
-              class="w-full bg-charcoal border border-graphite rounded-lg px-4 py-3 text-white text-sm font-medium placeholder-neutral focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               placeholder="John Doe" 
             />
             <p v-if="errors.name" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.name }}</p>
@@ -83,7 +83,7 @@
             <input 
               v-model="phone" 
               id="reg-phone"
-              class="w-full bg-charcoal border border-graphite rounded-lg px-4 py-3 text-white text-sm font-medium placeholder-neutral focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               placeholder="+234 800 000 0000" 
             />
             <p v-if="errors.phone" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.phone }}</p>
@@ -95,7 +95,7 @@
             <input 
               v-model="email" 
               id="reg-email"
-              class="w-full bg-charcoal border border-graphite rounded-lg px-4 py-3 text-white text-sm font-medium placeholder-neutral focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               placeholder="you@example.com" 
               type="email" 
             />
@@ -108,7 +108,7 @@
             <input 
               v-model="password" 
               id="reg-password"
-              class="w-full bg-charcoal border border-graphite rounded-lg px-4 py-3 text-white text-sm font-medium placeholder-neutral focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               type="password" 
               placeholder="Minimum 8 characters" 
             />
@@ -121,7 +121,7 @@
             <input 
               v-model="passwordConfirmation" 
               id="reg-password-confirm"
-              class="w-full bg-charcoal border border-graphite rounded-lg px-4 py-3 text-white text-sm font-medium placeholder-neutral focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               type="password" 
               placeholder="Re-enter your password" 
             />

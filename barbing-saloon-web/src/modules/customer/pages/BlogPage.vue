@@ -50,7 +50,7 @@
               <span class="w-1 h-1 rounded-full bg-theme-border"></span>
               <span>{{ formatDate(posts[0].created_at) }}</span>
             </div>
-            <h2 class="font-display text-4xl text-ivory leading-tight group-hover:text-gold transition-colors">{{ posts[0].title }}</h2>
+            <h2 class="font-display text-4xl text-theme-text leading-tight group-hover:text-gold transition-colors">{{ posts[0].title }}</h2>
             <p class="mt-6 text-base leading-relaxed text-theme-muted line-clamp-3">{{ posts[0].excerpt }}</p>
             <div class="mt-10">
               <RouterLink :to="`/blog/${posts[0].slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">
@@ -62,7 +62,7 @@
         </article>
 
         <!-- Regular Posts Grid -->
-        <div v-if="posts.length > 1" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 pt-8 border-t border-theme-border/50">
+        <div v-if="posts.length > 1" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 pt-8 border-t border-theme-border">
           <article v-for="(post, index) in posts.slice(1)" :key="post.id" :data-reveal-delay="index * 100" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col shadow-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 hover:-translate-y-1">
             <div class="relative aspect-[4/3] w-full overflow-hidden bg-theme-bg">
               <img v-if="post.featured_image" :src="post.featured_image" :alt="post.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -71,7 +71,7 @@
               <div class="flex items-center justify-between text-xs uppercase tracking-[0.15em] font-semibold text-gold-light mb-3">
                 <span>{{ formatDate(post.created_at) }}</span>
               </div>
-              <h3 class="font-display text-2xl text-ivory leading-snug group-hover:text-gold transition-colors line-clamp-2">{{ post.title }}</h3>
+              <h3 class="font-display text-2xl text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">{{ post.title }}</h3>
               <p class="mt-4 text-sm leading-relaxed text-theme-muted line-clamp-3">{{ post.excerpt }}</p>
               <div class="mt-auto pt-8">
                 <RouterLink :to="`/blog/${post.slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">

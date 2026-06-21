@@ -6,7 +6,7 @@
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10">
           <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Customer Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
             Your <span class="text-gold">Wishlist</span>
           </h1>
           <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -21,7 +21,7 @@
 
       <div v-else-if="wishlist.length === 0" class="rounded-xl border border-gold/10 bg-surface py-20 text-center">
         <HeartIcon class="mx-auto h-12 w-12 text-theme-muted/50" />
-        <h3 class="mt-4 font-display text-2xl text-ivory">Your wishlist is empty</h3>
+        <h3 class="mt-4 font-display text-2xl text-theme-text">Your wishlist is empty</h3>
         <p class="mt-2 text-theme-muted">Browse our gallery or services to save your favorites.</p>
         <RouterLink to="/" class="mt-6 inline-block rounded-full bg-gold px-6 py-2.5 font-semibold text-obsidian transition-colors hover:bg-gold-light">
           Browse Styles
@@ -30,14 +30,14 @@
 
       <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div v-for="item in wishlist" :key="item.id" class="group relative overflow-hidden rounded-xl border border-gold/10 bg-surface transition-all hover:border-gold/30">
-          <div class="aspect-square w-full overflow-hidden bg-obsidian">
+          <div class="aspect-square w-full overflow-hidden bg-theme-bg">
             <img 
               v-if="item.item_type === 'gallery'" 
               :src="item.gallery_image" 
               alt="Style" 
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div v-else class="flex h-full w-full items-center justify-center bg-charcoal">
+            <div v-else class="flex h-full w-full items-center justify-center bg-theme-surface">
                <ScissorsIcon class="h-16 w-16 text-gold/20" />
             </div>
           </div>
@@ -48,7 +48,7 @@
                 <TrashIcon class="h-5 w-5" />
               </button>
             </div>
-            <h3 class="mt-2 font-display text-xl text-ivory">
+            <h3 class="mt-2 font-display text-xl text-theme-text">
               {{ item.item_type === 'gallery' ? item.gallery_title : item.service_name }}
             </h3>
             <p v-if="item.item_type === 'service'" class="mt-1 font-bold text-theme-text">₦{{ item.price }}</p>

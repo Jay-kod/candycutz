@@ -29,16 +29,16 @@
             <div class="mx-auto w-full max-w-7xl px-6 pb-20">
               <div data-reveal class="max-w-3xl">
                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-gold-light mb-4">Master Barber</p>
-                <h1 class="font-display text-6xl md:text-8xl font-bold text-ivory drop-shadow-2xl">{{ barber.name }}</h1>
+                <h1 class="font-display text-6xl md:text-8xl font-bold text-theme-text drop-shadow-2xl">{{ barber.name }}</h1>
                 
                 <div class="mt-8 flex flex-wrap items-center gap-8">
                   <!-- Stat: Experience -->
-                  <div class="flex items-center gap-3 bg-white/5 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10">
+                  <div class="flex items-center gap-3 bg-white/5 backdrop-blur-md px-6 py-3 rounded-2xl border border-theme-border">
                     <span class="font-display text-3xl text-gold">{{ barber.years_experience }}</span>
                     <span class="text-xs uppercase tracking-widest text-ivory/80 leading-tight">Years<br>Exp</span>
                   </div>
                   <!-- Stat: Rating -->
-                  <div class="flex items-center gap-3 bg-white/5 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10">
+                  <div class="flex items-center gap-3 bg-white/5 backdrop-blur-md px-6 py-3 rounded-2xl border border-theme-border">
                     <span class="font-display text-3xl text-gold">{{ barber.rating }}</span>
                     <div class="flex flex-col">
                       <div class="flex text-gold">
@@ -79,7 +79,7 @@
               <div class="rounded-3xl border border-theme-border bg-theme-surface p-8 shadow-2xl relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 
-                <h3 class="font-display text-3xl text-ivory mb-2">Book an Appointment</h3>
+                <h3 class="font-display text-3xl text-theme-text mb-2">Book an Appointment</h3>
                 <p class="text-theme-muted text-sm mb-8">Secure your slot with {{ barber.name }} today.</p>
                 
                 <RouterLink to="/customer/login" class="group flex w-full items-center justify-center gap-3 rounded-2xl bg-gold py-5 text-lg font-bold text-obsidian shadow-[0_0_40px_-10px_rgba(212,175,55,0.5)] hover:shadow-[0_0_60px_-10px_rgba(212,175,55,0.7)] transition-all duration-300 hover:-translate-y-1">
@@ -121,7 +121,7 @@
                 <img v-if="item.image_path" :src="item.image_path" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
               </div>
-              <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 text-white translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
+              <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 text-theme-text translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
                 <p class="text-xs uppercase tracking-[0.3em] text-gold font-bold opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">{{ item.category }}</p>
                 <h3 class="mt-2 font-display text-3xl">{{ item.title }}</h3>
                 
@@ -136,21 +136,21 @@
     </main>
 
     <!-- Lightbox Overlay -->
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-obsidian/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
+    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-theme-bg/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
       <!-- Close Button -->
-      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-theme-surface/10 p-2 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors">
+      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-theme-surface/10 p-2 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
 
       <!-- Previous Button -->
-      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-theme-surface/10 p-3 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
+      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
       </button>
 
       <!-- Main Image -->
       <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
         <img v-if="barber.gallery[currentIdx]?.image_path" :src="barber.gallery[currentIdx].image_path" :alt="barber.gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
-        <div class="mt-6 text-center text-white">
+        <div class="mt-6 text-center text-theme-text">
           <p class="text-sm font-semibold uppercase tracking-widest text-gold-light">{{ barber.gallery[currentIdx]?.category }}</p>
           <h2 class="mt-2 font-display text-2xl md:text-3xl">{{ barber.gallery[currentIdx]?.title }}</h2>
           <p class="mt-2 text-theme-muted max-w-2xl mx-auto">{{ barber.gallery[currentIdx]?.description }}</p>
@@ -158,7 +158,7 @@
       </div>
 
       <!-- Next Button -->
-      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-theme-surface/10 p-3 text-white hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === (barber.gallery.length - 1) }" :disabled="currentIdx === (barber.gallery.length - 1)">
+      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === (barber.gallery.length - 1) }" :disabled="currentIdx === (barber.gallery.length - 1)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
       </button>
     </div>

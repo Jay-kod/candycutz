@@ -7,7 +7,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Portfolio</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Gallery</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -30,9 +30,9 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="gallery.length === 0" class="rounded-2xl border border-white/[0.06] bg-charcoal/80 py-20 text-center">
+      <div v-else-if="gallery.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
         <PhotoIcon class="mx-auto h-12 w-12 text-ivory/20" />
-        <h3 class="mt-4 font-display text-xl text-ivory">No gallery images yet</h3>
+        <h3 class="mt-4 font-display text-xl text-theme-text">No gallery images yet</h3>
         <p class="mt-2 text-sm text-ivory/50">Upload photos of your best cuts to attract customers.</p>
       </div>
 
@@ -41,7 +41,7 @@
         <div
           v-for="item in gallery"
           :key="item.id"
-          class="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-charcoal/80 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]"
+          class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]"
         >
           <div class="aspect-square overflow-hidden">
             <img
@@ -54,7 +54,7 @@
           <div class="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <div class="flex items-end justify-between">
               <div>
-                <p class="font-display text-lg text-white">{{ item.title }}</p>
+                <p class="font-display text-lg text-theme-text">{{ item.title }}</p>
                 <p class="text-xs text-gold-light/80">{{ item.category }}</p>
               </div>
               <button
@@ -72,22 +72,22 @@
       <!-- Upload Modal -->
       <Teleport to="body">
         <div v-if="showUploadForm" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showUploadForm = false">
-          <div class="w-full max-w-lg rounded-2xl border border-gold/20 bg-charcoal p-8 shadow-2xl animate-fade-in">
-            <h2 class="font-display text-2xl text-ivory">Upload Gallery Image</h2>
+          <div class="w-full max-w-lg rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl animate-fade-in">
+            <h2 class="font-display text-2xl text-theme-text">Upload Gallery Image</h2>
             <form class="mt-6 space-y-5" @submit.prevent="uploadImage">
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Image URL</label>
-                <input v-model="uploadForm.image_url" type="url" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="https://example.com/image.jpg" />
+                <input v-model="uploadForm.image_url" type="url" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="https://example.com/image.jpg" />
                 <p class="text-xs text-ivory/30">Paste a direct link to your image</p>
               </div>
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Title</label>
-                <input v-model="uploadForm.title" type="text" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="e.g. Clean Low Fade" />
+                <input v-model="uploadForm.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="e.g. Clean Low Fade" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                   <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Category</label>
-                  <select v-model="uploadForm.category" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory outline-none transition-colors focus:border-gold/50">
+                  <select v-model="uploadForm.category" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text outline-none transition-colors focus:border-gold/50">
                     <option value="Haircut">Haircut</option>
                     <option value="Beard">Beard</option>
                     <option value="Design">Design</option>
@@ -98,13 +98,13 @@
               </div>
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Description</label>
-                <textarea v-model="uploadForm.description" rows="2" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Optional description..."></textarea>
+                <textarea v-model="uploadForm.description" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Optional description..."></textarea>
               </div>
               <div class="flex gap-3 pt-2">
                 <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50">
                   {{ saving ? 'Uploading...' : 'Add to Gallery' }}
                 </button>
-                <button type="button" @click="showUploadForm = false" class="rounded-xl border border-white/[0.08] px-6 py-3 text-sm font-medium text-ivory/60 hover:bg-white/5 transition-colors">
+                <button type="button" @click="showUploadForm = false" class="rounded-xl border border-theme-border px-6 py-3 text-sm font-medium text-theme-muted hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>

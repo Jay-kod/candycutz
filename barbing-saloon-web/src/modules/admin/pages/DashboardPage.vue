@@ -1,23 +1,23 @@
 <template>
   <AdminLayout>
     <section class="space-y-8">
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Admin Dashboard</p>
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
+        <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Admin Dashboard</p>
         <h1 class="mt-3 font-display text-4xl text-admin">Operational overview</h1>
       </div>
 
       <div class="grid gap-4 md:grid-cols-4">
-        <article v-for="item in statsCards" :key="item.label" class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-          <p class="text-sm text-[var(--color-text-muted)]">{{ item.label }}</p>
+        <article v-for="item in statsCards" :key="item.label" class="rounded-3xl border border-theme-border bg-theme-surface p-6">
+          <p class="text-sm text-theme-muted">{{ item.label }}</p>
           <p class="mt-3 font-display text-3xl text-obsidian">{{ item.value }}</p>
         </article>
       </div>
 
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-6">
         <h2 class="font-display text-2xl text-admin">Reports snapshot</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <article class="rounded-2xl border border-white/70 bg-white px-4 py-4">
-            <p class="text-sm text-[var(--color-text-muted)]">Revenue estimate</p>
+            <p class="text-sm text-theme-muted">Revenue estimate</p>
             <p class="mt-2 font-display text-2xl text-obsidian">₦{{ dashboard.reports?.revenue_estimate ?? 0 }}</p>
           </article>
         </div>

@@ -1,35 +1,35 @@
 <template>
   <AdminLayout>
     <section class="space-y-8">
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Site Configuration</p>
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
+        <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Site Configuration</p>
         <h1 class="mt-3 font-display text-4xl text-admin">Settings</h1>
       </div>
 
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
         <h2 class="font-display text-2xl text-admin mb-6">Hero Section</h2>
         <form @submit.prevent="saveSettings" class="space-y-6">
           
           <div>
-            <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Hero Title</label>
-            <input v-model="settings.hero_title" type="text" class="w-full rounded-xl border border-white/10 bg-black/20 p-4 text-white focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin" required />
+            <label class="block text-sm font-medium text-theme-muted mb-2">Hero Title</label>
+            <input v-model="settings.hero_title" type="text" class="w-full rounded-xl border border-theme-border bg-black/20 p-4 text-theme-text focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin" required />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Hero Subtitle</label>
-            <textarea v-model="settings.hero_subtitle" rows="3" class="w-full rounded-xl border border-white/10 bg-black/20 p-4 text-white focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin" required></textarea>
+            <label class="block text-sm font-medium text-theme-muted mb-2">Hero Subtitle</label>
+            <textarea v-model="settings.hero_subtitle" rows="3" class="w-full rounded-xl border border-theme-border bg-black/20 p-4 text-theme-text focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin" required></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Hero Background Image</label>
+            <label class="block text-sm font-medium text-theme-muted mb-2">Hero Background Image</label>
             <div v-if="currentHeroImage" class="mb-4">
-              <img :src="getStorageUrl(currentHeroImage)" alt="Current Hero Image" class="h-48 w-auto object-cover rounded-xl border border-white/10" />
+              <img :src="getStorageUrl(currentHeroImage)" alt="Current Hero Image" class="h-48 w-auto object-cover rounded-xl border border-theme-border" />
             </div>
-            <input type="file" @change="handleImageUpload" accept="image/jpeg,image/png,image/webp" class="w-full text-sm text-[var(--color-text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-admin file:px-4 file:py-2 file:text-sm file:font-semibold file:text-obsidian hover:file:bg-admin-light" />
+            <input type="file" @change="handleImageUpload" accept="image/jpeg,image/png,image/webp" class="w-full text-sm text-theme-muted file:mr-4 file:rounded-full file:border-0 file:bg-admin file:px-4 file:py-2 file:text-sm file:font-semibold file:text-obsidian hover:file:bg-admin-light" />
             <p class="mt-2 text-xs text-white/50">Recommended: 1920x1080 (Max 2MB, JPG/PNG/WEBP)</p>
           </div>
 
-          <div class="pt-4 border-t border-white/10 flex justify-end">
+          <div class="pt-4 border-t border-theme-border flex justify-end">
             <button type="submit" :disabled="saving" class="rounded-full bg-admin px-8 py-3 font-bold text-obsidian shadow-[0_0_15px_rgba(255,103,0,0.3)] transition hover:scale-105 hover:bg-admin-light disabled:opacity-50 disabled:hover:scale-100">
               {{ saving ? 'Saving...' : 'Save Settings' }}
             </button>

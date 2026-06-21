@@ -15,7 +15,7 @@ header('Content-Type: application/json');
 
 // Database connection
 $host = 'localhost';
-$db = 'barbing_saloon';
+$db = 'candycutz_db';
 $user = 'root';
 $pass = '';
 

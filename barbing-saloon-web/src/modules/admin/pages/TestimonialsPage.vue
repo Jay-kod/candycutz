@@ -11,7 +11,7 @@
           <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div>
               <div class="flex items-center gap-3">
-                <h2 class="font-display text-2xl text-obsidian dark:text-ivory">{{ item.client_name }}</h2>
+                <h2 class="font-display text-2xl text-obsidian dark:text-theme-text">{{ item.client_name }}</h2>
                 <div class="flex text-admin text-sm">
                   <span v-for="i in 5" :key="i">
                     <svg v-if="i <= item.rating" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
@@ -29,7 +29,7 @@
                 {{ item.is_approved ? 'Approved' : 'Pending' }}
               </span>
 
-              <button v-if="!item.is_approved" @click="toggleApproval(item)" class="flex items-center justify-center gap-2 rounded-lg bg-obsidian text-ivory px-4 py-2 text-sm font-medium hover:bg-obsidian-light transition-colors">
+              <button v-if="!item.is_approved" @click="toggleApproval(item)" class="flex items-center justify-center gap-2 rounded-lg bg-theme-bg text-theme-text px-4 py-2 text-sm font-medium hover:bg-obsidian-light transition-colors">
                 Approve
               </button>
               <button v-else @click="toggleApproval(item)" class="flex items-center justify-center gap-2 rounded-lg border border-theme-border bg-theme-bg px-4 py-2 text-sm font-medium hover:bg-theme-surface transition-colors">

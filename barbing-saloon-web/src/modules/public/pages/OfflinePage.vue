@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center bg-[var(--color-bg)] px-6 py-20 text-center text-[var(--color-text)]">
+  <div class="flex min-h-screen flex-col items-center justify-center bg-theme-bg px-6 py-20 text-center text-theme-text">
     <!-- Decorative background -->
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
       <div class="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
@@ -27,7 +27,7 @@
       <h1 class="font-display text-4xl font-bold text-theme-text md:text-5xl">
         You're Offline
       </h1>
-      <p class="mt-4 text-lg text-[var(--color-text-muted)]">
+      <p class="mt-4 text-lg text-theme-muted">
         It seems your connection dropped. Check your internet and try again — your fresh cut awaits.
       </p>
     </div>
@@ -44,7 +44,7 @@
     </button>
 
     <!-- Status indicator -->
-    <div class="mt-12 flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
+    <div class="mt-12 flex items-center gap-3 text-sm text-theme-muted">
       <span class="relative flex h-2.5 w-2.5">
         <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-75"></span>
         <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-danger"></span>

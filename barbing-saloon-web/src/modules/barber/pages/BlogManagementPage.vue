@@ -7,7 +7,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Content</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Blog</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -30,9 +30,9 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="posts.length === 0" class="rounded-2xl border border-white/[0.06] bg-charcoal/80 py-20 text-center">
+      <div v-else-if="posts.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
         <PencilSquareIcon class="mx-auto h-12 w-12 text-ivory/20" />
-        <h3 class="mt-4 font-display text-xl text-ivory">No blog posts yet</h3>
+        <h3 class="mt-4 font-display text-xl text-theme-text">No blog posts yet</h3>
         <p class="mt-2 text-sm text-ivory/50">Start writing to engage with your audience.</p>
       </div>
 
@@ -41,7 +41,7 @@
         <div
           v-for="post in posts"
           :key="post.id"
-          class="group rounded-2xl border border-white/[0.06] bg-charcoal/80 p-6 backdrop-blur-sm transition-all hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.06)]"
+          class="group rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.06)]"
         >
           <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div class="flex-1 min-w-0">
@@ -55,7 +55,7 @@
                 </span>
                 <span class="text-xs text-ivory/30">{{ formatDate(post.created_at) }}</span>
               </div>
-              <h3 class="mt-3 font-display text-xl text-ivory group-hover:text-gold transition-colors line-clamp-1">{{ post.title }}</h3>
+              <h3 class="mt-3 font-display text-xl text-theme-text group-hover:text-gold transition-colors line-clamp-1">{{ post.title }}</h3>
               <p v-if="post.excerpt" class="mt-2 text-sm text-ivory/50 line-clamp-2">{{ post.excerpt }}</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -77,20 +77,20 @@
       <!-- Editor Modal -->
       <Teleport to="body">
         <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showEditor = false">
-          <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-charcoal p-8 shadow-2xl animate-fade-in custom-scrollbar">
-            <h2 class="font-display text-2xl text-ivory">{{ editingId ? 'Edit Post' : 'New Post' }}</h2>
+          <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl animate-fade-in custom-scrollbar">
+            <h2 class="font-display text-2xl text-theme-text">{{ editingId ? 'Edit Post' : 'New Post' }}</h2>
             <form class="mt-6 space-y-5" @submit.prevent="savePost">
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Title</label>
-                <input v-model="form.title" type="text" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50" placeholder="e.g. 5 Tips for the Perfect Fade" />
+                <input v-model="form.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="e.g. 5 Tips for the Perfect Fade" />
               </div>
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Excerpt</label>
-                <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
+                <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
               </div>
               <div class="space-y-2">
                 <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Content</label>
-                <textarea v-model="form.content" rows="12" required class="w-full rounded-xl border border-white/[0.08] bg-obsidian px-4 py-3 text-ivory placeholder-ivory/30 outline-none transition-colors focus:border-gold/50 resize-none font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
+                <textarea v-model="form.content" rows="12" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
               </div>
               <div class="flex items-center gap-3">
                 <input v-model="form.is_published" type="checkbox" id="publish" class="h-4 w-4 rounded accent-gold" />
@@ -100,7 +100,7 @@
                 <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50">
                   {{ saving ? 'Saving...' : (editingId ? 'Update Post' : 'Create Post') }}
                 </button>
-                <button type="button" @click="showEditor = false" class="rounded-xl border border-white/[0.08] px-6 py-3 text-sm font-medium text-ivory/60 hover:bg-white/5 transition-colors">
+                <button type="button" @click="showEditor = false" class="rounded-xl border border-theme-border px-6 py-3 text-sm font-medium text-theme-muted hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>

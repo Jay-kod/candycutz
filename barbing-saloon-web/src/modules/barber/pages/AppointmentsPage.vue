@@ -7,26 +7,26 @@
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Appointments</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Manage Your <span class="text-gold">Chair List</span>
             </h1>
           </div>
-          <div class="flex items-center gap-2 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5">
+          <div class="flex items-center gap-2 rounded-xl bg-white/[0.04] border border-theme-border px-4 py-2.5">
             <MagnifyingGlassIcon class="h-4 w-4 text-ivory/30" />
             <input
               v-model="search"
               type="text"
               placeholder="Search client..."
-              class="bg-transparent text-sm text-ivory placeholder:text-ivory/25 outline-none w-40"
+              class="bg-transparent text-sm text-theme-text placeholder:text-ivory/25 outline-none w-40"
             />
           </div>
         </div>
       </div>
 
       <!-- Appointments List -->
-      <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden">
+      <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
         <!-- Table Header -->
-        <div class="hidden md:grid grid-cols-[1fr_1fr_0.7fr_0.5fr_auto] gap-4 border-b border-white/[0.06] px-6 py-3.5 text-[11px] uppercase tracking-wider text-ivory/30 font-semibold">
+        <div class="hidden md:grid grid-cols-[1fr_1fr_0.7fr_0.5fr_auto] gap-4 border-b border-theme-border px-6 py-3.5 text-[11px] uppercase tracking-wider text-ivory/30 font-semibold">
           <span>Client</span>
           <span>Service</span>
           <span>Date & Time</span>
@@ -38,7 +38,7 @@
           <div
             v-for="appointment in filteredAppointments"
             :key="appointment.id"
-            class="group md:grid md:grid-cols-[1fr_1fr_0.7fr_0.5fr_auto] md:items-center gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]"
+            class="group md:grid md:grid-cols-[1fr_1fr_0.7fr_0.5fr_auto] md:items-center gap-4 px-6 py-4 transition-colors hover:bg-theme-surface/50"
           >
             <!-- Client -->
             <div class="flex items-center gap-3">
@@ -46,17 +46,17 @@
                 {{ initials(appointment.client_name) }}
               </div>
               <div>
-                <p class="text-sm font-semibold text-ivory">{{ appointment.client_name }}</p>
+                <p class="text-sm font-semibold text-theme-text">{{ appointment.client_name }}</p>
                 <p class="text-[11px] text-ivory/30 md:hidden">{{ appointment.service?.name || 'General' }}</p>
               </div>
             </div>
 
             <!-- Service -->
-            <p class="hidden md:block text-sm text-ivory/60">{{ appointment.service?.name || 'General' }}</p>
+            <p class="hidden md:block text-sm text-theme-muted">{{ appointment.service?.name || 'General' }}</p>
 
             <!-- Date & Time -->
             <div class="mt-1 md:mt-0">
-              <p class="text-sm text-ivory/60 font-medium tracking-wider">{{ appointment.appointment_date }}</p>
+              <p class="text-sm text-theme-muted font-medium tracking-wider">{{ appointment.appointment_date }}</p>
               <p class="text-[11px] text-gold/50 font-medium tracking-wider">{{ appointment.appointment_time }}</p>
             </div>
 
@@ -81,7 +81,7 @@
               </button>
               <button
                 @click="markNoShow(appointment.id)"
-                class="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] px-3 py-1.5 text-[11px] font-semibold text-ivory/40 hover:border-red-400/30 hover:text-red-400 transition-colors"
+                class="inline-flex items-center gap-1 rounded-lg border border-theme-border px-3 py-1.5 text-[11px] font-semibold text-ivory/40 hover:border-red-400/30 hover:text-red-400 transition-colors"
               >
                 No show
               </button>

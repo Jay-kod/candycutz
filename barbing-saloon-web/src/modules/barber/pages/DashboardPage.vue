@@ -7,7 +7,7 @@
         <div class="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gold/8 blur-3xl"></div>
         <div class="relative z-10">
           <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Barber Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
             Today's <span class="text-gold">Chair View</span>
           </h1>
           <p class="mt-2 max-w-2xl text-sm text-ivory/50 leading-relaxed">
@@ -21,7 +21,7 @@
         <article
           v-for="(item, index) in statsCards"
           :key="item.label"
-          class="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-charcoal/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-gold/20 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]"
+          class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-gold/20 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]"
         >
           <div class="absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             :class="item.gradient"
@@ -33,7 +33,7 @@
             </div>
             
             <div class="mt-1">
-              <p class="text-5xl font-extrabold text-ivory font-sans tracking-tight leading-none">{{ item.value }}</p>
+              <p class="text-5xl font-extrabold text-theme-text font-sans tracking-tight leading-none">{{ item.value }}</p>
             </div>
             
             <div class="mt-auto pt-6">
@@ -46,13 +46,13 @@
       <!-- Main Grid: Appointments + Actions -->
       <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         <!-- Today's Appointments -->
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden">
-          <div class="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
+          <div class="flex items-center justify-between border-b border-theme-border px-6 py-5">
             <div class="flex items-center gap-3">
               <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
                 <CalendarDaysIcon class="h-5 w-5 text-gold" />
               </div>
-              <h2 class="font-display text-lg text-ivory">Today's Appointments</h2>
+              <h2 class="font-display text-lg text-theme-text">Today's Appointments</h2>
             </div>
             <RouterLink
               to="/barber/appointments"
@@ -67,7 +67,7 @@
             <div
               v-for="appointment in (dashboard.today_appointments || [])"
               :key="appointment.id"
-              class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]"
+              class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-theme-surface/50"
             >
               <!-- Time Indicator -->
               <div class="flex flex-col items-center pt-1">
@@ -77,7 +77,7 @@
 
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-semibold text-ivory truncate">{{ appointment.client_name }}</p>
+                  <p class="text-sm font-semibold text-theme-text truncate">{{ appointment.client_name }}</p>
                   <span class="shrink-0 text-xs text-gold/60 font-medium tracking-wider">{{ appointment.appointment_time }}</span>
                 </div>
                 <p class="mt-0.5 text-xs text-ivory/40">{{ appointment.service?.name || 'General' }}</p>
@@ -96,7 +96,7 @@
                   </button>
                   <button
                     @click="markNoShow(appointment.id)"
-                    class="inline-flex items-center gap-1 rounded-full border border-white/[0.08] px-2.5 py-0.5 text-[10px] font-semibold text-ivory/40 uppercase tracking-wider hover:border-red-400/30 hover:text-red-400 transition-colors"
+                    class="inline-flex items-center gap-1 rounded-full border border-theme-border px-2.5 py-0.5 text-[10px] font-semibold text-ivory/40 uppercase tracking-wider hover:border-red-400/30 hover:text-red-400 transition-colors"
                   >
                     No show
                   </button>
@@ -118,19 +118,19 @@
         <!-- Quick Actions -->
         <div class="space-y-4">
           <!-- Action Card -->
-          <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm p-6">
+          <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm p-6">
             <div class="flex items-center gap-3 mb-5">
               <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
                 <BoltIcon class="h-5 w-5 text-gold" />
               </div>
-              <h2 class="font-display text-lg text-ivory">Quick Actions</h2>
+              <h2 class="font-display text-lg text-theme-text">Quick Actions</h2>
             </div>
             <div class="space-y-2">
               <RouterLink
                 v-for="action in quickActions"
                 :key="action.to"
                 :to="action.to"
-                class="group flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3.5 transition-all duration-200 hover:border-gold/15 hover:bg-gold/5"
+                class="group flex items-center gap-3 rounded-xl border border-theme-border bg-theme-surface/50 px-4 py-3.5 transition-all duration-200 hover:border-gold/15 hover:bg-gold/5"
               >
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors"
                   :class="action.iconBg"
@@ -138,7 +138,7 @@
                   <component :is="action.icon" class="h-4 w-4" :class="action.iconColor" />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-ivory group-hover:text-gold transition-colors">{{ action.label }}</p>
+                  <p class="text-sm font-medium text-theme-text group-hover:text-gold transition-colors">{{ action.label }}</p>
                   <p class="text-[11px] text-ivory/30">{{ action.description }}</p>
                 </div>
                 <ChevronRightIcon class="h-4 w-4 text-ivory/20 transition-all group-hover:text-gold/60 group-hover:translate-x-0.5" />
@@ -147,13 +147,13 @@
           </div>
 
           <!-- Today's Overview Mini Card -->
-          <div class="rounded-2xl border border-white/[0.06] bg-gradient-to-br from-gold/10 via-charcoal/80 to-charcoal/80 backdrop-blur-sm p-6">
+          <div class="rounded-2xl border border-theme-border bg-gradient-to-br from-gold/10 via-charcoal/80 to-charcoal/80 backdrop-blur-sm p-6">
             <div class="flex items-center gap-3 mb-4">
               <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/15">
                 <ClockIcon class="h-5 w-5 text-gold" />
               </div>
               <div>
-                <h3 class="text-sm font-semibold text-ivory">Today's Progress</h3>
+                <h3 class="text-sm font-semibold text-theme-text">Today's Progress</h3>
                 <p class="text-[11px] text-ivory/40">{{ formattedDate }}</p>
               </div>
             </div>

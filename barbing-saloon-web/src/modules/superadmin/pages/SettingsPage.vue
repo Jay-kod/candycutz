@@ -1,18 +1,18 @@
 <template>
   <SuperAdminLayout>
     <section class="space-y-6">
-      <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Settings</p>
+      <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
+        <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Settings</p>
         <h1 class="mt-3 font-display text-4xl text-gold">System configuration</h1>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-2">
-        <article v-for="(value, group) in settings" :key="group" class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <article v-for="(value, group) in settings" :key="group" class="rounded-3xl border border-theme-border bg-theme-surface p-6">
           <h2 class="font-display text-2xl text-gold capitalize">{{ group }}</h2>
           <div class="mt-6 space-y-4">
             <div v-for="(val, key) in value" :key="key" class="grid gap-2">
-              <label class="text-sm text-[var(--color-text-muted)]">{{ key }}</label>
-              <div class="rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-obsidian">{{ val }}</div>
+              <label class="text-sm text-theme-muted">{{ key }}</label>
+              <div class="rounded-2xl border border-theme-border bg-white px-4 py-3 text-obsidian">{{ val }}</div>
             </div>
           </div>
         </article>

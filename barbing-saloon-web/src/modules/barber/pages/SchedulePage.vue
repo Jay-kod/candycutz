@@ -6,7 +6,7 @@
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10">
           <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Schedule</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-ivory">
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
             Working Hours & <span class="text-gold">Bookings</span>
           </h1>
         </div>
@@ -15,18 +15,18 @@
       <!-- Grid: Working Hours + Upcoming -->
       <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <!-- Working Hours Card -->
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden">
-          <div class="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
+          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
               <ClockIcon class="h-5 w-5 text-gold" />
             </div>
-            <h2 class="font-display text-lg text-ivory">Working Hours</h2>
+            <h2 class="font-display text-lg text-theme-text">Working Hours</h2>
           </div>
           <div class="p-4 space-y-1.5">
             <div
               v-for="hour in schedule.working_hours || []"
               :key="hour.id"
-              class="group flex items-center justify-between rounded-xl px-4 py-3 transition-colors hover:bg-white/[0.02]"
+              class="group flex items-center justify-between rounded-xl px-4 py-3 transition-colors hover:bg-theme-surface/50"
             >
               <div class="flex items-center gap-3">
                 <div class="h-2 w-2 rounded-full" :class="hour.is_closed ? 'bg-red-400/60' : 'bg-emerald-400/60'"></div>
@@ -47,28 +47,28 @@
         </div>
 
         <!-- Upcoming Appointments Card -->
-        <div class="rounded-2xl border border-white/[0.06] bg-charcoal/80 backdrop-blur-sm overflow-hidden">
-          <div class="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
+        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
+          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-400/10">
               <CalendarDaysIcon class="h-5 w-5 text-blue-400" />
             </div>
-            <h2 class="font-display text-lg text-ivory">Upcoming Appointments</h2>
+            <h2 class="font-display text-lg text-theme-text">Upcoming Appointments</h2>
           </div>
 
           <div class="divide-y divide-white/[0.04]">
             <div
               v-for="appointment in schedule.appointments || []"
               :key="appointment.id"
-              class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]"
+              class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-theme-surface/50"
             >
               <!-- Date Block -->
-              <div class="flex flex-col items-center shrink-0 rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 min-w-[56px]">
+              <div class="flex flex-col items-center shrink-0 rounded-xl bg-white/[0.04] border border-theme-border px-3 py-2 min-w-[56px]">
                 <span class="text-[10px] uppercase tracking-wider text-ivory/30 font-semibold">{{ getMonth(appointment.appointment_date) }}</span>
-                <span class="text-lg font-bold text-ivory font-display leading-tight">{{ getDay(appointment.appointment_date) }}</span>
+                <span class="text-lg font-bold text-theme-text font-display leading-tight">{{ getDay(appointment.appointment_date) }}</span>
               </div>
 
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-ivory truncate">{{ appointment.client_name }}</p>
+                <p class="text-sm font-semibold text-theme-text truncate">{{ appointment.client_name }}</p>
                 <p class="mt-0.5 text-xs text-ivory/40">{{ appointment.service?.name || 'General' }}</p>
                 <div class="mt-1.5 flex items-center gap-2">
                   <ClockIcon class="h-3 w-3 text-gold/50" />
