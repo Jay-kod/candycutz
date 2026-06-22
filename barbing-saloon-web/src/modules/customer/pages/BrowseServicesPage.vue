@@ -8,7 +8,7 @@
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Browse</p>
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-              Our <span class="text-gold">Services</span>
+              Our <span class="text-gold">Services</span> <span class="text-xl text-ivory/50">({{ services.length }})</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
               Explore our menu of premium grooming services and book your next appointment directly.
@@ -150,7 +150,10 @@ import { onMounted, ref, watch, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { publicApi } from '../../public/api/public.api';
+import { customerApi } from '../api/customer.api';
+import { useToast } from '../../../core/composables/useToast';
 
+const toast = useToast();
 const services = ref([]);
 const wishlist = ref([]);
 const activeCategory = ref('All');
@@ -176,29 +179,51 @@ function changeCategory(cat) {
   }, 400); 
 }
 
-function toggleWishlist(id) {
+async function toggleWishlist(id) {
+  const serviceName = services.value.find(s => s.id === id)?.name || 'Item';
+  
   if (wishlist.value.includes(id)) {
+    // Optimistic UI update
     wishlist.value = wishlist.value.filter(itemId => itemId !== id);
+    try {
+      await customerApi.removeFromWishlistByType('service', id);
+      toast.info(`${serviceName} removed from wishlist`);
+    } catch (err) {
+      // Revert if failed
+      wishlist.value.push(id);
+      toast.error('Failed to remove from wishlist');
+    }
   } else {
+    // Optimistic UI update
     wishlist.value.push(id);
+    try {
+      await customerApi.addToWishlist({ item_type: 'service', item_id: id });
+      toast.success(`${serviceName} added to wishlist`);
+    } catch (err) {
+      // Revert if failed
+      wishlist.value = wishlist.value.filter(itemId => itemId !== id);
+      toast.error('Failed to add to wishlist');
+    }
   }
 }
 
-watch(wishlist, (newWishlist) => {
-  localStorage.setItem('candycutz_wishlist', JSON.stringify(newWishlist));
-}, { deep: true });
-
 onMounted(async () => {
   try {
-    const response = await publicApi.services();
-    services.value = response.data.data;
+    const [servicesRes, wishlistRes] = await Promise.all([
+      publicApi.services(),
+      customerApi.getWishlist().catch(() => ({ data: [] })) // Handle case where user is not logged in gracefully, though they should be
+    ]);
     
-    const savedWishlist = localStorage.getItem('candycutz_wishlist');
-    if (savedWishlist) {
-      wishlist.value = JSON.parse(savedWishlist);
-    }
+    services.value = servicesRes.data.data;
+    
+    // Map wishlist to array of service IDs
+    const dbWishlist = wishlistRes?.data?.data || (Array.isArray(wishlistRes?.data) ? wishlistRes.data : []);
+    wishlist.value = dbWishlist
+      .filter(item => item.item_type === 'service')
+      .map(item => item.item_id);
+      
   } catch (error) {
-    console.error('Failed to load services:', error);
+    console.error('Failed to load data:', error);
   } finally {
     isLoading.value = false;
   }

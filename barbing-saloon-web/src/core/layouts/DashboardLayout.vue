@@ -179,7 +179,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
 import { useDark, useToggle } from '@vueuse/core';
 import {

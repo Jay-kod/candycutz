@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../../core/composables/useToast';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import { adminApi } from '../api/admin.api';
 

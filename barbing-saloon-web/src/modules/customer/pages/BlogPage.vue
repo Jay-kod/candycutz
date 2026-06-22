@@ -2,7 +2,7 @@
   <CustomerLayout>
     <section class="mx-auto max-w-7xl px-4 md:px-6 py-24 text-theme-text min-h-screen">
       <div data-reveal class="max-w-3xl mb-16">
-        <p class="text-sm uppercase tracking-[0.3em] font-semibold text-gold-light">The Journal</p>
+        <p class="text-sm uppercase tracking-[0.3em] font-semibold text-gold-light">The Blog</p>
         <h1 class="mt-4 font-display text-4xl sm:text-5xl text-gold md:text-7xl">Style, Trends & Updates</h1>
         <p class="mt-6 text-xl text-theme-muted font-light leading-relaxed">Discover the latest in men's grooming, expert styling tips, and news from inside CandyCutz.</p>
       </div>
@@ -53,7 +53,7 @@
             <h2 class="font-display text-4xl text-theme-text leading-tight group-hover:text-gold transition-colors">{{ posts[0].title }}</h2>
             <p class="mt-6 text-base leading-relaxed text-theme-muted line-clamp-3">{{ posts[0].excerpt }}</p>
             <div class="mt-10">
-              <RouterLink :to="`/blog/${posts[0].slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">
+              <RouterLink :to="`/customer/dashboard/blog/${posts[0].slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">
                 Read more
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 transition-transform group-hover:translate-x-1"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </RouterLink>
@@ -74,7 +74,7 @@
               <h3 class="font-display text-2xl text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">{{ post.title }}</h3>
               <p class="mt-4 text-sm leading-relaxed text-theme-muted line-clamp-3">{{ post.excerpt }}</p>
               <div class="mt-auto pt-8">
-                <RouterLink :to="`/blog/${post.slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">
+                <RouterLink :to="`/customer/dashboard/blog/${post.slug}`" class="inline-flex items-center gap-2 text-sm font-bold text-gold hover:text-gold-light transition-colors">
                   Read more
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 transition-transform group-hover:translate-x-1"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </RouterLink>

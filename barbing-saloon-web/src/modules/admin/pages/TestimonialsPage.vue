@@ -32,9 +32,6 @@
               <button v-if="!item.is_approved" @click="toggleApproval(item)" class="flex items-center justify-center gap-2 rounded-lg bg-theme-bg text-theme-text px-4 py-2 text-sm font-medium hover:bg-obsidian-light transition-colors">
                 Approve
               </button>
-              <button v-else @click="toggleApproval(item)" class="flex items-center justify-center gap-2 rounded-lg border border-theme-border bg-theme-bg px-4 py-2 text-sm font-medium hover:bg-theme-surface transition-colors">
-                Unapprove
-              </button>
               
               <button @click="deleteReview(item.id)" class="flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 transition-colors">
                 Delete
@@ -68,9 +65,8 @@ const loadTestimonials = async () => {
 
 const toggleApproval = async (item) => {
   try {
-    const newStatus = !item.is_approved;
-    await adminApi.updateTestimonial(item.id, { is_approved: newStatus });
-    item.is_approved = newStatus;
+    await adminApi.approveTestimonial(item.id);
+    item.is_approved = true; // In our backend approve sets it to true. Wait, is there an unapprove?
   } catch (error) {
     console.error("Failed to update approval", error);
   }

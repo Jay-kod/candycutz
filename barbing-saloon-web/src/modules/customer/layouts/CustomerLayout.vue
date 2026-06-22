@@ -30,7 +30,7 @@ const navItems = [
   { name: 'Reviews', to: '/customer/dashboard/reviews', icon: StarIcon },
   { name: 'Wishlist', to: '/customer/dashboard/wishlist', icon: HeartIcon },
   { name: 'Gallery', to: '/customer/dashboard/gallery', icon: PhotoIcon },
-  { name: 'Journal', to: '/customer/dashboard/blog', icon: BookOpenIcon },
+  { name: 'Blog', to: '/customer/dashboard/blog', icon: BookOpenIcon },
   { name: 'Testimonials', to: '/customer/dashboard/testimonials', icon: ChatBubbleLeftRightIcon },
 ];
 </script>

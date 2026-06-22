@@ -57,6 +57,17 @@
               </div>
               <h3 class="mt-3 font-display text-xl text-theme-text group-hover:text-gold transition-colors line-clamp-1">{{ post.title }}</h3>
               <p v-if="post.excerpt" class="mt-2 text-sm text-ivory/50 line-clamp-2">{{ post.excerpt }}</p>
+              
+              <div class="mt-4 flex items-center gap-4 text-xs font-medium">
+                <div class="flex items-center gap-1.5 text-gold" title="Loves">
+                  <HeartIcon class="h-4 w-4" />
+                  <span>{{ post.loves_count || 0 }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-red-400" title="Dislikes">
+                  <HandThumbDownIcon class="h-4 w-4" />
+                  <span>{{ post.dislikes_count || 0 }}</span>
+                </div>
+              </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <button @click="openEditor(post)" class="rounded-lg p-2.5 text-ivory/40 hover:bg-gold/10 hover:text-gold transition-colors" title="Edit">
@@ -116,9 +127,9 @@
 import { ref, reactive, onMounted } from 'vue';
 import BarberLayout from '../layouts/BarberLayout.vue';
 import { barberApi } from '../api/barber.api';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
-import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const { confirm } = useConfirm();

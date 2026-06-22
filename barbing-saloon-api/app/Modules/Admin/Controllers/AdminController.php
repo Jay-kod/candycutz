@@ -154,6 +154,13 @@ class AdminController
         return ApiResponse::success(new TestimonialResource($this->adminService->featureTestimonial($testimonial)), 'Testimonial feature toggled');
     }
 
+    public function deleteTestimonial(Testimonial $testimonial)
+    {
+        $this->adminService->deleteTestimonial($testimonial);
+
+        return ApiResponse::success(null, 'Testimonial deleted');
+    }
+
     public function blogPosts()
     {
         return ApiResponse::success($this->adminService->blogPosts(), 'Blog posts loaded');

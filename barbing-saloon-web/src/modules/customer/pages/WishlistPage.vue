@@ -44,7 +44,7 @@
           <div class="p-5">
             <div class="flex items-center justify-between">
               <span class="text-xs uppercase tracking-widest text-gold-light font-medium">{{ item.item_type }}</span>
-              <button @click="removeItem(item.id)" class="text-red-400/70 hover:text-red-400 transition-colors">
+              <button @click="removeItem(item.id, item.item_type === 'gallery' ? item.gallery_title : item.service_name)" class="text-red-400/70 hover:text-red-400 transition-colors">
                 <TrashIcon class="h-5 w-5" />
               </button>
             </div>
@@ -72,16 +72,18 @@ import { RouterLink } from 'vue-router';
 import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { HeartIcon, ScissorsIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { customerApi } from '../api/customer.api';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../../core/composables/useToast';
+import { useConfirm } from '../../../core/composables/useConfirm';
 
 const toast = useToast();
+const { confirm } = useConfirm();
 const loading = ref(true);
 const wishlist = ref([]);
 
 const fetchWishlist = async () => {
   try {
     const res = await customerApi.getWishlist();
-    wishlist.value = res.data;
+    wishlist.value = res.data.data || [];
   } catch (err) {
     toast.error('Failed to load wishlist');
   } finally {
@@ -89,11 +91,19 @@ const fetchWishlist = async () => {
   }
 };
 
-const removeItem = async (id) => {
+const removeItem = async (id, name) => {
+  const ok = await confirm({ 
+    title: 'Remove from Wishlist', 
+    message: `Are you sure you want to remove ${name || 'this item'} from your wishlist?`, 
+    confirmText: 'Remove' 
+  });
+  
+  if (!ok) return;
+
   try {
     await customerApi.removeFromWishlist(id);
     wishlist.value = wishlist.value.filter(i => i.id !== id);
-    toast.success('Removed from wishlist');
+    toast.info('Removed from wishlist');
   } catch (err) {
     toast.error('Failed to remove item');
   }

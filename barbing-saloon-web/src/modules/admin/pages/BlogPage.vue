@@ -8,7 +8,7 @@
 
       <div class="grid gap-4 md:grid-cols-2">
         <article v-for="post in posts" :key="post.id" class="rounded-3xl border border-theme-border bg-theme-surface p-6">
-          <p class="text-xs uppercase tracking-[0.25em] text-admin-dark">{{ post.status }}</p>
+          <p class="text-xs uppercase tracking-[0.25em] text-admin-dark">{{ post.is_published ? 'Published' : 'Draft' }}</p>
           <h2 class="mt-3 font-display text-2xl text-obsidian">{{ post.title }}</h2>
           <p class="mt-3 text-sm text-theme-muted">{{ post.excerpt }}</p>
         </article>

@@ -3,7 +3,7 @@
     <section class="mx-auto max-w-7xl px-4 md:px-6 py-20 text-theme-text">
       <div data-reveal>
         <p class="text-sm uppercase tracking-[0.3em] text-gold-light">Gallery</p>
-        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">Recent work</h1>
+        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">Recent work <span class="text-2xl sm:text-3xl md:text-4xl text-gold/50">({{ gallery.length }})</span></h1>
       </div>
 
       <!-- Gallery Skeleton -->

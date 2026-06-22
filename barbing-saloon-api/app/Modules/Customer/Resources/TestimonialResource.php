@@ -10,15 +10,10 @@ class TestimonialResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'client_name' => $this->client_name,
+            'client_name' => $this->customer?->name ?? 'Anonymous',
             'rating' => $this->rating,
-            'review' => $this->review,
+            'review' => $this->comment,
             'is_approved' => $this->is_approved,
-            'is_featured' => $this->is_featured,
-            'service' => $this->whenLoaded('service', fn () => [
-                'id' => $this->service->id,
-                'name' => $this->service->name,
-            ]),
             'barber' => $this->whenLoaded('barber', fn () => [
                 'id' => $this->barber->id,
                 'name' => $this->barber->user?->name,

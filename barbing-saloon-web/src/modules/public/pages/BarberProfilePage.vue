@@ -47,6 +47,13 @@
                       <span class="text-xs uppercase tracking-widest text-ivory/80 mt-1">Rating</span>
                     </div>
                   </div>
+                  <!-- Stat: Status -->
+                  <div class="flex items-center gap-3 bg-white/5 backdrop-blur-md px-6 py-3 rounded-2xl border border-theme-border">
+                    <span class="font-display text-2xl uppercase" :class="barber.status === 'active' ? 'text-emerald-400' : 'text-amber-400'">
+                      {{ barber.status === 'active' ? 'Available' : 'Not Active' }}
+                    </span>
+                    <span class="text-xs uppercase tracking-widest text-ivory/80 leading-tight">Status</span>
+                  </div>
                 </div>
               </div>
             </div>

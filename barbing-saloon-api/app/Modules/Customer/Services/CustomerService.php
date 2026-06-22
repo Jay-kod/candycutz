@@ -132,7 +132,7 @@ class CustomerService
                 ->limit(5)
                 ->get(),
             'recent_reviews' => Testimonial::query()
-                ->with(['service', 'barber.user'])
+                ->with(['barber.user'])
                 ->where('customer_id', $user->id)
                 ->latest()
                 ->limit(5)
@@ -154,7 +154,7 @@ class CustomerService
     public function reviews(User $user): LengthAwarePaginator
     {
         return Testimonial::query()
-            ->with(['service', 'barber.user'])
+            ->with(['barber.user'])
             ->where('customer_id', $user->id)
             ->latest()
             ->paginate(10);
@@ -164,14 +164,10 @@ class CustomerService
     {
         return Testimonial::query()->create([
             'customer_id' => $user->id,
-            'client_name' => $user->name,
-            'client_avatar' => $user->avatar,
             'rating' => $data['rating'],
-            'review' => $data['review'],
-            'service_id' => $data['service_id'],
-            'barber_id' => $data['barber_id'],
+            'comment' => $data['review'] ?? $data['comment'] ?? '',
+            'barber_id' => $data['barber_id'] ?? null,
             'is_approved' => false,
-            'is_featured' => false,
         ]);
     }
 }

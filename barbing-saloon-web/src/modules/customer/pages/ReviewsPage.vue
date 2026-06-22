@@ -92,7 +92,7 @@ import { onMounted, reactive, ref } from 'vue';
 import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { publicApi } from '../../public/api/public.api';
 import { customerApi } from '../api/customer.api';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../../core/composables/useToast';
 
 const toast = useToast();
 const form = reactive({ barber_id: '', rating: 5, comment: '' });

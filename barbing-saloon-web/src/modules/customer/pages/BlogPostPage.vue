@@ -19,7 +19,7 @@
       <div v-else-if="error" class="mx-auto max-w-2xl px-6 text-center py-40">
         <h1 class="font-display text-5xl text-gold">Article not found</h1>
         <p class="mt-6 text-theme-muted text-lg">The post you're looking for doesn't exist or has been removed.</p>
-        <RouterLink to="/blog" class="mt-10 inline-block rounded-full bg-gold px-8 py-4 text-obsidian font-bold tracking-wide hover:bg-gold-light transition-all">Back to Journal</RouterLink>
+        <RouterLink to="/customer/dashboard/blog" class="mt-10 inline-block rounded-full bg-gold px-8 py-4 text-obsidian font-bold tracking-wide hover:bg-gold-light transition-all">Back to Blog</RouterLink>
       </div>
 
       <!-- Post Content -->
@@ -59,14 +59,20 @@
               <!-- Reactions & Sharing -->
               <div class="mt-20 pt-10 border-t border-theme-border flex flex-col md:flex-row items-center justify-between gap-8" data-reveal>
                 
-                <!-- Reaction Button -->
+                <!-- Reaction Buttons -->
                 <div class="flex items-center gap-4">
-                  <button @click="toggleReaction" class="group flex items-center gap-3 rounded-full border border-theme-border bg-theme-surface px-6 py-3 transition-all duration-300 hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]" :class="{ 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-gold': isLiked, 'text-theme-text': !isLiked }">
-                    <svg xmlns="http://www.w3.org/2000/svg" :fill="isLiked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="1.5" :stroke="isLiked ? 'currentColor' : 'currentColor'" class="w-6 h-6 transition-transform group-hover:scale-125" :class="{'scale-125': isLiked}">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                    <span class="font-semibold">{{ reactionCount }}</span>
-                    <span class="text-xs uppercase tracking-widest text-theme-muted ml-2">Applaud</span>
+                  <!-- Love Button -->
+                  <button @click="react('love')" class="group flex items-center gap-3 rounded-full border bg-theme-surface px-6 py-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]" :class="{ 'border-gold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-gold': userReaction === 'love', 'border-theme-border text-theme-text hover:border-gold hover:text-gold': userReaction !== 'love' }">
+                    <HeartIcon :class="{'fill-current': userReaction === 'love'}" class="w-6 h-6 transition-transform group-hover:scale-125" />
+                    <span class="font-semibold">{{ post.loves_count || 0 }}</span>
+                    <span class="text-xs uppercase tracking-widest ml-1" :class="{ 'text-gold': userReaction === 'love', 'text-theme-muted group-hover:text-gold': userReaction !== 'love' }">Love</span>
+                  </button>
+
+                  <!-- Dislike Button -->
+                  <button @click="react('dislike')" class="group flex items-center gap-3 rounded-full border bg-theme-surface px-6 py-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]" :class="{ 'border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)] text-red-500': userReaction === 'dislike', 'border-theme-border text-theme-text hover:border-red-500 hover:text-red-500': userReaction !== 'dislike' }">
+                    <HandThumbDownIcon :class="{'fill-current': userReaction === 'dislike'}" class="w-6 h-6 transition-transform group-hover:scale-125" />
+                    <span class="font-semibold">{{ post.dislikes_count || 0 }}</span>
+                    <span class="text-xs uppercase tracking-widest ml-1" :class="{ 'text-red-500': userReaction === 'dislike', 'text-theme-muted group-hover:text-red-500': userReaction !== 'dislike' }">Dislike</span>
                   </button>
                 </div>
 
@@ -85,7 +91,7 @@
               
               <div class="mt-16">
                 <RouterLink to="/blog" class="inline-flex items-center gap-2 font-semibold text-gold hover:text-gold-light transition-colors">
-                  &larr; Back to Journal
+                  &larr; Back to Blog
                 </RouterLink>
               </div>
             </div>
@@ -100,12 +106,12 @@
                 
                 <div class="space-y-6">
                   <article v-for="recent in recentPosts" :key="recent.id" class="group flex gap-4 items-center">
-                    <RouterLink :to="`/blog/${recent.slug}`" class="block w-20 h-20 shrink-0 overflow-hidden rounded-xl bg-theme-bg">
+                    <RouterLink :to="`/customer/dashboard/blog/${recent.slug}`" class="block w-20 h-20 shrink-0 overflow-hidden rounded-xl bg-theme-bg">
                       <img v-if="recent.featured_image" :src="recent.featured_image" :alt="recent.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     </RouterLink>
                     <div>
                       <p class="text-[10px] uppercase tracking-widest text-gold-light mb-1">{{ formatDate(recent.created_at) }}</p>
-                      <RouterLink :to="`/blog/${recent.slug}`" class="block text-sm font-semibold text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">
+                      <RouterLink :to="`/customer/dashboard/blog/${recent.slug}`" class="block text-sm font-semibold text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">
                         {{ recent.title }}
                       </RouterLink>
                     </div>
@@ -127,7 +133,9 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { publicApi } from '../../public/api/public.api';
+import { customerApi } from '../api/customer.api';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
 
 const route = useRoute();
 const post = ref(null);
@@ -138,15 +146,27 @@ const error = ref(false);
 const { init: initScrollReveal } = useScrollReveal();
 
 // Reactions
-const isLiked = ref(false);
-const reactionCount = ref(Math.floor(Math.random() * 50) + 10); // Simulated existing likes
+const userReaction = ref(null);
 
-const toggleReaction = () => {
-  isLiked.value = !isLiked.value;
-  if (isLiked.value) {
-    reactionCount.value++;
-  } else {
-    reactionCount.value--;
+const react = async (type) => {
+  if (!post.value) return;
+  
+  try {
+    if (userReaction.value === type) {
+      // Toggle off
+      const res = await customerApi.removeReactionFromBlogPost(post.value.id);
+      post.value.loves_count = res.data.loves_count;
+      post.value.dislikes_count = res.data.dislikes_count;
+      userReaction.value = null;
+    } else {
+      // Toggle on
+      const res = await customerApi.reactToBlogPost(post.value.id, type);
+      post.value.loves_count = res.data.loves_count;
+      post.value.dislikes_count = res.data.dislikes_count;
+      userReaction.value = res.data.user_reaction;
+    }
+  } catch (err) {
+    console.error('Failed to react:', err);
   }
 };
 
@@ -165,6 +185,7 @@ const loadData = async (slug) => {
   try {
     const response = await publicApi.blogPost(slug);
     post.value = response.data.data;
+    userReaction.value = post.value.user_reaction || null;
     
     // Fetch all posts for sidebar and filter out current
     const allPostsRes = await publicApi.blog();

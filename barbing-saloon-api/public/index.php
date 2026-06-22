@@ -20,8 +20,13 @@ $user = 'root';
 $pass = '';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
+    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass, $options);
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed']);
@@ -74,7 +79,7 @@ if ($method === 'GET') {
 
     // Public barbers list
     if ($path === '/public/barbers') {
-        $stmt = $pdo->query("SELECT b.id, u.name, u.avatar, b.bio, b.rating, b.experience_years as years_experience, b.specialties, (b.rating >= 4.8) as is_featured FROM barbers b 
+        $stmt = $pdo->query("SELECT b.id, u.name, u.avatar, b.bio, b.rating, b.experience_years as years_experience, b.specialties, b.status, (b.rating >= 4.8) as is_featured FROM barbers b 
                             JOIN users u ON b.user_id = u.id WHERE b.is_available = 1");
         $barbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -92,7 +97,7 @@ if ($method === 'GET') {
     // Single barber profile
     if (preg_match('/^\/public\/barbers\/(\d+)$/', $path, $matches)) {
         $id = $matches[1];
-        $stmt = $pdo->prepare("SELECT b.id, u.name, u.avatar, b.bio, b.rating, b.experience_years as years_experience, b.specialties FROM barbers b 
+        $stmt = $pdo->prepare("SELECT b.id, u.name, u.avatar, b.bio, b.rating, b.experience_years as years_experience, b.specialties, b.status FROM barbers b 
                             JOIN users u ON b.user_id = u.id WHERE b.id = ? AND b.is_available = 1");
         $stmt->execute([$id]);
         $barber = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -144,12 +149,17 @@ if ($method === 'GET') {
 
     // Blog posts
     if ($path === '/public/blog') {
-        $stmt = $pdo->query("SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, u.name as author_name FROM blog_posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.is_published = 1 ORDER BY p.created_at DESC");
+        $stmt = $pdo->query("SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, u.name as author_name,
+            (SELECT SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as loves_count,
+            (SELECT SUM(CASE WHEN reaction_type = 'dislike' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as dislikes_count
+            FROM blog_posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.is_published = 1 ORDER BY p.created_at DESC");
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Format author object for Vue component
         $formattedPosts = array_map(function($post) {
             $post['author'] = ['name' => $post['author_name']];
+            $post['loves_count'] = (int)$post['loves_count'];
+            $post['dislikes_count'] = (int)$post['dislikes_count'];
             unset($post['author_name']);
             return $post;
         }, $posts);
@@ -161,12 +171,23 @@ if ($method === 'GET') {
     // Single blog post
     if (preg_match('/^\/public\/blog\/([a-zA-Z0-9-]+)$/', $path, $matches)) {
         $slug = $matches[1];
-        $stmt = $pdo->prepare("SELECT p.id, p.title, p.slug, p.content, p.featured_image, p.created_at, u.name as author_name FROM blog_posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.slug = ? AND p.is_published = 1");
-        $stmt->execute([$slug]);
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        $token = str_replace('Bearer ', '', $authHeader);
+        $parts = explode('_', $token);
+        $userId = isset($parts[2]) ? intval($parts[2]) : 0;
+        
+        $stmt = $pdo->prepare("SELECT p.id, p.title, p.slug, p.content, p.featured_image, p.created_at, u.name as author_name,
+            (SELECT SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as loves_count,
+            (SELECT SUM(CASE WHEN reaction_type = 'dislike' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as dislikes_count,
+            (SELECT reaction_type FROM blog_reactions WHERE post_id = p.id AND customer_id = ?) as user_reaction
+            FROM blog_posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.slug = ? AND p.is_published = 1");
+        $stmt->execute([$userId, $slug]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($post) {
             $post['author'] = ['name' => $post['author_name']];
+            $post['loves_count'] = (int)$post['loves_count'];
+            $post['dislikes_count'] = (int)$post['dislikes_count'];
             unset($post['author_name']);
             echo json_encode(['data' => $post]);
         } else {
@@ -307,6 +328,11 @@ if (strpos($path, '/customer/') === 0) {
 // Require Barber API Routes
 if (strpos($path, '/barber/') === 0) {
     require __DIR__ . '/api_barber.php';
+}
+
+// Require Admin API Routes
+if (strpos($path, '/admin/') === 0 && !strpos($path, '/admin/testimonials')) {
+    require __DIR__ . '/api_admin.php';
 }
 
 // Default 404

@@ -8,6 +8,11 @@ export const barberApi = {
   noShow: (id) => client.patch(`/barber/appointments/${id}/no-show`),
   profile: () => client.get('/barber/profile'),
   updateProfile: (data) => client.post('/barber/profile', data),
+  updateMyStatus: (data) => client.patch('/barber/my-status', data),
+  
+  // Notifications
+  getNotifications: () => client.get('/barber/notifications'),
+  sendNotification: (data) => client.post('/barber/notifications', data),
   
   // Services
   getServices: () => client.get('/barber/services'),

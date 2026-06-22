@@ -13,5 +13,9 @@ export const customerApi = {
   getWishlist: () => client.get('/customer/wishlist'),
   addToWishlist: (data) => client.post('/customer/wishlist', data),
   removeFromWishlist: (id) => client.delete(`/customer/wishlist/${id}`),
+  removeFromWishlistByType: (type, id) => client.delete(`/customer/wishlist/item?type=${type}&id=${id}`),
   checkout: (data) => client.post('/customer/checkout', data),
+  reactToBlogPost: (id, type) => client.post(`/customer/blog/${id}/react`, { type }),
+  removeReactionFromBlogPost: (id) => client.delete(`/customer/blog/${id}/react`),
+  notifications: () => client.get('/customer/notifications'),
 };

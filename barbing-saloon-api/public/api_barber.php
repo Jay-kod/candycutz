@@ -25,14 +25,79 @@ if (!$barberId) {
 }
 
 // ==========================================
+// BARBER OWN STATUS & AVAILABILITY
+// ==========================================
+if ($method === 'GET' && $path === '/barber/my-status') {
+    $stmt = $pdo->prepare("SELECT b.status, b.is_available, u.name FROM barbers b INNER JOIN users u ON b.user_id = u.id WHERE b.id = ?");
+    $stmt->execute([$barberId]);
+    echo json_encode(['data' => $stmt->fetch(PDO::FETCH_ASSOC)]);
+    exit;
+}
+
+if ($method === 'PATCH' && $path === '/barber/my-status') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $newStatus = $data['status'] ?? null;
+    $is_available = isset($data['is_available']) ? ($data['is_available'] ? 1 : 0) : null;
+    
+    // Check current status first
+    $stmt = $pdo->prepare("SELECT status FROM barbers WHERE id = ?");
+    $stmt->execute([$barberId]);
+    $currentStatus = $stmt->fetchColumn();
+    
+    if ($currentStatus === 'suspended' || $currentStatus === 'pending_approval') {
+        http_response_code(403); echo json_encode(['error' => 'You cannot change your status while your account is ' . str_replace('_', ' ', $currentStatus)]); exit;
+    }
+    
+    $allowed = ['active', 'on_leave'];
+    if ($newStatus && !in_array($newStatus, $allowed)) {
+        http_response_code(400); echo json_encode(['error' => 'You can only set your status to Active or Not Active']); exit;
+    }
+    
+    if ($newStatus) {
+        $pdo->prepare("UPDATE barbers SET status = ? WHERE id = ?")->execute([$newStatus, $barberId]);
+    }
+    if ($is_available !== null) {
+        $pdo->prepare("UPDATE barbers SET is_available = ? WHERE id = ?")->execute([$is_available, $barberId]);
+    }
+    
+    echo json_encode(['success' => true, 'message' => 'Status updated']);
+    exit;
+}
+
+// ==========================================
+// BARBER NOTIFICATIONS TO CUSTOMERS
+// ==========================================
+if ($method === 'POST' && $path === '/barber/notifications') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $title = $data['title'] ?? '';
+    $message = $data['message'] ?? '';
+    
+    if (!$title || !$message) {
+        http_response_code(400); echo json_encode(['error' => 'Title and message required']); exit;
+    }
+    
+    $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, title, message) VALUES (?, 'all_customers', ?, ?)");
+    $stmt->execute([$userId, $title, $message]);
+    echo json_encode(['success' => true, 'message' => 'Notification sent to all customers']);
+    exit;
+}
+
+if ($method === 'GET' && $path === '/barber/notifications') {
+    $stmt = $pdo->prepare("SELECT * FROM notifications WHERE sender_id = ? ORDER BY created_at DESC LIMIT 20");
+    $stmt->execute([$userId]);
+    echo json_encode(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    exit;
+}
+
+// ==========================================
 // SERVICES MANAGEMENT
 // ==========================================
 if (strpos($path, '/barber/services') === 0) {
     // GET all services for this barber (and maybe globals?)
     // Let's just return all services they own, plus globals so they can see them, or just their own.
     if ($method === 'GET') {
-        $stmt = $pdo->prepare("SELECT s.*, c.name as category_name FROM services s LEFT JOIN service_categories c ON s.category_id = c.id WHERE s.barber_id = ? ORDER BY s.created_at DESC");
-        $stmt->execute([$barberId]);
+        $stmt = $pdo->prepare("SELECT s.*, c.name as category_name FROM services s LEFT JOIN service_categories c ON s.category_id = c.id ORDER BY s.created_at DESC");
+        $stmt->execute();
         echo json_encode(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         exit;
     }
@@ -86,8 +151,8 @@ if (strpos($path, '/barber/services') === 0) {
 // ==========================================
 if (strpos($path, '/barber/gallery') === 0) {
     if ($method === 'GET') {
-        $stmt = $pdo->prepare("SELECT * FROM gallery WHERE barber_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$barberId]);
+        $stmt = $pdo->prepare("SELECT * FROM gallery ORDER BY created_at DESC");
+        $stmt->execute();
         echo json_encode(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         exit;
     }
@@ -123,9 +188,18 @@ if (strpos($path, '/barber/gallery') === 0) {
 // ==========================================
 if (strpos($path, '/barber/blog') === 0) {
     if ($method === 'GET') {
-        $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE author_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$userId]); // blog_posts uses author_id which is users.id
-        echo json_encode(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        $stmt = $pdo->prepare("SELECT p.*,
+            (SELECT SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as loves_count,
+            (SELECT SUM(CASE WHEN reaction_type = 'dislike' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as dislikes_count
+            FROM blog_posts p ORDER BY p.created_at DESC");
+        $stmt->execute(); 
+        $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Cast to int
+        foreach ($posts as &$post) {
+            $post['loves_count'] = (int)$post['loves_count'];
+            $post['dislikes_count'] = (int)$post['dislikes_count'];
+        }
+        echo json_encode(['data' => $posts]);
         exit;
     }
     
@@ -156,16 +230,16 @@ if (strpos($path, '/barber/blog') === 0) {
         $excerpt = $data['excerpt'] ?? '';
         $is_published = isset($data['is_published']) ? ($data['is_published'] ? 1 : 0) : 0;
         
-        $stmt = $pdo->prepare("UPDATE blog_posts SET title = ?, content = ?, excerpt = ?, is_published = ? WHERE id = ? AND author_id = ?");
-        $stmt->execute([$title, $content, $excerpt, $is_published, $id, $userId]);
+        $stmt = $pdo->prepare("UPDATE blog_posts SET title = ?, content = ?, excerpt = ?, is_published = ? WHERE id = ?");
+        $stmt->execute([$title, $content, $excerpt, $is_published, $id]);
         echo json_encode(['success' => true, 'message' => 'Blog post updated']);
         exit;
     }
 
     if ($method === 'DELETE' && preg_match('/^\/barber\/blog\/(\d+)$/', $path, $matches)) {
         $id = $matches[1];
-        $stmt = $pdo->prepare("DELETE FROM blog_posts WHERE id = ? AND author_id = ?");
-        $stmt->execute([$id, $userId]);
+        $stmt = $pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
+        $stmt->execute([$id]);
         echo json_encode(['success' => true, 'message' => 'Blog post deleted']);
         exit;
     }

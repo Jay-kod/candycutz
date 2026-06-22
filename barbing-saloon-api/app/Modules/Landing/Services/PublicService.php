@@ -28,12 +28,15 @@ class PublicService
             ->all();
     }
 
+    // ──────────────────────────────────────────
+    // Services  (DB: is_available, NO slug, NO display_order)
+    // ──────────────────────────────────────────
     public function services(): array
     {
         return Service::query()
             ->with('category')
-            ->where('is_active', true)
-            ->orderBy('display_order')
+            ->where('is_available', true)
+            ->orderBy('name')
             ->get()
             ->map(fn (Service $service) => $this->serviceData($service))
             ->all();
@@ -41,33 +44,38 @@ class PublicService
 
     public function serviceBySlug(string $slug): ?array
     {
-        $service = Service::query()->with('category')->where('slug', $slug)->first();
+        // Services table has no slug column — match by id instead
+        $service = Service::query()->with('category')->find($slug);
 
         return $service ? $this->serviceData($service) : null;
     }
 
     public function serviceCategories(): array
     {
+        // service_categories: id, name, description, icon — NO slug, NO display_order
         return ServiceCategory::query()
-            ->withCount(['services as services_count' => fn ($query) => $query->where('is_active', true)])
-            ->orderBy('display_order')
+            ->withCount(['services as services_count' => fn ($query) => $query->where('is_available', true)])
+            ->orderBy('name')
             ->get()
             ->map(fn (ServiceCategory $category) => [
                 'id' => $category->id,
                 'name' => $category->name,
-                'slug' => $category->slug,
+                'description' => $category->description,
                 'icon' => $category->icon,
-                'display_order' => $category->display_order,
                 'services_count' => $category->services_count,
             ])
             ->all();
     }
 
+    // ──────────────────────────────────────────
+    // Barbers  (DB: experience_years, is_available, NO display_order, NO instagram_url, NO is_featured)
+    // ──────────────────────────────────────────
     public function barbers(): array
     {
         return Barber::query()
             ->with(['user'])
-            ->orderBy('display_order')
+            ->where('is_available', true)
+            ->orderBy('rating', 'desc')
             ->get()
             ->map(fn (Barber $barber) => $this->barberData($barber))
             ->all();
@@ -80,6 +88,9 @@ class PublicService
         return $barber ? $this->barberData($barber) : null;
     }
 
+    // ──────────────────────────────────────────
+    // Gallery  (DB: title, barber_id, image_path, category (enum), description, is_featured, display_order)
+    // ──────────────────────────────────────────
     public function gallery(?string $category = null): array
     {
         return Gallery::query()
@@ -100,34 +111,37 @@ class PublicService
             ->all();
     }
 
+    // ──────────────────────────────────────────
+    // Testimonials  (DB: customer_id, barber_id, rating, comment, is_approved — NO client_name, NO review, NO is_featured, NO service_id)
+    // ──────────────────────────────────────────
     public function testimonials(): array
     {
         return Testimonial::query()
-            ->with(['service.category', 'barber.user'])
+            ->with(['barber.user', 'customer'])
             ->where('is_approved', true)
-            ->orderByDesc('is_featured')
             ->orderByDesc('rating')
             ->latest()
             ->get()
             ->map(fn (Testimonial $testimonial) => [
                 'id' => $testimonial->id,
-                'client_name' => $testimonial->client_name,
-                'client_avatar' => $testimonial->client_avatar,
+                'client_name' => $testimonial->customer?->name ?? 'Anonymous',
+                'client_avatar' => $testimonial->customer?->avatar ?? null,
                 'rating' => $testimonial->rating,
-                'review' => $testimonial->review,
-                'is_featured' => $testimonial->is_featured,
-                'service' => $testimonial->service ? $this->serviceData($testimonial->service) : null,
+                'review' => $testimonial->comment,
                 'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,
+                'created_at' => $testimonial->created_at,
             ])
             ->all();
     }
 
+    // ──────────────────────────────────────────
+    // Blog  (DB: content, is_published — NO status, NO body, NO published_at)
+    // ──────────────────────────────────────────
     public function blogPosts(): array
     {
         return BlogPost::query()
             ->with('author')
-            ->where('status', 'published')
-            ->orderByDesc('published_at')
+            ->where('is_published', true)
             ->latest()
             ->get()
             ->map(fn (BlogPost $post) => $this->blogData($post))
@@ -141,6 +155,9 @@ class PublicService
         return $post ? $this->blogData($post) : null;
     }
 
+    // ──────────────────────────────────────────
+    // Working Hours
+    // ──────────────────────────────────────────
     public function workingHours(): array
     {
         return WorkingHour::query()
@@ -184,6 +201,9 @@ class PublicService
         ];
     }
 
+    // ──────────────────────────────────────────
+    // Data transformers (single source of truth for JSON shape)
+    // ──────────────────────────────────────────
     protected function barberData(Barber $barber): array
     {
         return [
@@ -192,10 +212,9 @@ class PublicService
             'avatar' => $barber->user?->avatar,
             'bio' => $barber->bio,
             'specialties' => $barber->specialties ?? [],
-            'years_experience' => $barber->years_experience,
-            'instagram_url' => $barber->instagram_url,
-            'display_order' => $barber->display_order,
-            'is_featured' => $barber->is_featured,
+            'experience_years' => $barber->experience_years,
+            'rating' => $barber->rating,
+            'is_available' => $barber->is_available,
         ];
     }
 
@@ -204,17 +223,14 @@ class PublicService
         return [
             'id' => $service->id,
             'name' => $service->name,
-            'slug' => $service->slug,
             'description' => $service->description,
             'price' => $service->price,
             'duration_minutes' => $service->duration_minutes,
             'image' => $service->image,
-            'is_active' => $service->is_active,
-            'display_order' => $service->display_order,
+            'is_available' => $service->is_available,
             'category' => $service->category ? [
                 'id' => $service->category->id,
                 'name' => $service->category->name,
-                'slug' => $service->category->slug,
             ] : null,
         ];
     }
@@ -226,9 +242,11 @@ class PublicService
             'title' => $post->title,
             'slug' => $post->slug,
             'excerpt' => $post->excerpt,
-            'body' => $post->body,
+            'content' => $post->content,
             'featured_image' => $post->featured_image,
-            'published_at' => $post->published_at,
+            'is_published' => $post->is_published,
+            'created_at' => $post->created_at,
+            'updated_at' => $post->updated_at,
             'author' => $post->author ? [
                 'id' => $post->author->id,
                 'name' => $post->author->name,

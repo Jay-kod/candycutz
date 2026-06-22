@@ -30,6 +30,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/testimonials', [AdminController::class, 'testimonials']);
     Route::patch('/testimonials/{testimonial}/approve', [AdminController::class, 'approveTestimonial']);
     Route::patch('/testimonials/{testimonial}/feature', [AdminController::class, 'featureTestimonial']);
+    Route::delete('/testimonials/{testimonial}', [AdminController::class, 'deleteTestimonial']);
 
     Route::get('/blog', [AdminController::class, 'blogPosts']);
     Route::post('/blog', [AdminController::class, 'storeBlogPost']);

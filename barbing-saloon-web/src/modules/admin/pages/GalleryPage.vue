@@ -3,7 +3,7 @@
     <section class="space-y-6">
       <div class="rounded-3xl border border-theme-border bg-theme-surface p-8">
         <p class="text-sm uppercase tracking-[0.3em] text-theme-muted">Gallery</p>
-        <h1 class="mt-3 font-display text-4xl text-admin">Gallery management</h1>
+        <h1 class="mt-3 font-display text-4xl text-admin">Gallery management <span class="text-xl text-theme-muted">({{ gallery.length }})</span></h1>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

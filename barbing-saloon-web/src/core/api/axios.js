@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../composables/useToast';
 
 const toast = useToast();
 

@@ -99,7 +99,7 @@ class AdminService
 
     public function services(): array
     {
-        return Service::query()->with('category')->orderBy('display_order')->get()->all();
+        return Service::query()->with('category')->orderBy('name')->get()->all();
     }
 
     public function storeService(array $data): Service
@@ -110,14 +110,12 @@ class AdminService
 
         return Service::query()->create([
             'name' => $data['name'],
-            'slug' => $data['slug'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? null,
             'price' => $data['price'],
             'duration_minutes' => $data['duration_minutes'],
-            'category_id' => $data['category_id'],
+            'category_id' => $data['category_id'] ?? 1, // fallback
             'image' => $imagePath,
-            'is_active' => $data['is_active'] ?? true,
-            'display_order' => $data['display_order'] ?? 0,
+            'is_available' => $data['is_available'] ?? $data['is_active'] ?? true,
         ]);
     }
 
@@ -132,6 +130,10 @@ class AdminService
         } else {
             unset($data['image']);
         }
+        
+        unset($data['slug']);
+        unset($data['is_active']);
+        unset($data['display_order']);
 
         $service->update($data);
 
@@ -149,7 +151,7 @@ class AdminService
 
     public function serviceCategories(): array
     {
-        return ServiceCategory::query()->orderBy('display_order')->get()->all();
+        return ServiceCategory::query()->orderBy('name')->get()->all();
     }
 
     public function storeServiceCategory(array $data): ServiceCategory
@@ -224,21 +226,25 @@ class AdminService
 
     public function testimonials(): array
     {
-        return Testimonial::query()->with(['service', 'barber.user', 'customer'])->latest()->get()->all();
+        return Testimonial::query()->with(['barber.user', 'customer'])->latest()->get()->all();
     }
 
     public function approveTestimonial(Testimonial $testimonial): Testimonial
     {
         $testimonial->update(['is_approved' => true]);
 
-        return $testimonial->refresh()->load(['service', 'barber.user', 'customer']);
+        return $testimonial->refresh()->load(['barber.user', 'customer']);
     }
 
     public function featureTestimonial(Testimonial $testimonial): Testimonial
     {
-        $testimonial->update(['is_featured' => ! $testimonial->is_featured]);
+        // No is_featured in DB, just return the testimonial
+        return $testimonial->refresh()->load(['barber.user', 'customer']);
+    }
 
-        return $testimonial->refresh()->load(['service', 'barber.user', 'customer']);
+    public function deleteTestimonial(Testimonial $testimonial): void
+    {
+        $testimonial->delete();
     }
 
     public function blogPosts(): array
@@ -254,13 +260,12 @@ class AdminService
 
         return BlogPost::query()->create([
             'title' => $data['title'],
-            'slug' => $data['slug'],
-            'excerpt' => $data['excerpt'],
-            'body' => $data['body'],
+            'slug' => $data['slug'] ?? \Illuminate\Support\Str::slug($data['title']) . '-' . time(),
+            'excerpt' => $data['excerpt'] ?? null,
+            'content' => $data['body'] ?? $data['content'] ?? '',
             'featured_image' => $imagePath,
             'author_id' => $author->id,
-            'status' => $data['status'],
-            'published_at' => $data['published_at'] ?? null,
+            'is_published' => isset($data['status']) ? ($data['status'] === 'published') : true,
         ]);
     }
 
@@ -274,17 +279,16 @@ class AdminService
             $data['featured_image'] = $this->uploadFile($data['featured_image'], 'blog');
         }
 
-        $blogPost->update([
-            'title' => $data['title'],
-            'slug' => $data['slug'],
-            'excerpt' => $data['excerpt'],
-            'body' => $data['body'],
-            'featured_image' => $data['featured_image'] ?? $blogPost->featured_image,
-            'status' => $data['status'],
-            'published_at' => $data['published_at'] ?? null,
-        ]);
+        if (isset($data['body'])) {
+            $data['content'] = $data['body'];
+            unset($data['body']);
+        }
+        if (isset($data['status'])) {
+            $data['is_published'] = $data['status'] === 'published';
+            unset($data['status']);
+        }
 
-        return $blogPost->refresh()->load('author');
+        $blogPost->update($data);return $blogPost->refresh()->load('author');
     }
 
     public function deleteBlogPost(BlogPost $blogPost): void

@@ -5,15 +5,44 @@
       <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gold/8 blur-3xl"></div>
-        <div class="relative z-10">
-          <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Barber Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-            Today's <span class="text-gold">Chair View</span>
-          </h1>
-          <p class="mt-2 max-w-2xl text-sm text-ivory/50 leading-relaxed">
-            Review today's customers, manage your schedule, and close out appointments after the cut.
-          </p>
-        </div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Barber Dashboard</p>
+              <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
+                Today's <span class="text-gold">Chair View</span>
+              </h1>
+              <p class="mt-2 max-w-2xl text-sm text-ivory/50 leading-relaxed">
+                Review today's customers, manage your schedule, and close out appointments after the cut.
+              </p>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-theme-surface/40 p-3 rounded-xl border border-white/5 backdrop-blur-md shrink-0">
+              <div class="flex flex-col items-end mr-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-theme-text">My Status</span>
+                <span class="text-[10px]" :class="myStatus === 'suspended' ? 'text-red-400' : (myStatus === 'pending_approval' ? 'text-amber-400' : 'text-ivory/40')">
+                  {{ formatStatus(myStatus) }}
+                </span>
+              </div>
+              <template v-if="myStatus === 'active' || myStatus === 'on_leave'">
+                <button 
+                  @click="toggleMyStatus('active')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all"
+                  :class="myStatus === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-theme-bg text-ivory/30 hover:bg-white/5 border border-transparent'"
+                >Active</button>
+                <button 
+                  @click="toggleMyStatus('on_leave')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all"
+                  :class="myStatus === 'on_leave' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-theme-bg text-ivory/30 hover:bg-white/5 border border-transparent'"
+                >Not Active</button>
+              </template>
+              <template v-else>
+                <div class="px-4 py-1.5 rounded-lg text-xs font-bold uppercase border"
+                     :class="myStatus === 'suspended' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'">
+                  {{ myStatus === 'suspended' ? 'Suspended by Admin' : 'Pending Admin Approval' }}
+                </div>
+              </template>
+            </div>
+          </div>
       </div>
 
       <!-- Stats Grid -->
@@ -143,6 +172,19 @@
                 </div>
                 <ChevronRightIcon class="h-4 w-4 text-ivory/20 transition-all group-hover:text-gold/60 group-hover:translate-x-0.5" />
               </RouterLink>
+              <button
+                @click="showNotificationModal = true"
+                class="w-full group flex items-center gap-3 rounded-xl border border-theme-border bg-theme-surface/50 px-4 py-3.5 transition-all duration-200 hover:border-gold/15 hover:bg-gold/5"
+              >
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors bg-purple-400/10 group-hover:bg-purple-400/20">
+                  <MegaphoneIcon class="h-4 w-4 text-purple-400" />
+                </div>
+                <div class="flex-1 min-w-0 text-left">
+                  <p class="text-sm font-medium text-theme-text group-hover:text-gold transition-colors">Notify Customers</p>
+                  <p class="text-[11px] text-ivory/30">Send a quick update</p>
+                </div>
+                <ChevronRightIcon class="h-4 w-4 text-ivory/20 transition-all group-hover:text-gold/60 group-hover:translate-x-0.5" />
+              </button>
             </div>
           </div>
 
@@ -174,6 +216,32 @@
           </div>
         </div>
       </div>
+      
+      <!-- Notification Modal -->
+      <transition name="fade">
+        <div v-if="showNotificationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-obsidian/80 backdrop-blur-sm" @click="showNotificationModal = false"></div>
+          <div class="relative w-full max-w-md rounded-2xl border border-theme-border bg-theme-surface shadow-2xl overflow-hidden animate-slide-up">
+            <div class="border-b border-theme-border bg-theme-bg/30 px-6 py-4 flex justify-between items-center">
+              <h3 class="font-display text-lg text-theme-text">Send Notification</h3>
+              <button @click="showNotificationModal = false" class="text-ivory/40 hover:text-white"><XMarkIcon class="h-5 w-5"/></button>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="text-xs text-theme-muted ml-1">Title</label>
+                <input v-model="notificationForm.title" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition-all focus:border-gold/50 focus:ring-2 focus:ring-gold/20 mt-1" placeholder="e.g. I am around now!" />
+              </div>
+              <div>
+                <label class="text-xs text-theme-muted ml-1">Message</label>
+                <textarea v-model="notificationForm.message" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition-all focus:border-gold/50 focus:ring-2 focus:ring-gold/20 mt-1 resize-none" placeholder="Let your customers know you are available or running late..."></textarea>
+              </div>
+              <button @click="sendNotification" :disabled="sendingNotification" class="w-full rounded-xl bg-gradient-to-r from-gold to-gold-light py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50 mt-2">
+                {{ sendingNotification ? 'Sending...' : 'Send to All Customers' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </section>
   </BarberLayout>
 </template>
@@ -194,10 +262,29 @@ import {
   CalendarIcon,
   ClipboardDocumentCheckIcon,
   UserIcon,
+  MegaphoneIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline';
 import { BoltIcon } from '@heroicons/vue/24/solid';
+import { useToast } from '../../../core/composables/useToast';
+
+const toast = useToast();
 
 const dashboard = ref({ stats: {}, today_appointments: [] });
+const myStatus = ref('active');
+const showNotificationModal = ref(false);
+const sendingNotification = ref(false);
+const notificationForm = ref({ title: '', message: '' });
+
+function formatStatus(status) {
+  switch (status) {
+    case 'active': return 'Available';
+    case 'on_leave': return 'Not Active';
+    case 'pending_approval': return 'Pending';
+    case 'suspended': return 'Suspended';
+    default: return status;
+  }
+}
 
 const statsCards = computed(() => [
   {
@@ -293,6 +380,51 @@ async function loadDashboard() {
   }
 }
 
+async function loadMyStatus() {
+  try {
+    const res = await barberApi.profile();
+    if (res.data?.data) {
+      myStatus.value = res.data.data.status || 'active';
+    }
+  } catch (e) {
+    // Ignore error
+  }
+}
+
+async function toggleMyStatus(status) {
+  if (myStatus.value === 'suspended' || myStatus.value === 'pending_approval') {
+    toast.error(`You cannot change your status while your account is ${formatStatus(myStatus.value)}`);
+    return;
+  }
+  
+  try {
+    await barberApi.updateMyStatus({ status, is_available: status === 'active' });
+    myStatus.value = status;
+    toast.success(`Status updated to ${status === 'active' ? 'Active' : 'Not Active'}`);
+  } catch (error) {
+    toast.error(error.response?.data?.error || 'Failed to update status');
+  }
+}
+
+async function sendNotification() {
+  if (!notificationForm.value.title || !notificationForm.value.message) {
+    toast.error('Please enter a title and message');
+    return;
+  }
+  
+  sendingNotification.value = true;
+  try {
+    await barberApi.sendNotification(notificationForm.value);
+    toast.success('Notification sent successfully!');
+    showNotificationModal.value = false;
+    notificationForm.value = { title: '', message: '' };
+  } catch (error) {
+    toast.error('Failed to send notification');
+  } finally {
+    sendingNotification.value = false;
+  }
+}
+
 async function complete(id) {
   await barberApi.complete(id);
   await loadDashboard();
@@ -303,7 +435,10 @@ async function markNoShow(id) {
   await loadDashboard();
 }
 
-onMounted(loadDashboard);
+onMounted(() => {
+  loadDashboard();
+  loadMyStatus();
+});
 </script>
 
 <style scoped>

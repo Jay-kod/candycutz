@@ -8,7 +8,7 @@
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Portfolio</p>
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-              Your <span class="text-gold">Gallery</span>
+              Your <span class="text-gold">Gallery</span> <span class="text-xl text-ivory/50">({{ gallery.length }})</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
               Showcase your best work. Upload haircut photos that customers can browse and bookmark.
@@ -120,7 +120,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import BarberLayout from '../layouts/BarberLayout.vue';
 import { barberApi } from '../api/barber.api';
-import { useToast } from 'vue-toastification';
+import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { PlusIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 

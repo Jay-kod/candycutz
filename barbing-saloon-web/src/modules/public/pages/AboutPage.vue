@@ -69,6 +69,11 @@
                 </div>
                 <span class="text-theme-border text-xs">|</span>
                 <span class="text-theme-muted">{{ barber.years_experience }} Years Exp</span>
+                <span class="text-theme-border text-xs">|</span>
+                <span class="flex items-center gap-1.5" :class="barber.status === 'active' ? 'text-emerald-400' : 'text-amber-400'">
+                  <div class="h-1.5 w-1.5 rounded-full" :class="barber.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'"></div>
+                  {{ barber.status === 'active' ? 'Available' : 'Not Active' }}
+                </span>
               </div>
               
               <p class="mt-6 text-base leading-relaxed text-theme-text line-clamp-4">{{ barber.bio }}</p>
