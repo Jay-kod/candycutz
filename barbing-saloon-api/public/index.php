@@ -1,4 +1,25 @@
 <?php
+require __DIR__ . '/../vendor/autoload.php';
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+// Parse .env for JWT_SECRET
+$jwtSecret = 'candycutz_super_secret_jwt_key_2026';
+$envFile = __DIR__ . '/../.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            if (trim($name) === 'JWT_SECRET') {
+                $jwtSecret = trim($value);
+                break;
+            }
+        }
+    }
+}
+$jwtSecret = getenv('JWT_SECRET') ?: $jwtSecret;
 
 // Serve static files (uploads) directly with proper MIME type
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -400,10 +421,20 @@ if ($method === 'POST' && $path === '/auth/login') {
         // Log the login to audit_logs
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'login', 'user', ?, ?)")->execute([$user['id'], $user['id'], $_SERVER['REMOTE_ADDR'] ?? '']);
         
+        // Generate JWT Token
+        $payload = [
+            'iss' => 'candycutz_api',
+            'iat' => time(),
+            'exp' => time() + (86400 * 30), // 30 days expiration
+            'sub' => $user['id'],
+            'role' => $user['role']
+        ];
+        $token = JWT::encode($payload, $jwtSecret, 'HS256');
+
         unset($user['password']);
         echo json_encode([
             'data' => [
-                'token' => 'dummy_token_' . $user['id'] . '_' . time(),
+                'token' => $token,
                 'user' => $user
             ]
         ]);
@@ -419,15 +450,20 @@ if ($method === 'GET' && $path === '/auth/me') {
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     $token = str_replace('Bearer ', '', $authHeader);
     
-    if (!$token || strpos($token, 'dummy_token_') !== 0) {
+    if (!$token) {
         http_response_code(401);
         echo json_encode(['error' => 'Unauthenticated']);
         exit;
     }
-    
-    // Extract user_id from token format: dummy_token_{user_id}_{timestamp}
-    $parts = explode('_', $token);
-    $userId = isset($parts[2]) ? intval($parts[2]) : 0;
+
+    try {
+        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+        $userId = $decoded->sub;
+    } catch (Exception $e) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid or expired token']);
+        exit;
+    }
     
     if ($userId > 0) {
         $stmt = $pdo->prepare("SELECT id, name, email, role, phone, avatar, notification_preferences, created_at, updated_at FROM users WHERE id = ?");
@@ -455,9 +491,16 @@ if ($method === 'POST' && $path === '/auth/logout') {
 if (strpos($path, '/notifications') === 0) {
     // Authenticate
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    $token = str_replace('Bearer ', '', $authHeader);
-    $parts = explode('_', $token);
-    $userId = isset($parts[2]) ? intval($parts[2]) : 0;
+    if (!$token) {
+        http_response_code(401); echo json_encode(['error' => 'Unauthenticated']); exit;
+    }
+
+    try {
+        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+        $userId = $decoded->sub;
+    } catch (Exception $e) {
+        http_response_code(401); echo json_encode(['error' => 'Invalid or expired token']); exit;
+    }
     
     if (!$userId) {
         http_response_code(401); echo json_encode(['error' => 'Unauthenticated']); exit;

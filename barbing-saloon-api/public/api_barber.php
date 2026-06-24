@@ -4,8 +4,21 @@
 // Authentication Check
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 $token = str_replace('Bearer ', '', $authHeader);
-$parts = explode('_', $token);
-$userId = isset($parts[2]) ? intval($parts[2]) : 0;
+
+if (!$token) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthenticated']);
+    exit;
+}
+
+try {
+    $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($jwtSecret, 'HS256'));
+    $userId = $decoded->sub;
+} catch (Exception $e) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Invalid or expired token']);
+    exit;
+}
 
 if (!$userId) {
     http_response_code(401);
