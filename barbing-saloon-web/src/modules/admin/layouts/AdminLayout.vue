@@ -23,11 +23,19 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   UserGroupIcon,
-  UsersIcon
+  UsersIcon,
+  ClipboardDocumentListIcon,
+  BellAlertIcon,
+  PresentationChartLineIcon,
+  ShieldCheckIcon,
+  GlobeAltIcon,
+  UserPlusIcon
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
   { name: 'Dashboard', to: '/admin/dashboard', icon: HomeIcon },
+  { name: 'Website', to: '/admin/websites', icon: GlobeAltIcon },
+  { name: 'Walk-In', to: '/admin/walk-in', icon: UserPlusIcon },
   { name: 'Appointments', to: '/admin/appointments', icon: CalendarDaysIcon },
   { name: 'Customers', to: '/admin/customers', icon: UserGroupIcon },
   { name: 'Barbers', to: '/admin/barbers', icon: UsersIcon },
@@ -37,6 +45,9 @@ const navItems = [
   { name: 'Blog', to: '/admin/blog', icon: DocumentTextIcon },
   { name: 'Working Hours', to: '/admin/working-hours', icon: ClockIcon },
   { name: 'Reports', to: '/admin/reports', icon: ChartBarIcon },
-  { name: 'Settings', to: '/admin/settings', icon: Cog6ToothIcon },
+  { name: 'Analytics', to: '/admin/analytics', icon: PresentationChartLineIcon },
+  { name: 'Verifications', to: '/admin/verifications', icon: ShieldCheckIcon },
+  { name: 'System Logs', to: '/admin/system-logs', icon: ClipboardDocumentListIcon },
+  { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
 ];
 </script>

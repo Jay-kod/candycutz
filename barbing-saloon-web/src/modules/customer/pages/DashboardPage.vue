@@ -6,7 +6,7 @@
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10">
           <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Customer Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-white">
             Your <span class="text-gold">booking overview</span>
           </h1>
           <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
@@ -18,17 +18,17 @@
       <!-- Stats Grid -->
       <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <article v-for="item in statsCards" :key="item.label" class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]">
-          <div class="absolute right-0 top-0 -mr-6 -mt-6 opacity-5 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-10 group-hover:rotate-12" :class="item.colorClass">
-            <component :is="item.icon" class="w-32 h-32" />
+          <!-- Watermark icon top-right background -->
+          <div class="absolute -right-4 -top-4 opacity-[0.06] transition-all duration-700 group-hover:opacity-[0.12] group-hover:scale-110 group-hover:rotate-6 pointer-events-none" :class="item.colorClass">
+            <component :is="item.icon" class="w-28 h-28" />
           </div>
-          <div class="relative z-10">
-            <div class="flex items-center gap-3">
-              <div class="p-2 rounded-xl bg-theme-bg border border-theme-border text-theme-muted group-hover:border-gold/30 group-hover:bg-gold/5 transition-colors" :class="item.colorClass">
-                <component :is="item.icon" class="w-5 h-5" />
-              </div>
-              <p class="text-xs font-semibold uppercase tracking-widest text-ivory/50">{{ item.label }}</p>
+          <div class="relative z-10 flex items-start gap-4">
+            <!-- Large icon on left, no background -->
+            <component :is="item.icon" class="w-10 h-10 shrink-0 mt-0.5 transition-colors duration-300" :class="item.colorClass" />
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted">{{ item.label }}</p>
+              <p class="mt-2 font-display text-4xl text-theme-text group-hover:text-gold transition-colors">{{ item.value }}</p>
             </div>
-            <p class="mt-4 font-display text-4xl text-theme-text group-hover:text-gold transition-colors">{{ item.value }}</p>
           </div>
         </article>
       </div>
@@ -49,10 +49,23 @@
                   </div>
                   <div>
                     <p class="font-display text-lg text-theme-text group-hover:text-gold transition-colors">{{ booking.service?.name }}</p>
-                    <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-ivory/50">
+                    <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-theme-muted">
                       <span class="flex items-center gap-1"><ClockIcon class="h-4 w-4 text-gold/50" /> {{ booking.appointment_date }} at {{ booking.appointment_time }}</span>
                       <span class="hidden sm:block text-theme-border">•</span>
                       <span class="flex items-center gap-1"><UserIcon class="h-4 w-4 text-gold/50" /> {{ booking.barber?.name }}</span>
+                    </div>
+                    <div v-if="booking.status === 'confirmed' && booking.verification_code" class="mt-3">
+                      <p class="text-[10px] uppercase tracking-widest text-emerald-400 mb-1 font-bold">Verification Code</p>
+                      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded px-2 py-1 text-emerald-400 font-mono text-sm tracking-[0.2em] shadow-inner font-bold">
+                        <span>{{ booking.verification_code }}</span>
+                        <button 
+                          @click.prevent="copyCode(booking.verification_code)"
+                          class="p-1 hover:bg-emerald-500/20 rounded transition-colors"
+                          title="Copy Code"
+                        >
+                          <DocumentDuplicateIcon class="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -61,7 +74,7 @@
             </div>
             
             <div v-if="(dashboard.upcoming_appointments || []).length === 0" class="rounded-xl border border-dashed border-theme-border p-8 text-center">
-              <p class="text-sm text-ivory/40">No upcoming appointments yet.</p>
+              <p class="text-sm text-theme-muted">No upcoming appointments yet.</p>
               <RouterLink to="/" class="mt-4 inline-block text-sm font-bold text-gold hover:text-gold-light">Book a service &rarr;</RouterLink>
             </div>
           </div>
@@ -78,10 +91,10 @@
                 </div>
                 <div>
                   <p class="text-sm font-semibold text-theme-text group-hover:text-gold transition-colors">Bookings</p>
-                  <p class="mt-0.5 text-xs text-ivory/40">Manage your appointments</p>
+                  <p class="mt-0.5 text-xs text-theme-muted">Manage your appointments</p>
                 </div>
               </div>
-              <ChevronRightIcon class="h-5 w-5 text-ivory/20 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              <ChevronRightIcon class="h-5 w-5 text-theme-muted/50 group-hover:text-gold group-hover:translate-x-1 transition-all" />
             </RouterLink>
             <RouterLink to="/customer/dashboard/profile" class="group flex items-center justify-between rounded-xl border border-theme-border bg-theme-bg/50 p-4 transition-all hover:border-gold/30 hover:bg-theme-surface/50 hover:shadow-lg">
               <div class="flex items-center gap-4">
@@ -90,10 +103,10 @@
                 </div>
                 <div>
                   <p class="text-sm font-semibold text-theme-text group-hover:text-gold transition-colors">Profile</p>
-                  <p class="mt-0.5 text-xs text-ivory/40">Update personal details</p>
+                  <p class="mt-0.5 text-xs text-theme-muted">Update personal details</p>
                 </div>
               </div>
-              <ChevronRightIcon class="h-5 w-5 text-ivory/20 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              <ChevronRightIcon class="h-5 w-5 text-theme-muted/50 group-hover:text-gold group-hover:translate-x-1 transition-all" />
             </RouterLink>
             <RouterLink to="/customer/dashboard/reviews" class="group flex items-center justify-between rounded-xl border border-theme-border bg-theme-bg/50 p-4 transition-all hover:border-gold/30 hover:bg-theme-surface/50 hover:shadow-lg">
               <div class="flex items-center gap-4">
@@ -102,10 +115,10 @@
                 </div>
                 <div>
                   <p class="text-sm font-semibold text-theme-text group-hover:text-gold transition-colors">Reviews</p>
-                  <p class="mt-0.5 text-xs text-ivory/40">Leave feedback</p>
+                  <p class="mt-0.5 text-xs text-theme-muted">Leave feedback</p>
                 </div>
               </div>
-              <ChevronRightIcon class="h-5 w-5 text-ivory/20 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              <ChevronRightIcon class="h-5 w-5 text-theme-muted/50 group-hover:text-gold group-hover:translate-x-1 transition-all" />
             </RouterLink>
             <RouterLink to="/customer/dashboard/wishlist" class="group flex items-center justify-between rounded-xl border border-theme-border bg-theme-bg/50 p-4 transition-all hover:border-gold/30 hover:bg-theme-surface/50 hover:shadow-lg">
               <div class="flex items-center gap-4">
@@ -114,10 +127,10 @@
                 </div>
                 <div>
                   <p class="text-sm font-semibold text-theme-text group-hover:text-gold transition-colors">Wishlist</p>
-                  <p class="mt-0.5 text-xs text-ivory/40">View saved styles</p>
+                  <p class="mt-0.5 text-xs text-theme-muted">View saved styles</p>
                 </div>
               </div>
-              <ChevronRightIcon class="h-5 w-5 text-ivory/20 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              <ChevronRightIcon class="h-5 w-5 text-theme-muted/50 group-hover:text-gold group-hover:translate-x-1 transition-all" />
             </RouterLink>
           </div>
         </article>
@@ -133,18 +146,18 @@
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="font-bold text-theme-text">{{ notif.title }}</h3>
-                  <span class="text-[10px] text-ivory/40">{{ new Date(notif.created_at).toLocaleDateString() }}</span>
+                  <span class="text-[10px] text-theme-muted">{{ new Date(notif.created_at).toLocaleDateString() }}</span>
                 </div>
-                <p class="mt-1 text-sm text-ivory/70">{{ notif.message }}</p>
+                <p class="mt-1 text-sm text-theme-muted">{{ notif.message }}</p>
                 <p class="mt-2 text-xs text-gold/70 italic">- {{ notif.sender_name }}</p>
               </div>
             </div>
             
             <div v-if="notifications.length === 0" class="rounded-xl border border-dashed border-theme-border p-8 text-center">
-              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-theme-surface border border-theme-border text-ivory/20 mb-3">
+              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-theme-surface border border-theme-border text-theme-muted/50 mb-3">
                 <BellIcon class="h-6 w-6" />
               </div>
-              <p class="text-sm text-ivory/40">You have no new notifications.</p>
+              <p class="text-sm text-theme-muted">You have no new notifications.</p>
             </div>
           </div>
         </article>
@@ -154,10 +167,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { customerApi } from '../api/customer.api';
+import CustomerLayout from '../layouts/CustomerLayout.vue';
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -169,11 +182,17 @@ import {
   HeartIcon, 
   ChevronRightIcon,
   UserIcon,
-  BellIcon
+  BellIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline';
+import ReceiptViewer from '../../../core/components/ReceiptViewer.vue';
+import { useToast } from '../../../core/composables/useToast';
 
 const dashboard = ref({ stats: {}, upcoming_appointments: [] });
 const notifications = ref([]);
+const loading = ref(true);
+const toast = useToast();
+let pollInterval = null;
 
 const statsCards = computed(() => [
   { label: 'Total bookings', value: dashboard.value.stats?.total_bookings ?? 0, icon: CalendarIcon, colorClass: 'text-blue-400 group-hover:text-blue-300' },
@@ -182,7 +201,7 @@ const statsCards = computed(() => [
   { label: 'Reviews', value: dashboard.value.stats?.reviews_count ?? 0, icon: StarIcon, colorClass: 'text-purple-400 group-hover:text-purple-300' },
 ]);
 
-onMounted(async () => {
+async function loadData() {
   try {
     const [dashRes, notifRes] = await Promise.all([
       customerApi.dashboard(),
@@ -193,5 +212,24 @@ onMounted(async () => {
   } catch (err) {
     console.error(err);
   }
+}
+
+onMounted(() => {
+  loadData();
+  pollInterval = setInterval(loadData, 30000);
+});
+
+async function copyCode(code) {
+  if (!code) return;
+  try {
+    await navigator.clipboard.writeText(code);
+    toast.success('Code copied to clipboard!');
+  } catch (err) {
+    toast.error('Failed to copy code');
+  }
+}
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 </script>

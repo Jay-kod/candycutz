@@ -43,7 +43,10 @@
           :key="post.id"
           class="group rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.06)]"
         >
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div class="flex flex-col md:flex-row md:items-start gap-4">
+            <div v-if="post.featured_image" class="w-full md:w-32 h-32 shrink-0 rounded-xl overflow-hidden border border-gold/10 relative group-hover:border-gold/30 transition-colors">
+              <img :src="getImageUrl(post.featured_image)" :alt="post.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3">
                 <span
@@ -85,85 +88,39 @@
         </div>
       </div>
 
-      <!-- Editor Modal -->
-      <Teleport to="body">
-        <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showEditor = false">
-          <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl animate-fade-in custom-scrollbar">
-            <h2 class="font-display text-2xl text-theme-text">{{ editingId ? 'Edit Post' : 'New Post' }}</h2>
-            <form class="mt-6 space-y-5" @submit.prevent="savePost">
-              <div class="space-y-2">
-                <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Title</label>
-                <input v-model="form.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="e.g. 5 Tips for the Perfect Fade" />
-              </div>
-              <div class="space-y-2">
-                <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Excerpt</label>
-                <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
-              </div>
-              <div class="space-y-2">
-                <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Content</label>
-                <textarea v-model="form.content" rows="12" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
-              </div>
-              <div class="flex items-center gap-3">
-                <input v-model="form.is_published" type="checkbox" id="publish" class="h-4 w-4 rounded accent-gold" />
-                <label for="publish" class="text-sm text-ivory/70">Publish immediately</label>
-              </div>
-              <div class="flex gap-3 pt-2">
-                <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50">
-                  {{ saving ? 'Saving...' : (editingId ? 'Update Post' : 'Create Post') }}
-                </button>
-                <button type="button" @click="showEditor = false" class="rounded-xl border border-theme-border px-6 py-3 text-sm font-medium text-theme-muted hover:bg-white/5 transition-colors">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </Teleport>
+
     </section>
   </BarberLayout>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import BarberLayout from '../layouts/BarberLayout.vue';
 import { barberApi } from '../api/barber.api';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
-import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 
+const router = useRouter();
 const toast = useToast();
 const { confirm } = useConfirm();
 const loading = ref(true);
-const saving = ref(false);
-const showEditor = ref(false);
-const editingId = ref(null);
 const posts = ref([]);
 
-const form = reactive({
-  title: '',
-  excerpt: '',
-  content: '',
-  is_published: false,
-});
-
-function resetForm() {
-  form.title = '';
-  form.excerpt = '';
-  form.content = '';
-  form.is_published = false;
-  editingId.value = null;
+function getImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/images/')) return path;
+  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
 }
 
 function openEditor(post = null) {
-  resetForm();
   if (post) {
-    editingId.value = post.id;
-    form.title = post.title;
-    form.excerpt = post.excerpt || '';
-    form.content = post.content;
-    form.is_published = post.is_published == 1;
+    router.push(`/barber/blog/${post.id}/edit`);
+  } else {
+    router.push('/barber/blog/new');
   }
-  showEditor.value = true;
 }
 
 function formatDate(dateStr) {
@@ -182,24 +139,7 @@ async function fetchPosts() {
   }
 }
 
-async function savePost() {
-  saving.value = true;
-  try {
-    if (editingId.value) {
-      await barberApi.updateBlogPost(editingId.value, { ...form });
-      toast.success('Post updated');
-    } else {
-      await barberApi.createBlogPost({ ...form });
-      toast.success('Post created');
-    }
-    showEditor.value = false;
-    await fetchPosts();
-  } catch (err) {
-    toast.error('Failed to save post');
-  } finally {
-    saving.value = false;
-  }
-}
+
 
 async function togglePublish(post) {
   try {

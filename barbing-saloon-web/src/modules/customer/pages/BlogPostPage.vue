@@ -27,19 +27,19 @@
         <!-- Hero Header -->
         <header class="relative h-[70vh] min-h-[500px] w-full flex items-center justify-center overflow-hidden">
           <div class="absolute inset-0">
-            <img v-if="post.featured_image" :src="post.featured_image" :alt="post.title" class="h-full w-full object-cover" />
+            <img v-if="post.featured_image" :src="getImageUrl(post.featured_image)" :alt="post.title" class="h-full w-full object-cover" />
             <div class="absolute inset-0 bg-obsidian/60 backdrop-blur-[2px]"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-theme-bg via-transparent to-transparent opacity-100"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent opacity-100"></div>
           </div>
           
           <div class="relative z-10 mx-auto max-w-4xl px-6 text-center" data-reveal>
-            <div class="flex items-center justify-center gap-3 text-sm uppercase tracking-[0.2em] font-semibold text-gold-light mb-8">
+            <div class="flex items-center justify-center gap-3 text-sm uppercase tracking-[0.2em] font-semibold text-gold mb-8">
               <span>{{ post.author?.name || 'CandyCutz' }}</span>
-              <span class="w-1 h-1 rounded-full bg-theme-border"></span>
+              <span class="w-1 h-1 rounded-full bg-white/30"></span>
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
             
-            <h1 class="font-display text-5xl md:text-7xl font-bold text-theme-text leading-tight drop-shadow-2xl">
+            <h1 class="font-display text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
               {{ post.title }}
             </h1>
           </div>
@@ -90,7 +90,7 @@
               </div>
               
               <div class="mt-16">
-                <RouterLink to="/blog" class="inline-flex items-center gap-2 font-semibold text-gold hover:text-gold-light transition-colors">
+                <RouterLink to="/customer/dashboard/blog" class="inline-flex items-center gap-2 font-semibold text-gold hover:text-gold-light transition-colors">
                   &larr; Back to Blog
                 </RouterLink>
               </div>
@@ -107,10 +107,10 @@
                 <div class="space-y-6">
                   <article v-for="recent in recentPosts" :key="recent.id" class="group flex gap-4 items-center">
                     <RouterLink :to="`/customer/dashboard/blog/${recent.slug}`" class="block w-20 h-20 shrink-0 overflow-hidden rounded-xl bg-theme-bg">
-                      <img v-if="recent.featured_image" :src="recent.featured_image" :alt="recent.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <img v-if="recent.featured_image" :src="getImageUrl(recent.featured_image)" :alt="recent.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     </RouterLink>
                     <div>
-                      <p class="text-[10px] uppercase tracking-widest text-gold-light mb-1">{{ formatDate(recent.created_at) }}</p>
+                      <p class="text-[10px] uppercase tracking-widest text-theme-muted mb-1">{{ formatDate(recent.created_at) }}</p>
                       <RouterLink :to="`/customer/dashboard/blog/${recent.slug}`" class="block text-sm font-semibold text-theme-text leading-snug group-hover:text-gold transition-colors line-clamp-2">
                         {{ recent.title }}
                       </RouterLink>
@@ -176,11 +176,17 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
+const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/images/')) return path;
+  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
+};
+
 const loadData = async (slug) => {
   isLoading.value = true;
   error.value = false;
   window.scrollTo(0, 0);
-  isLiked.value = false;
   
   try {
     const response = await publicApi.blogPost(slug);

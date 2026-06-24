@@ -8,7 +8,7 @@ export const publicApi = {
   barbers: () => client.get('/public/barbers'),
   barber: (id) => client.get(`/public/barbers/${id}`),
   gallery: (params = {}) => client.get('/public/gallery', { params }),
-  testimonials: () => client.get('/public/testimonials'),
+  testimonials: (params = {}) => client.get('/public/testimonials', { params }),
   blog: () => client.get('/public/blog'),
   blogPost: (slug) => client.get(`/public/blog/${slug}`),
   workingHours: () => client.get('/public/working-hours'),

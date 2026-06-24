@@ -4,26 +4,20 @@
       <!-- Shop Section -->
       <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
-          <p class="text-sm uppercase tracking-[0.3em] text-gold-light">About Us</p>
-          <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">A Sharper Standard</h1>
-          <p class="mt-6 text-lg text-theme-muted leading-relaxed">
-            Welcome to CandyCutz, where precision meets style. We've been providing premium grooming services to those who appreciate a quality cut. Our shop combines traditional barbering techniques with modern trends in a relaxing, luxurious environment.
-          </p>
-          <p class="mt-4 text-lg text-theme-muted leading-relaxed">
-            Whether you're here for a quick shape-up or a complete restyle, our expert barbers are dedicated to making you look and feel your best. Experience the art of grooming at its finest.
-          </p>
+          <p class="text-sm uppercase tracking-[0.3em] text-gold-light">{{ shopTitle }}</p>
+          <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">{{ shopSubtitle }}</h1>
+          <p class="mt-6 text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">{{ shopText1 }}</p>
+          <p class="mt-4 text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">{{ shopText2 }}</p>
         </div>
         <div class="relative overflow-hidden rounded-3xl aspect-[4/3] bg-theme-surface border border-theme-border">
-          <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="CandyCutz Shop Interior" class="w-full h-full object-cover" />
+          <img :src="shopImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" class="w-full h-full object-cover" />
         </div>
       </div>
 
       <!-- Barbers Section -->
       <div data-reveal class="mt-32">
-        <h2 class="font-display text-3xl sm:text-4xl text-gold text-center">Meet the team</h2>
-        <p class="mt-4 text-center text-theme-muted max-w-2xl mx-auto">
-          Our barbers are masters of their craft, bringing years of experience and a passion for perfection to every cut.
-        </p>
+        <h2 class="font-display text-3xl sm:text-4xl text-gold text-center">{{ teamTitle }}</h2>
+        <p class="mt-4 text-center text-theme-muted max-w-2xl mx-auto whitespace-pre-wrap">{{ teamSubtitle }}</p>
         
         <!-- Single Featured Barber Skeleton -->
         <div v-if="isLoading" class="mt-16 mx-auto max-w-5xl overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col md:flex-row">
@@ -48,7 +42,7 @@
           <article v-for="(barber, index) in barbers.slice(0, 1)" :key="barber.id" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col md:flex-row shadow-xl hover:shadow-2xl hover:shadow-gold/5 transition-all duration-500">
             <!-- Barber Image -->
             <div class="md:w-1/2 relative overflow-hidden bg-theme-bg aspect-[4/5] md:aspect-auto">
-              <img v-if="barber.avatar" :src="barber.avatar" :alt="barber.name" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+              <img v-if="barber.avatar" :src="getImageUrl(barber.avatar)" :alt="barber.name" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <div v-else class="absolute inset-0 flex items-center justify-center text-theme-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -83,7 +77,7 @@
               </div>
               
               <div class="mt-10">
-                <RouterLink :to="`/barber/${barber.id}`" class="inline-flex items-center gap-2 rounded-xl bg-gold px-8 py-4 text-sm font-bold text-obsidian shadow-lg hover:bg-gold-light transition-all duration-300 hover:scale-[1.02]">
+                <RouterLink :to="`/customer/dashboard/barber/${barber.id}`" class="inline-flex items-center gap-2 rounded-xl bg-gold px-8 py-4 text-sm font-bold text-obsidian shadow-lg hover:bg-gold-light transition-all duration-300 hover:scale-[1.02]">
                   View Full Profile
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </RouterLink>
@@ -106,10 +100,56 @@ import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 const barbers = ref([]);
 const isLoading = ref(true);
 
+const shopTitle = ref('About Us');
+const shopSubtitle = ref('A Sharper Standard');
+const shopText1 = ref("Welcome to CandyCutz, where precision meets style. We've been providing premium grooming services to those who appreciate a quality cut. Our shop combines traditional barbering techniques with modern trends in a relaxing, luxurious environment.");
+const shopText2 = ref("Whether you're here for a quick shape-up or a complete restyle, our expert barbers are dedicated to making you look and feel your best. Experience the art of grooming at its finest.");
+const shopImage = ref(null);
+
+const teamTitle = ref('Meet the team');
+const teamSubtitle = ref('Our barbers are masters of their craft, bringing years of experience and a passion for perfection to every cut.');
+
 const { init: initScrollReveal } = useScrollReveal();
+
+const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('data:')) return path;
+  
+  const baseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
+  
+  if (path.startsWith('/uploads/') || path.startsWith('/storage/')) {
+    return `${baseUrl}${path}`;
+  }
+  if (path.startsWith('uploads/') || path.startsWith('storage/')) {
+    return `${baseUrl}/${path}`;
+  }
+  
+  return path.startsWith('/') ? `${baseUrl}/storage${path}` : `${baseUrl}/storage/${path}`;
+};
+
+const fetchSettings = async () => {
+  try {
+    const response = await publicApi.settings();
+    const settings = response.data.data;
+    if (settings) {
+      if (settings.about_shop_title) shopTitle.value = settings.about_shop_title;
+      if (settings.about_shop_subtitle) shopSubtitle.value = settings.about_shop_subtitle;
+      if (settings.about_shop_text_1) shopText1.value = settings.about_shop_text_1;
+      if (settings.about_shop_text_2) shopText2.value = settings.about_shop_text_2;
+      if (settings.about_shop_image) shopImage.value = getImageUrl(settings.about_shop_image);
+      
+      if (settings.about_team_title) teamTitle.value = settings.about_team_title;
+      if (settings.about_team_subtitle) teamSubtitle.value = settings.about_team_subtitle;
+    }
+  } catch (error) {
+    console.error('Failed to load settings:', error);
+  }
+};
 
 onMounted(async () => {
   try {
+    fetchSettings();
     const response = await publicApi.barbers();
     barbers.value = response.data.data;
     isLoading.value = false;

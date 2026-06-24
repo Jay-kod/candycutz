@@ -20,7 +20,7 @@
         <!-- Hero Section with Parallax Feel -->
         <section class="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
           <div class="absolute inset-0">
-            <img v-if="barber.avatar" :src="barber.avatar" :alt="barber.name" class="h-full w-full object-cover scale-105" />
+            <img v-if="barber.avatar" :src="getImageUrl(barber.avatar)" :alt="barber.name" class="h-full w-full object-cover scale-105" />
             <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/70 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-obsidian/90 via-obsidian/50 to-transparent"></div>
           </div>
@@ -125,7 +125,7 @@
           <div class="px-6 mx-auto max-w-7xl columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
             <article v-for="(item, index) in barber.gallery" :key="item.id" @click="openLightbox(index)" class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface relative block mb-6 break-inside-avoid cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] transition-all duration-500 hover:-translate-y-1">
               <div class="relative w-full overflow-hidden bg-theme-bg" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '1/1') }">
-                <img v-if="item.image_path" :src="item.image_path" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
               </div>
               <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 text-theme-text translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
@@ -156,7 +156,7 @@
 
       <!-- Main Image -->
       <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
-        <img v-if="barber.gallery[currentIdx]?.image_path" :src="barber.gallery[currentIdx].image_path" :alt="barber.gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
+        <img v-if="barber.gallery[currentIdx]?.image_path" :src="getImageUrl(barber.gallery[currentIdx].image_path)" :alt="barber.gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
         <div class="mt-6 text-center text-theme-text">
           <p class="text-sm font-semibold uppercase tracking-widest text-gold-light">{{ barber.gallery[currentIdx]?.category }}</p>
           <h2 class="mt-2 font-display text-2xl md:text-3xl">{{ barber.gallery[currentIdx]?.title }}</h2>
@@ -190,6 +190,23 @@ const { init: initScrollReveal } = useScrollReveal();
 const isLightboxOpen = ref(false);
 const currentIdx = ref(0);
 const lightboxRef = ref(null);
+
+function getImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('data:')) return path;
+  
+  const baseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '');
+  
+  if (path.startsWith('/uploads/') || path.startsWith('/storage/')) {
+    return `${baseUrl}${path}`;
+  }
+  if (path.startsWith('uploads/') || path.startsWith('storage/')) {
+    return `${baseUrl}/${path}`;
+  }
+  
+  return path.startsWith('/') ? `${baseUrl}/storage${path}` : `${baseUrl}/storage/${path}`;
+}
 
 onMounted(async () => {
   window.scrollTo(0, 0);

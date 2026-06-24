@@ -17,15 +17,21 @@
       <div v-else class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
         <article v-for="(item, index) in gallery" :key="item.id" @click="openLightbox(index)" :data-reveal-delay="index * 100" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface relative block mb-6 break-inside-avoid cursor-pointer shadow-md hover:shadow-2xl hover:shadow-gold/10 transition-shadow duration-500">
           <div class="relative w-full overflow-hidden bg-theme-bg" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }">
-             <img v-if="item.image_path" :src="item.image_path" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+             <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
              <!-- Smart Gradient Overlay -->
              <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
           </div>
           <!-- Smart Hover Content -->
-          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-theme-text translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
-            <p class="text-xs uppercase tracking-[0.25em] text-gold-light font-semibold opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">{{ item.category }}</p>
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-white translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
+            <div class="flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">
+                <p class="text-[10px] uppercase tracking-[0.25em] text-gold-light font-semibold">{{ item.category }}</p>
+                <p class="text-[10px] uppercase font-bold tracking-widest text-white/60 bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                    {{ item.barber_name || 'CandyCutz Admin' }}
+                </p>
+            </div>
             <h2 class="mt-2 font-display text-2xl font-semibold">{{ item.title }}</h2>
-            <p class="mt-3 text-sm text-white/80 line-clamp-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">{{ item.description }}</p>
+            <p class="mt-2 text-sm text-white/80 line-clamp-2 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">{{ item.description }}</p>
             <!-- Expand action button -->
             <button class="absolute right-6 bottom-6 flex h-10 w-10 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-gold-light" aria-label="View larger">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
@@ -49,11 +55,18 @@
 
       <!-- Main Image -->
       <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
-        <img v-if="gallery[currentIdx]?.image_path" :src="gallery[currentIdx].image_path" :alt="gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
+        <img v-if="gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url" :src="getImageUrl(gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url)" :alt="gallery[currentIdx]?.title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
         <div class="mt-6 text-center text-theme-text">
-          <p class="text-sm font-semibold uppercase tracking-widest text-gold-light">{{ gallery[currentIdx]?.category }}</p>
-          <h2 class="mt-2 font-display text-2xl md:text-3xl">{{ gallery[currentIdx]?.title }}</h2>
-          <p class="mt-2 text-theme-muted max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
+          <div class="flex items-center justify-center gap-3">
+              <p class="text-xs font-semibold uppercase tracking-widest text-gold-light">{{ gallery[currentIdx]?.category }}</p>
+              <span class="w-1.5 h-1.5 rounded-full bg-theme-border"></span>
+              <p class="text-xs font-bold uppercase tracking-widest text-theme-muted flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                  By {{ gallery[currentIdx]?.barber_name || 'CandyCutz Admin' }}
+              </p>
+          </div>
+          <h2 class="mt-3 font-display text-2xl md:text-3xl">{{ gallery[currentIdx]?.title }}</h2>
+          <p class="mt-3 text-theme-muted max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
         </div>
       </div>
 
@@ -104,6 +117,13 @@ function prevImage() {
   if (currentIdx.value > 0) {
     currentIdx.value--;
   }
+}
+
+function getImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/images/')) return path;
+  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
 }
 
 onMounted(async () => {

@@ -1,182 +1,215 @@
 <template>
   <BarberLayout>
-    <section class="space-y-8 animate-fade-in">
-      <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Manage</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-              Your <span class="text-gold">Services</span> <span class="text-xl text-ivory/50">({{ services.length }})</span>
-            </h1>
-            <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
-              Add, edit, or remove the services you offer. Customers see these on the public page.
-            </p>
+    <section class="space-y-6 animate-fade-in pb-10">
+      <!-- Premium Header Banner -->
+      <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#111111]/90 p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 backdrop-blur-3xl">
+        <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-gold/10 blur-[100px]"></div>
+        <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/8 blur-[80px]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.05),transparent_60%)]"></div>
+
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="flex h-6 w-6 items-center justify-center rounded-md bg-gold/20 text-gold border border-gold/30">
+              <SparklesIcon class="h-3.5 w-3.5" />
+            </span>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-gold/80 font-bold">Catalog</p>
           </div>
-          <button
-            @click="openForm()"
-            class="flex items-center gap-2 shrink-0 rounded-xl bg-gradient-to-r from-gold to-gold-dark px-5 py-3 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02]"
-          >
-            <PlusIcon class="h-5 w-5" />
+          <h1 class="font-display text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
+            Service <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">Menu</span>
+            <span v-if="!loading" class="ml-3 inline-flex items-center justify-center h-9 px-3.5 rounded-full bg-white/5 border border-white/10 text-lg text-white/60 font-normal align-middle">{{ services.length }}</span>
+          </h1>
+          <p class="mt-3 text-sm text-white/40 max-w-lg leading-relaxed">
+            Manage your saloon's service offerings, pricing, and durations. These services are visible to your customers during booking.
+          </p>
+        </div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row items-center gap-4 shrink-0 w-full md:w-auto">
+          <router-link to="/barber/services/new" class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold to-gold-dark px-6 py-3.5 text-sm font-bold text-obsidian transition-all hover:shadow-[0_8px_30px_rgba(212,175,55,0.3)] shrink-0 group">
+            <PlusIcon class="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
             Add Service
-          </button>
+          </router-link>
         </div>
       </div>
 
-      <!-- Loading -->
-      <div v-if="loading" class="flex justify-center py-20">
-        <div class="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent"></div>
+      <!-- Category Filter Tabs -->
+      <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
+        <button
+          @click="activeCategory = 'all'"
+          class="shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all"
+          :class="activeCategory === 'all'
+            ? 'bg-gold/20 text-gold border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
+            : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
+        >
+          All Services
+          <span class="ml-1.5 text-[10px] opacity-60">{{ services.length }}</span>
+        </button>
+        <button
+          v-for="cat in categories"
+          :key="cat"
+          @click="activeCategory = cat"
+          class="shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all"
+          :class="activeCategory === cat
+            ? 'bg-gold/20 text-gold border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
+            : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
+        >
+          {{ cat }}
+          <span class="ml-1.5 text-[10px] opacity-60">{{ services.filter(s => (s.category_name || 'General') === cat).length }}</span>
+        </button>
       </div>
 
-      <!-- Empty State -->
-      <div v-else-if="services.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
-        <ScissorsIcon class="mx-auto h-12 w-12 text-ivory/20" />
-        <h3 class="mt-4 font-display text-xl text-theme-text">No services yet</h3>
-        <p class="mt-2 text-sm text-ivory/50">Add your first service to start getting bookings.</p>
-      </div>
+      <!-- Services Grid -->
+      <div class="rounded-[2rem] border border-white/[0.05] bg-[#1a1a1a]/80 backdrop-blur-2xl shadow-2xl overflow-hidden min-h-[400px]">
 
-      <!-- Services Table/Grid -->
-      <div v-else class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-theme-border">
-                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Service</th>
-                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Price (₦)</th>
-                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Duration</th>
-                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40">Status</th>
-                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-ivory/40 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="service in services"
-                :key="service.id"
-                class="border-b border-theme-border transition-colors hover:bg-theme-surface/50"
-              >
-                <td class="px-6 py-4">
-                  <p class="font-semibold text-theme-text">{{ service.name }}</p>
-                  <p class="mt-0.5 text-xs text-ivory/40 line-clamp-1">{{ service.description || 'No description' }}</p>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="font-bold text-gold text-lg">₦{{ Number(service.price).toLocaleString() }}</span>
-                </td>
-                <td class="px-6 py-4 text-sm text-theme-muted">{{ service.duration_minutes }} min</td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                    :class="service.is_available == 1 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'"
-                  >
-                    <span class="h-1.5 w-1.5 rounded-full" :class="service.is_available == 1 ? 'bg-emerald-400' : 'bg-red-400'"></span>
-                    {{ service.is_available == 1 ? 'Active' : 'Inactive' }}
+        <!-- Loading skeleton -->
+        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-6">
+          <div v-for="i in 6" :key="i" class="rounded-2xl border border-white/[0.02] bg-white/[0.01] p-6 animate-pulse">
+            <div class="h-4 w-20 bg-white/[0.03] rounded mb-4"></div>
+            <div class="h-6 w-3/4 bg-white/[0.03] rounded mb-3"></div>
+            <div class="h-3 w-full bg-white/[0.02] rounded mb-2"></div>
+            <div class="h-3 w-5/6 bg-white/[0.02] rounded mb-6"></div>
+            <div class="flex justify-between items-center pt-4 border-t border-white/[0.03]">
+              <div class="h-6 w-16 bg-white/[0.03] rounded"></div>
+              <div class="h-6 w-20 bg-white/[0.02] rounded"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div v-else-if="filteredServices.length === 0" class="flex flex-col items-center justify-center py-24 px-6 text-center">
+          <div class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.05] mb-6">
+            <div class="absolute inset-0 rounded-full border border-dashed border-white/10 animate-[spin_10s_linear_infinite]"></div>
+            <SparklesIcon class="h-8 w-8 text-white/20" />
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">{{ activeCategory !== 'all' ? 'No Services in This Category' : 'No Services Found' }}</h3>
+          <p class="text-sm text-white/40 max-w-sm mx-auto mb-6">
+            {{ activeCategory !== 'all' ? 'Try selecting a different category or add a new service.' : 'Add your first service to start accepting bookings from customers.' }}
+          </p>
+          <router-link to="/barber/services/new" class="text-gold hover:text-gold-light text-sm font-semibold transition-colors flex items-center gap-2">
+            <PlusIcon class="h-4 w-4" /> Add your first service
+          </router-link>
+        </div>
+
+        <!-- Service Cards -->
+        <div v-else class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <article
+              v-for="service in filteredServices"
+              :key="service.id"
+              class="group relative overflow-hidden rounded-3xl border border-white/[0.05] bg-gradient-to-br from-white/[0.02] to-transparent transition-all duration-300 hover:border-gold/20 hover:from-white/[0.04] hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex flex-col"
+            >
+              <!-- Glow accent -->
+              <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold to-gold-light opacity-0 group-hover:opacity-100 transition-opacity z-20"></div>
+
+              <!-- Cover Image (if exists) -->
+              <div v-if="service.image" class="relative w-full h-40 bg-black overflow-hidden shrink-0">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay z-10"></div>
+                <img :src="service.image" :alt="service.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/50 to-transparent z-10"></div>
+                
+                <!-- Category badge moved to image overlay -->
+                <div class="absolute top-4 left-4 z-20">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-gold/20 bg-gold/10 text-gold backdrop-blur-md">
+                    <TagIcon class="h-3 w-3" />
+                    {{ service.category_name || 'General' }}
                   </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <button @click="openForm(service)" class="rounded-lg p-2 text-ivory/40 hover:bg-gold/10 hover:text-gold transition-colors" title="Edit">
-                      <PencilIcon class="h-4 w-4" />
-                    </button>
-                    <button @click="deleteService(service.id)" class="rounded-lg p-2 text-ivory/40 hover:bg-red-500/10 hover:text-red-400 transition-colors" title="Delete">
+                </div>
+              </div>
+
+              <div class="relative z-20 flex flex-col flex-1 p-6" :class="{'pt-2': service.image}">
+                <!-- Header row (no image state) -->
+                <div v-if="!service.image" class="flex items-start justify-between gap-4 mb-4">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-gold/20 bg-gold/10 text-gold">
+                    <TagIcon class="h-3 w-3" />
+                    {{ service.category_name || 'General' }}
+                  </span>
+
+                  <div class="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <router-link :to="`/barber/services/${service.id}/edit`" class="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors" title="Edit Service">
+                      <PencilSquareIcon class="h-4 w-4" />
+                    </router-link>
+                    <button @click="deleteService(service)" class="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/20 transition-colors" title="Delete Service">
                       <TrashIcon class="h-4 w-4" />
                     </button>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </div>
+                
+                <!-- Floating action buttons (with image state) -->
+                <div v-if="service.image" class="absolute top-4 right-4 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                  <router-link :to="`/barber/services/${service.id}/edit`" class="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors" title="Edit Service">
+                    <PencilSquareIcon class="h-4 w-4" />
+                  </router-link>
+                  <button @click="deleteService(service)" class="p-1.5 rounded-lg text-white/70 hover:text-red-400 hover:bg-red-500/30 transition-colors" title="Delete Service">
+                    <TrashIcon class="h-4 w-4" />
+                  </button>
+                </div>
 
-      <!-- Modal Form -->
-      <Teleport to="body">
-        <div v-if="showForm" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showForm = false">
-          <div class="w-full max-w-lg rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl animate-fade-in">
-            <h2 class="font-display text-2xl text-theme-text">{{ editingId ? 'Edit Service' : 'New Service' }}</h2>
-            <form class="mt-6 space-y-5" @submit.prevent="saveService">
-              <div class="space-y-2">
-                <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Service Name</label>
-                <input v-model="form.name" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="e.g. Classic Fade" />
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Price (₦)</label>
-                  <input v-model="form.price" type="number" min="0" step="100" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="5000" />
+                <!-- Name & Description -->
+                <h2 class="font-display text-2xl text-white mb-2 group-hover:text-gold-light transition-colors leading-tight drop-shadow-sm">{{ service.name }}</h2>
+                <p v-if="service.description" class="text-sm text-white/50 line-clamp-2 mb-auto leading-relaxed">{{ service.description }}</p>
+                <p v-else class="text-sm text-white/20 italic mb-auto">No description provided</p>
+
+                <!-- Availability -->
+                <div class="mt-4 mb-4">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border"
+                    :class="service.is_available
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : 'bg-red-500/10 text-red-400 border-red-500/20'"
+                  >
+                    {{ service.is_available ? 'Available' : 'Unavailable' }}
+                  </span>
                 </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Duration (min)</label>
-                  <input v-model="form.duration_minutes" type="number" min="5" step="5" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" placeholder="30" />
+
+                <!-- Price & Duration -->
+                <div class="pt-4 flex items-center justify-between border-t border-white/[0.05]">
+                  <div class="flex items-baseline gap-1 text-emerald-400 font-display">
+                    <span class="text-xs opacity-60">₦</span>
+                    <span class="text-2xl font-bold">{{ Number(service.price).toLocaleString() }}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-white/50 bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.05]">
+                    <ClockIcon class="h-4 w-4 text-gold/60" />
+                    {{ service.duration_minutes }} mins
+                  </div>
                 </div>
               </div>
-              <div class="space-y-2">
-                <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Description</label>
-                <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none" placeholder="Briefly describe this service..."></textarea>
-              </div>
-              <div class="flex items-center gap-3">
-                <input v-model="form.is_available" type="checkbox" id="available" class="h-4 w-4 rounded accent-gold" />
-                <label for="available" class="text-sm text-ivory/70">Available for booking</label>
-              </div>
-              <div class="flex gap-3 pt-2">
-                <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50">
-                  {{ saving ? 'Saving...' : (editingId ? 'Update Service' : 'Create Service') }}
-                </button>
-                <button type="button" @click="showForm = false" class="rounded-xl border border-theme-border px-6 py-3 text-sm font-medium text-theme-muted hover:bg-white/5 transition-colors">
-                  Cancel
-                </button>
-              </div>
-            </form>
+            </article>
           </div>
         </div>
-      </Teleport>
+      </div>
     </section>
   </BarberLayout>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import BarberLayout from '../layouts/BarberLayout.vue';
 import { barberApi } from '../api/barber.api';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
-import { PlusIcon, PencilIcon, TrashIcon, ScissorsIcon } from '@heroicons/vue/24/outline';
+import { 
+  PlusIcon, 
+  PencilSquareIcon, 
+  TrashIcon, 
+  SparklesIcon, 
+  TagIcon, 
+  ClockIcon 
+} from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const { confirm } = useConfirm();
 const loading = ref(true);
-const saving = ref(false);
-const showForm = ref(false);
-const editingId = ref(null);
 const services = ref([]);
+const activeCategory = ref('all');
 
-const form = reactive({
-  name: '',
-  price: '',
-  duration_minutes: 30,
-  description: '',
-  is_available: true,
+const categories = computed(() => {
+  const cats = new Set(services.value.map(s => s.category_name || 'General'));
+  return [...cats].sort();
 });
 
-function resetForm() {
-  form.name = '';
-  form.price = '';
-  form.duration_minutes = 30;
-  form.description = '';
-  form.is_available = true;
-  editingId.value = null;
-}
-
-function openForm(service = null) {
-  resetForm();
-  if (service) {
-    editingId.value = service.id;
-    form.name = service.name;
-    form.price = service.price;
-    form.duration_minutes = service.duration_minutes;
-    form.description = service.description || '';
-    form.is_available = service.is_available == 1;
-  }
-  showForm.value = true;
-}
+const filteredServices = computed(() => {
+  if (activeCategory.value === 'all') return services.value;
+  return services.value.filter(s => (s.category_name || 'General') === activeCategory.value);
+});
 
 async function fetchServices() {
   try {
@@ -189,31 +222,12 @@ async function fetchServices() {
   }
 }
 
-async function saveService() {
-  saving.value = true;
-  try {
-    if (editingId.value) {
-      await barberApi.updateService(editingId.value, { ...form });
-      toast.success('Service updated');
-    } else {
-      await barberApi.createService({ ...form });
-      toast.success('Service created');
-    }
-    showForm.value = false;
-    await fetchServices();
-  } catch (err) {
-    toast.error('Failed to save service');
-  } finally {
-    saving.value = false;
-  }
-}
-
-async function deleteService(id) {
-  const ok = await confirm({ title: 'Delete Service', message: 'Are you sure you want to delete this service? Customers will no longer be able to book it.', confirmText: 'Delete' });
+async function deleteService(service) {
+  const ok = await confirm('Delete Service', `Are you sure you want to delete "${service.name}"? This action cannot be undone.`);
   if (!ok) return;
   try {
-    await barberApi.deleteService(id);
-    services.value = services.value.filter(s => s.id !== id);
+    await barberApi.deleteService(service.id);
+    services.value = services.value.filter(s => s.id !== service.id);
     toast.success('Service deleted');
   } catch (err) {
     toast.error('Failed to delete service');
@@ -222,3 +236,15 @@ async function deleteService(id) {
 
 onMounted(fetchServices);
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

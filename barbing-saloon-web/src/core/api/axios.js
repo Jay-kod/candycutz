@@ -47,7 +47,7 @@ client.interceptors.response.use(
         // Validation error - don't show generic toast, let component handle it
         break;
       case 404:
-        toast.error('Resource not found.');
+        toast.error(`Resource not found: ${error.config?.url}`);
         break;
       case 500:
         toast.error('Server error. Please contact support.');

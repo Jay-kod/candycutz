@@ -19,12 +19,12 @@
       <!-- Sidebar Header -->
       <div class="flex h-20 items-center justify-between px-6 border-b border-white/[0.04]">
         <RouterLink :to="homeRoute" class="flex items-center gap-3 group">
-          <div :class="['relative flex items-center justify-center h-10 w-10 shrink-0 rounded-xl transition-transform group-hover:scale-105 bg-gradient-to-br', themeClasses.gradient, themeClasses.shadowLogo]">
-            <img src="/images/logo-icon.png" alt="Logo" class="h-6 w-6 object-contain" />
+          <div class="relative flex items-center justify-center h-10 w-10 shrink-0 transition-transform group-hover:scale-105">
+            <img src="/images/logo-icon.png" alt="Logo" class="h-8 w-8 object-contain" />
           </div>
           <span
             :class="[
-              'font-display text-xl font-bold text-white whitespace-nowrap transition-all duration-300',
+              'font-display text-xl font-bold text-theme-text whitespace-nowrap transition-all duration-300',
               isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
             ]"
           >
@@ -43,12 +43,13 @@
       </div>
 
       <!-- Navigation Links -->
-      <div class="flex-1 overflow-y-auto overflow-x-hidden py-6 custom-scrollbar">
+      <div ref="navContainer" class="flex-1 overflow-y-auto overflow-x-hidden py-6 custom-scrollbar">
         <nav class="space-y-2 px-4">
           <RouterLink
             v-for="item in navItems"
             :key="item.name"
             :to="item.to"
+            :id="($route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to) ? 'active-nav-item' : undefined"
             class="group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200"
             :class="[
               $route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to
@@ -149,15 +150,23 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <!-- Theme Toggle -->
-          <button @click="toggleDark()" class="p-2 text-theme-muted hover:text-theme-text transition-colors" aria-label="Toggle theme">
-            <SunIcon v-if="isDark" class="h-6 w-6" />
-            <MoonIcon v-else class="h-6 w-6" />
-          </button>
+          <div class="flex items-center gap-2">
+            <!-- Notification Bell -->
+            <NotificationBell />
+
+            <!-- Theme Toggle -->
+            <button @click="toggleDark()" class="p-2 text-theme-muted hover:text-theme-text transition-colors" aria-label="Toggle theme">
+              <SunIcon v-if="isDark" class="h-6 w-6" />
+              <MoonIcon v-else class="h-6 w-6" />
+            </button>
+          </div>
 
           <!-- Optional Header Actions / User Profile Snippet -->
           <div class="flex items-center gap-3 rounded-full border border-theme-border py-1.5 pl-1.5 pr-4 bg-theme-surface">
-            <div :class="['flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold', themeClasses.bg20, themeClasses.text]">
+            <div v-if="userAvatarUrl" class="h-8 w-8 rounded-full overflow-hidden border border-theme-border">
+              <img :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
+            </div>
+            <div v-else :class="['flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold', themeClasses.bg20, themeClasses.text]">
               {{ userInitials }}
             </div>
             <span class="text-sm font-medium text-theme-text hidden md:block">{{ authStore.user?.name || 'User' }}</span>
@@ -167,7 +176,7 @@
 
       <!-- Scrollable Main Content -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-10 custom-scrollbar bg-theme-bg">
-        <div class="mx-auto max-w-7xl">
+        <div class="mx-auto max-w-7xl min-h-full">
           <slot />
         </div>
       </main>
@@ -176,11 +185,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
+import NotificationBell from '../components/NotificationBell.vue';
 import { useDark, useToggle } from '@vueuse/core';
 import {
   SunIcon,
@@ -305,6 +315,42 @@ const currentRouteName = computed(() => {
 const userInitials = computed(() => {
   const name = authStore.user?.name || 'User';
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+});
+
+const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+
+const userAvatarUrl = computed(() => {
+  const avatar = authStore.user?.avatar;
+  if (!avatar) return null;
+  return avatar.startsWith('http') ? avatar : API_ROOT + avatar;
+});
+
+const navContainer = ref(null);
+
+const scrollToActiveItem = async () => {
+  await nextTick();
+  const activeEl = document.getElementById('active-nav-item');
+  if (activeEl && navContainer.value) {
+    const container = navContainer.value;
+    const scrollPos = activeEl.offsetTop - (container.offsetHeight / 2) + (activeEl.offsetHeight / 2);
+    
+    // Check if it actually needs scrolling
+    if (activeEl.offsetTop < container.scrollTop || activeEl.offsetTop + activeEl.offsetHeight > container.scrollTop + container.offsetHeight) {
+      container.scrollTo({
+        top: scrollPos > 0 ? scrollPos : 0,
+        behavior: 'smooth'
+      });
+    }
+  }
+};
+
+onMounted(() => {
+  // Add a slight delay for initial render to complete accurately
+  setTimeout(scrollToActiveItem, 100);
+});
+
+watch(() => route.path, () => {
+  scrollToActiveItem();
 });
 
 const handleLogout = async () => {

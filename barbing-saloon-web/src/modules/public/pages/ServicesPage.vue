@@ -94,9 +94,10 @@
               :src="service.image" 
               :alt="service.name" 
               class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              style="-webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%); mask-image: linear-gradient(to bottom, black 60%, transparent 100%);"
             />
-            <div v-else class="h-full w-full flex items-center justify-center bg-theme-bg/50">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-12 h-12 text-theme-muted">
+            <div v-else class="h-full w-full flex items-center justify-center bg-theme-bg" style="-webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%); mask-image: linear-gradient(to bottom, black 60%, transparent 100%);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-12 h-12 text-ivory/20">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.525W6.75a3.75 3.75 0 00-3.75 3.75v8.25c0 2.071 1.679 3.75 3.75 3.75h10.5a3.75 3.75 0 003.75-3.75v-8.25c0-2.071-1.679-3.75-3.75-3.75h-3.375c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125z" />
               </svg>
             </div>
@@ -121,32 +122,43 @@
 
           <!-- Content -->
           <div class="flex flex-1 flex-col p-6">
-            <h2 class="font-display text-2xl font-semibold text-gold">{{ service.name }}</h2>
-            <p class="mt-2 text-sm leading-relaxed text-theme-muted line-clamp-2 flex-1">
-              {{ service.description }}
-            </p>
-            
-            <div class="mt-6 flex items-center justify-between border-b border-theme-border pb-6">
-              <div class="flex flex-col">
-                <span class="text-xs uppercase tracking-wider text-theme-muted">Price</span>
-                <span class="font-display text-xl font-bold text-theme-text mt-1">₦{{ service.price }}</span>
+            <!-- Header Row: Title & Barber vs Price & Time -->
+            <div class="mb-3 flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <h2 class="font-display text-xl font-bold text-theme-text group-hover:text-gold transition-colors truncate">{{ service.name }}</h2>
+                <p v-if="service.barber?.name" class="mt-1 text-xs font-semibold text-gold/80 flex items-center gap-1.5">
+                  <span class="h-px w-3 bg-gold/50 inline-block"></span>
+                  by {{ service.barber.name }}
+                </p>
               </div>
-              <div class="flex flex-col items-end">
-                <span class="text-xs uppercase tracking-wider text-theme-muted">Duration</span>
-                <span class="text-sm font-semibold text-theme-text mt-1">{{ service.duration_minutes }} mins</span>
+              <div class="flex shrink-0 flex-col items-end text-right">
+                <span class="font-display text-lg font-bold text-gold drop-shadow-sm">₦{{ Number(service.price).toLocaleString() }}</span>
+                <span class="text-[10px] uppercase tracking-widest text-theme-muted mt-1 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{{ service.duration_minutes }} mins</span>
               </div>
             </div>
+            
+            <p class="text-sm leading-relaxed text-theme-muted line-clamp-2 flex-1">
+              {{ service.description || 'Premium grooming service.' }}
+            </p>
 
-            <!-- Book Button -->
-            <RouterLink 
-              :to="`/customer/login?service=${service.id}`" 
-              class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 font-semibold text-obsidian transition-colors hover:bg-gold-light"
-            >
-              Book Now
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </RouterLink>
+            <!-- Action Buttons -->
+            <div class="mt-6 pt-5 border-t border-theme-border/50 flex gap-3">
+              <RouterLink 
+                :to="`/customer/login?service=${service.id}`" 
+                class="flex flex-1 items-center justify-center rounded-xl border border-gold/30 bg-gold/5 px-3 py-3 text-sm font-bold text-gold transition-all hover:bg-gold/10 hover:scale-[1.02]"
+              >
+                Details
+              </RouterLink>
+              <RouterLink 
+                :to="`/customer/login?service=${service.id}`" 
+                class="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
+              >
+                Book Now
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </RouterLink>
+            </div>
           </div>
         </article>
       </div>
