@@ -11,13 +11,37 @@ export default defineConfig({
         navigateFallback: '/offline.html',
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.candycutz\.local\//,
+            urlPattern: /^https?:\/\/.*\/api\//,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 3600,
+                maxAgeSeconds: 300, // 5 minutes for API responses
+              },
+            },
+          },
+          {
+            // Cache images aggressively
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 86400 * 7, // 7 days
+              },
+            },
+          },
+          {
+            // Cache fonts
+            urlPattern: /\.(?:woff|woff2|ttf|eot)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'font-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 86400 * 30, // 30 days
               },
             },
           },
@@ -62,4 +86,30 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    // ── Chunk splitting for better caching ──
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate heavy vendor libraries into their own chunk
+          'vendor-vue': ['vue', 'vue-router', 'pinia'],
+          'vendor-ui': ['@heroicons/vue'],
+        },
+      },
+    },
+    // ── Minification ──
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,  // Remove console.log in production
+        drop_debugger: true,
+      },
+    },
+    // ── CSS optimization ──
+    cssMinify: true,
+    // ── Target modern browsers for smaller output ──
+    target: 'es2020',
+    // ── Increase chunk warning limit ──
+    chunkSizeWarningLimit: 600,
+  },
 });

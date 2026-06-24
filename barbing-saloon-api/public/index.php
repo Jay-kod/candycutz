@@ -80,22 +80,35 @@ try {
 }
 
 // ═══════════════════════════════════════════════════
+// PERFORMANCE: Gzip compression for all responses
+// ═══════════════════════════════════════════════════
+if (!headers_sent() && extension_loaded('zlib') && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+    ob_start('ob_gzhandler');
+}
+
+// ═══════════════════════════════════════════════════
 // RATE LIMITING - Protect server from abuse
 // ═══════════════════════════════════════════════════
 
-// Auto-create rate_limits table if it doesn't exist
-$pdo->exec("CREATE TABLE IF NOT EXISTS rate_limits (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ip_address VARCHAR(45) NOT NULL,
-    endpoint VARCHAR(100) NOT NULL DEFAULT 'global',
-    request_count INT NOT NULL DEFAULT 1,
-    window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_ip_endpoint (ip_address, endpoint),
-    INDEX idx_window (window_start)
-) ENGINE=InnoDB");
+// Auto-create rate_limits table ONCE (check via marker file)
+$markerFile = sys_get_temp_dir() . '/candycutz_rate_limits_created.marker';
+if (!file_exists($markerFile)) {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS rate_limits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip_address VARCHAR(45) NOT NULL,
+        endpoint VARCHAR(100) NOT NULL DEFAULT 'global',
+        request_count INT NOT NULL DEFAULT 1,
+        window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_ip_endpoint (ip_address, endpoint),
+        INDEX idx_window (window_start)
+    ) ENGINE=InnoDB");
+    @file_put_contents($markerFile, time());
+}
 
-// Clean up expired rate limit records (older than 5 minutes)
-$pdo->exec("DELETE FROM rate_limits WHERE window_start < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+// Clean up expired records only ~5% of requests (not every request)
+if (mt_rand(1, 20) === 1) {
+    $pdo->exec("DELETE FROM rate_limits WHERE window_start < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+}
 
 // Rate limit configuration: [max_requests, window_seconds]
 $rateLimits = [
@@ -106,7 +119,6 @@ $rateLimits = [
 ];
 
 $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
-// Take the first IP if X-Forwarded-For has multiple
 if (strpos($clientIp, ',') !== false) {
     $clientIp = trim(explode(',', $clientIp)[0]);
 }
@@ -127,59 +139,84 @@ foreach ($rateLimits as $pattern => $limits) {
 
 list($maxRequests, $windowSeconds) = $rateLimits[$rateLimitKey];
 
-// Check current request count for this IP + endpoint within the window
+// Check current request count
 $stmt = $pdo->prepare("SELECT id, request_count, window_start FROM rate_limits WHERE ip_address = ? AND endpoint = ? AND window_start > DATE_SUB(NOW(), INTERVAL ? SECOND) ORDER BY window_start DESC LIMIT 1");
 $stmt->execute([$clientIp, $rateLimitKey, $windowSeconds]);
 $rateRecord = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($rateRecord) {
     if ($rateRecord['request_count'] >= $maxRequests) {
-        // Calculate how many seconds until the window resets
         $windowStart = strtotime($rateRecord['window_start']);
         $retryAfter = max(1, ($windowStart + $windowSeconds) - time());
-        
         http_response_code(429);
         header("Retry-After: $retryAfter");
         header("X-RateLimit-Limit: $maxRequests");
         header("X-RateLimit-Remaining: 0");
-        echo json_encode([
-            'error' => 'Too many requests. Please try again later.',
-            'retry_after' => $retryAfter
-        ]);
+        echo json_encode(['error' => 'Too many requests. Please try again later.', 'retry_after' => $retryAfter]);
         exit;
     }
-    // Increment the counter
     $stmt = $pdo->prepare("UPDATE rate_limits SET request_count = request_count + 1 WHERE id = ?");
     $stmt->execute([$rateRecord['id']]);
     $remaining = $maxRequests - $rateRecord['request_count'] - 1;
 } else {
-    // Create a new window record
     $stmt = $pdo->prepare("INSERT INTO rate_limits (ip_address, endpoint, request_count, window_start) VALUES (?, ?, 1, NOW())");
     $stmt->execute([$clientIp, $rateLimitKey]);
     $remaining = $maxRequests - 1;
 }
 
-// Add rate limit headers to every response
 header("X-RateLimit-Limit: $maxRequests");
 header("X-RateLimit-Remaining: " . max(0, $remaining));
+
+// ═══════════════════════════════════════════════════
+// PERFORMANCE: Server-side cache for public endpoints
+// ═══════════════════════════════════════════════════
+$cacheDir = sys_get_temp_dir() . '/candycutz_cache';
+if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+
+/**
+ * Try to serve a cached response. Returns true if cache was served.
+ * Cache TTL is in seconds. Public GET endpoints are cached to avoid
+ * hitting the database on every single page load.
+ */
+function serveFromCache($cacheDir, $cacheKey, $ttl = 60) {
+    $cacheFile = $cacheDir . '/' . md5($cacheKey) . '.json';
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
+        header('X-Cache: HIT');
+        echo file_get_contents($cacheFile);
+        return true;
+    }
+    return false;
+}
+
+function writeToCache($cacheDir, $cacheKey, $data) {
+    $cacheFile = $cacheDir . '/' . md5($cacheKey) . '.json';
+    @file_put_contents($cacheFile, $data);
+}
 
 // ═══════════════════════════════════════════════════
 // API Routes
 // ═══════════════════════════════════════════════════
 if ($method === 'GET') {
-    // Public settings
+    // Public settings (cached for 60 seconds)
     if ($path === '/public/settings') {
+        if (serveFromCache($cacheDir, 'public_settings', 60)) exit;
+        
         $stmt = $pdo->query("SELECT `key`, `value` FROM settings");
         $settings = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $settings[$row['key']] = $row['value'];
         }
-        echo json_encode(['data' => ($settings ?: ['name' => 'CandyCutz'])]);
+        $response = json_encode(['data' => ($settings ?: ['name' => 'CandyCutz'])]);
+        writeToCache($cacheDir, 'public_settings', $response);
+        header('X-Cache: MISS');
+        echo $response;
         exit;
     }
 
-    // Public services list
+    // Public services list (cached for 60 seconds)
     if ($path === '/public/services') {
+        if (serveFromCache($cacheDir, 'public_services', 60)) exit;
+        
         $stmt = $pdo->query("
             SELECT s.id, s.name, s.description, s.image, s.image2, s.image3, s.price, s.duration_minutes, s.barber_id,
                    c.id as category_id, c.name as category_name,
@@ -192,7 +229,6 @@ if ($method === 'GET') {
         ");
         $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Format category and barber objects for frontend
         foreach ($services as &$service) {
             if ($service['category_name']) {
                 $service['category'] = [
@@ -208,24 +244,31 @@ if ($method === 'GET') {
             unset($service['category_id'], $service['category_name'], $service['barber_name'], $service['barber_avatar']);
         }
         
-        echo json_encode(['data' => $services, 'count' => count($services)]);
+        $response = json_encode(['data' => $services, 'count' => count($services)]);
+        writeToCache($cacheDir, 'public_services', $response);
+        header('X-Cache: MISS');
+        echo $response;
         exit;
     }
 
-    // Public barbers list
+    // Public barbers list (cached for 60 seconds)
     if ($path === '/public/barbers') {
+        if (serveFromCache($cacheDir, 'public_barbers', 60)) exit;
+        
         $stmt = $pdo->query("SELECT b.id, u.name, u.avatar, b.bio, b.rating, b.experience_years as years_experience, b.specialties, b.status, (b.rating >= 4.8) as is_featured FROM barbers b 
                             JOIN users u ON b.user_id = u.id WHERE b.is_available = 1");
         $barbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Decode JSON specialties
         foreach ($barbers as &$barber) {
             if (isset($barber['specialties'])) {
                 $barber['specialties'] = json_decode($barber['specialties'], true);
             }
         }
         
-        echo json_encode(['data' => $barbers, 'count' => count($barbers)]);
+        $response = json_encode(['data' => $barbers, 'count' => count($barbers)]);
+        writeToCache($cacheDir, 'public_barbers', $response);
+        header('X-Cache: MISS');
+        echo $response;
         exit;
     }
 
