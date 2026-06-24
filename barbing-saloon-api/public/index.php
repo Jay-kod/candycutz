@@ -79,12 +79,93 @@ try {
     exit;
 }
 
-// Parse request path
+// ═══════════════════════════════════════════════════
+// RATE LIMITING - Protect server from abuse
+// ═══════════════════════════════════════════════════
+
+// Auto-create rate_limits table if it doesn't exist
+$pdo->exec("CREATE TABLE IF NOT EXISTS rate_limits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    endpoint VARCHAR(100) NOT NULL DEFAULT 'global',
+    request_count INT NOT NULL DEFAULT 1,
+    window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ip_endpoint (ip_address, endpoint),
+    INDEX idx_window (window_start)
+) ENGINE=InnoDB");
+
+// Clean up expired rate limit records (older than 5 minutes)
+$pdo->exec("DELETE FROM rate_limits WHERE window_start < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+
+// Rate limit configuration: [max_requests, window_seconds]
+$rateLimits = [
+    '/auth/login'    => [5, 60],     // 5 login attempts per minute (anti brute-force)
+    '/auth/register' => [3, 60],     // 3 registrations per minute
+    '/public/contact'=> [3, 60],     // 3 contact messages per minute
+    'default'        => [60, 60],    // 60 requests per minute for everything else
+];
+
+$clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+// Take the first IP if X-Forwarded-For has multiple
+if (strpos($clientIp, ',') !== false) {
+    $clientIp = trim(explode(',', $clientIp)[0]);
+}
+
+// Parse request path early for rate limiting
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = preg_replace('/^\/api/', '', $path);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Determine which rate limit rule applies
+$rateLimitKey = 'default';
+foreach ($rateLimits as $pattern => $limits) {
+    if ($pattern !== 'default' && strpos($path, $pattern) === 0) {
+        $rateLimitKey = $pattern;
+        break;
+    }
+}
+
+list($maxRequests, $windowSeconds) = $rateLimits[$rateLimitKey];
+
+// Check current request count for this IP + endpoint within the window
+$stmt = $pdo->prepare("SELECT id, request_count, window_start FROM rate_limits WHERE ip_address = ? AND endpoint = ? AND window_start > DATE_SUB(NOW(), INTERVAL ? SECOND) ORDER BY window_start DESC LIMIT 1");
+$stmt->execute([$clientIp, $rateLimitKey, $windowSeconds]);
+$rateRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($rateRecord) {
+    if ($rateRecord['request_count'] >= $maxRequests) {
+        // Calculate how many seconds until the window resets
+        $windowStart = strtotime($rateRecord['window_start']);
+        $retryAfter = max(1, ($windowStart + $windowSeconds) - time());
+        
+        http_response_code(429);
+        header("Retry-After: $retryAfter");
+        header("X-RateLimit-Limit: $maxRequests");
+        header("X-RateLimit-Remaining: 0");
+        echo json_encode([
+            'error' => 'Too many requests. Please try again later.',
+            'retry_after' => $retryAfter
+        ]);
+        exit;
+    }
+    // Increment the counter
+    $stmt = $pdo->prepare("UPDATE rate_limits SET request_count = request_count + 1 WHERE id = ?");
+    $stmt->execute([$rateRecord['id']]);
+    $remaining = $maxRequests - $rateRecord['request_count'] - 1;
+} else {
+    // Create a new window record
+    $stmt = $pdo->prepare("INSERT INTO rate_limits (ip_address, endpoint, request_count, window_start) VALUES (?, ?, 1, NOW())");
+    $stmt->execute([$clientIp, $rateLimitKey]);
+    $remaining = $maxRequests - 1;
+}
+
+// Add rate limit headers to every response
+header("X-RateLimit-Limit: $maxRequests");
+header("X-RateLimit-Remaining: " . max(0, $remaining));
+
+// ═══════════════════════════════════════════════════
 // API Routes
+// ═══════════════════════════════════════════════════
 if ($method === 'GET') {
     // Public settings
     if ($path === '/public/settings') {
