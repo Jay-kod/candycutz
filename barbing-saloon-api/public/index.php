@@ -39,10 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 header('Content-Type: application/json');
 
 // Database connection
-$host = '127.0.0.1';
-$db = 'candycutz_db';
-$user = 'root';
-$pass = '';
+$host = getenv('DB_HOST') ?: '127.0.0.1';
+$db = getenv('DB_DATABASE') ?: 'candycutz_db';
+$user = getenv('DB_USERNAME') ?: 'root';
+$pass = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '';
 
 try {
     $options = [
