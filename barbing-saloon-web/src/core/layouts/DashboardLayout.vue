@@ -175,7 +175,7 @@
       </header>
 
       <!-- Scrollable Main Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-10 custom-scrollbar bg-theme-bg">
+      <main id="main-scroll-container" class="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-10 custom-scrollbar bg-theme-bg">
         <div class="mx-auto max-w-7xl min-h-full">
           <slot />
         </div>

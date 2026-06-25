@@ -14,30 +14,69 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
+import { watch } from 'vue';
 
 const isVisible = ref(false);
+const route = useRoute();
+let mainContainer = null;
 
-const checkScroll = () => {
-  // Show button when scrolled down 300px
-  isVisible.value = window.scrollY > 300;
+const checkScroll = (e) => {
+  // Check either the specific container scroll or the window scroll
+  const scrollY = mainContainer ? mainContainer.scrollTop : window.scrollY;
+  isVisible.value = scrollY > 300;
 };
 
 const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+  if (mainContainer && mainContainer.scrollTop > 0) {
+    mainContainer.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  } else {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+};
+
+const attachListeners = () => {
+  // First remove any existing listeners to prevent duplicates
+  window.removeEventListener('scroll', checkScroll);
+  if (mainContainer) {
+    mainContainer.removeEventListener('scroll', checkScroll);
+  }
+
+  // Look for the dashboard scroll container
+  mainContainer = document.getElementById('main-scroll-container');
+  
+  if (mainContainer) {
+    mainContainer.addEventListener('scroll', checkScroll);
+  } else {
+    window.addEventListener('scroll', checkScroll);
+  }
+  
+  checkScroll();
 };
 
 onMounted(() => {
-  window.addEventListener('scroll', checkScroll);
-  // Initial check in case page is already scrolled on load
-  checkScroll();
+  attachListeners();
+});
+
+// Re-attach listeners when the route changes (e.g. moving between PublicLayout and DashboardLayout)
+watch(() => route.path, async () => {
+  await nextTick();
+  // Brief delay to allow DOM to render the new layout
+  setTimeout(attachListeners, 100);
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', checkScroll);
+  if (mainContainer) {
+    mainContainer.removeEventListener('scroll', checkScroll);
+  }
 });
 </script>
 
