@@ -3,10 +3,12 @@
     <router-view />
     <ConfirmModal />
     <ToastNotification />
+    <BackToTop />
   </div>
 </template>
 
 <script setup>
 import ConfirmModal from './core/components/ConfirmModal.vue';
 import ToastNotification from './core/components/ToastNotification.vue';
+import BackToTop from './core/components/BackToTop.vue';
 </script>
