@@ -215,6 +215,16 @@ function getDay(dateStr) {
   return d.getDate();
 }
 
+function formatTimeDisplay(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':');
+  const d = new Date();
+  d.setHours(h, m, 0);
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+const isEditing = ref(false); // Just a placeholder for UI state if needed
+
 const getDefaultHours = () => {
   return Array.from({ length: 7 }, (_, i) => ({
     day_of_week: i,
@@ -233,7 +243,20 @@ async function loadData() {
     appointments.value = data.appointments || [];
     
     if (data.working_hours && data.working_hours.length > 0) {
-      workingHours.value = JSON.parse(JSON.stringify(data.working_hours));
+      // Map existing hours and fill in missing days
+      const map = {};
+      data.working_hours.forEach(h => { map[h.day_of_week] = h; });
+      const full = [];
+      for (let d = 0; d < 7; d++) {
+        full.push(map[d] || {
+          id: null,
+          day_of_week: d,
+          open_time: '09:00',
+          close_time: '17:00',
+          is_closed: true // Default missing to closed
+        });
+      }
+      workingHours.value = full;
     } else {
       workingHours.value = getDefaultHours();
     }

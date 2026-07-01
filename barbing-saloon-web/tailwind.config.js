@@ -2,6 +2,21 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
   theme: {
     extend: {
+      keyframes: {
+        'blink-red-border': {
+          '0%, 100%': {
+            borderColor: 'rgba(239, 68, 68, 0.9)',
+            boxShadow: '0 0 18px rgba(239, 68, 68, 0.4), 0 0 6px rgba(239, 68, 68, 0.2), inset 0 0 12px rgba(239, 68, 68, 0.06)',
+          },
+          '50%': {
+            borderColor: 'rgba(239, 68, 68, 0.15)',
+            boxShadow: '0 0 4px rgba(239, 68, 68, 0.08), 0 0 2px rgba(239, 68, 68, 0.04), inset 0 0 4px rgba(239, 68, 68, 0)',
+          },
+        },
+      },
+      animation: {
+        'blink-red-border': 'blink-red-border 1.5s ease-in-out infinite',
+      },
       colors: {
         theme: {
           bg: 'var(--color-bg)',

@@ -37,5 +37,6 @@ const navItems = [
 
   { name: 'Notifications', to: '/customer/dashboard/notifications', icon: BellAlertIcon },
   { name: 'Analytics', to: '/customer/dashboard/analytics', icon: ChartBarIcon },
+  { name: 'Reports', to: '/customer/dashboard/reports', icon: ChartBarIcon },
 ];
 </script>

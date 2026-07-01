@@ -16,11 +16,11 @@ import {
   FunnelIcon,
   XMarkIcon,
   ClockIcon,
-  TagIcon
+  TagIcon,
+  CreditCardIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../modules/auth/store/auth.store'
-
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+import client from '../api/axios'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -45,6 +45,7 @@ const timeFilters = [
 const typeFilters = [
   { value: 'all', label: 'All Types', icon: TagIcon },
   { value: 'booking', label: 'Bookings', color: 'text-gold', bg: 'bg-gold/10 border-gold/20' },
+  { value: 'payment', label: 'Payments', color: 'text-cyan-400', bg: 'bg-cyan-400/10 border-cyan-400/20' },
   { value: 'system_update', label: 'System', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
   { value: 'wishlist_update', label: 'Wishlist', color: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/20' },
   { value: 'blog_update', label: 'Blog', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
@@ -136,19 +137,8 @@ function clearFilters() {
 const fetchNotifications = async () => {
   loading.value = true
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    if (!token) return
-    
-    const res = await fetch(`${API_ROOT}/notifications`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    
-    if (res.ok) {
-      const data = await res.json()
-      notifications.value = data.data
-    } else {
-      error.value = 'Failed to load notifications'
-    }
+    const res = await client.get('/notifications')
+    notifications.value = res.data.data || res.data
   } catch (err) {
     error.value = 'Network error loading notifications'
     console.error(err)
@@ -159,11 +149,7 @@ const fetchNotifications = async () => {
 
 const markAsRead = async (id) => {
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    await fetch(`${API_ROOT}/notifications/${id}/read`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    await client.patch(`/notifications/${id}/read`)
     
     const n = notifications.value.find(n => n.id === id)
     if (n) {
@@ -176,11 +162,7 @@ const markAsRead = async (id) => {
 
 const deleteNotification = async (id) => {
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    await fetch(`${API_ROOT}/notifications/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    await client.delete(`/notifications/${id}`)
     
     notifications.value = notifications.value.filter(n => n.id !== id)
   } catch (err) {
@@ -190,11 +172,7 @@ const deleteNotification = async (id) => {
 
 const markAllRead = async () => {
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    await fetch(`${API_ROOT}/notifications/read-all`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    await client.patch(`/notifications/read-all`)
     
     // Optimistic UI update
     notifications.value = notifications.value.map(n => ({...n, is_read: true}))
@@ -231,6 +209,7 @@ const formatFullDate = (dateString) => {
 const getIconForType = (type) => {
   switch (type) {
     case 'booking': return CalendarDaysIcon;
+    case 'payment': return CreditCardIcon;
     case 'system_update': return UserIcon;
     case 'wishlist_update': return HeartIcon;
     case 'blog_update': return DocumentTextIcon;
@@ -244,6 +223,7 @@ const getIconForType = (type) => {
 const getLabelForType = (type) => {
   switch (type) {
     case 'booking': return 'Booking';
+    case 'payment': return 'Payment';
     case 'system_update': return 'System';
     case 'wishlist_update': return 'Wishlist';
     case 'blog_update': return 'Blog';
@@ -257,6 +237,7 @@ const getLabelForType = (type) => {
 const getIconColorForType = (type) => {
   switch (type) {
     case 'booking': return 'text-gold';
+    case 'payment': return 'text-cyan-400';
     case 'system_update': return 'text-blue-400';
     case 'wishlist_update': return 'text-rose-400';
     case 'blog_update': return 'text-emerald-400';
@@ -270,6 +251,7 @@ const getIconColorForType = (type) => {
 const getBgColorForType = (type) => {
   switch (type) {
     case 'booking': return 'bg-gold/10 border-gold/20';
+    case 'payment': return 'bg-cyan-400/10 border-cyan-400/20';
     case 'system_update': return 'bg-blue-400/10 border-blue-400/20';
     case 'wishlist_update': return 'bg-rose-400/10 border-rose-400/20';
     case 'blog_update': return 'bg-emerald-400/10 border-emerald-400/20';

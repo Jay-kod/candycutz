@@ -1,0 +1,1 @@
+import{D as a,P as t,S as s,V as i}from"./index-CraedoAR.js";import{t as o}from"./AdminLayout-CU_MOc2c.js";import{t as e}from"./NotificationsView-BzJSElo8.js";var m={__name:"NotificationsPage",setup:m=>(m,r)=>(t(),s(o,null,{default:i(()=>[a(e)]),_:1}))};export{m as default};

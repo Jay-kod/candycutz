@@ -3,6 +3,26 @@ import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  server: {
+    allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/uploads': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/storage': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   plugins: [
     vue(),
     VitePWA({
@@ -88,15 +108,6 @@ export default defineConfig({
   ],
   build: {
     // ── Chunk splitting for better caching ──
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Separate heavy vendor libraries into their own chunk
-          'vendor-vue': ['vue', 'vue-router', 'pinia'],
-          'vendor-ui': ['@heroicons/vue'],
-        },
-      },
-    },
     // ── Minification ──
     minify: 'terser',
     terserOptions: {

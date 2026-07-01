@@ -44,6 +44,11 @@
           </div>
 
           <div class="space-y-3">
+            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Author / Source (Optional)</label>
+            <input v-model="form.author_display" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50" placeholder="Defaults to your name — or type a custom source" />
+          </div>
+
+          <div class="space-y-3">
             <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Excerpt</label>
             <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
           </div>
@@ -93,6 +98,7 @@ const form = reactive({
   content: '',
   is_published: false,
   featured_image: '',
+  author_display: '',
 });
 
 function getImageUrl(path) {
@@ -125,6 +131,7 @@ async function loadPost() {
       form.content = post.content;
       form.is_published = post.is_published == 1;
       form.featured_image = post.featured_image || '';
+      form.author_display = post.author_display || '';
       if (form.featured_image) {
         previewImage.value = getImageUrl(form.featured_image);
       }
@@ -145,6 +152,7 @@ async function savePost() {
     formData.append('content', form.content);
     formData.append('excerpt', form.excerpt);
     formData.append('is_published', form.is_published ? 1 : 0);
+    formData.append('author_display', form.author_display);
     
     if (form.featured_image && !selectedFile.value) {
       formData.append('featured_image', form.featured_image);

@@ -157,6 +157,16 @@ import { reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
+import { useDark } from '@vueuse/core';
+
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'data-theme',
+  valueDark: 'dark',
+  valueLight: 'light',
+});
+
+isDark.value = true;
 
 const router = useRouter();
 const { register, redirectAfterLogin } = useAuth();

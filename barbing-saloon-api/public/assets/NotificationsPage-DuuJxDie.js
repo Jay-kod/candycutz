@@ -1,0 +1,1 @@
+import{D as a,P as t,S as s,V as i}from"./index-B4moSbT8.js";import{t as o}from"./AdminLayout-X_rE4b_a.js";import{t as e}from"./NotificationsView-6fgBFBN_.js";var m={__name:"NotificationsPage",setup:m=>(m,r)=>(t(),s(o,null,{default:i(()=>[a(e)]),_:1}))};export{m as default};

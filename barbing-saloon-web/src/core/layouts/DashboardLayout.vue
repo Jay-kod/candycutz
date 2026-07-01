@@ -10,114 +10,175 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-theme-border transition-all duration-300 ease-in-out lg:static lg:translate-x-0',
-        'bg-theme-surface',
+        'fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300 ease-in-out lg:static lg:translate-x-0',
+        'sidebar-panel',
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         isSidebarCollapsed ? 'lg:w-[88px]' : 'w-72'
       ]"
     >
+      <!-- Sidebar Decorative Elements -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div :class="['absolute -top-32 -right-32 h-64 w-64 rounded-full blur-[100px] opacity-[0.07]', themeClasses.bgRaw]"></div>
+        <div :class="['absolute -bottom-20 -left-20 h-40 w-40 rounded-full blur-[80px] opacity-[0.05]', themeClasses.bgRaw]"></div>
+      </div>
+
       <!-- Sidebar Header -->
-      <div class="flex h-20 items-center justify-between px-6 border-b border-white/[0.04]">
+      <div class="relative z-10 flex h-20 items-center justify-between px-5 border-b border-white/[0.06]">
         <RouterLink :to="homeRoute" class="flex items-center gap-3 group">
-          <div class="relative flex items-center justify-center h-10 w-10 shrink-0 transition-transform group-hover:scale-105">
-            <img src="/images/logo-icon.png" alt="Logo" class="h-8 w-8 object-contain" />
+          <div class="relative flex items-center justify-center h-11 w-11 shrink-0 transition-transform duration-300 group-hover:scale-105">
+            <div :class="['absolute inset-0 rounded-2xl opacity-20 blur-md transition-opacity duration-500 group-hover:opacity-40', themeClasses.bgRaw]"></div>
+            <div class="relative h-11 w-11 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center overflow-hidden backdrop-blur-sm">
+              <img src="/images/logo-icon.png" alt="Logo" class="h-7 w-7 object-contain drop-shadow-sm" />
+            </div>
           </div>
           <span
             :class="[
-              'font-display text-xl font-bold text-theme-text whitespace-nowrap transition-all duration-300',
+              'whitespace-nowrap transition-all duration-300',
               isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
             ]"
           >
-            Candy<span :class="themeClasses.text">Cutz</span>
-            <span :class="['block text-[10px] uppercase tracking-widest -mt-1', themeClasses.textLight70]">{{ portalName }}</span>
+            <span class="font-display text-xl font-bold text-theme-text leading-none">Candy<span :class="themeClasses.text">Cutz</span></span>
+            <span :class="['block text-[9px] uppercase tracking-[0.25em] mt-0.5 font-semibold', themeClasses.textLight70]">{{ portalName }} Portal</span>
           </span>
         </RouterLink>
 
         <!-- Mobile Close Button -->
         <button
           @click="isMobileSidebarOpen = false"
-          class="lg:hidden p-2 text-theme-muted hover:text-theme-text transition-colors"
+          class="lg:hidden p-2 text-theme-muted hover:text-theme-text transition-colors rounded-xl hover:bg-white/5"
         >
-          <XMarkIcon class="h-6 w-6" />
+          <XMarkIcon class="h-5 w-5" />
         </button>
       </div>
 
       <!-- Navigation Links -->
-      <div ref="navContainer" class="flex-1 overflow-y-auto overflow-x-hidden py-6 custom-scrollbar">
-        <nav class="space-y-2 px-4">
-          <RouterLink
-            v-for="item in navItems"
-            :key="item.name"
-            :to="item.to"
-            :id="($route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to) ? 'active-nav-item' : undefined"
-            class="group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200"
-            :class="[
-              $route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to
-                ? [themeClasses.bg10, themeClasses.text, themeClasses.shadowNavBox]
-                : 'text-theme-muted hover:bg-theme-surface hover:text-theme-text'
-            ]"
-            :title="isSidebarCollapsed ? item.name : ''"
-          >
-            <!-- Active Indicator Line -->
-            <div
-              v-if="$route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to"
-              :class="['absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full', themeClasses.bg, themeClasses.shadowNavLine]"
-            ></div>
-
-            <component
-              :is="item.icon"
-              class="h-6 w-6 shrink-0 transition-transform duration-200 group-hover:scale-110"
+      <div ref="navContainer" class="relative z-10 flex-1 overflow-y-auto overflow-x-hidden py-4 custom-scrollbar">
+        <template v-for="(group, gIdx) in groupedNavItems" :key="gIdx">
+          <!-- Section Label -->
+          <div v-if="group.label" class="px-5 pt-5 pb-2 first:pt-2">
+            <p
               :class="[
-                $route.path.startsWith(item.to) && item.to !== homeRoute || $route.path === item.to ? themeClasses.text : ['text-theme-muted', themeClasses.hoverTextLight]
+                'text-[9px] uppercase tracking-[0.25em] font-bold transition-all duration-300',
+                themeClasses.textLight70,
+                isSidebarCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-60'
               ]"
-            />
-            
+            >
+              {{ group.label }}
+            </p>
+          </div>
+
+          <!-- Separator (except first group) -->
+          <div v-if="gIdx > 0 && !group.label" class="mx-5 my-3 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"></div>
+
+          <nav class="space-y-1 px-3">
+            <RouterLink
+              v-for="item in group.items"
+              :key="item.name"
+              :to="item.to"
+              :id="(isActiveRoute(item.to)) ? 'active-nav-item' : undefined"
+              class="nav-item group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 transition-all duration-200"
+              :class="[
+                isActiveRoute(item.to)
+                  ? ['nav-item-active', themeClasses.bg10, themeClasses.text, 'border border-white/[0.06]']
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/[0.03] border border-transparent'
+              ]"
+              :title="isSidebarCollapsed ? item.name : ''"
+            >
+              <!-- Active Indicator Line -->
+              <div
+                v-if="isActiveRoute(item.to)"
+                :class="['absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full transition-all duration-300', themeClasses.bg, themeClasses.shadowNavLine]"
+              ></div>
+
+              <!-- Active Glow Background -->
+              <div
+                v-if="isActiveRoute(item.to)"
+                :class="['absolute inset-0 rounded-xl opacity-[0.04] pointer-events-none', themeClasses.bgRaw]"
+                style="filter: blur(20px);"
+              ></div>
+
+              <!-- Icon Container -->
+              <div
+                :class="[
+                  'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-200',
+                  isActiveRoute(item.to)
+                    ? [themeClasses.bg15, 'border border-white/[0.08]']
+                    : 'bg-transparent group-hover:bg-white/[0.04]'
+                ]"
+              >
+                <component
+                  :is="item.icon"
+                  class="h-4 w-4 transition-all duration-200 group-hover:scale-110"
+                  :class="[
+                    isActiveRoute(item.to) ? themeClasses.text : ['text-white/40', themeClasses.hoverTextLight]
+                  ]"
+                />
+              </div>
+
+              <span
+                :class="[
+                  'text-[13px] font-medium whitespace-nowrap transition-all duration-300',
+                  isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
+                ]"
+              >
+                {{ item.name }}
+              </span>
+
+              <!-- Badge for items with badges -->
+              <span
+                v-if="item.badge && !isSidebarCollapsed"
+                :class="[
+                  'ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md',
+                  themeClasses.bg15, themeClasses.text
+                ]"
+              >
+                {{ item.badge }}
+              </span>
+            </RouterLink>
+          </nav>
+        </template>
+      </div>
+
+      <!-- Logout Section -->
+      <div class="relative z-10 border-t border-white/[0.06] p-3">
+        <div class="space-y-0.5">
+          <RouterLink
+            v-if="profileRoute"
+            :to="profileRoute"
+            class="group flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-white/40 hover:bg-white/[0.03] hover:text-white/70 transition-all duration-200 border border-transparent"
+            :title="isSidebarCollapsed ? 'Profile' : ''"
+          >
+            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-transparent group-hover:bg-white/[0.04] transition-all">
+              <UserIcon class="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+            </div>
             <span
               :class="[
-                'font-medium whitespace-nowrap transition-all duration-300',
+                'text-[13px] font-medium whitespace-nowrap transition-all duration-300',
                 isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
               ]"
             >
-              {{ item.name }}
+              My Profile
             </span>
           </RouterLink>
-        </nav>
-      </div>
 
-      <!-- User/Logout Section -->
-      <div class="border-t border-theme-border p-4 space-y-1">
-        <RouterLink
-          v-if="profileRoute"
-          :to="profileRoute"
-          class="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-theme-muted hover:bg-theme-surface hover:text-theme-text transition-all duration-200"
-          :title="isSidebarCollapsed ? 'Profile' : ''"
-        >
-          <UserIcon class="h-6 w-6 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-          <span
-            :class="[
-              'font-medium whitespace-nowrap transition-all duration-300',
-              isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
-            ]"
+          <button
+            @click="handleLogout"
+            class="group flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-red-400/60 hover:bg-red-500/[0.06] hover:text-red-400 transition-all duration-200 border border-transparent"
+            :title="isSidebarCollapsed ? 'Logout' : ''"
           >
-            My Profile
-          </span>
-        </RouterLink>
-
-        <button
-          @click="handleLogout"
-          class="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
-          :title="isSidebarCollapsed ? 'Logout' : ''"
-        >
-          <ArrowRightOnRectangleIcon class="h-6 w-6 shrink-0 transition-transform duration-200 group-hover:-translate-x-1" />
-          <span
-            :class="[
-              'font-medium whitespace-nowrap transition-all duration-300',
-              isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
-            ]"
-          >
-            Sign Out
-          </span>
-        </button>
+            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-transparent group-hover:bg-red-500/[0.08] transition-all">
+              <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            </div>
+            <span
+              :class="[
+                'text-[13px] font-medium whitespace-nowrap transition-all duration-300',
+                isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto'
+              ]"
+            >
+              Sign Out
+            </span>
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -242,6 +303,61 @@ const isDark = useDark({
 });
 const toggleDark = useToggle(isDark);
 
+const isActiveRoute = (to) => {
+  if (to === props.homeRoute) return route.path === to;
+  return route.path.startsWith(to);
+};
+
+// Group nav items into logical sections
+const groupedNavItems = computed(() => {
+  const items = props.navItems;
+  if (!items || items.length === 0) return [];
+
+  // Define section groupings based on portal type
+  const barberSections = {
+    'Overview': ['Dashboard'],
+    'Clients': ['Walk-In', 'Payments', 'Appointments'],
+    'Work': ['Schedule', 'Services', 'Gallery'],
+    'Content': ['Blog', 'Notifications'],
+    'Insights': ['Analytics', 'Reports'],
+  };
+
+  const adminSections = {
+    'Overview': ['Dashboard', 'Website'],
+    'Operations': ['Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'Content': ['Services', 'Gallery', 'Testimonials', 'Blog'],
+    'Management': ['Working Hours', 'Analytics', 'Reports'],
+    'Security': ['Verifications', 'System Logs', 'Notifications'],
+  };
+
+  const sections = props.theme === 'admin' ? adminSections : barberSections;
+
+  const groups = [];
+  const used = new Set();
+
+  for (const [label, names] of Object.entries(sections)) {
+    const groupItems = [];
+    for (const name of names) {
+      const item = items.find(i => i.name === name);
+      if (item) {
+        groupItems.push(item);
+        used.add(item.name);
+      }
+    }
+    if (groupItems.length > 0) {
+      groups.push({ label, items: groupItems });
+    }
+  }
+
+  // Add any remaining items not in a section
+  const remaining = items.filter(i => !used.has(i.name));
+  if (remaining.length > 0) {
+    groups.push({ label: 'Other', items: remaining });
+  }
+
+  return groups;
+});
+
 const themeClasses = computed(() => {
   if (props.theme === 'admin') {
     return {
@@ -249,7 +365,9 @@ const themeClasses = computed(() => {
       textLight: 'text-admin-light',
       textLight70: 'text-admin-light/70',
       bg: 'bg-admin',
+      bgRaw: 'bg-admin',
       bg10: 'bg-admin/10',
+      bg15: 'bg-admin/15',
       bg20: 'bg-admin/20',
       gradient: 'from-admin to-admin-dark',
       shadowLogo: 'shadow-[0_0_15px_rgba(255,103,0,0.3)]',
@@ -271,7 +389,9 @@ const themeClasses = computed(() => {
       textLight: 'text-blue-400',
       textLight70: 'text-blue-400/70',
       bg: 'bg-blue-500',
+      bgRaw: 'bg-blue-500',
       bg10: 'bg-blue-500/10',
+      bg15: 'bg-blue-500/15',
       bg20: 'bg-blue-500/20',
       gradient: 'from-blue-500 to-blue-700',
       shadowLogo: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]',
@@ -292,11 +412,13 @@ const themeClasses = computed(() => {
       textLight: 'text-gold-light',
       textLight70: 'text-gold-light/70',
       bg: 'bg-gold',
+      bgRaw: 'bg-gold',
       bg10: 'bg-gold/10',
+      bg15: 'bg-gold/15',
       bg20: 'bg-gold/20',
       gradient: 'from-gold to-gold-dark',
       shadowLogo: 'shadow-[0_0_15px_rgba(212,175,55,0.3)]',
-      shadowNavLine: 'shadow-[0_0_10px_rgba(212,175,55,0.5)]',
+      shadowNavLine: 'shadow-[0_0_10px_rgba(255,153,0,0.5)]',
       shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]',
       borderHover: 'hover:border-gold/30',
       hoverTextLight: 'group-hover:text-gold-light',
@@ -380,17 +502,43 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+.sidebar-panel {
+  background: linear-gradient(180deg, 
+    rgba(13, 13, 13, 0.98) 0%, 
+    rgba(10, 10, 10, 0.99) 50%, 
+    rgba(8, 8, 8, 1) 100%
+  );
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+}
+
+.nav-item {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover {
+  transform: translateX(2px);
+}
+
+.nav-item-active {
+  background: linear-gradient(135deg, 
+    rgba(255, 153, 0, 0.08) 0%, 
+    rgba(255, 153, 0, 0.03) 100%
+  );
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
 }
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(212, 175, 55, 0.3);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 </style>

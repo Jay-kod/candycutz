@@ -1,0 +1,1 @@
+import{D as a,P as t,S as o,V as s}from"./index-CraedoAR.js";import{t as i}from"./NotificationsView-BzJSElo8.js";import{t as r}from"./BarberLayout-3znQDqeN.js";var e={__name:"NotificationsPage",setup:e=>(e,f)=>(t(),o(r,null,{default:s(()=>[a(i)]),_:1}))};export{e as default};

@@ -5,36 +5,48 @@
         <div
           v-for="t in toasts"
           :key="t.id"
+          v-show="t.visible"
           :class="[
-            'pointer-events-auto w-full max-w-md rounded-2xl border px-5 py-4 shadow-2xl backdrop-blur-xl transition-all duration-300 cursor-pointer',
-            typeClasses[t.type]
+            'pointer-events-auto relative w-full max-w-2xl rounded-sm shadow-xl transition-all duration-300 overflow-hidden',
+            typeClasses[t.type].bg
           ]"
-          @click="dismiss(t.id)"
         >
-          <div class="flex items-start gap-3">
-            <!-- Icon -->
-            <div :class="['mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full', iconBgClasses[t.type]]">
-              <CheckCircleIcon v-if="t.type === 'success'" class="h-5 w-5" />
-              <ExclamationCircleIcon v-else-if="t.type === 'error'" class="h-5 w-5" />
-              <ExclamationTriangleIcon v-else-if="t.type === 'warning'" class="h-5 w-5" />
-              <InformationCircleIcon v-else class="h-5 w-5" />
-            </div>
-            <!-- Content -->
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-bold uppercase tracking-widest opacity-70">{{ typeLabels[t.type] }}</p>
-              <p class="mt-0.5 text-sm font-medium leading-snug">{{ t.message }}</p>
-            </div>
-            <!-- Close -->
-            <button @click.stop="dismiss(t.id)" class="shrink-0 rounded-lg p-1 opacity-50 hover:opacity-100 transition-opacity">
-              <XMarkIcon class="h-4 w-4" />
-            </button>
-          </div>
-          <!-- Progress bar -->
-          <div class="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-white/10">
+          <!-- Left Tick Progress Bar -->
+          <div class="absolute left-2 top-2.5 bottom-2.5 w-[5px] z-10 bg-black/20 rounded-[3px]">
             <div
-              :class="['h-full rounded-full', progressClasses[t.type]]"
+              :class="['w-full h-full rounded-[3px]', typeClasses[t.type].bar]"
               :style="{ animation: `toast-progress ${t.type === 'error' ? 5 : 4}s linear forwards` }"
             ></div>
+          </div>
+
+          <div class="flex items-center justify-between pl-6 pr-4 py-3.5 w-full relative z-20">
+            <div class="flex items-center gap-4 min-w-0">
+              <!-- Icon -->
+              <div class="shrink-0 flex items-center justify-center text-white/90">
+                <CheckCircleIcon v-if="t.type === 'success'" class="h-[22px] w-[22px]" />
+                <XCircleIcon v-else-if="t.type === 'error'" class="h-[22px] w-[22px]" />
+                <ExclamationCircleIcon v-else-if="t.type === 'warning'" class="h-[22px] w-[22px]" />
+                <InformationCircleIcon v-else class="h-[22px] w-[22px]" />
+              </div>
+              
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <p class="text-[15px] font-bold text-[#f8f9fa] leading-tight mb-0.5 tracking-wide">{{ typeLabels[t.type] }}</p>
+                <p class="text-[14px] text-[#adb5bd] leading-tight pr-2">{{ t.message }}</p>
+              </div>
+            </div>
+
+            <!-- Close Button -->
+            <button 
+              type="button"
+              @click.stop="dismiss(t.id)" 
+              :class="[
+                'shrink-0 text-[13px] font-semibold px-4 py-1.5 rounded transition-colors pointer-events-auto cursor-pointer relative z-50',
+                typeClasses[t.type].btn
+              ]"
+            >
+              {{ t.type === 'info' ? 'Dismiss' : 'Close' }}
+            </button>
           </div>
         </div>
       </transition-group>
@@ -46,40 +58,41 @@
 import { useToast } from '../composables/useToast';
 import {
   CheckCircleIcon,
+  XCircleIcon,
   ExclamationCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XMarkIcon
+  InformationCircleIcon
 } from '@heroicons/vue/24/solid';
 
 const { toasts, dismiss } = useToast();
 
 const typeClasses = {
-  success: 'border-emerald-500/30 bg-emerald-950/80 text-emerald-100',
-  error: 'border-red-500/30 bg-red-950/80 text-red-100',
-  warning: 'border-amber-500/30 bg-amber-950/80 text-amber-100',
-  info: 'border-sky-500/30 bg-sky-950/80 text-sky-100',
-};
-
-const iconBgClasses = {
-  success: 'bg-emerald-500/20 text-emerald-400',
-  error: 'bg-red-500/20 text-red-400',
-  warning: 'bg-amber-500/20 text-amber-400',
-  info: 'bg-sky-500/20 text-sky-400',
-};
-
-const progressClasses = {
-  success: 'bg-emerald-400',
-  error: 'bg-red-400',
-  warning: 'bg-amber-400',
-  info: 'bg-sky-400',
+  success: {
+    bg: 'bg-[#0f3521]',
+    bar: 'bg-[#10b87f]',
+    btn: 'bg-[#165a37] text-[#7df5c2] hover:bg-[#1a6b41]'
+  },
+  error: {
+    bg: 'bg-[#4b1515]',
+    bar: 'bg-[#ef4343]',
+    btn: 'bg-[#7b2222] text-[#f79b9b] hover:bg-[#8f2828]'
+  },
+  warning: {
+    bg: 'bg-[#472b07]',
+    bar: 'bg-[#f59e0a]',
+    btn: 'bg-[#76470f] text-[#f9c878] hover:bg-[#8c5412]'
+  },
+  info: {
+    bg: 'bg-[#192444]',
+    bar: 'bg-[#2462e9]',
+    btn: 'bg-[#2b3f79] text-[#9db2f5] hover:bg-[#324a8f]'
+  }
 };
 
 const typeLabels = {
-  success: 'Success',
-  error: 'Error',
-  warning: 'Warning',
-  info: 'Info',
+  success: 'Success!',
+  error: 'Error!',
+  warning: 'Warning!',
+  info: 'Heads up!',
 };
 </script>
 
@@ -103,7 +116,7 @@ const typeLabels = {
 }
 
 @keyframes toast-progress {
-  from { width: 100%; }
-  to { width: 0%; }
+  from { height: 100%; }
+  to { height: 0%; }
 }
 </style>

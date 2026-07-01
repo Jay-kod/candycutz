@@ -124,7 +124,11 @@ async function togglePublish(post) {
     
     await adminApi.updateBlogPost(post.id, formData);
     post.is_published = newStatus ? 1 : 0;
-    toast.success(newStatus ? 'Post published' : 'Post unpublished');
+    if (newStatus) {
+      toast.success('Post published');
+    } else {
+      toast.info('Post unpublished');
+    }
   } catch (err) {
     toast.error('Failed to update post status');
   }

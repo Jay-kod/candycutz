@@ -16,6 +16,7 @@ export default [
 	{ path: '/admin/blog/:id/edit', name: 'admin-blog-edit', component: () => import('./pages/BlogEditorPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/working-hours', name: 'admin-working-hours', component: () => import('./pages/WorkingHoursPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/reports', name: 'admin-reports', component: () => import('./pages/ReportsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
+	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('./pages/AnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{
 		path: '/admin/websites',
 		component: () => import('./layouts/CmsLayout.vue'),
@@ -34,5 +35,4 @@ export default [
 	{ path: '/admin/system-logs', name: 'admin-system-logs', component: () => import('./pages/SystemLogsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/verifications', name: 'admin-verifications', component: () => import('./pages/VerificationPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/notifications', name: 'admin-notifications', component: () => import('./pages/NotificationsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
-	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('./pages/AnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 ];

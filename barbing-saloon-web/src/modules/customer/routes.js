@@ -15,5 +15,6 @@ export default [
   { path: '/customer/dashboard/notifications', name: 'customer-notifications', component: () => import('./pages/NotificationsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/notification-settings', name: 'customer-notification-settings', component: () => import('./pages/NotificationSettingsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/analytics', name: 'customer-analytics', component: () => import('./pages/AnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/reports', name: 'customer-reports', component: () => import('./pages/ReportsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/barber/:id', name: 'customer-barber-profile', component: () => import('./pages/BarberProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
 ];

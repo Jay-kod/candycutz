@@ -1,0 +1,1 @@
+import{D as a,P as t,S as o,V as s}from"./index-BKLkdp1J.js";import{t as i}from"./NotificationsView-B9PkGN82.js";import{t as r}from"./BarberLayout-CqowsxN4.js";var e={__name:"NotificationsPage",setup:e=>(e,f)=>(t(),o(r,null,{default:s(()=>[a(i)]),_:1}))};export{e as default};

@@ -22,6 +22,7 @@ import {
   BellAlertIcon,
   BanknotesIcon,
   ChartBarIcon,
+  PresentationChartLineIcon,
   UserPlusIcon
 } from '@heroicons/vue/24/outline';
 
@@ -35,6 +36,7 @@ const navItems = [
   { name: 'Gallery', to: '/barber/gallery', icon: PhotoIcon },
   { name: 'Blog', to: '/barber/blog', icon: PencilSquareIcon },
   { name: 'Notifications', to: '/barber/notifications', icon: BellAlertIcon },
-  { name: 'Analytics', to: '/barber/analytics', icon: ChartBarIcon },
+  { name: 'Analytics', to: '/barber/analytics', icon: PresentationChartLineIcon },
+  { name: 'Reports', to: '/barber/reports', icon: ChartBarIcon },
 ];
 </script>

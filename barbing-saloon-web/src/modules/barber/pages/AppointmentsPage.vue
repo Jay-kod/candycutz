@@ -21,10 +21,11 @@
             </button>
             <button 
               @click="loadAppointments"
-              class="p-2.5 rounded-xl bg-white/[0.04] border border-theme-border text-ivory/50 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all shadow-sm group"
+              class="flex items-center gap-2 rounded-xl bg-white/[0.04] border border-theme-border px-4 py-2.5 text-xs font-bold text-ivory/50 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all shadow-sm group"
               title="Refresh Data"
             >
-              <ArrowPathIcon class="w-5 h-5 group-active:rotate-180 transition-transform duration-500" />
+              <ArrowPathIcon class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': loading }" />
+              <span class="hidden sm:inline">Refresh</span>
             </button>
             <div class="flex items-center gap-2 rounded-xl bg-white/[0.04] border border-theme-border px-4 py-2.5">
               <MagnifyingGlassIcon class="h-4 w-4 text-ivory/30" />

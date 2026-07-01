@@ -35,6 +35,12 @@
               </span>
               <span class="text-xs font-semibold text-emerald-400 whitespace-nowrap">All Systems Operational</span>
             </div>
+            
+            <!-- Refresh Button -->
+            <button @click="loadDashboardData(true)" class="flex items-center justify-center gap-2 rounded-xl bg-white/[0.05] border border-white/10 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 shrink-0 group">
+              <ArrowPathIcon class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': isRefreshing }" />
+              <span class="hidden sm:inline">Refresh</span>
+            </button>
           </div>
         </div>
       </div>
@@ -47,9 +53,8 @@
       <template v-else>
         <!-- KPI Row 1 - Primary Metrics -->
         <div class="grid gap-5 grid-cols-2 lg:grid-cols-4">
-          <article v-for="card in primaryKpis" :key="card.label" class="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#1a1a1a]/80 p-6 backdrop-blur-xl transition-all duration-500 hover:border-white/20 hover:shadow-2xl hover:-translate-y-1">
-            <!-- Subtle gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:opacity-100" :class="card.gradient"></div>
+          <article v-for="card in primaryKpis" :key="card.label" @click="card.link && router.push(card.link)" class="group relative overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1" :class="[card.bgClass || 'bg-charcoal border-white/[0.08] hover:border-white/20', card.link ? 'cursor-pointer' : '']">
+            
             <!-- Watermark icon top-right background -->
             <div class="absolute -right-4 -top-4 opacity-[0.06] transition-all duration-700 group-hover:opacity-[0.12] group-hover:scale-110 group-hover:rotate-6 pointer-events-none" :class="card.iconColor">
               <component :is="card.icon" class="w-28 h-28" />
@@ -57,23 +62,28 @@
 
             <div class="relative z-10 flex flex-col h-full justify-between gap-5">
               <div class="flex items-start gap-4">
-                <!-- Large icon on left, no background wrapper -->
-                <component :is="card.icon" class="w-10 h-10 shrink-0 mt-0.5 transition-colors duration-300" :class="card.iconColor" />
-                <div class="flex-1 min-w-0">
-                  <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-white/50 mb-2">{{ card.label }}</p>
-                  <p class="text-4xl lg:text-5xl font-black tracking-tight font-sans drop-shadow-sm" :class="card.valueColor || 'text-white'">
-                    {{ card.prefix || '' }}{{ card.value }}{{ card.suffix || '' }}
-                  </p>
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border" :class="card.iconWrap">
+                  <component :is="card.icon" class="h-6 w-6" :class="card.iconColor" />
+                </div>
+                <div>
+                  <h3 class="text-[11px] font-bold uppercase tracking-[0.25em] mb-1" :class="card.labelColor || 'text-ivory/60'">{{ card.label }}</h3>
+                  <div class="flex items-baseline gap-2">
+                    <span class="font-display text-4xl font-bold" :class="card.valueColor || 'text-white'">
+                      {{ card.value }}
+                    </span>
+                    <span v-if="card.suffix" class="text-sm font-medium" :class="card.labelColor || 'text-ivory/40'">{{ card.suffix }}</span>
+                  </div>
                 </div>
               </div>
 
               <div class="flex items-center justify-between border-t border-white/5 pt-4">
-                <p v-if="card.sub" class="text-[11px] text-white/40 font-medium">{{ card.sub }}</p>
-                <div v-else></div> <!-- Spacer -->
-                <span v-if="card.badge" class="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm" :class="card.badgeClass">
-                  <component :is="card.badgeIcon" class="h-3 w-3" />
-                  {{ card.badge }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <div v-if="card.badge" class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border shadow-sm transition-all duration-300" :class="card.badgeClass || 'border-current/10'">
+                    <component :is="card.badgeIcon" class="h-3 w-3" />
+                    {{ card.badge }}
+                  </div>
+                  <span class="text-[11px] font-medium" :class="card.subColor || 'text-white/40'">{{ card.sub }}</span>
+                </div>
               </div>
             </div>
           </article>
@@ -407,8 +417,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import { adminApi } from '../api/admin.api';
 import {
@@ -430,14 +440,18 @@ import {
   TrophyIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
-  PhotoIcon
+  PhotoIcon,
+  ArrowPathIcon
 } from '@heroicons/vue/24/outline';
 
+const router = useRouter();
 const dashboard = ref({});
 const loading = ref(true);
+const isRefreshing = ref(false);
 const currentTime = ref('');
 const currentDate = ref('');
 let clockInterval = null;
+let dashboardInterval = null;
 
 const updateClock = () => {
   const now = new Date();
@@ -486,63 +500,61 @@ const primaryKpis = computed(() => {
       label: "Today's Bookings",
       value: s.appointments_today ?? 0,
       icon: CalendarDaysIcon,
-      iconColor: 'text-blue-400',
-      iconWrap: 'bg-blue-500/10 border-blue-500/15',
-      gradient: 'from-blue-500/5 to-transparent',
-      glowClass: 'bg-blue-500',
+      iconColor: 'text-white/70',
+      iconWrap: 'bg-white/10 border-white/20',
+      bgClass: 'bg-obsidian border-white/[0.08] hover:border-white/20',
       badge: todayDelta !== 0 ? `${todayDelta > 0 ? '+' : ''}${todayDelta}` : null,
-      badgeClass: todayDelta > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400',
+      badgeClass: todayDelta > 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20' : 'bg-red-500/20 text-red-300 border-red-500/20',
       badgeIcon: todayDelta > 0 ? ArrowTrendingUpIcon : ArrowTrendingDownIcon,
-      sub: 'vs yesterday'
+      sub: 'vs yesterday',
+      link: '/admin/appointments'
     },
     {
       label: 'Pending Approval',
       value: s.pending_appointments ?? 0,
       icon: ExclamationTriangleIcon,
-      iconColor: 'text-amber-400',
-      iconWrap: 'bg-amber-500/10 border-amber-500/15',
-      gradient: 'from-amber-500/5 to-transparent',
-      glowClass: 'bg-amber-500',
-      valueColor: (s.pending_appointments || 0) > 0 ? 'text-amber-400' : 'text-white',
-      badge: (s.pending_appointments || 0) > 0 ? 'Action needed' : null,
-      badgeClass: 'bg-amber-500/10 text-amber-400',
+      iconColor: (s.pending_appointments || 0) > 0 ? 'text-red-400' : 'text-white',
+      iconWrap: (s.pending_appointments || 0) > 0 ? 'bg-red-500/10 border-red-500/20' : 'bg-white/20 border-white/30',
+      bgClass: (s.pending_appointments || 0) > 0 
+        ? 'bg-gradient-to-br from-red-950/60 to-charcoal border-red-500/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_20px_rgba(239,68,68,0.2)]' 
+        : 'bg-admin-dark border-white/[0.08] hover:border-white/20',
+      valueColor: (s.pending_appointments || 0) > 0 ? 'text-red-400' : 'text-white',
+      labelColor: (s.pending_appointments || 0) > 0 ? 'text-red-400/70' : 'text-white/70',
+      subColor: (s.pending_appointments || 0) > 0 ? 'text-red-400/60' : 'text-white/60',
+      badge: (s.pending_appointments || 0) > 0 ? 'Action Required' : null,
+      badgeClass: (s.pending_appointments || 0) > 0 ? 'bg-red-500/10 text-red-400 border-red-500/30 animate-pulse' : 'bg-black/20 text-white border-white/10',
       badgeIcon: ExclamationTriangleIcon,
-      sub: 'Requires admin review'
+      sub: 'Requires admin review',
+      actionNeeded: (s.pending_appointments || 0) > 0,
+      link: '/admin/appointments'
     },
     {
       label: 'Total Customers',
       value: s.total_customers ?? 0,
       icon: UserGroupIcon,
-      iconColor: 'text-cyan-400',
-      iconWrap: 'bg-cyan-500/10 border-cyan-500/15',
-      gradient: 'from-cyan-500/5 to-transparent',
-      glowClass: 'bg-cyan-500',
+      iconColor: 'text-obsidian',
+      iconWrap: 'bg-black/10 border-black/20',
+      bgClass: 'bg-admin-light border-black/10 hover:border-black/20',
+      valueColor: 'text-obsidian',
+      labelColor: 'text-obsidian/70',
+      subColor: 'text-obsidian/60',
       badge: (s.new_customers_week || 0) > 0 ? `+${s.new_customers_week} this week` : null,
-      badgeClass: 'bg-emerald-500/10 text-emerald-400',
+      badgeClass: 'bg-black/10 text-obsidian border-black/10',
       badgeIcon: ArrowTrendingUpIcon,
-      sub: `${s.new_customers_week || 0} new this week`
+      sub: `${s.new_customers_week || 0} new this week`,
+      link: '/admin/customers'
     },
     {
       label: 'Completion Rate',
       value: s.completion_rate ?? 0,
       suffix: '%',
       icon: CheckCircleIcon,
-      iconColor: 'text-emerald-400',
-      iconWrap: 'bg-emerald-500/10 border-emerald-500/15',
-      gradient: 'from-emerald-500/5 to-transparent',
-      glowClass: 'bg-emerald-500',
+      iconColor: 'text-emerald-500',
+      iconWrap: 'bg-emerald-500/10 border-emerald-500/20',
+      bgClass: 'bg-obsidian border-white/[0.08] hover:border-white/20',
       valueColor: (s.completion_rate || 0) >= 80 ? 'text-emerald-400' : (s.completion_rate || 0) >= 50 ? 'text-amber-400' : 'text-red-400',
-      sub: `${s.total_appointments ?? 0} total appointments`
+      sub: `${s.total_appointments ?? 0} total appointments`,
     },
-  ];
-});
-
-const revenueCards = computed(() => {
-  const r = dashboard.value.revenue || {};
-  return [
-    { label: 'Today\'s Revenue', value: r.today ?? 0 },
-    { label: 'This Week', value: r.week ?? 0 },
-    { label: 'This Month', value: r.month ?? 0 },
   ];
 });
 
@@ -726,9 +738,13 @@ const quickActions = [
   { label: 'Gallery', to: '/admin/gallery', icon: PhotoIcon },
 ];
 
-onMounted(async () => {
-  updateClock();
-  clockInterval = setInterval(updateClock, 30000);
+const loadDashboardData = async (silent = false) => {
+  if (!silent) {
+    loading.value = true;
+  } else {
+    isRefreshing.value = true;
+  }
+  
   try {
     const response = await adminApi.dashboard();
     dashboard.value = response.data.data;
@@ -736,10 +752,24 @@ onMounted(async () => {
     console.error('Failed to load dashboard data:', err);
   } finally {
     loading.value = false;
+    isRefreshing.value = false;
   }
+};
+
+onMounted(async () => {
+  updateClock();
+  clockInterval = setInterval(updateClock, 30000);
+  
+  loadDashboardData();
+  
+  // Auto-reload dashboard every 30 seconds silently
+  dashboardInterval = setInterval(() => {
+    loadDashboardData(true);
+  }, 30000);
 });
 
 onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
+  if (dashboardInterval) clearInterval(dashboardInterval);
 });
 </script>

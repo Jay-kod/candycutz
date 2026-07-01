@@ -146,7 +146,11 @@ async function togglePublish(post) {
     const newStatus = post.is_published == 1 ? false : true;
     await barberApi.updateBlogPost(post.id, { title: post.title, content: post.content, excerpt: post.excerpt || '', is_published: newStatus });
     post.is_published = newStatus ? 1 : 0;
-    toast.success(newStatus ? 'Post published' : 'Post unpublished');
+    if (newStatus) {
+      toast.success('Post published');
+    } else {
+      toast.info('Post unpublished');
+    }
   } catch (err) {
     toast.error('Failed to update post');
   }

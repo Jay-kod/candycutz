@@ -164,8 +164,19 @@ if ($path === '/customer/profile') {
         $notifySystem = $prefs['notify_system'] ?? true; // default true
         
         if ($notifySystem) {
-            $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message) VALUES (0, 'customer', ?, 'system_update', 'Profile Updated', 'Your profile information has been successfully updated.')");
-            $stmt->execute([$userId]);
+            cc_notify_customer($pdo, (int) $userId, [
+                'sender_id' => $userId,
+                'type' => 'system_update',
+                'title' => 'Profile Updated',
+                'message' => 'Your profile information has been successfully updated.',
+            ]);
+            cc_notify_admin($pdo, [
+                'sender_id' => $userId,
+                'type' => 'system_update',
+                'title' => 'Customer Profile Updated',
+                'message' => 'A customer updated their profile information.',
+                'related_entity_id' => (int) $userId,
+            ]);
         }
 
         echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
@@ -195,8 +206,12 @@ if ($method === 'POST' && $path === '/customer/notification-settings') {
     $stmt = $pdo->prepare("UPDATE users SET notification_preferences = ? WHERE id = ?");
     $stmt->execute([json_encode($prefs), $userId]);
 
-    $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message) VALUES (?, 'customer', ?, 'general_update', 'Settings Updated', 'Your notification preferences have been successfully updated.')");
-    $stmt->execute([$userId, $userId]);
+    cc_notify_customer($pdo, (int) $userId, [
+        'sender_id' => $userId,
+        'type' => 'general_update',
+        'title' => 'Settings Updated',
+        'message' => 'Your notification preferences have been successfully updated.',
+    ]);
 
     echo json_encode(['success' => true, 'message' => 'Notification preferences updated']);
     exit;
@@ -386,24 +401,30 @@ if ($method === 'POST' && $path === '/customer/bookings') {
     
     // Notifications
     try {
-        // To Customer
-        $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message, related_entity_id) VALUES (?, 'customer', ?, 'booking', 'Booking Created', 'Your booking has been created and is pending payment.', ?)");
-        $stmt->execute([$userId, $userId, $appointment_id]);
-        
-        // To Barber
-        $barberUserStmt = $pdo->prepare("SELECT user_id FROM barbers WHERE id = ?");
-        $barberUserStmt->execute([$barber_id]);
-        $barber_user_id = $barberUserStmt->fetchColumn();
-        
-        if ($barber_user_id) {
-            $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message, related_entity_id) VALUES (?, 'barber', ?, 'booking', 'New Online Booking', 'You have a new online booking pending payment.', ?)");
-            $stmt->execute([$userId, $barber_user_id, $appointment_id]);
-        }
-        
-        // To Admin
-        $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, type, title, message, related_entity_id) VALUES (?, 'admin', 'booking', 'New Online Booking', 'A new online booking was created via the website.', ?)");
-        $stmt->execute([$userId, $appointment_id]);
-        
+        cc_notify_customer($pdo, (int) $userId, [
+            'sender_id' => $userId,
+            'type' => 'booking',
+            'title' => 'Booking Created',
+            'message' => 'Your booking has been created and is pending payment.',
+            'related_entity_id' => (int) $appointment_id,
+        ]);
+
+        cc_notify_barber($pdo, (int) $barber_id, [
+            'sender_id' => $userId,
+            'type' => 'booking',
+            'title' => 'New Online Booking',
+            'message' => 'You have a new online booking pending payment.',
+            'related_entity_id' => (int) $appointment_id,
+        ]);
+
+        cc_notify_admin($pdo, [
+            'sender_id' => $userId,
+            'type' => 'booking',
+            'title' => 'New Online Booking',
+            'message' => 'A new online booking was created via the website.',
+            'related_entity_id' => (int) $appointment_id,
+        ]);
+
         // Audit log
         $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'create_booking', 'appointment', ?, ?)");
         $stmt->execute([$userId, $appointment_id, $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
@@ -424,6 +445,22 @@ if ($method === 'PATCH' && preg_match('/^\/customer\/bookings\/(\d+)\/cancel$/',
     $stmt->execute([$bookingId, $userId]);
     
     if ($stmt->rowCount() > 0) {
+        cc_notify_appointment_parties($pdo, (int) $bookingId, [
+            'sender_id' => $userId,
+            'type' => 'booking',
+            'customer' => [
+                'title' => 'Booking Cancelled',
+                'message' => 'You cancelled your booking.',
+            ],
+            'barber' => [
+                'title' => 'Booking Cancelled',
+                'message' => 'A customer cancelled their booking on your schedule.',
+            ],
+            'admin' => [
+                'title' => 'Booking Cancelled by Customer',
+                'message' => 'A customer cancelled their booking.',
+            ],
+        ]);
         echo json_encode(['success' => true, 'message' => 'Booking cancelled']);
     } else {
         http_response_code(400); echo json_encode(['error' => 'Booking cannot be cancelled or not found']);
@@ -440,6 +477,22 @@ if ($method === 'DELETE' && preg_match('/^\/customer\/bookings\/(\d+)$/', $path,
     $stmt->execute([$bookingId, $userId]);
     
     if ($stmt->rowCount() > 0) {
+        cc_notify_appointment_parties($pdo, (int) $bookingId, [
+            'sender_id' => $userId,
+            'type' => 'booking',
+            'customer' => [
+                'title' => 'Booking Deleted',
+                'message' => 'You deleted a booking from your history.',
+            ],
+            'barber' => [
+                'title' => 'Booking Removed',
+                'message' => 'A booking was removed from your schedule by the customer.',
+            ],
+            'admin' => [
+                'title' => 'Booking Deleted by Customer',
+                'message' => 'A customer deleted a booking record.',
+            ],
+        ]);
         echo json_encode(['success' => true, 'message' => 'Booking deleted']);
     } else {
         http_response_code(400); echo json_encode(['error' => 'Booking cannot be deleted or not found']);
@@ -477,8 +530,19 @@ if ($path === '/customer/wishlist') {
             $stmt = $pdo->prepare("INSERT INTO wishlists (customer_id, item_type, item_id) VALUES (?, ?, ?)");
             $stmt->execute([$userId, $item_type, $item_id]);
 
-            $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message) VALUES (?, 'customer', ?, 'wishlist_update', 'Wishlist Updated', 'You have successfully added an item to your wishlist.')");
-            $stmt->execute([$userId, $userId]);
+            cc_notify_customer($pdo, (int) $userId, [
+                'sender_id' => $userId,
+                'type' => 'wishlist_update',
+                'title' => 'Wishlist Updated',
+                'message' => 'You have successfully added an item to your wishlist.',
+            ]);
+            cc_notify_admin($pdo, [
+                'sender_id' => $userId,
+                'type' => 'wishlist_update',
+                'title' => 'Customer Wishlist Updated',
+                'message' => 'A customer added an item to their wishlist.',
+                'related_entity_id' => (int) $item_id,
+            ]);
 
             echo json_encode(['success' => true, 'message' => 'Added to wishlist']);
         } catch (PDOException $e) {
@@ -586,15 +650,31 @@ if ($method === 'POST' && $path === '/customer/testimonials') {
     $stmt = $pdo->prepare("INSERT INTO testimonials (customer_id, barber_id, service_id, rating, comment, is_approved) VALUES (?, ?, ?, ?, ?, 0)");
     $stmt->execute([$userId, $barber_id, $service_id, $rating, $comment]);
     
-    $reviewId = $pdo->lastInsertId();
+    $reviewId = (int) $pdo->lastInsertId();
     
-    // Notify admin
-    $notifStmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, type, title, message, related_entity_id) VALUES (?, 'admin', 'review', 'New Review Pending', 'A customer has submitted a new review that requires your approval.', ?)");
-    $notifStmt->execute([$userId, $reviewId]);
-
-    // Notify customer
-    $custNotifStmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message, related_entity_id) VALUES (?, 'customer', ?, 'review', 'Review Pending', 'Your review has been successfully submitted and is currently pending approval.', ?)");
-    $custNotifStmt->execute([$userId, $userId, $reviewId]);
+    cc_notify_admin($pdo, [
+        'sender_id' => $userId,
+        'type' => 'review',
+        'title' => 'New Review Pending',
+        'message' => 'A customer has submitted a new review that requires your approval.',
+        'related_entity_id' => $reviewId,
+    ]);
+    cc_notify_customer($pdo, (int) $userId, [
+        'sender_id' => $userId,
+        'type' => 'review',
+        'title' => 'Review Pending',
+        'message' => 'Your review has been successfully submitted and is currently pending approval.',
+        'related_entity_id' => $reviewId,
+    ]);
+    if ($barber_id) {
+        cc_notify_barber($pdo, (int) $barber_id, [
+            'sender_id' => $userId,
+            'type' => 'review',
+            'title' => 'New Review Received',
+            'message' => 'A customer submitted a review for your service (pending approval).',
+            'related_entity_id' => $reviewId,
+        ]);
+    }
 
     echo json_encode(['success' => true, 'message' => 'Review submitted for approval']);
     exit;
@@ -683,19 +763,28 @@ if ($method === 'POST' && preg_match('/^\/customer\/checkout\/(\d+)\/receipt$/',
         $barber_id = $stmt->fetchColumn();
         
         if ($barber_id) {
-            // Get user_id for barber
-            $stmt = $pdo->prepare("SELECT user_id FROM barbers WHERE id = ?");
-            $stmt->execute([$barber_id]);
-            $barber_user_id = $stmt->fetchColumn();
-            
-            // Notify barber
-            $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message, related_entity_id) VALUES (?, 'barber', ?, 'payment', 'Payment Receipt Uploaded', 'A customer has uploaded a payment receipt for verification.', ?)");
-            $stmt->execute([$userId, $barber_user_id, $appointment_id]);
-            
-            // Notify admins
-            $stmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, type, title, message, related_entity_id) VALUES (?, 'admin', 'payment', 'Payment Receipt Uploaded', 'A customer has uploaded a payment receipt for verification.', ?)");
-            $stmt->execute([$userId, $appointment_id]);
+            cc_notify_barber($pdo, (int) $barber_id, [
+                'sender_id' => $userId,
+                'type' => 'payment',
+                'title' => 'Payment Receipt Uploaded',
+                'message' => 'A customer has uploaded a payment receipt for verification.',
+                'related_entity_id' => (int) $appointment_id,
+            ]);
+            cc_notify_admin($pdo, [
+                'sender_id' => $userId,
+                'type' => 'payment',
+                'title' => 'Payment Receipt Uploaded',
+                'message' => 'A customer has uploaded a payment receipt for verification.',
+                'related_entity_id' => (int) $appointment_id,
+            ]);
         }
+        cc_notify_customer($pdo, (int) $userId, [
+            'sender_id' => $userId,
+            'type' => 'payment',
+            'title' => 'Receipt Uploaded',
+            'message' => 'Your payment receipt was uploaded and is awaiting verification.',
+            'related_entity_id' => (int) $appointment_id,
+        ]);
         
         // Log in audit_logs
         $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'upload_receipt', 'payment', ?, ?)");

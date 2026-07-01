@@ -27,7 +27,7 @@ client.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    const message = error?.response?.data?.message || 'An error occurred. Please try again.';
+    const message = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'An error occurred. Please try again.';
 
     switch (status) {
       case 401:
@@ -35,29 +35,39 @@ client.interceptors.response.use(
         if (!error.config?.url?.includes('/auth/login') && !error.config?.url?.includes('/auth/register')) {
           const auth = useAuthStore();
           auth.clearAuth();
-          toast.error('Session expired. Please log in again.');
+          toast.error(error?.response?.data?.message || 'Session expired. Please log in again.');
           window.location.href = '/customer/login';
+        } else {
+          toast.error(message);
         }
         break;
       case 403:
         // Forbidden
-        toast.error('You do not have permission to perform this action.');
+        toast.error(error?.response?.data?.message || 'You do not have permission to perform this action.');
         break;
       case 422:
-        // Validation error - don't show generic toast, let component handle it
+        // Validation error
+        if (error?.response?.data?.errors) {
+            const firstError = Object.values(error.response.data.errors)[0];
+            const errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
+            if (errorMsg) toast.error(errorMsg);
+            else toast.error(message);
+        } else {
+            toast.error(message);
+        }
         break;
       case 404:
-        toast.error(`Resource not found: ${error.config?.url}`);
+        toast.error(error?.response?.data?.message || `Resource not found: ${error.config?.url}`);
         break;
       case 500:
-        toast.error('Server error. Please contact support.');
+        toast.error(error?.response?.data?.message || error?.response?.data?.error || 'Server error. Please contact support.');
         break;
       default:
         if (!error.response) {
           if (error.code === 'ECONNABORTED') {
             toast.error('Request timeout. Please try again.');
           } else {
-            toast.error('Network error. Please check your connection.');
+            toast.error(`Network error: ${error.message}`);
           }
         } else {
           toast.error(message);

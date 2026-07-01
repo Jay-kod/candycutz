@@ -7,39 +7,48 @@
         <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-purple-500/10 blur-[80px]"></div>
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,103,0,0.05),transparent_60%)]"></div>
         
-        <div class="relative z-10">
+        <div class="relative z-10 flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-2">
             <span class="flex h-6 w-6 items-center justify-center rounded-md bg-admin/20 text-admin border border-admin/30">
               <CalendarDaysIcon class="h-3.5 w-3.5" />
             </span>
-            <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold">Booking Management</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold truncate">Booking Management</p>
           </div>
-          <h1 class="font-display text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
+          <h1 class="font-display text-3xl lg:text-4xl text-white drop-shadow-md leading-tight whitespace-nowrap">
             Saloon <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-amber-400">Appointments</span>
           </h1>
-          <p class="mt-3 text-sm text-white/40 max-w-lg leading-relaxed">
+          <p class="mt-3 text-sm text-white/40 max-w-md leading-relaxed hidden sm:block">
             Review, verify payments, and manage all customer bookings in real-time.
           </p>
         </div>
         
-        <div class="relative z-10 flex flex-col sm:flex-row items-center gap-4 shrink-0 w-full md:w-auto">
-          <div class="relative w-full sm:w-64">
+        <div class="relative z-10 flex flex-col items-end gap-3 shrink-0 w-full lg:w-auto">
+          <!-- Search Bar -->
+          <div class="relative w-full lg:w-80">
             <MagnifyingGlassIcon class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
             <input
               v-model="search"
               type="text"
               placeholder="Search by client name..."
-              class="w-full bg-white/[0.03] border border-white/[0.08] text-sm text-white rounded-2xl py-3.5 pl-11 pr-4 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-admin/10 placeholder:text-white/20"
+              class="w-full bg-white/[0.03] border border-white/[0.08] text-sm text-white rounded-2xl py-3 pl-11 pr-4 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-admin/10 placeholder:text-white/20"
             />
           </div>
-          <button @click="$router.push('/admin/walk-in')" class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-6 py-3.5 text-sm font-bold text-obsidian transition-all hover:shadow-[0_8px_30px_rgba(16,185,129,0.3)] shrink-0 group">
-            <UserPlusIcon class="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
-            New Walk-In
-          </button>
-          <button @click="showSettingsModal = true" class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-admin to-admin-light px-6 py-3.5 text-sm font-bold text-obsidian transition-all hover:shadow-[0_8px_30px_rgba(255,103,0,0.3)] shrink-0 group">
-            <BanknotesIcon class="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
-            Bank Settings
-          </button>
+          
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap justify-end gap-3 w-full">
+            <button @click="$router.push('/admin/walk-in')" class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-4 py-2 text-xs font-bold text-obsidian transition-all hover:shadow-[0_4px_15px_rgba(16,185,129,0.2)] group">
+              <UserPlusIcon class="h-4 w-4 group-hover:scale-110 transition-transform" />
+              New Walk-In
+            </button>
+            <button @click="showSettingsModal = true" class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light px-4 py-2 text-xs font-bold text-obsidian transition-all hover:shadow-[0_4px_15px_rgba(255,103,0,0.2)] group">
+              <BanknotesIcon class="h-4 w-4 group-hover:scale-110 transition-transform" />
+              Bank Settings
+            </button>
+            <button @click="loadAppointments(true)" class="flex items-center justify-center gap-2 rounded-xl bg-white/[0.05] border border-white/10 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 group">
+              <ArrowPathIcon class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': isRefreshing }" />
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
 
@@ -62,6 +71,22 @@
               </span>
             </span>
           </button>
+        </div>
+        
+        <!-- Sorting Dropdown -->
+        <div class="relative shrink-0">
+          <select 
+            v-model="sortOrder"
+            class="appearance-none bg-white/[0.03] border border-white/[0.08] text-xs font-bold text-white rounded-xl py-2.5 pl-4 pr-10 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-admin/10 cursor-pointer"
+          >
+            <option value="newest_created" class="bg-[#1a1a1a] text-white">Newest First</option>
+            <option value="oldest_created" class="bg-[#1a1a1a] text-white">Oldest First</option>
+            <option value="upcoming_date" class="bg-[#1a1a1a] text-white">Date (Ascending)</option>
+            <option value="past_date" class="bg-[#1a1a1a] text-white">Date (Descending)</option>
+          </select>
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg class="h-4 w-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
         </div>
       </div>
 
@@ -87,96 +112,105 @@
           <div v-if="filteredAppointments.length > 0" class="overflow-x-auto pb-4">
             <table class="w-full text-left border-collapse min-w-[800px]">
               <thead>
-                <tr class="border-b border-white/[0.05] bg-black/20 text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">
-                  <th class="px-6 py-4 font-bold rounded-tl-3xl">Client Details</th>
+                <tr class="divide-x divide-white/[0.04] border-y border-white/[0.04] bg-white/[0.02] text-[10px] uppercase tracking-[0.25em] text-white/40 font-bold">
+                  <th class="px-6 py-4 font-bold">Client Details</th>
                   <th class="px-6 py-4 font-bold">Service & Barber</th>
                   <th class="px-6 py-4 font-bold">Schedule</th>
                   <th class="px-6 py-4 font-bold">Status</th>
-                  <th class="px-6 py-4 text-right font-bold rounded-tr-3xl">Actions</th>
+                  <th class="px-6 py-4 text-right font-bold">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.02]">
+              <tbody class="divide-y divide-white/[0.04]">
                 <tr
                   v-for="appointment in filteredAppointments"
                   :key="appointment.id"
-                  class="group transition-colors hover:bg-white/[0.02]"
+                  class="group transition-colors hover:bg-white/[0.02] divide-x divide-white/[0.02]"
                 >
                   <!-- Client details -->
-                  <td class="px-6 py-4 align-top">
-                    <div class="flex items-center gap-3">
-                      <div class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-white font-bold text-sm shadow-inner group-hover:scale-105 transition-transform">
-                        {{ initials(appointment.customer?.name || appointment.client_name) }}
-                        <div v-if="isNewClient(appointment)" class="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-admin border-2 border-[#1a1a1a]" title="New Client"></div>
+                  <td class="px-6 py-5 align-middle">
+                    <div class="flex items-center gap-4">
+                      <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-admin/20 to-admin/5 border border-admin/20 text-admin font-bold text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                        <img v-if="appointment.customer_avatar" :src="getAvatarUrl(appointment.customer_avatar)" :alt="appointment.customer?.name || appointment.client_name" class="w-full h-full object-cover" />
+                        <span v-else>{{ initials(appointment.customer?.name || appointment.client_name) }}</span>
+                        <div v-if="isNewClient(appointment)" class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#1a1a1a] z-10" title="New Client"></div>
                       </div>
                       <div>
-                        <p class="text-sm font-bold text-white">{{ appointment.customer?.name || appointment.client_name }}</p>
-                        <p class="text-[10px] font-mono text-white/40 flex items-center gap-1 mt-0.5"><HashtagIcon class="h-3 w-3"/> {{ String(appointment.id).padStart(5, '0') }}</p>
+                        <p class="text-sm font-bold text-white whitespace-nowrap">{{ appointment.customer?.name || appointment.client_name }}</p>
+                        <p class="text-[11px] font-mono text-white/40 flex items-center gap-1 mt-0.5"><HashtagIcon class="h-3 w-3"/> {{ String(appointment.id).padStart(5, '0') }}</p>
                       </div>
                     </div>
                   </td>
                   
                   <!-- Service & Barber -->
-                  <td class="px-6 py-4 align-top">
+                  <td class="px-6 py-5 align-middle">
                     <p class="text-sm text-white/90 font-medium truncate max-w-[200px]" :title="appointment.service?.name">{{ appointment.service?.name || 'General Booking' }}</p>
-                    <p class="text-[11px] text-white/40 mt-1 flex items-center gap-1"><UserIcon class="h-3 w-3" /> {{ appointment.barber?.name || 'Any Barber' }}</p>
+                    <p class="text-[11px] text-white/40 mt-1 flex items-center gap-1 whitespace-nowrap"><UserIcon class="h-3 w-3 opacity-70" /> {{ appointment.barber?.name || 'Any Barber' }}</p>
                   </td>
 
                   <!-- Schedule -->
-                  <td class="px-6 py-4 align-top">
-                    <p class="text-sm text-white/80 font-medium flex items-center gap-1.5 mb-1"><CalendarDaysIcon class="h-3.5 w-3.5 text-white/30" /> {{ formatDate(appointment.appointment_date) }}</p>
-                    <p class="text-[11px] text-admin font-bold flex items-center gap-1.5"><ClockIcon class="h-3.5 w-3.5 opacity-60" /> {{ appointment.appointment_time }}</p>
+                  <td class="px-6 py-5 align-middle">
+                    <div class="flex flex-col gap-1 whitespace-nowrap">
+                      <p class="text-sm text-white/90 font-medium flex items-center gap-1.5"><CalendarDaysIcon class="h-4 w-4 text-white/30" /> {{ formatDate(appointment.appointment_date) }}</p>
+                      <p class="text-xs text-admin font-bold flex items-center gap-1.5"><ClockIcon class="h-4 w-4 opacity-60" /> {{ appointment.appointment_time }}</p>
+                    </div>
                   </td>
 
                   <!-- Status -->
-                  <td class="px-6 py-4 align-top">
-                    <div class="flex flex-col items-start gap-2">
-                      <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest border shadow-sm" :class="statusClass(appointment.status)">
+                  <td class="px-6 py-5 align-middle">
+                    <div class="flex flex-col gap-1.5 whitespace-nowrap">
+                      <!-- Main Appointment Status Pill -->
+                      <span class="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest border shadow-sm" :class="statusClass(appointment.status)">
                         <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(appointment.status)"></span>
                         {{ appointment.status }}
                       </span>
-                      <div class="flex flex-wrap items-center gap-1.5">
-                        <span v-if="appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border border-purple-500/30 bg-purple-500/10 text-purple-400">
-                          <UserPlusIcon class="h-2.5 w-2.5" />
-                          Walk-In
-                        </span>
-                        <span v-else class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-                          <GlobeAltIcon class="h-2.5 w-2.5" />
-                          Online
-                        </span>
-                        <span v-if="appointment.payment_method" class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border border-white/10 bg-white/[0.04] text-white/70">
-                          {{ appointment.payment_method === 'pos' ? 'POS' : appointment.payment_method }}
-                        </span>
+                      
+                      <!-- Subtle Metadata Row (Source & Payment) -->
+                      <div class="flex items-center gap-3 text-[10px] font-medium text-white/50 mt-1 uppercase tracking-wide">
+                        <!-- Booking Source -->
+                        <div class="flex items-center gap-1">
+                          <UserPlusIcon v-if="appointment.booking_type === 'walk_in'" class="h-3 w-3 opacity-70" />
+                          <GlobeAltIcon v-else class="h-3 w-3 opacity-70" />
+                          <span>{{ appointment.booking_type === 'walk_in' ? 'Walk-In' : 'Online' }}</span>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <span v-if="appointment.payment_status" class="text-white/20">&bull;</span>
+                        
+                        <!-- Payment Info -->
+                        <div v-if="appointment.payment_status" class="flex items-center gap-1" :class="appointment.payment_status === 'verified' ? 'text-emerald-400' : appointment.payment_status === 'awaiting_verification' ? 'text-amber-400' : ''">
+                          <BanknotesIcon class="h-3 w-3 opacity-80" />
+                          <span>{{ appointment.payment_method === 'pos' ? 'POS' : appointment.payment_method ? appointment.payment_method : 'PAY' }}: {{ appointment.payment_status.replace('_', ' ') }}</span>
+                        </div>
                       </div>
-                      <span v-if="appointment.payment_status" class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border bg-[#111] shadow-sm" :class="paymentStatusClass(appointment.payment_status)">
-                        <BanknotesIcon class="h-3 w-3 opacity-70" />
-                        PAY: {{ appointment.payment_status.replace('_', ' ') }}
-                      </span>
                     </div>
                   </td>
 
                   <!-- Actions -->
-                  <td class="px-6 py-4 text-right align-top">
-                    <div class="flex flex-wrap items-center justify-end gap-2">
-                      <button @click="openDetails(appointment)" class="rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white transition-all shadow-sm">
+                  <td class="px-6 py-5 text-right align-middle">
+                    <div class="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <button @click="openDetails(appointment)" class="rounded-xl bg-white/[0.05] border border-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/[0.15] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all">
                         Details
                       </button>
                       
                       <template v-if="appointment.status === 'pending'">
-                        <button v-if="!appointment.receipt_image || appointment.payment_status !== 'awaiting_verification'" @click="approve(appointment.id)" class="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" title="Approve">
+                        <button v-if="!appointment.receipt_image || appointment.payment_status !== 'awaiting_verification'" @click="approve(appointment.id)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all" title="Approve">
                           <CheckIcon class="h-4 w-4" />
                         </button>
-                        <button v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'" @click="viewReceipt(appointment)" class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2 text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm" title="Verify Receipt">
+                        <button @click="forceApprove(appointment.id)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all" title="Force Approve (Bypass Clearance)">
+                          <ShieldCheckIcon class="h-4 w-4" />
+                        </button>
+                        <button v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'" @click="viewReceipt(appointment)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all" title="Verify Receipt">
                           <DocumentTextIcon class="h-4 w-4" />
                         </button>
-                        <button @click="cancel(appointment.id)" class="rounded-lg border border-red-500/20 p-2 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all" title="Cancel Booking">
+                        <button @click="cancel(appointment.id)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all" title="Cancel Booking">
                           <XMarkIcon class="h-4 w-4" />
                         </button>
                       </template>
                       <template v-else-if="appointment.status === 'confirmed' || appointment.status === 'completed'">
-                        <button v-if="appointment.receipt_image" @click="viewReceipt(appointment)" class="rounded-lg bg-white/5 border border-white/10 p-2 text-white/60 hover:bg-white/10 hover:text-white transition-all" title="View Receipt">
+                        <button v-if="appointment.receipt_image" @click="viewReceipt(appointment)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-white/[0.05] border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all" title="View Receipt">
                           <DocumentTextIcon class="h-4 w-4" />
                         </button>
-                        <button v-if="appointment.status === 'confirmed'" @click="cancel(appointment.id)" class="rounded-lg border border-red-500/20 p-2 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all" title="Cancel Booking">
+                        <button v-if="appointment.status === 'confirmed'" @click="cancel(appointment.id)" class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all" title="Cancel Booking">
                           <XMarkIcon class="h-4 w-4" />
                         </button>
                       </template>
@@ -391,7 +425,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import { adminApi } from '../api/admin.api';
 import ReceiptViewer from '../../../core/components/ReceiptViewer.vue';
@@ -411,7 +445,9 @@ import {
   ClockIcon,
   CalendarDaysIcon,
   UserPlusIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  ShieldCheckIcon,
+  ArrowPathIcon
 } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
@@ -419,8 +455,10 @@ const { confirm } = useConfirm();
 
 const appointments = ref([]);
 const loading = ref(true);
+const isRefreshing = ref(false);
 const search = ref('');
 const currentFilter = ref('all');
+const sortOrder = ref('newest_created');
 const showSettingsModal = ref(false);
 const savingSettings = ref(false);
 const selectedBooking = ref(null);
@@ -491,12 +529,36 @@ const filteredAppointments = computed(() => {
     });
   }
   
+  // Apply sorting
+  result = [...result].sort((a, b) => {
+    if (sortOrder.value === 'newest_created') {
+      return b.id - a.id;
+    } else if (sortOrder.value === 'oldest_created') {
+      return a.id - b.id;
+    } else if (sortOrder.value === 'upcoming_date') {
+      const dateA = new Date(a.appointment_date + 'T' + a.appointment_time);
+      const dateB = new Date(b.appointment_date + 'T' + b.appointment_time);
+      return dateA - dateB;
+    } else if (sortOrder.value === 'past_date') {
+      const dateA = new Date(a.appointment_date + 'T' + a.appointment_time);
+      const dateB = new Date(b.appointment_date + 'T' + b.appointment_time);
+      return dateB - dateA;
+    }
+    return 0;
+  });
+  
   return result;
 });
 
 function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
+
+const getAvatarUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `http://localhost:8000${path}`;
+};
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -542,6 +604,7 @@ const paymentStatusClass = (status) => {
   const map = {
     verified: 'text-emerald-400 border-emerald-500/30',
     approved: 'text-emerald-400 border-emerald-500/30',
+    successful: 'text-emerald-400 border-emerald-500/30',
     awaiting_verification: 'text-amber-400 border-amber-500/30',
     pending: 'text-amber-400 border-amber-500/30',
     rejected: 'text-red-400 border-red-500/30',
@@ -550,15 +613,21 @@ const paymentStatusClass = (status) => {
   return map[status] || 'text-white/40 border-white/10';
 };
 
-async function loadAppointments() {
-  loading.value = true;
+async function loadAppointments(silent = false) {
+  if (!silent) {
+    loading.value = true;
+  } else {
+    isRefreshing.value = true;
+  }
+  
   try {
     const response = await adminApi.appointments();
     appointments.value = response.data.data;
   } catch (err) {
-    toast.error('Failed to load appointments');
+    if (!silent) toast.error('Failed to load appointments');
   } finally {
     loading.value = false;
+    isRefreshing.value = false;
   }
 }
 
@@ -619,6 +688,18 @@ async function approve(id) {
   }
 }
 
+async function forceApprove(id) {
+  if (await confirm('Force Approve Booking', 'Are you sure you want to force approve this booking? This will bypass all payment clearances and disputes.')) {
+    try {
+      await adminApi.forceApproveAppointment(id);
+      await loadAppointments();
+      toast.success('Booking force approved successfully');
+    } catch (err) {
+      toast.error('Failed to force approve');
+    }
+  }
+}
+
 async function cancel(id) {
   if (await confirm('Cancel Booking', 'Are you sure you want to cancel this booking? This action cannot be undone.')) {
     try {
@@ -672,10 +753,23 @@ async function submitWalkIn() {
   }
 }
 
+let refreshInterval;
+
 onMounted(() => {
   loadAppointments();
   loadSettings();
   loadServicesAndBarbers();
+  
+  // Auto-reload every 30 seconds silently
+  refreshInterval = setInterval(() => {
+    loadAppointments(true);
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
 });
 </script>
 

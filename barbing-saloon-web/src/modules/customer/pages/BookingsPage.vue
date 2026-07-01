@@ -26,8 +26,9 @@
         <div class="rounded-3xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl p-6 md:p-8 shadow-2xl">
           <div class="flex items-center justify-between mb-8">
             <h2 class="font-display text-2xl md:text-3xl text-theme-text">Booking <span class="text-gold">History</span></h2>
-            <button class="rounded-full bg-theme-bg p-2.5 text-theme-muted hover:bg-gold/10 hover:text-gold hover:rotate-180 transition-all duration-500 border border-theme-border" @click="loadBookings" title="Refresh">
-              <ArrowPathIcon class="h-5 w-5" :class="{ 'animate-spin': loadingBookings }" />
+            <button class="flex items-center gap-2 rounded-xl bg-theme-bg px-4 py-2 text-xs font-bold text-theme-muted hover:bg-gold/10 hover:text-gold hover:border-gold/30 transition-all border border-theme-border shadow-sm group" @click="loadBookings" title="Refresh Data">
+              <ArrowPathIcon class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': loadingBookings }" />
+              <span class="hidden sm:inline">Refresh</span>
             </button>
           </div>
 

@@ -53,18 +53,21 @@ const filteredLogs = computed(() => {
 
 const getIconForAction = (action) => {
   if (action === 'login') return ArrowRightOnRectangleIcon
-  if (action === 'verify_payment' || action === 'reject_payment') return CreditCardIcon
+  if (action.includes('payment')) return CreditCardIcon
+  if (action.includes('booking') || action.includes('walkin')) return ShieldCheckIcon
+  if (action.includes('service')) return ShieldCheckIcon
+  if (action.includes('barber')) return UserIcon
+  if (action.includes('blog')) return ClipboardDocumentListIcon
   if (action.includes('error') || action.includes('failed')) return ExclamationCircleIcon
-  if (action.includes('admin') || action.includes('system')) return ShieldCheckIcon
+  if (action.includes('admin') || action.includes('system') || action.includes('update_settings')) return ShieldCheckIcon
   return UserIcon
 }
 
 const getIconColorForAction = (action) => {
   if (action === 'login') return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-  if (action === 'verify_payment') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-  if (action === 'reject_payment') return 'text-red-400 bg-red-500/10 border-red-500/20'
-  if (action.includes('approve')) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-  if (action.includes('cancel') || action.includes('delete')) return 'text-red-400 bg-red-500/10 border-red-500/20'
+  if (action.includes('verify') || action.includes('approve') || action.includes('complete') || action.includes('create')) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+  if (action.includes('reject') || action.includes('cancel') || action.includes('delete') || action.includes('no_show')) return 'text-red-400 bg-red-500/10 border-red-500/20'
+  if (action.includes('update')) return 'text-amber-400 bg-amber-500/10 border-amber-500/20'
   return 'text-admin bg-admin/10 border-admin/20'
 }
 
@@ -106,8 +109,13 @@ onMounted(() => {
               <select v-model="filterType" class="bg-transparent text-ivory/80 text-sm outline-none cursor-pointer">
                 <option value="all" class="bg-obsidian">All Actions</option>
                 <option value="login" class="bg-obsidian">Logins</option>
+                <option value="appointment" class="bg-obsidian">Appointments</option>
                 <option value="payment" class="bg-obsidian">Payments</option>
                 <option value="user" class="bg-obsidian">Users</option>
+                <option value="barber" class="bg-obsidian">Barbers</option>
+                <option value="service" class="bg-obsidian">Services</option>
+                <option value="blog" class="bg-obsidian">Blog</option>
+                <option value="system" class="bg-obsidian">System</option>
               </select>
             </div>
           </div>

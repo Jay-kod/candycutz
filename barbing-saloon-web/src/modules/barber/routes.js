@@ -15,4 +15,5 @@ export default [
 	{ path: '/barber/blog/:id/edit', name: 'barber-blog-edit', component: () => import('./pages/BlogEditorPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/notifications', name: 'barber-notifications', component: () => import('./pages/NotificationsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/analytics', name: 'barber-analytics', component: () => import('./pages/AnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
+	{ path: '/barber/reports', name: 'barber-reports', component: () => import('./pages/ReportsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 ];

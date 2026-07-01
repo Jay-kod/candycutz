@@ -46,6 +46,17 @@ if (preg_match('/^\/(uploads|storage)\//', $requestUri)) {
     }
 }
 
+// Catch non-API routes and serve the Vue frontend
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (strpos($requestUri, '/api') !== 0) {
+    if (file_exists(__DIR__ . $requestUri) && is_file(__DIR__ . $requestUri)) {
+        return false; // serve the requested resource as-is
+    } else {
+        readfile(__DIR__ . '/index.html');
+        exit;
+    }
+}
+
 // Enable CORS
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
@@ -78,6 +89,9 @@ try {
     echo json_encode(['error' => 'Database connection failed']);
     exit;
 }
+
+require_once __DIR__ . '/notification_helper.php';
+cc_ensure_notifications_schema($pdo);
 
 // ═══════════════════════════════════════════════════
 // PERFORMANCE: Gzip compression for all responses
@@ -339,7 +353,7 @@ if ($method === 'GET') {
 
     // Blog posts
     if ($path === '/public/blog') {
-        $stmt = $pdo->query("SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, u.name as author_name,
+        $stmt = $pdo->query("SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, COALESCE(NULLIF(p.author_display, ''), u.name) as author_name,
             (SELECT SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as loves_count,
             (SELECT SUM(CASE WHEN reaction_type = 'dislike' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as dislikes_count
             FROM blog_posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.is_published = 1 ORDER BY p.created_at DESC");
@@ -366,7 +380,7 @@ if ($method === 'GET') {
         $parts = explode('_', $token);
         $userId = isset($parts[2]) ? intval($parts[2]) : 0;
         
-        $stmt = $pdo->prepare("SELECT p.id, p.title, p.slug, p.content, p.featured_image, p.created_at, u.name as author_name,
+        $stmt = $pdo->prepare("SELECT p.id, p.title, p.slug, p.content, p.featured_image, p.created_at, COALESCE(NULLIF(p.author_display, ''), u.name) as author_name,
             (SELECT SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as loves_count,
             (SELECT SUM(CASE WHEN reaction_type = 'dislike' THEN 1 ELSE 0 END) FROM blog_reactions WHERE post_id = p.id) as dislikes_count,
             (SELECT reaction_type FROM blog_reactions WHERE post_id = p.id AND customer_id = ?) as user_reaction
@@ -478,6 +492,13 @@ if ($method === 'POST' && $path === '/public/contact') {
         // Table might not exist yet, ignore for now as this is a mock
     }
 
+    cc_notify_admin($pdo, [
+        'sender_id' => null,
+        'type' => 'general_update',
+        'title' => 'New Contact Message',
+        'message' => sprintf('Contact form submission from %s (%s).', $name ?: 'Guest', $email ?: $phone ?: 'no contact info'),
+    ]);
+
     echo json_encode(['success' => true, 'message' => 'Message sent successfully. We will get back to you soon.']);
     exit;
 }
@@ -508,12 +529,29 @@ if ($method === 'PUT' && preg_match('/^\/admin\/testimonials\/(\d+)$/', $path, $
             $stmt->execute([$id]);
             $testimonial = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($testimonial) {
-                // Determine admin user ID (or default to 1 for system)
-                // In a real scenario, this would come from the auth token
-                $adminId = 1; 
-                $notifStmt = $pdo->prepare("INSERT INTO notifications (sender_id, recipient_type, recipient_id, type, title, message, related_entity_id) VALUES (?, 'customer', ?, 'review_approved', 'Review Approved', 'Your recent review has been approved and is now public.', ?)");
-                $notifStmt->execute([$adminId, $testimonial['customer_id'], $id]);
+                cc_notify_customer($pdo, (int) $testimonial['customer_id'], [
+                    'sender_id' => null,
+                    'type' => 'review_approved',
+                    'title' => 'Review Approved',
+                    'message' => 'Your recent review has been approved and is now public.',
+                    'related_entity_id' => (int) $id,
+                ]);
+                cc_notify_admin($pdo, [
+                    'sender_id' => null,
+                    'type' => 'review_approved',
+                    'title' => 'Review Approved',
+                    'message' => 'A customer review was approved and is now public.',
+                    'related_entity_id' => (int) $id,
+                ]);
             }
+        } else {
+            cc_notify_admin($pdo, [
+                'sender_id' => null,
+                'type' => 'review',
+                'title' => 'Review Unapproved',
+                'message' => 'A customer review was marked as not approved.',
+                'related_entity_id' => (int) $id,
+            ]);
         }
         
         echo json_encode(['success' => true, 'message' => 'Testimonial updated']);
@@ -526,6 +564,13 @@ if ($method === 'DELETE' && preg_match('/^\/admin\/testimonials\/(\d+)$/', $path
     $id = $matches[1];
     $stmt = $pdo->prepare("DELETE FROM testimonials WHERE id = ?");
     $stmt->execute([$id]);
+    cc_notify_admin($pdo, [
+        'sender_id' => null,
+        'type' => 'review',
+        'title' => 'Review Deleted',
+        'message' => 'A customer review was removed from the system.',
+        'related_entity_id' => (int) $id,
+    ]);
     echo json_encode(['success' => true, 'message' => 'Testimonial deleted']);
     exit;
 }
@@ -615,6 +660,7 @@ if ($method === 'POST' && $path === '/auth/logout') {
 if (strpos($path, '/notifications') === 0) {
     // Authenticate
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $token = str_replace('Bearer ', '', $authHeader);
     if (!$token) {
         http_response_code(401); echo json_encode(['error' => 'Unauthenticated']); exit;
     }
@@ -636,18 +682,7 @@ if (strpos($path, '/notifications') === 0) {
     $role = $stmt->fetchColumn();
     
     if ($method === 'GET' && $path === '/notifications') {
-        // Fetch notifications for this user
-        // Includes specific recipient_id, or role-based (e.g. 'all_customers', 'admin')
-        $query = "SELECT * FROM notifications WHERE 
-                  (recipient_id = ?) OR 
-                  (recipient_type = ?) OR 
-                  (recipient_type = 'admin' AND ? IN ('admin', 'super_admin')) OR
-                  (recipient_type = 'all_customers' AND ? = 'customer')
-                  ORDER BY created_at DESC LIMIT 100";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$userId, $role, $role, $role]);
-        
-        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $notifications = cc_fetch_notifications_for_user($pdo, (int) $userId, $role);
 
         // Filter notifications based on customer preferences
         if ($role === 'customer') {
@@ -688,8 +723,7 @@ if (strpos($path, '/notifications') === 0) {
     }
 
     if ($method === 'PATCH' && $path === '/notifications/read-all') {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE recipient_id = ? OR recipient_type = ?");
-        $stmt->execute([$userId, $role]);
+        cc_mark_all_notifications_read($pdo, (int) $userId, $role);
         echo json_encode(['success' => true]);
         exit;
     }

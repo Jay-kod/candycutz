@@ -11,12 +11,14 @@ const unreadCount = ref(0)
 const isOpen = ref(false)
 let pollInterval = null
 
+const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+
 const fetchNotifications = async () => {
   try {
     const token = localStorage.getItem('candycutz_auth_token')
     if (!token) return
     
-    const res = await fetch('http://localhost:8000/notifications', {
+    const res = await fetch(`${API_ROOT}/notifications`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     
@@ -33,7 +35,7 @@ const fetchNotifications = async () => {
 const markAsRead = async (id) => {
   try {
     const token = localStorage.getItem('candycutz_auth_token')
-    await fetch(`http://localhost:8000/notifications/${id}/read`, {
+    await fetch(`${API_ROOT}/notifications/${id}/read`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${token}` }
     })
