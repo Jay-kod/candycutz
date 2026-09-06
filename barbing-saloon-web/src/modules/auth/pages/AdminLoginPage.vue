@@ -216,9 +216,8 @@ async function submitForm() {
 
   try {
     await schema.validate({ email: email.value, password: password.value }, { abortEarly: false });
-    // In a real app, you'd pass rememberMe to the login function if supported by the backend
     await login({ email: email.value, password: password.value });
-    await router.push(redirectAfterLogin());
+    await router.push(redirectAfterLogin('/admin/dashboard'));
   } catch (error) {
     if (error.inner) {
       error.inner.forEach((item) => {
@@ -228,7 +227,7 @@ async function submitForm() {
       return;
     }
 
-    generalError.value = 'Credentials not correct, either the password or the email.';
+    generalError.value = error?.response?.data?.message || 'Credentials not correct, either the password or the email.';
   } finally {
     loading.value = false;
   }

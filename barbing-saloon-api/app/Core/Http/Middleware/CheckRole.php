@@ -7,12 +7,36 @@ use Illuminate\Http\Request;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $roles)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        $allowed = array_map('trim', explode(',', $roles));
-        $role = auth()->user()?->role?->value ?? auth()->user()?->role;
+        $user = auth()->user();
 
-        if (! auth()->check() || ! in_array($role, $allowed, true)) {
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+                'code' => 401,
+            ], 401);
+        }
+
+        $role = $user->role?->value ?? $user->role;
+
+        // Super Admin has full administrative access to admin endpoints
+        if ($role === 'super_admin') {
+            return $next($request);
+        }
+
+        $allowed = [];
+        foreach ($roles as $r) {
+            foreach (explode(',', (string) $r) as $part) {
+                $trimmed = trim($part);
+                if ($trimmed !== '') {
+                    $allowed[] = $trimmed;
+                }
+            }
+        }
+
+        if (! in_array($role, $allowed, true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden',

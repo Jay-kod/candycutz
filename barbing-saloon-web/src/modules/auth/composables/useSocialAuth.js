@@ -47,6 +47,8 @@ export function useSocialAuth() {
           appleScriptLoaded.value = true;
         });
       }
+    }).catch(() => {
+      // Graceful fallback if settings endpoint fails or times out
     });
   }
 

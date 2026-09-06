@@ -90,24 +90,37 @@ export const useAuthStore = defineStore('auth', {
       this.intendedRoute = route;
     },
 
-    redirectAfterLogin() {
+    redirectAfterLogin(preferredRoute = null) {
+      const role = this.user?.role?.value ?? this.user?.role;
+
       if (this.intendedRoute) {
         const intendedRoute = this.intendedRoute;
         this.intendedRoute = null;
-        return intendedRoute;
+
+        const isAdminRoute = intendedRoute.startsWith('/admin');
+        const isBarberRoute = intendedRoute.startsWith('/barber');
+        const isCustomerRoute = intendedRoute.startsWith('/customer');
+
+        if ((role === 'admin' || role === 'super_admin') && isAdminRoute) {
+          return intendedRoute;
+        }
+        if (role === 'barber' && isBarberRoute) {
+          return intendedRoute;
+        }
+        if (role === 'customer' && !isAdminRoute && !isBarberRoute) {
+          return intendedRoute;
+        }
       }
 
-      const role = this.user?.role ?? this.user?.role?.value;
+      if (preferredRoute) {
+        return preferredRoute;
+      }
 
       if (role === 'barber') {
         return '/barber/dashboard';
       }
 
-      if (role === 'admin') {
-        return '/admin/dashboard';
-      }
-
-      if (role === 'super_admin') {
+      if (role === 'admin' || role === 'super_admin') {
         return '/admin/dashboard';
       }
 
