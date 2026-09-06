@@ -19,9 +19,11 @@ storage/logs/
 barbing-saloon-api/storage/framework/cache/*
 barbing-saloon-api/storage/framework/sessions/*
 barbing-saloon-api/storage/framework/views/*
+barbing-saloon-api/storage/app/public/*
 !barbing-saloon-api/storage/framework/cache/.gitkeep
 !barbing-saloon-api/storage/framework/sessions/.gitkeep
 !barbing-saloon-api/storage/framework/views/.gitkeep
+!barbing-saloon-api/storage/app/public/.gitkeep
 
 # Expo & Mobile
 .expo/

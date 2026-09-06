@@ -52,7 +52,11 @@ class AdminService
     public function updateSettings(array $settings, ?UploadedFile $heroImage = null): array
     {
         foreach ($settings as $key => $value) {
-            Setting::query()->updateOrCreate(['key' => $key], ['value' => $value]);
+            $group = Setting::resolveGroupForKey((string) $key);
+            Setting::query()->updateOrCreate(
+                ['key' => $key],
+                ['value' => $value, 'group' => $group]
+            );
         }
 
         if ($heroImage) {
