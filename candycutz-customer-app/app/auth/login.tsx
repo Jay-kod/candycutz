@@ -53,11 +53,51 @@ export default function LoginScreen() {
               </View>
             )}
 
+            {/* Quick Demo Login Box */}
+            <View style={styles.demoBox}>
+              <View style={styles.demoBadgeRow}>
+                <View style={styles.demoBadge}>
+                  <Text style={styles.demoBadgeText}>DEMO MODE</Text>
+                </View>
+                <Text style={styles.demoSubtitle}>Test customer dashboard & bookings</Text>
+              </View>
+              <Text style={styles.demoCredText}>
+                <Text style={styles.demoCredLabel}>Account: </Text>customer@candycutz.com
+              </Text>
+              <Text style={styles.demoCredText}>
+                <Text style={styles.demoCredLabel}>Password: </Text>customer123
+              </Text>
+              <Button
+                title="⚡ 1-Tap Customer Demo Login"
+                variant="outline"
+                onPress={async () => {
+                  setIdentity('customer@candycutz.com');
+                  setPassword('customer123');
+                  const success = await login('customer@candycutz.com', 'customer123');
+                  if (success) {
+                    if (router.canGoBack()) {
+                      router.back();
+                    } else {
+                      router.replace('/(tabs)');
+                    }
+                  }
+                }}
+                loading={isLoading}
+                style={styles.demoBtn}
+              />
+            </View>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR SIGN IN MANUALLY</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Username or Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g. joshua or josh@candycutz.ng"
+                placeholder="e.g. joshua or customer@candycutz.com"
                 placeholderTextColor={COLORS.textMuted}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -148,6 +188,67 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontSize: FONTS.sizes.xs,
     fontWeight: '600',
+  },
+  demoBox: {
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: 14,
+    marginBottom: 20,
+  },
+  demoBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  demoBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+  },
+  demoBadgeText: {
+    color: COLORS.background,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  demoSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    flex: 1,
+  },
+  demoCredText: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.xs,
+    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  demoCredLabel: {
+    color: COLORS.textMuted,
+    fontWeight: '600',
+  },
+  demoBtn: {
+    marginTop: 10,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  dividerText: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    paddingHorizontal: 12,
   },
   fieldGroup: {
     marginBottom: 16,

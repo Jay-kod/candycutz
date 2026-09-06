@@ -31,14 +31,25 @@ class AuthService
 
     public function login(array $data): array
     {
-        if (! Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
-            $this->logFailure($data['email']);
+        $identifier = trim((string) ($data['identity'] ?? $data['email'] ?? ''));
+        $password = (string) ($data['password'] ?? '');
+
+        // Resolve user by email, username, or phone
+        $user = User::where('email', $identifier)
+            ->orWhere('username', $identifier)
+            ->orWhere('phone', $identifier)
+            ->first();
+
+        if (! $user || ! Hash::check($password, $user->password)) {
+            $this->logFailure($identifier);
 
             throw new RuntimeException('Invalid credentials');
         }
 
-        /** @var User $user */
-        $user = Auth::user();
+        if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
+            throw new RuntimeException('Account is currently inactive or suspended');
+        }
+
         $user->tokens()->delete();
         $token = $user->createToken('auth-token')->plainTextToken;
 

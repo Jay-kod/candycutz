@@ -32,9 +32,28 @@ class AuthController
             return ApiResponse::error('Invalid credentials', [], 401);
         }
 
+        $barberProfile = null;
+        if ($payload['user']->barber) {
+            $b = $payload['user']->barber;
+            $barberProfile = [
+                'id' => $b->id,
+                'user_id' => $payload['user']->id,
+                'name' => $payload['user']->name,
+                'real_name' => $payload['user']->real_name ?? $payload['user']->name,
+                'username' => $payload['user']->username ?? 'barber',
+                'email' => $payload['user']->email,
+                'phone' => $payload['user']->phone,
+                'avatar' => $payload['user']->avatar,
+                'chair_status' => $b->chair_status ?? 'free',
+                'is_active' => (bool) $payload['user']->is_active,
+                'rating' => (float) ($b->rating ?? 5.0),
+            ];
+        }
+
         return ApiResponse::success([
             'user' => new AuthUserResource($payload['user']),
             'token' => $payload['token'],
+            'barber' => $barberProfile,
         ], 'Login successful');
     }
 

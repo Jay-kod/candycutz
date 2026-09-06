@@ -26,7 +26,11 @@ export default function BarberLoginScreen() {
     if (!identity.trim() || !password) return;
     const success = await login(identity.trim(), password);
     if (success) {
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   };
 
@@ -52,11 +56,51 @@ export default function BarberLoginScreen() {
               </View>
             )}
 
+            {/* Quick Demo Staff Login Box */}
+            <View style={styles.demoBox}>
+              <View style={styles.demoBadgeRow}>
+                <View style={styles.demoBadge}>
+                  <Text style={styles.demoBadgeText}>DEMO STAFF</Text>
+                </View>
+                <Text style={styles.demoSubtitle}>Marcus Vance (Master Barber)</Text>
+              </View>
+              <Text style={styles.demoCredText}>
+                <Text style={styles.demoCredLabel}>Account: </Text>marcus@candycutz.com
+              </Text>
+              <Text style={styles.demoCredText}>
+                <Text style={styles.demoCredLabel}>Password: </Text>barber123
+              </Text>
+              <Button
+                title="⚡ 1-Tap Barber Staff Demo Login"
+                variant="outline"
+                onPress={async () => {
+                  setIdentity('marcus@candycutz.com');
+                  setPassword('barber123');
+                  const success = await login('marcus@candycutz.com', 'barber123');
+                  if (success) {
+                    if (router.canGoBack()) {
+                      router.back();
+                    } else {
+                      router.replace('/(tabs)');
+                    }
+                  }
+                }}
+                loading={isLoading}
+                style={styles.demoBtn}
+              />
+            </View>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR SIGN IN MANUALLY</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Staff Username or Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g. master_barber or staff@candycutz.ng"
+                placeholder="e.g. marcus or marcus@candycutz.com"
                 placeholderTextColor={COLORS.textMuted}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -140,6 +184,67 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontSize: FONTS.sizes.xs,
     fontWeight: '600',
+  },
+  demoBox: {
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: 14,
+    marginBottom: 20,
+  },
+  demoBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  demoBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+  },
+  demoBadgeText: {
+    color: COLORS.background,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  demoSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    flex: 1,
+  },
+  demoCredText: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.xs,
+    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  demoCredLabel: {
+    color: COLORS.textMuted,
+    fontWeight: '600',
+  },
+  demoBtn: {
+    marginTop: 10,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  dividerText: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    paddingHorizontal: 12,
   },
   fieldGroup: {
     marginBottom: 16,
