@@ -7,7 +7,10 @@ Route::get('/health', fn () => response()->json(['success' => true, 'message' =>
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::get('/notification-settings', [NotificationController::class, 'getNotificationSettings']);
+    Route::post('/notification-settings', [NotificationController::class, 'updateNotificationSettings']);
 });

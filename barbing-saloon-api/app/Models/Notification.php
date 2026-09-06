@@ -15,14 +15,7 @@ class Notification extends Model
      */
     protected $table = 'notifications';
 
-    /**
-     * Disable updated_at if the table only has created_at
-     */
-    public $timestamps = false; // We will manually handle created_at if necessary, but actually let's check the schema.
-    
-    // The schema only has created_at timestamp. So we can use CREATED_AT constant and disable updated_at.
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = null;
+    public $timestamps = true;
 
     protected $fillable = [
         'sender_id',

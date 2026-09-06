@@ -79,4 +79,25 @@ class CustomerController
 
         return ApiResponse::success(new TestimonialResource($testimonial->load(['service', 'barber.user'])), 'Review submitted', 201);
     }
+
+    public function analytics(Request $request)
+    {
+        $user = $request->user();
+        $totalSpent = Appointment::query()
+            ->where('customer_id', $user->id)
+            ->where('status', \App\Core\Enums\AppointmentStatus::completed->value)
+            ->sum('total_price');
+
+        $monthlyBookings = Appointment::query()
+            ->where('customer_id', $user->id)
+            ->where('appointment_date', '>=', now()->subMonths(6)->startOfMonth())
+            ->selectRaw('MONTHNAME(appointment_date) as month, COUNT(*) as bookings, SUM(total_price) as spent')
+            ->groupBy('month')
+            ->get();
+
+        return ApiResponse::success([
+            'total_spent' => (float) $totalSpent,
+            'monthly' => $monthlyBookings,
+        ], 'Analytics loaded');
+    }
 }

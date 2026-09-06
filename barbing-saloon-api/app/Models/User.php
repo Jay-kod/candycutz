@@ -30,6 +30,7 @@ class User extends Authenticatable
         'is_active',
         'last_username_change_at',
         'deactivated_at',
+        'notification_preferences',
     ];
 
     protected $casts = [
@@ -38,6 +39,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'last_username_change_at' => 'datetime',
         'deactivated_at' => 'datetime',
+        'notification_preferences' => 'array',
     ];
 
     public function barber(): HasOne

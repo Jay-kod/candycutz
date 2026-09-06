@@ -1,5 +1,6 @@
 <?php
 
+use App\Core\Http\Controllers\NotificationController;
 use App\Modules\Admin\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
@@ -7,6 +8,13 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/settings', [AdminController::class, 'settings']);
     Route::post('/settings', [AdminController::class, 'updateSettings']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
     Route::get('/appointments', [AdminController::class, 'appointments']);
     Route::patch('/appointments/{appointment}/approve', [AdminController::class, 'approveAppointment']);
