@@ -29,6 +29,7 @@ export const adminApi = {
   reports: () => client.get('/admin/reports'),
   settings: () => client.get('/admin/settings'),
   updateSettings: (data) => client.post('/admin/settings', data),
+  testEmail: (to) => client.post('/admin/test-email', { to }),
   barbers: () => client.get('/admin/barbers'),
   createBarber: (data) => client.post('/admin/barbers', data),
   updateBarber: (id, data) => client.put(`/admin/barbers/${id}`, data),

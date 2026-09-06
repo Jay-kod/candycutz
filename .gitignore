@@ -1,4 +1,37 @@
+# Dependencies
 node_modules/
+*/node_modules/
 vendor/
+*/vendor/
+
+# Environment files
 .env
+.env.*
+!.env.example
+
+# Logs and runtime caches
 *.log
+storage/logs/
+*.sqlite
+.phpunit.result.cache
+
+# Laravel storage framework
+barbing-saloon-api/storage/framework/cache/*
+barbing-saloon-api/storage/framework/sessions/*
+barbing-saloon-api/storage/framework/views/*
+!barbing-saloon-api/storage/framework/cache/.gitkeep
+!barbing-saloon-api/storage/framework/sessions/.gitkeep
+!barbing-saloon-api/storage/framework/views/.gitkeep
+
+# Expo & Mobile
+.expo/
+*/.expo/
+.expo-shared/
+dist/
+web-build/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

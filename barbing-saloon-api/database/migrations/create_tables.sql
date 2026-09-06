@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `barbers` (
     `rating` DECIMAL(3, 2) DEFAULT 5.00,
     `experience_years` INT DEFAULT 0,
     `is_available` BOOLEAN DEFAULT TRUE,
+    `status` VARCHAR(20) DEFAULT 'active' NOT NULL,
     `deleted_at` TIMESTAMP NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

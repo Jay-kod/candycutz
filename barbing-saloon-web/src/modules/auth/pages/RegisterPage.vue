@@ -143,6 +143,8 @@
           </div>
         </form>
 
+        <SocialAuthButtons label="or sign up with" />
+
         <p class="mt-6 text-center text-xs text-theme-muted">
           Already have an account?
           <RouterLink to="/customer/login" class="font-semibold text-gold hover:text-gold-dark transition-colors">Sign in</RouterLink>
@@ -157,6 +159,7 @@ import { reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
+import SocialAuthButtons from '../components/SocialAuthButtons.vue';
 import { useDark } from '@vueuse/core';
 
 const isDark = useDark({

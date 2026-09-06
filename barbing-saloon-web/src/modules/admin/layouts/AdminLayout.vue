@@ -29,7 +29,8 @@ import {
   PresentationChartLineIcon,
   ShieldCheckIcon,
   GlobeAltIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  KeyIcon
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -44,6 +45,7 @@ const navItems = [
   { name: 'Testimonials', to: '/admin/testimonials', icon: ChatBubbleLeftRightIcon },
   { name: 'Blog', to: '/admin/blog', icon: DocumentTextIcon },
   { name: 'Working Hours', to: '/admin/working-hours', icon: ClockIcon },
+  { name: 'Integrations', to: '/admin/integrations', icon: KeyIcon },
   { name: 'Analytics', to: '/admin/analytics', icon: PresentationChartLineIcon },
   { name: 'Reports', to: '/admin/reports', icon: ChartBarIcon },
   { name: 'Verifications', to: '/admin/verifications', icon: ShieldCheckIcon },

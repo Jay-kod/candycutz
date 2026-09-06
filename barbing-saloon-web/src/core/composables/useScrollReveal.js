@@ -1,14 +1,26 @@
 import { onMounted, onUnmounted } from 'vue';
 
+const nativeScrollTimeline =
+  typeof window !== 'undefined' &&
+  window.CSS &&
+  window.CSS.supports &&
+  window.CSS.supports('animation-timeline', 'view()');
+
 /**
- * Scroll reveal composable.
- * Call inside any page's setup to animate elements with `data-reveal` attribute.
+ * Scroll reveal composable (IntersectionObserver fallback).
+ * When the browser supports native CSS scroll-driven animations
+ * (animation-timeline: view()), the CSS in main.css handles the reveal
+ * with zero JS — this becomes a no-op. For older browsers it observes
+ * elements and toggles `.revealed` via IntersectionObserver.
  * Optionally set `data-reveal-delay="100"` for staggered entrances.
  */
 export function useScrollReveal(rootRef = null) {
   let observer = null;
 
   const init = () => {
+    // Native CSS scroll-driven animations already cover the reveal.
+    if (nativeScrollTimeline) return;
+
     if (!observer) {
       observer = new IntersectionObserver(
         (entries) => {

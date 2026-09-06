@@ -10,9 +10,34 @@ class Barber extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'bio', 'specialties', 'years_experience', 'instagram_url', 'display_order', 'is_featured'];
+    protected $fillable = [
+        'user_id',
+        'branch_id',
+        'bio',
+        'specialties',
+        'years_experience',
+        'experience_years',
+        'rating',
+        'is_available',
+        'is_home_service_ready',
+        'status',
+        'instagram_url',
+        'display_order',
+        'is_featured',
+    ];
 
-    protected $casts = ['specialties' => 'array', 'is_featured' => 'boolean'];
+    protected $casts = [
+        'specialties' => 'array',
+        'is_featured' => 'boolean',
+        'is_available' => 'boolean',
+        'is_home_service_ready' => 'boolean',
+        'rating' => 'float',
+    ];
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function user()
     {
@@ -37,5 +62,15 @@ class Barber extends Model
     public function workingHours(): HasMany
     {
         return $this->hasMany(WorkingHour::class);
+    }
+
+    public function barberServices(): HasMany
+    {
+        return $this->hasMany(BarberService::class);
+    }
+
+    public function blockedPeriods(): HasMany
+    {
+        return $this->hasMany(BlockedPeriod::class);
     }
 }

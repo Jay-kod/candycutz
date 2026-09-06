@@ -37,6 +37,11 @@ if (!$barberId) {
     exit;
 }
 
+// Barber mutations (gallery, blog posts) invalidate cached public endpoints
+if (in_array($method, ['POST', 'PUT', 'DELETE'], true) && function_exists('cc_flush_public_cache')) {
+    cc_flush_public_cache($cacheDir);
+}
+
 // ==========================================
 // BARBER OWN STATUS & AVAILABILITY
 // ==========================================

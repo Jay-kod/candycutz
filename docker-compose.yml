@@ -14,15 +14,16 @@ services:
       MYSQL_USER: candycutz
       MYSQL_PASSWORD: secret
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db-data:/var/lib/mysql
       # Auto-run migration & seed SQL on first boot
       - ./barbing-saloon-api/database/migrations/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
-      - ./barbing-saloon-api/database/migrations/fix_gallery_schema.sql:/docker-entrypoint-initdb.d/02_fix_gallery_schema.sql:ro
+      - ./barbing-saloon-api/database/migrations/seed_data.sql:/docker-entrypoint-initdb.d/02_seed_data.sql:ro
       - ./barbing-saloon-api/database/migrations/add_images_update.sql:/docker-entrypoint-initdb.d/03_add_images_update.sql:ro
-      - ./barbing-saloon-api/database/migrations/seed_data.sql:/docker-entrypoint-initdb.d/04_seed_data.sql:ro
-      - ./barbing-saloon-api/database/migrations/seed_data_additional.sql:/docker-entrypoint-initdb.d/05_seed_data_additional.sql:ro
+      - ./barbing-saloon-api/database/migrations/fix_gallery_schema.sql:/docker-entrypoint-initdb.d/04_fix_gallery_schema.sql:ro
+      - ./barbing-saloon-api/database/migrations/05_schema_sync.sql:/docker-entrypoint-initdb.d/05_schema_sync.sql:ro
+      - ./barbing-saloon-api/database/migrations/seed_hero_settings.sql:/docker-entrypoint-initdb.d/06_seed_hero_settings.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
       interval: 10s

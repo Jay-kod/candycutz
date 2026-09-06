@@ -12,6 +12,8 @@ class Gallery extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'gallery';
+
     protected $fillable = ['title', 'description', 'image_path', 'category', 'barber_id', 'is_featured', 'display_order'];
 
     protected $casts = ['category' => GalleryCategory::class, 'is_featured' => 'boolean'];

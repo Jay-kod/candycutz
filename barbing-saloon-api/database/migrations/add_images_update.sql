@@ -19,6 +19,48 @@ PREPARE addColumnIfNotExists FROM @preparedStatement;
 EXECUTE addColumnIfNotExists;
 DEALLOCATE PREPARE addColumnIfNotExists;
 
+-- Add image2/image3 columns to services if they don't exist
+SET @columnname = 'image2';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @columnname
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(255) NULL AFTER `image`')
+));
+PREPARE addColumnIfNotExists FROM @preparedStatement;
+EXECUTE addColumnIfNotExists;
+DEALLOCATE PREPARE addColumnIfNotExists;
+
+SET @columnname = 'image3';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @columnname
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(255) NULL AFTER `image2`')
+));
+PREPARE addColumnIfNotExists FROM @preparedStatement;
+EXECUTE addColumnIfNotExists;
+DEALLOCATE PREPARE addColumnIfNotExists;
+
+-- Add status column to barbers if it doesn't exist
+SET @tablename = 'barbers';
+SET @columnname = 'status';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @columnname
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(20) DEFAULT ''active'' NOT NULL AFTER `is_available`')
+));
+PREPARE addColumnIfNotExists FROM @preparedStatement;
+EXECUTE addColumnIfNotExists;
+DEALLOCATE PREPARE addColumnIfNotExists;
+
 -- Update barber user avatars
 UPDATE users SET avatar = '/images/barbers/barber-1.png' WHERE email = 'marcus@candycutz.com';
 UPDATE users SET avatar = '/images/barbers/barber-2.png' WHERE email = 'david@candycutz.com';

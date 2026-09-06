@@ -3,9 +3,29 @@
     <main class="min-h-screen bg-theme-bg pb-32">
       
       <!-- Skeleton Loader -->
-      <div v-if="isLoading" class="mx-auto max-w-7xl px-6 pt-32">
-        <!-- Skeleton content remains same to keep simple -->
-        <div class="h-96 w-full rounded-3xl skeleton-shimmer mb-12"></div>
+      <div v-if="isLoading" class="mx-auto max-w-7xl px-6 pt-32 space-y-12">
+        <div class="relative overflow-hidden rounded-3xl border border-theme-border bg-theme-surface">
+          <div class="skeleton-block h-72 w-full"></div>
+          <div class="p-8 -mt-16 relative z-10 flex flex-col md:flex-row md:items-end gap-6">
+            <div class="skeleton-block h-32 w-32 rounded-full ring-4 ring-theme-bg shrink-0"></div>
+            <div class="flex-1 space-y-3">
+              <div class="skeleton-block h-8 w-56"></div>
+              <div class="skeleton-block h-4 w-40"></div>
+              <div class="skeleton-block h-4 w-full max-w-md"></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div class="lg:col-span-7 space-y-4">
+            <div class="skeleton-block h-5 w-full"></div>
+            <div class="skeleton-block h-5 w-5/6"></div>
+            <div class="skeleton-block h-5 w-2/3"></div>
+          </div>
+          <div class="lg:col-span-5 space-y-3">
+            <div class="skeleton-block h-28 w-full rounded-2xl"></div>
+            <div class="skeleton-block h-28 w-full rounded-2xl"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Error State -->
@@ -210,6 +230,11 @@ onMounted(async () => {
   window.scrollTo(0, 0);
   try {
     const id = route.params.id;
+    if (!/^\d+$/.test(String(id))) {
+      error.value = true;
+      isLoading.value = false;
+      return;
+    }
     const response = await publicApi.barber(id);
     barber.value = response.data.data;
     isLoading.value = false;

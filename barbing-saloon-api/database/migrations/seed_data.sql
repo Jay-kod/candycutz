@@ -4,30 +4,31 @@ USE candycutz_db;
 
 -- Users: Super Admin
 INSERT INTO users (name, email, password, role, is_active, created_at, updated_at) VALUES
-('Super Admin', 'superadmin@candycutz.com', '$2y$12$PLACEHOLDER', 'super_admin', TRUE, NOW(), NOW());
+('Super Admin', 'superadmin@candycutz.com', '$2y$12$mmv6e8EoDEIriV//zb2v5u2YeGzUBEGvr7RSeYbbGaX9EDdfCIr3C', 'super_admin', TRUE, NOW(), NOW());
 
 -- Users: Admins
 INSERT INTO users (name, email, password, role, is_active, created_at, updated_at) VALUES
-('John Admin', 'admin@candycutz.com', '$2y$12$PLACEHOLDER', 'admin', TRUE, NOW(), NOW()),
-('Jane Admin', 'admin2@candycutz.com', '$2y$12$PLACEHOLDER', 'admin', TRUE, NOW(), NOW());
+('John Admin', 'admin@candycutz.com', '$2y$12$2N7mXIVmdprcpcLA9VafGuiJOWW1hDK/DxAOt2II5g6UYkWWZfWI2', 'admin', TRUE, NOW(), NOW()),
+('Jane Admin', 'admin2@candycutz.com', '$2y$12$2N7mXIVmdprcpcLA9VafGuiJOWW1hDK/DxAOt2II5g6UYkWWZfWI2', 'admin', TRUE, NOW(), NOW());
 
 -- Users: Barbers
 INSERT INTO users (name, email, password, role, avatar, phone, is_active, created_at, updated_at) VALUES
-('Marcus Johnson', 'marcus@candycutz.com', '$2y$12$PLACEHOLDER', 'barber', '/images/barbers/barber-1.png', '555-0101', TRUE, NOW(), NOW()),
-('David Williams', 'david@candycutz.com', '$2y$12$PLACEHOLDER', 'barber', '/images/barbers/barber-2.png', '555-0102', TRUE, NOW(), NOW()),
-('James Brown', 'james@candycutz.com', '$2y$12$PLACEHOLDER', 'barber', '/images/barbers/barber-1.png', '555-0103', TRUE, NOW(), NOW()),
-('Chris Lee', 'chris@candycutz.com', '$2y$12$PLACEHOLDER', 'barber', '/images/barbers/barber-2.png', '555-0104', TRUE, NOW(), NOW());
+('Marcus Johnson', 'marcus@candycutz.com', '$2y$12$vRFgVJLqbFyJqVT9luXWxu1v0oTEyxB3L/eM5SWe2v8fur4885HKW', 'barber', '/images/barbers/barber-1.png', '555-0101', TRUE, NOW(), NOW()),
+('David Williams', 'david@candycutz.com', '$2y$12$vRFgVJLqbFyJqVT9luXWxu1v0oTEyxB3L/eM5SWe2v8fur4885HKW', 'barber', '/images/barbers/barber-2.png', '555-0102', TRUE, NOW(), NOW()),
+('James Brown', 'james@candycutz.com', '$2y$12$vRFgVJLqbFyJqVT9luXWxu1v0oTEyxB3L/eM5SWe2v8fur4885HKW', 'barber', '/images/barbers/barber-1.png', '555-0103', TRUE, NOW(), NOW()),
+('Chris Lee', 'chris@candycutz.com', '$2y$12$vRFgVJLqbFyJqVT9luXWxu1v0oTEyxB3L/eM5SWe2v8fur4885HKW', 'barber', '/images/barbers/barber-2.png', '555-0104', TRUE, NOW(), NOW());
 
 -- Users: Customers
 INSERT INTO users (name, email, password, role, phone, is_active, created_at, updated_at) VALUES
-('Michael Smith', 'michael@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1001', TRUE, NOW(), NOW()),
-('Robert Jones', 'robert@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1002', TRUE, NOW(), NOW()),
-('William Garcia', 'william@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1003', TRUE, NOW(), NOW()),
-('Thomas Miller', 'thomas@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1004', TRUE, NOW(), NOW()),
-('Anthony Davis', 'anthony@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1005', TRUE, NOW(), NOW()),
-('Kevin Rodriguez', 'kevin@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1006', TRUE, NOW(), NOW()),
-('Jason Martinez', 'jason@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1007', TRUE, NOW(), NOW()),
-('Jeffrey Moore', 'jeffrey@example.com', '$2y$12$PLACEHOLDER', 'customer', '555-1008', TRUE, NOW(), NOW());
+('Michael Smith', 'michael@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1001', TRUE, NOW(), NOW()),
+('Robert Jones', 'robert@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1002', TRUE, NOW(), NOW()),
+('William Garcia', 'william@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1003', TRUE, NOW(), NOW()),
+('Thomas Miller', 'thomas@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1004', TRUE, NOW(), NOW()),
+('Anthony Davis', 'anthony@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1005', TRUE, NOW(), NOW()),
+('Kevin Rodriguez', 'kevin@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1006', TRUE, NOW(), NOW()),
+('Jason Martinez', 'jason@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1007', TRUE, NOW(), NOW()),
+('Jeffrey Moore', 'jeffrey@example.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1008', TRUE, NOW(), NOW()),
+('Jane Customer', 'customer@candycutz.com', '$2y$12$tgl43jYl2IaAXKaH20XADOIdnNaXRIyj7cXdmO1Fc8p9k1Hh2FUdq', 'customer', '555-1009', TRUE, NOW(), NOW());
 
 -- Service Categories
 INSERT INTO service_categories (name, description, icon, created_at, updated_at) VALUES
@@ -86,19 +87,9 @@ INSERT INTO working_hours (barber_id, day_of_week, start_time, end_time, is_avai
 (4, 1, '11:00:00', '19:00:00', TRUE, NOW(), NOW()),
 (4, 2, '11:00:00', '19:00:00', TRUE, NOW(), NOW()),
 (4, 3, '11:00:00', '19:00:00', TRUE, NOW(), NOW()),
-(4, 4, '11:00:00', '19:00:00', TRUE, NOW(), NOW()),
+(4, 4, '11:00:00', '19:00:00', TRUE, NOW(), NOW());
 
-INSERT INTO settings (key, value, created_at, updated_at) VALUES
-('shop_name', 'CandyCutz', NOW(), NOW()),
-('shop_email', 'contact@candycutz.com', NOW(), NOW()),
-('shop_phone', '555-CUTZ-00', NOW(), NOW()),
-('shop_address', '123 Main Street, Barberville, CA 90001', NOW(), NOW()),
-('shop_timezone', 'America/Los_Angeles', NOW(), NOW()),
-('appointment_slot_duration', '30', NOW(), NOW()),
-('min_advance_booking_hours', '2', NOW(), NOW()),
-('max_advance_booking_days', '60', NOW(), NOW());
--- Settings
-INSERT INTO settings (`key`, `value`, `created_at`, `updated_at`) VALUES
+INSERT INTO settings (`key`, `value`, created_at, updated_at) VALUES
 ('shop_name', 'CandyCutz', NOW(), NOW()),
 ('shop_email', 'contact@candycutz.com', NOW(), NOW()),
 ('shop_phone', '555-CUTZ-00', NOW(), NOW()),
@@ -127,7 +118,7 @@ INSERT INTO testimonials (customer_id, barber_id, rating, comment, is_approved, 
 (11, 1, 5, 'First time at CandyCutz and I was blown away by the level of service. Marcus doesn\'t just cut hair; he performs an art. He fixed a bad fade I got from another shop and left me looking sharp for my wedding weekend. Absolutely worth the price.', FALSE, NOW(), NOW()),
 (12, 4, 5, 'I brought my 5-year-old son in for a cut, and they handled him so well. It\'s usually a nightmare getting him to sit still, but the barber was patient, engaging, and gave him a perfect little gentleman\'s cut. Love that this place caters to everyone.', TRUE, NOW(), NOW()),
 (13, 2, 5, 'The Presidential Grooming package is next level. David includes a scalp massage and facial scrub that genuinely makes you feel like a new person. If you want to treat yourself to a luxury grooming experience, this is the place to go. 10/10.', FALSE, NOW(), NOW()),
-(14, 3, 5, 'Consistently excellent. I\'ve been coming here for 6 months and every single cut has been precision perfect. The booking process is seamless and the shop is always impeccably clean. Highly recommend the VIP treatment.', TRUE, NOW(), NOW());
+(14, 3, 5, 'Consistently excellent. I\'ve been coming here for 6 months and every single cut has been precision perfect. The booking process is seamless and the shop is always impeccably clean. Highly recommend the VIP treatment.', TRUE, NOW(), NOW()),
 (15, 1, 4, 'Solid haircut as always. Marcus is consistent and reliable.', TRUE, NOW(), NOW());
 
 -- Blog Posts

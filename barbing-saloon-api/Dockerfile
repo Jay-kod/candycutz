@@ -1,7 +1,10 @@
 FROM php:8.2-cli
 
-# Install PDO MySQL extension
-RUN docker-php-ext-install pdo pdo_mysql
+# Install required PHP extensions
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libonig-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

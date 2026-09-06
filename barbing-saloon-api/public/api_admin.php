@@ -37,6 +37,11 @@ if ($role !== 'admin' && $role !== 'super_admin') {
     exit;
 }
 
+// Any admin mutation invalidates the cached public endpoints immediately
+if (in_array($method, ['POST', 'PUT', 'DELETE'], true) && function_exists('cc_flush_public_cache')) {
+    cc_flush_public_cache($cacheDir);
+}
+
 // ==========================================
 // DASHBOARD
 // ==========================================
@@ -621,6 +626,14 @@ if ($method === 'POST' && $path === '/admin/settings') {
     // Handle form-data since frontend sends FormData (for image uploads)
     $settingsData = isset($_POST['settings']) && is_array($_POST['settings']) ? $_POST['settings'] : [];
     
+    // Fallback to JSON body (used by the Integrations page)
+    if (empty($settingsData)) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (is_array($json) && isset($json['settings']) && is_array($json['settings'])) {
+            $settingsData = $json['settings'];
+        }
+    }
+    
     // Handle image upload if present
     if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['hero_image'];
@@ -703,6 +716,33 @@ if ($method === 'POST' && $path === '/admin/settings') {
         $pdo->rollBack();
         http_response_code(500); echo json_encode(['error' => 'Failed to update settings: ' . $e->getMessage()]);
     }
+    exit;
+}
+
+// ==========================================
+// INTEGRATIONS - Test Email
+// ==========================================
+if ($method === 'POST' && $path === '/admin/test-email') {
+    $json = json_decode(file_get_contents('php://input'), true);
+    $to = trim($json['to'] ?? '');
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'Enter a valid recipient email']);
+        exit;
+    }
+
+    $cfg = cc_mail_config($pdo);
+    if (!cc_mail_is_configured($cfg)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Mail transport not configured', 'config' => ['host' => $cfg['host'], 'from' => $cfg['from']]]);
+        exit;
+    }
+
+    $html = cc_email_wrap('This is a test email from your CandyCutz admin panel.<br/><br/>If you are seeing this, your SMTP settings are working correctly.');
+    $result = cc_smtp_send($cfg, $to, 'CandyCutz test email', $html);
+    cc_record_outbox($pdo, $to, 'CandyCutz test email', $html, $result['ok'], $result['error']);
+
+    echo json_encode(['success' => $result['ok'], 'message' => $result['ok'] ? 'Test email sent successfully' : $result['error']]);
     exit;
 }
 

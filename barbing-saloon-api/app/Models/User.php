@@ -15,12 +15,29 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'avatar', 'phone', 'is_active'];
+    protected $fillable = [
+        'username',
+        'real_name',
+        'name',
+        'email',
+        'password',
+        'role',
+        'avatar',
+        'phone',
+        'auth_provider',
+        'provider_id',
+        'status',
+        'is_active',
+        'last_username_change_at',
+        'deactivated_at',
+    ];
 
     protected $casts = [
         'role' => UserRole::class,
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'last_username_change_at' => 'datetime',
+        'deactivated_at' => 'datetime',
     ];
 
     public function barber(): HasOne
@@ -31,6 +48,16 @@ class User extends Authenticatable
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'customer_id');
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
     }
 
     public function blogPosts(): HasMany

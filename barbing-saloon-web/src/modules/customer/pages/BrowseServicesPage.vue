@@ -49,14 +49,14 @@
           class="relative flex flex-col overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80"
           :style="{ animationDelay: (n - 1) * 80 + 'ms' }"
         >
-          <div class="relative aspect-[4/3] w-full overflow-hidden bg-theme-muted/10 animate-pulse"></div>
+          <div class="relative aspect-[4/3] w-full overflow-hidden skeleton-block rounded-none"></div>
           <div class="flex flex-1 flex-col p-6 gap-4">
-            <div class="h-6 w-3/4 rounded-lg bg-theme-muted/10 animate-pulse"></div>
+            <div class="h-6 w-3/4 skeleton-block"></div>
             <div class="space-y-2">
-              <div class="h-4 w-full rounded bg-theme-muted/10 animate-pulse"></div>
-              <div class="h-4 w-5/6 rounded bg-theme-muted/10 animate-pulse"></div>
+              <div class="h-4 w-full skeleton-block"></div>
+              <div class="h-4 w-5/6 skeleton-block"></div>
             </div>
-            <div class="mt-4 h-12 w-full rounded-xl bg-theme-muted/10 animate-pulse"></div>
+            <div class="mt-4 h-12 w-full rounded-xl skeleton-block"></div>
           </div>
         </div>
       </div>
@@ -107,7 +107,11 @@
             <div class="mb-3 flex items-start justify-between gap-4">
               <RouterLink :to="`/customer/dashboard/services/${service.id}`" class="block min-w-0">
                 <h2 class="font-display text-xl font-bold text-theme-text group-hover:text-gold transition-colors truncate">{{ service.name }}</h2>
-                <p v-if="service.barber?.name" class="mt-1 text-xs font-semibold text-gold/80 flex items-center gap-1.5">
+                <p v-if="service.barbers && service.barbers.length" class="mt-1 text-xs font-semibold text-gold/80 flex items-center gap-1.5 flex-wrap">
+                  <span class="h-px w-3 bg-gold/50 inline-block"></span>
+                  Barbers: {{ service.barbers.map(b => b.name).join(', ') }}
+                </p>
+                <p v-else-if="service.barber?.name" class="mt-1 text-xs font-semibold text-gold/80 flex items-center gap-1.5">
                   <span class="h-px w-3 bg-gold/50 inline-block"></span>
                   by {{ service.barber.name }}
                 </p>

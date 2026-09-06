@@ -37,6 +37,11 @@ if ($userRole !== 'customer' && $userRole !== 'admin') {
     exit;
 }
 
+// Mutations that change public data (reviews/testimonials) invalidate public caches
+if (in_array($method, ['POST', 'PUT', 'DELETE'], true) && function_exists('cc_flush_public_cache')) {
+    cc_flush_public_cache($cacheDir);
+}
+
 // ==========================================
 // NOTIFICATIONS
 // ==========================================

@@ -38,7 +38,7 @@
     </div>
 
     <!-- Right Section: Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border overflow-y-auto">
       
       <!-- Mobile Logo -->
       <div class="absolute top-8 left-8 lg:hidden">
@@ -58,7 +58,11 @@
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
             <p class="text-theme-text"><span class="text-theme-muted">Email:</span> customer@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> password</p>
+            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> customer123</p>
+          </div>
+
+          <div class="mb-6">
+            <SocialAuthButtons />
           </div>
         </div>
 
@@ -179,6 +183,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
+import SocialAuthButtons from '../components/SocialAuthButtons.vue';
 import { useDark } from '@vueuse/core';
 
 const isDark = useDark({
@@ -208,7 +213,7 @@ const schema = object({
 
 const demoCustomerLogin = async () => {
   email.value = 'customer@candycutz.com';
-  password.value = 'password';
+  password.value = 'customer123';
   rememberMe.value = true;
   await submitForm();
 };

@@ -99,7 +99,7 @@ const { init: initScrollReveal } = useScrollReveal();
 
 const heroTitle = ref('Premium grooming with a sharper standard.');
 const heroSubtitle = ref('Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.');
-const heroBtn1Text = ref('Login & Book Now');
+const heroBtn1Text = ref('Book a Service');
 const heroBtn2Text = ref('About Us');
 const heroImage = ref(null);
 

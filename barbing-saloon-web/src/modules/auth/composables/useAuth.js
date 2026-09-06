@@ -12,6 +12,7 @@ export function useAuth() {
     isAuthenticated,
     login: auth.login,
     register: auth.register,
+    socialLogin: auth.socialLogin,
     logout: auth.logout,
     fetchUser: auth.fetchUser,
     setIntendedRoute: auth.setIntendedRoute,

@@ -2,8 +2,24 @@
   <CustomerLayout>
     <section class="animate-fade-in pb-12">
       <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
-        <div class="h-12 w-12 animate-spin rounded-full border-4 border-gold/30 border-t-gold"></div>
+      <div v-if="loading" class="max-w-6xl mx-auto space-y-8">
+        <div class="flex items-center justify-between">
+          <div class="skeleton-block h-10 w-40"></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="skeleton-block aspect-[4/3] w-full rounded-2xl"></div>
+          <div class="space-y-4">
+            <div class="skeleton-block h-8 w-3/4"></div>
+            <div class="skeleton-block h-8 w-24 rounded-full"></div>
+            <div class="skeleton-block h-5 w-full"></div>
+            <div class="skeleton-block h-5 w-5/6"></div>
+            <div class="skeleton-block h-5 w-2/3"></div>
+            <div class="mt-6 flex gap-3">
+              <div class="skeleton-block h-14 w-40 rounded-xl"></div>
+              <div class="skeleton-block h-14 w-40 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-else-if="service" class="max-w-6xl mx-auto space-y-8">
@@ -100,8 +116,15 @@
                 </div>
               </div>
 
-              <div v-if="reviewsLoading" class="flex justify-center py-8">
-                <div class="h-8 w-8 animate-spin rounded-full border-2 border-gold/30 border-t-gold"></div>
+              <div v-if="reviewsLoading" class="space-y-4 py-4">
+                <div v-for="n in 2" :key="'review-skel-' + n" class="flex gap-3 rounded-2xl border border-theme-border bg-theme-surface/60 p-4">
+                  <div class="skeleton-block h-10 w-10 rounded-full shrink-0"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="skeleton-block h-4 w-32"></div>
+                    <div class="skeleton-block h-4 w-full"></div>
+                    <div class="skeleton-block h-4 w-2/3"></div>
+                  </div>
+                </div>
               </div>
 
               <div v-else-if="reviews.length > 0" class="space-y-6">
@@ -207,22 +230,25 @@
             </div>
 
             <!-- Barber Profile Card -->
-            <div v-if="service.barber" class="rounded-[2rem] border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm">
+            <div v-if="primaryBarber" class="rounded-[2rem] border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm">
               <h3 class="text-xs uppercase tracking-widest text-theme-muted font-bold mb-4">Service Provider</h3>
               <div class="flex items-center gap-4">
                 <div class="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-gold/40">
-                  <img v-if="service.barber.avatar" :src="getFullImageUrl(service.barber.avatar)" :alt="service.barber.name" class="h-full w-full object-cover" />
+                  <img v-if="primaryBarber.avatar" :src="getFullImageUrl(primaryBarber.avatar)" :alt="primaryBarber.name" class="h-full w-full object-cover" />
                   <div v-else class="h-full w-full bg-gold/10 flex items-center justify-center text-gold font-bold text-xl">
-                    {{ service.barber.name?.charAt(0) || 'B' }}
+                    {{ primaryBarber.name?.charAt(0) || 'B' }}
                   </div>
                 </div>
                 <div>
-                  <h4 class="font-display text-lg font-bold text-theme-text">{{ service.barber.name }}</h4>
-                  <RouterLink :to="`/customer/dashboard/barber/${service.barber.id}`" class="text-sm text-gold hover:underline mt-0.5 inline-block">
+                  <h4 class="font-display text-lg font-bold text-theme-text">{{ primaryBarber.name }}</h4>
+                  <RouterLink :to="`/customer/dashboard/barber/${primaryBarber.id}`" class="text-sm text-gold hover:underline mt-0.5 inline-block">
                     View Provider
                   </RouterLink>
                 </div>
               </div>
+              <p v-if="otherBarbers.length" class="mt-4 border-t border-theme-border/50 pt-3 text-xs text-theme-muted">
+                Also available: <span class="font-semibold text-gold/80">{{ otherBarbers.map(b => b.name).join(', ') }}</span>
+              </p>
             </div>
           </div>
           
@@ -282,6 +308,18 @@ const averageRating = computed(() => {
   if (!reviews.value.length) return '0.0';
   const total = reviews.value.reduce((acc, rev) => acc + Number(rev.rating), 0);
   return (total / reviews.value.length).toFixed(1);
+});
+
+const primaryBarber = computed(() => {
+  if (!service.value) return null;
+  if (service.value.barber?.id) return service.value.barber;
+  return service.value.barbers?.[0] || null;
+});
+
+const otherBarbers = computed(() => {
+  if (!service.value) return [];
+  const primaryId = primaryBarber.value?.id;
+  return (service.value.barbers || []).filter(b => b.id !== primaryId);
 });
 
 function nextImage() {

@@ -35,6 +35,16 @@ export const useAuthStore = defineStore('auth', {
       return payload;
     },
 
+    async socialLogin(credentials) {
+      const response = await authApi.socialLogin(credentials);
+      const payload = response.data.data;
+
+      this.setToken(payload.token);
+      this.setUser(payload.user.data ?? payload.user);
+
+      return payload;
+    },
+
     async register(data) {
       await authApi.register(data);
 

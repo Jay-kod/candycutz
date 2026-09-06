@@ -92,7 +92,7 @@
                           v-model="settings.hero_btn1_text" 
                           type="text" 
                           class="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-3 text-sm font-display text-theme-text placeholder-ivory/20 focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin/50 transition-all hover:border-white/20" 
-                          placeholder="e.g. Login & Book Now"
+                          placeholder="e.g. Book a Service"
                         />
                       </div>
                       <div class="group">
@@ -288,7 +288,7 @@ const saving = ref(false);
 const settings = ref({
   hero_title: 'Premium grooming with a sharper standard.',
   hero_subtitle: 'Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.',
-  hero_btn1_text: 'Login & Book Now',
+  hero_btn1_text: 'Book a Service',
   hero_btn2_text: 'About Us',
   stats_years: '10+',
   stats_barbers: '5+',

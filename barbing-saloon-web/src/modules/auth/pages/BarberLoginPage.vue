@@ -58,7 +58,7 @@
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
             <p class="text-theme-text"><span class="text-theme-muted">Email:</span> marcus@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> password</p>
+            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> barber123</p>
           </div>
         </div>
 
@@ -154,6 +154,8 @@
           </div>
         </form>
 
+        <SocialAuthButtons />
+
         <!-- Register Link -->
         <div class="mt-10 text-center text-sm text-theme-muted">
           Don't have an account yet? 
@@ -172,6 +174,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
+import SocialAuthButtons from '../components/SocialAuthButtons.vue';
 import { useDark } from '@vueuse/core';
 
 const isDark = useDark({
@@ -203,7 +206,7 @@ const schema = object({
 
 const demoBarberLogin = async () => {
   email.value = 'marcus@candycutz.com';
-  password.value = 'password';
+  password.value = 'barber123';
   rememberMe.value = true;
   await submitForm();
 };
