@@ -15,7 +15,7 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-36 w-36 object-contain drop-shadow-[0_0_16px_rgba(255,103,0,0.5)] rounded-full" />
+          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-36 w-36 object-contain rounded-full" />
           <span><span class="text-admin">Candy</span>Cutz</span>
         </a>
       </div>

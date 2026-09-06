@@ -26,9 +26,8 @@
       <div class="relative z-10 flex h-20 items-center justify-between px-5 border-b border-white/[0.06]">
         <RouterLink :to="homeRoute" class="flex items-center gap-3 group">
           <div class="relative flex items-center justify-center h-11 w-11 shrink-0 transition-transform duration-300 group-hover:scale-105">
-            <div :class="['absolute inset-0 rounded-2xl opacity-20 blur-md transition-opacity duration-500 group-hover:opacity-40', themeClasses.bgRaw]"></div>
             <div class="relative h-11 w-11 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center overflow-hidden backdrop-blur-sm">
-              <img src="/images/logo-icon.png" alt="Logo" class="h-7 w-7 object-contain drop-shadow-sm" />
+              <img src="/images/logo-icon.png" alt="Logo" class="h-7 w-7 object-contain" />
             </div>
           </div>
           <span
