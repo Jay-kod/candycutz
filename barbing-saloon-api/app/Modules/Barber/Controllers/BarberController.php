@@ -268,18 +268,25 @@ class BarberController
     {
         $user = $request->user();
         $barber = $user->barber;
-        if ($request->has('schedule') && is_array($request->input('schedule'))) {
-            foreach ($request->input('schedule') as $item) {
+        
+        $hours = $request->input('working_hours', $request->input('schedule', []));
+        if (is_array($hours) && $barber) {
+            foreach ($hours as $item) {
+                if (!isset($item['day_of_week'])) {
+                    continue;
+                }
+
                 \App\Models\WorkingHour::updateOrCreate(
-                    ['barber_id' => $barber->id, 'day_of_week' => $item['day_of_week']],
+                    ['barber_id' => $barber->id, 'day_of_week' => (int) $item['day_of_week']],
                     [
-                        'start_time' => $item['start_time'] ?? '09:00:00',
-                        'end_time' => $item['end_time'] ?? '18:00:00',
-                        'is_off' => $item['is_off'] ?? false,
+                        'open_time' => $item['open_time'] ?? ($item['start_time'] ?? '09:00:00'),
+                        'close_time' => $item['close_time'] ?? ($item['end_time'] ?? '18:00:00'),
+                        'is_closed' => isset($item['is_closed']) ? (bool) $item['is_closed'] : (isset($item['is_off']) ? (bool) $item['is_off'] : false),
                     ]
                 );
             }
         }
+
         return ApiResponse::success($this->barberService->schedule($user), 'Schedule updated');
     }
 

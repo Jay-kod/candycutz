@@ -14,6 +14,7 @@ class BarberProfileResource extends JsonResource
             'email' => $this->user?->email,
             'phone' => $this->user?->phone,
             'avatar' => $this->user?->avatar,
+            'profile_image' => $this->user?->avatar,
             'bio' => $this->bio,
             'specialties' => $this->specialties ?? [],
             'years_experience' => $this->years_experience,

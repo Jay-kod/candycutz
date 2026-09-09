@@ -23,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(false);
     }
 }

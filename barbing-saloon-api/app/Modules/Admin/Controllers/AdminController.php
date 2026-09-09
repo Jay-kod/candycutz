@@ -226,4 +226,136 @@ class AdminController
 
         return ApiResponse::success(null, 'Holiday deleted');
     }
+
+    public function updateTestimonial(Request $request, Testimonial $testimonial)
+    {
+        $data = $request->validate([
+            'is_approved' => 'sometimes|boolean',
+            'rating' => 'sometimes|integer|min:1|max:5',
+            'comment' => 'sometimes|string',
+        ]);
+
+        return ApiResponse::success(new TestimonialResource($this->adminService->updateTestimonial($testimonial, $data)), 'Testimonial updated');
+    }
+
+    public function updateBarberWorkingHours(Request $request, int $barberId)
+    {
+        $hours = $request->input('hours', $request->all());
+
+        return ApiResponse::success($this->adminService->updateBarberWorkingHours($barberId, $hours), 'Working hours updated');
+    }
+
+    public function barbers()
+    {
+        return ApiResponse::success($this->adminService->barbers(), 'Barbers loaded');
+    }
+
+    public function storeBarber(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|min:2',
+            'email' => 'required|email',
+            'password' => 'nullable|string|min:6',
+            'phone' => 'nullable|string',
+            'experience_years' => 'nullable|integer',
+            'specialties' => 'nullable',
+            'bio' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+
+        return ApiResponse::success($this->adminService->storeBarber($data), 'Barber created', 201);
+    }
+
+    public function updateBarber(Request $request, int $barberId)
+    {
+        $data = $request->validate([
+            'name' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'password' => 'nullable|string|min:6',
+            'phone' => 'nullable|string',
+            'experience_years' => 'nullable|integer',
+            'specialties' => 'nullable',
+            'bio' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+
+        return ApiResponse::success($this->adminService->updateBarber($barberId, $data), 'Barber updated');
+    }
+
+    public function updateBarberStatus(Request $request, int $barberId)
+    {
+        $status = $request->input('status', 'active');
+
+        return ApiResponse::success($this->adminService->updateBarberStatus($barberId, $status), 'Barber status updated');
+    }
+
+    public function deleteBarber(int $barberId)
+    {
+        $this->adminService->deleteBarber($barberId);
+
+        return ApiResponse::success(null, 'Barber deleted');
+    }
+
+    public function customers()
+    {
+        return ApiResponse::success($this->adminService->customers(), 'Customers loaded');
+    }
+
+    public function customerProfile(int $id)
+    {
+        return ApiResponse::success($this->adminService->customerProfile($id), 'Customer profile loaded');
+    }
+
+    public function logs()
+    {
+        return ApiResponse::success($this->adminService->logs(), 'Logs loaded');
+    }
+
+    public function verifications(Request $request)
+    {
+        return ApiResponse::success($this->adminService->verifications($request->all()), 'Verifications loaded');
+    }
+
+    public function verificationStats()
+    {
+        return ApiResponse::success($this->adminService->verificationStats(), 'Verification stats loaded');
+    }
+
+    public function verifyAppointment(int $id)
+    {
+        return ApiResponse::success(new AppointmentResource($this->adminService->verifyAppointment($id)), 'Appointment verified');
+    }
+
+    public function createWalkIn(Request $request)
+    {
+        $data = $request->validate([
+            'service_id' => 'required|integer',
+            'barber_id' => 'required|integer',
+            'customer_name' => 'required|string',
+            'customer_phone' => 'nullable|string',
+            'customer_email' => 'nullable|email',
+            'appointment_date' => 'nullable|date',
+            'appointment_time' => 'nullable|string',
+            'payment_method' => 'nullable|string',
+        ]);
+
+        return ApiResponse::success(new AppointmentResource($this->adminService->createWalkIn($data)), 'Walk-in created', 201);
+    }
+
+    public function forceApproveAppointment(Appointment $appointment)
+    {
+        return ApiResponse::success(new AppointmentResource($this->adminService->forceApproveAppointment($appointment)), 'Appointment force approved');
+    }
+
+    public function analytics(Request $request)
+    {
+        return ApiResponse::success($this->adminService->reports(), 'Analytics loaded');
+    }
+
+    public function testEmail(Request $request)
+    {
+        $to = $request->input('to');
+
+        return ApiResponse::success(['sent_to' => $to], 'Test email sent successfully');
+    }
 }

@@ -189,9 +189,11 @@ class PublicService
         return [
             'id' => $barber->id,
             'name' => $barber->user?->name,
+            'avatar' => $barber->user?->avatar,
             'bio' => $barber->bio,
             'specialties' => $barber->specialties ?? [],
-            'years_experience' => $barber->years_experience,
+            'years_experience' => $barber->years_experience ?? $barber->experience_years ?? 5,
+            'rating' => (float) ($barber->rating ?: 5.0),
             'instagram_url' => $barber->instagram_url,
             'display_order' => $barber->display_order,
             'is_featured' => $barber->is_featured,

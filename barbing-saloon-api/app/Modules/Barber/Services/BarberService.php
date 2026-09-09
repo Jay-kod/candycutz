@@ -114,7 +114,17 @@ class BarberService
         $barber = $this->barberForUser($user);
 
         $barber->update(array_intersect_key($data, array_flip(['bio', 'specialties', 'years_experience', 'instagram_url'])));
-        $barber->user->update(array_intersect_key($data, array_flip(['name', 'phone'])));
+
+        $userUpdates = array_intersect_key($data, array_flip(['name', 'phone']));
+        $imageFile = $data['profile_image'] ?? ($data['avatar'] ?? null);
+        if ($imageFile instanceof \Illuminate\Http\UploadedFile) {
+            $path = $this->uploadFile($imageFile, 'avatars');
+            $userUpdates['avatar'] = $path;
+        }
+
+        if (!empty($userUpdates)) {
+            $barber->user->update($userUpdates);
+        }
 
         return $barber->refresh()->load('user');
     }

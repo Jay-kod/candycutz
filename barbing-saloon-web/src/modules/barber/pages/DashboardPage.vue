@@ -490,34 +490,50 @@ function statusClass(status) {
 
 async function loadDashboard() {
   try {
-    const response = await barberApi.getBookings();
-    const bookings = response.data.data || [];
+    const [dashRes, bookingsRes] = await Promise.allSettled([
+      barberApi.dashboard(),
+      barberApi.getBookings()
+    ]);
     
-    // Compute dashboard data manually
-    const today = new Date().toISOString().split('T')[0];
-    
-    const todayBookings = bookings.filter(b => b.appointment_date === today);
-    const completedBookings = bookings.filter(b => b.status === 'completed');
-    const upcomingBookings = bookings.filter(b => b.status === 'confirmed' && b.appointment_date >= today);
-    const noShowBookings = bookings.filter(b => b.status === 'no_show');
-    
-    const pendingPayments = bookings.filter(b => b.status === 'pending' && b.payment_status === 'awaiting_verification');
+    let stats = { today_bookings: 0, upcoming_bookings: 0, completed_bookings: 0, no_show_count: 0 };
+    let todayAppointments = [];
+    let pendingPayments = [];
+
+    if (dashRes.status === 'fulfilled' && dashRes.value.data?.data) {
+      const d = dashRes.value.data.data;
+      stats = d.stats || stats;
+      todayAppointments = (d.today_appointments || []).map(a => ({
+        id: a.id,
+        client_name: a.client_name || a.customer?.name || 'Client',
+        appointment_time: a.appointment_time,
+        status: a.status,
+        service: a.service || { name: 'General' }
+      }));
+    }
+
+    if (bookingsRes.status === 'fulfilled' && bookingsRes.value.data?.data) {
+      const bookings = bookingsRes.value.data.data || [];
+      pendingPayments = bookings.filter(b => b.status === 'pending' && b.payment_status === 'awaiting_verification');
+      
+      if (!todayAppointments.length && bookings.length) {
+        const today = new Date().toISOString().split('T')[0];
+        const todayBookings = bookings.filter(b => b.appointment_date === today);
+        if (todayBookings.length) {
+          todayAppointments = todayBookings.map(b => ({
+            id: b.id,
+            client_name: b.customer_name || b.client_name || 'Client',
+            appointment_time: b.appointment_time,
+            status: b.status,
+            service: { name: b.service_name }
+          }));
+        }
+      }
+    }
 
     dashboard.value = {
-      today_appointments: todayBookings.map(b => ({
-        id: b.id,
-        client_name: b.customer_name,
-        appointment_time: b.appointment_time,
-        status: b.status,
-        service: { name: b.service_name }
-      })),
-      pending_payments: pendingPayments,
-      stats: {
-        today_bookings: todayBookings.length,
-        completed_bookings: completedBookings.length,
-        upcoming_bookings: upcomingBookings.length,
-        no_show_count: noShowBookings.length
-      }
+      stats,
+      today_appointments: todayAppointments,
+      pending_payments: pendingPayments
     };
   } catch (e) {
     // API may not have data yet

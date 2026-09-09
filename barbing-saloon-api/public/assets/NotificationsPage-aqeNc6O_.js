@@ -1,0 +1,1 @@
+import{I as a,U as t,k as s,w as o}from"./index-T4jkAb25.js";import{t as i}from"./CustomerLayout-BiJlaiF4.js";import{t as e}from"./NotificationsView-DOKAjgi1.js";var r={__name:"NotificationsPage",setup:r=>(r,m)=>(a(),o(i,null,{default:t(()=>[s(e)]),_:1}))};export{r as default};
