@@ -161,8 +161,8 @@ $forgotRes = request('POST', '/api/v1/auth/forgot-password', [
 assertTest('11. Forgot password accepts email', $forgotRes['code'] === 200, "Code: {$forgotRes['code']}");
 
 // 12. Password Reset using token directly from DB
-require_once __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+$app = require_once dirname(__DIR__) . '/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 $resetRecord = \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $testEmail)->first();

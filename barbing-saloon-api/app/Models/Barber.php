@@ -21,6 +21,7 @@ class Barber extends Model
         'is_available',
         'is_home_service_ready',
         'status',
+        'chair_status',
         'instagram_url',
         'display_order',
         'is_featured',

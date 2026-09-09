@@ -1,8 +1,8 @@
 # Candycutz — Living Project State
 
-**Current Status**: Phase 2 (Authentication Recovery & Multi-Device Session Isolation) Completed  
-**Active Phase**: Phase 3 — Routing & API v1 Harmonization  
-**System Version**: 1.3.0-auth-recovery  
+**Current Status**: Phase 3 (Routing & API v1 Harmonization) Completed  
+**Active Phase**: Phase 4 — Single Unified Expo Mobile App Convergence  
+**System Version**: 1.4.0-api-v1-harmonized  
 **Last Updated**: September 2026  
 
 ---
@@ -14,8 +14,8 @@
 | **Phase 0** | Comprehensive System Audit & Forensic Inspection | **COMPLETED** | 100% | `docs/recovery/SYSTEM_AUDIT.md` |
 | **Phase 1** | Architecture Lock & Contract Specifications | **COMPLETED** | 100% | `API_SPEC.md`, `AUTHENTICATION_SPEC.md`, `ROUTING_SPEC.md`, `DEPLOYMENT_SPEC.md` |
 | **Phase 2** | Authentication Recovery & Multi-Device Session Isolation | **COMPLETED** | 100% | Social Auth, Password Reset, Scoped Tokens, Zero Collision |
-| **Phase 3** | Routing & API v1 Harmonization | **ACTIVE PHASE** | 0% | Canonical RESTful endpoints (`/api/v1/*`), Context-Aware 401 |
-| **Phase 4** | Single Unified Expo Mobile App Convergence | **QUEUED** | 0% | Merge customer & barber apps into one Expo client |
+| **Phase 3** | Routing & API v1 Harmonization | **COMPLETED** | 100% | Canonical RESTful endpoints (`/api/v1/*`), Context-Aware 401, Standard Error Envelopes |
+| **Phase 4** | Single Unified Expo Mobile App Convergence | **ACTIVE PHASE** | 0% | Merge customer & barber apps into one Expo client |
 | **Phase 5** | Database & Business Logic Hardening | **QUEUED** | 0% | Atomic slot booking, Stripe webhooks, Brevo queue |
 | **Phase 6** | Website Integration Verification | **QUEUED** | 0% | Zero-regression Vue 3 web verification |
 | **Phase 7** | Single-VPS Dockerized Infrastructure | **QUEUED** | 0% | Nginx reverse proxy, PHP-FPM, Redis, MySQL, backups |

@@ -31,12 +31,20 @@ client.interceptors.response.use(
 
     switch (status) {
       case 401:
-        // Unauthorized - clear auth and redirect (but not during login/register)
+        // Unauthorized - clear auth and redirect contextually based on active portal
         if (!error.config?.url?.includes('/auth/login') && !error.config?.url?.includes('/auth/register')) {
           const auth = useAuthStore();
           auth.clearAuth();
           toast.error(error?.response?.data?.message || 'Session expired. Please log in again.');
-          window.location.href = '/customer/login';
+
+          const path = window.location.pathname;
+          if (path.startsWith('/admin')) {
+            window.location.href = '/admin/login';
+          } else if (path.startsWith('/barber')) {
+            window.location.href = '/barber/login';
+          } else {
+            window.location.href = '/customer/login';
+          }
         } else {
           toast.error(message);
         }

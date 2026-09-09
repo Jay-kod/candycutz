@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core\Http\Response;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -16,12 +18,27 @@ class ApiResponse
         ], $status);
     }
 
-    public static function error(string $message = 'Error', array $errors = [], int $status = 400): JsonResponse
+    public static function error(string $message = 'Error', array $errors = [], int $status = 400, ?string $errorCode = null): JsonResponse
     {
+        $code = $errorCode ?? match ($status) {
+            401 => 'UNAUTHENTICATED',
+            403 => 'FORBIDDEN_ROLE',
+            404 => 'RESOURCE_NOT_FOUND',
+            409 => 'IDEMPOTENCY_COLLISION',
+            422 => 'VALIDATION_FAILED',
+            429 => 'RATE_LIMIT_EXCEEDED',
+            500 => 'SERVER_ERROR',
+            default => 'BAD_REQUEST',
+        };
+
         $payload = [
             'success' => false,
             'message' => $message,
-            'error' => $message,
+            'error' => [
+                'code' => $code,
+                'message' => $message,
+                'details' => $errors,
+            ],
             'code' => $status,
         ];
 
