@@ -20,6 +20,7 @@ class AuthUserResource extends JsonResource
             'phone' => $this->phone,
             'status' => $this->status ?? 'active',
             'is_active' => (bool) $this->is_active,
+            'wallet_balance' => (float) ($this->wallet_balance ?? 0),
         ];
 
         if ($this->barber) {

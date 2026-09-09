@@ -49,6 +49,10 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
+        if ($request->has('chair_status') && !$request->has('status')) {
+            $request->merge(['status' => $request->input('chair_status')]);
+        }
+
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:free,busy,break,offline'],
         ]);
