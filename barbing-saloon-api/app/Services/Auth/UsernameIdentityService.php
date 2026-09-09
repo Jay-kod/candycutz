@@ -70,4 +70,29 @@ class UsernameIdentityService
 
         return $user;
     }
+
+    /**
+     * Generate a unique, compliant @username from a name or email string.
+     */
+    public function generateUniqueUsername(string $base): string
+    {
+        $clean = preg_replace('/[^a-z0-9]/', '', strtolower($base));
+        if (strlen($clean) < 3) {
+            $clean = 'vip' . str_pad($clean, 3, '0');
+        }
+        $clean = substr($clean, 0, 18);
+
+        $candidate = $clean;
+        $counter = 1;
+        while (User::whereRaw('LOWER(username) = ?', [$candidate])->exists() || in_array($candidate, $this->reservedUsernames, true)) {
+            $candidate = $clean . '_' . rand(100, 999);
+            $counter++;
+            if ($counter > 20) {
+                $candidate = $clean . '_' . substr(uniqid(), -5);
+                break;
+            }
+        }
+
+        return $candidate;
+    }
 }

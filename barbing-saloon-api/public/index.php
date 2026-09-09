@@ -39,16 +39,6 @@ if (strpos($requestUri, '/api') !== 0 && strpos($requestUri, '/up') !== 0 && str
     }
 }
 
-// Global CORS headers for mobile & web clients
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Idempotency-Key');
-header('Access-Control-Max-Age: 86400');
-
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
 // Maintenance mode check
 if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {

@@ -21,6 +21,7 @@ class ApiResponse
         $payload = [
             'success' => false,
             'message' => $message,
+            'error' => $message,
             'code' => $status,
         ];
 

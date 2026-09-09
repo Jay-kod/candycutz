@@ -12,7 +12,7 @@ class ModuleServiceProvider extends ServiceProvider
         $base = app_path('Modules');
 
         $modules = [
-            'Auth' => ['api', 'throttle:10,1', 'sanitize.input', 'security.headers'],
+            'Auth' => ['api', 'throttle:60,1', 'sanitize.input', 'security.headers'],
             'Public' => ['api', 'throttle:60,1', 'sanitize.input', 'security.headers'],
             'Customer' => ['api', 'auth:sanctum', 'check.role:customer', 'throttle:120,1', 'sanitize.input', 'security.headers'],
             'Barber' => ['api', 'auth:sanctum', 'check.role:barber', 'throttle:120,1', 'sanitize.input', 'security.headers'],

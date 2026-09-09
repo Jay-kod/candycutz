@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Auth\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,13 +13,29 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+        if ($this->has('phone') && is_string($this->phone)) {
+            $merge['phone'] = preg_replace('/[\s\-\(\)]+/', '', $this->phone);
+        }
+        if ($this->has('username') && is_string($this->username)) {
+            $merge['username'] = ltrim(strtolower(trim($this->username)), '@');
+        }
+        if (!empty($merge)) {
+            $this->merge($merge);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'min:2', 'max:100'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'phone' => ['required', 'string', 'regex:/^(?:\+?234|0)(?:7[0-9]|8[0-9]|9[0-1])[0-9]{8}$/'],
-            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'],
+            'username' => ['nullable', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:users,username'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email'],
+            'phone' => ['required', 'string', 'min:7', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'device_name' => ['nullable', 'string', 'max:50'],
         ];
     }
 }
