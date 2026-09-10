@@ -6,11 +6,13 @@ namespace App\Core\Http\Controllers\Api\V1;
 
 use App\Core\Enums\AppointmentStatus;
 use App\Core\Http\Response\ApiResponse;
+use App\Exceptions\BookingSlotUnavailableException;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Service;
 use App\Models\ServiceZone;
 use App\Models\User;
+use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +21,9 @@ use Illuminate\Support\Str;
 
 class AppointmentApiController
 {
+    public function __construct(
+        protected BookingService $bookingService
+    ) {}
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -106,84 +111,14 @@ class AppointmentApiController
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $service = Service::findOrFail((int) $validated['service_id']);
-        $type = $validated['appointment_type'] ?? 'in_shop';
-        $time = substr(trim((string) $validated['appointment_time']), 0, 5);
-        $date = Carbon::parse($validated['appointment_date'])->toDateString();
-
-        // Assign barber
-        $barberId = !empty($validated['barber_id'])
-            ? (int) $validated['barber_id']
-            : (Barber::where('is_available', true)->value('id') ?? 1);
-
-        $barber = Barber::findOrFail($barberId);
-
-        // Transaction with concurrency lock to prevent double booking
-        $appointment = DB::transaction(function () use ($user, $service, $barber, $date, $time, $type, $validated) {
-            // Lock and check for existing overlapping bookings
-            $existing = Appointment::where('barber_id', $barber->id)
-                ->where('appointment_date', $date)
-                ->where('appointment_time', $time)
-                ->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
-                ->lockForUpdate()
-                ->first();
-
-            if ($existing) {
-                abort(response()->json([
-                    'success' => false,
-                    'message' => 'This appointment time has just been reserved by another customer. Please select another slot.',
-                    'error' => [
-                        'code' => 'BOOKING_SLOT_UNAVAILABLE',
-                        'message' => 'This appointment time has just been reserved by another customer.',
-                        'details' => ['slot' => ["{$date} {$time}"]],
-                    ],
-                    'code' => 422,
-                ], 422));
-            }
-
-            $travelFee = 0.0;
-            $zoneId = null;
-            if ($type === 'home_service') {
-                $zoneId = $validated['destination_address']['service_zone_id'] ?? null;
-                $zone = $zoneId ? ServiceZone::find($zoneId) : ServiceZone::where('is_active', true)->first();
-                $travelFee = (float) ($zone?->base_travel_fee ?? 1500.0);
-            }
-
-            $price = (float) $service->price;
-            $grandTotal = $price + $travelFee;
-            $durationMinutes = (int) ($service->duration_minutes ?? 30);
-            $endTime = Carbon::parse("{$date} {$time}")->addMinutes($durationMinutes)->format('H:i');
-
-            $bookingReference = 'CC-' . strtoupper(Str::random(6));
-
-            return Appointment::create([
-                'booking_reference' => $bookingReference,
-                'customer_id' => $user->id,
-                'client_name' => $user->name,
-                'client_phone' => $user->phone ?? '',
-                'client_email' => $user->email,
-                'barber_id' => $barber->id,
-                'service_id' => $service->id,
-                'service_zone_id' => $zoneId,
-                'appointment_type' => $type,
-                'appointment_date' => $date,
-                'appointment_time' => $time,
-                'end_time' => $endTime,
-                'total_duration_minutes' => $durationMinutes,
-                'total_price' => $price,
-                'total_amount' => $price,
-                'travel_fee' => $travelFee,
-                'grand_total' => $grandTotal,
-                'status' => AppointmentStatus::pending->value,
-                'notes' => $validated['notes'] ?? null,
-                'deposit_paid' => ($validated['payment_method'] ?? '') === 'pay_at_venue',
-                'deposit_amount' => 0.0,
-            ]);
-        });
-
-        $appointment->load(['service.category', 'barber.user', 'serviceZone']);
-
-        return ApiResponse::success($this->formatAppointment($appointment), 'Appointment reserved successfully.', 201);
+        try {
+            $appointment = $this->bookingService->createBooking($user, array_merge($request->all(), $validated));
+            return ApiResponse::success($this->formatAppointment($appointment), 'Appointment reserved successfully.', 201);
+        } catch (BookingSlotUnavailableException $e) {
+            return $e->render($request);
+        } catch (\Throwable $e) {
+            return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
+        }
     }
 
     public function cancel(Request $request, int $id): JsonResponse
@@ -201,17 +136,14 @@ class AppointmentApiController
             return ApiResponse::error('You do not have permission to cancel this appointment.', [], 403, 'FORBIDDEN_ROLE');
         }
 
-        $currentStatus = $appointment->status?->value ?? $appointment->status;
+        $currentStatus = $appointment->status?->value ?? (string) $appointment->status;
         if (in_array($currentStatus, ['completed', 'cancelled'], true)) {
             return ApiResponse::error("Cannot cancel an appointment that is already {$currentStatus}.", [], 422, 'INVALID_TRANSITION');
         }
 
         $reason = $request->input('reason', 'Customer requested cancellation');
 
-        $appointment->update([
-            'status' => AppointmentStatus::cancelled->value,
-            'cancellation_reason' => $reason,
-        ]);
+        $this->bookingService->transitionStatus($appointment, AppointmentStatus::cancelled->value, $user, $reason);
 
         $appointment->load(['service.category', 'barber.user', 'serviceZone']);
 
@@ -246,15 +178,8 @@ class AppointmentApiController
             default => AppointmentStatus::confirmed->value,
         };
 
-        $notes = $appointment->notes;
-        if (!empty($validated['reason'])) {
-            $notes = ($notes ? "{$notes} | " : '') . "Status update ({$validated['status']}): {$validated['reason']}";
-        }
-
-        $appointment->update([
-            'status' => $dbStatus,
-            'notes' => $notes,
-        ]);
+        $reason = $validated['reason'] ?? "Status updated to {$validated['status']}";
+        $this->bookingService->transitionStatus($appointment, $dbStatus, $user, $reason);
 
         $appointment->load(['service.category', 'barber.user', 'serviceZone']);
 
@@ -267,46 +192,30 @@ class AppointmentApiController
         $barber = $user->barber;
 
         $validated = $request->validate([
-            'client_name' => ['required', 'string', 'max:100'],
+            'client_name' => ['nullable', 'string', 'max:100'],
+            'customer_name' => ['nullable', 'string', 'max:100'],
             'client_phone' => ['nullable', 'string', 'max:30'],
+            'customer_phone' => ['nullable', 'string', 'max:30'],
             'service_id' => ['required', 'integer', 'exists:services,id'],
+            'barber_id' => ['nullable', 'integer', 'exists:barbers,id'],
             'appointment_date' => ['nullable', 'date'],
             'appointment_time' => ['nullable', 'string'],
+            'start_time' => ['nullable', 'string'],
+            'take_immediately' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $service = Service::findOrFail((int) $validated['service_id']);
-        $barberId = $barber?->id ?? Barber::value('id') ?? 1;
+        $barberId = $barber?->id ?? ($validated['barber_id'] ?? (Barber::value('id') ?? 1));
+        $targetBarber = Barber::findOrFail((int) $barberId);
 
-        $date = $validated['appointment_date'] ?? now()->toDateString();
-        $time = $validated['appointment_time'] ?? now()->format('H:i');
-        $durationMinutes = (int) ($service->duration_minutes ?? 30);
-        $endTime = Carbon::parse("{$date} {$time}")->addMinutes($durationMinutes)->format('H:i');
-
-        $bookingReference = 'WALK-' . strtoupper(Str::random(5));
-
-        $appointment = Appointment::create([
-            'booking_reference' => $bookingReference,
-            'client_name' => $validated['client_name'],
-            'client_phone' => $validated['client_phone'] ?? '08000000000',
-            'client_email' => 'walkin@candycutz.com',
-            'barber_id' => $barberId,
-            'service_id' => $service->id,
-            'appointment_type' => 'in_shop',
-            'appointment_date' => $date,
-            'appointment_time' => $time,
-            'end_time' => $endTime,
-            'total_duration_minutes' => $durationMinutes,
-            'total_price' => (float) $service->price,
-            'total_amount' => (float) $service->price,
-            'grand_total' => (float) $service->price,
-            'status' => AppointmentStatus::confirmed->value,
-            'notes' => 'Rapid Walk-In Client',
-            'deposit_paid' => true,
-        ]);
-
-        $appointment->load(['service.category', 'barber.user', 'serviceZone']);
-
-        return ApiResponse::success($this->formatAppointment($appointment), 'Walk-in client booked successfully.', 201);
+        try {
+            $appointment = $this->bookingService->createWalkIn($user, $targetBarber, array_merge($request->all(), $validated));
+            return ApiResponse::success($this->formatAppointment($appointment), 'Walk-in client booked successfully.', 201);
+        } catch (BookingSlotUnavailableException $e) {
+            return $e->render($request);
+        } catch (\Throwable $e) {
+            return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
+        }
     }
 
     protected function formatAppointment(Appointment $a): array

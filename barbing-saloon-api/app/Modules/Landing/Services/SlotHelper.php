@@ -3,6 +3,7 @@
 namespace App\Modules\Landing\Services;
 
 use App\Models\Barber;
+use App\Models\BlockedPeriod;
 use App\Models\Holiday;
 use App\Models\Service;
 use App\Models\Setting;
@@ -36,6 +37,10 @@ class SlotHelper
             ->with('service')
             ->get();
 
+        $blockedPeriods = BlockedPeriod::where('barber_id', $barber->id)
+            ->whereDate('start_datetime', $date->toDateString())
+            ->get();
+
         $now = now();
         $slots = [];
 
@@ -52,9 +57,20 @@ class SlotHelper
                 }
             }
 
+            $isBlocked = $blockedPeriods->contains(function ($blocked) use ($slotStart, $slotEnd) {
+                return $slotStart->lt($blocked->end_datetime) && $slotEnd->gt($blocked->start_datetime);
+            });
+
+            if ($isBlocked) {
+                continue;
+            }
+
             $overlaps = $confirmedAppointments->contains(function ($appointment) use ($slotStart, $slotEnd) {
-                $appointmentStart = Carbon::parse($appointment->appointment_date->toDateString().' '.$appointment->appointment_time);
-                $appointmentEnd = $appointmentStart->copy()->addMinutes($appointment->service->duration_minutes);
+                $appointmentDate = Carbon::parse($appointment->appointment_date)->toDateString();
+                $appointmentStart = Carbon::parse($appointmentDate . ' ' . $appointment->appointment_time);
+                $appointmentEnd = $appointment->end_time
+                    ? Carbon::parse($appointmentDate . ' ' . $appointment->end_time)
+                    : $appointmentStart->copy()->addMinutes($appointment->service?->duration_minutes ?? 30);
 
                 return $slotStart->lt($appointmentEnd) && $slotEnd->gt($appointmentStart);
             });

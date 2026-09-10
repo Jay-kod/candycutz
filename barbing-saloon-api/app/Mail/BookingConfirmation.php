@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Appointment;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -18,7 +19,7 @@ class BookingConfirmation extends Mailable implements ShouldQueue
 
     public function __construct(Appointment $appointment)
     {
-        $this->appointment = $appointment->load(['customer', 'barber', 'service']);
+        $this->appointment = $appointment->load(['customer', 'barber.user', 'service']);
     }
 
     public function envelope(): Envelope
@@ -30,15 +31,22 @@ class BookingConfirmation extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $dateStr = $this->appointment->appointment_date
+            ? Carbon::parse($this->appointment->appointment_date)->format('M d, Y')
+            : now()->format('M d, Y');
+
+        $timeStr = $this->appointment->appointment_time;
+        $formattedTime = $timeStr ? Carbon::parse($timeStr)->format('g:i A') : 'Scheduled Time';
+
         return new Content(
             view: 'mail.booking-confirmation',
             with: [
                 'appointment' => $this->appointment,
-                'customerName' => $this->appointment->customer->name,
-                'barberName' => $this->appointment->barber?->user->name ?? 'Our Team',
-                'serviceName' => $this->appointment->service->name,
-                'appointmentDate' => $this->appointment->appointment_date->format('M d, Y'),
-                'appointmentTime' => $this->appointment->appointment_date->format('g:i A'),
+                'customerName' => $this->appointment->customer?->name ?? ($this->appointment->client_name ?? 'Valued Customer'),
+                'barberName' => $this->appointment->barber?->user?->name ?? 'Our Team',
+                'serviceName' => $this->appointment->service?->name ?? 'Grooming Service',
+                'appointmentDate' => $dateStr,
+                'appointmentTime' => $formattedTime,
             ],
         );
     }

@@ -122,7 +122,8 @@ $barberToken = $barberLogin['json']['data']['token'];
 
 // 9. Customer Creates Appointment (Atomic reservation)
 $assignedBarberId = $barberLogin['json']['data']['barber']['id'] ?? $barberLogin['json']['data']['user']['barber_id'] ?? $firstBarber['id'];
-$nextWeek = date('Y-m-d', strtotime('+3 days'));
+$dayOffset = 10 + (int) (time() % 70) + random_int(1, 20);
+$nextWeek = date('Y-m-d', strtotime("+{$dayOffset} days"));
 $bookingPayload = [
     'service_id' => $firstService['id'],
     'barber_id' => $assignedBarberId,
@@ -163,10 +164,11 @@ $statusCompleteRes = request('PATCH', "/api/v1/appointments/{$appointmentId}/sta
 assertTest('12b. Barber PATCH status to completed', $statusCompleteRes['code'] === 200, "Code: {$statusCompleteRes['code']}");
 
 // 13. Cancellation flow on separate booking
+$cancelDate = date('Y-m-d', strtotime("+" . ($dayOffset + 1) . " days"));
 $cancelBooking = request('POST', '/api/v1/appointments', [
     'service_id' => $firstService['id'],
     'barber_id' => $firstBarber['id'],
-    'appointment_date' => date('Y-m-d', strtotime('+4 days')),
+    'appointment_date' => $cancelDate,
     'start_time' => '15:00',
     'appointment_type' => 'in_shop',
     'payment_method' => 'pay_at_venue',
