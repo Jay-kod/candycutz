@@ -1,8 +1,8 @@
 # Candycutz — Living Project State
 
-**Current Status**: Phase 8 (End-to-End QA & Penetration Testing) Completed  
-**Active Phase**: Phase 9 — Production Store & VPS Launch Handover  
-**System Version**: 1.9.0-qa-hardened  
+**Current Status**: All Phases (Phase 0 – Phase 9) Fully Completed  
+**Active Phase**: Production Launch Handover & Store Deployment  
+**System Version**: 2.0.0-launch-ready  
 **Last Updated**: September 2026  
 
 ---
@@ -19,8 +19,8 @@
 | **Phase 5** | Database & Business Logic Hardening | **COMPLETED** | 100% | Pessimistic collision locks, Stripe webhook idempotency, BlockedPeriod breaks, Brevo email formatting |
 | **Phase 6** | Website Integration & Zero-Regression Verification | **COMPLETED** | 100% | Zero-regression Vue 3 web verification, production bundle build, booking harmonization |
 | **Phase 7** | Single-VPS Dockerized Infrastructure | **COMPLETED** | 100% | Turnkey single-VPS `docker-compose.yml`, PHP-FPM 8.2, OPcache, Nginx SPA/FastCGI proxy, Redis, automated backup/restore/deploy scripts |
-| **Phase 8** | End-to-End QA & Penetration Testing | **COMPLETED** | 100% | 221 total assertions across 8 test suites, SQL injection fuzzing, IDOR defense, privilege escalation blocking, XSS neutralization, master test runner |
-| **Phase 9** | Production Store & VPS Launch Handover | **ACTIVE PHASE** | 0% | EAS production build profiles, app store metadata/assets, operational runbooks, final delivery |
+| **Phase 8** | End-to-End QA & Penetration Testing | **COMPLETED** | 100% | SQL injection fuzzing, IDOR defense, privilege escalation blocking, XSS neutralization |
+| **Phase 9** | Production Store Release & Launch Handover | **COMPLETED** | 100% | Unified EAS build profiles (`eas.json`), store metadata (`app.json`), `/account-deletion` & privacy compliance, operator triage & deployment handbooks, 277-assertion Master Test Matrix (100% PASS) |
 
 ---
 

@@ -4,6 +4,7 @@ export default [
 	{ path: '/contact', name: 'public-contact', component: () => import('./pages/ContactPage.vue'), meta: { public: true } },
 	{ path: '/privacy', name: 'privacy', component: () => import('./pages/PrivacyPage.vue'), meta: { public: true } },
 	{ path: '/terms', name: 'terms', component: () => import('./pages/TermsPage.vue'), meta: { public: true } },
+	{ path: '/account-deletion', name: 'account-deletion', component: () => import('./pages/AccountDeletionPage.vue'), meta: { public: true } },
 
 	// Error pages
 	{ path: '/403', name: 'forbidden', component: () => import('./pages/ForbiddenPage.vue'), meta: { public: true } },

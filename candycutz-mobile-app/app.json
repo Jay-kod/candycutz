@@ -3,24 +3,36 @@
     "name": "CandyCutz",
     "slug": "candycutz",
     "version": "1.0.0",
+    "description": "Luxury Grooming & Barbing Saloon Platform in Keffi, Nasarawa State",
+    "primaryColor": "#C6A15B",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F9F2E8"
+      "backgroundColor": "#0B0B0B"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.candycutz.app"
+      "bundleIdentifier": "com.candycutz.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CandyCutz requires camera access to allow you to take and upload your profile photo.",
+        "NSPhotoLibraryUsageDescription": "CandyCutz requires photo library access to allow you to select and upload your profile photo."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F9F2E8"
+        "backgroundColor": "#0B0B0B"
       },
-      "package": "com.candycutz.app"
+      "package": "com.candycutz.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -34,6 +46,9 @@
     "extra": {
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "candycutz-mobile-app-unified"
       }
     }
   }

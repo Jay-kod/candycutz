@@ -9,13 +9,13 @@ Development Build ──► Internal Testing ──► Closed Testing / TestFlig
 
 ---
 
-## 2. EAS Build Configuration (`eas.json`)
+## 2. Unified EAS Build Configuration (`eas.json`)
 
-Both `candycutz-customer-app` and `candycutz-barber-app` utilize standardized `eas.json` build profiles:
+The single unified mobile application (`candycutz-mobile-app`) utilizes a standardized `eas.json` build profile:
 ```json
 {
   "cli": {
-    "version": ">= 10.0.0"
+    "version": ">= 12.0.0"
   },
   "build": {
     "development": {
@@ -92,3 +92,12 @@ Both `candycutz-customer-app` and `candycutz-barber-app` utilize standardized `e
 - [ ] iOS build uploaded to TestFlight for staff device verification.
 - [ ] Physical salon staff in Angwan Kare trained on the Barber Mobile App and walk-in flows.
 - [ ] Live monitoring and error tracking (Sentry / Bugsnag) configured.
+
+---
+
+## 6. Living Runbook References
+
+- **Operator & Salon Incident Triage**: [`docs/debugging/OPERATOR_TRIAGE_RUNBOOK.md`](file:///c:/xampp/htdocs/1/candycutz/docs/debugging/OPERATOR_TRIAGE_RUNBOOK.md)
+- **Production Store & VPS Release Handbook**: [`docs/deployment/PRODUCTION_RELEASE_RUNBOOK.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/PRODUCTION_RELEASE_RUNBOOK.md)
+- **Single-VPS Docker Infrastructure**: [`docs/deployment/DOCKER.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/DOCKER.md)
+- **Backup & Restore Operations**: [`docs/deployment/BACKUP_AND_RESTORE.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/BACKUP_AND_RESTORE.md)

@@ -51,6 +51,10 @@ const pageSections = ref([
   {
     heading: '5. Your Legal Rights',
     body: "Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to:\n\n• Request access to your personal data.\n• Request correction of your personal data.\n• Request erasure of your personal data.\n• Object to processing of your personal data."
+  },
+  {
+    heading: '6. Account Deactivation & Data Erasure (App Store & Play Store Compliance)',
+    body: "In accordance with Apple Guideline 5.1.1(v) and Google Play user data policies, users have full autonomy to deactivate their accounts and request data deletion:\n\n• In-App Deactivation: You may initiate immediate account deactivation within the CandyCutz mobile app under Profile > Security > Deactivate Account.\n• Web Deletion Request: You can submit an account erasure request at https://candycutz.com/account-deletion or by emailing privacy@candycutz.com.\n• Data Retention Policy: Upon deactivation, your profile is immediately deactivated and active authentication tokens are revoked. Historical financial transaction logs are retained strictly in accordance with statutory accounting and tax regulations in Nigeria before being permanently purged."
   }
 ]);
 

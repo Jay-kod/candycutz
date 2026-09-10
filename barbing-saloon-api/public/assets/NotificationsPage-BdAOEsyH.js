@@ -1,0 +1,1 @@
+import{I as a,U as t,k as s,w as o}from"./index-CRoEsZrz.js";import{t as i}from"./CustomerLayout-Aqx45Mxe.js";import{t as e}from"./NotificationsView-BILfmUQ-.js";var r={__name:"NotificationsPage",setup:r=>(r,m)=>(a(),o(i,null,{default:t(()=>[s(e)]),_:1}))};export{r as default};
