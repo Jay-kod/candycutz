@@ -136,7 +136,7 @@ assertTest('1c. Catalog service resolved', !empty($service['id']), 'No service f
 $serviceId = (int) $service['id'];
 
 // Choose a unique future date for isolation
-$dayOffset = 10 + (int) (time() % 80) + random_int(1, 15);
+$dayOffset = 150 + (int) (microtime(true) * 1000 % 300) + random_int(1, 100);
 $testDate = date('Y-m-d', strtotime("+{$dayOffset} days"));
 
 // 2. Simultaneous Double-Booking Race Condition Test (Exact Same Slot)
