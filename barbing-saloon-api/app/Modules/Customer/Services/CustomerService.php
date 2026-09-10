@@ -152,12 +152,18 @@ class CustomerService
 
     public function createReview(User $user, array $data): Testimonial
     {
+        $content = $data['review'] ?? $data['comment'] ?? '';
+
         return Testimonial::query()->create([
             'customer_id' => $user->id,
-            'rating' => $data['rating'],
-            'comment' => $data['review'] ?? $data['comment'] ?? '',
+            'client_name' => $user->name,
+            'client_avatar' => $user->avatar,
+            'rating' => (int) $data['rating'],
+            'review' => $content,
+            'service_id' => $data['service_id'] ?? null,
             'barber_id' => $data['barber_id'] ?? null,
             'is_approved' => false,
+            'is_featured' => false,
         ]);
     }
 }

@@ -49,7 +49,12 @@ class SuperAdminService
 
     public function deactivateUser(User $user): User
     {
-        $user->update(['is_active' => false]);
+        $user->update([
+            'is_active' => false,
+            'status' => 'deactivated',
+            'deactivated_at' => now(),
+        ]);
+        $user->tokens()->delete();
 
         return $user->refresh();
     }

@@ -237,6 +237,7 @@ class AppointmentApiController
             'appointment_type' => $a->appointment_type ?? 'in_shop',
             'status' => $statusVal,
             'payment_status' => $a->deposit_paid ? 'paid' : 'pending',
+            'deposit_paid' => (bool) $a->deposit_paid,
             'total_duration_minutes' => (int) ($a->total_duration_minutes ?? $service?->duration_minutes ?? 30),
             'subtotal' => (float) ($a->total_price ?? $a->total_amount ?? $service?->price ?? 0),
             'home_service_surcharge' => (float) ($a->travel_fee ?? 0),
