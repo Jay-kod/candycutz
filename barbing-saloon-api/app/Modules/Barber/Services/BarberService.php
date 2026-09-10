@@ -14,12 +14,19 @@ use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\WorkingHour;
 use App\Models\User;
+use App\Services\Booking\BookingService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BarberService
 {
     use \App\Core\Traits\HasSecureUploads;
+
+    public function __construct(
+        protected ?BookingService $bookingService = null
+    ) {
+        $this->bookingService = $bookingService ?? app(BookingService::class);
+    }
     public function barberForUser(User $user): Barber
     {
         return Barber::query()->with('user')->where('user_id', $user->id)->firstOrFail();
@@ -83,9 +90,14 @@ class BarberService
             ->paginate(10);
     }
 
-    public function complete(Appointment $appointment): Appointment
+    public function complete(Appointment $appointment, ?User $actor = null): Appointment
     {
-        $appointment->update(['status' => AppointmentStatus::completed->value]);
+        $user = $actor ?? $appointment->barber?->user ?? auth()->user();
+        if ($user) {
+            $this->bookingService->transitionStatus($appointment, AppointmentStatus::completed->value, $user, 'Barber completed service');
+        } else {
+            $appointment->update(['status' => AppointmentStatus::completed->value]);
+        }
 
         // Dispatch thank you email and admin notification
         SendBookingThankYou::dispatch($appointment);
@@ -94,9 +106,14 @@ class BarberService
         return $appointment->refresh()->load(['service', 'customer']);
     }
 
-    public function noShow(Appointment $appointment): Appointment
+    public function noShow(Appointment $appointment, ?User $actor = null): Appointment
     {
-        $appointment->update(['status' => AppointmentStatus::no_show->value]);
+        $user = $actor ?? $appointment->barber?->user ?? auth()->user();
+        if ($user) {
+            $this->bookingService->transitionStatus($appointment, AppointmentStatus::no_show->value, $user, 'Client did not show up');
+        } else {
+            $appointment->update(['status' => AppointmentStatus::no_show->value]);
+        }
 
         // Dispatch admin notification
         SendAdminNotification::dispatch($appointment, 'no_show');

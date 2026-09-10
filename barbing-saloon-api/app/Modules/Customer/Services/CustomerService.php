@@ -7,6 +7,7 @@ use App\Core\Traits\HasSecureUploads;
 use App\Jobs\SendAdminNotification;
 use App\Jobs\SendBookingConfirmation;
 use App\Jobs\SendBookingCancellation;
+use App\Exceptions\BookingSlotUnavailableException;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Service;
@@ -14,6 +15,7 @@ use App\Models\Setting;
 use App\Models\Testimonial;
 use App\Models\User;
 use App\Modules\Landing\Services\SlotHelper;
+use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,6 +23,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class CustomerService
 {
     use HasSecureUploads;
+
+    public function __construct(
+        protected ?BookingService $bookingService = null
+    ) {
+        $this->bookingService = $bookingService ?? app(BookingService::class);
+    }
 
     public function dashboard(User $user): array
     {
@@ -70,53 +78,35 @@ class CustomerService
 
     public function createBooking(User $user, array $data): Appointment
     {
-        $barber = Barber::query()->findOrFail($data['barber_id']);
-        $service = Service::query()->findOrFail($data['service_id']);
-        $date = Carbon::parse($data['appointment_date']);
-
-        $slotHelper = new SlotHelper();
-        $slots = $slotHelper->generate($date, $barber, $service);
-
-        if (! in_array($data['appointment_time'], $slots, true)) {
-            abort(422, 'Selected time is not available');
+        try {
+            return $this->bookingService->createBooking($user, $data);
+        } catch (BookingSlotUnavailableException $e) {
+            abort(response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error' => [
+                    'code' => 'BOOKING_SLOT_UNAVAILABLE',
+                    'message' => $e->getMessage(),
+                    'details' => ['slot' => [$e->getSlotDetails()]],
+                ],
+                'code' => 409,
+            ], 409));
         }
-
-        $depositAmount = (float) Setting::query()->where('key', 'deposit_amount')->value('value') ?: 0;
-
-        $appointment = Appointment::query()->create([
-            'customer_id' => $user->id,
-            'client_name' => $user->name,
-            'client_phone' => $user->phone ?? '',
-            'client_email' => $user->email,
-            'barber_id' => $barber->id,
-            'service_id' => $service->id,
-            'appointment_date' => $date->toDateString(),
-            'appointment_time' => $data['appointment_time'],
-            'status' => AppointmentStatus::pending->value,
-            'notes' => $data['notes'] ?? null,
-            'total_price' => $service->price,
-            'deposit_paid' => false,
-            'deposit_amount' => $depositAmount,
-        ]);
-
-        // Dispatch email jobs
-        SendBookingConfirmation::dispatch($appointment);
-        SendAdminNotification::dispatch($appointment, 'new_booking');
-
-        return $appointment;
     }
 
-    public function cancelBooking(Appointment $appointment): Appointment
+    public function cancelBooking(Appointment $appointment, ?User $actor = null, ?string $reason = 'Customer requested cancellation'): Appointment
     {
-        // Dispatch cancellation email and notification
-        SendBookingCancellation::dispatch($appointment);
-        SendAdminNotification::dispatch($appointment, 'cancellation');
-
-        if (! in_array($appointment->status?->value ?? $appointment->status, [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value], true)) {
+        $currentStatus = $appointment->status?->value ?? (string) $appointment->status;
+        if (! in_array($currentStatus, [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value], true)) {
             abort(422, 'Booking cannot be cancelled');
         }
 
-        $appointment->update(['status' => AppointmentStatus::cancelled->value]);
+        $user = $actor ?? $appointment->customer ?? User::find($appointment->customer_id);
+        if ($user) {
+            $this->bookingService->transitionStatus($appointment, AppointmentStatus::cancelled->value, $user, $reason);
+        } else {
+            $appointment->update(['status' => AppointmentStatus::cancelled->value]);
+        }
 
         return $appointment->refresh()->load(['service', 'barber.user']);
     }

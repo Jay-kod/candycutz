@@ -1,8 +1,8 @@
 # Candycutz — Living Project State
 
-**Current Status**: Phase 5 (Database & Business Logic Hardening) Completed  
-**Active Phase**: Phase 6 — Website Integration Verification  
-**System Version**: 1.6.0-hardened-logic  
+**Current Status**: Phase 6 (Website Integration & Zero-Regression Verification) Completed  
+**Active Phase**: Phase 7 — Single-VPS Docker & Nginx Infrastructure  
+**System Version**: 1.7.0-web-harmonized  
 **Last Updated**: September 2026  
 
 ---
@@ -17,8 +17,8 @@
 | **Phase 3** | Routing & API v1 Harmonization | **COMPLETED** | 100% | Canonical RESTful endpoints (`/api/v1/*`), Context-Aware 401, Standard Error Envelopes |
 | **Phase 4** | Single Unified Expo Mobile App Convergence | **COMPLETED** | 100% | Merged customer & barber apps into one Expo client (`candycutz-mobile-app`), role-based tabs & guards, zero TS errors |
 | **Phase 5** | Database & Business Logic Hardening | **COMPLETED** | 100% | Pessimistic collision locks, Stripe webhook idempotency, BlockedPeriod breaks, Brevo email formatting |
-| **Phase 6** | Website Integration Verification | **ACTIVE PHASE** | 0% | Zero-regression Vue 3 web verification |
-| **Phase 7** | Single-VPS Dockerized Infrastructure | **QUEUED** | 0% | Nginx reverse proxy, PHP-FPM, Redis, MySQL, backups |
+| **Phase 6** | Website Integration & Zero-Regression Verification | **COMPLETED** | 100% | Zero-regression Vue 3 web verification, production bundle build, booking harmonization |
+| **Phase 7** | Single-VPS Dockerized Infrastructure | **ACTIVE PHASE** | 0% | Nginx reverse proxy, PHP-FPM, Redis, MySQL, backups |
 | **Phase 8** | End-to-End QA & Penetration Testing | **QUEUED** | 0% | Automated multi-role test matrix |
 | **Phase 9** | Production Store & VPS Launch Handover | **QUEUED** | 0% | Production deployment runbooks & handover |
 
