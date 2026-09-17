@@ -3,29 +3,27 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Responses\ApiResponse;
-use App\Services\PublicService;
+use App\Domain\Catalogue\Services\CatalogueService;
+use App\Domain\Content\Services\ContentService;
+use App\Domain\Content\Services\SettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PublicApiController
 {
-    public function __construct(protected PublicService $publicService)
+    public function settings(SettingsService $settingsService)
     {
+        return ApiResponse::success($settingsService->settings(), 'Public settings loaded');
     }
 
-    public function settings()
+    public function services(CatalogueService $catalogueService)
     {
-        return ApiResponse::success($this->publicService->settings(), 'Public settings loaded');
+        return ApiResponse::success($catalogueService->services(), 'Services loaded');
     }
 
-    public function services()
+    public function service(string $slug, CatalogueService $catalogueService)
     {
-        return ApiResponse::success($this->publicService->services(), 'Services loaded');
-    }
-
-    public function service(string $slug)
-    {
-        $service = $this->publicService->serviceBySlug($slug);
+        $service = $catalogueService->serviceBySlug($slug);
 
         if (! $service) {
             return ApiResponse::error('Forbidden', [], 403);
@@ -34,19 +32,19 @@ class PublicApiController
         return ApiResponse::success($service, 'Service loaded');
     }
 
-    public function serviceCategories()
+    public function serviceCategories(CatalogueService $catalogueService)
     {
-        return ApiResponse::success($this->publicService->serviceCategories(), 'Service categories loaded');
+        return ApiResponse::success($catalogueService->serviceCategories(), 'Service categories loaded');
     }
 
-    public function barbers()
+    public function barbers(CatalogueService $catalogueService)
     {
-        return ApiResponse::success($this->publicService->barbers(), 'Barbers loaded');
+        return ApiResponse::success($catalogueService->barbers(), 'Barbers loaded');
     }
 
-    public function barber(int $id)
+    public function barber(int $id, CatalogueService $catalogueService)
     {
-        $barber = $this->publicService->barberById($id);
+        $barber = $catalogueService->barberById($id);
 
         if (! $barber) {
             return ApiResponse::error('Forbidden', [], 403);
@@ -55,24 +53,24 @@ class PublicApiController
         return ApiResponse::success($barber, 'Barber loaded');
     }
 
-    public function gallery(Request $request)
+    public function gallery(Request $request, ContentService $contentService)
     {
-        return ApiResponse::success($this->publicService->gallery($request->string('category')->toString() ?: null), 'Gallery loaded');
+        return ApiResponse::success($contentService->gallery($request->string('category')->toString() ?: null), 'Gallery loaded');
     }
 
-    public function testimonials()
+    public function testimonials(ContentService $contentService)
     {
-        return ApiResponse::success($this->publicService->testimonials(), 'Testimonials loaded');
+        return ApiResponse::success($contentService->testimonials(), 'Testimonials loaded');
     }
 
-    public function blog()
+    public function blog(ContentService $contentService)
     {
-        return ApiResponse::success($this->publicService->blogPosts(), 'Blog loaded');
+        return ApiResponse::success($contentService->blogPosts(), 'Blog loaded');
     }
 
-    public function blogPost(string $slug)
+    public function blogPost(string $slug, ContentService $contentService)
     {
-        $post = $this->publicService->blogPostBySlug($slug);
+        $post = $contentService->blogPostBySlug($slug);
 
         if (! $post) {
             return ApiResponse::error('Forbidden', [], 403);
@@ -81,12 +79,12 @@ class PublicApiController
         return ApiResponse::success($post, 'Blog post loaded');
     }
 
-    public function workingHours()
+    public function workingHours(CatalogueService $catalogueService)
     {
-        return ApiResponse::success($this->publicService->workingHours(), 'Working hours loaded');
+        return ApiResponse::success($catalogueService->workingHours(), 'Working hours loaded');
     }
 
-    public function availableSlots(Request $request)
+    public function availableSlots(Request $request, CatalogueService $catalogueService)
     {
         $validated = $request->validate([
             'date' => ['required', 'date'],
@@ -94,7 +92,7 @@ class PublicApiController
             'service_id' => ['required', 'integer', 'exists:services,id'],
         ]);
 
-        $slots = $this->publicService->availableSlots(
+        $slots = $catalogueService->availableSlots(
             Carbon::parse($validated['date']),
             (int) $validated['barber_id'],
             (int) $validated['service_id']
@@ -103,7 +101,7 @@ class PublicApiController
         return ApiResponse::success($slots, 'Available slots loaded');
     }
 
-    public function contact(Request $request)
+    public function contact(Request $request, ContentService $contentService)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:100'],
@@ -112,6 +110,6 @@ class PublicApiController
             'message' => ['required', 'string', 'min:10'],
         ]);
 
-        return ApiResponse::success($this->publicService->contact($data), 'Message received');
+        return ApiResponse::success($contentService->contact($data), 'Message received');
     }
 }
