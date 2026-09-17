@@ -17,7 +17,7 @@ class GalleryFactory extends Factory
         return [
             'title' => fake()->sentence(3),
             'description' => fake()->sentence(),
-            'image_path' => 'images/gallery/' . fake()->uuid() . '.jpg',
+            'image_path' => 'images/gallery/'.fake()->uuid().'.jpg',
             'category' => fake()->randomElement(GalleryCategory::cases()),
             'barber_id' => Barber::factory(),
             'is_featured' => false,

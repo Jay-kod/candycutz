@@ -21,16 +21,19 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
         'avatar',
         'phone',
         'auth_provider',
         'provider_id',
-        'status',
-        'is_active',
         'last_username_change_at',
         'deactivated_at',
         'notification_preferences',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'provider_id',
     ];
 
     protected $casts = [

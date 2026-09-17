@@ -13,6 +13,13 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(\App\Domain\Payment\Contracts\PaymentGateway::class, function ($app) {
+            return match (config('payments.default')) {
+                'paystack' => $app->make(\App\Domain\Payment\Gateways\PaystackGateway::class),
+                'manual_transfer' => $app->make(\App\Domain\Payment\Gateways\ManualTransferGateway::class),
+                default => $app->make(\App\Domain\Payment\Gateways\PaystackGateway::class),
+            };
+        });
     }
 
     public function boot(): void

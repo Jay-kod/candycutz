@@ -19,7 +19,7 @@ class SettingSeeder extends Seeder
             ['group' => 'contact', 'key' => 'address', 'value' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria'],
             ['group' => 'contact', 'key' => 'city', 'value' => 'Keffi'],
             ['group' => 'contact', 'key' => 'state', 'value' => 'Nasarawa'],
-            ['group' => 'contact', 'key' => 'latitude', 'value' => '8.84710000'],
+            ['group' => 'contact', 'key' => 'latitude', 'value' => '8.84860000'],
             ['group' => 'contact', 'key' => 'longitude', 'value' => '7.87360000'],
             ['group' => 'contact', 'key' => 'map_link', 'value' => 'https://maps.app.goo.gl/RtpPCeBRobajKmwS7'],
             ['group' => 'social', 'key' => 'instagram', 'value' => 'https://instagram.com/candycutz'],

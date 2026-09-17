@@ -142,7 +142,7 @@ class CleanPlatformSeeder extends Seeder
         // Upcoming Confirmed Appointment (Tomorrow at 10:00 AM)
         $tomorrow = Carbon::now()->addDay()->toDateString();
         Appointment::create([
-            'booking_reference' => 'CC-KEF-' . strtoupper(Str::random(6)),
+            'booking_reference' => 'CC-KEF-'.strtoupper(Str::random(6)),
             'branch_id' => $branchId,
             'customer_id' => $customer->id,
             'client_name' => $customer->name,
@@ -166,7 +166,7 @@ class CleanPlatformSeeder extends Seeder
         // Past Completed Appointment (3 Days ago at 2:00 PM)
         $pastDate = Carbon::now()->subDays(3)->toDateString();
         Appointment::create([
-            'booking_reference' => 'CC-KEF-' . strtoupper(Str::random(6)),
+            'booking_reference' => 'CC-KEF-'.strtoupper(Str::random(6)),
             'branch_id' => $branchId,
             'customer_id' => $customer->id,
             'client_name' => $customer->name,

@@ -1,18 +1,22 @@
 <?php
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 // Admin API Routes
 
 // Authentication Check
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 $token = str_replace('Bearer ', '', $authHeader);
 
-if (!$token) {
+if (! $token) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthenticated']);
     exit;
 }
 
 try {
-    $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($jwtSecret, 'HS256'));
+    $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
     $userId = $decoded->sub;
 } catch (Exception $e) {
     http_response_code(401);
@@ -20,14 +24,14 @@ try {
     exit;
 }
 
-if (!$userId) {
+if (! $userId) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthenticated']);
     exit;
 }
 
 // Ensure user is admin
-$stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+$stmt = $pdo->prepare('SELECT role FROM users WHERE id = ?');
 $stmt->execute([$userId]);
 $role = $stmt->fetchColumn();
 
@@ -53,69 +57,69 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
 
     // --- Core KPIs ---
     // Appointments Today
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = ?");
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE appointment_date = ?');
     $stmt->execute([$today]);
-    $appointmentsToday = (int)$stmt->fetchColumn();
+    $appointmentsToday = (int) $stmt->fetchColumn();
 
     // Yesterday's appointments for comparison
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = ?");
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE appointment_date = ?');
     $stmt->execute([$yesterday]);
-    $appointmentsYesterday = (int)$stmt->fetchColumn();
+    $appointmentsYesterday = (int) $stmt->fetchColumn();
 
     // Pending Appointments
     $stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE status = 'pending'");
-    $pendingAppointments = (int)$stmt->fetchColumn();
+    $pendingAppointments = (int) $stmt->fetchColumn();
 
     // Active Services
-    $stmt = $pdo->query("SELECT COUNT(*) FROM services WHERE is_available = 1");
-    $activeServices = (int)$stmt->fetchColumn();
+    $stmt = $pdo->query('SELECT COUNT(*) FROM services WHERE is_available = 1');
+    $activeServices = (int) $stmt->fetchColumn();
 
     // Registered Barbers
-    $stmt = $pdo->query("SELECT COUNT(*) FROM barbers");
-    $totalBarbers = (int)$stmt->fetchColumn();
+    $stmt = $pdo->query('SELECT COUNT(*) FROM barbers');
+    $totalBarbers = (int) $stmt->fetchColumn();
 
     // Total Customers
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer'");
-    $totalCustomers = (int)$stmt->fetchColumn();
+    $totalCustomers = (int) $stmt->fetchColumn();
 
     // New customers this week
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'customer' AND created_at >= ?");
     $stmt->execute([$weekAgo]);
-    $newCustomersWeek = (int)$stmt->fetchColumn();
+    $newCustomersWeek = (int) $stmt->fetchColumn();
 
     // --- Revenue ---
     // Total revenue (all time)
     $stmt = $pdo->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'successful'");
-    $totalRevenue = (float)$stmt->fetchColumn();
+    $totalRevenue = (float) $stmt->fetchColumn();
 
     // Revenue this month
     $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'successful' AND created_at >= ?");
     $stmt->execute([$monthAgo]);
-    $revenueMonth = (float)$stmt->fetchColumn();
+    $revenueMonth = (float) $stmt->fetchColumn();
 
     // Revenue this week
     $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'successful' AND created_at >= ?");
     $stmt->execute([$weekAgo]);
-    $revenueWeek = (float)$stmt->fetchColumn();
+    $revenueWeek = (float) $stmt->fetchColumn();
 
     // Revenue today (from service prices of completed today)
     $stmt = $pdo->prepare("SELECT COALESCE(SUM(s.price), 0) FROM appointments a JOIN services s ON a.service_id = s.id WHERE a.appointment_date = ? AND a.status = 'completed'");
     $stmt->execute([$today]);
-    $revenueToday = (float)$stmt->fetchColumn();
+    $revenueToday = (float) $stmt->fetchColumn();
 
     // --- Completion rate ---
     $stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE status = 'completed'");
-    $completedCount = (int)$stmt->fetchColumn();
-    $stmt = $pdo->query("SELECT COUNT(*) FROM appointments");
-    $totalAppointments = (int)$stmt->fetchColumn();
+    $completedCount = (int) $stmt->fetchColumn();
+    $stmt = $pdo->query('SELECT COUNT(*) FROM appointments');
+    $totalAppointments = (int) $stmt->fetchColumn();
     $completionRate = $totalAppointments > 0 ? round(($completedCount / $totalAppointments) * 100, 1) : 0;
 
     // --- Status Breakdown ---
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM appointments GROUP BY status");
+    $stmt = $pdo->query('SELECT status, COUNT(*) as count FROM appointments GROUP BY status');
     $statusRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $statusBreakdown = ['pending' => 0, 'confirmed' => 0, 'completed' => 0, 'cancelled' => 0, 'no_show' => 0];
     foreach ($statusRows as $s) {
-        $statusBreakdown[$s['status']] = (int)$s['count'];
+        $statusBreakdown[$s['status']] = (int) $s['count'];
     }
 
     // --- Revenue Trend (last 7 days) ---
@@ -125,7 +129,7 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
         $label = date('D', strtotime("-$i days")); // Mon, Tue, etc.
         $stmt = $pdo->prepare("SELECT COALESCE(SUM(s.price), 0) FROM appointments a JOIN services s ON a.service_id = s.id WHERE a.appointment_date = ? AND a.status = 'completed'");
         $stmt->execute([$d]);
-        $revenueTrend[] = ['day' => $label, 'date' => $d, 'revenue' => (float)$stmt->fetchColumn()];
+        $revenueTrend[] = ['day' => $label, 'date' => $d, 'revenue' => (float) $stmt->fetchColumn()];
     }
 
     // --- Booking Trend (last 7 days) ---
@@ -133,9 +137,9 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
     for ($i = 6; $i >= 0; $i--) {
         $d = date('Y-m-d', strtotime("-$i days"));
         $label = date('D', strtotime("-$i days"));
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = ?");
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE appointment_date = ?');
         $stmt->execute([$d]);
-        $bookingTrend[] = ['day' => $label, 'date' => $d, 'count' => (int)$stmt->fetchColumn()];
+        $bookingTrend[] = ['day' => $label, 'date' => $d, 'count' => (int) $stmt->fetchColumn()];
     }
 
     // --- Top Barbers (by completed bookings) ---
@@ -152,7 +156,7 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
     $topBarbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // --- Recent Appointments (last 10) ---
-    $stmt = $pdo->query("
+    $stmt = $pdo->query('
         SELECT a.id, a.appointment_date, a.appointment_time, a.status,
                u.name as customer_name, u.avatar as customer_avatar,
                s.name as service_name, s.price as service_price,
@@ -164,17 +168,17 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
         LEFT JOIN users bu ON b.user_id = bu.id
         ORDER BY a.created_at DESC
         LIMIT 10
-    ");
+    ');
     $recentAppointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // --- Recent Activity (audit logs) ---
-    $stmt = $pdo->query("
+    $stmt = $pdo->query('
         SELECT al.action, al.entity_type, al.created_at, u.name as user_name, u.role as user_role
         FROM audit_logs al
         LEFT JOIN users u ON al.user_id = u.id
         ORDER BY al.created_at DESC
         LIMIT 8
-    ");
+    ');
     $recentActivity = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // --- Top Services ---
@@ -199,13 +203,13 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
                 'total_customers' => $totalCustomers,
                 'new_customers_week' => $newCustomersWeek,
                 'total_appointments' => $totalAppointments,
-                'completion_rate' => $completionRate
+                'completion_rate' => $completionRate,
             ],
             'revenue' => [
                 'total' => $totalRevenue,
                 'month' => $revenueMonth,
                 'week' => $revenueWeek,
-                'today' => $revenueToday
+                'today' => $revenueToday,
             ],
             'status_breakdown' => $statusBreakdown,
             'revenue_trend' => $revenueTrend,
@@ -213,8 +217,8 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
             'top_barbers' => $topBarbers,
             'top_services' => $topServices,
             'recent_appointments' => $recentAppointments,
-            'recent_activity' => $recentActivity
-        ]
+            'recent_activity' => $recentActivity,
+        ],
     ]);
     exit;
 }
@@ -224,20 +228,20 @@ if ($method === 'GET' && $path === '/admin/dashboard') {
 // ==========================================
 if ($method === 'GET' && $path === '/admin/analytics') {
     $range = $_GET['range'] ?? '30d';
-    
+
     // Determine date filter based on range
-    $df = "";
-    $dfA = "";
-    $dfP = "";
+    $df = '';
+    $dfA = '';
+    $dfP = '';
     if ($range === '7d') {
-        $df = "AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        $dfA = "AND a.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        $dfP = "AND p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
-    } else if ($range === '30d') {
-        $df = "AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-        $dfA = "AND a.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-        $dfP = "AND p.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-    } else if ($range === 'month') {
+        $df = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+        $dfA = 'AND a.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+        $dfP = 'AND p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+    } elseif ($range === '30d') {
+        $df = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+        $dfA = 'AND a.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+        $dfP = 'AND p.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+    } elseif ($range === 'month') {
         $df = "AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')";
         $dfA = "AND a.created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')";
         $dfP = "AND p.created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')";
@@ -250,24 +254,24 @@ if ($method === 'GET' && $path === '/admin/analytics') {
         'status_breakdown' => [],
         'top_barbers' => [],
         'top_services' => [],
-        'customer_growth' => []
+        'customer_growth' => [],
     ];
 
     // Business Stats
     $stmt = $pdo->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'successful' $df");
-    $analytics['business_stats']['total_revenue'] = (float)$stmt->fetchColumn();
+    $analytics['business_stats']['total_revenue'] = (float) $stmt->fetchColumn();
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE status = 'completed' $df");
-    $analytics['business_stats']['total_appointments'] = (int)$stmt->fetchColumn();
+    $analytics['business_stats']['total_appointments'] = (int) $stmt->fetchColumn();
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer' $df");
-    $analytics['business_stats']['new_customers'] = (int)$stmt->fetchColumn();
+    $analytics['business_stats']['new_customers'] = (int) $stmt->fetchColumn();
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer'");
-    $analytics['business_stats']['total_customers'] = (int)$stmt->fetchColumn();
+    $analytics['business_stats']['total_customers'] = (int) $stmt->fetchColumn();
 
-    $stmt = $pdo->query("SELECT COUNT(*) FROM blog_posts");
-    $analytics['platform_stats']['total_blog_posts'] = (int)$stmt->fetchColumn();
+    $stmt = $pdo->query('SELECT COUNT(*) FROM blog_posts');
+    $analytics['platform_stats']['total_blog_posts'] = (int) $stmt->fetchColumn();
 
     // Top Barbers
     $stmt = $pdo->query("
@@ -299,7 +303,7 @@ if ($method === 'GET' && $path === '/admin/analytics') {
     $statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $breakdown = ['pending' => 0, 'confirmed' => 0, 'completed' => 0, 'cancelled' => 0, 'no_show' => 0];
     foreach ($statuses as $s) {
-        $breakdown[$s['status']] = (int)$s['count'];
+        $breakdown[$s['status']] = (int) $s['count'];
     }
     $analytics['status_breakdown'] = $breakdown;
 
@@ -343,7 +347,7 @@ if ($method === 'GET' && $path === '/admin/analytics') {
 // ==========================================
 if (strpos($path, '/admin/appointments') === 0) {
     if ($method === 'GET' && $path === '/admin/appointments') {
-        $stmt = $pdo->query("
+        $stmt = $pdo->query('
             SELECT a.*, 
                    u.name as client_name, u.email as client_email, u.phone as client_phone, u.avatar as customer_avatar,
                    s.name as service_name, s.price as service_price, s.duration_minutes,
@@ -356,9 +360,9 @@ if (strpos($path, '/admin/appointments') === 0) {
             LEFT JOIN users bu ON b.user_id = bu.id
             LEFT JOIN payments p ON a.id = p.appointment_id
             ORDER BY a.appointment_date DESC, a.appointment_time DESC
-        ");
+        ');
         $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         foreach ($appointments as &$appt) {
             $appt['service'] = ['name' => $appt['service_name'], 'price' => $appt['service_price'], 'duration_minutes' => $appt['duration_minutes']];
             $appt['barber'] = ['name' => $appt['barber_name']];
@@ -371,19 +375,19 @@ if (strpos($path, '/admin/appointments') === 0) {
 
     if ($method === 'PATCH' && preg_match('/^\/admin\/appointments\/(\d+)\/approve$/', $path, $matches)) {
         $appointmentId = $matches[1];
-        
+
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare("UPDATE appointments SET status = 'confirmed' WHERE id = ?");
             $stmt->execute([$appointmentId]);
-            
+
             $stmt = $pdo->prepare("UPDATE payments SET status = 'successful', verified_by = 'admin' WHERE appointment_id = ?");
             $stmt->execute([$appointmentId]);
-            
-            $stmt = $pdo->prepare("SELECT customer_id, barber_id FROM appointments WHERE id = ?");
+
+            $stmt = $pdo->prepare('SELECT customer_id, barber_id FROM appointments WHERE id = ?');
             $stmt->execute([$appointmentId]);
             $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($appointment) {
                 cc_notify_appointment_parties($pdo, (int) $appointmentId, [
                     'sender_id' => $userId,
@@ -402,51 +406,52 @@ if (strpos($path, '/admin/appointments') === 0) {
                     ],
                 ]);
             }
-            
+
             $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'approve_booking', 'appointment', ?, ?)");
             $stmt->execute([$userId, $appointmentId, $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
-            
+
             $pdo->commit();
             echo json_encode(['success' => true, 'message' => 'Appointment approved']);
         } catch (PDOException $e) {
             $pdo->rollBack();
-            http_response_code(500); echo json_encode(['error' => 'Failed to approve']);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to approve']);
         }
         exit;
     }
 
     if ($method === 'PATCH' && preg_match('/^\/admin\/appointments\/(\d+)\/force-approve$/', $path, $matches)) {
         $appointmentId = $matches[1];
-        
+
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare("UPDATE appointments SET status = 'confirmed' WHERE id = ?");
             $stmt->execute([$appointmentId]);
-            
+
             // Check if payment exists, if not insert it
-            $stmt = $pdo->prepare("SELECT id FROM payments WHERE appointment_id = ?");
+            $stmt = $pdo->prepare('SELECT id FROM payments WHERE appointment_id = ?');
             $stmt->execute([$appointmentId]);
-            if (!$stmt->fetch()) {
+            if (! $stmt->fetch()) {
                 // Insert a dummy payment to satisfy the clearance
-                $stmt = $pdo->prepare("SELECT customer_id, service_id FROM appointments WHERE id = ?");
+                $stmt = $pdo->prepare('SELECT customer_id, service_id FROM appointments WHERE id = ?');
                 $stmt->execute([$appointmentId]);
                 $appt = $stmt->fetch(PDO::FETCH_ASSOC);
-                
-                $stmt = $pdo->prepare("SELECT price FROM services WHERE id = ?");
+
+                $stmt = $pdo->prepare('SELECT price FROM services WHERE id = ?');
                 $stmt->execute([$appt['service_id']]);
                 $price = $stmt->fetchColumn() ?: 0;
-                
+
                 $stmt = $pdo->prepare("INSERT INTO payments (appointment_id, user_id, amount, payment_method, status, transaction_ref, verified_by) VALUES (?, ?, ?, 'manual', 'successful', 'FORCE_BYPASS', 'admin')");
                 $stmt->execute([$appointmentId, $appt['customer_id'], $price]);
             } else {
                 $stmt = $pdo->prepare("UPDATE payments SET status = 'successful', verified_by = 'admin' WHERE appointment_id = ?");
                 $stmt->execute([$appointmentId]);
             }
-            
-            $stmt = $pdo->prepare("SELECT customer_id, barber_id FROM appointments WHERE id = ?");
+
+            $stmt = $pdo->prepare('SELECT customer_id, barber_id FROM appointments WHERE id = ?');
             $stmt->execute([$appointmentId]);
             $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($appointment) {
                 cc_notify_appointment_parties($pdo, (int) $appointmentId, [
                     'sender_id' => $userId,
@@ -465,15 +470,16 @@ if (strpos($path, '/admin/appointments') === 0) {
                     ],
                 ]);
             }
-            
+
             $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'force_approve_booking', 'appointment', ?, ?)");
             $stmt->execute([$userId, $appointmentId, $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
-            
+
             $pdo->commit();
             echo json_encode(['success' => true, 'message' => 'Appointment force approved']);
         } catch (PDOException $e) {
             $pdo->rollBack();
-            http_response_code(500); echo json_encode(['error' => 'Failed to force approve']);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to force approve']);
         }
         exit;
     }
@@ -482,10 +488,10 @@ if (strpos($path, '/admin/appointments') === 0) {
         $appointmentId = $matches[1];
         $stmt = $pdo->prepare("UPDATE appointments SET status = 'cancelled' WHERE id = ?");
         $stmt->execute([$appointmentId]);
-        
+
         $stmt = $pdo->prepare("UPDATE payments SET status = 'failed' WHERE appointment_id = ?");
         $stmt->execute([$appointmentId]);
-        
+
         $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'cancel_booking', 'appointment', ?, ?)");
         $stmt->execute([$userId, $appointmentId, $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
 
@@ -505,7 +511,7 @@ if (strpos($path, '/admin/appointments') === 0) {
                 'message' => 'You cancelled a customer booking.',
             ],
         ]);
-        
+
         echo json_encode(['success' => true, 'message' => 'Appointment cancelled']);
         exit;
     }
@@ -522,16 +528,20 @@ if (strpos($path, '/admin/appointments') === 0) {
         $appointment_time = $data['appointment_time'] ?? date('H:i:s');
         $payment_method = $data['payment_method'] ?? 'cash';
 
-        if (!$customer_name || !$customer_phone || !$service_id || !$barber_id) {
-            http_response_code(400); echo json_encode(['error' => 'Customer name, phone, barber, and service are required']); exit;
+        if (! $customer_name || ! $customer_phone || ! $service_id || ! $barber_id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Customer name, phone, barber, and service are required']);
+            exit;
         }
 
         // Fetch service price
-        $stmt = $pdo->prepare("SELECT price FROM services WHERE id = ?");
+        $stmt = $pdo->prepare('SELECT price FROM services WHERE id = ?');
         $stmt->execute([$service_id]);
         $service_price = $stmt->fetchColumn();
-        if (!$service_price) {
-            http_response_code(400); echo json_encode(['error' => 'Invalid service selected']); exit;
+        if (! $service_price) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid service selected']);
+            exit;
         }
 
         $pdo->beginTransaction();
@@ -539,18 +549,18 @@ if (strpos($path, '/admin/appointments') === 0) {
             // Check if user exists by phone or email
             $customerId = null;
             if ($customer_email) {
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? OR phone = ?");
+                $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? OR phone = ?');
                 $stmt->execute([$customer_email, $customer_phone]);
                 $customerId = $stmt->fetchColumn();
             } else {
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE phone = ?");
+                $stmt = $pdo->prepare('SELECT id FROM users WHERE phone = ?');
                 $stmt->execute([$customer_phone]);
                 $customerId = $stmt->fetchColumn();
             }
 
-            if (!$customerId) {
-                if (!$customer_email) {
-                    $customer_email = 'walkin_' . time() . '_' . rand(1000, 9999) . '@candycutz.local';
+            if (! $customerId) {
+                if (! $customer_email) {
+                    $customer_email = 'walkin_'.time().'_'.rand(1000, 9999).'@candycutz.local';
                 }
                 $hashedPassword = password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare("INSERT INTO users (name, email, phone, password, role) VALUES (?, ?, ?, ?, 'customer')");
@@ -570,7 +580,7 @@ if (strpos($path, '/admin/appointments') === 0) {
             } elseif ($payment_method === 'transfer' || $payment_method === 'pos') {
                 $payment_status = 'awaiting_verification';
             }
-            $stmt = $pdo->prepare("INSERT INTO payments (customer_id, appointment_id, amount, status, payment_method) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare('INSERT INTO payments (customer_id, appointment_id, amount, status, payment_method) VALUES (?, ?, ?, ?, ?)');
             $stmt->execute([$customerId, $appointmentId, $service_price, $payment_status, $payment_method]);
 
             // Audit log
@@ -603,7 +613,8 @@ if (strpos($path, '/admin/appointments') === 0) {
             echo json_encode(['success' => true, 'message' => 'Walk-in appointment created successfully']);
         } catch (PDOException $e) {
             $pdo->rollBack();
-            http_response_code(500); echo json_encode(['error' => 'Failed to create walk-in appointment: ' . $e->getMessage()]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to create walk-in appointment: '.$e->getMessage()]);
         }
         exit;
     }
@@ -613,7 +624,7 @@ if (strpos($path, '/admin/appointments') === 0) {
 // SETTINGS MANAGEMENT
 // ==========================================
 if ($method === 'GET' && $path === '/admin/settings') {
-    $stmt = $pdo->query("SELECT `key`, `value` FROM settings");
+    $stmt = $pdo->query('SELECT `key`, `value` FROM settings');
     $settings = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $settings[$row['key']] = $row['value'];
@@ -625,7 +636,7 @@ if ($method === 'GET' && $path === '/admin/settings') {
 if ($method === 'POST' && $path === '/admin/settings') {
     // Handle form-data since frontend sends FormData (for image uploads)
     $settingsData = isset($_POST['settings']) && is_array($_POST['settings']) ? $_POST['settings'] : [];
-    
+
     // Fallback to JSON body (used by the Integrations page)
     if (empty($settingsData)) {
         $json = json_decode(file_get_contents('php://input'), true);
@@ -633,69 +644,77 @@ if ($method === 'POST' && $path === '/admin/settings') {
             $settingsData = $json['settings'];
         }
     }
-    
+
     // Handle image upload if present
     if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['hero_image'];
         $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
         if (in_array($file['type'], $allowedTypes)) {
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = 'hero_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $uploadDir = __DIR__ . '/storage/hero/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-                $settingsData['hero_image'] = 'hero/' . $filename;
+            $filename = 'hero_'.time().'_'.rand(100, 999).'.'.$ext;
+            $uploadDir = __DIR__.'/storage/hero/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            if (move_uploaded_file($file['tmp_name'], $uploadDir.$filename)) {
+                $settingsData['hero_image'] = 'hero/'.$filename;
             }
         }
     }
-    
+
     // Handle about image upload if present
     if (isset($_FILES['about_teaser_image']) && $_FILES['about_teaser_image']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['about_teaser_image'];
         $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
         if (in_array($file['type'], $allowedTypes)) {
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = 'about_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $uploadDir = __DIR__ . '/storage/about/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-                $settingsData['about_teaser_image'] = 'about/' . $filename;
+            $filename = 'about_'.time().'_'.rand(100, 999).'.'.$ext;
+            $uploadDir = __DIR__.'/storage/about/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            if (move_uploaded_file($file['tmp_name'], $uploadDir.$filename)) {
+                $settingsData['about_teaser_image'] = 'about/'.$filename;
             }
         }
     }
-    
+
     // Handle about shop image upload if present
     if (isset($_FILES['about_shop_image']) && $_FILES['about_shop_image']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['about_shop_image'];
         $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
         if (in_array($file['type'], $allowedTypes)) {
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = 'about_shop_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $uploadDir = __DIR__ . '/storage/about/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-                $settingsData['about_shop_image'] = 'about/' . $filename;
+            $filename = 'about_shop_'.time().'_'.rand(100, 999).'.'.$ext;
+            $uploadDir = __DIR__.'/storage/about/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            if (move_uploaded_file($file['tmp_name'], $uploadDir.$filename)) {
+                $settingsData['about_shop_image'] = 'about/'.$filename;
             }
         }
     }
 
     if (empty($settingsData)) {
-        http_response_code(400); echo json_encode(['error' => 'No data provided']); exit;
+        http_response_code(400);
+        echo json_encode(['error' => 'No data provided']);
+        exit;
     }
-    
+
     $pdo->beginTransaction();
     try {
-        $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
+        $stmt = $pdo->prepare('INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?');
         foreach ($settingsData as $key => $value) {
             $stmt->execute([$key, $value, $value]);
         }
-        
+
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, ip_address) VALUES (?, 'update_settings', 'system', ?)");
         $logStmt->execute([$userId, $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
-        
+
         $pdo->commit();
 
         cc_notify_admin($pdo, [
@@ -704,9 +723,9 @@ if ($method === 'POST' && $path === '/admin/settings') {
             'title' => 'Settings Updated',
             'message' => 'Site settings were updated by an admin.',
         ]);
-        
+
         // Return the updated settings so the frontend can refresh the UI
-        $stmt = $pdo->query("SELECT `key`, `value` FROM settings");
+        $stmt = $pdo->query('SELECT `key`, `value` FROM settings');
         $allSettings = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $allSettings[$row['key']] = $row['value'];
@@ -714,7 +733,8 @@ if ($method === 'POST' && $path === '/admin/settings') {
         echo json_encode(['success' => true, 'message' => 'Settings updated successfully', 'data' => $allSettings]);
     } catch (PDOException $e) {
         $pdo->rollBack();
-        http_response_code(500); echo json_encode(['error' => 'Failed to update settings: ' . $e->getMessage()]);
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to update settings: '.$e->getMessage()]);
     }
     exit;
 }
@@ -725,14 +745,14 @@ if ($method === 'POST' && $path === '/admin/settings') {
 if ($method === 'POST' && $path === '/admin/test-email') {
     $json = json_decode(file_get_contents('php://input'), true);
     $to = trim($json['to'] ?? '');
-    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+    if (! filter_var($to, FILTER_VALIDATE_EMAIL)) {
         http_response_code(422);
         echo json_encode(['error' => 'Enter a valid recipient email']);
         exit;
     }
 
     $cfg = cc_mail_config($pdo);
-    if (!cc_mail_is_configured($cfg)) {
+    if (! cc_mail_is_configured($cfg)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Mail transport not configured', 'config' => ['host' => $cfg['host'], 'from' => $cfg['from']]]);
         exit;
@@ -752,42 +772,47 @@ if ($method === 'POST' && $path === '/admin/test-email') {
 if (strpos($path, '/admin/services') === 0) {
     // GET all global services
     if ($method === 'GET' && $path === '/admin/services') {
-        $stmt = $pdo->query("SELECT s.*, c.name as category_name FROM services s LEFT JOIN service_categories c ON s.category_id = c.id ORDER BY s.name ASC");
+        $stmt = $pdo->query('SELECT s.*, c.name as category_name FROM services s LEFT JOIN service_categories c ON s.category_id = c.id ORDER BY s.name ASC');
         echo json_encode(['data' => $stmt->fetchAll()]);
         exit;
     }
 
     // Helper to handle image uploads
-    $handleUpload = function($fileKey) {
+    $handleUpload = function ($fileKey) {
         if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES[$fileKey];
             $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-            if (!in_array($file['type'], $allowedTypes)) return null;
-            
+            if (! in_array($file['type'], $allowedTypes)) {
+                return null;
+            }
+
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = 'service_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $uploadDir = __DIR__ . '/uploads/services/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-                return '/public/uploads/services/' . $filename;
+            $filename = 'service_'.time().'_'.rand(100, 999).'.'.$ext;
+            $uploadDir = __DIR__.'/uploads/services/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            if (move_uploaded_file($file['tmp_name'], $uploadDir.$filename)) {
+                return '/public/uploads/services/'.$filename;
             }
         }
+
         return null;
     };
 
     // POST create new service
     if ($method === 'POST' && $path === '/admin/services') {
-        $data = strpos($_SERVER["CONTENT_TYPE"] ?? '', 'multipart/form-data') !== false ? $_POST : json_decode(file_get_contents('php://input'), true);
-        
+        $data = strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false ? $_POST : json_decode(file_get_contents('php://input'), true);
+
         $name = trim($data['name'] ?? '');
         $description = trim($data['description'] ?? '');
         $price = floatval($data['price'] ?? 0);
         $duration = intval($data['duration_minutes'] ?? 30);
-        $categoryId = !empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
+        $categoryId = ! empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
         $isAvailable = isset($data['is_available']) ? (in_array($data['is_available'], [1, '1', 'true', true], true) ? 1 : 0) : 1;
 
-        if (!$name || $price <= 0) {
+        if (! $name || $price <= 0) {
             http_response_code(422);
             echo json_encode(['error' => 'Name and a valid price are required']);
             exit;
@@ -797,7 +822,7 @@ if (strpos($path, '/admin/services') === 0) {
         $image2 = $handleUpload('image2');
         $image3 = $handleUpload('image3');
 
-        $stmt = $pdo->prepare("INSERT INTO services (name, description, price, duration_minutes, category_id, is_available, image, image2, image3, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt = $pdo->prepare('INSERT INTO services (name, description, price, duration_minutes, category_id, is_available, image, image2, image3, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
         $stmt->execute([$name, $description, $price, $duration, $categoryId, $isAvailable, $image1, $image2, $image3]);
         $serviceId = (int) $pdo->lastInsertId();
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'create_service', 'service', ?, ?)")->execute([$userId, $serviceId, $_SERVER['REMOTE_ADDR']]);
@@ -822,24 +847,26 @@ if (strpos($path, '/admin/services') === 0) {
     // POST (simulated PUT via FormData) update service
     if ($method === 'POST' && preg_match('#^/admin/services/(\d+)$#', $path, $m)) {
         $serviceId = $m[1];
-        $data = strpos($_SERVER["CONTENT_TYPE"] ?? '', 'multipart/form-data') !== false ? $_POST : json_decode(file_get_contents('php://input'), true);
-        
+        $data = strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false ? $_POST : json_decode(file_get_contents('php://input'), true);
+
         // Ensure service exists
-        $stmt = $pdo->prepare("SELECT image, image2, image3 FROM services WHERE id = ?");
+        $stmt = $pdo->prepare('SELECT image, image2, image3 FROM services WHERE id = ?');
         $stmt->execute([$serviceId]);
         $existing = $stmt->fetch();
-        if (!$existing) {
-            http_response_code(404); echo json_encode(['error' => 'Service not found']); exit;
+        if (! $existing) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Service not found']);
+            exit;
         }
 
         $name = trim($data['name'] ?? '');
         $description = trim($data['description'] ?? '');
         $price = floatval($data['price'] ?? 0);
         $duration = intval($data['duration_minutes'] ?? 30);
-        $categoryId = !empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
+        $categoryId = ! empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
         $isAvailable = isset($data['is_available']) ? (in_array($data['is_available'], [1, '1', 'true', true], true) ? 1 : 0) : 1;
 
-        if (!$name || $price <= 0) {
+        if (! $name || $price <= 0) {
             http_response_code(422);
             echo json_encode(['error' => 'Name and a valid price are required']);
             exit;
@@ -848,13 +875,19 @@ if (strpos($path, '/admin/services') === 0) {
         $image1 = $handleUpload('image1') ?? $existing['image'];
         $image2 = $handleUpload('image2') ?? $existing['image2'];
         $image3 = $handleUpload('image3') ?? $existing['image3'];
-        
-        // Handle image removal if specified
-        if (isset($data['remove_image1']) && $data['remove_image1'] === 'true') $image1 = null;
-        if (isset($data['remove_image2']) && $data['remove_image2'] === 'true') $image2 = null;
-        if (isset($data['remove_image3']) && $data['remove_image3'] === 'true') $image3 = null;
 
-        $stmt = $pdo->prepare("UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, category_id = ?, is_available = ?, image = ?, image2 = ?, image3 = ? WHERE id = ?");
+        // Handle image removal if specified
+        if (isset($data['remove_image1']) && $data['remove_image1'] === 'true') {
+            $image1 = null;
+        }
+        if (isset($data['remove_image2']) && $data['remove_image2'] === 'true') {
+            $image2 = null;
+        }
+        if (isset($data['remove_image3']) && $data['remove_image3'] === 'true') {
+            $image3 = null;
+        }
+
+        $stmt = $pdo->prepare('UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, category_id = ?, is_available = ?, image = ?, image2 = ?, image3 = ? WHERE id = ?');
         $stmt->execute([$name, $description, $price, $duration, $categoryId, $isAvailable, $image1, $image2, $image3, $serviceId]);
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'update_service', 'service', ?, ?)")->execute([$userId, $serviceId, $_SERVER['REMOTE_ADDR']]);
         cc_notify_admin($pdo, [
@@ -867,11 +900,11 @@ if (strpos($path, '/admin/services') === 0) {
         echo json_encode(['message' => 'Service updated']);
         exit;
     }
-    
+
     // Fallback standard PUT (without images) for backward compatibility
     if ($method === 'PUT' && preg_match('#^/admin/services/(\d+)$#', $path, $m)) {
         // ... handled same as above without files. But let's let the POST simulated PUT do the heavy lifting from now on.
-        // Actually, just keep it simple: if Axios sends FormData for PUT, PHP won't populate $_POST. 
+        // Actually, just keep it simple: if Axios sends FormData for PUT, PHP won't populate $_POST.
         // We MUST use POST with `_method=PUT` or just use POST to an update endpoint.
         // The regex `^/admin/services/(\d+)$` with POST is perfect. I will change admin.api.js to use POST.
         $serviceId = $m[1];
@@ -880,16 +913,16 @@ if (strpos($path, '/admin/services') === 0) {
         $description = trim($data['description'] ?? '');
         $price = floatval($data['price'] ?? 0);
         $duration = intval($data['duration_minutes'] ?? 30);
-        $categoryId = !empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
+        $categoryId = ! empty($data['category_id']) && $data['category_id'] !== 'null' ? intval($data['category_id']) : null;
         $isAvailable = isset($data['is_available']) ? (in_array($data['is_available'], [1, '1', 'true', true], true) ? 1 : 0) : 1;
 
-        if (!$name || $price <= 0) {
+        if (! $name || $price <= 0) {
             http_response_code(422);
             echo json_encode(['error' => 'Name and a valid price are required']);
             exit;
         }
 
-        $stmt = $pdo->prepare("UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, category_id = ?, is_available = ? WHERE id = ?");
+        $stmt = $pdo->prepare('UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, category_id = ?, is_available = ? WHERE id = ?');
         $stmt->execute([$name, $description, $price, $duration, $categoryId, $isAvailable, $serviceId]);
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'update_service', 'service', ?, ?)")->execute([$userId, $serviceId, $_SERVER['REMOTE_ADDR']]);
         cc_notify_admin($pdo, [
@@ -906,7 +939,7 @@ if (strpos($path, '/admin/services') === 0) {
     // DELETE service
     if ($method === 'DELETE' && preg_match('#^/admin/services/(\d+)$#', $path, $m)) {
         $serviceId = $m[1];
-        $stmt = $pdo->prepare("DELETE FROM services WHERE id = ?");
+        $stmt = $pdo->prepare('DELETE FROM services WHERE id = ?');
         $stmt->execute([$serviceId]);
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'delete_service', 'service', ?, ?)")->execute([$userId, $serviceId, $_SERVER['REMOTE_ADDR']]);
         cc_notify_admin($pdo, [
@@ -927,7 +960,7 @@ if (strpos($path, '/admin/services') === 0) {
 if (strpos($path, '/admin/gallery') === 0) {
     // GET all global gallery items
     if ($method === 'GET' && $path === '/admin/gallery') {
-        $stmt = $pdo->query("SELECT g.*, u.name as barber_name FROM gallery g LEFT JOIN barbers b ON g.barber_id = b.id LEFT JOIN users u ON b.user_id = u.id ORDER BY g.created_at DESC");
+        $stmt = $pdo->query('SELECT g.*, u.name as barber_name FROM gallery g LEFT JOIN barbers b ON g.barber_id = b.id LEFT JOIN users u ON b.user_id = u.id ORDER BY g.created_at DESC');
         echo json_encode(['data' => $stmt->fetchAll()]);
         exit;
     }
@@ -937,28 +970,34 @@ if (strpos($path, '/admin/gallery') === 0) {
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         $category = $_POST['category'] ?? '';
-        $barber_id = !empty($_POST['barber_id']) ? $_POST['barber_id'] : null;
+        $barber_id = ! empty($_POST['barber_id']) ? $_POST['barber_id'] : null;
         $image_url = '';
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/uploads/gallery/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            $uploadDir = __DIR__.'/uploads/gallery/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
             $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $filename = 'admin_gallery_' . time() . '_' . uniqid() . '.' . $ext;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
-                $image_url = '/uploads/gallery/' . $filename;
+            $filename = 'admin_gallery_'.time().'_'.uniqid().'.'.$ext;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir.$filename)) {
+                $image_url = '/uploads/gallery/'.$filename;
             } else {
-                http_response_code(500); echo json_encode(['error' => 'Failed to move uploaded file']); exit;
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to move uploaded file']);
+                exit;
             }
         } else {
             $image_url = $_POST['image_url'] ?? '';
         }
 
-        if (!$image_url) {
-            http_response_code(400); echo json_encode(['error' => 'Image file required']); exit;
+        if (! $image_url) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Image file required']);
+            exit;
         }
 
-        $stmt = $pdo->prepare("INSERT INTO gallery (barber_id, image_path, title, description, category) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare('INSERT INTO gallery (barber_id, image_path, title, description, category) VALUES (?, ?, ?, ?, ?)');
         $stmt->execute([$barber_id, $image_url, $title, $description, $category]);
         $galleryId = (int) $pdo->lastInsertId();
         cc_notify_admin($pdo, [
@@ -985,27 +1024,29 @@ if (strpos($path, '/admin/gallery') === 0) {
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         $category = $_POST['category'] ?? '';
-        $barber_id = !empty($_POST['barber_id']) ? $_POST['barber_id'] : null;
+        $barber_id = ! empty($_POST['barber_id']) ? $_POST['barber_id'] : null;
         $image_url = $_POST['image_url'] ?? '';
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/uploads/gallery/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            $uploadDir = __DIR__.'/uploads/gallery/';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
             $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $filename = 'admin_gallery_' . time() . '_' . uniqid() . '.' . $ext;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
-                $image_url = '/uploads/gallery/' . $filename;
+            $filename = 'admin_gallery_'.time().'_'.uniqid().'.'.$ext;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir.$filename)) {
+                $image_url = '/uploads/gallery/'.$filename;
             }
         }
 
         if ($image_url) {
-            $stmt = $pdo->prepare("UPDATE gallery SET barber_id = ?, title = ?, description = ?, category = ?, image_path = ? WHERE id = ?");
+            $stmt = $pdo->prepare('UPDATE gallery SET barber_id = ?, title = ?, description = ?, category = ?, image_path = ? WHERE id = ?');
             $stmt->execute([$barber_id, $title, $description, $category, $image_url, $id]);
         } else {
-            $stmt = $pdo->prepare("UPDATE gallery SET barber_id = ?, title = ?, description = ?, category = ? WHERE id = ?");
+            $stmt = $pdo->prepare('UPDATE gallery SET barber_id = ?, title = ?, description = ?, category = ? WHERE id = ?');
             $stmt->execute([$barber_id, $title, $description, $category, $id]);
         }
-        
+
         cc_notify_admin($pdo, [
             'sender_id' => $userId,
             'type' => 'general_update',
@@ -1020,7 +1061,7 @@ if (strpos($path, '/admin/gallery') === 0) {
     // DELETE gallery image
     if ($method === 'DELETE' && preg_match('#^/admin/gallery/(\d+)$#', $path, $matches)) {
         $id = $matches[1];
-        $stmt = $pdo->prepare("DELETE FROM gallery WHERE id = ?");
+        $stmt = $pdo->prepare('DELETE FROM gallery WHERE id = ?');
         $stmt->execute([$id]);
         cc_notify_admin($pdo, [
             'sender_id' => $userId,
@@ -1038,7 +1079,7 @@ if (strpos($path, '/admin/gallery') === 0) {
 // WORKING HOURS (Read-Only Mirror of Barber Schedules)
 // ==========================================
 if ($method === 'GET' && $path === '/admin/working-hours') {
-    $stmt = $pdo->query("
+    $stmt = $pdo->query('
         SELECT 
             wh.id,
             wh.barber_id,
@@ -1051,26 +1092,26 @@ if ($method === 'GET' && $path === '/admin/working-hours') {
         JOIN barbers b ON wh.barber_id = b.id
         JOIN users u ON b.user_id = u.id
         ORDER BY u.name ASC, wh.day_of_week ASC
-    ");
+    ');
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Format the data: group by barber, convert times, flip is_available → is_closed
     $barbers = [];
     foreach ($rows as $row) {
         $bid = $row['barber_id'];
-        if (!isset($barbers[$bid])) {
+        if (! isset($barbers[$bid])) {
             $barbers[$bid] = [
-                'barber_id' => (int)$bid,
+                'barber_id' => (int) $bid,
                 'barber_name' => $row['barber_name'],
                 'hours' => [],
             ];
         }
         $barbers[$bid]['hours'][] = [
-            'id' => (int)$row['id'],
-            'day_of_week' => (int)$row['day_of_week'],
+            'id' => (int) $row['id'],
+            'day_of_week' => (int) $row['day_of_week'],
             'open_time' => substr($row['open_time'], 0, 5),
             'close_time' => substr($row['close_time'], 0, 5),
-            'is_closed' => !(bool)$row['is_available'],
+            'is_closed' => ! (bool) $row['is_available'],
         ];
     }
 
@@ -1096,18 +1137,18 @@ if ($method === 'PUT' && preg_match('/^\/admin\/working-hours\/(\d+)$/', $path, 
             $dayOfWeek = (int) $hour['day_of_week'];
             $openTime = $hour['open_time'] ?? '09:00';
             $closeTime = $hour['close_time'] ?? '17:00';
-            
+
             $is_closed_val = $hour['is_closed'] ?? false;
             $is_closed = filter_var($is_closed_val, FILTER_VALIDATE_BOOLEAN);
             $isAvailable = $is_closed ? 0 : 1;
 
-            $check = $pdo->prepare("SELECT id FROM working_hours WHERE barber_id = ? AND day_of_week = ?");
+            $check = $pdo->prepare('SELECT id FROM working_hours WHERE barber_id = ? AND day_of_week = ?');
             $check->execute([$targetBarberId, $dayOfWeek]);
             if ($check->fetchColumn()) {
-                $pdo->prepare("UPDATE working_hours SET start_time = ?, end_time = ?, is_available = ? WHERE barber_id = ? AND day_of_week = ?")
+                $pdo->prepare('UPDATE working_hours SET start_time = ?, end_time = ?, is_available = ? WHERE barber_id = ? AND day_of_week = ?')
                     ->execute([$openTime, $closeTime, $isAvailable, $targetBarberId, $dayOfWeek]);
             } else {
-                $pdo->prepare("INSERT INTO working_hours (barber_id, day_of_week, start_time, end_time, is_available) VALUES (?, ?, ?, ?, ?)")
+                $pdo->prepare('INSERT INTO working_hours (barber_id, day_of_week, start_time, end_time, is_available) VALUES (?, ?, ?, ?, ?)')
                     ->execute([$targetBarberId, $dayOfWeek, $openTime, $closeTime, $isAvailable]);
             }
         }
@@ -1116,7 +1157,7 @@ if ($method === 'PUT' && preg_match('/^\/admin\/working-hours\/(\d+)$/', $path, 
     } catch (Exception $e) {
         $pdo->rollBack();
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to update working hours: ' . $e->getMessage()]);
+        echo json_encode(['error' => 'Failed to update working hours: '.$e->getMessage()]);
     }
     exit;
 }
@@ -1135,12 +1176,14 @@ if (strpos($path, '/admin/blog') === 0) {
     // UPDATE - must be checked before CREATE since POST is used for both
     if (($method === 'PUT' || $method === 'POST') && preg_match('/^\/admin\/blog\/(\d+)$/', $path, $matches)) {
         $id = $matches[1];
-        
-        $stmt = $pdo->prepare("SELECT featured_image FROM blog_posts WHERE id = ?");
+
+        $stmt = $pdo->prepare('SELECT featured_image FROM blog_posts WHERE id = ?');
         $stmt->execute([$id]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$existing) {
-            http_response_code(404); echo json_encode(['error' => 'Post not found']); exit;
+        if (! $existing) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Post not found']);
+            exit;
         }
         $featured_image = $existing['featured_image'];
 
@@ -1151,44 +1194,68 @@ if (strpos($path, '/admin/blog') === 0) {
 
         if (isset($_FILES['image'])) {
             if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/uploads/blog/';
-                if (!is_dir($uploadDir)) {
+                $uploadDir = __DIR__.'/uploads/blog/';
+                if (! is_dir($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
                 $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $filename = 'blog_admin_' . time() . '_' . uniqid() . '.' . $ext;
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
-                    $featured_image = '/uploads/blog/' . $filename;
+                $filename = 'blog_admin_'.time().'_'.uniqid().'.'.$ext;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir.$filename)) {
+                    $featured_image = '/uploads/blog/'.$filename;
                 } else {
-                    http_response_code(500); echo json_encode(['error' => 'Failed to move uploaded file']); exit;
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Failed to move uploaded file']);
+                    exit;
                 }
             } else {
                 $errCode = $_FILES['image']['error'];
-                $errMsg = 'Image upload failed with error code: ' . $errCode;
-                if ($errCode === UPLOAD_ERR_INI_SIZE) $errMsg = 'Image file is too large.';
-                http_response_code(400); echo json_encode(['error' => $errMsg]); exit;
+                $errMsg = 'Image upload failed with error code: '.$errCode;
+                if ($errCode === UPLOAD_ERR_INI_SIZE) {
+                    $errMsg = 'Image file is too large.';
+                }
+                http_response_code(400);
+                echo json_encode(['error' => $errMsg]);
+                exit;
             }
         } else {
             $data = json_decode(file_get_contents('php://input'), true);
             if ($data) {
-                if (isset($data['title'])) $title = $data['title'];
-                if (isset($data['content'])) $content = $data['content'];
-                if (isset($data['excerpt'])) $excerpt = $data['excerpt'];
-                if (isset($data['is_published'])) $is_published = $data['is_published'] ? 1 : 0;
-                if (isset($data['featured_image'])) $featured_image = $data['featured_image'];
+                if (isset($data['title'])) {
+                    $title = $data['title'];
+                }
+                if (isset($data['content'])) {
+                    $content = $data['content'];
+                }
+                if (isset($data['excerpt'])) {
+                    $excerpt = $data['excerpt'];
+                }
+                if (isset($data['is_published'])) {
+                    $is_published = $data['is_published'] ? 1 : 0;
+                }
+                if (isset($data['featured_image'])) {
+                    $featured_image = $data['featured_image'];
+                }
             }
         }
 
-        if ($title === null) $title = $_POST['title'] ?? '';
-        if ($content === null) $content = $_POST['content'] ?? '';
-        if ($excerpt === null) $excerpt = $_POST['excerpt'] ?? '';
-        if ($is_published === null) $is_published = isset($_POST['is_published']) ? ($_POST['is_published'] ? 1 : 0) : 0;
+        if ($title === null) {
+            $title = $_POST['title'] ?? '';
+        }
+        if ($content === null) {
+            $content = $_POST['content'] ?? '';
+        }
+        if ($excerpt === null) {
+            $excerpt = $_POST['excerpt'] ?? '';
+        }
+        if ($is_published === null) {
+            $is_published = isset($_POST['is_published']) ? ($_POST['is_published'] ? 1 : 0) : 0;
+        }
         $author_display = trim($_POST['author_display'] ?? ($input['author_display'] ?? ''));
         if ($author_display === '') {
             $author_display = 'Admin';
         }
 
-        $stmt = $pdo->prepare("UPDATE blog_posts SET title = ?, content = ?, excerpt = ?, is_published = ?, featured_image = ?, author_display = ? WHERE id = ?");
+        $stmt = $pdo->prepare('UPDATE blog_posts SET title = ?, content = ?, excerpt = ?, is_published = ?, featured_image = ?, author_display = ? WHERE id = ?');
         $stmt->execute([$title, $content, $excerpt, $is_published, $featured_image, $author_display, $id]);
         if ($is_published) {
             cc_notify_all_customers($pdo, [
@@ -1221,22 +1288,28 @@ if (strpos($path, '/admin/blog') === 0) {
 
         if (isset($_FILES['image'])) {
             if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/uploads/blog/';
-                if (!is_dir($uploadDir)) {
+                $uploadDir = __DIR__.'/uploads/blog/';
+                if (! is_dir($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
                 $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $filename = 'blog_admin_' . time() . '_' . uniqid() . '.' . $ext;
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
-                    $featured_image = '/uploads/blog/' . $filename;
+                $filename = 'blog_admin_'.time().'_'.uniqid().'.'.$ext;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir.$filename)) {
+                    $featured_image = '/uploads/blog/'.$filename;
                 } else {
-                    http_response_code(500); echo json_encode(['error' => 'Failed to move uploaded file']); exit;
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Failed to move uploaded file']);
+                    exit;
                 }
             } else {
                 $errCode = $_FILES['image']['error'];
-                $errMsg = 'Image upload failed with error code: ' . $errCode;
-                if ($errCode === UPLOAD_ERR_INI_SIZE) $errMsg = 'Image file is too large.';
-                http_response_code(400); echo json_encode(['error' => $errMsg]); exit;
+                $errMsg = 'Image upload failed with error code: '.$errCode;
+                if ($errCode === UPLOAD_ERR_INI_SIZE) {
+                    $errMsg = 'Image file is too large.';
+                }
+                http_response_code(400);
+                echo json_encode(['error' => $errMsg]);
+                exit;
             }
         } else {
             $data = json_decode(file_get_contents('php://input'), true);
@@ -1248,23 +1321,25 @@ if (strpos($path, '/admin/blog') === 0) {
                 $featured_image = $data['featured_image'] ?? null;
             }
         }
-        
-        if (!$title || !$content) {
-            http_response_code(400); echo json_encode(['error' => 'Title and content required']); exit;
+
+        if (! $title || ! $content) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Title and content required']);
+            exit;
         }
-        
+
         $author_display = trim($_POST['author_display'] ?? ($input['author_display'] ?? ''));
         if ($author_display === '') {
             $author_display = 'Admin';
         }
-        
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title))) . '-' . time();
-        
+
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title))).'-'.time();
+
         // Use $userId for author_id since admin is also a user
-        $stmt = $pdo->prepare("INSERT INTO blog_posts (author_id, author_display, title, slug, content, excerpt, is_published, featured_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare('INSERT INTO blog_posts (author_id, author_display, title, slug, content, excerpt, is_published, featured_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([$userId, $author_display, $title, $slug, $content, $excerpt, $is_published, $featured_image]);
         $blogId = (int) $pdo->lastInsertId();
-        
+
         if ($is_published) {
             cc_notify_all_customers($pdo, [
                 'sender_id' => $userId,
@@ -1290,7 +1365,7 @@ if (strpos($path, '/admin/blog') === 0) {
     // DELETE
     if ($method === 'DELETE' && preg_match('/^\/admin\/blog\/(\d+)$/', $path, $matches)) {
         $id = $matches[1];
-        $stmt = $pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
+        $stmt = $pdo->prepare('DELETE FROM blog_posts WHERE id = ?');
         $stmt->execute([$id]);
         $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address) VALUES (?, 'delete_blog', 'blog', ?, ?)")->execute([$userId, $id, $_SERVER['REMOTE_ADDR']]);
         cc_notify_admin($pdo, [
@@ -1310,7 +1385,7 @@ if (strpos($path, '/admin/blog') === 0) {
 // ==========================================
 if (strpos($path, '/admin/service-categories') === 0) {
     if ($method === 'GET') {
-        $stmt = $pdo->query("SELECT * FROM service_categories ORDER BY name ASC");
+        $stmt = $pdo->query('SELECT * FROM service_categories ORDER BY name ASC');
         echo json_encode(['data' => $stmt->fetchAll()]);
         exit;
     }
@@ -1321,10 +1396,10 @@ if (strpos($path, '/admin/service-categories') === 0) {
 // ==========================================
 if (strpos($path, '/admin/barbers') === 0) {
     if ($method === 'GET' && $path === '/admin/barbers') {
-        $stmt = $pdo->query("SELECT b.*, u.name, u.email, u.avatar, u.phone, u.is_active 
+        $stmt = $pdo->query('SELECT b.*, u.name, u.email, u.avatar, u.phone, u.is_active 
                              FROM barbers b 
                              INNER JOIN users u ON b.user_id = u.id 
-                             ORDER BY u.name ASC");
+                             ORDER BY u.name ASC');
         $barbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($barbers as &$barber) {
             $barber['specialties'] = json_decode($barber['specialties'], true) ?: [];
@@ -1332,35 +1407,37 @@ if (strpos($path, '/admin/barbers') === 0) {
         echo json_encode(['data' => $barbers]);
         exit;
     }
-    
+
     if ($method === 'POST' && $path === '/admin/barbers') {
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         $name = $data['name'] ?? '';
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
         $bio = $data['bio'] ?? '';
         $experience = $data['experience_years'] ?? 0;
         $specialties = json_encode(array_map('trim', explode(',', $data['specialties'] ?? '')));
-        
-        if (!$name || !$email || !$password) {
-            http_response_code(400); echo json_encode(['error' => 'Name, email, and password are required']); exit;
+
+        if (! $name || ! $email || ! $password) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Name, email, and password are required']);
+            exit;
         }
-        
+
         try {
             $pdo->beginTransaction();
-            
+
             // 1. Create User
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'barber')");
             $stmt->execute([$name, $email, $hashedPassword]);
             $newUserId = $pdo->lastInsertId();
-            
+
             // 2. Create Barber (new barbers start as pending_approval)
             $status = $data['status'] ?? 'pending_approval';
-            $stmt = $pdo->prepare("INSERT INTO barbers (user_id, bio, specialties, experience_years, is_available, status) VALUES (?, ?, ?, ?, 1, ?)");
+            $stmt = $pdo->prepare('INSERT INTO barbers (user_id, bio, specialties, experience_years, is_available, status) VALUES (?, ?, ?, ?, 1, ?)');
             $stmt->execute([$newUserId, $bio, $specialties, $experience, $status]);
-            
+
             $pdo->commit();
             cc_notify_barber_user($pdo, (int) $newUserId, [
                 'sender_id' => $userId,
@@ -1381,62 +1458,68 @@ if (strpos($path, '/admin/barbers') === 0) {
             $pdo->rollBack();
             // Handle duplicate email error code (23000 usually)
             if ($e->getCode() == 23000) {
-                http_response_code(409); echo json_encode(['error' => 'Email already exists']);
+                http_response_code(409);
+                echo json_encode(['error' => 'Email already exists']);
             } else {
-                http_response_code(500); echo json_encode(['error' => 'Database error']);
+                http_response_code(500);
+                echo json_encode(['error' => 'Database error']);
             }
         }
         exit;
     }
-    
+
     if ($method === 'PUT' && preg_match('/^\/admin\/barbers\/(\d+)$/', $path, $matches)) {
         $barberId = $matches[1];
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         $name = $data['name'] ?? '';
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? ''; // Optional on edit
         $bio = $data['bio'] ?? '';
         $experience = $data['experience_years'] ?? 0;
-        
+
         // Handle specialties array/string conversion securely
         if (is_array($data['specialties'])) {
             $specialties = json_encode($data['specialties']);
         } else {
             $specialties = json_encode(array_map('trim', explode(',', $data['specialties'] ?? '')));
         }
-        
-        if (!$name || !$email) {
-            http_response_code(400); echo json_encode(['error' => 'Name and email are required']); exit;
+
+        if (! $name || ! $email) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Name and email are required']);
+            exit;
         }
-        
+
         try {
             // Get user_id first
-            $stmt = $pdo->prepare("SELECT user_id FROM barbers WHERE id = ?");
+            $stmt = $pdo->prepare('SELECT user_id FROM barbers WHERE id = ?');
             $stmt->execute([$barberId]);
             $barberUserId = $stmt->fetchColumn();
-            
-            if (!$barberUserId) {
-                http_response_code(404); echo json_encode(['error' => 'Barber not found']); exit;
+
+            if (! $barberUserId) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Barber not found']);
+                exit;
             }
-            
+
             $pdo->beginTransaction();
-            
+
             // 1. Update User
             if ($password) {
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?");
+                $stmt = $pdo->prepare('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?');
                 $stmt->execute([$name, $email, $hashedPassword, $barberUserId]);
             } else {
-                $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+                $stmt = $pdo->prepare('UPDATE users SET name = ?, email = ? WHERE id = ?');
                 $stmt->execute([$name, $email, $barberUserId]);
             }
-            
+
             // 2. Update Barber
             $status = $data['status'] ?? 'active';
-            $stmt = $pdo->prepare("UPDATE barbers SET bio = ?, specialties = ?, experience_years = ?, status = ? WHERE id = ?");
+            $stmt = $pdo->prepare('UPDATE barbers SET bio = ?, specialties = ?, experience_years = ?, status = ? WHERE id = ?');
             $stmt->execute([$bio, $specialties, $experience, $status, $barberId]);
-            
+
             $pdo->commit();
             cc_notify_barber_user($pdo, (int) $barberUserId, [
                 'sender_id' => $userId,
@@ -1456,26 +1539,30 @@ if (strpos($path, '/admin/barbers') === 0) {
         } catch (PDOException $e) {
             $pdo->rollBack();
             if ($e->getCode() == 23000) {
-                http_response_code(409); echo json_encode(['error' => 'Email already exists']);
+                http_response_code(409);
+                echo json_encode(['error' => 'Email already exists']);
             } else {
-                http_response_code(500); echo json_encode(['error' => 'Database error']);
+                http_response_code(500);
+                echo json_encode(['error' => 'Database error']);
             }
         }
         exit;
     }
-    
+
     // Quick status change
     if ($method === 'PATCH' && preg_match('/^\/admin\/barbers\/(\d+)\/status$/', $path, $matches)) {
         $barberId = $matches[1];
         $data = json_decode(file_get_contents('php://input'), true);
         $status = $data['status'] ?? '';
-        
+
         $allowed = ['active', 'pending_approval', 'suspended', 'on_leave'];
-        if (!in_array($status, $allowed)) {
-            http_response_code(400); echo json_encode(['error' => 'Invalid status']); exit;
+        if (! in_array($status, $allowed)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid status']);
+            exit;
         }
-        
-        $stmt = $pdo->prepare("UPDATE barbers SET status = ? WHERE id = ?");
+
+        $stmt = $pdo->prepare('UPDATE barbers SET status = ? WHERE id = ?');
         $stmt->execute([$status, $barberId]);
         $barberUserId = cc_barber_user_id($pdo, (int) $barberId);
         if ($barberUserId) {
@@ -1496,43 +1583,45 @@ if (strpos($path, '/admin/barbers') === 0) {
         echo json_encode(['success' => true, 'message' => 'Status updated']);
         exit;
     }
-    
+
     if ($method === 'DELETE' && preg_match('/^\/admin\/barbers\/(\d+)$/', $path, $matches)) {
         $barberId = $matches[1];
-        
+
         try {
             // Get user_id first
-            $stmt = $pdo->prepare("SELECT user_id FROM barbers WHERE id = ?");
+            $stmt = $pdo->prepare('SELECT user_id FROM barbers WHERE id = ?');
             $stmt->execute([$barberId]);
             $barberUserId = $stmt->fetchColumn();
-            
-            if (!$barberUserId) {
-                http_response_code(404); echo json_encode(['error' => 'Barber not found']); exit;
+
+            if (! $barberUserId) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Barber not found']);
+                exit;
             }
-            
+
             $pdo->beginTransaction();
-            
+
             // Clean up all dependent records referencing barbers.id
-            $pdo->prepare("DELETE FROM appointments WHERE barber_id = ?")->execute([$barberId]);
-            $pdo->prepare("DELETE FROM gallery WHERE barber_id = ?")->execute([$barberId]);
-            $pdo->prepare("UPDATE services SET barber_id = NULL WHERE barber_id = ?")->execute([$barberId]);
-            $pdo->prepare("DELETE FROM testimonials WHERE barber_id = ?")->execute([$barberId]);
-            $pdo->prepare("DELETE FROM working_hours WHERE barber_id = ?")->execute([$barberId]);
-            $pdo->prepare("DELETE FROM holidays WHERE barber_id = ?")->execute([$barberId]);
-            
+            $pdo->prepare('DELETE FROM appointments WHERE barber_id = ?')->execute([$barberId]);
+            $pdo->prepare('DELETE FROM gallery WHERE barber_id = ?')->execute([$barberId]);
+            $pdo->prepare('UPDATE services SET barber_id = NULL WHERE barber_id = ?')->execute([$barberId]);
+            $pdo->prepare('DELETE FROM testimonials WHERE barber_id = ?')->execute([$barberId]);
+            $pdo->prepare('DELETE FROM working_hours WHERE barber_id = ?')->execute([$barberId]);
+            $pdo->prepare('DELETE FROM holidays WHERE barber_id = ?')->execute([$barberId]);
+
             // Clean up records referencing users.id
-            $pdo->prepare("DELETE FROM blog_reactions WHERE customer_id = ?")->execute([$barberUserId]);
-            $pdo->prepare("DELETE FROM blog_posts WHERE author_id = ?")->execute([$barberUserId]);
-            $pdo->prepare("DELETE FROM audit_logs WHERE user_id = ?")->execute([$barberUserId]);
-            
+            $pdo->prepare('DELETE FROM blog_reactions WHERE customer_id = ?')->execute([$barberUserId]);
+            $pdo->prepare('DELETE FROM blog_posts WHERE author_id = ?')->execute([$barberUserId]);
+            $pdo->prepare('DELETE FROM audit_logs WHERE user_id = ?')->execute([$barberUserId]);
+
             // Delete barber record
-            $stmt = $pdo->prepare("DELETE FROM barbers WHERE id = ?");
+            $stmt = $pdo->prepare('DELETE FROM barbers WHERE id = ?');
             $stmt->execute([$barberId]);
-            
+
             // Delete user record
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');
             $stmt->execute([$barberUserId]);
-            
+
             $pdo->commit();
             cc_notify_admin($pdo, [
                 'sender_id' => $userId,
@@ -1544,7 +1633,8 @@ if (strpos($path, '/admin/barbers') === 0) {
             echo json_encode(['success' => true, 'message' => 'Barber deleted successfully']);
         } catch (PDOException $e) {
             $pdo->rollBack();
-            http_response_code(500); echo json_encode(['error' => 'Failed to delete barber: ' . $e->getMessage()]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to delete barber: '.$e->getMessage()]);
         }
         exit;
     }
@@ -1554,13 +1644,13 @@ if (strpos($path, '/admin/barbers') === 0) {
 // SYSTEM AUDIT LOGS
 // ==========================================
 if ($method === 'GET' && $path === '/admin/logs') {
-    $stmt = $pdo->query("
+    $stmt = $pdo->query('
         SELECT a.*, u.name as user_name, u.email as user_email, u.role as user_role
         FROM audit_logs a
         LEFT JOIN users u ON a.user_id = u.id
         ORDER BY a.created_at DESC
         LIMIT 100
-    ");
+    ');
     echo json_encode(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     exit;
 }
@@ -1593,7 +1683,7 @@ if ($method === 'GET' && $path === '/admin/customers') {
 // GET /admin/customers/{id} - Single customer profile with booking history
 if ($method === 'GET' && preg_match('/^\/admin\/customers\/(\d+)$/', $path, $matches)) {
     $customerId = $matches[1];
-    
+
     // Get customer info
     $stmt = $pdo->prepare("
         SELECT 
@@ -1609,15 +1699,15 @@ if ($method === 'GET' && preg_match('/^\/admin\/customers\/(\d+)$/', $path, $mat
     ");
     $stmt->execute([$customerId]);
     $customer = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$customer) {
+
+    if (! $customer) {
         http_response_code(404);
         echo json_encode(['message' => 'Customer not found']);
         exit;
     }
-    
+
     // Get their appointment history
-    $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare('
         SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.booking_type, a.created_at,
                s.name as service_name, s.price as service_price,
                bu.name as barber_name,
@@ -1629,10 +1719,10 @@ if ($method === 'GET' && preg_match('/^\/admin\/customers\/(\d+)$/', $path, $mat
         LEFT JOIN payments p ON a.id = p.appointment_id
         WHERE a.customer_id = ?
         ORDER BY a.appointment_date DESC, a.appointment_time DESC
-    ");
+    ');
     $stmt->execute([$customerId]);
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $customer['appointments'] = $appointments;
     echo json_encode(['data' => $customer]);
     exit;
@@ -1645,27 +1735,27 @@ if (strpos($path, '/admin/verifications') === 0) {
     if ($method === 'GET' && $path === '/admin/verifications/stats') {
         // Total codes generated
         $stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE verification_code IS NOT NULL AND verification_code != ''");
-        $totalCodes = (int)$stmt->fetchColumn();
+        $totalCodes = (int) $stmt->fetchColumn();
 
         // Verified today
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE verification_code IS NOT NULL AND verification_code != '' AND status = 'completed' AND DATE(updated_at) = ?");
         $stmt->execute([date('Y-m-d')]);
-        $verifiedToday = (int)$stmt->fetchColumn();
+        $verifiedToday = (int) $stmt->fetchColumn();
 
         // Pending verification
         $stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE verification_code IS NOT NULL AND verification_code != '' AND status = 'confirmed'");
-        $pendingVerification = (int)$stmt->fetchColumn();
+        $pendingVerification = (int) $stmt->fetchColumn();
 
         // Expired/missed (confirmed but past date)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE verification_code IS NOT NULL AND verification_code != '' AND status = 'confirmed' AND appointment_date < ?");
         $stmt->execute([date('Y-m-d')]);
-        $expired = (int)$stmt->fetchColumn();
+        $expired = (int) $stmt->fetchColumn();
 
         echo json_encode(['data' => [
             'total' => $totalCodes,
             'verified_today' => $verifiedToday,
             'pending' => $pendingVerification,
-            'expired' => $expired
+            'expired' => $expired,
         ]]);
         exit;
     }
@@ -1697,31 +1787,33 @@ if (strpos($path, '/admin/verifications') === 0) {
         }
 
         if ($search) {
-            $query .= " AND (a.verification_code LIKE ? OR c.name LIKE ? OR b.name LIKE ?)";
-            $searchTerm = '%' . $search . '%';
+            $query .= ' AND (a.verification_code LIKE ? OR c.name LIKE ? OR b.name LIKE ?)';
+            $searchTerm = '%'.$search.'%';
             $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm]);
         }
 
-        $query .= " ORDER BY a.appointment_date DESC, a.appointment_time DESC";
+        $query .= ' ORDER BY a.appointment_date DESC, a.appointment_time DESC';
 
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         echo json_encode(['data' => $verifications]);
         exit;
     }
 
     if ($method === 'PATCH' && preg_match('/^\/admin\/verifications\/(\d+)\/verify$/', $path, $matches)) {
         $appointmentId = $matches[1];
-        
+
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare("UPDATE appointments SET status = 'completed' WHERE id = ? AND status = 'confirmed'");
             $stmt->execute([$appointmentId]);
-            
+
             if ($stmt->rowCount() === 0) {
-                http_response_code(400); echo json_encode(['error' => 'Appointment is not in a confirmable state.']); exit;
+                http_response_code(400);
+                echo json_encode(['error' => 'Appointment is not in a confirmable state.']);
+                exit;
             }
 
             // Get customer_id to notify
@@ -1750,7 +1842,8 @@ if (strpos($path, '/admin/verifications') === 0) {
             echo json_encode(['success' => true, 'message' => 'Appointment verified and marked as completed']);
         } catch (PDOException $e) {
             $pdo->rollBack();
-            http_response_code(500); echo json_encode(['error' => 'Failed to verify appointment: ' . $e->getMessage()]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to verify appointment: '.$e->getMessage()]);
         }
         exit;
     }

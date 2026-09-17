@@ -16,7 +16,7 @@ class PaymentTransactionFactory extends Factory
         return [
             'payment_id' => Payment::factory(),
             'transaction_type' => 'authorization',
-            'gateway' => 'stripe',
+            'gateway' => 'paystack',
             'gateway_event_id' => fake()->unique()->bothify('evt_########'),
             'amount' => fake()->randomFloat(2, 1000, 15000),
             'raw_payload' => [],

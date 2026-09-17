@@ -21,7 +21,7 @@ class AddressFactory extends Factory
             'city' => 'Keffi',
             'state' => 'Nasarawa',
             'postal_code' => '961101',
-            'latitude' => 8.8471,
+            'latitude' => 8.8486,
             'longitude' => 7.8736,
             'is_default' => false,
         ];

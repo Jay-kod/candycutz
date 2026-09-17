@@ -8,8 +8,8 @@ use App\Models\Payment;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\ServiceZone;
-use App\Models\WorkingHour;
 use App\Models\User;
+use App\Models\WorkingHour;
 
 it('constructs the core booking graph with factories', function () {
     $business = Business::factory()->make();

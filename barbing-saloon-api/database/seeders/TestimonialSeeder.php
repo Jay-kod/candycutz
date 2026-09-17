@@ -35,7 +35,7 @@ class TestimonialSeeder extends Seeder
             $barber = $barbers[$index % max($barbers->count(), 1)] ?? null;
 
             Testimonial::updateOrCreate(
-                ['client_name' => $customer?->name ?? 'Client ' . ($index + 1)],
+                ['client_name' => $customer?->name ?? 'Client '.($index + 1)],
                 [
                     'customer_id' => $customer?->id,
                     'client_avatar' => null,

@@ -20,7 +20,7 @@ class BlogPostFactory extends Factory
             'title' => $title,
             'slug' => fake()->unique()->slug(),
             'excerpt' => fake()->sentence(),
-            'body' => '<p>' . fake()->paragraph() . '</p>',
+            'body' => '<p>'.fake()->paragraph().'</p>',
             'featured_image' => null,
             'author_id' => User::factory()->admin(),
             'status' => BlogStatus::draft,

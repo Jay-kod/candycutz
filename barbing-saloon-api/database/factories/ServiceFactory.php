@@ -19,7 +19,6 @@ class ServiceFactory extends Factory
         return [
             'branch_id' => Branch::factory(),
             'category_id' => ServiceCategory::factory(),
-            'barber_id' => null,
             'name' => $name,
             'slug' => fake()->unique()->slug(),
             'description' => fake()->sentence(),
@@ -27,7 +26,6 @@ class ServiceFactory extends Factory
             'duration_minutes' => fake()->randomElement([30, 45, 60, 90]),
             'image' => null,
             'home_service_allowed' => true,
-            'is_available' => true,
             'is_active' => true,
             'is_featured' => false,
             'display_order' => fake()->numberBetween(1, 20),

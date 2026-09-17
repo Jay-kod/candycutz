@@ -1,0 +1,2611 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot cast App\\\\Core\\\\Enums\\\\AppointmentStatus to string\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/AppointmentApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\AppointmentApiController\\:\\:formatAppointment\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/AppointmentApiController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/BarberApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\BarberApiController\\:\\:formatBarber\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/BarberApiController.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/BarberApiController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\BlogPost\\:\\:\\$content\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/BlogApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\BlogApiController\\:\\:formatPost\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/BlogApiController.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, App\\\\Models\\\\BlogReaction\\>\\. Use \\-\\> instead\\.$#"
+			count: 2
+			path: app/Core/Http/Controllers/Api/V1/BlogApiController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/GalleryApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\GalleryApiController\\:\\:formatGallery\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/GalleryApiController.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 2
+			path: app/Core/Http/Controllers/Api/V1/GalleryApiController.php
+
+		-
+			message: "#^Access to an undefined property Stripe\\\\StripeObject\\:\\:\\$object\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/PaymentWebhookApiController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Appointment\\:\\:\\$payment\\.$#"
+			count: 2
+			path: app/Core/Http/Controllers/Api/V1/ReceiptApiController.php
+
+		-
+			message: "#^Cannot cast App\\\\Core\\\\Enums\\\\UserRole to string\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/ReceiptApiController.php
+
+		-
+			message: "#^Relation 'payment' is not found in App\\\\Models\\\\Appointment model\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/ReceiptApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\ServiceApiController\\:\\:formatService\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/ServiceApiController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Testimonial\\:\\:\\$comment\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/TestimonialApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\TestimonialApiController\\:\\:formatTestimonial\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/TestimonialApiController.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/Api/V1/TestimonialApiController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\NotificationController\\:\\:destroy\\(\\) has parameter \\$id with no type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/NotificationController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Controllers\\\\NotificationController\\:\\:markAsRead\\(\\) has parameter \\$id with no type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Controllers/NotificationController.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\CheckRole\\:\\:handle\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/CheckRole.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\CheckRole\\:\\:handle\\(\\) has parameter \\$roles with no type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/CheckRole.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\ForceHttps\\:\\:handle\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/ForceHttps.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\LogApiRequest\\:\\:handle\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/LogApiRequest.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\SanitizeInput\\:\\:handle\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/SanitizeInput.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\SanitizeInput\\:\\:sanitizeArray\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/SanitizeInput.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\SanitizeInput\\:\\:sanitizeArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/SanitizeInput.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Middleware\\\\SecurityHeaders\\:\\:handle\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Core/Http/Middleware/SecurityHeaders.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Response\\\\ApiResponse\\:\\:error\\(\\) has parameter \\$errors with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Core/Http/Response/ApiResponse.php
+
+		-
+			message: "#^Method App\\\\Core\\\\Http\\\\Response\\\\ApiResponse\\:\\:paginated\\(\\) has parameter \\$data with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator but does not specify its types\\: TItem$#"
+			count: 1
+			path: app/Core/Http/Response/ApiResponse.php
+
+		-
+			message: "#^Method App\\\\Mail\\\\AdminNotification\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Mail/AdminNotification.php
+
+		-
+			message: "#^Method App\\\\Mail\\\\BookingCancellation\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Mail/BookingCancellation.php
+
+		-
+			message: "#^Method App\\\\Mail\\\\BookingConfirmation\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Mail/BookingConfirmation.php
+
+		-
+			message: "#^Method App\\\\Mail\\\\BookingReminder\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Mail/BookingReminder.php
+
+		-
+			message: "#^Method App\\\\Mail\\\\BookingThankYou\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Mail/BookingThankYou.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Address uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Address.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Address\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Address.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Appointment uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:customerAddress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:items\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:payment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:serviceZone\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Appointment\\:\\:statusHistory\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function str_pad expects string, int given\\.$#"
+			count: 1
+			path: app/Models/Appointment.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AppointmentItem uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AppointmentItem.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppointmentItem\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AppointmentItem.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppointmentItem\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AppointmentItem.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AppointmentStatusHistory uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AppointmentStatusHistory.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppointmentStatusHistory\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AppointmentStatusHistory.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppointmentStatusHistory\\:\\:changedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AppointmentStatusHistory.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AuditLog uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AuditLog.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AuditLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AuditLog.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Barber uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:barberServices\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:blockedPeriods\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:branch\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:galleries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:user\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Barber\\:\\:workingHours\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Barber.php
+
+		-
+			message: "#^Class App\\\\Models\\\\BarberService uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/BarberService.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BarberService\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BarberService.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BarberService\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BarberService.php
+
+		-
+			message: "#^Class App\\\\Models\\\\BlockedPeriod uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/BlockedPeriod.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlockedPeriod.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlockedPeriod.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:createdByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlockedPeriod.php
+
+		-
+			message: "#^Class App\\\\Models\\\\BlogPost uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/BlogPost.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlogPost\\:\\:author\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlogPost.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlogPost\\:\\:reactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlogPost.php
+
+		-
+			message: "#^Class App\\\\Models\\\\BlogReaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/BlogReaction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlogReaction\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlogReaction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BlogReaction\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BlogReaction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Branch uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Branch\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Branch\\:\\:barbers\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Branch\\:\\:business\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Branch\\:\\:serviceZones\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Branch\\:\\:services\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Branch.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Business uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Business.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Business\\:\\:branches\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Business.php
+
+		-
+			message: "#^Class App\\\\Models\\\\DeviceToken uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/DeviceToken.php
+
+		-
+			message: "#^Method App\\\\Models\\\\DeviceToken\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/DeviceToken.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Gallery uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Gallery.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Gallery\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Gallery.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Holiday uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Holiday.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Notification uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Notification.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Notification\\:\\:recipient\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Notification.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Notification\\:\\:sender\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/Notification.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Payment uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:transactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: "#^Class App\\\\Models\\\\PaymentTransaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/PaymentTransaction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\PaymentTransaction\\:\\:payment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/PaymentTransaction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Service uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:appointmentItems\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:barberServices\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:category\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Class App\\\\Models\\\\ServiceCategory uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/ServiceCategory.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ServiceCategory\\:\\:services\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ServiceCategory.php
+
+		-
+			message: "#^Class App\\\\Models\\\\ServiceZone uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/ServiceZone.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ServiceZone\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ServiceZone.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ServiceZone\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ServiceZone.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Setting uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Setting.php
+
+		-
+			message: "#^Property App\\\\Models\\\\Setting\\:\\:\\$attributes type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/Setting.php
+
+		-
+			message: "#^Class App\\\\Models\\\\Testimonial uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: "#^Class App\\\\Models\\\\ThemeSetting uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/ThemeSetting.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ThemeSetting\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ThemeSetting.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ThemeSetting\\:\\:versions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ThemeSetting.php
+
+		-
+			message: "#^Class App\\\\Models\\\\ThemeVersion uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/ThemeVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ThemeVersion\\:\\:publishedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ThemeVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ThemeVersion\\:\\:themeSetting\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ThemeVersion.php
+
+		-
+			message: "#^Class App\\\\Models\\\\User uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:addresses\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:auditLogs\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:blogPosts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:deviceTokens\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Method App\\\\Models\\\\User\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: "#^Class App\\\\Models\\\\WorkingHour uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/WorkingHour.php
+
+		-
+			message: "#^Method App\\\\Models\\\\WorkingHour\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/WorkingHour.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:analytics\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:appointments\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:approveAppointment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:approveTestimonial\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:barbers\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:blogPosts\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:cancelAppointment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:createWalkIn\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:customerProfile\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:customers\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:dashboard\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteBarber\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteGallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteHoliday\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteServiceCategory\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteTestimonial\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:deleteWorkingHour\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:featureTestimonial\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:forceApproveAppointment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:gallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:holidays\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:logs\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:reports\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:serviceCategories\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:services\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:settings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeBarber\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeGallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeHoliday\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeServiceCategory\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:storeWorkingHour\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:testEmail\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:testimonials\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateBarber\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateBarberStatus\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateBarberWorkingHours\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateGallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateHoliday\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateServiceCategory\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateSettings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateTestimonial\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:updateWorkingHour\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:verificationStats\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:verifications\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:verifyAppointment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Controllers\\\\AdminController\\:\\:workingHours\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Admin/Controllers/AdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreBlogPostRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreBlogPostRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreGalleryRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreGalleryRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreHolidayRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreHolidayRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreServiceCategoryRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreServiceCategoryRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreServiceRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreServiceRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\StoreWorkingHourRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/StoreWorkingHourRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateBlogPostRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateBlogPostRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateGalleryRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateGalleryRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateHolidayRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateHolidayRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateServiceCategoryRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateServiceCategoryRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateServiceRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateServiceRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateSettingsRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateSettingsRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Requests\\\\UpdateWorkingHourRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Requests/UpdateWorkingHourRequest.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$status\\.$#"
+			count: 2
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$total_appointments\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 6
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$total_bookings\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:appointments\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TItem$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:barbers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:blogPosts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:createWalkIn\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:customerProfile\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:customers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:dashboard\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:gallery\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:holidays\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:logs\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:reports\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:serviceCategories\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:services\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:settings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeBarber\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeBarber\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeBlogPost\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeGallery\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeHoliday\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeService\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeServiceCategory\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:storeWorkingHour\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:testimonials\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBarber\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBarber\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBarberStatus\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBarberWorkingHours\\(\\) has parameter \\$hours with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBarberWorkingHours\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateBlogPost\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateGallery\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateHoliday\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateService\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateServiceCategory\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateSettings\\(\\) has parameter \\$settings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateTestimonial\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:updateWorkingHour\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:verificationStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:verifications\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:verifications\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Admin\\\\Services\\\\AdminService\\:\\:workingHours\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 14
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\Barber\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Support\\\\Collection\\<int,array\\<string, mixed\\>\\>\\:\\:all\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Modules/Admin/Services/AdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Requests\\\\LoginRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Requests/LoginRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Requests\\\\LoginRequest\\:\\:withValidator\\(\\) has parameter \\$validator with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Auth/Requests/LoginRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Requests\\\\RegisterRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Requests/RegisterRequest.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$avatar\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$barber\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$email\\.$#"
+			count: 2
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$is_active\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$name\\.$#"
+			count: 2
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$phone\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:\\$role\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Resources\\\\AuthUserResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Resources/AuthUserResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:changePassword\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:logAction\\(\\) has parameter \\$newValue with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:logAction\\(\\) has parameter \\$oldValue with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:login\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:login\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:register\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:register\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:resetPassword\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:resetPassword\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:socialLogin\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:socialLogin\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Auth\\\\Services\\\\AuthService\\:\\:verifyAndDecodeIdToken\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Laravel\\\\Sanctum\\\\PersonalAccessToken\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Modules/Auth/Services/AuthService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:account\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:analytics\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:appointments\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:approveBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:blogPosts\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:bookings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:cancelBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:complete\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:createWalkIn\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:dashboard\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:deleteBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:deleteGallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:deleteService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:gallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:noShow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:profile\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:schedule\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:services\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:storeBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:storeGallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:storeService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateAccount\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateMyStatus\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateProfile\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateSchedule\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:updateService\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Controllers\\\\BarberController\\:\\:verifyPayment\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Barber/Controllers/BarberController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Requests\\\\UpdateBarberProfileRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Requests/UpdateBarberProfileRequest.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$appointment_date\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$appointment_time\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$client_email\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$client_name\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$client_phone\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$customer\\.$#"
+			count: 4
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$notes\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$service\\.$#"
+			count: 4
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:\\$total_price\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Resources\\\\BarberAppointmentResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberAppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$bio\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$instagram_url\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$is_featured\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$user\\.$#"
+			count: 5
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:\\$years_experience\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Resources\\\\BarberProfileResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Resources/BarberProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TValue$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:blogPosts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:dashboard\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:gallery\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:schedule\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:services\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:storeBlogPost\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:storeGallery\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:storeService\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:updateBlogPost\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:updateProfile\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Barber\\\\Services\\\\BarberService\\:\\:updateService\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 1
+			path: app/Modules/Barber/Services/BarberService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$account_name\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$account_number\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$bank_name\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 3
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:addToWishlist\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:analytics\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:bookings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:cancelBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:checkout\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:dashboard\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:deleteBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:myCodes\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:paymentDetails\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:paymentDetails\\(\\) has parameter \\$appointmentId with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:profile\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:reactToBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:reactToBlogPost\\(\\) has parameter \\$id with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:removeFromWishlist\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:removeFromWishlist\\(\\) has parameter \\$id with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:removeFromWishlistByType\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:removeReactionFromBlogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:removeReactionFromBlogPost\\(\\) has parameter \\$id with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:reviews\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:showBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:storeBooking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:storeReview\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:updateProfile\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:uploadReceipt\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:uploadReceipt\\(\\) has parameter \\$appointmentId with no type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Controllers\\\\CustomerController\\:\\:wishlist\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 2
+			path: app/Modules/Customer/Controllers/CustomerController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Requests\\\\StoreBookingRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Requests/StoreBookingRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Requests\\\\StoreReviewRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Requests/StoreReviewRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Requests\\\\UpdateProfileRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Requests/UpdateProfileRequest.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$appointment_date\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$appointment_time\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$barber\\.$#"
+			count: 2
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$deposit_amount\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$deposit_paid\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$notes\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$service\\.$#"
+			count: 5
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:\\$total_price\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Resources\\\\AppointmentResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/AppointmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:\\$barber\\.$#"
+			count: 2
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:\\$comment\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:\\$is_approved\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:\\$rating\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Resources\\\\TestimonialResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/TestimonialResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$avatar\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$email\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$phone\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:\\$role\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Resources\\\\UserProfileResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Resources/UserProfileResource.php
+
+		-
+			message: "#^Cannot cast App\\\\Core\\\\Enums\\\\AppointmentStatus to string\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:bookings\\(\\) return type with generic class Illuminate\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TValue$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:createBooking\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:createReview\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:dashboard\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:profile\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:reviews\\(\\) return type with generic class Illuminate\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TValue$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Customer\\\\Services\\\\CustomerService\\:\\:updateProfile\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 6
+			path: app/Modules/Customer/Services/CustomerService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:availableSlots\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:barber\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:barbers\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:blog\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:blogPost\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:contact\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:gallery\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:service\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:serviceCategories\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:services\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:settings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:testimonials\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Controllers\\\\PublicController\\:\\:workingHours\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/Landing/Controllers/PublicController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 2
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\BlogPost\\:\\:\\$content\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\BlogPost\\:\\:\\$is_published\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\ServiceCategory\\:\\:\\$description\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Testimonial\\:\\:\\$comment\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:availableSlots\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:barberById\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:barberData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:barbers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:blogData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:blogPostBySlug\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:blogPosts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:contact\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:contact\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:gallery\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:serviceBySlug\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:serviceCategories\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:serviceData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:services\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:settings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:testimonials\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\PublicService\\:\\:workingHours\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 5
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\ServiceCategory\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\Testimonial\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Support\\\\Collection\\<int,array\\<string, mixed\\>\\>\\:\\:all\\(\\) contains unresolvable type\\.$#"
+			count: 2
+			path: app/Modules/Landing/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Landing\\\\Services\\\\SlotHelper\\:\\:generate\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Landing/Services/SlotHelper.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 2
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Call to method generate\\(\\) on an unknown class App\\\\Modules\\\\Public\\\\Services\\\\SlotHelper\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Instantiated class App\\\\Modules\\\\Public\\\\Services\\\\SlotHelper not found\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:availableSlots\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:barberById\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:barberData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:barbers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:blogData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:blogPostBySlug\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:blogPosts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:contact\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:contact\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:gallery\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:serviceBySlug\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:serviceCategories\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:serviceData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:services\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:settings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:testimonials\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\Public\\\\Services\\\\PublicService\\:\\:workingHours\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Relation 'user' is not found in App\\\\Models\\\\Barber model\\.$#"
+			count: 4
+			path: app/Modules/Public/Services/PublicService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:activateUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:auditLogs\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:dashboard\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:deactivateUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:deleteUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:settings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:storeUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:updateSettings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:updateUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Controllers\\\\SuperAdminController\\:\\:users\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Controllers/SuperAdminController.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Requests\\\\StoreUserRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Requests/StoreUserRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Requests\\\\UpdateSettingsRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Requests/UpdateSettingsRequest.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Requests\\\\UpdateUserRequest\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Requests/UpdateUserRequest.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$action\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$ip_address\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$module\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$new_value\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$old_value\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$target_id\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$target_type\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$user\\.$#"
+			count: 3
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:\\$user_role\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\AuditLogResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/AuditLogResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$avatar\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$email\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$is_active\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$phone\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:\\$role\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Resources\\\\UserResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Resources/UserResource.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:auditLogs\\(\\) return type with generic class Illuminate\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TValue$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:dashboard\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:settings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:storeUser\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:updateSettings\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:updateSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:updateUser\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Method App\\\\Modules\\\\SuperAdmin\\\\Services\\\\SuperAdminService\\:\\:users\\(\\) return type with generic class Illuminate\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TValue$#"
+			count: 1
+			path: app/Modules/SuperAdmin/Services/SuperAdminService.php
+
+		-
+			message: "#^Property App\\\\Services\\\\Auth\\\\UsernameIdentityService\\:\\:\\$reservedUsernames type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Auth/UsernameIdentityService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Appointment\\:\\:\\$start_time\\.$#"
+			count: 2
+			path: app/Services/Booking/AvailabilityEngine.php
+
+		-
+			message: "#^Call to static method where\\(\\) on an unknown class App\\\\Models\\\\BarberAvailability\\.$#"
+			count: 1
+			path: app/Services/Booking/AvailabilityEngine.php
+
+		-
+			message: "#^Cannot cast App\\\\Core\\\\Enums\\\\AppointmentStatus to string\\.$#"
+			count: 1
+			path: app/Services/Booking/BookingService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Booking\\\\BookingService\\:\\:createBooking\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Booking/BookingService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Booking\\\\BookingService\\:\\:createWalkIn\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Booking/BookingService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\CMS\\\\ThemeStudioService\\:\\:getPublishedTheme\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/CMS/ThemeStudioService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\CMS\\\\ThemeStudioService\\:\\:publishThemeVersion\\(\\) has parameter \\$tokens with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/CMS/ThemeStudioService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Geolocation\\\\HomeServiceZoneService\\:\\:calculateTravelFee\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Geolocation/HomeServiceZoneService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Appointment\\:\\:\\$start_time\\.$#"
+			count: 1
+			path: app/Services/Notification/BrevoNotificationAdapter.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Barber\\:\\:\\$user\\.$#"
+			count: 1
+			path: app/Services/Notification/BrevoNotificationAdapter.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Payment\\\\PaymentService\\:\\:confirmPaymentFromWebhook\\(\\) has parameter \\$rawPayload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Payment/PaymentService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Payment\\\\PaymentService\\:\\:initializePayment\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Payment/PaymentService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Payment\\\\PaymentService\\:\\:recordFailedPaymentFromWebhook\\(\\) has parameter \\$rawPayload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Payment/PaymentService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Payment\\\\StripePaymentProvider\\:\\:createPaymentIntent\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Payment/StripePaymentProvider.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Payment\\\\StripePaymentProvider\\:\\:refund\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Payment/StripePaymentProvider.php

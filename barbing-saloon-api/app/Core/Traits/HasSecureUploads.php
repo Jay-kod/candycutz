@@ -23,7 +23,7 @@ trait HasSecureUploads
         }
 
         $folder = trim($folder, '/');
-        $fileName = Str::uuid() . '-' . time() . '.webp';
+        $fileName = Str::uuid().'-'.time().'.webp';
 
         return $file->storePubliclyAs($folder, $fileName, 'public');
     }

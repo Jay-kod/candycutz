@@ -2,7 +2,7 @@
 
 namespace App\Core\Traits;
 
-use App\Core\Http\Response\ApiResponse;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 trait HasApiResponse

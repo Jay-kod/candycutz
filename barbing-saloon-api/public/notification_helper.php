@@ -1,9 +1,9 @@
 <?php
+
 /**
  * Centralized in-app notifications for CandyCutz.
  * Every mutating action should notify affected users and relay to the admin dashboard.
  */
-
 function cc_ensure_notifications_schema(PDO $pdo): void
 {
     static $done = false;
@@ -11,9 +11,10 @@ function cc_ensure_notifications_schema(PDO $pdo): void
         return;
     }
 
-    $marker = sys_get_temp_dir() . '/candycutz_notif_schema.marker';
+    $marker = sys_get_temp_dir().'/candycutz_notif_schema.marker';
     if (file_exists($marker)) {
         $done = true;
+
         return;
     }
 
@@ -53,9 +54,11 @@ function cc_notify(PDO $pdo, array $opts): ?int
             $message,
             $relatedEntityId,
         ]);
+
         return (int) $pdo->lastInsertId();
     } catch (PDOException $e) {
-        error_log('cc_notify failed: ' . $e->getMessage());
+        error_log('cc_notify failed: '.$e->getMessage());
+
         return null;
     }
 }
@@ -64,6 +67,7 @@ function cc_notify_admin(PDO $pdo, array $opts): ?int
 {
     $opts['recipient_type'] = 'admin';
     $opts['recipient_id'] = null;
+
     return cc_notify($pdo, $opts);
 }
 
@@ -71,6 +75,7 @@ function cc_notify_customer(PDO $pdo, int $customerUserId, array $opts): ?int
 {
     $opts['recipient_type'] = 'customer';
     $opts['recipient_id'] = $customerUserId;
+
     return cc_notify($pdo, $opts);
 }
 
@@ -78,6 +83,7 @@ function cc_notify_barber_user(PDO $pdo, int $barberUserId, array $opts): ?int
 {
     $opts['recipient_type'] = 'barber';
     $opts['recipient_id'] = $barberUserId;
+
     return cc_notify($pdo, $opts);
 }
 
@@ -86,15 +92,17 @@ function cc_barber_user_id(PDO $pdo, int $barberId): ?int
     $stmt = $pdo->prepare('SELECT user_id FROM barbers WHERE id = ?');
     $stmt->execute([$barberId]);
     $id = $stmt->fetchColumn();
+
     return $id ? (int) $id : null;
 }
 
 function cc_notify_barber(PDO $pdo, int $barberId, array $opts): ?int
 {
     $barberUserId = cc_barber_user_id($pdo, $barberId);
-    if (!$barberUserId) {
+    if (! $barberUserId) {
         return null;
     }
+
     return cc_notify_barber_user($pdo, $barberUserId, $opts);
 }
 
@@ -102,6 +110,7 @@ function cc_notify_all_customers(PDO $pdo, array $opts): ?int
 {
     $opts['recipient_type'] = 'all_customers';
     $opts['recipient_id'] = null;
+
     return cc_notify($pdo, $opts);
 }
 
@@ -113,7 +122,7 @@ function cc_notify_appointment_parties(PDO $pdo, int $appointmentId, array $opts
     $stmt = $pdo->prepare('SELECT customer_id, barber_id FROM appointments WHERE id = ?');
     $stmt->execute([$appointmentId]);
     $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$appointment) {
+    if (! $appointment) {
         return;
     }
 
@@ -121,7 +130,7 @@ function cc_notify_appointment_parties(PDO $pdo, int $appointmentId, array $opts
     $type = $opts['type'] ?? 'booking';
     $relatedEntityId = $appointmentId;
 
-    if (!empty($opts['customer']) && $appointment['customer_id']) {
+    if (! empty($opts['customer']) && $appointment['customer_id']) {
         cc_notify_customer($pdo, (int) $appointment['customer_id'], array_merge($opts['customer'], [
             'sender_id' => $senderId,
             'type' => $type,
@@ -129,7 +138,7 @@ function cc_notify_appointment_parties(PDO $pdo, int $appointmentId, array $opts
         ]));
     }
 
-    if (!empty($opts['barber']) && $appointment['barber_id']) {
+    if (! empty($opts['barber']) && $appointment['barber_id']) {
         cc_notify_barber($pdo, (int) $appointment['barber_id'], array_merge($opts['barber'], [
             'sender_id' => $senderId,
             'type' => $type,
@@ -137,7 +146,7 @@ function cc_notify_appointment_parties(PDO $pdo, int $appointmentId, array $opts
         ]));
     }
 
-    if (!empty($opts['admin'])) {
+    if (! empty($opts['admin'])) {
         cc_notify_admin($pdo, array_merge($opts['admin'], [
             'sender_id' => $senderId,
             'type' => $type,
@@ -160,6 +169,7 @@ function cc_fetch_notifications_for_user(PDO $pdo, int $userId, string $role): a
 {
     $stmt = $pdo->prepare(cc_notifications_for_user_query());
     $stmt->execute([$userId, $role, $userId, $role, $role]);
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

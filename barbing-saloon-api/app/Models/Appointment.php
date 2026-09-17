@@ -100,6 +100,6 @@ class Appointment extends Model
 
     public function getVerificationCodeAttribute(): string
     {
-        return $this->booking_reference ?: ('CC-' . str_pad($this->id, 5, '0', STR_PAD_LEFT));
+        return $this->booking_reference ?: ('CC-'.str_pad($this->id, 5, '0', STR_PAD_LEFT));
     }
 }

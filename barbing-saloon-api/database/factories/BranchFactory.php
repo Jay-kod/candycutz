@@ -13,16 +13,16 @@ class BranchFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->city() . ' Hub';
+        $name = fake()->city().' Hub';
 
         return [
             'business_id' => Business::factory(),
             'name' => $name,
             'slug' => fake()->unique()->slug(),
             'address' => fake()->address(),
-            'latitude' => 8.8471,
+            'latitude' => 8.8486,
             'longitude' => 7.8736,
-            'phone' => '+234 ' . fake()->numerify('##########'),
+            'phone' => '+234 '.fake()->numerify('##########'),
             'email' => fake()->companyEmail(),
             'is_active' => true,
         ];

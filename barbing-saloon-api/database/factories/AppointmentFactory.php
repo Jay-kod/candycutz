@@ -7,7 +7,6 @@ use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Branch;
 use App\Models\Service;
-use App\Models\ServiceZone;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +23,7 @@ class AppointmentFactory extends Factory
         $price = fake()->randomFloat(2, 1000, 15000);
 
         return [
-            'booking_reference' => 'BK-' . strtoupper(fake()->unique()->bothify('####??')),
+            'booking_reference' => 'BK-'.strtoupper(fake()->unique()->bothify('####??')),
             'branch_id' => Branch::factory(),
             'customer_id' => User::factory()->customer(),
             'barber_id' => Barber::factory(),

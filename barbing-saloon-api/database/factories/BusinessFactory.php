@@ -14,8 +14,8 @@ class BusinessFactory extends Factory
     {
         return [
             'name' => fake()->company(),
-            'legal_name' => fake()->company() . ' Ltd.',
-            'phone' => '+234 ' . fake()->numerify('##########'),
+            'legal_name' => fake()->company().' Ltd.',
+            'phone' => '+234 '.fake()->numerify('##########'),
             'email' => fake()->companyEmail(),
             'logo' => null,
         ];

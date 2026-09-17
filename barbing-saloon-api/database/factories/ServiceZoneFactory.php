@@ -15,7 +15,7 @@ class ServiceZoneFactory extends Factory
     {
         return [
             'branch_id' => Branch::factory(),
-            'name' => fake()->unique()->city() . ' Zone',
+            'name' => fake()->unique()->city().' Zone',
             'description' => fake()->sentence(),
             'boundary_polygon' => null,
             'radius_km' => fake()->randomFloat(2, 5, 20),

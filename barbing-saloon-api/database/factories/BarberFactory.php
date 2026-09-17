@@ -24,7 +24,6 @@ class BarberFactory extends Factory
             'rating' => fake()->randomFloat(2, 3, 5),
             'is_available' => true,
             'is_home_service_ready' => true,
-            'status' => 'active',
             'chair_status' => 'available',
             'instagram_url' => null,
             'display_order' => fake()->numberBetween(1, 20),

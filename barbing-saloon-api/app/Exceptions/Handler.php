@@ -2,22 +2,23 @@
 
 namespace App\Exceptions;
 
-use App\Core\Http\Response\ApiResponse;
+use App\Http\Responses\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\QueryException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
     protected $dontReport = [
-        \Illuminate\Auth\AuthenticationException::class,
-        \Illuminate\Auth\Access\AuthorizationException::class,
-        \Illuminate\Validation\ValidationException::class,
+        AuthenticationException::class,
+        AuthorizationException::class,
+        ValidationException::class,
     ];
 
     public function register(): void
@@ -43,6 +44,7 @@ class Handler extends ExceptionHandler
             if (app()->environment('production')) {
                 return ApiResponse::error('Database error. Please try again.', [], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
+
             return null;
         });
     }

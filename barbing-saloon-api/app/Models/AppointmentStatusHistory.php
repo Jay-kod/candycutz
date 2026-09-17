@@ -11,6 +11,7 @@ class AppointmentStatusHistory extends Model
     use HasFactory;
 
     protected $table = 'appointment_status_history';
+
     public $timestamps = false;
 
     protected $fillable = [

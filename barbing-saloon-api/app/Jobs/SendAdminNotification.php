@@ -18,6 +18,7 @@ class SendAdminNotification implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public Appointment $appointment;
+
     public string $action;
 
     public function __construct(Appointment $appointment, string $action = 'new_booking')
@@ -32,7 +33,7 @@ class SendAdminNotification implements ShouldQueue
             ->pluck('email')
             ->toArray();
 
-        if (!empty($adminEmails)) {
+        if (! empty($adminEmails)) {
             Mail::to($adminEmails)
                 ->send(new AdminNotification($this->appointment, $this->action));
         }

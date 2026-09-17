@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Core\Http\Response\ApiResponse;
+use App\Http\Responses\ApiResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 class BookingSlotUnavailableException extends Exception
 {
     protected ?string $slotDetails;
+
     protected int $statusCode;
 
     public function __construct(

@@ -15,6 +15,7 @@ class AdminNotification extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public Appointment $appointment;
+
     public string $action;
 
     public function __construct(Appointment $appointment, string $action = 'new_booking')
@@ -25,7 +26,7 @@ class AdminNotification extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $actionText = match($this->action) {
+        $actionText = match ($this->action) {
             'new_booking' => 'New Booking',
             'cancellation' => 'Booking Cancellation',
             'completed' => 'Booking Completed',
