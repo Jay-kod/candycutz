@@ -25,7 +25,6 @@ class ModuleServiceProvider extends ServiceProvider
 
             if (file_exists($routes)) {
                 Route::prefix('api')->middleware($middleware)->group($routes);
-                Route::prefix('api/v1')->middleware($middleware)->group($routes);
             }
         }
     }

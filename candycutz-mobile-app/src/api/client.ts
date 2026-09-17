@@ -268,7 +268,8 @@ export const bookingsApi = {
 
   getAll: async (params?: { date?: string; status?: string }): Promise<Appointment[]> => {
     const res = await apiClient.get<ApiResponse<Appointment[]>>('/appointments', { params });
-    return res.data.data || (res.data as any) || [];
+    const data = res.data.data as any;
+    return Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
   },
 
   getById: async (id: number): Promise<Appointment> => {

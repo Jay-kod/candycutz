@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
 
@@ -37,7 +38,9 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
 
 export default function TabLayout() {
   const { user, isAuthenticated, viewMode } = useAuthStore();
+  const insets = useSafeAreaInsets();
   const isBarber = isAuthenticated && user?.role === 'barber' && viewMode === 'barber';
+  const tabBarContentHeight = 56;
 
   return (
     <Tabs
@@ -47,8 +50,8 @@ export default function TabLayout() {
           backgroundColor: COLORS.surface,
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 10,
+          height: tabBarContentHeight + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 8,
         },
         tabBarActiveTintColor: COLORS.primary,

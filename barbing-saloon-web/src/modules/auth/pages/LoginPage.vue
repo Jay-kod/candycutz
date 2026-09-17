@@ -56,9 +56,20 @@
           <p class="text-theme-muted text-xs sm:text-sm mb-4">Please enter your credentials to access your dashboard.</p>
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
-            <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> customer@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> customer123</p>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-theme-text font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
+                Official Demo Credentials
+              </span>
+              <button 
+                type="button" 
+                @click="quickFillCustomer" 
+                class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
+                ⚡ Quick Fill
+              </button>
+            </div>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> customer@candycutz.com</p>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> customer123</p>
           </div>
 
           <div class="mb-6">
@@ -199,7 +210,7 @@ const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
 const email = ref('customer@candycutz.com');
-const password = ref('password');
+const password = ref('customer123');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -211,9 +222,16 @@ const schema = object({
   password: string().required('Password is required'),
 });
 
-const demoCustomerLogin = async () => {
+const quickFillCustomer = () => {
   email.value = 'customer@candycutz.com';
   password.value = 'customer123';
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+};
+
+const demoCustomerLogin = async () => {
+  quickFillCustomer();
   rememberMe.value = true;
   await submitForm();
 };

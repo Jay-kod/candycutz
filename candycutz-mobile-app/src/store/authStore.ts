@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const user = await authApi.me();
-      const isBarber = user.role === 'barber' || user.role === 'admin' || user.role === 'super_admin';
+      const isBarber = user.role === 'barber';
       const barberProfile: BarberProfile | null = isBarber && (user as any).barber ? (user as any).barber : null;
 
       set({
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await authApi.login(identity, password);
-      const isBarber = res.user.role === 'barber' || res.user.role === 'admin' || res.user.role === 'super_admin';
+      const isBarber = res.user.role === 'barber';
       const barberProfile: BarberProfile | null = isBarber && (res.user as any).barber ? (res.user as any).barber : null;
 
       set({
@@ -153,7 +153,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshProfile: async () => {
     try {
       const user = await authApi.me();
-      const isBarber = user.role === 'barber' || user.role === 'admin' || user.role === 'super_admin';
+      const isBarber = user.role === 'barber';
       const barberProfile: BarberProfile | null = isBarber && (user as any).barber ? (user as any).barber : null;
       set({ user, barber: barberProfile, isBarber });
     } catch (e) {}

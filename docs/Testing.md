@@ -1,5 +1,26 @@
 # Candycutz — Testing Strategy & Quality Assurance
 
+## Current Verification Baseline
+
+The repository contains one Laravel API, one Vue website, and one unified Expo application. The website and mobile app are validated independently because they are separate clients of the same API.
+
+Verified commands from the current hardening pass:
+
+```bash
+cd barbing-saloon-api
+php artisan route:list --path=api
+php -l app/Core/Http/Controllers/Api/V1/ReceiptApiController.php
+php -l app/Core/Http/Controllers/Api/V1/PaymentWebhookApiController.php
+
+cd ../barbing-saloon-web
+npm run build
+
+cd ../candycutz-mobile-app
+npm run type-check
+```
+
+The phase scripts under `barbing-saloon-api/tests` require a running API and database and may mutate data. Run them only with disposable test credentials and a disposable database. They are smoke/integration scripts, not substitutes for isolated PHPUnit or Pest tests.
+
 ## 1. Testing Philosophy
 A feature in Candycutz is never marked complete merely because its happy path executes. Quality assurance validates edge cases, network dropouts, concurrent race conditions, authorization leaks, and malicious inputs.
 
@@ -103,10 +124,9 @@ public function test_duplicate_webhook_events_are_ignored(): void
 ## 3. Mobile Automated Verification
 
 ### 3.1 TypeScript Static Analysis
-Executed on both mobile codebases:
+Executed against the single unified mobile codebase:
 ```bash
-cd candycutz-customer-app && npx tsc --noEmit
-cd candycutz-barber-app && npx tsc --noEmit
+cd candycutz-mobile-app && npm run type-check
 ```
 Zero type errors permitted in committed code.
 

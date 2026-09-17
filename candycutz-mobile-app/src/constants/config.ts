@@ -2,9 +2,12 @@ import { Platform } from 'react-native';
 
 // Dynamically handle local development IP (Android emulator uses 10.0.2.2, iOS simulator uses localhost)
 const DEFAULT_LOCAL_IP = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '');
+const apiHost = configuredApiUrl || DEFAULT_LOCAL_IP;
+const API_BASE_URL = /\/api\/v1$/i.test(apiHost) ? apiHost : `${apiHost}/api/v1`;
 
 export const CONFIG = {
-  API_BASE_URL: process.env.EXPO_PUBLIC_API_URL || `${DEFAULT_LOCAL_IP}/api/v1`,
+  API_BASE_URL,
   API_WEB_URL: process.env.EXPO_PUBLIC_WEB_URL || 'http://localhost:5173',
   APP_NAME: 'CandyCutz',
   DEFAULT_CURRENCY: 'NGN',

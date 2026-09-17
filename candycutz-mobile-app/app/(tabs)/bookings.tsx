@@ -15,6 +15,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { bookingsApi } from '../../src/api/client';
 import { Badge } from '../../src/components/common/Badge';
+import { BookingSkeletons } from '../../src/components/common/Skeleton';
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { CONFIG } from '../../src/constants/config';
@@ -27,6 +29,7 @@ export default function BookingsScreen() {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [pendingCancellation, setPendingCancellation] = useState<Appointment | null>(null);
 
   const {
     data: appointments = [],
@@ -50,18 +53,7 @@ export default function BookingsScreen() {
   });
 
   const handleCancelPrompt = (appointment: Appointment) => {
-    Alert.alert(
-      'Cancel Appointment',
-      `Are you sure you want to cancel booking ${appointment.booking_reference}?`,
-      [
-        { text: 'No, Keep It', style: 'cancel' },
-        {
-          text: 'Yes, Cancel',
-          style: 'destructive',
-          onPress: () => cancelMutation.mutate(appointment.id),
-        },
-      ]
-    );
+    setPendingCancellation(appointment);
   };
 
   if (!isAuthenticated) {
@@ -85,11 +77,13 @@ export default function BookingsScreen() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const upcomingBookings = appointments.filter(
+  const bookingList = Array.isArray(appointments) ? appointments : [];
+
+  const upcomingBookings = bookingList.filter(
     (item) => item.status !== 'cancelled' && item.status !== 'completed' && item.appointment_date >= today
   );
 
-  const pastBookings = appointments.filter(
+  const pastBookings = bookingList.filter(
     (item) => item.status === 'cancelled' || item.status === 'completed' || item.appointment_date < today
   );
 
@@ -192,9 +186,7 @@ export default function BookingsScreen() {
       </View>
 
       {isLoading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
+        <BookingSkeletons />
       ) : (
         <FlatList
           data={currentList}
@@ -225,6 +217,18 @@ export default function BookingsScreen() {
           }
         />
       )}
+      <ConfirmDialog
+        visible={Boolean(pendingCancellation)}
+        title="Cancel appointment?"
+        message={pendingCancellation ? `Booking ${pendingCancellation.booking_reference} will be cancelled and removed from your upcoming schedule.` : ''}
+        confirmLabel="Cancel Booking"
+        destructive
+        onCancel={() => setPendingCancellation(null)}
+        onConfirm={() => {
+          if (pendingCancellation) cancelMutation.mutate(pendingCancellation.id);
+          setPendingCancellation(null);
+        }}
+      />
     </SafeAreaView>
   );
 }

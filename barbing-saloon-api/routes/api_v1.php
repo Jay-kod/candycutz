@@ -5,11 +5,16 @@ declare(strict_types=1);
 use App\Core\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Core\Http\Controllers\Api\V1\AvailabilityApiController;
 use App\Core\Http\Controllers\Api\V1\BarberApiController;
+use App\Core\Http\Controllers\Api\V1\BlogApiController;
+use App\Core\Http\Controllers\Api\V1\GalleryApiController;
 use App\Core\Http\Controllers\Api\V1\HealthApiController;
 use App\Core\Http\Controllers\Api\V1\PaymentWebhookApiController;
+use App\Core\Http\Controllers\Api\V1\ReceiptApiController;
 use App\Core\Http\Controllers\Api\V1\ServiceApiController;
 use App\Core\Http\Controllers\Api\V1\ServiceZoneApiController;
+use App\Core\Http\Controllers\Api\V1\TestimonialApiController;
 use App\Core\Http\Controllers\NotificationController;
+use App\Modules\Auth\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // Public Canonical Endpoints
@@ -20,10 +25,27 @@ Route::get('/services/{idOrSlug}', [ServiceApiController::class, 'show']);
 Route::get('/barbers', [BarberApiController::class, 'index']);
 Route::get('/availability', [AvailabilityApiController::class, 'index']);
 Route::get('/service-zones', [ServiceZoneApiController::class, 'index']);
+Route::get('/gallery', [GalleryApiController::class, 'index']);
+Route::get('/gallery/{id}', [GalleryApiController::class, 'show'])->whereNumber('id');
+Route::get('/testimonials', [TestimonialApiController::class, 'index']);
+Route::get('/blog', [BlogApiController::class, 'index']);
+Route::get('/blog/{slug}', [BlogApiController::class, 'show']);
+
+// Auth Endpoints
+Route::post('/auth/social-login', [AuthController::class, 'socialLogin']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/payments/webhook', [PaymentWebhookApiController::class, 'handle']);
 
 // Authenticated Canonical Endpoints
 Route::middleware('auth:sanctum')->group(function () {
+    // Auth
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::get('/payments/appointments/{appointmentId}/receipt', [ReceiptApiController::class, 'show'])->whereNumber('appointmentId');
+
     // Specific Barber Operations (declared before /barbers/{id} wildcard)
     Route::patch('/barbers/chair-status', [BarberApiController::class, 'updateChairStatus']);
     Route::get('/barbers/my-appointments', [AppointmentApiController::class, 'index']);

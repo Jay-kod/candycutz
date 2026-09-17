@@ -50,7 +50,12 @@ class BookingService
             $barberId = !empty($data['barber_id'])
                 ? (int) $data['barber_id']
                 : (Barber::where('is_available', true)->value('id') ?? 1);
-            $barber = Barber::findOrFail($barberId);
+            // Serialize bookings per barber before checking an empty slot. Appointment-row
+            // locks alone cannot protect a slot that has no appointment yet.
+            $barber = Barber::query()
+                ->whereKey($barberId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
             // Resolve service(s)
             $serviceId = (int) ($data['service_id'] ?? 1);

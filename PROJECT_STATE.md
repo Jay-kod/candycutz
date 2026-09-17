@@ -1,9 +1,11 @@
 # Candycutz — Living Project State
 
-**Current Status**: All Phases (Phase 0 – Phase 9) Fully Completed  
-**Active Phase**: Production Launch Handover & Store Deployment  
-**System Version**: 2.0.0-launch-ready  
-**Last Updated**: September 2026  
+**Current Status**: Core client and API alignment complete; security and deployment hardening in progress  
+**Active Phase**: Production hardening, automated verification, and launch readiness  
+**System Version**: 2.0.0-hardening  
+**Last Updated**: September 16, 2026  
+
+The Vue website and unified Expo application remain separate clients of the Laravel API. Verified work includes canonical route ownership, mobile authentication gating, protected receipt delivery, signed Stripe webhook enforcement, and a Laravel-backed Docker health check. Production launch remains blocked until TLS, secret enforcement, legacy public scripts, automated tests, and deployment configuration are completed.
 
 ---
 
@@ -24,19 +26,19 @@
 
 ---
 
-## 2. Core Forensic Audit Findings
+## 2. Historical Findings and Current Resolution Status
 
-1. **Dual Mobile App Fracture**: Two separate mobile projects (`candycutz-customer-app` and `candycutz-barber-app`) duplicate 80% of their code. They must be merged into ONE Expo application with role-based navigation guards.
-2. **Session Collision Bug**: Backend `AuthService::login` calls `$user->tokens()->delete()`, destroying existing web tokens when logging into mobile, and vice versa.
+1. **Dual Mobile App Fracture**: Resolved in the unified `candycutz-mobile-app`; legacy launcher directories still require cleanup.
+2. **Session Collision Bug**: Normal login now issues non-destructive scoped tokens. Token deletion remains intentional for logout-all and password reset.
 3. **Missing Critical Endpoints**:
    - `/api/auth/social-login` (404)
    - `/api/auth/forgot-password` (404)
    - `/api/v1/payments/webhook` (404)
    - Canonical RESTful endpoints (`/api/v1/services`, `/api/v1/barbers`, `/api/v1/availability`, `/api/v1/appointments`) are 404 for mobile clients.
-4. **CORS Header Collision**: Raw PHP `header('Access-Control-Allow-Origin: *')` in `public/index.php` collides with `config/cors.php` and breaks credentialed browser requests.
-5. **Context-Blind Web 401 Redirect**: `axios.js` redirects all 401s to `/customer/login`, abruptly ejecting Admins and Barbers from their respective portals.
-6. **Missing Stripe Dependency**: `stripe/stripe-php` is missing from `composer.json`, causing fatal errors if live payment methods are invoked.
-7. **Infrastructure Debt**: `docker-compose.yml` mounts raw SQL files and lacks Nginx, Redis, and a background queue worker.
+4. **CORS Header Collision**: Removed from the PHP entrypoints; configured origin patterns still need production review.
+5. **Context-Blind Web 401 Redirect**: The primary website Axios client now redirects by portal; the unused duplicate interceptor remains to be removed.
+6. **Missing Stripe Dependency**: Resolved; `stripe/stripe-php` is declared and webhook signatures are required.
+7. **Infrastructure Debt**: Nginx, Redis, workers, scheduler, and a Laravel health check are present. TLS certificates, secret enforcement, and backup-drill verification remain open.
 
 ---
 

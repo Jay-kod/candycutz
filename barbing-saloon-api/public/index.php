@@ -6,7 +6,7 @@ define('LARAVEL_START', microtime(true));
 
 // Serve static uploads and files directly under PHP built-in server
 $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-if (preg_match('/^\/(uploads|storage)\//', $requestUri)) {
+if (preg_match('/^\/(uploads|storage)\//', $requestUri) && ! preg_match('/^\/uploads\/receipts\//', $requestUri)) {
     $filePath = __DIR__ . $requestUri;
     if (file_exists($filePath) && is_file($filePath)) {
         $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
@@ -20,7 +20,6 @@ if (preg_match('/^\/(uploads|storage)\//', $requestUri)) {
             'svg' => 'image/svg+xml',
         ];
         $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
-        header('Access-Control-Allow-Origin: *');
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($filePath));
         header('Cache-Control: public, max-age=86400');
@@ -48,6 +47,35 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
 // Register Composer autoloader
 require __DIR__ . '/../vendor/autoload.php';
 
+// Read raw input before Laravel captures the request when using PHP's built-in server.
+$rawInput = file_get_contents('php://input');
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+// Parse request body BEFORE Laravel captures the request
+$requestData = [];
+if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE']) && $rawInput !== false && $rawInput !== '') {
+    $cleanInput = ltrim($rawInput, "\xEF\xBB\xBF");
+    
+    if (str_contains($contentType, 'application/json')) {
+        $decoded = json_decode($cleanInput, true);
+        if ($decoded !== null) {
+            $requestData = $decoded;
+        }
+    } elseif (str_contains($contentType, 'application/x-www-form-urlencoded')) {
+        parse_str($rawInput, $parsed);
+        $requestData = $parsed;
+    }
+}
+
 // Bootstrap Laravel 11 and handle the request
 $app = require_once __DIR__ . '/../bootstrap/app.php';
-$app->handleRequest(Request::capture());
+
+$request = Request::capture();
+
+// Populate request data BEFORE Laravel processes the request
+if (!empty($requestData)) {
+    $request->request->replace($requestData);
+}
+
+$app->handleRequest($request);

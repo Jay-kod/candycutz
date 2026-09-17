@@ -15,6 +15,7 @@ import { staffQueueApi } from '../../api/client';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
 import { Card } from '../common/Card';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useChairStore } from '../../store/chairStore';
@@ -32,6 +33,7 @@ export function BarberQueueView() {
   const queryClient = useQueryClient();
   const { barber, isAuthenticated, setChairStatus } = useAuthStore();
   const { activeClient, elapsedSeconds, setActiveClient, tickTimer } = useChairStore();
+  const [pendingApproval, setPendingApproval] = React.useState<{ appointment: Appointment; status: 'in_progress' | 'completed' | 'no_show' } | null>(null);
 
   const {
     data: queue = [],
@@ -97,26 +99,15 @@ export function BarberQueueView() {
   };
 
   const handleStartService = (appointment: Appointment) => {
-    transitionMutation.mutate({ id: appointment.id, status: 'in_progress' });
+    setPendingApproval({ appointment, status: 'in_progress' });
   };
 
   const handleCompleteService = (appointment: Appointment) => {
-    transitionMutation.mutate({ id: appointment.id, status: 'completed' });
+    setPendingApproval({ appointment, status: 'completed' });
   };
 
   const handleMarkNoShow = (appointment: Appointment) => {
-    Alert.alert(
-      'Mark as No-Show',
-      `Are you sure ${appointment.customer?.name || 'client'} did not arrive?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm No-Show',
-          style: 'destructive',
-          onPress: () => transitionMutation.mutate({ id: appointment.id, status: 'no_show' }),
-        },
-      ]
-    );
+    setPendingApproval({ appointment, status: 'no_show' });
   };
 
   return (
@@ -278,6 +269,18 @@ export function BarberQueueView() {
             />
           </View>
         }
+      />
+      <ConfirmDialog
+        visible={Boolean(pendingApproval)}
+        title={pendingApproval?.status === 'no_show' ? 'Approve no-show?' : pendingApproval?.status === 'completed' ? 'Approve completion?' : 'Start this service?'}
+        message={pendingApproval ? `${pendingApproval.appointment.customer?.name || 'This client'}'s appointment will be marked as ${pendingApproval.status.replace('_', ' ')}.` : ''}
+        confirmLabel={pendingApproval?.status === 'no_show' ? 'Confirm No-Show' : 'Approve'}
+        destructive={pendingApproval?.status === 'no_show'}
+        onCancel={() => setPendingApproval(null)}
+        onConfirm={() => {
+          if (pendingApproval) transitionMutation.mutate({ id: pendingApproval.appointment.id, status: pendingApproval.status });
+          setPendingApproval(null);
+        }}
       />
     </SafeAreaView>
   );

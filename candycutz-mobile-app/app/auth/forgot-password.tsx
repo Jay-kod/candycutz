@@ -4,21 +4,25 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { GoogleLogo } from '../../src/components/common/GoogleLogo';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -45,18 +49,27 @@ export default function ForgotPasswordScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={insets.top}
         style={styles.keyboardView}
       >
-        <View style={styles.container}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <Text style={styles.closeText}>✕</Text>
-          </TouchableOpacity>
-
+        <ScrollView
+          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.xl }]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Card style={styles.card} elevated>
-            <Text style={styles.title}>Reset Password</Text>
-            <Text style={styles.desc}>
-              Enter your registered email address and we will send you a secure link to reset your account password.
-            </Text>
+            <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+              <Text style={styles.closeText}>✕</Text>
+            </TouchableOpacity>
+
+            <View style={styles.brandBlock}>
+              <View style={styles.iconFrame}>
+                <Image source={require('../../assets/icon.png')} style={styles.systemIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brandName}>CandyCutz</Text>
+              <Text style={styles.title}>Reset password</Text>
+              <Text style={styles.subtitle}>We will help you get back into your account</Text>
+            </View>
 
             {isSubmitted ? (
               <View style={styles.successBox}>
@@ -73,6 +86,10 @@ export default function ForgotPasswordScreen() {
               </View>
             ) : (
               <>
+                <View style={styles.providerRow}>
+                  <GoogleLogo size={18} />
+                  <Text style={styles.providerText}>Secure account recovery</Text>
+                </View>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Email Address</Text>
                   <TextInput
@@ -96,7 +113,7 @@ export default function ForgotPasswordScreen() {
               </>
             )}
           </Card>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -111,14 +128,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    flex: 1,
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.lg,
     justifyContent: 'center',
+    flexGrow: 1,
   },
   closeButton: {
     alignSelf: 'flex-end',
-    padding: 8,
-    marginBottom: SPACING.sm,
+    padding: 4,
+    marginBottom: 2,
   },
   closeText: {
     color: COLORS.textSecondary,
@@ -126,13 +144,51 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   card: {
+    width: '100%',
+    maxWidth: 390,
+    alignSelf: 'center',
     padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+  },
+  brandBlock: {
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  iconFrame: {
+    width: 64,
+    height: 64,
+    borderRadius: RADIUS.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    backgroundColor: COLORS.surface,
+    marginBottom: SPACING.sm,
+  },
+  systemIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: RADIUS.full,
+  },
+  brandName: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   title: {
-    fontSize: FONTS.sizes.xxl,
+    fontSize: FONTS.sizes.lg,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginBottom: 8,
+  },
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 18,
+    paddingHorizontal: 8,
   },
   desc: {
     fontSize: FONTS.sizes.sm,
@@ -159,6 +215,18 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+  providerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  providerText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '600',
   },
   successBox: {
     alignItems: 'center',

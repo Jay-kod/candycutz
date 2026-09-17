@@ -56,9 +56,20 @@
           <p class="text-theme-muted text-xs sm:text-sm mb-4">Please enter your credentials to access the barber dashboard.</p>
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
-            <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> marcus@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> barber123</p>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-theme-text font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
+                Official Barber Credentials
+              </span>
+              <button 
+                type="button" 
+                @click="quickFillBarber" 
+                class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
+                ✂ Quick Fill
+              </button>
+            </div>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> marcus@candycutz.com</p>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> barber123</p>
           </div>
         </div>
 
@@ -190,7 +201,7 @@ const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
 const email = ref('marcus@candycutz.com');
-const password = ref('password');
+const password = ref('barber123');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -202,11 +213,16 @@ const schema = object({
   password: string().required('Password is required'),
 });
 
-
-
-const demoBarberLogin = async () => {
+const quickFillBarber = () => {
   email.value = 'marcus@candycutz.com';
   password.value = 'barber123';
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+};
+
+const demoBarberLogin = async () => {
+  quickFillBarber();
   rememberMe.value = true;
   await submitForm();
 };

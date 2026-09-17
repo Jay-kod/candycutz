@@ -8,8 +8,10 @@ echo Starting PHP backend on http://localhost:8000 ...
 start "CandyCutz Backend (API)" cmd /k "cd barbing-saloon-api && C:\xampp\php\php.exe -S localhost:8000 -t public"
 
 :: Start frontend in a new window
-echo Starting Vite frontend on http://localhost:5173 ...
+echo Starting Vite frontend on http://localhost:5174 (or http://localhost:5173) ...
 start "CandyCutz Frontend (Web)" cmd /k "cd barbing-saloon-web && npm run dev"
 
 echo Done! Both servers have been launched in separate terminal windows.
+echo Frontend Web URL: http://localhost:5174 (fallback: http://localhost:5173)
+echo Backend API URL: http://localhost:8000
 pause

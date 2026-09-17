@@ -4,13 +4,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
@@ -18,6 +19,7 @@ import { useAuthStore } from '../../src/store/authStore';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { register, isLoading, error } = useAuthStore();
 
   const [name, setName] = useState('');
@@ -46,18 +48,24 @@ export default function RegisterScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={insets.top}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.logo}>CANDYCUTZ</Text>
-            <Text style={styles.title}>Create your VIP profile</Text>
-            <Text style={styles.subtitle}>
-              Book top-tier barbershop and home grooming services across Keffi with ease.
-            </Text>
-          </View>
-
+        <ScrollView
+          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.xl }]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Card style={styles.card} elevated>
+            <View style={styles.brandBlock}>
+              <View style={styles.iconFrame}>
+                <Image source={require('../../assets/icon.png')} style={styles.systemIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brandName}>CandyCutz</Text>
+              <Text style={styles.title}>Create account</Text>
+              <Text style={styles.subtitle}>Create your account to continue</Text>
+            </View>
+
             {error && (
               <View style={styles.errorBox}>
                 <Text style={styles.errorText}>{error}</Text>
@@ -164,37 +172,57 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   container: {
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.lg,
     justifyContent: 'center',
     flexGrow: 1,
-    paddingBottom: 40,
   },
-  header: {
+  card: {
+    width: '100%',
+    maxWidth: 390,
+    alignSelf: 'center',
+    padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+  },
+  brandBlock: {
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.md,
   },
-  logo: {
+  iconFrame: {
+    width: 64,
+    height: 64,
+    borderRadius: RADIUS.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    backgroundColor: COLORS.surface,
+    marginBottom: SPACING.sm,
+  },
+  systemIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: RADIUS.full,
+  },
+  brandName: {
     color: COLORS.primary,
-    fontSize: FONTS.sizes.hero,
+    fontSize: FONTS.sizes.xxl,
     fontWeight: '900',
-    letterSpacing: 2,
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   title: {
     color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.xl,
+    fontSize: FONTS.sizes.lg,
     fontWeight: '800',
-    marginTop: 8,
   },
   subtitle: {
     color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.sm,
+    fontSize: 11,
     textAlign: 'center',
     marginTop: 4,
     lineHeight: 20,
-    paddingHorizontal: 20,
-  },
-  card: {
-    padding: SPACING.lg,
+    paddingHorizontal: 8,
   },
   errorBox: {
     backgroundColor: COLORS.errorLight,
@@ -202,7 +230,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RADIUS.md,
     padding: 12,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   errorText: {
     color: COLORS.error,
@@ -210,7 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   fieldGroup: {
-    marginBottom: 14,
+    marginBottom: 12,
   },
   label: {
     color: COLORS.textSecondary,
@@ -225,7 +253,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
-    padding: 14,
+    padding: 13,
     color: COLORS.textPrimary,
     fontSize: FONTS.sizes.sm,
   },

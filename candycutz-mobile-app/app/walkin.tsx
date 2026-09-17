@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { staffWalkInApi } from '../src/api/client';
 import { Button } from '../src/components/common/Button';
 import { Card } from '../src/components/common/Card';
@@ -24,6 +24,7 @@ import { Appointment, Service } from '../src/types';
 export default function WalkInScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const setActiveClient = useChairStore((state) => state.setActiveClient);
 
   const [customerName, setCustomerName] = useState('');
@@ -84,9 +85,14 @@ export default function WalkInScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={insets.top}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.xl }]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.title}>Fast Walk-In Entry</Text>
           <Text style={styles.subtitle}>
             Register an in-shop walk-in guest in 30 seconds. No app account required.

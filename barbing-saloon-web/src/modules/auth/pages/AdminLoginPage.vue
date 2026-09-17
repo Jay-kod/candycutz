@@ -56,9 +56,20 @@
           <p class="text-theme-muted text-xs sm:text-sm mb-4">Please enter your credentials to access the admin dashboard.</p>
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
-            <p class="text-theme-text font-semibold mb-1">Demo Credentials:</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Email:</span> superadmin@candycutz.com</p>
-            <p class="text-theme-text"><span class="text-theme-muted">Password:</span> superadmin123</p>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-theme-text font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-admin inline-block"></span>
+                Official Admin Credentials
+              </span>
+              <button 
+                type="button" 
+                @click="quickFillAdmin" 
+                class="text-[11px] font-bold text-admin hover:underline flex items-center gap-1 cursor-pointer">
+                🛡 Quick Fill
+              </button>
+            </div>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> superadmin@candycutz.com</p>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> superadmin123</p>
           </div>
         </div>
 
@@ -199,9 +210,16 @@ const schema = object({
   password: string().required('Password is required'),
 });
 
-const demoAdminLogin = async () => {
+const quickFillAdmin = () => {
   email.value = 'superadmin@candycutz.com';
   password.value = 'superadmin123';
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+};
+
+const demoAdminLogin = async () => {
+  quickFillAdmin();
   rememberMe.value = true;
   await submitForm();
 };

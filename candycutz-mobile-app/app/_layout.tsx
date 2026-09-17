@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthStore } from '../src/store/authStore';
 import { COLORS } from '../src/constants/theme';
+import { AppPreloader } from '../src/components/common/AppPreloader';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,15 +18,32 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthStack = segments[0] === 'auth';
+
+    if (!isAuthenticated && !inAuthStack) {
+      router.replace('/auth/login');
+    } else if (isAuthenticated && inAuthStack) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, isLoading, router, segments]);
+
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <StatusBar style="light" />
+        {isLoading ? <AppPreloader /> : (
         <Stack
           screenOptions={{
             headerStyle: {
@@ -85,6 +103,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        )}
       </QueryClientProvider>
     </SafeAreaProvider>
   );

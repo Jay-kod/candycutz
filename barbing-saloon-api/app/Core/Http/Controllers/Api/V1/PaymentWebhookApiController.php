@@ -24,19 +24,22 @@ class PaymentWebhookApiController
         $sigHeader = $request->header('Stripe-Signature');
         $webhookSecret = config('services.stripe.webhook_secret') ?: env('STRIPE_WEBHOOK_SECRET');
 
+        if (! $webhookSecret || str_starts_with($webhookSecret, 'whsec_placeholder') || ! $sigHeader) {
+            Log::warning('Stripe Webhook rejected because signature verification is not configured.');
+
+            return response()->json(['error' => 'Webhook verification unavailable'], 503);
+        }
+
         $event = null;
 
-        // If webhook secret is configured and signature header exists, verify cryptographic signature
-        if ($webhookSecret && !str_starts_with($webhookSecret, 'whsec_placeholder') && $sigHeader) {
-            try {
-                $event = Webhook::constructEvent($rawPayload, $sigHeader, $webhookSecret);
-            } catch (UnexpectedValueException $e) {
-                Log::warning('Stripe Webhook Invalid Payload: ' . $e->getMessage());
-                return response()->json(['error' => 'Invalid payload'], 400);
-            } catch (SignatureVerificationException $e) {
-                Log::warning('Stripe Webhook Signature Verification Failed: ' . $e->getMessage());
-                return response()->json(['error' => 'Invalid signature'], 400);
-            }
+        try {
+            $event = Webhook::constructEvent($rawPayload, $sigHeader, $webhookSecret);
+        } catch (UnexpectedValueException $e) {
+            Log::warning('Stripe Webhook Invalid Payload: ' . $e->getMessage());
+            return response()->json(['error' => 'Invalid payload'], 400);
+        } catch (SignatureVerificationException $e) {
+            Log::warning('Stripe Webhook Signature Verification Failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Invalid signature'], 400);
         }
 
         // Parse payload as array for data extraction

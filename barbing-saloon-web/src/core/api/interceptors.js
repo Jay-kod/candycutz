@@ -5,7 +5,7 @@ const toast = useToast();
 
 export function setupAxiosInterceptors() {
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ export function setupAxiosInterceptors() {
   // Request interceptor
   api.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem('candycutz_auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -38,8 +38,13 @@ export function setupAxiosInterceptors() {
       // Handle specific status codes
       if (error.response?.status === 401) {
         // Unauthorized - redirect to login
-        localStorage.removeItem('auth_token');
-        window.location.href = '/customer/login';
+        localStorage.removeItem('candycutz_auth_token');
+        const path = window.location.pathname;
+        window.location.href = path.startsWith('/admin')
+          ? '/admin/login'
+          : path.startsWith('/barber')
+            ? '/barber/login'
+            : '/customer/login';
         toast.error('Session expired. Please log in again.');
       } else if (error.response?.status === 403) {
         // Forbidden

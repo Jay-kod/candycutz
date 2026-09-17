@@ -29,13 +29,13 @@ class PublicService
     }
 
     // ──────────────────────────────────────────
-    // Services  (DB: is_available, NO slug, NO display_order)
+    // Services use the canonical active flag shared by web and mobile APIs.
     // ──────────────────────────────────────────
     public function services(): array
     {
         return Service::query()
             ->with('category')
-            ->where('is_available', true)
+            ->where('is_active', true)
             ->orderBy('name')
             ->get()
             ->map(fn (Service $service) => $this->serviceData($service))
@@ -52,9 +52,9 @@ class PublicService
 
     public function serviceCategories(): array
     {
-        // service_categories: id, name, description, icon — NO slug, NO display_order
+        // Keep the legacy public response compatible with the canonical schema.
         return ServiceCategory::query()
-            ->withCount(['services as services_count' => fn ($query) => $query->where('is_available', true)])
+            ->withCount(['services as services_count' => fn ($query) => $query->where('is_active', true)])
             ->orderBy('name')
             ->get()
             ->map(fn (ServiceCategory $category) => [
@@ -227,7 +227,7 @@ class PublicService
             'price' => $service->price,
             'duration_minutes' => $service->duration_minutes,
             'image' => $service->image,
-            'is_available' => $service->is_available,
+            'is_available' => (bool) $service->is_active,
             'category' => $service->category ? [
                 'id' => $service->category->id,
                 'name' => $service->category->name,

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { availabilityApi, barbersApi, bookingsApi, servicesApi, zonesApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
@@ -23,6 +23,7 @@ export default function BookingWizardScreen() {
   const router = useRouter();
   const { serviceId } = useLocalSearchParams<{ serviceId: string }>();
   const { isAuthenticated } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   const [step, setStep] = useState<number>(1);
   const [appointmentType, setAppointmentType] = useState<'in_shop' | 'home_service'>('in_shop');
@@ -157,7 +158,11 @@ export default function BookingWizardScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.xl }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Service Header Preview */}
         <Card style={styles.servicePreviewCard} elevated>
           <View>

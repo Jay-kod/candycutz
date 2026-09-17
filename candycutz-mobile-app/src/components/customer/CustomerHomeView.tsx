@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { barbersApi, servicesApi } from '../../api/client';
 import { Button } from '../common/Button';
+import { ServiceSkeletons, Skeleton } from '../common/Skeleton';
 import { Card } from '../common/Card';
 import { Header } from '../common/Header';
 import { CONFIG } from '../../constants/config';
@@ -117,7 +118,7 @@ export function CustomerHomeView() {
         </View>
 
         {loadingServices ? (
-          <ActivityIndicator color={COLORS.primary} style={styles.loader} />
+          <ServiceSkeletons />
         ) : (
           <View style={styles.servicesGrid}>
             {featuredServices.map((service: Service) => (
@@ -148,7 +149,9 @@ export function CustomerHomeView() {
         </View>
 
         {loadingBarbers ? (
-          <ActivityIndicator color={COLORS.primary} style={styles.loader} />
+          <View style={styles.barberSkeletonRow}>
+            {[1, 2].map((item) => <Skeleton key={item} style={styles.barberSkeleton} />)}
+          </View>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.barbersScroll}>
             {barbers.map((barber: Barber) => (
@@ -365,6 +368,15 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
+  },
+  barberSkeletonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  barberSkeleton: {
+    width: 170,
+    height: 190,
+    borderRadius: 16,
   },
   barbersScroll: {
     marginHorizontal: -SPACING.md,

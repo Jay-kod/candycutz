@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftIcon, CheckIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { barberApi } from '../api/barber.api'
@@ -13,6 +13,9 @@ const booking = ref(null)
 const isLoading = ref(true)
 const isProcessing = ref(false)
 const error = ref('')
+const receiptSrc = ref(null)
+const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || window.location.origin
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 const fetchBooking = async () => {
   isLoading.value = true
@@ -51,15 +54,33 @@ onMounted(() => {
   fetchBooking()
 })
 
-const receiptSrc = computed(() => {
-  if (!booking.value) return null
-  let img = booking.value.receipt_image
-  if (!img) return null
-  if (img.startsWith('http')) return img
-  if (img.startsWith('/public/')) {
-    img = img.replace('/public/', '/')
+let receiptObjectUrl = null
+
+const loadReceipt = async () => {
+  if (receiptObjectUrl) {
+    URL.revokeObjectURL(receiptObjectUrl)
+    receiptObjectUrl = null
   }
-  return `http://localhost:8000${img}`
+  receiptSrc.value = null
+
+  if (!booking.value?.receipt_image) return
+
+  try {
+    const token = localStorage.getItem('candycutz_auth_token')
+    const response = await fetch(`${API_BASE_URL}/payments/appointments/${booking.value.id}/receipt`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!response.ok) throw new Error('Unable to load receipt.')
+    receiptObjectUrl = URL.createObjectURL(await response.blob())
+    receiptSrc.value = receiptObjectUrl
+  } catch (loadError) {
+    error.value = loadError.message
+  }
+}
+
+watch(() => booking.value, loadReceipt)
+onUnmounted(() => {
+  if (receiptObjectUrl) URL.revokeObjectURL(receiptObjectUrl)
 })
 
 const isPdf = computed(() => {
@@ -72,7 +93,7 @@ const verifyPayment = async (action) => {
   
   try {
     const token = localStorage.getItem('candycutz_auth_token')
-    const res = await fetch(`http://localhost:8000/barber/bookings/${booking.value.id}/verify-payment`, {
+    const res = await fetch(`${API_ROOT}/barber/bookings/${booking.value.id}/verify-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
