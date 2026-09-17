@@ -38,6 +38,10 @@ barbing-saloon-api/storage/app/public/*
 dist/
 web-build/
 
+# Windows launcher scripts (hardcoded paths, not portable)
+*.bat
+*.ps1
+
 # IDE & OS
 .DS_Store
 Thumbs.db
