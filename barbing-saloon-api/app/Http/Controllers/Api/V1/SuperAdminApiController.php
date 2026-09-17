@@ -9,63 +9,64 @@ use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Resources\Api\V1\AuditLogResource;
-use App\Services\SuperAdminService;
+use App\Domain\Admin\Services\DashboardService;
+use App\Domain\Identity\Actions\ManageUsers;
+use App\Domain\Content\Services\SettingsService;
+use App\Domain\Content\Actions\UpdateSettings;
 
 class SuperAdminApiController
 {
-    public function __construct(protected SuperAdminService $superAdminService)
+    public function dashboard(DashboardService $dashboardService)
     {
+        return ApiResponse::success($dashboardService->dashboard(), 'Dashboard loaded');
     }
 
-    public function dashboard()
+    public function users(ManageUsers $manageUsers)
     {
-        return ApiResponse::success($this->superAdminService->dashboard(), 'Dashboard loaded');
+        return ApiResponse::paginated($manageUsers->listUsers(), 'Users loaded');
     }
 
-    public function users()
+    public function storeUser(StoreUserRequest $request, ManageUsers $manageUsers)
     {
-        return ApiResponse::paginated($this->superAdminService->users(), 'Users loaded');
+        return ApiResponse::success(new UserResource($manageUsers->storeUser($request->validated())), 'User created', 201);
     }
 
-    public function storeUser(StoreUserRequest $request)
+    public function updateUser(UpdateUserRequest $request, User $user, ManageUsers $manageUsers)
     {
-        return ApiResponse::success(new UserResource($this->superAdminService->storeUser($request->validated())), 'User created', 201);
+        return ApiResponse::success(new UserResource($manageUsers->updateUser($user, $request->validated())), 'User updated');
     }
 
-    public function updateUser(UpdateUserRequest $request, User $user)
+    public function activateUser(User $user, ManageUsers $manageUsers)
     {
-        return ApiResponse::success(new UserResource($this->superAdminService->updateUser($user, $request->validated())), 'User updated');
+        return ApiResponse::success(new UserResource($manageUsers->activateUser($user)), 'User activated');
     }
 
-    public function activateUser(User $user)
+    public function deactivateUser(User $user, ManageUsers $manageUsers)
     {
-        return ApiResponse::success(new UserResource($this->superAdminService->activateUser($user)), 'User activated');
+        return ApiResponse::success(new UserResource($manageUsers->deactivateUser($user)), 'User deactivated');
     }
 
-    public function deactivateUser(User $user)
+    public function deleteUser(User $user, ManageUsers $manageUsers)
     {
-        return ApiResponse::success(new UserResource($this->superAdminService->deactivateUser($user)), 'User deactivated');
-    }
-
-    public function deleteUser(User $user)
-    {
-        $this->superAdminService->deleteUser($user);
+        $manageUsers->deleteUser($user);
 
         return ApiResponse::success(null, 'User deleted');
     }
 
-    public function settings()
+    public function settings(SettingsService $settingsService)
     {
-        return ApiResponse::success($this->superAdminService->settings(), 'Settings loaded');
+        return ApiResponse::success($settingsService->settings(), 'Settings loaded');
     }
 
-    public function updateSettings(UpdateSettingsRequest $request)
+    public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService)
     {
-        return ApiResponse::success($this->superAdminService->updateSettings($request->validated()), 'Settings updated');
+        $action->execute($request->validated());
+        
+        return ApiResponse::success($settingsService->settings(), 'Settings updated');
     }
 
-    public function auditLogs()
+    public function auditLogs(DashboardService $dashboardService)
     {
-        return ApiResponse::paginated($this->superAdminService->auditLogs(), 'Audit logs loaded');
+        return ApiResponse::paginated($dashboardService->auditLogs(), 'Audit logs loaded');
     }
 }
