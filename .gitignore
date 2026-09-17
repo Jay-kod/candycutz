@@ -3,6 +3,12 @@ node_modules/
 */node_modules/
 vendor/
 */vendor/
+composer.phar
+*/composer.phar
+
+# Generated and ad hoc SQL outside the database source tree
+*.sql
+!barbing-saloon-api/database/**/*.sql
 
 # Environment files
 .env
