@@ -41,6 +41,7 @@ web-build/
 # Windows launcher scripts (hardcoded paths, not portable)
 *.bat
 *.ps1
+!upload-to-github.bat
 
 # IDE & OS
 .DS_Store
