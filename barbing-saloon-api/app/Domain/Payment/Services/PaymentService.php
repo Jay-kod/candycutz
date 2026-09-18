@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\Payment\Services;
 
 use App\Domain\Payment\Contracts\PaymentGateway;
+use App\Domain\Payment\Gateways\ManualTransferGateway;
+use App\Domain\Payment\Gateways\PaystackGateway;
+use App\Domain\Payment\Gateways\StripeGateway;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
@@ -21,6 +24,16 @@ class PaymentService
         protected PaymentGateway $gateway
     ) {}
 
+    public function resolveGateway(string $paymentMethod): PaymentGateway
+    {
+        return match ($paymentMethod) {
+            'paystack' => app(PaystackGateway::class),
+            'manual_transfer' => app(ManualTransferGateway::class),
+            'stripe' => app(StripeGateway::class),
+            default => $this->gateway,
+        };
+    }
+
     /**
      * Initialize payment intent for an appointment.
      *
@@ -28,20 +41,22 @@ class PaymentService
      */
     public function initializePayment(Appointment $appointment, string $paymentMethod = 'paystack'): array
     {
-        $amount = (int) $appointment->grand_total;
+        $amount = (int) ($appointment->grand_total ?: $appointment->total_price);
         $currency = 'NGN';
+        $initialStatus = $paymentMethod === 'manual_transfer' ? 'awaiting_transfer' : 'pending';
 
         $payment = Payment::create([
             'appointment_id' => $appointment->id,
             'customer_id' => $appointment->customer_id ?? 1,
             'amount' => $amount,
             'currency' => $currency,
-            'status' => 'pending',
+            'status' => $initialStatus,
             'payment_method' => $paymentMethod,
             'transaction_ref' => 'TXN-'.strtoupper(Str::random(12)),
         ]);
 
-        $checkout = $this->gateway->initiate($payment);
+        $gateway = $this->resolveGateway($paymentMethod);
+        $checkout = $gateway->initiate($payment);
 
         $payment->update([
             'gateway_reference' => $checkout->reference,

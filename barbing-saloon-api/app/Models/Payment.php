@@ -22,6 +22,10 @@ use Illuminate\Support\Carbon;
  * @property string|null $receipt_url
  * @property string|null $receipt_image
  * @property string|null $error_message
+ * @property Carbon|null $receipt_uploaded_at
+ * @property Carbon|null $verified_at
+ * @property int|null $verified_by_user_id
+ * @property Carbon|null $sla_expires_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -41,10 +45,17 @@ class Payment extends Model
         'transaction_ref',
         'receipt_url',
         'error_message',
+        'receipt_uploaded_at',
+        'verified_at',
+        'verified_by_user_id',
+        'sla_expires_at',
     ];
 
     protected $casts = [
         'amount' => 'integer',
+        'receipt_uploaded_at' => 'datetime',
+        'verified_at' => 'datetime',
+        'sla_expires_at' => 'datetime',
     ];
 
     public function appointment(): BelongsTo
@@ -55,6 +66,14 @@ class Payment extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by_user_id');
     }
 
     public function transactions(): HasMany
