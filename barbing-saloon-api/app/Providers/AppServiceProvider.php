@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domain\Payment\Contracts\PaymentGateway;
+use App\Domain\Payment\Gateways\ManualTransferGateway;
+use App\Domain\Payment\Gateways\PaystackGateway;
+use App\Domain\Payment\Gateways\StripeGateway;
 use App\Models\Appointment;
 use App\Policies\AppointmentPolicy;
 use Illuminate\Database\Eloquent\Model;
@@ -13,11 +17,12 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(\App\Domain\Payment\Contracts\PaymentGateway::class, function ($app) {
+        $this->app->bind(PaymentGateway::class, function ($app) {
             return match (config('payments.default')) {
-                'paystack' => $app->make(\App\Domain\Payment\Gateways\PaystackGateway::class),
-                'manual_transfer' => $app->make(\App\Domain\Payment\Gateways\ManualTransferGateway::class),
-                default => $app->make(\App\Domain\Payment\Gateways\PaystackGateway::class),
+                'paystack' => $app->make(PaystackGateway::class),
+                'manual_transfer' => $app->make(ManualTransferGateway::class),
+                'stripe' => $app->make(StripeGateway::class),
+                default => $app->make(PaystackGateway::class),
             };
         });
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Core\Enums\UserRole;
+use App\Domain\Shared\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BarberService;

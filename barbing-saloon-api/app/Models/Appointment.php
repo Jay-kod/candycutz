@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Core\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,12 +45,13 @@ class Appointment extends Model
         'status' => AppointmentStatus::class,
         'appointment_date' => 'date',
         'deposit_paid' => 'boolean',
-        'total_amount' => 'decimal:2',
-        'travel_fee' => 'decimal:2',
-        'tip_amount' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'grand_total' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'total_amount' => 'integer',
+        'travel_fee' => 'integer',
+        'tip_amount' => 'integer',
+        'discount_amount' => 'integer',
+        'grand_total' => 'integer',
+        'total_price' => 'integer',
+        'deposit_amount' => 'integer',
     ];
 
     public function branch(): BelongsTo

@@ -4,18 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
-use App\Core\Enums\UserRole;
-use App\Core\Traits\HasAuditLog;
-use App\Models\User;
 use App\Domain\Identity\Services\UsernameIdentityService;
-use Carbon\Carbon;
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Traits\HasAuditLog;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use RuntimeException;
 
 class RegisterCustomer
@@ -29,8 +22,8 @@ class RegisterCustomer
     public function execute(array $data): array
     {
         $name = trim($data['name']);
-        
-        if (!empty($data['username'])) {
+
+        if (! empty($data['username'])) {
             $username = strtolower(trim($data['username']));
             if (User::whereRaw('LOWER(username) = ?', [$username])->exists()) {
                 throw new RuntimeException('This username is already taken. Please choose another.');

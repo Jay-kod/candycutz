@@ -70,8 +70,8 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import AdminLayout from '../layouts/AdminLayout.vue';
-import client from '../../../core/api/axios';
+import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import client from '@/shared/api/client';
 
 const search = ref('');
 const activeFilter = ref('All');

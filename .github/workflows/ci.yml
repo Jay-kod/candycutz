@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend CI (API)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: barbing-saloon-api
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: candycutz_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        tools: composer:v2
+
+    - name: Install Dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+
+    - name: Copy .env
+      run: cp .env.example .env
+
+    - name: Generate Key
+      run: php artisan key:generate
+
+    - name: Set up Database
+      run: |
+        sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/g' .env
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g' .env
+        sed -i 's/DB_DATABASE=candycutz_db/DB_DATABASE=candycutz_test/g' .env
+        sed -i 's/DB_PASSWORD=/DB_PASSWORD=root/g' .env
+
+    - name: Run Pint
+      run: ./vendor/bin/pint --test
+
+    - name: Run Larastan
+      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+      continue-on-error: true
+
+    - name: Run Tests
+      run: ./vendor/bin/pest
+
+  frontend-web:
+    name: Frontend CI (Web)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: barbing-saloon-web
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run Lint
+      run: npm run lint
+      continue-on-error: true
+
+  frontend-mobile:
+    name: Mobile CI (Expo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: candycutz-mobile-app
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Type Check
+      run: npx tsc --noEmit
+      continue-on-error: true

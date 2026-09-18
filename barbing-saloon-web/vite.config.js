@@ -29,6 +29,11 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
   build: {
     // ── Chunk splitting for better caching ──
     // ── Minification ──

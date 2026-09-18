@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from '../layouts/AdminLayout.vue'
+import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue'
 import NotificationsView from '../../../core/components/NotificationsView.vue'
 </script>
 

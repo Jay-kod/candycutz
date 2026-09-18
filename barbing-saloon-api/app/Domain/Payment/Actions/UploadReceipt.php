@@ -17,7 +17,7 @@ class UploadReceipt
     {
         // 1. Validate file manually (if not done in FormRequest)
         $allowedMimes = ['image/jpeg', 'image/png', 'application/pdf'];
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
             throw ValidationException::withMessages([
                 'receipt' => ['Receipt must be a JPG, PNG, or PDF.'],
             ]);
@@ -42,7 +42,7 @@ class UploadReceipt
                     'currency' => 'NGN',
                     'status' => 'pending',
                     'payment_method' => 'manual_transfer',
-                    'transaction_ref' => 'MANUAL_' . strtoupper(uniqid()),
+                    'transaction_ref' => 'MANUAL_'.strtoupper(uniqid()),
                 ]
             );
 

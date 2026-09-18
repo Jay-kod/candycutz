@@ -95,8 +95,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import AdminLayout from '../layouts/AdminLayout.vue';
-import { adminApi } from '../api/admin.api';
+import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import { adminApi } from '@/shared/api/old_adminApi';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { useToast } from '../../../core/composables/useToast';
 import { ChatBubbleBottomCenterTextIcon, CheckCircleIcon, TrashIcon, ClockIcon } from '@heroicons/vue/24/outline';

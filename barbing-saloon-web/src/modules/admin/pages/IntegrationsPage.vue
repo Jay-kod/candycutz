@@ -140,8 +140,8 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import AdminLayout from '../layouts/AdminLayout.vue';
-import { adminApi } from '../api/admin.api';
+import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import { adminApi } from '@/shared/api/old_adminApi';
 import { EnvelopeIcon, GlobeAltIcon, PaperAirplaneIcon } from '@heroicons/vue/24/outline';
 
 const form = reactive({

@@ -25,8 +25,8 @@ class ServiceZone extends Model
     protected $casts = [
         'boundary_polygon' => 'array',
         'radius_km' => 'float',
-        'base_travel_fee' => 'float',
-        'per_km_fee' => 'float',
+        'base_travel_fee' => 'integer',
+        'per_km_fee' => 'integer',
         'is_active' => 'boolean',
     ];
 

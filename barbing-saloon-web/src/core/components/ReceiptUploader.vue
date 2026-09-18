@@ -1,8 +1,8 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { CloudArrowUpIcon, DocumentTextIcon, XMarkIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
-import { publicApi } from '../../modules/public/api/public.api'
-import { customerApi } from '../../modules/customer/api/customer.api'
+import { publicApi } from '@/shared/api/old_publicApi';
+import { customerApi } from '@/shared/api/old_customerApi';
 
 const props = defineProps({
   appointmentId: {

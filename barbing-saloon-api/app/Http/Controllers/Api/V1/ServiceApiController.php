@@ -93,6 +93,7 @@ class ServiceApiController
             'is_home_service_eligible' => (bool) $service->home_service_allowed,
         ];
     }
+
     public function store(Request $request): JsonResponse
     {
         $user = $request->user();

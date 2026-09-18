@@ -29,7 +29,7 @@ class ManualTransferGateway implements PaymentGateway
             gateway: 'manual_transfer',
             authorization_url: null, // No redirect
             access_code: null,
-            amount_kobo: (int) round($payment->amount * 100),
+            amount_kobo: (int) $payment->amount,
             meta: [
                 'bank_name' => $bankName,
                 'account_name' => $accountName,
@@ -47,14 +47,14 @@ class ManualTransferGateway implements PaymentGateway
             ->orWhere('gateway_reference', $reference)
             ->first();
 
-        if (!$payment) {
+        if (! $payment) {
             throw new RuntimeException("Payment reference {$reference} not found.");
         }
 
         return new GatewayResult(
             reference: $reference,
             status: $payment->status === 'successful' ? 'success' : ($payment->status === 'failed' ? 'failed' : 'pending'),
-            amount_kobo: (int) round($payment->amount * 100),
+            amount_kobo: (int) $payment->amount,
             gateway: 'manual_transfer',
             gateway_event_id: 'internal_verify',
             raw_payload: ['internal_status' => $payment->status],

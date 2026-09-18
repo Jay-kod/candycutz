@@ -64,6 +64,7 @@ class ContentService
     public function blogPostBySlug(string $slug): ?array
     {
         $post = BlogPost::query()->with('author')->where('slug', $slug)->first();
+
         return $post ? $this->blogData($post) : null;
     }
 

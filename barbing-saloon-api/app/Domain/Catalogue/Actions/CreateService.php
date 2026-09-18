@@ -2,27 +2,13 @@
 
 namespace App\Domain\Catalogue\Actions;
 
-use App\Models\Appointment;
-use App\Models\Barber;
-use App\Models\BlogPost;
-use App\Models\Gallery;
-use App\Models\Holiday;
+use App\Domain\Shared\Traits\HasSecureUploads;
 use App\Models\Service;
-use App\Models\ServiceCategory;
-use App\Models\Setting;
-use App\Models\Testimonial;
-use App\Models\WorkingHour;
-use App\Models\User;
-use App\Core\Enums\AppointmentStatus;
-use App\Core\Enums\BlogStatus;
-use App\Core\Enums\GalleryCategory;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
 
 class CreateService
 {
-    use \App\Core\Traits\HasSecureUploads;
+    use HasSecureUploads;
 
     public function execute(array $data): Service
     {

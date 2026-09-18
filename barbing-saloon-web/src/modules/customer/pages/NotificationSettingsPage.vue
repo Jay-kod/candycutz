@@ -2,9 +2,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Cog6ToothIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
-import CustomerLayout from '../layouts/CustomerLayout.vue'
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue'
 import { useAuthStore } from '../../auth/store/auth.store'
-import { customerApi } from '../api/customer.api'
+import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast'
 
 const router = useRouter()

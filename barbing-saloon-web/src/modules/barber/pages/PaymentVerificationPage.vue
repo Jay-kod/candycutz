@@ -285,8 +285,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import BarberLayout from '../layouts/BarberLayout.vue';
-import { barberApi } from '../api/barber.api';
+import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import {
   MagnifyingGlassIcon,

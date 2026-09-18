@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Payment\Services;
 
-use App\Core\Enums\AppointmentStatus;
+use App\Domain\Payment\Contracts\PaymentGateway;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
 class PaymentService
 {
     public function __construct(
-        protected \App\Domain\Payment\Contracts\PaymentGateway $gateway
+        protected PaymentGateway $gateway
     ) {}
 
     /**
@@ -25,7 +26,7 @@ class PaymentService
      */
     public function initializePayment(Appointment $appointment, string $paymentMethod = 'paystack'): array
     {
-        $amount = (float) $appointment->grand_total;
+        $amount = (int) $appointment->grand_total;
         $currency = 'NGN';
 
         $payment = Payment::create([
@@ -71,7 +72,7 @@ class PaymentService
             if (! $payment) {
                 $object = $rawPayload['data'] ?? $rawPayload;
                 $metadata = $object['metadata'] ?? [];
-                
+
                 $bookingRef = $metadata['booking_reference'] ?? null;
                 $appointmentId = $metadata['appointment_id'] ?? null;
 
@@ -83,12 +84,12 @@ class PaymentService
                 }
 
                 if ($appointment) {
-                    $amount = isset($object['amount']) ? ((float) $object['amount']) / 100 : (float) $appointment->grand_total;
+                    $amount = isset($object['amount']) ? (int) $object['amount'] : (int) $appointment->grand_total;
 
                     $payment = Payment::create([
                         'appointment_id' => $appointment->id,
                         'customer_id' => $appointment->customer_id ?? 1,
-                        'amount' => $amount ?: (float) $appointment->grand_total,
+                        'amount' => $amount ?: (int) $appointment->grand_total,
                         'currency' => strtoupper((string) ($object['currency'] ?? 'NGN')),
                         'status' => 'pending',
                         'payment_method' => config('payments.default'),

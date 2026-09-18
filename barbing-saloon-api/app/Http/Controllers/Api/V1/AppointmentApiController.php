@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Core\Enums\AppointmentStatus;
-use App\Http\Responses\ApiResponse;
+use App\Domain\Booking\Services\BookingService;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
+use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
-use App\Domain\Booking\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

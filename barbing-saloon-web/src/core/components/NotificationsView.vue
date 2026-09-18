@@ -20,7 +20,7 @@ import {
   CreditCardIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../modules/auth/store/auth.store'
-import client from '../api/axios'
+import client from '@/shared/api/client'
 
 const authStore = useAuthStore()
 const router = useRouter()

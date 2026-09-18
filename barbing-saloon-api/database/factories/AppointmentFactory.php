@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Core\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Branch;

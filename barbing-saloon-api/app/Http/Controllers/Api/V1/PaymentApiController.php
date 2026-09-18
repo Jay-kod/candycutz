@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Payment\Actions\UploadReceipt;
+use App\Domain\Payment\Services\PaymentService;
+use App\Http\Resources\Api\V1\PaymentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class PaymentApiController
 {
     public function __construct(
-        protected \App\Domain\Payment\Services\PaymentService $paymentService,
-        protected \App\Domain\Payment\Actions\UploadReceipt $uploadReceiptAction
+        protected PaymentService $paymentService,
+        protected UploadReceipt $uploadReceiptAction
     ) {}
 
     public function checkout(Request $request): JsonResponse
@@ -57,11 +58,11 @@ class PaymentApiController
         ]);
 
         $file = $request->file('receipt');
-        
+
         $payment = $this->uploadReceiptAction->execute($appointment, $file);
 
         return ApiResponse::success(
-            new \App\Http\Resources\Api\V1\PaymentResource($payment),
+            new PaymentResource($payment),
             'Receipt uploaded successfully. Awaiting verification.'
         );
     }

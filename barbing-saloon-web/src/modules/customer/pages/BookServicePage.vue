@@ -204,9 +204,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
-import { publicApi } from '../../public/api/public.api';
-import { customerApi } from '../api/customer.api';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { publicApi } from '@/shared/api/old_publicApi';
+import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
 import { 
   ArrowLeftIcon,

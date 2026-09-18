@@ -61,7 +61,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
-import { adminApi } from '../../api/admin.api';
+import { adminApi } from '@/shared/api/old_adminApi';
 import { SparklesIcon, CheckIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();

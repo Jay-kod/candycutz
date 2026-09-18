@@ -2,8 +2,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftIcon, CheckIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
-import { barberApi } from '../api/barber.api'
-import BarberLayout from '../layouts/BarberLayout.vue'
+import { barberApi } from '@/shared/api/old_barberApi';
+import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue'
 
 const route = useRoute()
 const router = useRouter()

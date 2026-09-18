@@ -120,8 +120,8 @@
 
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
-import { customerApi } from '../api/customer.api';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';
 

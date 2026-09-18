@@ -31,7 +31,8 @@
   "require-dev": {
     "pestphp/pest": "^3.0",
     "pestphp/pest-plugin-laravel": "^3.0",
-    "larastan/larastan": "^2.9",
+    "larastan/larastan": "^3.0",
+    "phpstan/phpstan": "^2.2",
     "laravel/pint": "^1.18",
     "mockery/mockery": "^1.6",
     "fakerphp/faker": "^1.24",

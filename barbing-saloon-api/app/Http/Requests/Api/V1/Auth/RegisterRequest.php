@@ -22,7 +22,7 @@ class RegisterRequest extends FormRequest
         if ($this->has('username') && is_string($this->username)) {
             $merge['username'] = ltrim(strtolower(trim($this->username)), '@');
         }
-        if (!empty($merge)) {
+        if (! empty($merge)) {
             $this->merge($merge);
         }
     }

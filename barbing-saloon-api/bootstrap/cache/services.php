@@ -29,7 +29,6 @@
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
     26 => 'Spatie\\Permission\\PermissionServiceProvider',
     27 => 'App\\Providers\\AppServiceProvider',
-    28 => 'App\\Providers\\ModuleServiceProvider',
   ),
   'eager' => 
   array (
@@ -48,7 +47,6 @@
     12 => 'Termwind\\Laravel\\TermwindServiceProvider',
     13 => 'Spatie\\Permission\\PermissionServiceProvider',
     14 => 'App\\Providers\\AppServiceProvider',
-    15 => 'App\\Providers\\ModuleServiceProvider',
   ),
   'deferred' => 
   array (

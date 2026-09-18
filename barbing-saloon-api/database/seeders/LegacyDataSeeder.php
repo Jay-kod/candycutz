@@ -147,7 +147,7 @@ SQL
         ];
 
         $driver = DB::connection()->getDriverName();
-        
+
         foreach ($sqls as $sql) {
             // Replace DATE_ADD syntax for SQLite
             if ($driver === 'sqlite') {
@@ -157,7 +157,7 @@ SQL
                 // Convert DATE_ADD(CURDATE(), INTERVAL X DAY) to DATE('now', '+X day')
                 $sql = preg_replace('/DATE_ADD\(CURDATE\(\),\s*INTERVAL\s*(\d+)\s*DAY\)/', "DATE('now', '+\$1 day')", $sql);
             }
-            
+
             DB::unprepared($sql);
         }
     }

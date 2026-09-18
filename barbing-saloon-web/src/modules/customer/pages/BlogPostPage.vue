@@ -131,9 +131,9 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
-import { publicApi } from '../../public/api/public.api';
-import { customerApi } from '../api/customer.api';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { publicApi } from '@/shared/api/old_publicApi';
+import { customerApi } from '@/shared/api/old_customerApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
 

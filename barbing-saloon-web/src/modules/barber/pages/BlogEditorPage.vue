@@ -78,8 +78,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import BarberLayout from '../layouts/BarberLayout.vue';
-import { barberApi } from '../api/barber.api';
+import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 

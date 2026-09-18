@@ -26,7 +26,7 @@
 import { ref, onMounted } from 'vue';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
-import { publicApi } from '../api/public.api';
+import { publicApi } from '@/shared/api/old_publicApi';
 
 const { init: initScrollReveal } = useScrollReveal();
 

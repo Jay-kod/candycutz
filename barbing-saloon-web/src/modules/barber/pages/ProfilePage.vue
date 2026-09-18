@@ -179,8 +179,8 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import BarberLayout from '../layouts/BarberLayout.vue';
-import { barberApi } from '../api/barber.api';
+import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import { barberApi } from '@/shared/api/old_barberApi';
 import { UserIcon, SparklesIcon, CameraIcon, XMarkIcon, ArrowPathIcon, CheckIcon } from '@heroicons/vue/24/outline';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';

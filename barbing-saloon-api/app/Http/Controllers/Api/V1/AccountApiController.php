@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Core\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Modules\Customer\Resources\UserProfileResource;
 use App\Modules\Customer\Services\CustomerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class AccountApiController
 {

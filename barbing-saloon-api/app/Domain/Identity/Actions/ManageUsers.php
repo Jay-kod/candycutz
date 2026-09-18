@@ -22,12 +22,14 @@ class ManageUsers
     public function updateUser(User $user, array $data): User
     {
         $user->update($data);
+
         return $user->refresh();
     }
 
     public function activateUser(User $user): User
     {
         $user->update(['is_active' => true]);
+
         return $user->refresh();
     }
 
@@ -39,6 +41,7 @@ class ManageUsers
             'deactivated_at' => now(),
         ]);
         $user->tokens()->delete();
+
         return $user->refresh();
     }
 

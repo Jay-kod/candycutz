@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Core\Enums\UserRole;
+use App\Domain\Shared\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

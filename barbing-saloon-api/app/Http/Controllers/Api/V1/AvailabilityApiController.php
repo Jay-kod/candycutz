@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Booking\Services\SlotHelper;
 use App\Http\Responses\ApiResponse;
 use App\Models\Barber;
 use App\Models\Service;
-use App\Domain\Booking\Services\SlotHelper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

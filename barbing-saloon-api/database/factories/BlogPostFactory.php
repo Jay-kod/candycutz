@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Core\Enums\BlogStatus;
+use App\Domain\Shared\Enums\BlogStatus;
 use App\Models\BlogPost;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;

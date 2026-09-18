@@ -27,8 +27,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import SuperAdminLayout from '../layouts/SuperAdminLayout.vue';
-import { superadminApi } from '../api/superadmin.api';
+import SuperAdminLayout from '@/portals/SuperAdmin/layouts/SuperAdminlayout.vue';
+import { superadminApi } from '@/shared/api/old_superadminApi';
 
 const logs = ref([]);
 

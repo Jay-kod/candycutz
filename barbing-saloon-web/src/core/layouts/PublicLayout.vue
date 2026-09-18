@@ -129,7 +129,7 @@
 import { ref, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useDark, useToggle, useWindowScroll } from '@vueuse/core';
-import { publicApi } from '../../modules/public/api/public.api';
+import { publicApi } from '@/shared/api/old_publicApi';
 
 const route = useRoute();
 const { y } = useWindowScroll();

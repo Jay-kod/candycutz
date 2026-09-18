@@ -277,9 +277,9 @@
 
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
-import { publicApi } from '../../public/api/public.api';
-import { customerApi } from '../api/customer.api';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { publicApi } from '@/shared/api/old_publicApi';
+import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
 import { 
   StarIcon, 

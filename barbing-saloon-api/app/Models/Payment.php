@@ -26,7 +26,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount' => 'float',
+        'amount' => 'integer',
     ];
 
     public function appointment(): BelongsTo

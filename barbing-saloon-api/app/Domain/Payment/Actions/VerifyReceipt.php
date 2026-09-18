@@ -27,13 +27,13 @@ class VerifyReceipt
             // passing 'manual_verify' as the mock event ID.
             $this->paymentService->confirmPaymentFromWebhook(
                 gatewayReference: $payment->gateway_reference ?? $payment->transaction_ref,
-                eventId: 'manual_verify_' . time(),
+                eventId: 'manual_verify_'.time(),
                 rawPayload: ['verified_by_admin' => true, 'notes' => $reason]
             );
         } else {
             $this->paymentService->recordFailedPaymentFromWebhook(
                 gatewayReference: $payment->gateway_reference ?? $payment->transaction_ref,
-                eventId: 'manual_reject_' . time(),
+                eventId: 'manual_reject_'.time(),
                 rawPayload: ['rejected_by_admin' => true, 'notes' => $reason],
                 errorMessage: $reason ?? 'Receipt rejected'
             );

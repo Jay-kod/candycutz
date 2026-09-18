@@ -176,7 +176,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
-import { adminApi } from '../../api/admin.api';
+import { adminApi } from '@/shared/api/old_adminApi';
 import { EnvelopeIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();

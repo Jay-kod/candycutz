@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Core\Enums\GalleryCategory;
+use App\Domain\Shared\Enums\GalleryCategory;
 use App\Models\Barber;
 use App\Models\Gallery;
 use Illuminate\Database\Eloquent\Factories\Factory;

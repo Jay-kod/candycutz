@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Core\Enums\UserRole;
-use App\Http\Responses\ApiResponse;
+use App\Domain\Identity\Actions\AuthenticateUser;
+use App\Domain\Identity\Actions\ChangePassword;
+use App\Domain\Identity\Actions\ManageUserTokens;
+use App\Domain\Identity\Actions\RegisterCustomer;
+use App\Domain\Identity\Actions\RequestPasswordReset;
+use App\Domain\Identity\Actions\ResetPassword;
+use App\Domain\Identity\Actions\SocialLogin;
+use App\Domain\Shared\Enums\UserRole;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
 use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\AuthUserResource;
-use App\Domain\Identity\Actions\RegisterCustomer;
-use App\Domain\Identity\Actions\AuthenticateUser;
-use App\Domain\Identity\Actions\SocialLogin;
-use App\Domain\Identity\Actions\RequestPasswordReset;
-use App\Domain\Identity\Actions\ResetPassword;
-use App\Domain\Identity\Actions\ChangePassword;
-use App\Domain\Identity\Actions\ManageUserTokens;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;

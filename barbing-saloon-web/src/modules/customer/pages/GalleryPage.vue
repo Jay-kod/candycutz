@@ -80,8 +80,8 @@
 
 <script setup>
 import { onMounted, ref, nextTick } from 'vue';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
-import { publicApi } from '../../public/api/public.api';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 
 const gallery = ref([]);

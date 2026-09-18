@@ -124,7 +124,7 @@
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
-import { publicApi } from '../api/public.api';
+import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 
 const form = reactive({ name: '', email: '', phone: '', message: '' });

@@ -19,7 +19,7 @@ class BarberService extends Model
     ];
 
     protected $casts = [
-        'custom_price' => 'float',
+        'custom_price' => 'integer',
         'custom_duration' => 'integer',
         'is_offered' => 'boolean',
     ];

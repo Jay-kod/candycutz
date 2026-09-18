@@ -27,6 +27,7 @@ class CatalogueService
     public function serviceBySlug(string $slug): ?array
     {
         $service = Service::query()->with('category')->find($slug);
+
         return $service ? $this->serviceData($service) : null;
     }
 
@@ -60,6 +61,7 @@ class CatalogueService
     public function barberById(int $id): ?array
     {
         $barber = Barber::query()->with(['user'])->find($id);
+
         return $barber ? $this->barberData($barber) : null;
     }
 
@@ -91,7 +93,8 @@ class CatalogueService
             return [];
         }
 
-        $slotHelper = new SlotHelper();
+        $slotHelper = new SlotHelper;
+
         return $slotHelper->generate($date, $barber, $service);
     }
 

@@ -8,6 +8,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\BlogPost;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BlogApiController
 {
@@ -103,7 +104,7 @@ class BlogApiController
             'title' => $validated['title'],
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'],
-            'slug' => \Illuminate\Support\Str::slug($validated['title']).'-'.time(),
+            'slug' => Str::slug($validated['title']).'-'.time(),
             'is_published' => true,
         ]);
 
@@ -136,7 +137,7 @@ class BlogApiController
 
         if (isset($validated['title'])) {
             $post->title = $validated['title'];
-            $post->slug = \Illuminate\Support\Str::slug($validated['title']).'-'.time();
+            $post->slug = Str::slug($validated['title']).'-'.time();
         }
         if (isset($validated['excerpt'])) {
             $post->excerpt = $validated['excerpt'];

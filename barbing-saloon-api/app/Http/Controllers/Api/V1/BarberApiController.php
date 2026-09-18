@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Responses\ApiResponse;
+use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
 use App\Models\WorkingHour;
@@ -36,20 +38,20 @@ class BarberApiController
         }
 
         $today = today()->toDateString();
-        $todayAppointments = \App\Models\Appointment::with(['service', 'customer'])
+        $todayAppointments = Appointment::with(['service', 'customer'])
             ->where('barber_id', $barber->id)
             ->where('appointment_date', $today)
             ->orderBy('appointment_time')
             ->get();
 
-        $upcomingCount = \App\Models\Appointment::where('barber_id', $barber->id)
+        $upcomingCount = Appointment::where('barber_id', $barber->id)
             ->where('appointment_date', '>=', $today)
-            ->whereIn('status', [\App\Core\Enums\AppointmentStatus::pending->value, \App\Core\Enums\AppointmentStatus::confirmed->value])
+            ->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
             ->count();
 
-        $completedToday = \App\Models\Appointment::where('barber_id', $barber->id)
+        $completedToday = Appointment::where('barber_id', $barber->id)
             ->where('appointment_date', $today)
-            ->where('status', \App\Core\Enums\AppointmentStatus::completed->value)
+            ->where('status', AppointmentStatus::completed->value)
             ->count();
 
         return ApiResponse::success([
@@ -70,8 +72,8 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
-        $completed = \App\Models\Appointment::where('barber_id', $barber->id)->where('status', \App\Core\Enums\AppointmentStatus::completed->value)->count();
-        $revenue = \App\Models\Appointment::where('barber_id', $barber->id)->where('status', \App\Core\Enums\AppointmentStatus::completed->value)->sum('total_price');
+        $completed = Appointment::where('barber_id', $barber->id)->where('status', AppointmentStatus::completed->value)->count();
+        $revenue = Appointment::where('barber_id', $barber->id)->where('status', AppointmentStatus::completed->value)->sum('total_price');
 
         return ApiResponse::success([
             'completed_count' => $completed,
@@ -118,7 +120,6 @@ class BarberApiController
             'barber' => $barber?->refresh(),
         ], 'Account updated');
     }
-
 
     public function show(int $id): JsonResponse
     {

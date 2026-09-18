@@ -2,27 +2,19 @@
 
 namespace App\Domain\System\Actions;
 
+use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\BlogStatus;
 use App\Models\Appointment;
+use App\Models\AuditLog;
 use App\Models\Barber;
 use App\Models\BlogPost;
 use App\Models\Gallery;
-use App\Models\Holiday;
 use App\Models\Service;
-use App\Models\ServiceCategory;
-use App\Models\Setting;
 use App\Models\Testimonial;
-use App\Models\WorkingHour;
 use App\Models\User;
-use App\Core\Enums\AppointmentStatus;
-use App\Core\Enums\BlogStatus;
-use App\Core\Enums\GalleryCategory;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
 
 class GetDashboardStats
 {
-
     public function __construct(protected GetReports $getReports) {}
 
     public function execute(): array
@@ -121,7 +113,7 @@ class GetDashboardStats
             ->get();
 
         // Recent activity from AuditLog
-        $recentActivity = \App\Models\AuditLog::query()
+        $recentActivity = AuditLog::query()
             ->with('user')
             ->latest()
             ->limit(10)
@@ -150,7 +142,7 @@ class GetDashboardStats
 
                 return [
                     'id' => $b->id,
-                    'name' => $b->user?->name ?? 'Barber ' . $b->id,
+                    'name' => $b->user?->name ?? 'Barber '.$b->id,
                     'total_appointments' => $b->total_appointments,
                     'completed_appointments' => $completed,
                     'rating' => (float) ($b->rating ?? 5.0),

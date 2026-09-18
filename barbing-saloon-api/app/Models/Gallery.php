@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Core\Enums\GalleryCategory;
+use App\Domain\Shared\Enums\GalleryCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

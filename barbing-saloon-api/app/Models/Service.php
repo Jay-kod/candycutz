@@ -30,10 +30,11 @@ class Service extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
+        'price' => 'integer',
+        'duration_minutes' => 'integer',
+        'home_service_allowed' => 'boolean',
         'is_active' => 'boolean',
         'is_available' => 'boolean',
-        'home_service_allowed' => 'boolean',
         'is_featured' => 'boolean',
     ];
 

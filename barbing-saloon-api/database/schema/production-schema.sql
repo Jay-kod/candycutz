@@ -1,6 +1,6 @@
 -- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
 --
--- Host: 127.0.0.1    Database: candycutz_db
+-- Host: localhost    Database: candycutz_db
 -- ------------------------------------------------------
 -- Server version	10.4.32-MariaDB
 
@@ -293,7 +293,7 @@ CREATE TABLE `branches` (
   `name` varchar(255) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `address` text NOT NULL,
-  `latitude` decimal(10,8) NOT NULL DEFAULT 8.84860000,
+  `latitude` decimal(10,8) NOT NULL DEFAULT 8.84710000,
   `longitude` decimal(11,8) NOT NULL DEFAULT 7.87360000,
   `phone` varchar(30) NOT NULL,
   `email` varchar(255) NOT NULL,
@@ -793,10 +793,6 @@ CREATE TABLE `working_hours` (
   CONSTRAINT `working_hours_barber_id_foreign` FOREIGN KEY (`barber_id`) REFERENCES `barbers` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping routines for database 'candycutz_db'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -807,4 +803,4 @@ CREATE TABLE `working_hours` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-17 16:40:38
+-- Dump completed on 2026-09-18  7:22:39

@@ -21,7 +21,7 @@ class AppointmentItem extends Model
     ];
 
     protected $casts = [
-        'price' => 'float',
+        'price' => 'integer',
         'duration_minutes' => 'integer',
         'created_at' => 'datetime',
     ];

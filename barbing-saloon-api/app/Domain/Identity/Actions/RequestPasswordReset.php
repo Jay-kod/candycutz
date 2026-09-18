@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
-use App\Core\Enums\UserRole;
-use App\Core\Traits\HasAuditLog;
+use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
-use App\Domain\Identity\Services\UsernameIdentityService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class RequestPasswordReset
 {
@@ -39,7 +34,7 @@ class RequestPasswordReset
 
             try {
                 $frontendUrl = config('app.frontend_url') ?: env('FRONTEND_URL', 'http://localhost:5173');
-                $resetUrl = "{$frontendUrl}/reset-password?token={$token}&email=" . urlencode($user->email);
+                $resetUrl = "{$frontendUrl}/reset-password?token={$token}&email=".urlencode($user->email);
 
                 Mail::send([], [], function ($message) use ($user, $resetUrl) {
                     $message->to($user->email, $user->name)
@@ -59,7 +54,7 @@ class RequestPasswordReset
                         ");
                 });
             } catch (Exception $e) {
-                Log::warning("Password reset email dispatch failed for {$user->email}: " . $e->getMessage());
+                Log::warning("Password reset email dispatch failed for {$user->email}: ".$e->getMessage());
             }
 
             $this->logAction('auth.forgot_password', $user, [], ['email' => $user->email]);

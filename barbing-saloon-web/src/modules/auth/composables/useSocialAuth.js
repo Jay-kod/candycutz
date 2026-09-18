@@ -1,6 +1,6 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { publicApi } from '../../public/api/public.api';
+import { publicApi } from '@/shared/api/old_publicApi';
 import { useAuth } from './useAuth';
 
 const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';

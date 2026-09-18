@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
-use App\Core\Enums\UserRole;
-use App\Core\Traits\HasAuditLog;
-use App\Models\User;
 use App\Domain\Identity\Services\UsernameIdentityService;
-use Carbon\Carbon;
+use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Traits\HasAuditLog;
+use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -51,7 +48,7 @@ class SocialLogin
             ->where('provider_id', $providerId)
             ->first();
 
-        if (!$user && !empty($email)) {
+        if (! $user && ! empty($email)) {
             $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
             if ($user) {
                 $user->update([
@@ -62,15 +59,15 @@ class SocialLogin
             }
         }
 
-        if (!$user) {
-            $baseForUsername = !empty($email) ? explode('@', $email)[0] : $name;
+        if (! $user) {
+            $baseForUsername = ! empty($email) ? explode('@', $email)[0] : $name;
             $username = $this->usernameService->generateUniqueUsername($baseForUsername);
 
             $user = User::create([
                 'name' => $name,
                 'real_name' => $name,
                 'username' => $username,
-                'email' => !empty($email) ? $email : "{$username}@social.candycutz.com",
+                'email' => ! empty($email) ? $email : "{$username}@social.candycutz.com",
                 'phone' => '',
                 'password' => Hash::make(Str::random(32)),
                 'role' => UserRole::customer,
@@ -88,7 +85,7 @@ class SocialLogin
             ]);
         }
 
-        if (!$user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
+        if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
             throw new RuntimeException('Your account is currently inactive or suspended.');
         }
 
@@ -111,15 +108,15 @@ class SocialLogin
             $parts = explode('.', $idToken);
             if (count($parts) === 3) {
                 $payload = json_decode(base64_decode(str_pad(strtr($parts[1], '-_', '+/'), strlen($parts[1]) % 4, '=', STR_PAD_RIGHT)), true);
-                if (is_array($payload) && !empty($payload['sub'])) {
+                if (is_array($payload) && ! empty($payload['sub'])) {
                     return $payload;
                 }
             }
 
             return [
-                'sub' => 'sub_' . substr(md5($idToken), 0, 16),
-                'email' => $provider . '_user_' . substr(md5($idToken), 0, 6) . '@candycutz.com',
-                'name' => ucfirst($provider) . ' Test User',
+                'sub' => 'sub_'.substr(md5($idToken), 0, 16),
+                'email' => $provider.'_user_'.substr(md5($idToken), 0, 6).'@candycutz.com',
+                'name' => ucfirst($provider).' Test User',
                 'picture' => null,
             ];
         }
@@ -132,12 +129,12 @@ class SocialLogin
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    if (!empty($data['sub'])) {
+                    if (! empty($data['sub'])) {
                         return $data;
                     }
                 }
             } catch (Exception $e) {
-                Log::warning('Google TokenInfo verification failed: ' . $e->getMessage());
+                Log::warning('Google TokenInfo verification failed: '.$e->getMessage());
             }
         }
 
@@ -145,7 +142,7 @@ class SocialLogin
             $parts = explode('.', $idToken);
             if (count($parts) === 3) {
                 $payload = json_decode(base64_decode(str_pad(strtr($parts[1], '-_', '+/'), strlen($parts[1]) % 4, '=', STR_PAD_RIGHT)), true);
-                if (is_array($payload) && !empty($payload['sub'])) {
+                if (is_array($payload) && ! empty($payload['sub'])) {
                     return $payload;
                 }
             }

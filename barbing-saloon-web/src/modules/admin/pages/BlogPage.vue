@@ -80,8 +80,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import AdminLayout from '../layouts/AdminLayout.vue';
-import { adminApi } from '../api/admin.api';
+import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import { adminApi } from '@/shared/api/old_adminApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { PencilSquareIcon, CalendarIcon, UserCircleIcon, TrashIcon, DocumentTextIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';

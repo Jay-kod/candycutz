@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -67,7 +68,7 @@ return new class extends Migration
             $table->decimal('longitude', 11, 8)->nullable();
             $table->boolean('is_default')->default(false);
             $table->timestamps();
-            
+
             $table->index(['user_id', 'is_default']);
         });
 
@@ -141,7 +142,7 @@ return new class extends Migration
             $table->integer('custom_duration')->nullable();
             $table->boolean('is_offered')->default(true);
             $table->timestamps();
-            
+
             $table->unique(['barber_id', 'service_id']);
         });
 
@@ -164,7 +165,7 @@ return new class extends Migration
             $table->string('reason')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-            
+
             $table->index(['barber_id', 'start_datetime', 'end_datetime'], 'blocked_periods_b_id_start_end_idx');
         });
 
@@ -206,7 +207,7 @@ return new class extends Migration
             $table->decimal('deposit_amount', 8, 2)->default(0.00);
             $table->softDeletes();
             $table->timestamps();
-            
+
             $table->index(['appointment_date', 'barber_id']);
             $table->index('status');
             $table->index(['barber_id', 'appointment_date', 'status'], 'appointments_barber_date_status_idx');
@@ -230,7 +231,7 @@ return new class extends Migration
             $table->foreignId('changed_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('reason')->nullable();
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->index(['appointment_id', 'created_at']);
         });
 
@@ -248,7 +249,7 @@ return new class extends Migration
             $table->string('receipt_url')->nullable();
             $table->text('error_message')->nullable();
             $table->timestamps();
-            
+
             $table->index(['appointment_id', 'status']);
         });
 
@@ -262,7 +263,7 @@ return new class extends Migration
             $table->json('raw_payload')->nullable();
             $table->string('status', 50);
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->index(['payment_id', 'transaction_type']);
         });
 
@@ -332,7 +333,7 @@ return new class extends Migration
             $table->foreignId('published_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('notes')->nullable();
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->unique(['theme_setting_id', 'version_number']);
         });
 
@@ -358,7 +359,7 @@ return new class extends Migration
             $table->enum('platform', ['ios', 'android', 'web'])->default('android');
             $table->timestamp('last_seen_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['user_id', 'platform']);
         });
 
@@ -374,7 +375,7 @@ return new class extends Migration
             $table->unsignedBigInteger('related_entity_id')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
-            
+
             $table->index(['recipient_type', 'recipient_id']);
             $table->index('recipient_id');
             $table->index('created_at');
@@ -411,7 +412,7 @@ return new class extends Migration
 
         // Add the partial unique index via raw SQL for DBs that support it (SQLite does)
         if (config('database.default') === 'sqlite') {
-            \Illuminate\Support\Facades\DB::statement(
+            DB::statement(
                 "CREATE UNIQUE INDEX appointments_barber_date_time_unique ON appointments(barber_id, appointment_date, appointment_time) WHERE status NOT IN ('cancelled', 'no_show')"
             );
         } else {

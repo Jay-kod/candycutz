@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Responses\ApiResponse;
 use App\Domain\Catalogue\Services\CatalogueService;
 use App\Domain\Content\Services\ContentService;
 use App\Domain\Content\Services\SettingsService;
+use App\Http\Responses\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

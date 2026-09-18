@@ -1,5 +1,5 @@
 <script setup>
-import CustomerLayout from '../layouts/CustomerLayout.vue'
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue'
 import NotificationsView from '../../../core/components/NotificationsView.vue'
 </script>
 

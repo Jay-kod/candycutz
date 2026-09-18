@@ -16,7 +16,9 @@ use RuntimeException;
 class PaystackGateway implements PaymentGateway
 {
     protected string $secretKey;
+
     protected string $publicKey;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -29,13 +31,14 @@ class PaystackGateway implements PaymentGateway
     public function initiate(Payment $payment): GatewayCheckout
     {
         // Paystack uses kobo
-        $amountKobo = (int) round($payment->amount * 100);
+        $amountKobo = (int) $payment->amount;
         $email = $payment->customer->email ?? 'customer@candycutz.com';
         $reference = $payment->transaction_ref ?? 'TXN_'.strtoupper(uniqid());
 
         // In mock mode (no keys), return a mock checkout url
         if (empty($this->secretKey) || str_starts_with($this->secretKey, 'sk_test_placeholder')) {
             Log::info("Paystack Mock: Initiating payment for Ref {$reference}");
+
             return new GatewayCheckout(
                 reference: $reference,
                 gateway: 'paystack',
@@ -45,7 +48,7 @@ class PaystackGateway implements PaymentGateway
             );
         }
 
-        $callbackUrl = config('payments.gateways.paystack.callback_url') 
+        $callbackUrl = config('payments.gateways.paystack.callback_url')
             ?: url('/api/v1/payments/callback');
 
         $response = Http::withToken($this->secretKey)
@@ -60,9 +63,9 @@ class PaystackGateway implements PaymentGateway
                 ],
             ]);
 
-        if ($response->failed() || !($response->json('status') ?? false)) {
-            Log::error('Paystack initialize failed: ' . $response->body());
-            throw new RuntimeException('Could not initialize Paystack transaction: ' . $response->json('message', 'Unknown error'));
+        if ($response->failed() || ! ($response->json('status') ?? false)) {
+            Log::error('Paystack initialize failed: '.$response->body());
+            throw new RuntimeException('Could not initialize Paystack transaction: '.$response->json('message', 'Unknown error'));
         }
 
         $data = $response->json('data');
@@ -88,11 +91,11 @@ class PaystackGateway implements PaymentGateway
         }
 
         $response = Http::withToken($this->secretKey)
-            ->get("{$this->baseUrl}/transaction/verify/" . rawurlencode($reference));
+            ->get("{$this->baseUrl}/transaction/verify/".rawurlencode($reference));
 
-        if ($response->failed() || !($response->json('status') ?? false)) {
-            Log::error('Paystack verify failed: ' . $response->body());
-            throw new RuntimeException('Could not verify Paystack transaction: ' . $response->json('message', 'Unknown error'));
+        if ($response->failed() || ! ($response->json('status') ?? false)) {
+            Log::error('Paystack verify failed: '.$response->body());
+            throw new RuntimeException('Could not verify Paystack transaction: '.$response->json('message', 'Unknown error'));
         }
 
         $data = $response->json('data');
@@ -116,12 +119,12 @@ class PaystackGateway implements PaymentGateway
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent
     {
         $signatureHeader = $headers['x-paystack-signature'] ?? null;
-        
+
         if (is_array($signatureHeader)) {
             $signatureHeader = $signatureHeader[0] ?? '';
         }
 
-        if (!$signatureHeader) {
+        if (! $signatureHeader) {
             throw new RuntimeException('Missing Paystack signature header.');
         }
 
@@ -131,12 +134,12 @@ class PaystackGateway implements PaymentGateway
 
         $expectedSignature = hash_hmac('sha512', $rawPayload, $this->secretKey);
 
-        if (!hash_equals($expectedSignature, $signatureHeader)) {
+        if (! hash_equals($expectedSignature, $signatureHeader)) {
             throw new RuntimeException('Invalid Paystack webhook signature.');
         }
 
         $payload = json_decode($rawPayload, true);
-        if (!$payload) {
+        if (! $payload) {
             throw new RuntimeException('Invalid JSON payload in webhook.');
         }
 

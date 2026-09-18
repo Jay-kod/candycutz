@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\Services;
 
-use App\Core\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Jobs\SendBookingCancellation;
 use App\Jobs\SendBookingConfirmation;

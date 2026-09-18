@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Admin\Services\DashboardService;
+use App\Domain\Content\Actions\UpdateSettings;
+use App\Domain\Content\Services\SettingsService;
+use App\Domain\Identity\Actions\ManageUsers;
+use App\Http\Requests\Api\V1\SuperAdmin\StoreUserRequest;
+use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
+use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
+use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
-use App\Http\Requests\Api\V1\SuperAdmin\StoreUserRequest;
-use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
-use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
-use App\Http\Resources\Api\V1\UserResource;
-use App\Http\Resources\Api\V1\AuditLogResource;
-use App\Domain\Admin\Services\DashboardService;
-use App\Domain\Identity\Actions\ManageUsers;
-use App\Domain\Content\Services\SettingsService;
-use App\Domain\Content\Actions\UpdateSettings;
 
 class SuperAdminApiController
 {
@@ -61,7 +60,7 @@ class SuperAdminApiController
     public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService)
     {
         $action->execute($request->validated());
-        
+
         return ApiResponse::success($settingsService->settings(), 'Settings updated');
     }
 

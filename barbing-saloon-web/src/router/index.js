@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import authRoutes from '../modules/auth/routes';
-import publicRoutes from '../modules/public/routes';
-import customerRoutes from '../modules/customer/routes';
-import barberRoutes from '../modules/barber/routes';
-import adminRoutes from '../modules/admin/routes';
-import superadminRoutes from '../modules/superadmin/routes';
+import authRoutes from '../portals/auth/routes';
+import publicRoutes from '../portals/public/routes';
+import customerRoutes from '../portals/customer/routes';
+import barberRoutes from '../portals/barber/routes';
+import adminRoutes from '../portals/admin/routes';
+import superadminRoutes from '../portals/superadmin/routes';
 
 const routes = [
   ...publicRoutes,

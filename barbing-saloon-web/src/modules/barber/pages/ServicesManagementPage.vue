@@ -182,8 +182,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import BarberLayout from '../layouts/BarberLayout.vue';
-import { barberApi } from '../api/barber.api';
+import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { 

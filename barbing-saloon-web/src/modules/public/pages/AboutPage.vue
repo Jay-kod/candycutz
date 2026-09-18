@@ -94,7 +94,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
-import { publicApi } from '../api/public.api';
+import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 
 const barbers = ref([]);

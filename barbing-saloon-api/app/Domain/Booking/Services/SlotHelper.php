@@ -67,9 +67,9 @@ class SlotHelper
 
             $overlaps = $confirmedAppointments->contains(function ($appointment) use ($slotStart, $slotEnd) {
                 $appointmentDate = Carbon::parse($appointment->appointment_date)->toDateString();
-                $appointmentStart = Carbon::parse($appointmentDate . ' ' . $appointment->appointment_time);
+                $appointmentStart = Carbon::parse($appointmentDate.' '.$appointment->appointment_time);
                 $appointmentEnd = $appointment->end_time
-                    ? Carbon::parse($appointmentDate . ' ' . $appointment->end_time)
+                    ? Carbon::parse($appointmentDate.' '.$appointment->end_time)
                     : $appointmentStart->copy()->addMinutes($appointment->service?->duration_minutes ?? 30);
 
                 return $slotStart->lt($appointmentEnd) && $slotEnd->gt($appointmentStart);

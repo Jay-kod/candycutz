@@ -2,27 +2,15 @@
 
 namespace App\Domain\Booking\Actions;
 
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Barber;
-use App\Models\BlogPost;
-use App\Models\Gallery;
-use App\Models\Holiday;
 use App\Models\Service;
-use App\Models\ServiceCategory;
-use App\Models\Setting;
-use App\Models\Testimonial;
-use App\Models\WorkingHour;
 use App\Models\User;
-use App\Core\Enums\AppointmentStatus;
-use App\Core\Enums\BlogStatus;
-use App\Core\Enums\GalleryCategory;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class CreateWalkInAppointment
 {
-
     public function execute(array $data): Appointment
     {
         $service = Service::findOrFail($data['service_id']);
@@ -33,12 +21,12 @@ class CreateWalkInAppointment
         $customerEmail = $data['customer_email'] ?? 'walkin@candycutz.com';
 
         $user = User::where('phone', $customerPhone)->orWhere('email', $customerEmail)->first();
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => $customerName,
-                'email' => $customerEmail ?: 'walkin_' . time() . '@candycutz.com',
+                'email' => $customerEmail ?: 'walkin_'.time().'@candycutz.com',
                 'phone' => $customerPhone,
-                'password' => \Illuminate\Support\Facades\Hash::make(uniqid()),
+                'password' => Hash::make(uniqid()),
                 'role' => 'customer',
                 'is_active' => true,
             ]);
@@ -59,7 +47,7 @@ class CreateWalkInAppointment
             'status' => AppointmentStatus::confirmed->value,
             'total_price' => $service->price,
             'deposit_paid' => true,
-            'verification_code' => 'CC-' . strtoupper(substr(uniqid(), -6)),
+            'verification_code' => 'CC-'.strtoupper(substr(uniqid(), -6)),
             'notes' => 'Walk-in booking',
         ]);
     }

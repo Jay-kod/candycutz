@@ -169,8 +169,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import { customerApi } from '../api/customer.api';
-import CustomerLayout from '../layouts/CustomerLayout.vue';
+import { customerApi } from '@/shared/api/old_customerApi';
+import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
 import { 
   CalendarIcon, 
   ClockIcon, 

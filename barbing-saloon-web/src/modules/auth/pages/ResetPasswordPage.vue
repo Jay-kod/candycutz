@@ -97,7 +97,7 @@
 import { reactive, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { object, string } from 'yup';
-import { authApi } from '../api/auth.api';
+import { authApi } from '@/shared/api/old_authApi';
 import { useDark } from '@vueuse/core';
 
 const isDark = useDark({

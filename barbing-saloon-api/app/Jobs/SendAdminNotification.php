@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Core\Enums\UserRole;
+use App\Domain\Shared\Enums\UserRole;
 use App\Mail\AdminNotification;
 use App\Models\Appointment;
 use App\Models\User;
