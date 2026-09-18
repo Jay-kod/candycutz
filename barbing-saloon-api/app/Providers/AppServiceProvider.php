@@ -63,8 +63,9 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(10)
                 ->by($identity.'|'.$request->ip())
-                ->response(function () {
-                    return ApiResponse::error('Too many requests. Please wait a moment before trying again.', [], 429, 'RATE_LIMIT_EXCEEDED');
+                ->response(function (Request $request, array $headers) {
+                    return ApiResponse::error('Too many requests. Please wait a moment before trying again.', [], 429, 'RATE_LIMIT_EXCEEDED')
+                        ->withHeaders($headers);
                 });
         });
 

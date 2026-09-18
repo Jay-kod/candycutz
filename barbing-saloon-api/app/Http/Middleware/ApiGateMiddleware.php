@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Domain\Gate\Services\DatabaseGateTracker;
 use App\Models\ApiGateLog;
 use Closure;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,8 +22,21 @@ class ApiGateMiddleware
         $startTime = microtime(true);
         $this->dbTracker->reset();
 
-        $response = $next($request);
+        try {
+            $response = $next($request);
+        } catch (HttpResponseException $e) {
+            $response = $e->getResponse();
+            $this->attachGateHeaders($request, $response, $startTime);
+            throw new HttpResponseException($response);
+        }
 
+        $this->attachGateHeaders($request, $response, $startTime);
+
+        return $response;
+    }
+
+    protected function attachGateHeaders(Request $request, Response $response, float $startTime): void
+    {
         $durationMs = (int) round((microtime(true) - $startTime) * 1000);
         $queryCount = $this->dbTracker->getQueryCount();
         $queryDurationMs = $this->dbTracker->getQueryDurationMs();
@@ -41,8 +55,6 @@ class ApiGateMiddleware
         $request->attributes->set('gate_duration_ms', $durationMs);
         $request->attributes->set('gate_query_count', $queryCount);
         $request->attributes->set('gate_query_duration_ms', $queryDurationMs);
-
-        return $response;
     }
 
     public function terminate(Request $request, Response $response): void
