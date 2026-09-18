@@ -6,6 +6,9 @@ import { useAuth } from './useAuth';
 const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';
 const APPLE_SCRIPT = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
 
+/** @type {any} */
+const win = typeof window !== 'undefined' ? window : {};
+
 export function useSocialAuth() {
   const router = useRouter();
   const { socialLogin, redirectAfterLogin } = useAuth();
@@ -54,7 +57,7 @@ export function useSocialAuth() {
 
   function ensureGoogleReady() {
     return new Promise((resolve) => {
-      if (window.google?.accounts?.id) {
+      if (win.google?.accounts?.id) {
         resolve(true);
         return;
       }
@@ -62,7 +65,7 @@ export function useSocialAuth() {
         resolve(false);
         return;
       }
-      loadScript(GOOGLE_SCRIPT, () => resolve(Boolean(window.google?.accounts?.id)));
+      loadScript(GOOGLE_SCRIPT, () => resolve(Boolean(win.google?.accounts?.id)));
     });
   }
 
@@ -80,13 +83,13 @@ export function useSocialAuth() {
       return;
     }
     try {
-      window.google.accounts.id.initialize({
+      win.google.accounts.id.initialize({
         client_id: googleClientId.value,
         callback: (response) => handleCredential(response.credential, 'google'),
         ux_mode: 'popup',
         auto_select: false,
       });
-      window.google.accounts.id.prompt((notification) => {
+      win.google.accounts.id.prompt((notification) => {
         if (notification?.getNotDisplayedReason?.()) {
           socialError.value = 'Google sign-in was blocked by this browser (private/incognito mode or third-party cookies disabled). Please use a normal window or sign in with email.';
         }
@@ -121,7 +124,7 @@ export function useSocialAuth() {
 
   function ensureAppleReady() {
     return new Promise((resolve) => {
-      if (appleScriptLoaded.value && window.AppleID) {
+      if (appleScriptLoaded.value && win.AppleID) {
         initApple();
         resolve(true);
         return;
@@ -133,16 +136,16 @@ export function useSocialAuth() {
       loadScript(APPLE_SCRIPT, () => {
         appleScriptLoaded.value = true;
         initApple();
-        resolve(Boolean(window.AppleID));
+        resolve(Boolean(win.AppleID));
       });
     });
   }
 
   function initApple() {
-    if (!window.AppleID?.auth || !appleClientId.value) {
+    if (!win.AppleID?.auth || !appleClientId.value) {
       return;
     }
-    window.AppleID.auth.init({
+    win.AppleID.auth.init({
       clientId: appleClientId.value,
       scope: 'name email',
       redirectURI: window.location.origin,
@@ -165,7 +168,7 @@ export function useSocialAuth() {
       return;
     }
     try {
-      const response = await window.AppleID.auth.signIn();
+      const response = await win.AppleID.auth.signIn();
       const idToken = response?.authorization?.id_token;
       if (!idToken) {
         throw new Error('no_token');
