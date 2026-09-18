@@ -2,28 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\HealthApiController;
 use Illuminate\Support\Facades\Route;
 
 // Canonical API v1 Routes (/api/v1/*)
 Route::prefix('v1')
     ->middleware(['throttle:120,1', 'security.headers'])
     ->group(function () {
-        Route::get('/health', function () {
-            return response()->json([
-                'success' => true,
-                'message' => 'API is operational',
-                'data' => [
-                    'status' => 'healthy',
-                    'timestamp' => now()->toIso8601String(),
-                    'services' => [
-                        'database' => 'connected',
-                        'storage' => 'connected',
-                        'api_version' => 'v1',
-                        'flagship' => 'candycutz',
-                    ],
-                ],
-            ]);
-        });
+        Route::get('/health', [HealthApiController::class, 'health']);
 
         require base_path('routes/api/v1/auth.php');
         require base_path('routes/api/v1/catalogue.php');

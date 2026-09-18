@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'remediation/**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, 'remediation/**' ]
 
 jobs:
   backend:
@@ -44,6 +44,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_mysql, bcmath
         tools: composer:v2
 
     - name: Install Dependencies
@@ -68,11 +69,10 @@ jobs:
     - name: Run Composer Audit
       run: composer audit
 
-    - name: Run Larastan
+    - name: Run Larastan (Level 6)
       run: ./vendor/bin/phpstan analyse --memory-limit=2G
-      continue-on-error: true
 
-    - name: Run Tests
+    - name: Run Pest Tests
       run: ./vendor/bin/pest
 
   frontend-web:
@@ -95,7 +95,12 @@ jobs:
 
     - name: Run Lint
       run: npm run lint
-      continue-on-error: true
+
+    - name: Run Unit Tests
+      run: npm run test:unit -- --run
+
+    - name: Build Web Application
+      run: npm run build
 
   frontend-mobile:
     name: Mobile CI (Expo)
@@ -117,4 +122,6 @@ jobs:
 
     - name: Type Check
       run: npx tsc --noEmit
-      continue-on-error: true
+
+    - name: Run Contract & Unit Tests
+      run: npm test
