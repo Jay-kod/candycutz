@@ -37,183 +37,26 @@
           <div class="mx-auto max-w-[794px] bg-white shadow-2xl">
             <!-- Actual PDF content to be captured -->
             <div ref="reportRef" class="report-document bg-white text-gray-900">
-              
               <!-- Page 1: Summary & KPIs -->
-              <div class="report-page">
-                <div class="report-watermark"></div>
-                <div class="relative z-10 px-10 py-12">
-                  <!-- Header -->
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #f3f4f6; padding-bottom: 24px;">
-                    <div>
-                      <h1 style="font-size: 28px; font-weight: 900; color: #111827; margin: 0; letter-spacing: -0.02em;">CANDYCUTZ</h1>
-                      <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #FF6700; margin: 4px 0 0 0; font-weight: 800;">Management System</p>
-                    </div>
-                    <div style="text-align: right;">
-                      <h2 style="font-size: 20px; font-weight: 700; color: #374151; margin: 0;">Operational Analytics</h2>
-                      <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">{{ todayFormatted }}</p>
-                      <p style="display: inline-block; background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Period: {{ activeRangeLabel }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Executive Summary (KPIs) -->
-                  <h2 style="font-size: 16px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.15em; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #FF6700;">Executive Summary</h2>
-                  
-                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px;">
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);">
-                      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin: 0 0 4px 0; font-weight: 700;">Total Revenue</p>
-                      <p style="font-size: 24px; font-weight: 800; color: #059669; margin: 0;">₦{{ Number(businessStats.total_revenue || 0).toLocaleString() }}</p>
-                    </div>
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);">
-                      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin: 0 0 4px 0; font-weight: 700;">Completed Appointments</p>
-                      <p style="font-size: 24px; font-weight: 800; color: #ea580c; margin: 0;">{{ businessStats.total_appointments || 0 }}</p>
-                    </div>
-                  </div>
-
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 40px;">
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);">
-                      <p style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin: 0 0 4px 0; font-weight: 700;">New Clients</p>
-                      <p style="font-size: 18px; font-weight: 800; color: #2563eb; margin: 0;">{{ businessStats.new_customers || 0 }}</p>
-                      <p style="font-size: 9px; color: #9ca3af; margin: 4px 0 0 0;">In period</p>
-                    </div>
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);">
-                      <p style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin: 0 0 4px 0; font-weight: 700;">Total Clients</p>
-                      <p style="font-size: 18px; font-weight: 800; color: #0284c7; margin: 0;">{{ businessStats.total_customers || 0 }}</p>
-                      <p style="font-size: 9px; color: #9ca3af; margin: 4px 0 0 0;">All time</p>
-                    </div>
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);">
-                      <p style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin: 0 0 4px 0; font-weight: 700;">Blog Posts</p>
-                      <p style="font-size: 18px; font-weight: 800; color: #7c3aed; margin: 0;">{{ platformStats.total_blog_posts || 0 }}</p>
-                      <p style="font-size: 9px; color: #9ca3af; margin: 4px 0 0 0;">Published</p>
-                    </div>
-                  </div>
-
-                  <!-- Appointment Status -->
-                  <h2 style="font-size: 16px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.15em; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #FF6700;">Appointment Status Breakdown</h2>
-                  
-                  <div v-if="statusBreakdown.length > 0" style="margin-bottom: 32px;">
-                    <!-- Visual Bar Chart -->
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                      <div v-for="status in statusBreakdown" :key="'pdf-status-' + status.status" style="display: flex; align-items: center; gap: 12px;">
-                        <span style="width: 90px; text-align: right; font-size: 12px; font-weight: 600; text-transform: capitalize; color: #374151;">{{ status.status }}</span>
-                        <div style="flex: 1; height: 28px; background: #f3f4f6; border-radius: 8px; overflow: hidden; position: relative;">
-                          <div :style="{ 
-                            width: totalAppointments > 0 ? Math.max((status.count / totalAppointments) * 100, 4) + '%' : '4%', 
-                            height: '100%', 
-                            borderRadius: '8px',
-                            background: statusBarColor(status.status),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            paddingRight: '10px',
-                            transition: 'width 0.5s ease'
-                          }">
-                            <span style="font-size: 11px; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ status.count }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p v-else style="color: #9ca3af; font-size: 13px; text-align: center; padding: 20px 0;">No appointment data available.</p>
-                </div>
-              </div>
+              <ReportsPDFPage1
+                :active-range-label="activeRangeLabel"
+                :today-formatted="todayFormatted"
+                :business-stats="businessStats"
+                :platform-stats="platformStats"
+                :status-breakdown="statusBreakdown"
+                :total-appointments="totalAppointments"
+                :status-bar-color="statusBarColor"
+              />
 
               <!-- Page 2: Top Barbers & Services -->
-              <div class="report-page relative border-t border-gray-200">
-                <div class="report-watermark"></div>
-                <div class="relative z-10 px-10 py-8">
-                  <!-- Top Barbers Section -->
-                  <h2 style="font-size: 16px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.15em; margin: 0 0 20px 0; padding-bottom: 8px; border-bottom: 2px solid #FF6700;">
-                    Top Performing Barbers
-                  </h2>
-
-                  <div v-if="topBarbers.length > 0" style="margin-bottom: 40px;">
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;">
-                      <thead>
-                        <tr>
-                          <th style="text-align: left; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Rank</th>
-                          <th style="text-align: left; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Barber Name</th>
-                          <th style="text-align: center; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Bookings</th>
-                          <th style="text-align: center; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Rating</th>
-                          <th style="text-align: right; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Revenue</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(barber, index) in topBarbers" :key="'pdf-barber-' + barber.id" style="background: transparent;">
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db;">
-                            <div :style="{ 
-                              width: '28px', height: '28px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                              fontWeight: 700, fontSize: '12px', color: 'white',
-                              background: index === 0 ? '#FF6700' : index === 1 ? '#6b7280' : '#9ca3af'
-                            }">{{ index + 1 }}</div>
-                          </td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; font-weight: 600; color: #111827;">{{ barber.name }}</td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; text-align: center; color: #374151;">{{ barber.bookings }}</td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; text-align: center; color: #d97706;">⭐ {{ barber.rating || 'N/A' }}</td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; text-align: right; font-weight: 700; color: #059669;">₦{{ Number(barber.revenue).toLocaleString() }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <p v-else style="color: #9ca3af; font-size: 13px; text-align: center; padding: 20px 0; margin-bottom: 40px;">No barber performance data available for this period.</p>
-
-                  <!-- Top Services Section -->
-                  <h2 style="font-size: 16px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.15em; margin: 0 0 20px 0; padding-bottom: 8px; border-bottom: 2px solid #FF6700;">
-                    Most Popular Services
-                  </h2>
-
-                  <div v-if="topServices.length > 0" style="margin-bottom: 32px;">
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;">
-                      <thead>
-                        <tr>
-                          <th style="text-align: left; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Rank</th>
-                          <th style="text-align: left; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Service Name</th>
-                          <th style="text-align: center; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Times Booked</th>
-                          <th style="text-align: right; padding: 12px 16px; background: transparent; border-bottom: 2px solid #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #4b5563; font-weight: 800;">Revenue</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(service, index) in topServices" :key="'pdf-service-' + index" style="background: transparent;">
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db;">
-                            <div :style="{ 
-                              width: '28px', height: '28px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                              fontWeight: 700, fontSize: '12px', color: 'white',
-                              background: index === 0 ? '#059669' : index === 1 ? '#6b7280' : '#9ca3af'
-                            }">{{ index + 1 }}</div>
-                          </td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; font-weight: 600; color: #111827;">{{ service.name }}</td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; text-align: center; color: #374151;">{{ service.count }}</td>
-                          <td style="padding: 14px 16px; border-bottom: 1px solid #d1d5db; text-align: right; font-weight: 700; color: #ea580c;">₦{{ Number(service.revenue).toLocaleString() }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <p v-else style="color: #9ca3af; font-size: 13px; text-align: center; padding: 20px 0;">No service data available for this period.</p>
-
-                  <!-- Footer & Authentication -->
-                  <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div>
-                      <p style="font-size: 10px; color: #9ca3af; margin: 0;">This report is auto-generated by CandyCutz Management System.</p>
-                      <p style="font-size: 10px; color: #9ca3af; margin: 2px 0 0 0;">Report Period: {{ activeRangeLabel }} • Generated: {{ todayFormatted }} at {{ currentTime }}</p>
-                      
-                      <!-- Digital Signature / Authenticity stamp -->
-                      <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center; background: #f9fafb; padding: 6px 10px; border-radius: 6px; border: 1px dashed #d1d5db; width: fit-content;">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px; color: #059669;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-                        <div>
-                          <p style="font-size: 8px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; font-weight: 700;">Authenticity Verification ID</p>
-                          <p style="font-size: 11px; font-family: monospace; font-weight: 800; color: #111827; margin: 2px 0 0 0; letter-spacing: 0.05em;">{{ reportId }}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <div style="width: 24px; height: 24px; border-radius: 6px; background: #FF6700; display: flex; align-items: center; justify-content: center;">
-                        <span style="font-size: 12px;">✂️</span>
-                      </div>
-                      <span style="font-size: 11px; font-weight: 700; color: #374151;">CandyCutz</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+              <ReportsPDFPage2
+                :top-barbers="topBarbers"
+                :top-services="topServices"
+                :active-range-label="activeRangeLabel"
+                :today-formatted="todayFormatted"
+                :current-time="currentTime"
+                :report-id="reportId"
+              />
             </div>
           </div>
         </div>
@@ -223,8 +66,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { XMarkIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+import { ref, computed } from 'vue'
+import { XMarkIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline'
+import ReportsPDFPage1 from './pdf/ReportsPDFPage1.vue'
+import ReportsPDFPage2 from './pdf/ReportsPDFPage2.vue'
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -235,32 +80,32 @@ const props = defineProps({
   statusBreakdown: { type: Array, required: true },
   activeRangeLabel: { type: String, required: true },
   selectedRange: { type: String, required: true }
-});
+})
 
-defineEmits(['close']);
+defineEmits(['close'])
 
-const isGeneratingPdf = ref(false);
-const reportRef = ref(null);
+const isGeneratingPdf = ref(false)
+const reportRef = ref(null)
 
 const todayFormatted = computed(() => {
   return new Date().toLocaleDateString('en-GB', { 
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-  });
-});
+  })
+})
 
 const currentTime = computed(() => {
-  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-});
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+})
 
 const reportId = computed(() => {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const hash = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `REF-CCZ-${timestamp}-${hash}`;
-});
+  const timestamp = Date.now().toString(36).toUpperCase()
+  const hash = Math.random().toString(36).substring(2, 8).toUpperCase()
+  return `REF-CCZ-${timestamp}-${hash}`
+})
 
 const totalAppointments = computed(() => {
-  return props.statusBreakdown.reduce((sum, s) => sum + Number(s.count), 0);
-});
+  return props.statusBreakdown.reduce((sum, s) => sum + Number(s.count), 0)
+})
 
 const statusBarColor = (status) => {
   const colors = {
@@ -270,16 +115,16 @@ const statusBarColor = (status) => {
     approved: 'linear-gradient(135deg, #2563eb, #3b82f6)',
     confirmed: 'linear-gradient(135deg, #2563eb, #3b82f6)',
     no_show: 'linear-gradient(135deg, #6b7280, #9ca3af)'
-  };
-  return colors[status] || 'linear-gradient(135deg, #6b7280, #9ca3af)';
-};
+  }
+  return colors[status] || 'linear-gradient(135deg, #6b7280, #9ca3af)'
+}
 
 const downloadPdf = async () => {
-  if (!reportRef.value) return;
-  isGeneratingPdf.value = true;
+  if (!reportRef.value) return
+  isGeneratingPdf.value = true
   
   try {
-    const html2pdf = (await import('html2pdf.js')).default;
+    const html2pdf = (await import('html2pdf.js')).default
     
     const opt = {
       margin: 0,
@@ -293,15 +138,15 @@ const downloadPdf = async () => {
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] }
-    };
+    }
     
-    await html2pdf().set(opt).from(reportRef.value).save();
+    await html2pdf().set(opt).from(reportRef.value).save()
   } catch (err) {
-    console.error('PDF generation failed:', err);
+    console.error('PDF generation failed:', err)
   } finally {
-    isGeneratingPdf.value = false;
+    isGeneratingPdf.value = false
   }
-};
+}
 </script>
 
 <style scoped>
@@ -327,13 +172,13 @@ const downloadPdf = async () => {
   margin: 0 auto;
 }
 
-.report-page {
+:deep(.report-page) {
   width: 794px;
   position: relative;
   box-sizing: border-box;
 }
 
-.report-watermark {
+:deep(.report-watermark) {
   position: absolute;
   inset: 0;
   z-index: 0;

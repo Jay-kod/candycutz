@@ -33,7 +33,6 @@
           </div>
 
           <div class="p-8 space-y-6">
-            
             <!-- Profile Picture Placeholder -->
             <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-4 border-b border-white/5">
               <div class="relative group cursor-pointer">
@@ -44,7 +43,6 @@
                     <CameraIcon class="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <!-- Hidden file input for future implementation -->
                 <input type="file" class="hidden" accept="image/*" @change="handleImageUpload" ref="fileInput" />
               </div>
               <div>
@@ -112,82 +110,30 @@
           </div>
         </form>
 
-        <!-- Specialties Card -->
-        <div class="rounded-3xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-xl overflow-hidden h-fit shadow-xl">
-          <div class="flex items-center gap-3 border-b border-white/[0.04] px-8 py-6 bg-black/20">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 shadow-inner">
-              <SparklesIcon class="h-5 w-5 text-purple-400" />
-            </div>
-            <div>
-              <h2 class="font-display text-xl text-theme-text">Specialties</h2>
-              <p class="text-[10px] uppercase tracking-widest text-ivory/40 font-bold mt-0.5">Your signature styles</p>
-            </div>
-          </div>
-
-          <div class="p-8">
-            <!-- All Available Styles Grid -->
-            <p class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-4">Tap to select / deselect</p>
-            <div class="flex flex-wrap gap-2.5 mb-6">
-              <button
-                v-for="style in allStyles"
-                :key="style"
-                type="button"
-                @click="toggleSpecialty(style)"
-                :class="[
-                  'inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-200 border cursor-pointer',
-                  form.specialties.includes(style)
-                    ? 'bg-gold/15 border-gold/50 text-gold shadow-[0_0_12px_rgba(212,175,55,0.2)] ring-1 ring-gold/20'
-                    : 'bg-[#1a1a1a] border-white/8 text-ivory/40 hover:border-white/20 hover:text-ivory/60'
-                ]"
-              >
-                <CheckIcon v-if="form.specialties.includes(style)" class="h-3.5 w-3.5" />
-                <span>{{ style }}</span>
-              </button>
-            </div>
-
-            <!-- Custom Add Input -->
-            <div class="pt-4 border-t border-white/5">
-              <p class="text-[10px] uppercase tracking-widest text-ivory/40 font-bold ml-1 mb-3">Add custom style</p>
-              <div class="flex gap-2">
-                <input
-                  v-model="newSpecialty"
-                  @keydown.enter.prevent="addSpecialty"
-                  class="flex-1 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-theme-text placeholder:text-ivory/30 outline-none transition-all focus:border-purple-500/50 focus:bg-black/40 focus:ring-1 focus:ring-purple-500/30"
-                  placeholder="Type a custom style name..."
-                />
-                <button
-                  type="button"
-                  @click="addSpecialty"
-                  class="rounded-xl bg-purple-500/20 hover:bg-purple-500 text-purple-400 hover:text-white px-5 py-3 text-sm font-bold transition-all border border-purple-500/30 hover:border-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            <!-- Selected count -->
-            <div class="mt-5 flex items-center gap-2 text-xs text-ivory/40">
-              <SparklesIcon class="h-4 w-4 text-gold/60" />
-              <span><strong class="text-gold">{{ form.specialties.length }}</strong> specialties selected</span>
-            </div>
-          </div>
-        </div>
+        <!-- Decomposed Specialties Card -->
+        <BarberSpecialtiesCard
+          :specialties="form.specialties"
+          :all-styles="allStyles"
+          @toggle="toggleSpecialty"
+          @add="addSpecialty"
+        />
       </div>
     </section>
   </BarberLayout>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
-import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
-import { barberApi } from '@/shared/api/old_barberApi';
-import { UserIcon, SparklesIcon, CameraIcon, ArrowPathIcon, CheckIcon } from '@heroicons/vue/24/outline';
-import { useToast } from '../../../core/composables/useToast';
-import { useAuthStore } from '../../auth/store/auth.store';
+import { onMounted, reactive, ref } from 'vue'
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue'
+import { barberApi } from '@/shared/api/old_barberApi'
+import { UserIcon, CameraIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { useToast } from '../../../core/composables/useToast'
+import { useAuthStore } from '../../auth/store/auth.store'
+import BarberSpecialtiesCard from '../components/profile/BarberSpecialtiesCard.vue'
 
-const toast = useToast();
-const authStore = useAuthStore();
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+const toast = useToast()
+const authStore = useAuthStore()
+const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'
 
 const form = reactive({ 
   name: '', 
@@ -196,10 +142,9 @@ const form = reactive({
   instagram_url: '', 
   specialties: [],
   profile_image: null
-});
-const saving = ref(false);
-const newSpecialty = ref('');
-const fileInput = ref(null);
+})
+const saving = ref(false)
+const fileInput = ref(null)
 
 const allStyles = [
   'Classic Fade', 'High Fade', 'Taper Fade', 'Textured Crop',
@@ -209,77 +154,71 @@ const allStyles = [
   'Kids Haircut', 'Kids Super Fade', 'Senior Cut',
   'Women Pixie Cut', 'Wedding Special', 'Home VIP Service',
   'Accessible Care Cut'
-];
+]
 
 function toggleSpecialty(style) {
-  const idx = form.specialties.indexOf(style);
+  const idx = form.specialties.indexOf(style)
   if (idx >= 0) {
-    form.specialties.splice(idx, 1);
+    form.specialties.splice(idx, 1)
   } else {
-    form.specialties.push(style);
+    form.specialties.push(style)
   }
 }
 
-function addSpecialty() {
-  const val = newSpecialty.value.trim();
-  if (val && !form.specialties.includes(val)) {
-    form.specialties.push(val);
+function addSpecialty(styleName) {
+  if (styleName && !form.specialties.includes(styleName)) {
+    form.specialties.push(styleName)
   }
-  newSpecialty.value = '';
 }
-
 
 function handleImageUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]
+  if (!file) return
   
-  // Create a fake placeholder URL for visual demonstration
-  const objectUrl = URL.createObjectURL(file);
-  form.profile_image = objectUrl;
-  toast.success('Image selected! Make sure to save the profile.');
+  const objectUrl = URL.createObjectURL(file)
+  form.profile_image = objectUrl
+  toast.success('Image selected! Make sure to save the profile.')
 }
 
 async function submit() {
-  saving.value = true;
+  saving.value = true
   try {
-    const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('phone', form.phone);
-    formData.append('bio', form.bio);
-    formData.append('instagram_url', form.instagram_url);
-    formData.append('specialties', JSON.stringify(form.specialties));
+    const formData = new FormData()
+    formData.append('name', form.name)
+    formData.append('phone', form.phone)
+    formData.append('bio', form.bio)
+    formData.append('instagram_url', form.instagram_url)
+    formData.append('specialties', JSON.stringify(form.specialties))
     
-    // Attach the actual file if one was selected
-    const fileInputEl = fileInput.value;
+    const fileInputEl = fileInput.value
     if (fileInputEl && fileInputEl.files.length > 0) {
-      formData.append('profile_image', fileInputEl.files[0]);
+      formData.append('profile_image', fileInputEl.files[0])
     }
     
-    const response = await barberApi.updateProfile(formData);
+    const response = await barberApi.updateProfile(formData)
     if (response.data?.profile_image) {
       form.profile_image = response.data.profile_image.startsWith('http') 
         ? response.data.profile_image 
-        : API_ROOT + response.data.profile_image;
+        : API_ROOT + response.data.profile_image
     }
-    await authStore.fetchUser();
-    toast.success('Profile saved successfully!');
+    await authStore.fetchUser()
+    toast.success('Profile saved successfully!')
   } catch (e) {
-    toast.error('Failed to save profile');
+    toast.error('Failed to save profile')
   } finally {
-    saving.value = false;
+    saving.value = false
   }
 }
 
 onMounted(async () => {
   try {
-    const response = await barberApi.profile();
-    const profile = response.data?.data || {};
+    const response = await barberApi.profile()
+    const profile = response.data?.data || {}
     
-    // Set properties, providing "Obo Shadow" defaults if completely empty 
-    form.name = profile.name || 'Obo Shadow';
-    form.phone = profile.phone || '+234 800 123 4567';
-    form.bio = profile.bio || 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups. I believe every haircut is an art form.';
-    form.instagram_url = profile.instagram_url || 'obo_shadow_cuts';
+    form.name = profile.name || 'Obo Shadow'
+    form.phone = profile.phone || '+234 800 123 4567'
+    form.bio = profile.bio || 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups. I believe every haircut is an art form.'
+    form.instagram_url = profile.instagram_url || 'obo_shadow_cuts'
     form.specialties = profile.specialties && profile.specialties.length > 0 
       ? profile.specialties 
       : [
@@ -290,27 +229,26 @@ onMounted(async () => {
           'Kids Haircut', 'Kids Super Fade', 'Senior Cut',
           'Women Pixie Cut', 'Wedding Special', 'Home VIP Service',
           'Accessible Care Cut'
-        ];
+        ]
       
     if (profile.profile_image) {
       form.profile_image = profile.profile_image.startsWith('http') 
         ? profile.profile_image 
-        : API_ROOT + profile.profile_image;
+        : API_ROOT + profile.profile_image
     } else {
-      form.profile_image = null;
+      form.profile_image = null
     }
     
   } catch (e) {
-    // API might fail if not fully implemented, fallback to defaults
-    form.name = 'Obo Shadow';
-    form.bio = 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups.';
+    form.name = 'Obo Shadow'
+    form.bio = 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups.'
     form.specialties = [
       'Classic Fade', 'High Fade', 'Taper Fade', 'Textured Crop',
       'Men Executive Cut', 'Full Beard Trim', 'Beard Detail',
       'Hot Towel Shave', 'Kids Haircut', 'Hair Styling'
-    ];
+    ]
   }
-});
+})
 </script>
 
 <style scoped>

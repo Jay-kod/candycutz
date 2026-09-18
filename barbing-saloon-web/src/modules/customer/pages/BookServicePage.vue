@@ -49,42 +49,12 @@
           </div>
 
           <!-- Select Barber Section -->
-          <div class="mt-6 pt-5 border-t border-white/10">
-            <div class="flex items-center justify-between mb-4">
-              <label class="text-xs font-semibold uppercase tracking-widest text-gold/80 block">Select Barber</label>
-              <span class="text-xs text-ivory/40">{{ barbers.length }} Master Barbers Available</span>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div 
-                v-for="b in barbers" 
-                :key="b.id"
-                @click="selectBarber(b.id)"
-                class="flex items-center gap-4 rounded-xl border p-4 cursor-pointer transition-all duration-200"
-                :class="form.barber_id === b.id 
-                  ? 'bg-gold/10 border-gold shadow-[0_0_20px_rgba(212,175,55,0.15)] ring-1 ring-gold/30' 
-                  : 'bg-white/[0.03] border-white/5 hover:border-gold/30 hover:bg-white/[0.06]'"
-              >
-                <div class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2" :class="form.barber_id === b.id ? 'border-gold' : 'border-white/10'">
-                  <img v-if="b.avatar" :src="getFullImageUrl(b.avatar)" :alt="b.name" class="h-full w-full object-cover" />
-                  <div v-else class="h-full w-full bg-gold/10 flex items-center justify-center text-gold font-bold text-lg">
-                    {{ b.name?.charAt(0) || 'B' }}
-                  </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm font-display font-bold text-theme-text truncate">{{ b.name }}</p>
-                    <span v-if="form.barber_id === b.id" class="text-[10px] font-bold uppercase tracking-wider text-gold bg-gold/20 px-2 py-0.5 rounded-full">Selected</span>
-                  </div>
-                  <div class="flex items-center gap-3 text-xs text-ivory/50 mt-0.5">
-                    <span class="text-gold flex items-center gap-1">★ {{ b.rating || '5.0' }}</span>
-                    <span>•</span>
-                    <span>{{ b.years_experience || 5 }}+ yrs exp</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <BookingBarberSelect
+            :barbers="barbers"
+            :selected-barber-id="form.barber_id"
+            :get-full-image-url="getFullImageUrl"
+            @select="selectBarber"
+          />
         </div>
 
         <!-- Booking Form: Date & Time only -->
@@ -92,107 +62,31 @@
           <div class="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
           <!-- Step 1: Date & Time -->
-          <div class="flex items-center justify-between mb-8">
-            <h2 class="font-display text-2xl md:text-3xl text-theme-text flex items-center gap-3">
-              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold text-obsidian text-sm font-bold">1</span>
-              Date &amp; <span class="text-gold">Time</span>
-            </h2>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50 ml-2 mb-2 block">Select Date</label>
-              <div class="relative group">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none text-gold/50 group-hover:text-gold transition-colors">
-                  <CalendarDaysIcon class="h-6 w-6" />
-                </div>
-                <input 
-                  v-model="form.appointment_date" 
-                  type="date" 
-                  :min="todayStr"
-                  class="w-full rounded-2xl border border-theme-border bg-theme-bg/80 pl-14 pr-6 py-4 text-base text-theme-text outline-none transition-all focus:border-gold focus:bg-theme-bg focus:ring-4 focus:ring-gold/10 hover:border-gold/30 [color-scheme:dark]" 
-                  @change="loadSlots" 
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50 ml-2 mb-2 block flex justify-between">
-                <span>Select Time</span>
-                <span v-if="loadingSlots" class="text-gold italic normal-case flex items-center gap-1">
-                  <ArrowPathIcon class="w-3 h-3 animate-spin" /> checking...
-                </span>
-              </label>
-              
-              <div v-if="slots.length > 0" class="grid grid-cols-3 gap-2">
-                <button 
-                  v-for="slot in slots" :key="slot"
-                  type="button"
-                  @click="form.appointment_time = slot"
-                  class="rounded-xl py-3 text-sm font-bold transition-all duration-200 border"
-                  :class="form.appointment_time === slot ? 'bg-gold text-obsidian border-gold shadow-[0_0_15px_rgba(212,175,55,0.3)] scale-105 z-10' : 'bg-theme-bg/50 border-theme-border text-theme-text hover:border-gold/40 hover:bg-theme-surface'"
-                >
-                  {{ slot }}
-                </button>
-              </div>
-              
-              <div v-else class="h-[58px] rounded-2xl border border-dashed border-theme-border flex items-center justify-center text-sm text-ivory/40 italic bg-theme-bg/30">
-                <span v-if="form.appointment_date">No slots available</span>
-                <span v-else>Pick a date first</span>
-              </div>
-            </div>
-          </div>
+          <BookingTimeSlotPicker
+            :appointment-date="form.appointment_date"
+            :appointment-time="form.appointment_time"
+            :today-str="todayStr"
+            :slots="slots"
+            :loading-slots="loadingSlots"
+            @update:appointment-date="form.appointment_date = $event"
+            @update:appointment-time="form.appointment_time = $event"
+            @date-change="loadSlots"
+          />
 
           <!-- Step 2: Notes & Submit -->
           <transition name="fade-slide">
-            <div v-if="form.appointment_time" key="step2">
-              <div class="w-full h-px bg-gradient-to-r from-transparent via-theme-border to-transparent my-8"></div>
-              
-              <div class="flex items-center justify-between mb-8">
-                <h2 class="font-display text-2xl md:text-3xl text-theme-text flex items-center gap-3">
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold text-obsidian text-sm font-bold">2</span>
-                  Special <span class="text-gold">Requests</span>
-                </h2>
-              </div>
-              
-              <div class="space-y-6">
-                <div>
-                  <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50 ml-2 mb-2 block">Notes (Optional)</label>
-                  <textarea 
-                    v-model="form.notes" 
-                    rows="2" 
-                    class="w-full rounded-2xl border border-theme-border bg-theme-bg/80 px-6 py-4 text-sm text-theme-text placeholder-theme-muted/50 outline-none transition-all focus:border-gold focus:bg-theme-bg focus:ring-4 focus:ring-gold/10 hover:border-gold/30 resize-none" 
-                    placeholder="Any particular styling instructions?"
-                  ></textarea>
-                </div>
-
-                <!-- Booking Summary -->
-                <div class="rounded-2xl border border-gold/20 bg-gold/5 p-5">
-                  <p class="text-xs uppercase tracking-widest text-gold/70 mb-3 font-bold">Booking Summary</p>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between"><span class="text-ivory/50">Service</span><span class="text-theme-text font-semibold">{{ service.name }}</span></div>
-                    <div class="flex justify-between"><span class="text-ivory/50">Barber</span><span class="text-theme-text font-semibold">{{ selectedBarberName }}</span></div>
-                    <div class="flex justify-between"><span class="text-ivory/50">Date</span><span class="text-theme-text font-semibold">{{ formatDate(form.appointment_date) }}</span></div>
-                    <div class="flex justify-between"><span class="text-ivory/50">Time</span><span class="text-gold font-bold">{{ form.appointment_time }}</span></div>
-                    <div class="flex justify-between border-t border-gold/20 pt-2 mt-2"><span class="text-ivory/50">Total</span><span class="text-gold font-display text-lg font-bold">₦{{ Number(service.price).toLocaleString() }}</span></div>
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  :disabled="isSubmitting"
-                  class="group w-full relative flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-gold via-gold-light to-gold p-1 shadow-[0_0_30px_rgba(212,175,55,0.2)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  <div class="w-full bg-obsidian rounded-xl px-8 py-4 transition-all duration-300 group-hover:bg-transparent flex items-center justify-center">
-                    <div class="flex items-center justify-center gap-3 text-gold group-hover:text-obsidian transition-colors font-display text-xl">
-                      <ArrowPathIcon v-if="isSubmitting" class="w-5 h-5 animate-spin" />
-                      <span>{{ isSubmitting ? 'Confirming...' : 'Confirm Booking' }}</span>
-                      <svg v-if="!isSubmitting" class="h-5 w-5 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
+            <BookingSummaryStep
+              v-if="form.appointment_time"
+              key="step2"
+              :notes="form.notes"
+              :service="service"
+              :selected-barber-name="selectedBarberName"
+              :appointment-date="form.appointment_date"
+              :appointment-time="form.appointment_time"
+              :format-date="formatDate"
+              :is-submitting="isSubmitting"
+              @update:notes="form.notes = $event"
+            />
           </transition>
         </form>
       </div>
@@ -202,148 +96,149 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
-import { publicApi } from '@/shared/api/old_publicApi';
-import { customerApi } from '@/shared/api/old_customerApi';
-import { useToast } from '../../../core/composables/useToast';
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
+import { publicApi } from '@/shared/api/old_publicApi'
+import { customerApi } from '@/shared/api/old_customerApi'
+import { useToast } from '../../../core/composables/useToast'
+import BookingBarberSelect from '../components/booking/BookingBarberSelect.vue'
+import BookingTimeSlotPicker from '../components/booking/BookingTimeSlotPicker.vue'
+import BookingSummaryStep from '../components/booking/BookingSummaryStep.vue'
 import { 
   ArrowLeftIcon,
-  CalendarDaysIcon, 
-  ArrowPathIcon, 
   ScissorsIcon, 
-  ClockIcon,
+  ClockIcon, 
   CurrencyDollarIcon
-} from '@heroicons/vue/24/outline';
+} from '@heroicons/vue/24/outline'
 
-const route = useRoute();
-const router = useRouter();
-const toast = useToast();
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 
-const serviceId = route.params.serviceId;
+const serviceId = route.params.serviceId
 
-const form = reactive({ barber_id: '', service_id: serviceId, appointment_date: '', appointment_time: '', notes: '' });
-const service = ref(null);
-const barbers = ref([]);
-const slots = ref([]);
+const form = reactive({ barber_id: '', service_id: serviceId, appointment_date: '', appointment_time: '', notes: '' })
+const service = ref(null)
+const barbers = ref([])
+const slots = ref([])
 
-const loadingService = ref(true);
-const loadingSlots = ref(false);
-const isSubmitting = ref(false);
+const loadingService = ref(true)
+const loadingSlots = ref(false)
+const isSubmitting = ref(false)
 
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'
 
-const todayStr = new Date().toISOString().split('T')[0];
+const todayStr = new Date().toISOString().split('T')[0]
 
 const selectedBarberName = computed(() => {
-  const b = barbers.value.find(item => item.id === form.barber_id);
-  return b ? b.name : (service.value?.barber?.name || 'Any Master Barber');
-});
+  const b = barbers.value.find(item => item.id === form.barber_id)
+  return b ? b.name : (service.value?.barber?.name || 'Any Master Barber')
+})
 
 function getFullImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${API_ROOT}${path.startsWith('/') ? '' : '/'}${path}`;
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `${API_ROOT}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
 function selectBarber(id) {
-  form.barber_id = id;
+  form.barber_id = id
   if (form.appointment_date) {
-    loadSlots();
+    loadSlots()
   }
 }
 
 function goBack() {
-  router.back();
+  router.back()
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 async function loadData() {
-  loadingService.value = true;
+  loadingService.value = true
   try {
     const [servicesResponse, barbersResponse] = await Promise.all([
       publicApi.services(),
       publicApi.barbers(),
-    ]);
+    ])
 
-    barbers.value = barbersResponse.data.data || [];
+    barbers.value = barbersResponse.data.data || []
     
     // Find the specific service
-    const foundService = (servicesResponse.data.data || []).find(s => s.id == serviceId);
+    const foundService = (servicesResponse.data.data || []).find(s => s.id == serviceId)
     if (!foundService) {
-      toast.error('Service not found');
-      loadingService.value = false;
-      return;
+      toast.error('Service not found')
+      loadingService.value = false
+      return
     }
     
-    service.value = foundService;
+    service.value = foundService
     
     // Auto-select preferred barber
     if (foundService.barber_id) {
-      form.barber_id = foundService.barber_id;
+      form.barber_id = foundService.barber_id
     } else if (barbers.value.length > 0) {
-      const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0];
-      form.barber_id = preferred.id;
+      const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0]
+      form.barber_id = preferred.id
     }
     
   } catch (err) {
-    toast.error('Failed to load booking details');
+    toast.error('Failed to load booking details')
   } finally {
-    loadingService.value = false;
+    loadingService.value = false
   }
 }
 
 async function loadSlots() {
   if (!form.barber_id || !form.service_id || !form.appointment_date) {
-    slots.value = [];
-    return;
+    slots.value = []
+    return
   }
 
-  loadingSlots.value = true;
+  loadingSlots.value = true
   try {
     const response = await publicApi.availableSlots({
       barber_id: form.barber_id,
       service_id: form.service_id,
       date: form.appointment_date,
-    });
-    slots.value = response.data.data || [];
+    })
+    slots.value = response.data.data || []
     
     if (form.appointment_time && !slots.value.includes(form.appointment_time)) {
-      form.appointment_time = '';
+      form.appointment_time = ''
     }
   } catch (err) {
-    toast.error('Failed to load available slots');
+    toast.error('Failed to load available slots')
   } finally {
-    loadingSlots.value = false;
+    loadingSlots.value = false
   }
 }
 
 async function submit() {
-  if (!form.barber_id) { toast.warning('Please select a master barber'); return; }
-  if (!form.service_id) { toast.warning('Please select a service'); return; }
-  if (!form.appointment_date) { toast.warning('Please select a date'); return; }
-  if (!form.appointment_time) { toast.warning('Please select a time slot'); return; }
+  if (!form.barber_id) { toast.warning('Please select a master barber'); return }
+  if (!form.service_id) { toast.warning('Please select a service'); return }
+  if (!form.appointment_date) { toast.warning('Please select a date'); return }
+  if (!form.appointment_time) { toast.warning('Please select a time slot'); return }
   
-  isSubmitting.value = true;
+  isSubmitting.value = true
   try {
-    await customerApi.createBooking(form);
-    toast.success('Booking created successfully! Please pay to confirm.');
-    router.push('/customer/dashboard/bookings');
+    await customerApi.createBooking(form)
+    toast.success('Booking created successfully! Please pay to confirm.')
+    router.push('/customer/dashboard/bookings')
   } catch (err) {
-    toast.error(err.response?.data?.error || 'Failed to create booking');
+    toast.error(err.response?.data?.error || 'Failed to create booking')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 
 onMounted(() => {
-  loadData();
-});
+  loadData()
+})
 </script>
 
 <style scoped>
