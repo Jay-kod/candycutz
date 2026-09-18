@@ -10,6 +10,7 @@ import {
   BarberProfile,
   BlockedPeriod,
   ChairStatus,
+  Notification,
   Service,
   ServiceZone,
   TimeSlot,
@@ -321,6 +322,42 @@ export const zonesApi = {
   getServiceZones: async (): Promise<ServiceZone[]> => {
     const res = await apiClient.get<ApiResponse<ServiceZone[]>>('/service-zones');
     return res.data.data || (res.data as any) || [];
+  },
+};
+
+// ==========================================
+// Notifications & Push Tokens Endpoints
+// ==========================================
+export const notificationsApi = {
+  getAll: async (type?: string): Promise<Notification[]> => {
+    const res = await apiClient.get<ApiResponse<Notification[]>>('/notifications', {
+      params: type ? { type } : undefined,
+    });
+    return res.data.data || (res.data as any) || [];
+  },
+
+  markAsRead: async (id: number): Promise<void> => {
+    await apiClient.patch(`/notifications/${id}/read`);
+  },
+
+  markAllRead: async (): Promise<void> => {
+    await apiClient.patch('/notifications/read-all');
+  },
+
+  registerDeviceToken: async (
+    token: string,
+    platform: 'ios' | 'android' | 'web' = Platform.OS === 'ios' ? 'ios' : 'android'
+  ): Promise<void> => {
+    await apiClient.post('/notifications/device-token', {
+      token,
+      platform,
+    });
+  },
+
+  deleteDeviceToken: async (token: string): Promise<void> => {
+    await apiClient.delete('/notifications/device-token', {
+      data: { token },
+    });
   },
 };
 

@@ -39,4 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->whereNumber('id');
     Route::get('/notification-settings', [NotificationController::class, 'getNotificationSettings']);
     Route::post('/notification-settings', [NotificationController::class, 'updateNotificationSettings']);
+    Route::post('/notifications/device-token', [NotificationController::class, 'registerDeviceToken']);
+    Route::delete('/notifications/device-token', [NotificationController::class, 'deleteDeviceToken']);
 });

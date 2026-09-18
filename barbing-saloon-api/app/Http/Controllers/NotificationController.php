@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\DeviceToken;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -251,6 +252,63 @@ class NotificationController
             'success' => true,
             'message' => 'Notification preferences saved successfully',
             'data' => $user->refresh()->notification_preferences,
+        ]);
+    }
+
+    /**
+     * Register or update a device token for push notifications
+     */
+    public function registerDeviceToken(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $validated = $request->validate([
+            'token' => 'required|string|max:500',
+            'platform' => 'nullable|string|in:ios,android,web',
+        ]);
+
+        $deviceToken = DeviceToken::updateOrCreate(
+            ['token' => $validated['token']],
+            [
+                'user_id' => $user->id,
+                'platform' => $validated['platform'] ?? 'android',
+                'last_seen_at' => now(),
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Device token registered successfully',
+            'data' => $deviceToken,
+        ]);
+    }
+
+    /**
+     * Delete a device token
+     */
+    public function deleteDeviceToken(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $validated = $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        DeviceToken::where('user_id', $user->id)
+            ->where('token', $validated['token'])
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Device token removed successfully',
         ]);
     }
 }

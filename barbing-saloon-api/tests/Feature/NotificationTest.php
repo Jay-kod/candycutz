@@ -43,3 +43,83 @@ it('characterises POST /notification-settings', function () {
     $response = $this->actingAs($user)->postJson('/api/v1/notification-settings', []);
     expect(in_array($response->status(), [200, 201, 422, 500, 403]))->toBeTrue();
 });
+
+it('registers a device token for authenticated user', function () {
+    $user = User::factory()->create();
+    $token = 'test-device-token-'.uniqid();
+
+    $response = $this->actingAs($user)->postJson('/api/v1/notifications/device-token', [
+        'token' => $token,
+        'platform' => 'android',
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'message' => 'Device token registered successfully',
+        ]);
+
+    $this->assertDatabaseHas('device_tokens', [
+        'user_id' => $user->id,
+        'token' => $token,
+        'platform' => 'android',
+    ]);
+});
+
+it('updates an existing device token', function () {
+    $user = User::factory()->create();
+    $token = 'test-update-token-'.uniqid();
+
+    $this->actingAs($user)->postJson('/api/v1/notifications/device-token', [
+        'token' => $token,
+        'platform' => 'android',
+    ])->assertStatus(200);
+
+    $response = $this->actingAs($user)->postJson('/api/v1/notifications/device-token', [
+        'token' => $token,
+        'platform' => 'ios',
+    ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('device_tokens', [
+        'user_id' => $user->id,
+        'token' => $token,
+        'platform' => 'ios',
+    ]);
+});
+
+it('deletes a device token for authenticated user', function () {
+    $user = User::factory()->create();
+    $token = 'test-delete-token-'.uniqid();
+
+    $this->actingAs($user)->postJson('/api/v1/notifications/device-token', [
+        'token' => $token,
+        'platform' => 'android',
+    ])->assertStatus(200);
+
+    $response = $this->actingAs($user)->deleteJson('/api/v1/notifications/device-token', [
+        'token' => $token,
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'message' => 'Device token removed successfully',
+        ]);
+
+    $this->assertDatabaseMissing('device_tokens', [
+        'user_id' => $user->id,
+        'token' => $token,
+    ]);
+});
+
+it('requires authentication for device token endpoints', function () {
+    $this->postJson('/api/v1/notifications/device-token', [
+        'token' => 'some-token',
+    ])->assertStatus(401);
+
+    $this->deleteJson('/api/v1/notifications/device-token', [
+        'token' => 'some-token',
+    ])->assertStatus(401);
+});
