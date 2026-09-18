@@ -15,7 +15,8 @@
       "@/*": ["src/*"]
     },
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "noEmit": true
   },
   "include": [
     "src/**/*.js",
