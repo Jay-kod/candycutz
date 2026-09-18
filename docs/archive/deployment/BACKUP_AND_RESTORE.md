@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -101,3 +105,4 @@ docker compose exec app php artisan up
 # Verify record counts
 docker compose exec db mysql -u candycutz -p"YOUR_STRONG_DATABASE_PASSWORD" -e "SELECT count(*) FROM candycutz_db.appointments; SELECT count(*) FROM candycutz_db.users;"
 ```
+

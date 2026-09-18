@@ -479,7 +479,6 @@ const handleLogout = async () => {
   if (!ok) return;
 
   try {
-    const isBarber = authStore.isBarber;
     const isAdmin = authStore.isAdmin || authStore.isSuperAdmin;
     const isCustomer = authStore.isCustomer;
     

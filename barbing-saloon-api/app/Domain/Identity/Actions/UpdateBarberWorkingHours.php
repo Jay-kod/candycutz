@@ -7,6 +7,10 @@ use App\Models\WorkingHour;
 
 class UpdateBarberWorkingHours
 {
+    /**
+     * @param  array<int, array<string, mixed>>  $hours
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(int $barberId, array $hours): array
     {
         $barber = Barber::findOrFail($barberId);
@@ -25,6 +29,12 @@ class UpdateBarberWorkingHours
             );
         }
 
-        return $this->workingHours();
+        return $barber->workingHours->map(fn ($h) => [
+            'id' => $h->id,
+            'day_of_week' => $h->day_of_week,
+            'open_time' => substr($h->open_time, 0, 5),
+            'close_time' => substr($h->close_time, 0, 5),
+            'is_closed' => (bool) $h->is_closed,
+        ])->values()->all();
     }
 }

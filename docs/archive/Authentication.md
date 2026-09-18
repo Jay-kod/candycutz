@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -96,3 +100,4 @@ sequenceDiagram
 - Tokens are injected automatically into outgoing API requests via Axios interceptors:
   `Authorization: Bearer <sanctum_token>`
 - If an HTTP 401 Unauthorized is returned, the app clears the token, resets the Zustand session state, and seamlessly routes the user to the Welcome / Login screen.
+

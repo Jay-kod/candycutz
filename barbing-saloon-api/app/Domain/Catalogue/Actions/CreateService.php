@@ -10,6 +10,9 @@ class CreateService
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(array $data): Service
     {
         $imagePath = isset($data['image']) && $data['image'] instanceof UploadedFile

@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -162,3 +166,4 @@ DB::transaction(function () use ($request, $user) {
 | **Late Cancellation** | < 4 hours prior to appointment. | Deposit forfeited according to CMS policy settings; client notified. |
 | **No-Show** | Client fails to arrive within 15 minutes of appointment start time. | Barber marks `no_show`. Account no-show tally increments; 3 strikes mandate full advance payment for future bookings. |
 | **Walk-In Entry** | In-person client enters the shop. | Barber or Admin taps "Walk-In", enters customer name, and immediately locks the chair for the required duration. |
+

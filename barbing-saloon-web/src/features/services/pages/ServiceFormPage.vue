@@ -72,8 +72,8 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
-import BarberLayout from '@/portals/Barber/layouts/BarberLayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/vue/24/outline';
 import ServiceLivePreview from '../components/ServiceLivePreview.vue';
 import ServiceDetailsForm from '../components/ServiceDetailsForm.vue';

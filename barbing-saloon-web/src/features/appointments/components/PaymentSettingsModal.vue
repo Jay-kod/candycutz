@@ -101,7 +101,7 @@ const props = defineProps({
   initialData: Object
 });
 
-const emit = defineEmits(['close', 'save']);
+defineEmits(['close', 'save']);
 
 const form = ref({
   bank_name: '',

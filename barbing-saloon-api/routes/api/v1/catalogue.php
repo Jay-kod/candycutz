@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/testimonials/{id}/approve', [TestimonialApiController::class, 'approve'])->whereNumber('id');
         Route::patch('/testimonials/{id}/feature', [TestimonialApiController::class, 'feature'])->whereNumber('id');
         Route::delete('/testimonials/{id}', [TestimonialApiController::class, 'destroy'])->whereNumber('id');
-        
+
         // Barber Management
         Route::post('/barbers', [BarberApiController::class, 'store']);
         Route::put('/barbers/{id}', [BarberApiController::class, 'update'])->whereNumber('id');

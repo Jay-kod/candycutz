@@ -99,7 +99,6 @@ export const useAuthStore = defineStore('auth', {
 
         const isAdminRoute = intendedRoute.startsWith('/admin');
         const isBarberRoute = intendedRoute.startsWith('/barber');
-        const isCustomerRoute = intendedRoute.startsWith('/customer');
 
         if ((role === 'admin' || role === 'super_admin') && isAdminRoute) {
           return intendedRoute;

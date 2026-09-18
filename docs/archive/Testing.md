@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -154,3 +158,4 @@ Zero type errors permitted in committed code.
 | **QA-04** | Customer deactivates account | App reports "Account Deleted", historical records preserved in database. |
 | **QA-05** | Super Admin overrides schedule in God Mode | Schedule updated immediately, audit log entry created with reason. |
 | **QA-06** | Super Admin modifies brand color in Theme Studio | Draft saved, previewed, published; web and mobile re-hydrate new token. |
+

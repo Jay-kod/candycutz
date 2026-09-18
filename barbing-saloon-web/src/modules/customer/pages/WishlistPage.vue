@@ -163,7 +163,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { HeartIcon, ScissorsIcon, TrashIcon, CalendarIcon } from '@heroicons/vue/24/outline';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';

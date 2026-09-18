@@ -10,6 +10,9 @@ class UpdateBlogPost
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(BlogPost $blogPost, array $data): BlogPost
     {
         if (isset($data['featured_image']) && $data['featured_image'] instanceof UploadedFile) {

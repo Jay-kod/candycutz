@@ -31,7 +31,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import SuperAdminLayout from '@/portals/SuperAdmin/layouts/SuperAdminlayout.vue';
+import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 
 const dashboard = ref({ stats: {}, recent_logs: [] });

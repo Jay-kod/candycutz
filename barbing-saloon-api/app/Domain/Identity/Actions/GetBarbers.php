@@ -6,6 +6,9 @@ use App\Models\Barber;
 
 class GetBarbers
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(): array
     {
         return Barber::with(['user'])->get()->map(function ($b) {

@@ -140,7 +140,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { EnvelopeIcon, GlobeAltIcon, PaperAirplaneIcon } from '@heroicons/vue/24/outline';
 

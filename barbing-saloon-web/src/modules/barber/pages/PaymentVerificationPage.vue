@@ -285,7 +285,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import {

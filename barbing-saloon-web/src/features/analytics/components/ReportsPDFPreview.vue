@@ -237,7 +237,7 @@ const props = defineProps({
   selectedRange: { type: String, required: true }
 });
 
-const emit = defineEmits(['close']);
+defineEmits(['close']);
 
 const isGeneratingPdf = ref(false);
 const reportRef = ref(null);

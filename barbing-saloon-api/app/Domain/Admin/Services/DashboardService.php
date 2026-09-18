@@ -10,6 +10,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardService
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function dashboard(): array
     {
         return [
@@ -24,6 +27,9 @@ class DashboardService
         ];
     }
 
+    /**
+     * @return LengthAwarePaginator<AuditLog>
+     */
     public function auditLogs(): LengthAwarePaginator
     {
         return AuditLog::with('user')->latest()->paginate(20);

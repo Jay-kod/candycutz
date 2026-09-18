@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Catalog\DataObjects\ServiceData;
 use App\Domain\Catalogue\Actions\CreateServiceCategory;
 use App\Domain\Catalogue\Actions\DeleteServiceCategory;
 use App\Domain\Catalogue\Actions\UpdateServiceCategory;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Http\Requests\Api\V1\Admin\StoreServiceCategoryRequest;
 use App\Http\Requests\Api\V1\Admin\UpdateServiceCategoryRequest;
+use App\Http\Requests\StoreServiceRequest;
+use App\Http\Requests\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Service;
@@ -78,45 +81,23 @@ class ServiceApiController
         return ApiResponse::success($data, 'Service categories retrieved');
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreServiceRequest $request): JsonResponse
     {
-        $this->authorize('create', Service::class);
-
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'duration_minutes' => 'nullable|integer',
-            'category_id' => 'required|integer|exists:service_categories,id',
-            'image' => 'nullable|image|max:2048',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        $service = Service::create($validated);
+        $service = Service::create(ServiceData::fromRequest($request)->toArray());
 
         if ($request->hasFile('image')) {
-            $path = (new SecureImageUpload())->execute($request->file('image'), 'uploads/services');
-            $service->update(['image' => '/storage/' . $path]);
+            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/services');
+            $service->update(['image' => '/storage/'.$path]);
         }
 
         return ApiResponse::success(new ServiceResource($service), 'Service created', 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateServiceRequest $request, int $id): JsonResponse
     {
         $service = Service::findOrFail($id);
-        $this->authorize('update', $service);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string',
-            'description' => 'nullable|string',
-            'price' => 'sometimes|numeric',
-            'duration_minutes' => 'nullable|integer',
-            'category_id' => 'sometimes|integer|exists:service_categories,id',
-            'image' => 'nullable|image|max:2048',
-            'is_active' => 'nullable|boolean',
-        ]);
-
+        $validated = $request->validated();
         if (isset($validated['is_active'])) {
             $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
         }
@@ -124,8 +105,8 @@ class ServiceApiController
         $service->update($validated);
 
         if ($request->hasFile('image')) {
-            $path = (new SecureImageUpload())->execute($request->file('image'), 'uploads/services');
-            $service->update(['image' => '/storage/' . $path]);
+            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/services');
+            $service->update(['image' => '/storage/'.$path]);
         }
 
         return ApiResponse::success(new ServiceResource($service->refresh()), 'Service updated');
@@ -140,19 +121,21 @@ class ServiceApiController
         return ApiResponse::success(null, 'Service deleted');
     }
 
-    public function storeCategory(StoreServiceCategoryRequest $request, CreateServiceCategory $action)
+    public function storeCategory(StoreServiceCategoryRequest $request, CreateServiceCategory $action): JsonResponse
     {
         $this->authorize('create', ServiceCategory::class);
+
         return ApiResponse::success($action->execute($request->validated()), 'Service category created', 201);
     }
 
-    public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action)
+    public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action): JsonResponse
     {
         $this->authorize('update', $serviceCategory);
+
         return ApiResponse::success($action->execute($serviceCategory, $request->validated()), 'Service category updated');
     }
 
-    public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action)
+    public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action): JsonResponse
     {
         $this->authorize('delete', $serviceCategory);
         $action->execute($serviceCategory);

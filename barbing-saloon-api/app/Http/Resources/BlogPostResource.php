@@ -2,9 +2,13 @@
 
 namespace App\Http\Resources;
 
+use App\Models\BlogPost;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin BlogPost
+ */
 class BlogPostResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -27,13 +31,13 @@ class BlogPostResource extends JsonResource
                 'name' => $this->author_display ?? $this->author?->name ?? 'CandyCutz Team',
             ],
             'created_at' => $this->created_at?->toISOString(),
-            'loves_count' => (int) ($this->reactions?->where('reaction_type', 'love')->count() ?? 0),
-            'dislikes_count' => (int) ($this->reactions?->where('reaction_type', 'dislike')->count() ?? 0),
+            'loves_count' => (int) ($this->reactions->where('reaction_type', 'love')->count() ?? 0),
+            'dislikes_count' => (int) ($this->reactions->where('reaction_type', 'dislike')->count() ?? 0),
         ];
 
         // Only include content on detailed views (show/update)
-        if ($request->routeIs('*.show') || $request->isMethod('POST') || $request->isMethod('PUT')) {
-            $data['content'] = $this->content;
+        if ($request->routeIs('*.show') || $request->routeIs('*.update') || $request->routeIs('*.store')) {
+            $data['content'] = $this->body;
         }
 
         return $data;

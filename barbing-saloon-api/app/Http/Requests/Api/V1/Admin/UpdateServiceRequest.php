@@ -12,6 +12,9 @@ class UpdateServiceRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         $serviceId = $this->route('service')?->id ?? $this->route('service');

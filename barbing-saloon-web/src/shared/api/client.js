@@ -69,4 +69,7 @@ export function setupAxiosInterceptors() {
   return api;
 }
 
-export default setupAxiosInterceptors();
+const client = setupAxiosInterceptors();
+export const api = client;
+export { client };
+export default client;

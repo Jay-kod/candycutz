@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Cog6ToothIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue'
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
 import { useAuthStore } from '../../auth/store/auth.store'
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast'
@@ -24,7 +24,11 @@ const loadSettings = () => {
   if (authStore.user?.notification_preferences) {
     let prefs = authStore.user.notification_preferences
     if (typeof prefs === 'string') {
-      try { prefs = JSON.parse(prefs) } catch(e) {}
+      try { 
+        prefs = JSON.parse(prefs); 
+      } catch { 
+        // ignore invalid json fallback
+      }
     }
     settings.notify_bookings = prefs.notify_bookings ?? true
     settings.notify_system = prefs.notify_system ?? true

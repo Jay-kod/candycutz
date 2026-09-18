@@ -195,7 +195,7 @@
 <script setup>
 import { onMounted, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 

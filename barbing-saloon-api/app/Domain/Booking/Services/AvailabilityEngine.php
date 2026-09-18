@@ -6,10 +6,10 @@ namespace App\Domain\Booking\Services;
 
 use App\Models\Appointment;
 use App\Models\Barber;
-use App\Models\BarberAvailability;
 use App\Models\BlockedPeriod;
 use App\Models\Branch;
 use App\Models\Holiday;
+use App\Models\WorkingHour;
 use Carbon\Carbon;
 
 class AvailabilityEngine
@@ -46,9 +46,9 @@ class AvailabilityEngine
         }
 
         // 3. Resolve Barber working hours for this day of week (0 = Sunday ... 6 = Saturday)
-        $schedule = BarberAvailability::where('barber_id', $barberId)
+        $schedule = WorkingHour::where('barber_id', $barberId)
             ->where('day_of_week', $date->dayOfWeek)
-            ->where('is_available', true)
+            ->where('is_closed', false)
             ->first();
 
         if (! $schedule) {
@@ -56,8 +56,8 @@ class AvailabilityEngine
         }
 
         // 4. Calculate working window bounds
-        $windowStart = $date->copy()->setTimeFromTimeString($schedule->start_time);
-        $windowEnd = $date->copy()->setTimeFromTimeString($schedule->end_time);
+        $windowStart = $date->copy()->setTimeFromTimeString($schedule->open_time);
+        $windowEnd = $date->copy()->setTimeFromTimeString($schedule->close_time);
 
         // If booking for today, advance window start past current time + 30 min minimum notice
         if ($date->isToday()) {
@@ -74,7 +74,7 @@ class AvailabilityEngine
         $existingAppointments = Appointment::where('barber_id', $barberId)
             ->where('appointment_date', $date->toDateString())
             ->whereNotIn('status', ['cancelled'])
-            ->get(['start_time', 'end_time', 'appointment_type']);
+            ->get(['appointment_time', 'end_time', 'appointment_type']);
 
         // 7. Fetch all blocked periods (lunch, prayer, personal leave)
         $blockedPeriods = BlockedPeriod::where('barber_id', $barberId)
@@ -102,8 +102,8 @@ class AvailabilityEngine
 
             // Check overlap against existing appointments
             foreach ($existingAppointments as $app) {
-                $appStart = (string) $app->start_time;
-                $appEnd = (string) ($app->end_time ?: Carbon::parse($app->start_time)->addMinutes(30)->toTimeString());
+                $appStart = (string) $app->appointment_time;
+                $appEnd = (string) ($app->end_time ?: Carbon::parse($app->appointment_time)->addMinutes(30)->toTimeString());
 
                 // Home service travel buffer padding
                 if ($app->appointment_type === 'home_service') {

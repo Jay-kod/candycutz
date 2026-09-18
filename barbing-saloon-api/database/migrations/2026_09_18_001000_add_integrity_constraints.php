@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -39,9 +38,9 @@ return new class extends Migration
         // In MariaDB 10.4, functional indexes are not supported. We create a virtual column and index it.
         Schema::table('appointments', function (Blueprint $table) {
             $table->string('active_status', 10)
-                  ->virtualAs("CASE WHEN status NOT IN ('cancelled', 'no_show') THEN 'active' ELSE NULL END")
-                  ->nullable();
-            
+                ->virtualAs("CASE WHEN status NOT IN ('cancelled', 'no_show') THEN 'active' ELSE NULL END")
+                ->nullable();
+
             $table->unique(['barber_id', 'appointment_date', 'appointment_time', 'active_status'], 'appointments_barber_datetime_unique');
         });
 
@@ -61,10 +60,10 @@ return new class extends Migration
         Schema::table('appointments', function (Blueprint $table) {
             $table->dropForeign(['service_id']);
             $table->foreign('service_id')->references('id')->on('services');
-            
+
             $table->dropUnique('appointments_barber_datetime_unique');
             $table->dropColumn('active_status');
-            
+
             $table->dropIndex('appointments_barber_date_status_idx');
             $table->dropIndex('appointments_customer_status_idx');
         });

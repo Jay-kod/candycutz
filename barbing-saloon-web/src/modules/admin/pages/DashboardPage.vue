@@ -54,7 +54,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { 
-  UsersIcon, CalendarDaysIcon, BanknotesIcon, CheckBadgeIcon, ChartBarIcon
+  UsersIcon, CalendarDaysIcon, CheckBadgeIcon, ChartBarIcon
 } from '@heroicons/vue/24/outline';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { useAdminDashboard } from '@/features/dashboard/composables/useAdminDashboard';
@@ -88,7 +88,6 @@ onUnmounted(() => {
 });
 
 // Format numbers
-const formatCurrency = (value) => Number(value || 0).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const formatNumber = (value) => Number(value || 0).toLocaleString('en-US');
 
 const statsCards = computed(() => {

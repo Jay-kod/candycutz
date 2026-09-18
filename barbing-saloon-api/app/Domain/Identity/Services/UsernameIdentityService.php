@@ -10,6 +10,9 @@ use Exception;
 
 class UsernameIdentityService
 {
+    /**
+     * @var array<int, string>
+     */
     protected array $reservedUsernames = [
         'admin',
         'superadmin',

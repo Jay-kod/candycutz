@@ -19,9 +19,9 @@ Route::prefix('v1')
                         'database' => 'connected',
                         'storage' => 'connected',
                         'api_version' => 'v1',
-                        'flagship' => 'candycutz'
-                    ]
-                ]
+                        'flagship' => 'candycutz',
+                    ],
+                ],
             ]);
         });
 

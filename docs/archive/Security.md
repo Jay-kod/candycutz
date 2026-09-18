@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -94,3 +98,4 @@ All mutations performed by administrators are written to `audit_logs`:
 - The table permits `INSERT` and `SELECT` operations only.
 - No `UPDATE` or `DELETE` permissions are granted to the application user on `audit_logs`.
 - Records store the initiating user ID, target entity, pre-change JSON, post-change JSON, IP address, and browser User-Agent.
+

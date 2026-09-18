@@ -6,7 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $appointment_id
+ * @property int $customer_id
+ * @property int $amount
+ * @property string $currency
+ * @property string $status
+ * @property string|null $payment_method
+ * @property string|null $gateway_reference
+ * @property string|null $gateway_charge_id
+ * @property string|null $transaction_ref
+ * @property string|null $receipt_url
+ * @property string|null $receipt_image
+ * @property string|null $error_message
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Payment extends Model
 {
     use HasFactory;

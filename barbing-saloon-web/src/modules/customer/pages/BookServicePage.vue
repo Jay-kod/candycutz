@@ -204,7 +204,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
@@ -213,8 +213,6 @@ import {
   CalendarDaysIcon, 
   ArrowPathIcon, 
   ScissorsIcon, 
-  UserIcon, 
-  CheckCircleIcon,
   ClockIcon,
   CurrencyDollarIcon
 } from '@heroicons/vue/24/outline';

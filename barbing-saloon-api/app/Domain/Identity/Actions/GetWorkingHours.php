@@ -6,6 +6,9 @@ use App\Models\Barber;
 
 class GetWorkingHours
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(): array
     {
         $barbers = Barber::with(['user', 'workingHours' => fn ($q) => $q->orderBy('day_of_week')])->get();

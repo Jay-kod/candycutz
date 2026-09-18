@@ -170,7 +170,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { customerApi } from '@/shared/api/old_customerApi';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -185,12 +185,10 @@ import {
   BellIcon,
   DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline';
-import ReceiptViewer from '../../../core/components/ReceiptViewer.vue';
 import { useToast } from '../../../core/composables/useToast';
 
 const dashboard = ref({ stats: {}, upcoming_appointments: [] });
 const notifications = ref([]);
-const loading = ref(true);
 const toast = useToast();
 let pollInterval = null;
 

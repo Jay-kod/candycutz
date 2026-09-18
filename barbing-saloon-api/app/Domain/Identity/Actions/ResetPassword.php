@@ -15,6 +15,10 @@ class ResetPassword
 {
     use HasAuditLog;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user: User, token: string}
+     */
     public function execute(array $data): array
     {
         $email = strtolower(trim($data['email']));

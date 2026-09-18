@@ -2,10 +2,17 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\AuditLog;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin AuditLog
+ */
 class AuditLogResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray($request): array
     {
         return [

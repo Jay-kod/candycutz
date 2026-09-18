@@ -6,6 +6,9 @@ use App\Models\Setting;
 
 class GetSettings
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
         return Setting::query()

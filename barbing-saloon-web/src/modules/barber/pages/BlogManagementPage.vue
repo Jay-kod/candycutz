@@ -96,11 +96,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
-import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon, PhotoIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
 
 const router = useRouter();
 const toast = useToast();

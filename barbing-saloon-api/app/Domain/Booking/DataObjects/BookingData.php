@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\DataObjects;
 
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 final class BookingData
 {
+    /**
+     * @param  array<string, mixed>|null  $destinationAddress
+     */
     public function __construct(
         public readonly int $serviceId,
         public readonly ?int $barberId,

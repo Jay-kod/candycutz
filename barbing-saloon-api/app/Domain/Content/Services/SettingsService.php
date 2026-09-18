@@ -8,6 +8,9 @@ use App\Models\Setting;
 
 class SettingsService
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function settings(): array
     {
         return Setting::all()

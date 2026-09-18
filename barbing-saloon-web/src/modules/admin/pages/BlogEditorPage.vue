@@ -78,7 +78,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useToast } from '../../../core/composables/useToast';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';

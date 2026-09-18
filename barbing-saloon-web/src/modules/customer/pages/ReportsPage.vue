@@ -43,7 +43,7 @@
       <template v-else>
         <!-- Summary Cards -->
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div v-for="(stat, idx) in statCards" :key="stat.label"
+          <div v-for="stat in statCards" :key="stat.label"
                class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-5 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]">
             <div class="absolute -right-3 -top-3 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none">
               <component :is="stat.icon" class="w-24 h-24" />
@@ -160,7 +160,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { customerApi } from '@/shared/api/old_customerApi';
 import {
   CalendarDaysIcon,
@@ -168,8 +168,6 @@ import {
   ClipboardDocumentCheckIcon,
   SparklesIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
   CurrencyDollarIcon
 } from '@heroicons/vue/24/outline';
 

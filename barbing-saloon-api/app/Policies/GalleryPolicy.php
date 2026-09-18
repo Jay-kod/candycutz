@@ -33,13 +33,13 @@ class GalleryPolicy
 
     public function update(User $user, Gallery $gallery): bool
     {
-        return ($user->role?->value ?? $user->role) === 'barber' && 
+        return ($user->role?->value ?? $user->role) === 'barber' &&
                $gallery->barber_id === $user->barber?->id;
     }
 
     public function delete(User $user, Gallery $gallery): bool
     {
-        return ($user->role?->value ?? $user->role) === 'barber' && 
+        return ($user->role?->value ?? $user->role) === 'barber' &&
                $gallery->barber_id === $user->barber?->id;
     }
 }

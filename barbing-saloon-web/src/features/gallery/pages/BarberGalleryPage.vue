@@ -54,7 +54,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import GalleryGrid from '../components/GalleryGrid.vue';
 import GalleryUploadModal from '../components/GalleryUploadModal.vue';
 import { useGallery } from '../composables/useGallery';

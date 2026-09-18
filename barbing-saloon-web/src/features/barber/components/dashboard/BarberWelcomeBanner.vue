@@ -59,12 +59,12 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps({
+defineProps({
   currentTime: { type: String, required: true },
   currentDate: { type: String, required: true },
   myStatus: { type: String, required: true },
   formatStatus: { type: Function, required: true }
 });
 
-const emit = defineEmits(['toggle-status']);
+defineEmits(['toggle-status']);
 </script>

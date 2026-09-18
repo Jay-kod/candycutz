@@ -21,7 +21,7 @@ class NotificationController
             return (string) $user->role->value;
         }
 
-        return (string) ($user->role ?? 'customer');
+        return is_string($user->role) ? $user->role : 'customer';
     }
 
     /**
@@ -119,7 +119,7 @@ class NotificationController
     /**
      * Mark a specific notification as read
      */
-    public function markAsRead($id): JsonResponse
+    public function markAsRead(int|string $id): JsonResponse
     {
         /** @var User|null $user */
         $user = Auth::user();
@@ -172,7 +172,7 @@ class NotificationController
     /**
      * Delete a specific notification
      */
-    public function destroy($id): JsonResponse
+    public function destroy(int|string $id): JsonResponse
     {
         /** @var User|null $user */
         $user = Auth::user();
@@ -235,9 +235,16 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $prefs = $request->all();
+        $validated = $request->validate([
+            'notify_appointments' => 'boolean',
+            'notify_promotions' => 'boolean',
+            'notify_wishlist' => 'boolean',
+            'notify_blog' => 'boolean',
+            'notify_general' => 'boolean',
+        ]);
+
         $user->update([
-            'notification_preferences' => $prefs,
+            'notification_preferences' => $validated,
         ]);
 
         return response()->json([

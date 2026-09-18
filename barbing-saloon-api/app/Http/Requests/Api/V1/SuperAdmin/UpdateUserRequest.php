@@ -12,6 +12,9 @@ class UpdateUserRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         $userId = $this->route('user')?->id ?? $this->route('user');

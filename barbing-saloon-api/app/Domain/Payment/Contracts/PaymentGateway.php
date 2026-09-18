@@ -31,6 +31,8 @@ interface PaymentGateway
      *
      * Validates the signature/authenticity and returns a structured event.
      * Throws on invalid signature.
+     *
+     * @param  array<string, mixed>  $headers
      */
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent;
 }

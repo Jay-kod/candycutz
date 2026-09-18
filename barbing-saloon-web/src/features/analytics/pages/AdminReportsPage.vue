@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 
 // Subcomponents
 import ReportsHeader from '@/features/analytics/components/ReportsHeader.vue';

@@ -3,15 +3,21 @@ require('@rushstack/eslint-patch/modern-module-resolution');
 
 module.exports = {
   root: true,
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+  },
   extends: [
-    'plugin:vue/vue3-essential',
+    'plugin:vue/essential',
     'eslint:recommended',
-    '@vue/eslint-config-prettier'
+    'prettier'
   ],
   parserOptions: {
     ecmaVersion: 'latest',
   },
   rules: {
     'vue/multi-word-component-names': 'off',
+    'vue/no-mutating-props': ['error', { shallowOnly: true }],
   }
 };

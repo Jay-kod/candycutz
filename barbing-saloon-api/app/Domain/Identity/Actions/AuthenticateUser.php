@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,10 @@ class AuthenticateUser
 {
     use HasAuditLog;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user: User, token: string}
+     */
     public function execute(array $data): array
     {
         $identifier = trim((string) ($data['identity'] ?? $data['email'] ?? ''));
@@ -42,8 +47,8 @@ class AuthenticateUser
         }
 
         $tokenName = $data['device_name'] ?? 'web-client';
-        $expiresAt = $user->role === \App\Domain\Shared\Enums\UserRole::CUSTOMER 
-            ? now()->addDays(30) 
+        $expiresAt = $user->role === UserRole::customer
+            ? now()->addDays(30)
             : now()->addHours(12);
 
         $token = $user->createToken($tokenName, ['*'], $expiresAt)->plainTextToken;

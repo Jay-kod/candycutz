@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 trait HasAuditLog
 {
+    /**
+     * @param  array<string, mixed>  $oldValue
+     * @param  array<string, mixed>  $newValue
+     */
     public function logAction(string $action, Model $target, array $oldValue = [], array $newValue = []): void
     {
         AuditLog::create([

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class CreateWalkInAppointment
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(array $data): Appointment
     {
         $service = Service::findOrFail($data['service_id']);

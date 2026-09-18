@@ -62,7 +62,7 @@
 import { ref } from 'vue';
 import { PhotoIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   settings: Object,
   previewAboutUrl: String,
   currentAboutImage: String,

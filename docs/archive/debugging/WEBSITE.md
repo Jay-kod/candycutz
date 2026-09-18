@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -78,3 +82,4 @@ Vite production assets are fingerprinted (`index-XXXXXX.js`), but the browser or
    cd barbing-saloon-web && npm run build
    ```
 3. Hard refresh the browser (`Ctrl + F5` or `Cmd + Shift + R`).
+

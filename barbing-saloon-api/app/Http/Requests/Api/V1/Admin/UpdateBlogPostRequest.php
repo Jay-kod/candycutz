@@ -12,6 +12,9 @@ class UpdateBlogPostRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         $blogPostId = $this->route('blogPost')?->id ?? $this->route('blogPost');

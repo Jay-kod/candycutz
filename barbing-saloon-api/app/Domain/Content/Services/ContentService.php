@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domain\Content\Services;
 
+use App\Models\Barber;
 use App\Models\BlogPost;
 use App\Models\Gallery;
 use App\Models\Testimonial;
 
 class ContentService
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function gallery(?string $category = null): array
     {
         return Gallery::query()
@@ -30,6 +34,9 @@ class ContentService
             ->all();
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function testimonials(): array
     {
         return Testimonial::query()
@@ -43,24 +50,30 @@ class ContentService
                 'client_name' => $testimonial->customer?->name ?? 'Anonymous',
                 'client_avatar' => $testimonial->customer?->avatar ?? null,
                 'rating' => $testimonial->rating,
-                'review' => $testimonial->comment,
+                'review' => $testimonial->review,
                 'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,
                 'created_at' => $testimonial->created_at,
             ])
             ->all();
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function blogPosts(): array
     {
         return BlogPost::query()
             ->with('author')
-            ->where('is_published', true)
+            ->where('status', 'published')
             ->latest()
             ->get()
             ->map(fn (BlogPost $post) => $this->blogData($post))
             ->all();
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function blogPostBySlug(string $slug): ?array
     {
         $post = BlogPost::query()->with('author')->where('slug', $slug)->first();
@@ -68,6 +81,10 @@ class ContentService
         return $post ? $this->blogData($post) : null;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public function contact(array $data): array
     {
         return [
@@ -78,6 +95,10 @@ class ContentService
         ];
     }
 
+    /**
+     * @param  Barber  $barber
+     * @return array<string, mixed>
+     */
     protected function barberData($barber): array
     {
         return [
@@ -92,6 +113,9 @@ class ContentService
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function blogData(BlogPost $post): array
     {
         return [
@@ -99,9 +123,10 @@ class ContentService
             'title' => $post->title,
             'slug' => $post->slug,
             'excerpt' => $post->excerpt,
-            'content' => $post->content,
+            'content' => $post->body,
             'featured_image' => $post->featured_image,
-            'is_published' => $post->is_published,
+            'status' => $post->status,
+            'is_published' => $post->status === 'published',
             'created_at' => $post->created_at,
             'updated_at' => $post->updated_at,
             'author' => $post->author ? [

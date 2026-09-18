@@ -30,7 +30,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import CustomersHeader from '../components/CustomersHeader.vue';
 import CustomersList from '../components/CustomersList.vue';
 import CustomerProfilePanel from '../components/CustomerProfilePanel.vue';

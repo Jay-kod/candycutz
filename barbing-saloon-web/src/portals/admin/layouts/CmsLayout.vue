@@ -38,14 +38,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AdminLayout from './AdminLayout.vue';
 import { 
   HomeIcon, 
   InformationCircleIcon, 
-  SparklesIcon, 
-  PhotoIcon, 
   EnvelopeIcon,
   ShieldCheckIcon,
   DocumentTextIcon

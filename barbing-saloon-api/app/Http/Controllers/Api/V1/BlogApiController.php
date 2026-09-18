@@ -8,7 +8,6 @@ use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Http\Resources\BlogPostResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\BlogPost;
-use App\Models\BlogReaction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +21,7 @@ class BlogApiController
     {
         $query = BlogPost::query()
             ->with(['author', 'reactions'])
-            ->where('is_published', true)
+            ->where('status', 'published')
             ->where('deleted_at', null);
 
         $posts = $query->orderByDesc('created_at')->paginate(10);
@@ -34,7 +33,7 @@ class BlogApiController
     {
         $post = BlogPost::query()
             ->with(['author', 'reactions'])
-            ->where('is_published', true)
+            ->where('status', 'published')
             ->where('deleted_at', null)
             ->where('slug', $slug)
             ->first();
@@ -67,7 +66,7 @@ class BlogApiController
         $validated = $request->validate([
             'title' => 'required|string',
             'excerpt' => 'nullable|string',
-            'content' => 'required|string',
+            'body' => 'required|string',
             'featured_image' => 'nullable|image|max:2048',
         ]);
 
@@ -75,14 +74,14 @@ class BlogApiController
             'author_id' => $user->id,
             'title' => $validated['title'],
             'excerpt' => $validated['excerpt'] ?? null,
-            'content' => $validated['content'],
+            'body' => $validated['body'],
             'slug' => Str::slug($validated['title']).'-'.time(),
-            'is_published' => true,
+            'status' => 'published',
         ]);
 
         if ($request->hasFile('featured_image')) {
-            $path = (new SecureImageUpload())->execute($request->file('featured_image'), 'uploads/blog');
-            $post->update(['featured_image' => '/storage/' . $path]);
+            $path = (new SecureImageUpload)->execute($request->file('featured_image'), 'uploads/blog');
+            $post->update(['featured_image' => '/storage/'.$path]);
         }
 
         return ApiResponse::success(new BlogPostResource($post), 'Blog post created', 201);
@@ -96,9 +95,9 @@ class BlogApiController
         $validated = $request->validate([
             'title' => 'sometimes|string',
             'excerpt' => 'nullable|string',
-            'content' => 'sometimes|string',
+            'body' => 'sometimes|string',
             'featured_image' => 'nullable|image|max:2048',
-            'is_published' => 'nullable|boolean',
+            'status' => 'nullable|string',
         ]);
 
         if (isset($validated['title'])) {
@@ -108,16 +107,16 @@ class BlogApiController
         if (isset($validated['excerpt'])) {
             $post->excerpt = $validated['excerpt'];
         }
-        if (isset($validated['content'])) {
-            $post->content = $validated['content'];
+        if (isset($validated['body'])) {
+            $post->body = $validated['body'];
         }
-        if (isset($validated['is_published'])) {
-            $post->is_published = filter_var($validated['is_published'], FILTER_VALIDATE_BOOLEAN);
+        if (isset($validated['status'])) {
+            $post->status = $validated['status'];
         }
 
         if ($request->hasFile('featured_image')) {
-            $path = (new SecureImageUpload())->execute($request->file('featured_image'), 'uploads/blog');
-            $post->featured_image = '/storage/' . $path;
+            $path = (new SecureImageUpload)->execute($request->file('featured_image'), 'uploads/blog');
+            $post->featured_image = '/storage/'.$path;
         }
 
         $post->save();

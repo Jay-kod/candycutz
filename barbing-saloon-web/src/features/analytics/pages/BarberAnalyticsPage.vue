@@ -160,7 +160,7 @@
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { 
   BanknotesIcon, 
   UsersIcon, 

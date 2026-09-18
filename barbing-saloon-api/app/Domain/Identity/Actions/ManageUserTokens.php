@@ -13,7 +13,10 @@ class ManageUserTokens
 
     public function logout(User $user): void
     {
-        $user->currentAccessToken()?->delete();
+        $token = $user->currentAccessToken();
+        if ($token) {
+            $token->delete();
+        }
         $this->logAction('auth.logout', $user, [], ['email' => $user->email]);
     }
 

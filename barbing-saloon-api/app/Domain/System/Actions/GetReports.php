@@ -9,6 +9,9 @@ use App\Models\ServiceCategory;
 
 class GetReports
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
         return [

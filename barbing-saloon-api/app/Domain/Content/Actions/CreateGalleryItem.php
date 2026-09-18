@@ -10,6 +10,9 @@ class CreateGalleryItem
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(array $data, UploadedFile $image): Gallery
     {
         $path = $this->uploadFile($image, 'gallery');

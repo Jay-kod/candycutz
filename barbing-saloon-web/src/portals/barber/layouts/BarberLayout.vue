@@ -15,7 +15,6 @@ import {
   HomeIcon,
   CalendarIcon,
   ClipboardDocumentCheckIcon,
-  UserIcon,
   ScissorsIcon,
   PhotoIcon,
   PencilSquareIcon,

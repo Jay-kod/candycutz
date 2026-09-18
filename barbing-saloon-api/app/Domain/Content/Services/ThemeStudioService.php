@@ -16,6 +16,8 @@ class ThemeStudioService
 
     /**
      * Get published theme tokens (cached for 24 hours or until version publish).
+     *
+     * @return array<string, mixed>
      */
     public function getPublishedTheme(): array
     {
@@ -60,6 +62,8 @@ class ThemeStudioService
 
     /**
      * Publish a new theme version.
+     *
+     * @param  array<string, mixed>  $tokens
      */
     public function publishThemeVersion(ThemeSetting $setting, array $tokens, User $publisher, ?string $notes = null): ThemeVersion
     {

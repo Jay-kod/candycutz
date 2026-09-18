@@ -7,6 +7,9 @@ use App\Models\Appointment;
 
 class GetVerificationStats
 {
+    /**
+     * @return array<string, int>
+     */
     public function execute(): array
     {
         $total = Appointment::query()->count();

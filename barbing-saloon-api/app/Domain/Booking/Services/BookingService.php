@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\Services;
 
+use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Jobs\SendBookingCancellation;
@@ -295,7 +296,7 @@ class BookingService
      */
     public function transitionStatus(Appointment $appointment, string $newStatus, User $actor, ?string $reason = null): Appointment
     {
-        $previousStatus = $appointment->status->value ?? (string) $appointment->status;
+        $previousStatus = $appointment->status->value;
 
         $appointment->update([
             'status' => $newStatus,

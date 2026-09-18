@@ -188,7 +188,7 @@
 
 <script setup>
 import { onMounted, computed } from 'vue';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { 
   BanknotesIcon, 
   CalculatorIcon, 

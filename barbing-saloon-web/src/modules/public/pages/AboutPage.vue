@@ -39,7 +39,7 @@
         
         <!-- Single Featured Barber Real -->
         <div v-else class="mt-16 mx-auto max-w-5xl">
-          <article v-for="(barber, index) in barbers.slice(0, 1)" :key="barber.id" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col md:flex-row shadow-xl hover:shadow-2xl hover:shadow-gold/5 transition-all duration-500">
+          <article v-for="barber in barbers.slice(0, 1)" :key="barber.id" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col md:flex-row shadow-xl hover:shadow-2xl hover:shadow-gold/5 transition-all duration-500">
             <!-- Barber Image -->
             <div class="md:w-1/2 relative overflow-hidden bg-theme-bg aspect-[4/5] md:aspect-auto">
               <img v-if="barber.avatar" :src="getImageUrl(barber.avatar)" :alt="barber.name" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" />

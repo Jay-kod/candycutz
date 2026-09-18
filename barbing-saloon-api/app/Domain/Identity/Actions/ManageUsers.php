@@ -9,16 +9,25 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ManageUsers
 {
+    /**
+     * @return LengthAwarePaginator<User>
+     */
     public function listUsers(): LengthAwarePaginator
     {
         return User::latest()->paginate(15);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function storeUser(array $data): User
     {
         return User::create($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function updateUser(User $user, array $data): User
     {
         $user->update($data);

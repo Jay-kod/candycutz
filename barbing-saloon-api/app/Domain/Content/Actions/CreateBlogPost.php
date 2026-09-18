@@ -12,6 +12,9 @@ class CreateBlogPost
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(User $author, array $data): BlogPost
     {
         $imagePath = isset($data['featured_image']) && $data['featured_image'] instanceof UploadedFile

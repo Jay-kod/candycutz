@@ -6,6 +6,9 @@ use App\Models\Barber;
 
 class UpdateBarberStatus
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(int $id, string $status): array
     {
         $barber = Barber::with('user')->findOrFail($id);

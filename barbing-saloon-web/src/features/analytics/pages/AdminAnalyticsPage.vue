@@ -158,7 +158,7 @@
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { 
   BanknotesIcon, 
   UsersIcon, 

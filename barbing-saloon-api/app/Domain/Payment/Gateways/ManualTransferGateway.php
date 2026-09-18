@@ -61,6 +61,9 @@ class ManualTransferGateway implements PaymentGateway
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $headers
+     */
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent
     {
         // Manual transfers don't receive webhooks. This should never be called.

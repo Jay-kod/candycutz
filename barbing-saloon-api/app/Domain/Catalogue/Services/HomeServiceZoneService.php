@@ -12,6 +12,8 @@ class HomeServiceZoneService
 {
     /**
      * Compute dynamic travel fee between a customer coordinate and branch hub.
+     *
+     * @return array<string, mixed>
      */
     public function calculateTravelFee(
         ServiceZone $zone,

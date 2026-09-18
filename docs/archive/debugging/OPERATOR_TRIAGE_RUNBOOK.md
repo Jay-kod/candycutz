@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -131,3 +135,4 @@ No software development or DevOps knowledge is assumed. Follow the numbered deci
 | **P2 — High** | Stripe/Paystack payment gateway errors affecting all clients | Lead Administrator | Urgent WhatsApp / Call |
 | **P3 — Normal** | Individual customer booking dispute, refund approval | Salon Front-Desk Supervisor | Admin Portal / Internal Slack |
 | **P4 — Low** | General feedback, catalog price adjustment requests | Content / Marketing Lead | Email: `concierge@candycutz.com` |
+

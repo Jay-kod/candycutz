@@ -1,5 +1,5 @@
 <script setup>
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue'
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue'
 import NotificationsView from '../../../core/components/NotificationsView.vue'
 </script>
 

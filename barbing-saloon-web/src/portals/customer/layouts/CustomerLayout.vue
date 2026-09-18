@@ -14,7 +14,6 @@ import DashboardLayout from '../../../core/layouts/DashboardLayout.vue';
 import {
   HomeIcon,
   CalendarDaysIcon,
-  UserIcon,
   StarIcon,
   HeartIcon,
   ScissorsIcon,

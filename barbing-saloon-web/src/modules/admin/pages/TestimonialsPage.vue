@@ -95,7 +95,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { useToast } from '../../../core/composables/useToast';

@@ -65,7 +65,7 @@ class TestimonialApiController
     {
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
-        
+
         return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial approved');
     }
 
@@ -73,7 +73,7 @@ class TestimonialApiController
     {
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
-        
+
         return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial feature toggled');
     }
 

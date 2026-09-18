@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -49,3 +53,4 @@ The repository rule is stronger than the cleanup shortcut: behavior is captured 
 XAMPP's `mysql.exe` and `mysqldump.exe` exist, but MySQL is not currently reachable at `127.0.0.1:3306`. Production schema capture and fresh-schema comparison are therefore blocked until a database source is made available.
 
 No `production-schema.sql` or `DRIFT.md` is created with guessed content.
+

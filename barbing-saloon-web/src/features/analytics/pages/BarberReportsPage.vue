@@ -49,7 +49,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import ReportsHeader from '../components/ReportsHeader.vue';
 import BarberReportsKPICards from '../components/BarberReportsKPICards.vue';
 import BarberReportsTopServices from '../components/BarberReportsTopServices.vue';

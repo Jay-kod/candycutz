@@ -12,59 +12,60 @@ use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 
 class SuperAdminApiController
 {
-    public function dashboard(DashboardService $dashboardService)
+    public function dashboard(DashboardService $dashboardService): JsonResponse
     {
         return ApiResponse::success($dashboardService->dashboard(), 'Dashboard loaded');
     }
 
-    public function users(ManageUsers $manageUsers)
+    public function users(ManageUsers $manageUsers): JsonResponse
     {
         return ApiResponse::paginated($manageUsers->listUsers(), 'Users loaded');
     }
 
-    public function storeUser(StoreUserRequest $request, ManageUsers $manageUsers)
+    public function storeUser(StoreUserRequest $request, ManageUsers $manageUsers): JsonResponse
     {
         return ApiResponse::success(new UserResource($manageUsers->storeUser($request->validated())), 'User created', 201);
     }
 
-    public function updateUser(UpdateUserRequest $request, User $user, ManageUsers $manageUsers)
+    public function updateUser(UpdateUserRequest $request, User $user, ManageUsers $manageUsers): JsonResponse
     {
         return ApiResponse::success(new UserResource($manageUsers->updateUser($user, $request->validated())), 'User updated');
     }
 
-    public function activateUser(User $user, ManageUsers $manageUsers)
+    public function activateUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
         return ApiResponse::success(new UserResource($manageUsers->activateUser($user)), 'User activated');
     }
 
-    public function deactivateUser(User $user, ManageUsers $manageUsers)
+    public function deactivateUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
         return ApiResponse::success(new UserResource($manageUsers->deactivateUser($user)), 'User deactivated');
     }
 
-    public function deleteUser(User $user, ManageUsers $manageUsers)
+    public function deleteUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
         $manageUsers->deleteUser($user);
 
         return ApiResponse::success(null, 'User deleted');
     }
 
-    public function settings(SettingsService $settingsService)
+    public function settings(SettingsService $settingsService): JsonResponse
     {
         return ApiResponse::success($settingsService->settings(), 'Settings loaded');
     }
 
-    public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService)
+    public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService): JsonResponse
     {
         $action->execute($request->validated());
 
         return ApiResponse::success($settingsService->settings(), 'Settings updated');
     }
 
-    public function auditLogs(DashboardService $dashboardService)
+    public function auditLogs(DashboardService $dashboardService): JsonResponse
     {
         return ApiResponse::paginated($dashboardService->auditLogs(), 'Audit logs loaded');
     }

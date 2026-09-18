@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -64,3 +68,4 @@ For specific domain runbooks, consult:
 - **Authentication & Sessions**: [`docs/debugging/AUTHENTICATION.md`](file:///c:/xampp/htdocs/1/candycutz/docs/debugging/AUTHENTICATION.md)
 - **Payments & Stripe**: [`docs/debugging/PAYMENTS.md`](file:///c:/xampp/htdocs/1/candycutz/docs/debugging/PAYMENTS.md)
 - **Transactional Notifications**: [`docs/debugging/NOTIFICATIONS.md`](file:///c:/xampp/htdocs/1/candycutz/docs/debugging/NOTIFICATIONS.md)
+

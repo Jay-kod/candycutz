@@ -56,7 +56,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import GalleryGrid from '../components/GalleryGrid.vue';
 import GalleryUploadModal from '../components/GalleryUploadModal.vue';
 import { useGallery } from '../composables/useGallery';

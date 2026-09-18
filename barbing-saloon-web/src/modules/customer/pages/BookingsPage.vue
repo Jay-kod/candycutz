@@ -154,7 +154,7 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import ReceiptUploader from '../../../core/components/ReceiptUploader.vue';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
@@ -238,7 +238,7 @@ async function startPayment(booking) {
   }
 }
 
-async function onReceiptUploaded(data) {
+async function onReceiptUploaded() {
   toast.success('Receipt uploaded successfully. Awaiting verification.');
   await loadBookings();
 }

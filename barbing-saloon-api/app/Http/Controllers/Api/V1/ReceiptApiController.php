@@ -14,7 +14,7 @@ class ReceiptApiController
     {
         $appointment = Appointment::with(['payment', 'barber'])->findOrFail($appointmentId);
         $user = $request->user();
-        $role = $user->role?->value ?? (string) $user->role;
+        $role = $user->role instanceof \BackedEnum ? $user->role->value : $user->role;
         $isStaff = in_array($role, ['admin', 'super_admin'], true);
         $isCustomer = $appointment->customer_id === $user->id;
         $isAssignedBarber = $appointment->barber?->user_id === $user->id;
@@ -24,7 +24,7 @@ class ReceiptApiController
         }
 
         $receiptPath = (string) ($appointment->payment?->receipt_image ?: $appointment->payment?->receipt_url);
-        $filePath = storage_path('app/' . $receiptPath);
+        $filePath = storage_path('app/'.$receiptPath);
 
         if ($receiptPath === '' || ! is_file($filePath)) {
             abort(404);

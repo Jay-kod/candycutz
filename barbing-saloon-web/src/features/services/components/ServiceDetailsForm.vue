@@ -188,7 +188,7 @@ import {
   SparklesIcon, PhotoIcon, TrashIcon, CurrencyDollarIcon, ClockIcon 
 } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   form: { type: Object, required: true },
   serviceCategories: { type: Array, required: true },
   images: { type: Object, required: true }

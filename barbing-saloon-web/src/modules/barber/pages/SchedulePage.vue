@@ -47,7 +47,7 @@
 
             <div v-else class="space-y-2.5">
               <div
-                v-for="(hour, index) in workingHours"
+                v-for="hour in workingHours"
                 :key="hour.day_of_week"
                 class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-5 transition-all duration-300"
                 :class="hour.is_closed 
@@ -176,15 +176,14 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { 
   ClockIcon, 
   CalendarDaysIcon, 
   PencilSquareIcon, 
-  XMarkIcon,
-  CheckCircleIcon,
+  CheckCircleIcon, 
   ArrowPathIcon
 } from '@heroicons/vue/24/outline';
 
@@ -271,10 +270,6 @@ async function loadData() {
   }
 }
 
-function resetToOriginal() {
-  workingHours.value = JSON.parse(JSON.stringify(originalHours.value));
-  toast.info('Changes reverted');
-}
 
 async function saveSchedule() {
   // Validate working hours

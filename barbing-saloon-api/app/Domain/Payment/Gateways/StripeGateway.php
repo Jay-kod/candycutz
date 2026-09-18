@@ -13,6 +13,7 @@ use RuntimeException;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
+use Stripe\StripeObject;
 use Stripe\Webhook;
 
 class StripeGateway implements PaymentGateway
@@ -85,6 +86,9 @@ class StripeGateway implements PaymentGateway
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $headers
+     */
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent
     {
         $signatureHeader = $headers['stripe-signature'] ?? null;
@@ -100,7 +104,10 @@ class StripeGateway implements PaymentGateway
             throw new RuntimeException('Invalid Stripe webhook signature.', 0, $e);
         }
 
-        $session = $event->data->object;
+        /** @var StripeObject $data */
+        $data = $event->data;
+        /** @var Session $session */
+        $session = $data->object;
         $reference = $session->client_reference_id ?? '';
         $amount = $session->amount_total ?? 0;
         $eventId = $event->id;

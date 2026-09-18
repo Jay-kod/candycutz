@@ -2,13 +2,40 @@
 
 namespace App\Domain\Booking\Actions;
 
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class GetAppointments
 {
-    public function execute(): LengthAwarePaginator
+    /**
+     * @return LengthAwarePaginator<Appointment>
+     */
+    public function execute(User $user, ?string $status = null, int $perPage = 15): LengthAwarePaginator
     {
-        return Appointment::query()->with(['service', 'barber.user', 'customer'])->latest('appointment_date')->latest('appointment_time')->paginate(15);
+        $role = $user->role?->value ?? $user->role;
+        $query = Appointment::query()->with(['service.category', 'barber.user', 'serviceZone', 'customer']);
+
+        if ($role === 'barber' && $user->barber) {
+            $query->where('barber_id', $user->barber->id);
+        } elseif ($role !== 'admin' && $role !== 'super_admin') {
+            $query->where('customer_id', $user->id);
+        }
+
+        if ($status && $status !== 'all') {
+            if ($status === 'upcoming') {
+                $query->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
+                    ->whereDate('appointment_date', '>=', now()->toDateString());
+            } elseif ($status === 'completed') {
+                $query->where('status', AppointmentStatus::completed->value);
+            } elseif ($status === 'cancelled') {
+                $query->where('status', AppointmentStatus::cancelled->value);
+            }
+        }
+
+        return $query->orderByDesc('appointment_date')
+            ->orderByDesc('appointment_time')
+            ->paginate($perPage);
     }
 }

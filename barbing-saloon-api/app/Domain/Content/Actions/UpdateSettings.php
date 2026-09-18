@@ -8,6 +8,9 @@ use App\Models\Setting;
 
 class UpdateSettings
 {
+    /**
+     * @param  array{settings: array<int, array{key: string, value: mixed, group: string}>}  $data
+     */
     public function execute(array $data): void
     {
         foreach ($data['settings'] as $setting) {

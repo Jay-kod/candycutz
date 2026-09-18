@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -154,3 +158,4 @@ The existing web application utilizes a luxury, grooming-focused color palette:
 ## 7. Conclusion & Next Action
 
 The existing system provides a rock-solid, visually stunning web foundation that will be preserved without regression. The immediate path forward is executing the **Project Brain** creation, deploying normalized database migrations, transitioning the backend to native Laravel 11 HTTP dispatch, and scaffolding the Expo mobile clients.
+

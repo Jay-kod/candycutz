@@ -17,6 +17,9 @@ class GetDashboardStats
 {
     public function __construct(protected GetReports $getReports) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
         $today = today();
@@ -143,9 +146,9 @@ class GetDashboardStats
                 return [
                     'id' => $b->id,
                     'name' => $b->user?->name ?? 'Barber '.$b->id,
-                    'total_appointments' => $b->total_appointments,
+                    'total_appointments' => (int) $b->getAttribute('total_appointments'),
                     'completed_appointments' => $completed,
-                    'rating' => (float) ($b->rating ?? 5.0),
+                    'rating' => (float) $b->getAttribute('rating') ?: 5.0,
                 ];
             })
             ->all();

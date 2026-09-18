@@ -22,7 +22,7 @@ const isVisible = ref(false);
 const route = useRoute();
 let mainContainer = null;
 
-const checkScroll = (e) => {
+const checkScroll = () => {
   // Check either the specific container scroll or the window scroll
   const scrollY = mainContainer ? mainContainer.scrollTop : window.scrollY;
   isVisible.value = scrollY > 300;

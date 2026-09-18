@@ -64,7 +64,7 @@
       <!-- Services Grid -->
       <div v-else-if="filteredServices.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <article 
-          v-for="(service, index) in filteredServices" 
+          v-for="service in filteredServices" 
           :key="service.id" 
           class="group relative flex flex-col overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-gold/5 hover:border-gold/20"
         >
@@ -162,9 +162,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';

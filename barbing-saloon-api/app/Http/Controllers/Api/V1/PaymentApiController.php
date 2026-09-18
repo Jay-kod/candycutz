@@ -41,10 +41,14 @@ class PaymentApiController
         $appointment = Appointment::with('barber.user')->where('id', $appointmentId)->where('customer_id', $user->id)->firstOrFail();
         $barber = $appointment->barber;
 
+        /** @var array<int|string, array<string, string>>|null $bankAccounts */
+        $bankAccounts = config('payments.gateways.manual.bank_accounts');
+        $firstAccount = is_array($bankAccounts) ? collect($bankAccounts)->first() : null;
+
         return ApiResponse::success([
-            'bank_name' => collect(config('payments.gateways.manual.bank_accounts'))->first()['bank_name'] ?? ($barber?->bank_name ?: 'Unknown Bank'),
-            'account_name' => collect(config('payments.gateways.manual.bank_accounts'))->first()['account_name'] ?? ($barber?->account_name ?: 'Candy Cutz Saloon'),
-            'account_number' => collect(config('payments.gateways.manual.bank_accounts'))->first()['account_number'] ?? ($barber?->account_number ?: '0000000000'),
+            'bank_name' => $firstAccount['bank_name'] ?? ($barber?->bank_name ?: 'Unknown Bank'),
+            'account_name' => $firstAccount['account_name'] ?? ($barber?->account_name ?: 'Candy Cutz Saloon'),
+            'account_number' => $firstAccount['account_number'] ?? ($barber?->account_number ?: '0000000000'),
         ], 'Payment details loaded');
     }
 

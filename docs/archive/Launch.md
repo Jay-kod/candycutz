@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -107,3 +111,4 @@ The single unified mobile application (`candycutz-mobile-app`) utilizes a standa
 - **Production Store & VPS Release Handbook**: [`docs/deployment/PRODUCTION_RELEASE_RUNBOOK.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/PRODUCTION_RELEASE_RUNBOOK.md)
 - **Single-VPS Docker Infrastructure**: [`docs/deployment/DOCKER.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/DOCKER.md)
 - **Backup & Restore Operations**: [`docs/deployment/BACKUP_AND_RESTORE.md`](file:///c:/xampp/htdocs/1/candycutz/docs/deployment/BACKUP_AND_RESTORE.md)
+

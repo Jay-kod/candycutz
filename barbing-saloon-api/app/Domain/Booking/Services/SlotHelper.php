@@ -12,6 +12,9 @@ use Carbon\CarbonPeriod;
 
 class SlotHelper
 {
+    /**
+     * @return array<int, string>
+     */
     public function generate(Carbon $date, Barber $barber, Service $service): array
     {
         if ($this->isHoliday($date)) {

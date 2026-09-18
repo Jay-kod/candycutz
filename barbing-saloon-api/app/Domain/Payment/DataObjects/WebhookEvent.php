@@ -6,6 +6,9 @@ namespace App\Domain\Payment\DataObjects;
 
 class WebhookEvent
 {
+    /**
+     * @param  array<string, mixed>  $raw_payload
+     */
     public function __construct(
         public readonly string $event_type,
         public readonly string $reference,

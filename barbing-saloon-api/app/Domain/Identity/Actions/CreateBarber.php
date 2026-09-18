@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Hash;
 
 class CreateBarber
 {
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public function execute(array $data): array
     {
         $password = ! empty($data['password']) ? $data['password'] : 'BarberPass123!';

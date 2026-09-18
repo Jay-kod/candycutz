@@ -272,12 +272,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import CustomerLayout from '@/portals/Customer/layouts/Customerlayout.vue';
+import { useRoute } from 'vue-router';
+import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 
 const route = useRoute();
-const router = useRouter();
 
 const serviceId = route.params.id;
 const service = ref(null);

@@ -2,13 +2,15 @@
 
 namespace App\Domain\Identity\Actions;
 
-use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class GetAuditLogs
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(): array
     {
         if (Schema::hasTable('audit_logs')) {
@@ -27,7 +29,7 @@ class GetAuditLogs
                 ->get();
 
             if ($logs->isNotEmpty()) {
-                return $logs->all();
+                return $logs->map(fn ($log) => (array) $log)->all();
             }
         }
 
@@ -36,7 +38,7 @@ class GetAuditLogs
         return $recentAppts->map(fn ($a) => [
             'id' => $a->id,
             'user_name' => $a->customer?->name ?? 'System',
-            'action' => 'booking_'.($a->status instanceof AppointmentStatus ? $a->status->value : $a->status),
+            'action' => 'booking_'.$a->status->value,
             'entity_type' => 'appointment',
             'ip_address' => '127.0.0.1',
             'created_at' => $a->created_at?->toIso8601String() ?? now()->toIso8601String(),

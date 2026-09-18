@@ -10,6 +10,9 @@ class UpdateService
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(Service $service, array $data): Service
     {
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {

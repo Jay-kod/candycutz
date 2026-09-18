@@ -116,6 +116,9 @@ class PaystackGateway implements PaymentGateway
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $headers
+     */
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent
     {
         $signatureHeader = $headers['x-paystack-signature'] ?? null;

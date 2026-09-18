@@ -179,9 +179,9 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import BarberLayout from '@/portals/Barber/layouts/Barberlayout.vue';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { barberApi } from '@/shared/api/old_barberApi';
-import { UserIcon, SparklesIcon, CameraIcon, XMarkIcon, ArrowPathIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { UserIcon, SparklesIcon, CameraIcon, ArrowPathIcon, CheckIcon } from '@heroicons/vue/24/outline';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';
 
@@ -228,9 +228,6 @@ function addSpecialty() {
   newSpecialty.value = '';
 }
 
-function removeSpecialty(index) {
-  form.specialties.splice(index, 1);
-}
 
 function handleImageUpload(e) {
   const file = e.target.files[0];

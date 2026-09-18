@@ -13,6 +13,9 @@ class ChangePassword
 {
     use HasAuditLog;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(User $user, array $data): bool
     {
         if (! Hash::check($data['current_password'], $user->password)) {

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Hash;
 
 class UpdateBarber
 {
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public function execute(int $id, array $data): array
     {
         $barber = Barber::with('user')->findOrFail($id);

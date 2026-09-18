@@ -69,7 +69,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue';
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/vue/24/outline';
 import { useBarberForm } from '../composables/useBarberForm';
 import BarberProfilePreview from '../components/BarberProfilePreview.vue';

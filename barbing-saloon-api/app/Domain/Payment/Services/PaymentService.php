@@ -23,6 +23,8 @@ class PaymentService
 
     /**
      * Initialize payment intent for an appointment.
+     *
+     * @return array<string, mixed>
      */
     public function initializePayment(Appointment $appointment, string $paymentMethod = 'paystack'): array
     {
@@ -53,6 +55,8 @@ class PaymentService
 
     /**
      * Confirm verified payment webhook with strict idempotency protection.
+     *
+     * @param  array<string, mixed>  $rawPayload
      */
     public function confirmPaymentFromWebhook(string $gatewayReference, string $eventId, array $rawPayload): Payment
     {
@@ -164,6 +168,8 @@ class PaymentService
 
     /**
      * Record failed payment attempt from webhook.
+     *
+     * @param  array<string, mixed>  $rawPayload
      */
     public function recordFailedPaymentFromWebhook(string $gatewayReference, string $eventId, array $rawPayload, ?string $errorMessage = null): ?Payment
     {

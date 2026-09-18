@@ -6,6 +6,9 @@ namespace App\Domain\Payment\DataObjects;
 
 class GatewayCheckout
 {
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     public function __construct(
         public readonly string $reference,
         public readonly string $gateway,
@@ -16,6 +19,9 @@ class GatewayCheckout
         public readonly array $meta = [],
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

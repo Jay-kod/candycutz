@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domain\Catalogue\Services;
 
+use App\Domain\Booking\Services\SlotHelper;
 use App\Models\Barber;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\WorkingHour;
-use App\Services\SlotHelper;
 use Carbon\Carbon;
 
 class CatalogueService
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function services(): array
     {
         return Service::query()
@@ -24,6 +27,9 @@ class CatalogueService
             ->all();
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function serviceBySlug(string $slug): ?array
     {
         $service = Service::query()->with('category')->find($slug);
@@ -31,22 +37,27 @@ class CatalogueService
         return $service ? $this->serviceData($service) : null;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function serviceCategories(): array
     {
         return ServiceCategory::query()
             ->withCount(['services as services_count' => fn ($query) => $query->where('is_active', true)])
             ->orderBy('name')
             ->get()
-            ->map(fn (ServiceCategory $category) => [
+            ->map(/** @return array<string, mixed> */ fn (ServiceCategory $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
-                'description' => $category->description,
                 'icon' => $category->icon,
                 'services_count' => $category->services_count,
             ])
             ->all();
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function barbers(): array
     {
         return Barber::query()
@@ -58,6 +69,9 @@ class CatalogueService
             ->all();
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function barberById(int $id): ?array
     {
         $barber = Barber::query()->with(['user'])->find($id);
@@ -65,6 +79,9 @@ class CatalogueService
         return $barber ? $this->barberData($barber) : null;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function workingHours(): array
     {
         return WorkingHour::query()
@@ -84,6 +101,9 @@ class CatalogueService
             ->all();
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function availableSlots(Carbon $date, int $barberId, int $serviceId): array
     {
         $barber = Barber::query()->find($barberId);
@@ -98,6 +118,9 @@ class CatalogueService
         return $slotHelper->generate($date, $barber, $service);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function barberData(Barber $barber): array
     {
         return [
@@ -112,6 +135,9 @@ class CatalogueService
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function serviceData(Service $service): array
     {
         return [

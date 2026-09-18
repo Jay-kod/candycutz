@@ -26,7 +26,7 @@ class BrevoNotificationAdapter
             'customer_username' => $customer->username ? "@{$customer->username}" : '',
             'barber_name' => $barber?->real_name ?: $barber?->name ?: 'Master Stylist',
             'appointment_date' => $appointment->appointment_date,
-            'start_time' => $appointment->start_time,
+            'start_time' => $appointment->appointment_time,
             'appointment_type' => ($appointment->appointment_type === 'home_service') ? 'Home Service' : 'In-Shop',
             'grand_total' => number_format((float) $appointment->grand_total, 2),
             'shop_address' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',

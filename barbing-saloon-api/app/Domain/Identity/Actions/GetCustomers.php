@@ -8,6 +8,9 @@ use App\Models\User;
 
 class GetCustomers
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(): array
     {
         return User::query()
@@ -30,7 +33,7 @@ class GetCustomers
                     'phone' => $u->phone ?? 'N/A',
                     'avatar' => $u->avatar,
                     'created_at' => $u->created_at?->toIso8601String(),
-                    'total_bookings' => (int) $u->total_bookings,
+                    'total_bookings' => (int) $u->getAttribute('total_bookings'),
                     'total_spent' => $totalSpent,
                     'last_booking_date' => $lastBooking,
                 ];

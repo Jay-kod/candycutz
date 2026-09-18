@@ -6,7 +6,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Identity\Actions\CreateBarber;
 use App\Domain\Identity\Actions\DeleteBarber;
+use App\Domain\Identity\Actions\GetBarberDashboard;
+use App\Domain\Identity\Actions\GetBarberSchedule;
+use App\Domain\Identity\Actions\StoreBlockedPeriod;
 use App\Domain\Identity\Actions\UpdateBarber;
+use App\Domain\Identity\Actions\UpdateBarberAccount;
+use App\Domain\Identity\Actions\UpdateBarberSchedule;
 use App\Domain\Identity\Actions\UpdateBarberStatus;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Resources\BarberResource;
@@ -14,7 +19,6 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
-use App\Models\WorkingHour;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,7 +39,7 @@ class BarberApiController
         return ApiResponse::success(BarberResource::collection($barbers), 'Barbers retrieved successfully');
     }
 
-    public function dashboard(Request $request): JsonResponse
+    public function dashboard(Request $request, GetBarberDashboard $action): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -43,30 +47,9 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
-        $today = today()->toDateString();
-        $todayAppointments = Appointment::with(['service', 'customer'])
-            ->where('barber_id', $barber->id)
-            ->where('appointment_date', $today)
-            ->orderBy('appointment_time')
-            ->get();
+        $data = $action->execute($barber);
 
-        $upcomingCount = Appointment::where('barber_id', $barber->id)
-            ->where('appointment_date', '>=', $today)
-            ->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
-            ->count();
-
-        $completedToday = Appointment::where('barber_id', $barber->id)
-            ->where('appointment_date', $today)
-            ->where('status', AppointmentStatus::completed->value)
-            ->count();
-
-        return ApiResponse::success([
-            'today_appointments' => $todayAppointments,
-            'stats' => [
-                'upcoming' => $upcomingCount,
-                'completed_today' => $completedToday,
-            ],
-        ], 'Barber dashboard loaded');
+        return ApiResponse::success($data, 'Barber dashboard loaded');
     }
 
     public function analytics(Request $request): JsonResponse
@@ -98,7 +81,7 @@ class BarberApiController
         ], 'Account details loaded');
     }
 
-    public function updateAccount(Request $request): JsonResponse
+    public function updateAccount(Request $request, UpdateBarberAccount $action): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -115,15 +98,7 @@ class BarberApiController
             'instagram_url' => 'sometimes|string|nullable',
         ]);
 
-        $userData = array_intersect_key($data, array_flip(['name', 'phone']));
-        if (! empty($userData)) {
-            $user->update($userData);
-        }
-
-        $barberData = array_intersect_key($data, array_flip(['bio', 'specialties', 'instagram_url']));
-        if (! empty($barberData) && $barber) {
-            $barber->update($barberData);
-        }
+        $action->execute($user, $data);
 
         return ApiResponse::success([
             'user' => $user->refresh(),
@@ -171,7 +146,7 @@ class BarberApiController
         return ApiResponse::success(new BarberResource($barber->refresh()), 'Chair status updated successfully');
     }
 
-    public function schedule(Request $request): JsonResponse
+    public function schedule(Request $request, GetBarberSchedule $action): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -180,48 +155,12 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
-        $hours = WorkingHour::where('barber_id', $barber->id)
-            ->orderBy('day_of_week')
-            ->get();
-
-        // Ensure all 7 days (0 to 6) are represented
-        $schedule = [];
-        $existing = $hours->keyBy('day_of_week');
-        $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-        for ($d = 0; $d < 7; $d++) {
-            if ($existing->has($d)) {
-                $row = $existing->get($d);
-                $schedule[] = [
-                    'id' => $row->id,
-                    'day_of_week' => $d,
-                    'day_name' => $dayNames[$d],
-                    'open_time' => substr((string) $row->open_time, 0, 5),
-                    'close_time' => substr((string) $row->close_time, 0, 5),
-                    'start_time' => substr((string) $row->open_time, 0, 5),
-                    'end_time' => substr((string) $row->close_time, 0, 5),
-                    'is_closed' => (bool) $row->is_closed,
-                    'is_off' => (bool) $row->is_closed,
-                ];
-            } else {
-                $schedule[] = [
-                    'id' => null,
-                    'day_of_week' => $d,
-                    'day_name' => $dayNames[$d],
-                    'open_time' => '08:00',
-                    'close_time' => '20:00',
-                    'start_time' => '08:00',
-                    'end_time' => '20:00',
-                    'is_closed' => $d === 0,
-                    'is_off' => $d === 0,
-                ];
-            }
-        }
+        $schedule = $action->execute($barber);
 
         return ApiResponse::success($schedule, 'Barber schedule retrieved');
     }
 
-    public function updateSchedule(Request $request): JsonResponse
+    public function updateSchedule(Request $request, UpdateBarberSchedule $updateAction, GetBarberSchedule $getAction): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -234,32 +173,10 @@ class BarberApiController
 
         $hours = $request->input('schedule', $request->input('working_hours', []));
         if (is_array($hours)) {
-            foreach ($hours as $item) {
-                if (! isset($item['day_of_week'])) {
-                    continue;
-                }
-
-                $open = $item['open_time'] ?? ($item['start_time'] ?? '08:00');
-                $close = $item['close_time'] ?? ($item['end_time'] ?? '20:00');
-                $isClosed = isset($item['is_closed'])
-                    ? (bool) $item['is_closed']
-                    : (isset($item['is_off']) ? (bool) $item['is_off'] : false);
-
-                WorkingHour::updateOrCreate(
-                    [
-                        'barber_id' => $barber->id,
-                        'day_of_week' => (int) $item['day_of_week'],
-                    ],
-                    [
-                        'open_time' => $open,
-                        'close_time' => $close,
-                        'is_closed' => $isClosed,
-                    ]
-                );
-            }
+            $updateAction->execute($barber, $hours);
         }
 
-        return $this->schedule($request);
+        return ApiResponse::success($getAction->execute($barber), 'Barber schedule updated');
     }
 
     public function blockedPeriods(Request $request): JsonResponse
@@ -279,7 +196,7 @@ class BarberApiController
         return ApiResponse::success($periods, 'Blocked periods retrieved');
     }
 
-    public function storeBlockedPeriod(Request $request): JsonResponse
+    public function storeBlockedPeriod(Request $request, StoreBlockedPeriod $action): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -296,14 +213,7 @@ class BarberApiController
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $period = BlockedPeriod::create([
-            'barber_id' => $barber->id,
-            'branch_id' => $barber->branch_id ?? 1,
-            'start_datetime' => $validated['start_datetime'],
-            'end_datetime' => $validated['end_datetime'],
-            'reason' => $validated['reason'] ?? 'Personal Time Off',
-            'created_by' => $user->id,
-        ]);
+        $period = $action->execute($barber, $user->id, $validated);
 
         return ApiResponse::success($period, 'Time block created successfully', 201);
     }
@@ -347,6 +257,7 @@ class BarberApiController
         ]);
 
         $barber = $action->execute($data);
+
         return ApiResponse::success(new BarberResource($barber), 'Barber created', 201);
     }
 
@@ -367,6 +278,7 @@ class BarberApiController
         ]);
 
         $updatedBarber = $action->execute($id, $data);
+
         return ApiResponse::success(new BarberResource($updatedBarber), 'Barber updated');
     }
 
@@ -387,6 +299,7 @@ class BarberApiController
         $this->authorize('delete', $barber);
 
         $action->execute($id);
+
         return ApiResponse::success(null, 'Barber deleted');
     }
 }

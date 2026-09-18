@@ -10,6 +10,9 @@ class UpdateGalleryItem
 {
     use HasSecureUploads;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(Gallery $gallery, array $data): Gallery
     {
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {

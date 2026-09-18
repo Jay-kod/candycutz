@@ -66,14 +66,14 @@ class GalleryApiController
             'image' => 'required|image|max:5120',
         ]);
 
-        $path = (new SecureImageUpload())->execute($request->file('image'), 'uploads/gallery');
+        $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/gallery');
 
         $gallery = Gallery::create([
             'barber_id' => $barber->id,
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'category' => $validated['category'] ?? null,
-            'image_path' => '/storage/' . $path,
+            'image_path' => '/storage/'.$path,
         ]);
 
         return ApiResponse::success(new GalleryResource($gallery), 'Gallery item created', 201);
@@ -87,7 +87,7 @@ class GalleryApiController
         }
 
         $this->authorize('delete', $item);
-        
+
         $item->delete();
 
         return ApiResponse::success(null, 'Gallery item deleted');

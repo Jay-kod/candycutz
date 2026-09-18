@@ -8,6 +8,9 @@ use App\Models\User;
 
 class GetCustomerProfile
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(int $id): array
     {
         $customer = User::findOrFail($id);

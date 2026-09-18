@@ -37,7 +37,7 @@ class BarberPolicy
     public function update(User $user, Barber $barber): bool
     {
         // Barbers can update their own profile, but admin/super_admin is handled in before()
-        return ($user->role?->value ?? $user->role) === 'barber' && 
+        return ($user->role?->value ?? $user->role) === 'barber' &&
                $barber->user_id === $user->id;
     }
 

@@ -7,6 +7,10 @@ use App\Models\Appointment;
 
 class GetVerifications
 {
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(array $filters): array
     {
         $query = Appointment::query()->with(['customer', 'barber.user', 'service']);
@@ -33,8 +37,8 @@ class GetVerifications
             return [
                 'id' => $a->id,
                 'verification_code' => $a->verification_code,
-                'status' => $a->status instanceof AppointmentStatus ? $a->status->value : $a->status,
-                'appointment_date' => $a->appointment_date?->toDateString() ?? $a->appointment_date,
+                'status' => $a->status->value,
+                'appointment_date' => $a->appointment_date->toDateString(),
                 'appointment_time' => $a->appointment_time,
                 'total_price' => (float) $a->total_price,
                 'customer_name' => $a->customer?->name ?? $a->client_name ?? 'Client',

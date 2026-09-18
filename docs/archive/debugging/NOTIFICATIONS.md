@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -65,3 +69,4 @@ When booking an appointment, the button spins for 20-30 seconds before succeedin
    docker compose exec -d app php artisan queue:work --tries=3
    ```
 The HTTP endpoint will respond in under 100ms, and the email will be dispatched asynchronously in the background.
+

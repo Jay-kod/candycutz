@@ -6,6 +6,9 @@ namespace App\Domain\Payment\DataObjects;
 
 class GatewayResult
 {
+    /**
+     * @param  array<string, mixed>  $raw_payload
+     */
     public function __construct(
         public readonly string $reference,
         public readonly string $status, // 'success', 'failed', 'pending'
@@ -21,6 +24,9 @@ class GatewayResult
         return $this->status === 'success';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

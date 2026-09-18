@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -88,3 +92,4 @@ To protect customer residential privacy and prevent unauthorized off-platform co
 | **Keffi Central** | BCG, Angwan Kare, Main Market, Total Filling Station | ₦2,000 | ₦100 | 5 km |
 | **University Axis** | NSUK Main Campus, High Court, Pyanku, GRA | ₦3,000 | ₦150 | 12 km |
 | **Outskirts Zone** | Akwanga Road Axis, Gidan Zakara, Keffi Bypass | ₦4,500 | ₦200 | 20 km |
+

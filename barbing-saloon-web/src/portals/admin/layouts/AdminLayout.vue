@@ -21,7 +21,6 @@ import {
   DocumentTextIcon,
   ClockIcon,
   ChartBarIcon,
-  Cog6ToothIcon,
   UserGroupIcon,
   UsersIcon,
   ClipboardDocumentListIcon,

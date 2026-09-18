@@ -19,6 +19,10 @@ class RegisterCustomer
         protected UsernameIdentityService $usernameService
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user: User, token: string}
+     */
     public function execute(array $data): array
     {
         $name = trim($data['name']);

@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -162,3 +166,4 @@ Operating in Nigeria necessitates resilience against intermittent mobile network
 4. Laravel `StripeWebhookController` verifies cryptographic signature using `STRIPE_WEBHOOK_SECRET`.
 5. System checks for duplicate processing via `stripe_event_id` in `payment_transactions`.
 6. System updates appointment to `confirmed`, dispatches Brevo receipt email, and sends push notification to barber.
+

@@ -23,6 +23,10 @@ class SocialLogin
         protected UsernameIdentityService $usernameService
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user: User, token: string}
+     */
     public function execute(array $data): array
     {
         $provider = strtolower(trim($data['provider'] ?? 'google'));
@@ -102,6 +106,9 @@ class SocialLogin
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function verifyAndDecodeIdToken(string $provider, string $idToken): array
     {
         if (str_starts_with($idToken, 'test_') || str_starts_with($idToken, 'mock_') || app()->environment('local', 'testing')) {

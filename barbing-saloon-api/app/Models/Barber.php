@@ -4,8 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $status
+ * @property string|null $bank_name
+ * @property string|null $account_name
+ * @property string|null $account_number
+ */
 class Barber extends Model
 {
     use HasFactory;
@@ -35,12 +42,12 @@ class Barber extends Model
         'rating' => 'float',
     ];
 
-    public function branch()
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

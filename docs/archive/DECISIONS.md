@@ -1,3 +1,7 @@
+> [!WARNING]
+> **LEGACY DOCUMENTATION**
+> This file is preserved for historical context but describes a system that was never fully built as specified. Do not use this file to infer architecture, business rules, or test status. The single authoritative source of truth for the target architecture is `ARCHITECTURE.md` in the repository root.
+
 > **ARCHIVED — HISTORICAL, UNVERIFIED.**
 > Written during AI-assisted development without verification gates.
 > Claims here do not reflect the state of the codebase.
@@ -95,3 +99,4 @@
   - `redis`: In-memory cache and queue driver.
   - `worker`: Dedicated `php artisan queue:work` container for Brevo emails and notifications.
 - **Consequences**: Highly predictable, isolated, easily backed up, and straightforward to debug for non-DevOps engineers.
+

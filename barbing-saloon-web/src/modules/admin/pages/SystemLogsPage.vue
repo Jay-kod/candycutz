@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import AdminLayout from '@/portals/Admin/layouts/Adminlayout.vue'
+import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi';
 import { 
   ClipboardDocumentListIcon, 
