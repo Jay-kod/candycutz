@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Modules\Customer\Resources\UserProfileResource;
-use App\Modules\Customer\Services\CustomerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -41,7 +41,14 @@ class AccountApiController
             'avatar' => ['nullable', 'image', 'max:5120'],
         ]);
 
-        $user = $this->customerService->updateProfile($request->user(), $validated, $request->file('avatar'));
+        $user = $request->user();
+        
+        if ($request->hasFile('avatar')) {
+            $path = (new SecureImageUpload())->execute($request->file('avatar'), 'uploads/avatars');
+            $validated['avatar'] = '/storage/' . $path;
+        }
+
+        $user->update($validated);
 
         return ApiResponse::success(new UserProfileResource($user->loadCount(['appointments', 'testimonials'])), 'Profile updated');
     }

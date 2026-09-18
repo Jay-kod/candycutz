@@ -4,15 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Catalogue\Actions\CreateServiceCategory;
+use App\Domain\Catalogue\Actions\DeleteServiceCategory;
+use App\Domain\Catalogue\Actions\UpdateServiceCategory;
+use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Http\Requests\Api\V1\Admin\StoreServiceCategoryRequest;
+use App\Http\Requests\Api\V1\Admin\UpdateServiceCategoryRequest;
+use App\Http\Resources\ServiceResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ServiceApiController
 {
+    use AuthorizesRequests;
+
     public function index(Request $request): JsonResponse
     {
         $query = Service::query()
@@ -31,7 +41,7 @@ class ServiceApiController
 
         $services = $query->orderBy('display_order')->orderBy('name')->get();
 
-        $data = $services->map(fn (Service $service) => $this->formatService($service));
+        $data = ServiceResource::collection($services);
 
         return ApiResponse::success($data, 'Services retrieved successfully');
     }
@@ -46,7 +56,7 @@ class ServiceApiController
             return ApiResponse::error("Service '{$idOrSlug}' not found.", [], 404, 'RESOURCE_NOT_FOUND');
         }
 
-        return ApiResponse::success($this->formatService($service), 'Service details retrieved');
+        return ApiResponse::success(new ServiceResource($service), 'Service details retrieved');
     }
 
     public function categories(): JsonResponse
@@ -68,38 +78,9 @@ class ServiceApiController
         return ApiResponse::success($data, 'Service categories retrieved');
     }
 
-    protected function formatService(Service $service): array
-    {
-        $imageUrl = null;
-        if ($service->image) {
-            $imageUrl = str_starts_with($service->image, 'http')
-                ? $service->image
-                : url('storage/'.ltrim($service->image, '/'));
-        }
-
-        return [
-            'id' => $service->id,
-            'name' => $service->name,
-            'slug' => $service->slug ?? Str::slug($service->name),
-            'description' => $service->description ?? '',
-            'price' => (float) $service->price,
-            'home_service_price' => (float) ($service->price * 1.25), // Standard 25% home service surcharge if not specified
-            'duration_minutes' => (int) ($service->duration_minutes ?? 30),
-            'category' => $service->category?->name ?? 'General Grooming',
-            'category_id' => $service->category_id,
-            'category_name' => $service->category?->name ?? 'General Grooming',
-            'image_url' => $imageUrl,
-            'is_active' => (bool) $service->is_active,
-            'is_home_service_eligible' => (bool) $service->home_service_allowed,
-        ];
-    }
-
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
-        if (! $user->barber && ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
-            return ApiResponse::error('Only barbers or admins can create services.', [], 403, 'FORBIDDEN_ROLE');
-        }
+        $this->authorize('create', Service::class);
 
         $validated = $request->validate([
             'name' => 'required|string',
@@ -114,23 +95,17 @@ class ServiceApiController
         $service = Service::create($validated);
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = 'service_'.$service->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/services'), $filename);
-            $service->update(['image' => '/uploads/services/'.$filename]);
+            $path = (new SecureImageUpload())->execute($request->file('image'), 'uploads/services');
+            $service->update(['image' => '/storage/' . $path]);
         }
 
-        return ApiResponse::success($this->formatService($service), 'Service created', 201);
+        return ApiResponse::success(new ServiceResource($service), 'Service created', 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        if (! $user->barber && ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
-            return ApiResponse::error('Only barbers or admins can update services.', [], 403, 'FORBIDDEN_ROLE');
-        }
-
         $service = Service::findOrFail($id);
+        $this->authorize('update', $service);
 
         $validated = $request->validate([
             'name' => 'sometimes|string',
@@ -149,25 +124,39 @@ class ServiceApiController
         $service->update($validated);
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = 'service_'.$service->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/services'), $filename);
-            $service->update(['image' => '/uploads/services/'.$filename]);
+            $path = (new SecureImageUpload())->execute($request->file('image'), 'uploads/services');
+            $service->update(['image' => '/storage/' . $path]);
         }
 
-        return ApiResponse::success($this->formatService($service->refresh()), 'Service updated');
+        return ApiResponse::success(new ServiceResource($service->refresh()), 'Service updated');
     }
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        if (! $user->barber && ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
-            return ApiResponse::error('Only barbers or admins can delete services.', [], 403, 'FORBIDDEN_ROLE');
-        }
-
         $service = Service::findOrFail($id);
+        $this->authorize('delete', $service);
         $service->delete();
 
         return ApiResponse::success(null, 'Service deleted');
+    }
+
+    public function storeCategory(StoreServiceCategoryRequest $request, CreateServiceCategory $action)
+    {
+        $this->authorize('create', ServiceCategory::class);
+        return ApiResponse::success($action->execute($request->validated()), 'Service category created', 201);
+    }
+
+    public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action)
+    {
+        $this->authorize('update', $serviceCategory);
+        return ApiResponse::success($action->execute($serviceCategory, $request->validated()), 'Service category updated');
+    }
+
+    public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action)
+    {
+        $this->authorize('delete', $serviceCategory);
+        $action->execute($serviceCategory);
+
+        return ApiResponse::success(null, 'Service category deleted');
     }
 }

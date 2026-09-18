@@ -4,18 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Content\Actions\ApproveTestimonial;
+use App\Domain\Content\Actions\DeleteTestimonial;
+use App\Domain\Content\Actions\FeatureTestimonial;
+use App\Http\Resources\TestimonialResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Testimonial;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TestimonialApiController
 {
+    use AuthorizesRequests;
+
     public function index(Request $request): JsonResponse
     {
         $query = Testimonial::query()
-            ->with(['customer', 'service', 'barber.user'])
-            ->where('is_approved', true);
+            ->with(['customer', 'service', 'barber.user']);
+
+        // Allow fetching unapproved if admin (optional, logic might be more complex)
+        $user = $request->user('sanctum');
+        if (! $user || ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+            $query->where('is_approved', true);
+        }
 
         if ($request->has('service_id') && is_numeric($request->service_id)) {
             $query->where('service_id', (int) $request->service_id);
@@ -31,39 +43,47 @@ class TestimonialApiController
 
         $testimonials = $query->orderByDesc('created_at')->paginate(20);
 
-        $data = $testimonials->map(fn (Testimonial $item) => $this->formatTestimonial($item));
-
-        return ApiResponse::success($data, 'Testimonials retrieved successfully');
+        return ApiResponse::success(TestimonialResource::collection($testimonials), 'Testimonials retrieved successfully');
     }
 
-    protected function formatTestimonial(Testimonial $item): array
+    public function update(Request $request, int $id): JsonResponse
     {
-        $avatarUrl = null;
-        if ($item->client_avatar) {
-            $avatarUrl = str_starts_with($item->client_avatar, 'http')
-                ? $item->client_avatar
-                : url('storage/'.ltrim($item->client_avatar, '/'));
-        } elseif ($item->customer?->avatar) {
-            $avatarUrl = str_starts_with($item->customer->avatar, 'http')
-                ? $item->customer->avatar
-                : url('storage/'.ltrim($item->customer->avatar, '/'));
-        }
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
 
-        return [
-            'id' => $item->id,
-            'customer_name' => $item->client_name ?? $item->customer?->name ?? 'Anonymous',
-            'avatar_url' => $avatarUrl,
-            'rating' => (int) $item->rating,
-            'comment' => $item->comment,
-            'service' => $item->service ? [
-                'id' => $item->service->id,
-                'name' => $item->service->name,
-            ] : null,
-            'barber' => $item->barber ? [
-                'id' => $item->barber->id,
-                'name' => $item->barber->user?->name ?? 'Unknown',
-            ] : null,
-            'created_at' => $item->created_at?->toISOString(),
-        ];
+        $validated = $request->validate([
+            'rating' => 'sometimes|integer|min:1|max:5',
+            'comment' => 'sometimes|string',
+        ]);
+
+        $testimonial->update($validated);
+
+        return ApiResponse::success(new TestimonialResource($testimonial->refresh()), 'Testimonial updated');
+    }
+
+    public function approve(int $id, ApproveTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
+        
+        return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial approved');
+    }
+
+    public function feature(int $id, FeatureTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
+        
+        return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial feature toggled');
+    }
+
+    public function destroy(int $id, DeleteTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('delete', $testimonial);
+
+        $action->execute($testimonial);
+
+        return ApiResponse::success(null, 'Testimonial deleted');
     }
 }

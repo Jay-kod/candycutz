@@ -65,6 +65,9 @@ jobs:
     - name: Run Pint
       run: ./vendor/bin/pint --test
 
+    - name: Run Composer Audit
+      run: composer audit
+
     - name: Run Larastan
       run: ./vendor/bin/phpstan analyse --memory-limit=2G
       continue-on-error: true

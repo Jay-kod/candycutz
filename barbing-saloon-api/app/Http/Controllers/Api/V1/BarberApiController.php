@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Identity\Actions\CreateBarber;
+use App\Domain\Identity\Actions\DeleteBarber;
+use App\Domain\Identity\Actions\UpdateBarber;
+use App\Domain\Identity\Actions\UpdateBarberStatus;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Http\Resources\BarberResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
 use App\Models\WorkingHour;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BarberApiController
 {
+    use AuthorizesRequests;
+
     public function index(): JsonResponse
     {
         $barbers = Barber::query()
@@ -24,9 +32,7 @@ class BarberApiController
             ->orderByDesc('rating')
             ->get();
 
-        $data = $barbers->map(fn (Barber $barber) => $this->formatBarber($barber));
-
-        return ApiResponse::success($data, 'Barbers retrieved successfully');
+        return ApiResponse::success(BarberResource::collection($barbers), 'Barbers retrieved successfully');
     }
 
     public function dashboard(Request $request): JsonResponse
@@ -88,7 +94,7 @@ class BarberApiController
 
         return ApiResponse::success([
             'user' => $user,
-            'barber' => $barber,
+            'barber' => $barber ? new BarberResource($barber) : null,
         ], 'Account details loaded');
     }
 
@@ -96,6 +102,10 @@ class BarberApiController
     {
         $user = $request->user();
         $barber = $user->barber;
+
+        if ($barber) {
+            $this->authorize('update', $barber);
+        }
 
         $data = $request->validate([
             'name' => 'sometimes|string',
@@ -117,7 +127,7 @@ class BarberApiController
 
         return ApiResponse::success([
             'user' => $user->refresh(),
-            'barber' => $barber?->refresh(),
+            'barber' => $barber ? new BarberResource($barber->refresh()) : null,
         ], 'Account updated');
     }
 
@@ -131,7 +141,7 @@ class BarberApiController
             return ApiResponse::error("Barber #{$id} not found.", [], 404, 'RESOURCE_NOT_FOUND');
         }
 
-        return ApiResponse::success($this->formatBarber($barber), 'Barber details retrieved');
+        return ApiResponse::success(new BarberResource($barber), 'Barber details retrieved');
     }
 
     public function updateChairStatus(Request $request): JsonResponse
@@ -142,6 +152,8 @@ class BarberApiController
         if (! $barber) {
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
+
+        $this->authorize('update', $barber);
 
         if ($request->has('chair_status') && ! $request->has('status')) {
             $request->merge(['status' => $request->input('chair_status')]);
@@ -156,7 +168,7 @@ class BarberApiController
             'is_available' => $validated['status'] !== 'offline',
         ]);
 
-        return ApiResponse::success($this->formatBarber($barber->refresh()), 'Chair status updated successfully');
+        return ApiResponse::success(new BarberResource($barber->refresh()), 'Chair status updated successfully');
     }
 
     public function schedule(Request $request): JsonResponse
@@ -218,6 +230,8 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
+        $this->authorize('update', $barber);
+
         $hours = $request->input('schedule', $request->input('working_hours', []));
         if (is_array($hours)) {
             foreach ($hours as $item) {
@@ -274,6 +288,8 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
+        $this->authorize('update', $barber);
+
         $validated = $request->validate([
             'start_datetime' => ['required', 'date'],
             'end_datetime' => ['required', 'date', 'after:start_datetime'],
@@ -301,6 +317,8 @@ class BarberApiController
             return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
         }
 
+        $this->authorize('update', $barber);
+
         $period = BlockedPeriod::where('barber_id', $barber->id)->where('id', $id)->first();
         if (! $period) {
             return ApiResponse::error("Blocked period #{$id} not found.", [], 404, 'RESOURCE_NOT_FOUND');
@@ -311,29 +329,64 @@ class BarberApiController
         return ApiResponse::success(null, 'Blocked period deleted successfully');
     }
 
-    protected function formatBarber(Barber $barber): array
-    {
-        $u = $barber->user;
-        $specialties = is_array($barber->specialties) ? $barber->specialties : (json_decode($barber->specialties ?? '[]', true) ?: []);
+    // CRUD Methods from AdminApiController
 
-        return [
-            'id' => $barber->id,
-            'user_id' => $barber->user_id,
-            'name' => $u?->name ?? 'Master Barber',
-            'real_name' => $u?->real_name ?? $u?->name ?? 'Master Barber',
-            'username' => $u?->username ?? 'barber',
-            'email' => $u?->email ?? '',
-            'phone' => $u?->phone ?? '',
-            'avatar' => $u?->avatar,
-            'avatar_url' => $u?->avatar ? (str_starts_with($u->avatar, 'http') ? $u->avatar : url('storage/'.ltrim($u->avatar, '/'))) : null,
-            'rating' => (float) ($barber->rating ?? 5.0),
-            'total_reviews' => (int) ($barber->testimonials()->count() ?: 12),
-            'experience_years' => (int) ($barber->experience_years ?? $barber->years_experience ?? 5),
-            'chair_status' => $barber->chair_status ?? 'free',
-            'specialties' => $specialties,
-            'bio' => $barber->bio ?? 'Expert master barber with precision razor craft.',
-            'is_available' => (bool) $barber->is_available,
-            'is_active' => (bool) ($u?->is_active ?? true),
-        ];
+    public function store(Request $request, CreateBarber $action): JsonResponse
+    {
+        $this->authorize('create', Barber::class);
+
+        $data = $request->validate([
+            'name' => 'required|string|min:2',
+            'email' => 'required|email',
+            'password' => 'nullable|string|min:6',
+            'phone' => 'nullable|string',
+            'experience_years' => 'nullable|integer',
+            'specialties' => 'nullable',
+            'bio' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+
+        $barber = $action->execute($data);
+        return ApiResponse::success(new BarberResource($barber), 'Barber created', 201);
+    }
+
+    public function update(Request $request, int $id, UpdateBarber $action): JsonResponse
+    {
+        $barber = Barber::findOrFail($id);
+        $this->authorize('update', $barber);
+
+        $data = $request->validate([
+            'name' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'password' => 'nullable|string|min:6',
+            'phone' => 'nullable|string',
+            'experience_years' => 'nullable|integer',
+            'specialties' => 'nullable',
+            'bio' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+
+        $updatedBarber = $action->execute($id, $data);
+        return ApiResponse::success(new BarberResource($updatedBarber), 'Barber updated');
+    }
+
+    public function updateStatus(Request $request, int $id, UpdateBarberStatus $action): JsonResponse
+    {
+        $barber = Barber::findOrFail($id);
+        $this->authorize('update', $barber);
+
+        $status = $request->input('status', 'active');
+        $updatedBarber = $action->execute($id, $status);
+
+        return ApiResponse::success(new BarberResource($updatedBarber), 'Barber status updated');
+    }
+
+    public function destroy(int $id, DeleteBarber $action): JsonResponse
+    {
+        $barber = Barber::findOrFail($id);
+        $this->authorize('delete', $barber);
+
+        $action->execute($id);
+        return ApiResponse::success(null, 'Barber deleted');
     }
 }

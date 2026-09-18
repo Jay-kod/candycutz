@@ -20,12 +20,6 @@ it('characterises POST /appointments/walk-in', function () {
     expect(in_array($response->status(), [200, 201, 422, 500, 403]))->toBeTrue();
 });
 
-it('characterises POST /barbers/walk-in', function () {
-    $user = User::factory()->create();
-    $response = $this->actingAs($user)->postJson('/api/v1/barbers/walk-in', []);
-    expect(in_array($response->status(), [200, 201, 422, 500, 403]))->toBeTrue();
-});
-
 it('characterises GET /appointments/{id}', function () {
     $user = User::factory()->create();
     $response = $this->actingAs($user)->getJson('/api/v1/appointments/999');

@@ -7,6 +7,15 @@ use App\Models\User;
 
 class AppointmentPolicy
 {
+    public function before(User $user, string $ability): ?bool
+    {
+        if (in_array($user->role?->value ?? $user->role, ['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function view(User $user, Appointment $appointment): bool
     {
         return $appointment->customer_id === $user->id;

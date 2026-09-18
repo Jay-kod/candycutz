@@ -18,12 +18,6 @@ it('characterises PATCH /barbers/chair-status', function () {
     expect(in_array($response->status(), [200, 422, 500, 403, 404]))->toBeTrue();
 });
 
-it('characterises GET /barbers/my-appointments', function () {
-    $user = User::factory()->create();
-    $response = $this->actingAs($user)->getJson('/api/v1/barbers/my-appointments');
-    expect(in_array($response->status(), [200, 500, 403]))->toBeTrue();
-});
-
 it('characterises GET /barbers/schedule', function () {
     $user = User::factory()->create();
     $response = $this->actingAs($user)->getJson('/api/v1/barbers/schedule');

@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Http\Resources\BlogPostResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\BlogPost;
+use App\Models\BlogReaction;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class BlogApiController
 {
+    use AuthorizesRequests;
+
     public function index(Request $request): JsonResponse
     {
         $query = BlogPost::query()
@@ -21,9 +27,7 @@ class BlogApiController
 
         $posts = $query->orderByDesc('created_at')->paginate(10);
 
-        $data = $posts->map(fn (BlogPost $post) => $this->formatPost($post));
-
-        return ApiResponse::success($data, 'Blog posts retrieved successfully');
+        return ApiResponse::success(BlogPostResource::collection($posts), 'Blog posts retrieved successfully');
     }
 
     public function show(string $slug): JsonResponse
@@ -39,42 +43,13 @@ class BlogApiController
             return ApiResponse::error("Blog post '{$slug}' not found.", [], 404, 'RESOURCE_NOT_FOUND');
         }
 
-        return ApiResponse::success($this->formatPost($post, true), 'Blog post retrieved');
-    }
-
-    protected function formatPost(BlogPost $post, bool $detailed = false): array
-    {
-        $imageUrl = null;
-        if ($post->featured_image) {
-            $imageUrl = str_starts_with($post->featured_image, 'http')
-                ? $post->featured_image
-                : url('storage/'.ltrim($post->featured_image, '/'));
-        }
-
-        $data = [
-            'id' => $post->id,
-            'title' => $post->title,
-            'slug' => $post->slug,
-            'excerpt' => $post->excerpt ?? '',
-            'featured_image_url' => $imageUrl,
-            'author' => [
-                'id' => $post->author->id ?? null,
-                'name' => $post->author_display ?? $post->author?->name ?? 'CandyCutz Team',
-            ],
-            'created_at' => $post->created_at?->toISOString(),
-            'loves_count' => (int) ($post->reactions?->where('reaction_type', 'love')->count() ?? 0),
-            'dislikes_count' => (int) ($post->reactions?->where('reaction_type', 'dislike')->count() ?? 0),
-        ];
-
-        if ($detailed) {
-            $data['content'] = $post->content;
-        }
-
-        return $data;
+        return ApiResponse::success(new BlogPostResource($post), 'Blog post retrieved');
     }
 
     public function react(Request $request, int $id): JsonResponse
     {
+        // Simple mock since this wasn't fully implemented in the original controller,
+        // but let's keep the signature.
         return ApiResponse::success(['status' => 'liked'], 'Reaction saved');
     }
 
@@ -85,12 +60,9 @@ class BlogApiController
 
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $barber = $user->barber;
+        $this->authorize('create', BlogPost::class);
 
-        if (! $barber) {
-            return ApiResponse::error('Only barbers can create blog posts.', [], 403, 'FORBIDDEN_ROLE');
-        }
+        $user = $request->user();
 
         $validated = $request->validate([
             'title' => 'required|string',
@@ -109,23 +81,17 @@ class BlogApiController
         ]);
 
         if ($request->hasFile('featured_image')) {
-            $file = $request->file('featured_image');
-            $filename = 'blog_'.$post->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/blog'), $filename);
-            $post->update(['featured_image' => '/uploads/blog/'.$filename]);
+            $path = (new SecureImageUpload())->execute($request->file('featured_image'), 'uploads/blog');
+            $post->update(['featured_image' => '/storage/' . $path]);
         }
 
-        return ApiResponse::success($this->formatPost($post), 'Blog post created', 201);
+        return ApiResponse::success(new BlogPostResource($post), 'Blog post created', 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $post = BlogPost::where('author_id', $user->id)->where('id', $id)->first();
-
-        if (! $post) {
-            return ApiResponse::error("Blog post #{$id} not found or you don't have permission.", [], 404, 'RESOURCE_NOT_FOUND');
-        }
+        $post = BlogPost::findOrFail($id);
+        $this->authorize('update', $post);
 
         $validated = $request->validate([
             'title' => 'sometimes|string',
@@ -146,29 +112,23 @@ class BlogApiController
             $post->content = $validated['content'];
         }
         if (isset($validated['is_published'])) {
-            $post->is_published = $validated['is_published'];
+            $post->is_published = filter_var($validated['is_published'], FILTER_VALIDATE_BOOLEAN);
         }
 
         if ($request->hasFile('featured_image')) {
-            $file = $request->file('featured_image');
-            $filename = 'blog_'.$post->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/blog'), $filename);
-            $post->featured_image = '/uploads/blog/'.$filename;
+            $path = (new SecureImageUpload())->execute($request->file('featured_image'), 'uploads/blog');
+            $post->featured_image = '/storage/' . $path;
         }
 
         $post->save();
 
-        return ApiResponse::success($this->formatPost($post, true), 'Blog post updated');
+        return ApiResponse::success(new BlogPostResource($post->refresh()), 'Blog post updated');
     }
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $post = BlogPost::where('author_id', $user->id)->where('id', $id)->first();
-
-        if (! $post) {
-            return ApiResponse::error("Blog post #{$id} not found or you don't have permission.", [], 404, 'RESOURCE_NOT_FOUND');
-        }
+        $post = BlogPost::findOrFail($id);
+        $this->authorize('delete', $post);
 
         $post->delete();
 

@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug', 100)->unique();
             $table->text('address');
-            $table->decimal('latitude', 10, 8)->default(8.84860000);
+            $table->decimal('latitude', 10, 8)->default(8.84710000);
             $table->decimal('longitude', 11, 8)->default(7.87360000);
             $table->string('phone', 30);
             $table->string('email');
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('role', ['super_admin', 'admin', 'barber', 'customer']);
-            $table->string('auth_provider', 50)->default('local');
+            $table->string('auth_provider', 50)->nullable()->default('local');
             $table->string('provider_id', 150)->nullable();
             $table->enum('status', ['active', 'username_pending', 'deactivated', 'suspended'])->default('active');
             $table->timestamp('last_username_change_at')->nullable();
@@ -186,7 +186,7 @@ return new class extends Migration
             $table->string('client_phone');
             $table->string('client_email');
             $table->foreignId('barber_id')->constrained('barbers');
-            $table->foreignId('service_id')->constrained('services')->restrictOnDelete();
+            $table->foreignId('service_id')->constrained('services');
             $table->enum('appointment_type', ['in_shop', 'home_service'])->default('in_shop');
             $table->foreignId('service_zone_id')->nullable()->constrained('service_zones')->nullOnDelete();
             $table->foreignId('customer_address_id')->nullable()->constrained('addresses')->nullOnDelete();
@@ -210,8 +210,6 @@ return new class extends Migration
 
             $table->index(['appointment_date', 'barber_id']);
             $table->index('status');
-            $table->index(['barber_id', 'appointment_date', 'status'], 'appointments_barber_date_status_idx');
-            $table->index(['customer_id', 'status'], 'appointments_customer_status_idx');
         });
 
         Schema::create('appointment_items', function (Blueprint $table) {
@@ -396,11 +394,11 @@ return new class extends Migration
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
             $table->morphs('tokenable');
-            $table->string('name');
+            $table->text('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();
             $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->timestamp('expires_at')->nullable()->index();
             $table->timestamps();
         });
 
@@ -410,15 +408,6 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
         });
 
-        // Add the partial unique index via raw SQL for DBs that support it (SQLite does)
-        if (config('database.default') === 'sqlite') {
-            DB::statement(
-                "CREATE UNIQUE INDEX appointments_barber_date_time_unique ON appointments(barber_id, appointment_date, appointment_time) WHERE status NOT IN ('cancelled', 'no_show')"
-            );
-        } else {
-            // MySQL 8+ supports functional indexes, but Laravel blueprint doesn't do partial cleanly.
-            // As a fallback for MySQL, we can just leave it to application lock, or try functional index in future.
-        }
     }
 
     public function down(): void

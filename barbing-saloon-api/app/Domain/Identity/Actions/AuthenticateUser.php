@@ -42,8 +42,11 @@ class AuthenticateUser
         }
 
         $tokenName = $data['device_name'] ?? 'web-client';
-        $token = $user->createToken($tokenName)->plainTextToken;
+        $expiresAt = $user->role === \App\Domain\Shared\Enums\UserRole::CUSTOMER 
+            ? now()->addDays(30) 
+            : now()->addHours(12);
 
+        $token = $user->createToken($tokenName, ['*'], $expiresAt)->plainTextToken;
         $this->logAction('auth.login', $user, [], [
             'email' => $user->email,
             'username' => $user->username,

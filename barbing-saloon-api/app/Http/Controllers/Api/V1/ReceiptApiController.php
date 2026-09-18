@@ -24,10 +24,9 @@ class ReceiptApiController
         }
 
         $receiptPath = (string) ($appointment->payment?->receipt_image ?: $appointment->payment?->receipt_url);
-        $fileName = basename(parse_url($receiptPath, PHP_URL_PATH) ?: $receiptPath);
-        $filePath = public_path('uploads/receipts/'.$fileName);
+        $filePath = storage_path('app/' . $receiptPath);
 
-        if ($fileName === '' || ! is_file($filePath)) {
+        if ($receiptPath === '' || ! is_file($filePath)) {
             abort(404);
         }
 

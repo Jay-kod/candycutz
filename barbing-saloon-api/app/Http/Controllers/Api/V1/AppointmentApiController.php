@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
+use App\Http\Resources\AppointmentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
-use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AppointmentApiController
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected BookingService $bookingService
     ) {}
@@ -49,7 +53,7 @@ class AppointmentApiController
             ->orderByDesc('appointment_time')
             ->paginate((int) $request->input('per_page', 15));
 
-        $data = $appointments->getCollection()->map(fn (Appointment $a) => $this->formatAppointment($a));
+        $data = AppointmentResource::collection($appointments->getCollection());
 
         return ApiResponse::success([
             'items' => $data,
@@ -64,27 +68,13 @@ class AppointmentApiController
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $role = $user->role?->value ?? $user->role;
-
         $appointment = Appointment::query()
             ->with(['service.category', 'barber.user', 'serviceZone'])
-            ->find($id);
+            ->findOrFail($id);
 
-        if (! $appointment) {
-            return ApiResponse::error("Appointment #{$id} not found.", [], 404, 'RESOURCE_NOT_FOUND');
-        }
+        $this->authorize('view', $appointment);
 
-        // Authorization check
-        $isOwner = $appointment->customer_id === $user->id;
-        $isBarber = $user->barber && $appointment->barber_id === $user->barber->id;
-        $isAdmin = in_array($role, ['admin', 'super_admin'], true);
-
-        if (! $isOwner && ! $isBarber && ! $isAdmin) {
-            return ApiResponse::error('You do not have permission to view this appointment.', [], 403, 'FORBIDDEN_ROLE');
-        }
-
-        return ApiResponse::success($this->formatAppointment($appointment), 'Appointment details retrieved');
+        return ApiResponse::success(new AppointmentResource($appointment), 'Appointment details retrieved');
     }
 
     public function store(Request $request): JsonResponse
@@ -108,9 +98,12 @@ class AppointmentApiController
         ]);
 
         try {
-            $appointment = $this->bookingService->createBooking($user, array_merge($request->all(), $validated));
+            $appointment = $this->bookingService->createBooking(
+                $user,
+                BookingData::fromRequest($request)
+            );
 
-            return ApiResponse::success($this->formatAppointment($appointment), 'Appointment reserved successfully.', 201);
+            return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);
         } catch (BookingSlotUnavailableException $e) {
             return $e->render($request);
         } catch (\Throwable $e) {
@@ -121,17 +114,9 @@ class AppointmentApiController
     public function cancel(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        $role = $user->role?->value ?? $user->role;
-
         $appointment = Appointment::findOrFail($id);
 
-        $isOwner = $appointment->customer_id === $user->id;
-        $isBarber = $user->barber && $appointment->barber_id === $user->barber->id;
-        $isAdmin = in_array($role, ['admin', 'super_admin'], true);
-
-        if (! $isOwner && ! $isBarber && ! $isAdmin) {
-            return ApiResponse::error('You do not have permission to cancel this appointment.', [], 403, 'FORBIDDEN_ROLE');
-        }
+        $this->authorize('cancel', $appointment);
 
         $currentStatus = $appointment->status?->value ?? (string) $appointment->status;
         if (in_array($currentStatus, ['completed', 'cancelled'], true)) {
@@ -144,22 +129,15 @@ class AppointmentApiController
 
         $appointment->load(['service.category', 'barber.user', 'serviceZone']);
 
-        return ApiResponse::success($this->formatAppointment($appointment), 'Appointment cancelled successfully.');
+        return ApiResponse::success(new AppointmentResource($appointment), 'Appointment cancelled successfully.');
     }
 
     public function updateStatus(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        $role = $user->role?->value ?? $user->role;
-
         $appointment = Appointment::findOrFail($id);
 
-        $isBarber = $user->barber && $appointment->barber_id === $user->barber->id;
-        $isAdmin = in_array($role, ['admin', 'super_admin'], true);
-
-        if (! $isBarber && ! $isAdmin) {
-            return ApiResponse::error('Only assigned barbers and administrators can update operational status.', [], 403, 'FORBIDDEN_ROLE');
-        }
+        $this->authorize('manageForBarber', $appointment);
 
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:confirmed,checked_in,in_progress,completed,no_show,cancelled'],
@@ -180,7 +158,7 @@ class AppointmentApiController
 
         $appointment->load(['service.category', 'barber.user', 'serviceZone']);
 
-        return ApiResponse::success($this->formatAppointment($appointment), "Appointment status updated to {$validated['status']}.");
+        return ApiResponse::success(new AppointmentResource($appointment), "Appointment status updated to {$validated['status']}.");
     }
 
     public function storeWalkIn(Request $request): JsonResponse
@@ -206,62 +184,17 @@ class AppointmentApiController
         $targetBarber = Barber::findOrFail((int) $barberId);
 
         try {
-            $appointment = $this->bookingService->createWalkIn($user, $targetBarber, array_merge($request->all(), $validated));
+            $appointment = $this->bookingService->createWalkIn(
+                $user,
+                $targetBarber,
+                BookingData::fromRequest($request)
+            );
 
-            return ApiResponse::success($this->formatAppointment($appointment), 'Walk-in client booked successfully.', 201);
+            return ApiResponse::success(new AppointmentResource($appointment), 'Walk-in client booked successfully.', 201);
         } catch (BookingSlotUnavailableException $e) {
             return $e->render($request);
         } catch (\Throwable $e) {
             return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
         }
-    }
-
-    protected function formatAppointment(Appointment $a): array
-    {
-        $service = $a->service;
-        $barber = $a->barber;
-        $statusVal = $a->status?->value ?? $a->status;
-
-        return [
-            'id' => $a->id,
-            'booking_reference' => $a->booking_reference ?? "CC-{$a->id}",
-            'customer_id' => $a->customer_id,
-            'client_name' => $a->client_name,
-            'client_phone' => $a->client_phone,
-            'client_email' => $a->client_email,
-            'appointment_date' => Carbon::parse($a->appointment_date)->toDateString(),
-            'start_time' => substr((string) $a->appointment_time, 0, 5),
-            'end_time' => $a->end_time ? substr((string) $a->end_time, 0, 5) : null,
-            'appointment_type' => $a->appointment_type ?? 'in_shop',
-            'status' => $statusVal,
-            'payment_status' => $a->deposit_paid ? 'paid' : 'pending',
-            'deposit_paid' => (bool) $a->deposit_paid,
-            'total_duration_minutes' => (int) ($a->total_duration_minutes ?? $service?->duration_minutes ?? 30),
-            'subtotal' => (float) ($a->total_price ?? $a->total_amount ?? $service?->price ?? 0),
-            'home_service_surcharge' => (float) ($a->travel_fee ?? 0),
-            'discount_amount' => (float) ($a->discount_amount ?? 0),
-            'grand_total' => (float) ($a->grand_total ?? $a->total_price ?? $service?->price ?? 0),
-            'notes' => $a->notes,
-            'service' => $service ? [
-                'id' => $service->id,
-                'name' => $service->name,
-                'price' => (float) $service->price,
-                'duration_minutes' => (int) $service->duration_minutes,
-                'category' => $service->category?->name ?? 'Grooming',
-            ] : null,
-            'barber' => $barber ? [
-                'id' => $barber->id,
-                'name' => $barber->user?->name ?? 'Master Barber',
-                'username' => $barber->user?->username ?? 'barber',
-                'rating' => (float) ($barber->rating ?? 5.0),
-                'chair_status' => $barber->chair_status ?? 'free',
-            ] : null,
-            'service_zone' => $a->serviceZone ? [
-                'id' => $a->serviceZone->id,
-                'name' => $a->serviceZone->name,
-                'surcharge' => (float) ($a->serviceZone->base_travel_fee ?? 0),
-            ] : null,
-            'created_at' => $a->created_at?->toIso8601String(),
-        ];
     }
 }

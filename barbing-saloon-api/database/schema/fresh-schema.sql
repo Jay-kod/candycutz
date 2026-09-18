@@ -53,7 +53,7 @@ CREATE TABLE `appointment_items` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `appointment_id` bigint(20) unsigned NOT NULL,
   `service_id` bigint(20) unsigned NOT NULL,
-  `price` bigint(20) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
   `duration_minutes` int(11) NOT NULL DEFAULT 30,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -111,30 +111,30 @@ CREATE TABLE `appointments` (
   `appointment_time` time NOT NULL,
   `end_time` time DEFAULT NULL,
   `total_duration_minutes` int(11) NOT NULL DEFAULT 30,
-  `total_amount` bigint(20) NOT NULL DEFAULT 0,
-  `travel_fee` bigint(20) NOT NULL DEFAULT 0,
-  `tip_amount` bigint(20) NOT NULL DEFAULT 0,
-  `discount_amount` bigint(20) NOT NULL DEFAULT 0,
-  `grand_total` bigint(20) NOT NULL DEFAULT 0,
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `travel_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `tip_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `grand_total` decimal(10,2) NOT NULL DEFAULT 0.00,
   `status` enum('pending','confirmed','completed','cancelled','no_show') NOT NULL DEFAULT 'pending',
   `notes` text DEFAULT NULL,
   `cancellation_reason` text DEFAULT NULL,
-  `total_price` bigint(20) NOT NULL,
+  `total_price` decimal(8,2) NOT NULL,
   `deposit_paid` tinyint(1) NOT NULL DEFAULT 0,
-  `deposit_amount` bigint(20) NOT NULL DEFAULT 0,
+  `deposit_amount` decimal(8,2) NOT NULL DEFAULT 0.00,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `appointments_booking_reference_unique` (`booking_reference`),
   KEY `appointments_branch_id_foreign` (`branch_id`),
+  KEY `appointments_customer_id_foreign` (`customer_id`),
+  KEY `appointments_barber_id_foreign` (`barber_id`),
   KEY `appointments_service_id_foreign` (`service_id`),
   KEY `appointments_service_zone_id_foreign` (`service_zone_id`),
   KEY `appointments_customer_address_id_foreign` (`customer_address_id`),
   KEY `appointments_appointment_date_barber_id_index` (`appointment_date`,`barber_id`),
   KEY `appointments_status_index` (`status`),
-  KEY `appointments_barber_date_status_idx` (`barber_id`,`appointment_date`,`status`),
-  KEY `appointments_customer_status_idx` (`customer_id`,`status`),
   CONSTRAINT `appointments_barber_id_foreign` FOREIGN KEY (`barber_id`) REFERENCES `barbers` (`id`),
   CONSTRAINT `appointments_branch_id_foreign` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL,
   CONSTRAINT `appointments_customer_address_id_foreign` FOREIGN KEY (`customer_address_id`) REFERENCES `addresses` (`id`) ON DELETE SET NULL,
@@ -182,7 +182,7 @@ CREATE TABLE `barber_services` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `barber_id` bigint(20) unsigned NOT NULL,
   `service_id` bigint(20) unsigned NOT NULL,
-  `custom_price` bigint(20) DEFAULT NULL,
+  `custom_price` decimal(10,2) DEFAULT NULL,
   `custom_duration` int(11) DEFAULT NULL,
   `is_offered` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -434,7 +434,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -494,7 +494,7 @@ CREATE TABLE `payment_transactions` (
   `transaction_type` enum('authorization','capture','refund','void') NOT NULL,
   `gateway` varchar(50) NOT NULL DEFAULT 'stripe',
   `gateway_event_id` varchar(150) DEFAULT NULL,
-  `amount` bigint(20) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
   `raw_payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`raw_payload`)),
   `status` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -516,12 +516,12 @@ CREATE TABLE `payments` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `appointment_id` bigint(20) unsigned NOT NULL,
   `customer_id` bigint(20) unsigned NOT NULL,
-  `amount` bigint(20) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
   `currency` varchar(10) NOT NULL DEFAULT 'NGN',
   `status` enum('pending','successful','failed','refunded') NOT NULL DEFAULT 'pending',
   `payment_method` varchar(50) NOT NULL DEFAULT 'stripe',
-  `gateway_reference` varchar(150) DEFAULT NULL,
-  `gateway_charge_id` varchar(150) DEFAULT NULL,
+  `stripe_payment_intent_id` varchar(150) DEFAULT NULL,
+  `stripe_charge_id` varchar(150) DEFAULT NULL,
   `transaction_ref` varchar(100) NOT NULL,
   `receipt_url` varchar(255) DEFAULT NULL,
   `error_message` text DEFAULT NULL,
@@ -531,7 +531,7 @@ CREATE TABLE `payments` (
   UNIQUE KEY `payments_transaction_ref_unique` (`transaction_ref`),
   KEY `payments_customer_id_foreign` (`customer_id`),
   KEY `payments_appointment_id_status_index` (`appointment_id`,`status`),
-  KEY `payments_stripe_payment_intent_id_index` (`gateway_reference`),
+  KEY `payments_stripe_payment_intent_id_index` (`stripe_payment_intent_id`),
   CONSTRAINT `payments_appointment_id_foreign` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payments_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -548,7 +548,7 @@ CREATE TABLE `personal_access_tokens` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `tokenable_type` varchar(255) NOT NULL,
   `tokenable_id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` text NOT NULL,
   `token` varchar(64) NOT NULL,
   `abilities` text DEFAULT NULL,
   `last_used_at` timestamp NULL DEFAULT NULL,
@@ -557,7 +557,8 @@ CREATE TABLE `personal_access_tokens` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`),
+  KEY `personal_access_tokens_expires_at_index` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -599,8 +600,8 @@ CREATE TABLE `service_zones` (
   `description` text DEFAULT NULL,
   `boundary_polygon` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`boundary_polygon`)),
   `radius_km` decimal(6,2) NOT NULL DEFAULT 15.00,
-  `base_travel_fee` bigint(20) NOT NULL DEFAULT 200000,
-  `per_km_fee` bigint(20) NOT NULL DEFAULT 15000,
+  `base_travel_fee` decimal(10,2) NOT NULL DEFAULT 2000.00,
+  `per_km_fee` decimal(10,2) NOT NULL DEFAULT 150.00,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -623,7 +624,7 @@ CREATE TABLE `services` (
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
   `description` text NOT NULL,
-  `price` bigint(20) NOT NULL,
+  `price` decimal(8,2) NOT NULL,
   `duration_minutes` int(10) unsigned NOT NULL,
   `home_service_allowed` tinyint(1) NOT NULL DEFAULT 1,
   `category_id` bigint(20) unsigned NOT NULL,
@@ -752,7 +753,7 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('super_admin','admin','barber','customer') NOT NULL,
-  `auth_provider` varchar(50) NOT NULL DEFAULT 'local',
+  `auth_provider` varchar(50) DEFAULT 'local',
   `provider_id` varchar(150) DEFAULT NULL,
   `status` enum('active','username_pending','deactivated','suspended') NOT NULL DEFAULT 'active',
   `last_username_change_at` timestamp NULL DEFAULT NULL,
@@ -802,4 +803,4 @@ CREATE TABLE `working_hours` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-18  7:22:39
+-- Dump completed on 2026-09-18  7:47:57

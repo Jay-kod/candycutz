@@ -30,25 +30,25 @@ class BookingService
      *
      * @throws BookingSlotUnavailableException
      */
-    public function createBooking(User $customer, array $data): Appointment
+    public function createBooking(User $customer, BookingData $data): Appointment
     {
         return DB::transaction(function () use ($customer, $data) {
             // 1. Resolve & normalize appointment parameters
-            $dateStr = $data['appointment_date'] ?? ($data['date'] ?? null);
+            $dateStr = $data->appointmentDate;
             if (! $dateStr) {
                 throw new \InvalidArgumentException('Appointment date is required.');
             }
             $date = Carbon::parse($dateStr)->toDateString();
 
-            $rawTime = $data['appointment_time'] ?? ($data['start_time'] ?? null);
+            $rawTime = $data->appointmentTime;
             if (! $rawTime) {
                 throw new \InvalidArgumentException('Appointment time is required.');
             }
             $startTime = substr(trim((string) $rawTime), 0, 5); // HH:MM
 
             // Resolve barber
-            $barberId = ! empty($data['barber_id'])
-                ? (int) $data['barber_id']
+            $barberId = $data->barberId
+                ? $data->barberId
                 : (Barber::where('is_available', true)->value('id') ?? 1);
             // Serialize bookings per barber before checking an empty slot. Appointment-row
             // locks alone cannot protect a slot that has no appointment yet.
@@ -58,27 +58,22 @@ class BookingService
                 ->firstOrFail();
 
             // Resolve service(s)
-            $serviceId = (int) ($data['service_id'] ?? 1);
+            $serviceId = $data->serviceId;
             $service = Service::findOrFail($serviceId);
 
             $services = collect([$service]);
-            if (! empty($data['services']) && is_array($data['services'])) {
-                $additionalIds = collect($data['services'])->pluck('id')->filter()->toArray();
-                if (! empty($additionalIds)) {
-                    $services = Service::whereIn('id', array_unique(array_merge([$serviceId], $additionalIds)))->get();
-                }
-            }
+            // Multi-service logic can be expanded if BookingData supports it in future.
 
             $totalDurationMinutes = (int) $services->sum('duration_minutes') ?: 30;
             $totalAmount = (float) $services->sum('price');
 
             // Handle home service travel calculation
-            $type = $data['appointment_type'] ?? 'in_shop';
+            $type = $data->appointmentType ?? 'in_shop';
             $travelFee = 0.0;
             $zoneId = null;
 
             if ($type === 'home_service') {
-                $zoneId = $data['service_zone_id'] ?? ($data['destination_address']['service_zone_id'] ?? null);
+                $zoneId = $data->destinationAddress['service_zone_id'] ?? null;
                 $zone = $zoneId ? ServiceZone::find($zoneId) : ServiceZone::where('is_active', true)->first();
                 $zoneId = $zone?->id;
                 $travelFee = (float) ($zone?->base_travel_fee ?? 1500.0);
@@ -160,11 +155,11 @@ class BookingService
 
             $appointment = Appointment::create([
                 'booking_reference' => $bookingReference,
-                'branch_id' => $data['branch_id'] ?? 1,
+                'branch_id' => 1, // Branch removed from DTO to simplify, usually defaults to 1
                 'customer_id' => $customer->id,
-                'client_name' => $data['client_name'] ?? ($customer->real_name ?: $customer->name),
-                'client_phone' => $data['client_phone'] ?? ($customer->phone ?: ''),
-                'client_email' => $data['client_email'] ?? $customer->email,
+                'client_name' => $data->clientName ?? ($customer->real_name ?: $customer->name),
+                'client_phone' => $data->clientPhone ?? ($customer->phone ?: ''),
+                'client_email' => $customer->email,
                 'barber_id' => $barber->id,
                 'service_id' => $service->id,
                 'service_zone_id' => $zoneId,
@@ -178,8 +173,8 @@ class BookingService
                 'travel_fee' => $travelFee,
                 'grand_total' => $grandTotal,
                 'status' => AppointmentStatus::pending->value,
-                'notes' => $data['notes'] ?? null,
-                'deposit_paid' => ($data['payment_method'] ?? '') === 'pay_at_venue',
+                'notes' => $data->notes,
+                'deposit_paid' => $data->paymentMethod === 'pay_at_venue',
                 'deposit_amount' => 0.0,
             ]);
 
@@ -220,12 +215,12 @@ class BookingService
      *
      * @throws BookingSlotUnavailableException
      */
-    public function createWalkIn(User $actor, Barber $barber, array $data): Appointment
+    public function createWalkIn(User $actor, Barber $barber, BookingData $data): Appointment
     {
         return DB::transaction(function () use ($actor, $barber, $data) {
-            $service = Service::findOrFail((int) $data['service_id']);
-            $date = Carbon::parse($data['appointment_date'] ?? now())->toDateString();
-            $startTime = substr(trim((string) ($data['appointment_time'] ?? now()->format('H:i'))), 0, 5);
+            $service = Service::findOrFail($data->serviceId);
+            $date = Carbon::parse($data->appointmentDate)->toDateString();
+            $startTime = substr(trim((string) $data->appointmentTime), 0, 5);
             $durationMinutes = (int) ($service->duration_minutes ?: 30);
             $endTime = Carbon::parse("{$date} {$startTime}")->addMinutes($durationMinutes)->format('H:i');
 
@@ -251,14 +246,14 @@ class BookingService
             }
 
             $bookingReference = 'CC-'.strtoupper(Str::random(6));
-            $initialStatus = ! empty($data['take_immediately']) ? 'in_progress' : 'confirmed';
+            $initialStatus = $data->takeImmediately ? 'in_progress' : 'confirmed';
 
             $appointment = Appointment::create([
                 'booking_reference' => $bookingReference,
                 'branch_id' => 1,
                 'customer_id' => null, // Guest walk-in
-                'client_name' => $data['customer_name'] ?? ($data['client_name'] ?? 'Walk-In Guest'),
-                'client_phone' => $data['customer_phone'] ?? ($data['client_phone'] ?? ''),
+                'client_name' => $data->clientName ?? 'Walk-In Guest',
+                'client_phone' => $data->clientPhone ?? '',
                 'client_email' => 'walkin@candycutz.com',
                 'barber_id' => $barber->id,
                 'service_id' => $service->id,
@@ -274,7 +269,7 @@ class BookingService
                 'status' => $initialStatus,
                 'deposit_paid' => true,
                 'deposit_amount' => (float) $service->price,
-                'notes' => $data['notes'] ?? 'Walk-in guest',
+                'notes' => $data->notes ?? 'Walk-in guest',
             ]);
 
             // Audit
