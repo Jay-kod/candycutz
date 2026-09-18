@@ -42,4 +42,7 @@ export const adminApi = {
   verifications: (params) => client.get('/admin/verifications', { params }),
   verifyAppointment: (id) => client.patch(`/admin/verifications/${id}/verify`),
   verificationStats: () => client.get('/admin/verifications/stats'),
+  gateMetrics: () => client.get('/admin/gate/metrics'),
+  gateLogs: (params) => client.get('/admin/gate/logs', { params }),
+  flushGate: (data) => client.post('/admin/gate/flush', data),
 };

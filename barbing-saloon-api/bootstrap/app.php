@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiGateMiddleware;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\LogApiRequest;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'force.https' => ForceHttps::class,
             'security.headers' => SecurityHeaders::class,
             'log.api.request' => LogApiRequest::class,
+            'api.gate' => ApiGateMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

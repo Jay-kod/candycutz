@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 // Canonical API v1 Routes (/api/v1/*)
 Route::prefix('v1')
-    ->middleware(['throttle:120,1', 'security.headers'])
+    ->middleware(['api.gate', 'throttle:api', 'security.headers'])
     ->group(function () {
         Route::get('/health', [HealthApiController::class, 'health']);
 

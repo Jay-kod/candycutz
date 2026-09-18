@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AdminApiController;
+use App\Http\Controllers\Api\V1\GateApiController;
 use App\Http\Controllers\Api\V1\SuperAdminApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminApiController::class, 'dashboard']);
+    Route::get('/admin/gate/metrics', [GateApiController::class, 'metrics']);
+    Route::get('/admin/gate/logs', [GateApiController::class, 'logs']);
+    Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
     Route::post('/admin/test-email', [AdminApiController::class, 'testEmail']);
