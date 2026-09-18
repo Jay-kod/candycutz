@@ -35,7 +35,7 @@ if errorlevel 1 (
     echo WARNING: staged patch contains whitespace errors. Continuing with upload.
 )
 
-set "MESSAGE=%*"
+set "MESSAGE=%~1"
 if not defined MESSAGE set "MESSAGE=chore: upload latest changes"
 
 git commit -m "%MESSAGE%"
