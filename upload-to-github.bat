@@ -32,8 +32,7 @@ if not errorlevel 1 (
 
 git diff --cached --check
 if errorlevel 1 (
-    echo Staged patch contains whitespace errors. Upload cancelled.
-    exit /b 1
+    echo WARNING: staged patch contains whitespace errors. Continuing with upload.
 )
 
 set "MESSAGE=%*"

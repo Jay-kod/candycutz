@@ -20,6 +20,8 @@ composer.phar
 storage/logs/
 *.sqlite
 .phpunit.result.cache
+barbing-saloon-api/storage/phpstan/
+barbing-saloon-api/routes_list.txt
 
 # Laravel storage framework
 barbing-saloon-api/storage/framework/cache/*
