@@ -88,14 +88,35 @@ Every index in the schema is designed for specific query access patterns:
 
 | Table | Index Columns | Purpose |
 |---|---|---|
+| `working_hours` | `(barber_id, day_of_week)` | O(1) barber shift & availability resolution during booking slot calculation. |
+| `users` | `(role, status)` | High-throughput filtering of users by role (customers, barbers, admins) and status. |
+| `users` | `phone` | Fast phone-based authentication, guest customer lookup, and SMS dispatch. |
+| `barbers` | `(is_available, display_order)` | Public barber directory display with custom ordering. |
+| `barbers` | `chair_status` | Real-time chair availability filtering (`available`, `busy`, `on_break`, `offline`). |
+| `services` | `(is_active, category_id, display_order)` | Catalog browsing filtered by category and active status. |
+| `services` | `(is_active, is_featured)` | Homepage featured services showcase. |
 | `appointments` | `(barber_id, appointment_date, status)` | Fast slot computation and double-booking conflict checks in `BookingService`. |
-| `appointments` | `(user_id, status)` | Optimized customer history and active booking lookups. |
+| `appointments` | `(customer_id, status)` | Optimized customer history and active booking lookups. |
 | `appointments` | `(appointment_date, status)` | Daily salon operational reports and admin dashboard metrics. |
-| `payments` | `reference` (UNIQUE) | Guaranteed idempotency on payment gateway webhooks and verification lookups. |
+| `appointments` | `(client_phone, appointment_date)` | Guest customer booking lookups by phone. |
+| `appointments` | `(client_email, appointment_date)` | Guest customer booking lookups by email. |
+| `appointments` | `created_at` | Rapid pagination and reverse chronological sorting on appointment lists. |
+| `payments` | `transaction_ref` (UNIQUE) | Guaranteed idempotency on payment gateway webhooks and verification lookups. |
 | `payments` | `(appointment_id, status)` | Rapid resolution of booking payment state and receipt downloads. |
-| `device_tokens` | `(user_id, token)` (UNIQUE) | Prevents duplicate device registrations while enabling multi-device broadcast. |
-| `barber_schedules` | `(barber_id, day_of_week)` | Instant calendar template resolution. |
-| `blocked_periods` | `(barber_id, starts_at, ends_at)` | Interval overlap querying during availability filtering. |
+| `payments` | `(status, created_at)` | Admin payment verification queue and reconciliation. |
+| `payments` | `(status, sla_expires_at)` | Manual bank transfer SLA expiration monitoring and alerting. |
+| `payments` | `(customer_id, created_at)` | Customer payment transaction history lookups. |
+| `payments` | `verified_by_user_id` | Audit trail lookups of manual transfer verifications by admin. |
+| `notifications` | `(recipient_id, is_read, created_at)` | Instant unread notifications badge calculation and chronological feed. |
+| `testimonials` | `(is_approved, is_featured)` | Public website testimonials carousel filter. |
+| `testimonials` | `(barber_id, is_approved)` | Barber-specific approved testimonials. |
+| `gallery` | `(is_featured, display_order)` | Homepage showcase gallery. |
+| `gallery` | `(category, display_order)` | Category-filtered portfolio browsing. |
+| `blog_posts` | `(status, published_at)` | Public blog listing sorted chronologically by published date. |
+| `audit_logs` | `(module, created_at)` | Module-specific audit log review. |
+| `audit_logs` | `(user_id, created_at)` | User-specific security audit trail. |
+| `device_tokens` | `(user_id, token)` / `token` (UNIQUE) | Prevents duplicate device registrations while enabling multi-device broadcast. |
+| `blocked_periods` | `(barber_id, start_datetime, end_datetime)` | Interval overlap querying during availability filtering. |
 
 ---
 
