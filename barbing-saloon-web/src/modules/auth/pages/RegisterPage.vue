@@ -180,7 +180,12 @@ const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
 const loading = ref(false);
-const errors = reactive({});
+const errors = reactive({
+  name: '',
+  phone: '',
+  email: '',
+  password: '',
+});
 const generalError = ref('');
 
 const schema = object({

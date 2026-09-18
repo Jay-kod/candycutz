@@ -101,7 +101,9 @@ const email = ref('');
 const loading = ref(false);
 const message = ref('');
 const generalError = ref('');
-const errors = reactive({});
+const errors = reactive({
+  email: '',
+});
 
 const schema = object({
   email: string().required('Email is required').email('Enter a valid email'),

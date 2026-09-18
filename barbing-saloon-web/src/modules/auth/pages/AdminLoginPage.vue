@@ -203,7 +203,10 @@ const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
 const generalError = ref('');
-const errors = reactive({});
+const errors = reactive({
+  email: '',
+  password: '',
+});
 
 const schema = object({
   email: string().required('Email is required').email('Enter a valid email'),

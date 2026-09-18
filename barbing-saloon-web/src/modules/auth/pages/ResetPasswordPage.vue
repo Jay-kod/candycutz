@@ -116,7 +116,10 @@ const passwordConfirmation = ref('');
 const loading = ref(false);
 const message = ref('');
 const generalError = ref('');
-const errors = reactive({});
+const errors = reactive({
+  password: '',
+  password_confirmation: '',
+});
 
 const schema = object({
   password: string().required('Password is required').min(8, 'Password must be at least 8 characters'),
