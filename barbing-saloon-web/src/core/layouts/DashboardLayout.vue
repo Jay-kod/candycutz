@@ -47,6 +47,7 @@ import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
 import DashboardSidebar from './components/DashboardSidebar.vue';
 import DashboardHeader from './components/DashboardHeader.vue';
+import { getStorageUrl } from '@/core/utils/url';
 
 const props = defineProps({
   portalName: { type: String, default: 'Portal' },
@@ -198,12 +199,10 @@ const userInitials = computed(() => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 });
 
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
-
 const userAvatarUrl = computed(() => {
   const avatar = authStore.user?.avatar;
   if (!avatar) return null;
-  return avatar.startsWith('http') ? avatar : API_ROOT + avatar;
+  return getStorageUrl(avatar);
 });
 
 const scrollToActiveItem = async () => {

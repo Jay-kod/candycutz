@@ -122,6 +122,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { InformationCircleIcon, CheckIcon, PhotoIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline';
+import { getStorageUrl } from '@/core/utils/url';
 
 const toast = useToast();
 const saving = ref(false);
@@ -147,10 +148,6 @@ const previewShopUrl = computed(() => {
   return null;
 });
 
-const getStorageUrl = (path) => {
-  if (!path) return '';
-  return `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/storage/${path}`;
-};
 
 const handleShopImageUpload = (event) => {
   const file = event.target.files[0];

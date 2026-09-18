@@ -124,8 +124,7 @@ import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';
-
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+import { getStorageUrl } from '@/core/utils/url';
 
 const toast = useToast();
 const authStore = useAuthStore();
@@ -221,7 +220,7 @@ async function loadProfile() {
   history.value = response.data.data.history;
 
   if (profile.avatar) {
-    avatarPreview.value = profile.avatar.startsWith('http') ? profile.avatar : API_ROOT + profile.avatar;
+    avatarPreview.value = getStorageUrl(profile.avatar);
   } else {
     avatarPreview.value = null;
   }

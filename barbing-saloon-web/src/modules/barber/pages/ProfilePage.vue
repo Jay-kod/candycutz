@@ -130,10 +130,10 @@ import { UserIcon, CameraIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { useToast } from '../../../core/composables/useToast'
 import { useAuthStore } from '../../auth/store/auth.store'
 import BarberSpecialtiesCard from '../components/profile/BarberSpecialtiesCard.vue'
+import { getStorageUrl } from '@/core/utils/url'
 
 const toast = useToast()
 const authStore = useAuthStore()
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'
 
 const form = reactive({ 
   name: '', 
@@ -197,9 +197,7 @@ async function submit() {
     
     const response = await barberApi.updateProfile(formData)
     if (response.data?.profile_image) {
-      form.profile_image = response.data.profile_image.startsWith('http') 
-        ? response.data.profile_image 
-        : API_ROOT + response.data.profile_image
+      form.profile_image = getStorageUrl(response.data.profile_image)
     }
     await authStore.fetchUser()
     toast.success('Profile saved successfully!')
@@ -231,13 +229,7 @@ onMounted(async () => {
           'Accessible Care Cut'
         ]
       
-    if (profile.profile_image) {
-      form.profile_image = profile.profile_image.startsWith('http') 
-        ? profile.profile_image 
-        : API_ROOT + profile.profile_image
-    } else {
-      form.profile_image = null
-    }
+    form.profile_image = profile.profile_image ? getStorageUrl(profile.profile_image) : null
     
   } catch (e) {
     form.name = 'Obo Shadow'

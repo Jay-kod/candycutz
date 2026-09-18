@@ -96,6 +96,7 @@ import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const barbers = ref([]);
 const isLoading = ref(true);
@@ -110,23 +111,6 @@ const teamTitle = ref('Meet the team');
 const teamSubtitle = ref('Our barbers are masters of their craft, bringing years of experience and a passion for perfection to every cut.');
 
 const { init: initScrollReveal } = useScrollReveal();
-
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('data:')) return path;
-  
-  const baseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
-  
-  if (path.startsWith('/uploads/') || path.startsWith('/storage/')) {
-    return `${baseUrl}${path}`;
-  }
-  if (path.startsWith('uploads/') || path.startsWith('storage/')) {
-    return `${baseUrl}/${path}`;
-  }
-  
-  return path.startsWith('/') ? `${baseUrl}/storage${path}` : `${baseUrl}/storage/${path}`;
-};
 
 const fetchSettings = async () => {
   try {

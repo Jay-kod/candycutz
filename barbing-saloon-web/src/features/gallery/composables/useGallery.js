@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
 import api from '@/shared/api/client';
+import { getStorageUrl } from '@/core/utils/url';
 
 export function useGallery(role = 'admin') {
   const toast = useToast();
@@ -84,10 +85,7 @@ export function useGallery(role = 'admin') {
   };
 
   const getImageUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    if (path.startsWith('/images/')) return path;
-    return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
+    return getStorageUrl(path);
   };
 
   return {

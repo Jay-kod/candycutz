@@ -94,6 +94,7 @@ import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { publicApi } from '@/shared/api/old_publicApi';
+import { getStorageUrl } from '@/core/utils/url';
 
 const { init: initScrollReveal } = useScrollReveal();
 
@@ -117,22 +118,6 @@ const portalTitle = ref('The CandyCutz Portal');
 const portalSubtitle = ref('Unlock the Full Experience');
 const portalText = ref('Create an account to browse our extensive list of services, check barber availability in real-time, view our exclusive gallery, and manage your appointments seamlessly from your own personalized dashboard.');
 
-const getStorageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('data:')) return path;
-  
-  const baseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
-  
-  if (path.startsWith('/uploads/') || path.startsWith('/storage/')) {
-    return `${baseUrl}${path}`;
-  }
-  if (path.startsWith('uploads/') || path.startsWith('storage/')) {
-    return `${baseUrl}/${path}`;
-  }
-  
-  return path.startsWith('/') ? `${baseUrl}/storage${path}` : `${baseUrl}/storage/${path}`;
-};
 
 const fetchSettings = async () => {
   try {

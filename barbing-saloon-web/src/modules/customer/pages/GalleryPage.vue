@@ -83,6 +83,7 @@ import { onMounted, ref, nextTick } from 'vue';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const gallery = ref([]);
 const isLoading = ref(true);
@@ -117,13 +118,6 @@ function prevImage() {
   if (currentIdx.value > 0) {
     currentIdx.value--;
   }
-}
-
-function getImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/images/')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
 }
 
 onMounted(async () => {

@@ -129,4 +129,26 @@ class AppointmentApiController
             return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
         }
     }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $appointment = Appointment::findOrFail($id);
+        $this->authorize('manageForBarber', $appointment);
+
+        $reason = $request->input('reason', 'Appointment approved');
+        $this->bookingService->transitionStatus($appointment, AppointmentStatus::confirmed->value, $request->user(), $reason);
+
+        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment approved successfully.');
+    }
+
+    public function forceApprove(Request $request, int $id): JsonResponse
+    {
+        $appointment = Appointment::findOrFail($id);
+        $this->authorize('manageForBarber', $appointment);
+
+        $reason = $request->input('reason', 'Appointment force-approved');
+        $this->bookingService->transitionStatus($appointment, AppointmentStatus::confirmed->value, $request->user(), $reason);
+
+        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment force-approved successfully.');
+    }
 }

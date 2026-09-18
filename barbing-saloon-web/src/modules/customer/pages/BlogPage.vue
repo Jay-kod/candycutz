@@ -94,6 +94,7 @@ import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const posts = ref([]);
 const isLoading = ref(true);
@@ -104,13 +105,6 @@ const formatDate = (dateString) => {
   if (!dateString) return '';
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(dateString).toLocaleDateString('en-US', options);
-};
-
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/images/')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
 };
 
 onMounted(async () => {

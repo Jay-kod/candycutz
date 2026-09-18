@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onUnmounted, watch } from 'vue'
 import { XMarkIcon, CheckIcon, XCircleIcon, ArrowPathIcon, DocumentIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
+import api from '@/shared/api/client'
+import { API_V1_BASE_URL } from '@/core/utils/url'
 
 const props = defineProps({
   booking: {
@@ -18,8 +20,6 @@ const emit = defineEmits(['close', 'approve', 'reject'])
 const isProcessing = ref(false)
 const error = ref('')
 const receiptSrc = ref(null)
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || window.location.origin
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 let receiptObjectUrl = null
 
@@ -34,7 +34,7 @@ const loadReceipt = async () => {
 
   try {
     const token = localStorage.getItem('candycutz_auth_token')
-    const response = await fetch(`${API_BASE_URL}/payments/appointments/${props.booking.id}/receipt`, {
+    const response = await fetch(`${API_V1_BASE_URL}/payments/appointments/${props.booking.id}/receipt`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!response.ok) throw new Error('Unable to load receipt.')
@@ -59,37 +59,25 @@ const verifyPayment = async (action) => {
   error.value = ''
   
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    let endpoint, method, body;
-    
     if (props.portal === 'barber') {
-      endpoint = `/barber/bookings/${props.booking.id}/verify-payment`
-      method = 'POST'
-      body = JSON.stringify({ action: action === 'approve' ? 'approve' : 'reject' })
+      await api.patch(`/v1/appointments/${props.booking.id}/status`, {
+        status: action === 'approve' ? 'confirmed' : 'cancelled',
+        reason: action === 'approve' ? 'Payment confirmed by barber' : 'Receipt rejected by barber'
+      })
     } else {
-      endpoint = action === 'approve'
-        ? `/admin/appointments/${props.booking.id}/approve`
-        : `/admin/appointments/${props.booking.id}/cancel`
-      method = 'PATCH'
-      body = undefined
+      if (action === 'approve') {
+        await api.patch(`/v1/admin/verifications/${props.booking.id}/verify`)
+      } else {
+        await api.post(`/v1/appointments/${props.booking.id}/cancel`, {
+          reason: 'Receipt rejected by admin'
+        })
+      }
     }
-    
-    const res = await fetch(`${API_ROOT}${endpoint}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body
-    })
-    
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Verification failed')
     
     emit(action === 'approve' ? 'approve' : 'reject')
     emit('close')
   } catch (err) {
-    error.value = err.message
+    error.value = err.response?.data?.message || err.message || 'Verification failed'
   } finally {
     isProcessing.value = false
   }

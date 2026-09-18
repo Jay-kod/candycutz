@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftIcon, CheckIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { barberApi } from '@/shared/api/old_barberApi';
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue'
+import api from '@/shared/api/client'
+import { API_V1_BASE_URL } from '@/core/utils/url'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,8 +16,7 @@ const isLoading = ref(true)
 const isProcessing = ref(false)
 const error = ref('')
 const receiptSrc = ref(null)
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || window.location.origin
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+let receiptObjectUrl = null
 
 const fetchBooking = async () => {
   isLoading.value = true
@@ -54,8 +55,6 @@ onMounted(() => {
   fetchBooking()
 })
 
-let receiptObjectUrl = null
-
 const loadReceipt = async () => {
   if (receiptObjectUrl) {
     URL.revokeObjectURL(receiptObjectUrl)
@@ -67,7 +66,7 @@ const loadReceipt = async () => {
 
   try {
     const token = localStorage.getItem('candycutz_auth_token')
-    const response = await fetch(`${API_BASE_URL}/payments/appointments/${booking.value.id}/receipt`, {
+    const response = await fetch(`${API_V1_BASE_URL}/payments/appointments/${booking.value.id}/receipt`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!response.ok) throw new Error('Unable to load receipt.')
@@ -92,22 +91,14 @@ const verifyPayment = async (action) => {
   error.value = ''
   
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    const res = await fetch(`${API_ROOT}/barber/bookings/${booking.value.id}/verify-payment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ action: action === 'approve' ? 'approve' : 'reject' })
+    await api.patch(`/v1/appointments/${booking.value.id}/status`, {
+      status: action === 'approve' ? 'confirmed' : 'cancelled',
+      reason: action === 'approve' ? 'Payment confirmed by barber' : 'Receipt rejected by barber'
     })
-    
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Verification failed')
     
     router.push('/barber/payments')
   } catch (err) {
-    error.value = err.message
+    error.value = err.response?.data?.message || err.message || 'Verification failed'
   } finally {
     isProcessing.value = false
   }

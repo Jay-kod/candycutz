@@ -101,6 +101,7 @@ import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { PlusIcon, PencilIcon, PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
+import { getStorageUrl } from '@/core/utils/url';
 
 const router = useRouter();
 const toast = useToast();
@@ -109,10 +110,7 @@ const loading = ref(true);
 const posts = ref([]);
 
 function getImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/images/')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
+  return getStorageUrl(path);
 }
 
 function openEditor(post = null) {

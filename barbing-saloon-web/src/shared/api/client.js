@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { useToast } from '@/core/composables/useToast';
+import { API_BASE_URL } from '@/core/utils/url';
 
 const toast = useToast();
 
 export function setupAxiosInterceptors() {
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    baseURL: API_BASE_URL,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
@@ -16,6 +17,18 @@ export function setupAxiosInterceptors() {
   // Request interceptor
   api.interceptors.request.use(
     (config) => {
+      // Normalize requested URL to guarantee clean /v1/ routing without double prefixes
+      if (config.url) {
+        let url = config.url;
+        if (url.startsWith('/api/v1/')) {
+          config.url = url.replace('/api/v1/', '/v1/');
+        } else if (url.startsWith('api/v1/')) {
+          config.url = `/${url.replace('api/v1/', 'v1/')}`;
+        } else if (!url.startsWith('/v1/') && !url.startsWith('http://') && !url.startsWith('https://')) {
+          config.url = `/v1/${url.replace(/^\/+/, '')}`;
+        }
+      }
+
       const token = localStorage.getItem('candycutz_auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;

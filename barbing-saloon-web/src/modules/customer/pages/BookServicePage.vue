@@ -111,6 +111,7 @@ import {
   ClockIcon, 
   CurrencyDollarIcon
 } from '@heroicons/vue/24/outline'
+import { getStorageUrl as getFullImageUrl } from '@/core/utils/url'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,20 +128,12 @@ const loadingService = ref(true)
 const loadingSlots = ref(false)
 const isSubmitting = ref(false)
 
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'
-
 const todayStr = new Date().toISOString().split('T')[0]
 
 const selectedBarberName = computed(() => {
   const b = barbers.value.find(item => item.id === form.barber_id)
   return b ? b.name : (service.value?.barber?.name || 'Any Master Barber')
 })
-
-function getFullImageUrl(path) {
-  if (!path) return ''
-  if (path.startsWith('http')) return path
-  return `${API_ROOT}${path.startsWith('/') ? '' : '/'}${path}`
-}
 
 function selectBarber(id) {
   form.barber_id = id

@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
+import { getStorageUrl as resolveStorageUrl } from '@/core/utils/url';
 
 export function useCmsSettings() {
   const toast = useToast();
@@ -47,8 +48,7 @@ export function useCmsSettings() {
   });
 
   const getStorageUrl = (path) => {
-    if (!path) return '';
-    return `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/storage/${path}`;
+    return resolveStorageUrl(path);
   };
 
   const fetchSettings = async () => {

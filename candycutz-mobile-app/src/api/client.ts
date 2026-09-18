@@ -76,6 +76,19 @@ export const apiClient = axios.create({
 // Request interceptor to attach Bearer token
 apiClient.interceptors.request.use(
   async (config) => {
+    // Prevent double /api/v1 or /v1 prefixes if endpoint includes them
+    if (config.url) {
+      if (config.url.startsWith('/api/v1/')) {
+        config.url = config.url.replace('/api/v1/', '/');
+      } else if (config.url.startsWith('api/v1/')) {
+        config.url = `/${config.url.replace('api/v1/', '')}`;
+      } else if (config.url.startsWith('/v1/')) {
+        config.url = config.url.replace('/v1/', '/');
+      } else if (config.url.startsWith('v1/')) {
+        config.url = `/${config.url.replace('v1/', '')}`;
+      }
+    }
+
     try {
       const token = await tokenStorage.get();
       if (token) {

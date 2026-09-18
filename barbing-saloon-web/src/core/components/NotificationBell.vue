@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { BellIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import api from '@/shared/api/client'
 
 const router = useRouter()
 const route = useRoute()
@@ -11,22 +12,15 @@ const unreadCount = ref(0)
 const isOpen = ref(false)
 let pollInterval = null
 
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
-
 const fetchNotifications = async () => {
   try {
     const token = localStorage.getItem('candycutz_auth_token')
     if (!token) return
     
-    const res = await fetch(`${API_ROOT}/notifications`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    
-    if (res.ok) {
-      const data = await res.json()
-      notifications.value = data.data
-      unreadCount.value = data.data.filter(n => !n.is_read).length
-    }
+    const res = await api.get('/v1/notifications')
+    const list = res.data?.data || []
+    notifications.value = list
+    unreadCount.value = list.filter(n => !n.is_read).length
   } catch (err) {
     console.error('Failed to fetch notifications:', err)
   }
@@ -34,11 +28,7 @@ const fetchNotifications = async () => {
 
 const markAsRead = async (id) => {
   try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    await fetch(`${API_ROOT}/notifications/${id}/read`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    await api.patch(`/v1/notifications/${id}/read`)
     // Optimistic update
     const n = notifications.value.find(n => n.id === id)
     if (n) {
@@ -50,8 +40,14 @@ const markAsRead = async (id) => {
   }
 }
 
-const markAllRead = () => {
-  notifications.value.filter(n => !n.is_read).forEach(n => markAsRead(n.id))
+const markAllRead = async () => {
+  try {
+    await api.patch('/v1/notifications/read-all')
+    notifications.value.forEach(n => { n.is_read = true })
+    unreadCount.value = 0
+  } catch (err) {
+    notifications.value.filter(n => !n.is_read).forEach(n => markAsRead(n.id))
+  }
 }
 
 const toggleOpen = () => {

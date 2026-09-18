@@ -198,13 +198,10 @@ import { useRoute } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
-
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+import { getStorageUrl } from '@/core/utils/url';
 
 function getFullImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${API_ROOT}${path.startsWith('/') ? '' : '/'}${path}`;
+  return getStorageUrl(path);
 }
 
 const route = useRoute();
@@ -220,10 +217,7 @@ const currentIdx = ref(0);
 const lightboxRef = ref(null);
 
 function getImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/images/')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
+  return getStorageUrl(path);
 }
 
 onMounted(async () => {

@@ -43,3 +43,15 @@ it('characterises PATCH /appointments/{id}/status', function () {
     $response = $this->actingAs($user)->patchJson('/api/v1/appointments/999/status', []);
     expect(in_array($response->status(), [200, 422, 404, 500, 403]))->toBeTrue();
 });
+
+it('characterises PATCH /appointments/{id}/approve', function () {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->patchJson('/api/v1/appointments/999/approve', []);
+    expect(in_array($response->status(), [200, 422, 404, 500, 403]))->toBeTrue();
+});
+
+it('characterises PATCH /appointments/{id}/force-approve', function () {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->patchJson('/api/v1/appointments/999/force-approve', []);
+    expect(in_array($response->status(), [200, 422, 404, 500, 403]))->toBeTrue();
+});

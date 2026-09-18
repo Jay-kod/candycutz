@@ -82,6 +82,7 @@ import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useToast } from '../../../core/composables/useToast';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';
+import { getStorageUrl } from '@/core/utils/url';
 
 const router = useRouter();
 const route = useRoute();
@@ -102,10 +103,7 @@ const form = reactive({
 });
 
 function getImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/images/')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}${path}`;
+  return getStorageUrl(path);
 }
 
 function onFileSelected(event) {

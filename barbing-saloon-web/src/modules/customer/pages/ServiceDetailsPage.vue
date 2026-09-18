@@ -97,6 +97,7 @@ import { publicApi } from '@/shared/api/old_publicApi'
 import ServiceGallerySection from '../components/services/ServiceGallerySection.vue'
 import ServiceBookingCard from '../components/services/ServiceBookingCard.vue'
 import ServiceReviewsSection from '../components/services/ServiceReviewsSection.vue'
+import { getStorageUrl as getFullImageUrl } from '@/core/utils/url'
 
 const route = useRoute()
 
@@ -116,14 +117,6 @@ const images = computed(() => {
   if (service.value.image3) imgs.push(service.value.image3)
   return imgs
 })
-
-const API_ROOT = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'
-
-function getFullImageUrl(path) {
-  if (!path) return ''
-  if (path.startsWith('http')) return path
-  return `${API_ROOT}${path.startsWith('/') ? '' : '/'}${path}`
-}
 
 const averageRating = computed(() => {
   if (!reviews.value.length) return '0.0'
