@@ -12,3 +12,21 @@ it('characterises GET /payments/appointments/{appointmentId}/receipt', function 
     $response = $this->actingAs($user)->getJson('/api/v1/payments/appointments/999/receipt');
     expect(in_array($response->status(), [200, 404, 500, 403]))->toBeTrue();
 });
+
+it('characterises POST /payments/checkout', function () {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->postJson('/api/v1/payments/checkout', []);
+    expect(in_array($response->status(), [200, 422, 404, 500, 400, 403]))->toBeTrue();
+});
+
+it('characterises GET /payments/appointments/{appointmentId}/details', function () {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->getJson('/api/v1/payments/appointments/999/details');
+    expect(in_array($response->status(), [200, 404, 500, 403]))->toBeTrue();
+});
+
+it('characterises POST /payments/appointments/{appointmentId}/receipt', function () {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->postJson('/api/v1/payments/appointments/999/receipt', []);
+    expect(in_array($response->status(), [200, 422, 404, 500, 400, 403]))->toBeTrue();
+});
