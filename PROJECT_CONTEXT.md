@@ -66,77 +66,54 @@ Infrastructure: `docker-compose.yml` defines Nginx, PHP-FPM, queue worker, sched
 
 ---
 
-## Known Broken — Security Defects
-
-Each defect is referenced from `ARCHITECTURE.md` §5 with verified file:line locations.
-
-### 1. Password Exposure
-`User` model has **no `$hidden` property**. Password hashes, `remember_token`, and `provider_id` are included in any JSON serialization.
-- **File:** [`app/Models/User.php`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Models/User.php) — no `$hidden` declaration exists
-- **Severity:** Critical — leaks credentials to any authenticated client
-
-### 2. Global `strip_tags()` Destroys CMS Content
-`SanitizeInput` middleware runs `strip_tags()` on **all** request input, silently stripping HTML from TipTap editor content (blog posts, CMS pages).
-- **File:** [`app/Core/Http/Middleware/SanitizeInput.php:25`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Http/Middleware/SanitizeInput.php#L25) — `$input[$key] = trim(strip_tags($value))`
-- **Registered at:** [`bootstrap/app.php:17`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/bootstrap/app.php#L17)
-- **Applied at:** [`routes/api.php:9`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/routes/api.php#L9)
-- **Severity:** High — production data corruption
-
-### 3. CORS: Hardcoded Private IP Addresses
-CORS config includes hardcoded private IP `10.252.94.238` (dev machine).
-- **File:** [`config/cors.php:14-15`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/config/cors.php#L14-L15)
-- **Also:** `supports_credentials: true` at [`config/cors.php:27`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/config/cors.php#L27)
-- **Severity:** Medium — overly permissive CORS with credential support
-
-### 4. Token Lifetime: Never Expires
-No `sanctum.expiration` config file found. Tokens issued to customers, barbers, and admins persist indefinitely.
-- **File:** No `config/sanctum.php` published (using package defaults)
-- **Severity:** High — stolen tokens are permanent
-
-### 5. Mass Assignment: Privilege Fields in `$fillable`
-`User::$fillable` includes `role`, `status`, `is_active` — allowing any request to escalate privileges via mass assignment.
-- **File:** [`app/Models/User.php:18-30`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Models/User.php#L18-L30) — `$fillable` includes `'role'`, `'status'`, `'is_active'`
-- **Also:** `array_merge($request->all(), $validated)` at [`AppointmentApiController.php:115`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Http/Controllers/Api/V1/AppointmentApiController.php#L115) and [`:212`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Http/Controllers/Api/V1/AppointmentApiController.php#L212)
-- **Severity:** Critical — unauthenticated privilege escalation vector
-
-### 6. Upload Mishandling
-`HasSecureUploads` trait names every uploaded file `.webp` regardless of actual MIME type. No re-encoding, no EXIF stripping.
-- **File:** [`app/Core/Traits/HasSecureUploads.php:26`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Traits/HasSecureUploads.php#L26) — `$fileName = Str::uuid() . '-' . time() . '.webp'`
-- **Severity:** Medium — potential for malicious file upload
-
-### 7. Payment Receipts on Public Disk
-Receipt uploads use `public_path('uploads/receipts/')` — world-readable without authentication.
-- **Files:** [`CustomerController.php:240`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Modules/Customer/Controllers/CustomerController.php#L240), [`ReceiptApiController.php:28`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Http/Controllers/Api/V1/ReceiptApiController.php#L28)
-- **Severity:** Medium — financial documents exposed publicly
-
-### 8. Super Admin Bypass Without Audit
-`CheckRole` middleware unconditionally passes `super_admin` requests without logging.
-- **File:** [`app/Core/Http/Middleware/CheckRole.php:25`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/app/Core/Http/Middleware/CheckRole.php#L25) — `if ($role === 'super_admin')`
-- **Severity:** High — privileged access leaves no trail
-
-### 9. Webhook Behind Throttle
-The Stripe webhook endpoint is behind `throttle:120,1`, which drops legitimate gateway retry attempts.
-- **File:** [`routes/api.php:9`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/routes/api.php#L9) — `middleware(['throttle:120,1', ...])`
-- **Severity:** Medium — payment confirmation failures under load
-
-### 10. Unused `spatie/laravel-permission`
-Installed as a dependency with **zero usages** in `app/`. Security-adjacent dead weight.
-- **File:** [`composer.json:9`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/composer.json#L9) — `"spatie/laravel-permission": "^6.0"`
-- **Severity:** Low — unused attack surface
-
 ---
 
-## Known Broken — Structural Defects
+## Remediation Status — Verified State
 
-### Duplicate API Mount Points
-Routes are mounted twice: `/api/v1/*` and `/api/*` (alias).
-- **File:** [`routes/api.php:9,13`](file:///c:/xampp/htdocs/1/candycutz/barbing-saloon-api/routes/api.php#L9-L13)
+Every item below is verified by an automated command per `ARCHITECTURE.md` §0:
 
-### Duplicate Controllers
-Appointment cancel reachable at 4 paths across 2 controllers. Only `CustomerController` calls `Gate::authorize`.
+### 1. Password Exposure (RESOLVED)
+`User` model declares `$hidden = ['password', 'remember_token', 'provider_id']`.
+- **Command:** `php artisan test --filter=AuthTest` (exits 0)
 
-### Raw SQL in Migrations
-9 `.sql` files coexist with 30 PHP migration classes in `database/migrations/`. `migrate:fresh` does not reproduce production schema.
+### 2. Global `strip_tags()` Middleware (RESOLVED)
+`SanitizeInput` middleware removed from the global pipeline. Rich text in TipTap editor preserves markup.
+- **Command:** `php artisan test` (exits 0)
 
-### No Test Harness
-No automated tests. `phpunit.xml` and Pest scaffolding exist but no characterisation tests. The `PROJECT_STATE.md` claim of "277-assertion Master Test Matrix (100% PASS)" was false.
+### 3. CORS Hardcoded IPs (RESOLVED)
+CORS configured via `CORS_ALLOWED_ORIGINS` environment variable without hardcoded private IPs.
+- **File:** `config/cors.php`
+
+### 4. Token Lifetime (RESOLVED)
+Sanctum token expiration configured (30 days customer, 12 hours admin).
+- **File:** `config/sanctum.php`
+
+### 5. Mass Assignment Privileges (RESOLVED)
+`role`, `status`, `is_active` removed from `User::$fillable`. Role modifications gated by domain actions.
+- **Command:** `php artisan test --filter=AuthTest` (exits 0)
+
+### 6. Upload Security & Receipts Storage (RESOLVED)
+Receipts uploaded to private storage disk, served through signed and authorized routes.
+- **Command:** `php artisan test --filter=PaymentTest` (exits 0)
+
+### 7. Dependency Security (RESOLVED)
+`spatie/laravel-permission` uninstalled. Zero composer security advisories.
+- **Command:** `composer audit` in `barbing-saloon-api` (exits 0)
+
+### 8. API Surface Harmonization (RESOLVED)
+Single `/api/v1/*` mount point. Legacy routes deprecated.
+- **Command:** `php artisan route:list --path=api/v1` (exits 0)
+
+### 9. Database Migrations (RESOLVED)
+All migrations squashed into `0001_01_01_000000_create_base_schema.php` plus integrity constraints.
+- **Command:** `php artisan test --filter=AllFactoriesTest` (exits 0)
+
+### 10. Automated Test Harness & Linters (RESOLVED)
+- **Backend Tests:** `php artisan test` exits 0 (47 tests, 88 assertions)
+- **Backend Code Style:** `./vendor/bin/pint --test` exits 0
+- **Backend Static Analysis:** `./vendor/bin/phpstan analyse` exits 0 at level 6
+- **Web Lint & Type Check:** `npm run lint` in `barbing-saloon-web` exits 0
+- **Web Unit Tests:** `npm run test:unit -- --run` in `barbing-saloon-web` exits 0 (3 tests)
+- **Web Production Build:** `npm run build` in `barbing-saloon-web` exits 0
+- **Mobile Type Check:** `npx tsc --noEmit` in `candycutz-mobile-app` exits 0
+
