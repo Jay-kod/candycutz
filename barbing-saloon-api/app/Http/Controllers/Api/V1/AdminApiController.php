@@ -60,7 +60,34 @@ class AdminApiController
             $settings[] = [
                 'key' => 'hero_image',
                 'value' => '/storage/'.$path,
-                'group' => 'general',
+                'group' => 'hero',
+            ];
+        }
+
+        if ($request->hasFile('splash_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('splash_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'splash_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('onboarding_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('onboarding_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'onboarding_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('login_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('login_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'login_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
             ];
         }
 

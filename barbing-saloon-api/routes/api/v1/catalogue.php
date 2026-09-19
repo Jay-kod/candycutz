@@ -3,12 +3,14 @@
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\PublicApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
 use App\Http\Controllers\Api\V1\ServiceZoneApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use Illuminate\Support\Facades\Route;
 
 // Public Endpoints
+Route::get('/settings', [PublicApiController::class, 'settings']);
 Route::get('/services', [ServiceApiController::class, 'index']);
 Route::get('/service-categories', [ServiceApiController::class, 'categories']);
 Route::get('/services/{idOrSlug}', [ServiceApiController::class, 'show']);

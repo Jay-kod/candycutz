@@ -9,15 +9,31 @@ use App\Models\Setting;
 class UpdateSettings
 {
     /**
-     * @param  array{settings: array<int, array{key: string, value: mixed, group: string}>}  $data
+     * @param  array{settings: array<mixed>}  $data
      */
     public function execute(array $data): void
     {
-        foreach ($data['settings'] as $setting) {
-            Setting::updateOrCreate(
-                ['key' => $setting['key']],
-                ['value' => $setting['value'], 'group' => $setting['group']]
-            );
+        $settings = $data['settings'] ?? [];
+
+        foreach ($settings as $key => $setting) {
+            if (is_array($setting) && isset($setting['key'])) {
+                $settingKey = (string) $setting['key'];
+                Setting::updateOrCreate(
+                    ['key' => $settingKey],
+                    [
+                        'value' => $setting['value'] ?? null,
+                        'group' => $setting['group'] ?? Setting::resolveGroupForKey($settingKey),
+                    ]
+                );
+            } elseif (is_string($key)) {
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    [
+                        'value' => is_scalar($setting) ? (string) $setting : (is_null($setting) ? null : json_encode($setting)),
+                        'group' => Setting::resolveGroupForKey($key),
+                    ]
+                );
+            }
         }
     }
 }

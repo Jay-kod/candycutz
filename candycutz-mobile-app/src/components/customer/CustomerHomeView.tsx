@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   Linking,
   RefreshControl,
   ScrollView,
@@ -67,51 +66,61 @@ export function CustomerHomeView() {
           />
         }
       >
-        {/* Hero Section */}
-        <View style={styles.heroCard}>
-          <Text style={styles.heroBadge}>KEFFI FLAGSHIP SALOON</Text>
-          <Text style={styles.heroTitle}>Master Cuts & Luxury Grooming</Text>
-          <Text style={styles.heroSubtitle}>
-            Precision haircuts, beard sculpts, and premium home services right here in Keffi, Nasarawa State.
-          </Text>
-          <View style={styles.heroActionRow}>
-            <Button
-              title="Book In-Shop"
-              onPress={() => router.push('/(tabs)/services')}
-              style={styles.heroBtn}
-            />
-            <Button
-              title="Home Service"
-              variant="outline"
-              onPress={() => router.push('/(tabs)/services')}
-              style={styles.heroBtnOutline}
-            />
+        <View style={styles.welcomeRow}>
+          <View style={styles.welcomeCopy}>
+            <Text style={styles.eyebrow}>WELCOME TO CANDYCUTZ</Text>
+            <Text style={styles.welcomeTitle}>Ready for your next look?</Text>
+            <Text style={styles.welcomeSubtitle}>Premium grooming, booked around your day.</Text>
+          </View>
+          <View style={styles.openBadge}>
+            <View style={styles.openDot} />
+            <Text style={styles.openText}>Open</Text>
           </View>
         </View>
 
-        {/* Physical Branch Location Banner */}
-        <Card style={styles.branchCard} elevated>
-          <View style={styles.branchHeader}>
-            <View>
-              <Text style={styles.branchLabel}>PHYSICAL SALOON LOCATION</Text>
-              <Text style={styles.branchName}>{CONFIG.BRANCH.NAME}</Text>
-            </View>
-            <TouchableOpacity onPress={handleOpenMaps} style={styles.mapsIconButton}>
-              <Text style={styles.mapsIconText}>🗺</Text>
-            </TouchableOpacity>
+        <View style={styles.primaryAction}>
+          <View style={styles.primaryActionCopy}>
+            <Text style={styles.primaryActionLabel}>YOUR TIME, YOUR CHAIR</Text>
+            <Text style={styles.primaryActionTitle}>Book a fresh cut</Text>
+            <Text style={styles.primaryActionSubtitle}>Choose a service and a time that works for you.</Text>
           </View>
-          <Text style={styles.branchAddress}>{CONFIG.BRANCH.ADDRESS}</Text>
-          <View style={styles.branchFooter}>
-            <Text style={styles.branchHours}>Hours: {CONFIG.OPENING_TIME} - {CONFIG.CLOSING_TIME} Daily</Text>
-            <TouchableOpacity onPress={handleOpenMaps}>
-              <Text style={styles.directionsLink}>Open in Google Maps &rarr;</Text>
-            </TouchableOpacity>
+          <Button title="Book now" onPress={() => router.push('/(tabs)/services')} style={styles.primaryActionButton} />
+        </View>
+
+        <View style={styles.quickActions}>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(tabs)/services')}>
+            <Text style={styles.quickIcon}>✂</Text>
+            <Text style={styles.quickLabel}>Services</Text>
+            <Text style={styles.quickHint}>Browse menu</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(tabs)/bookings')}>
+            <Text style={styles.quickIcon}>◷</Text>
+            <Text style={styles.quickLabel}>Bookings</Text>
+            <Text style={styles.quickHint}>View visits</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={handleOpenMaps}>
+            <Text style={styles.quickIcon}>⌖</Text>
+            <Text style={styles.quickLabel}>Find us</Text>
+            <Text style={styles.quickHint}>Get directions</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.branchStrip}>
+          <View style={styles.branchStripCopy}>
+            <Text style={styles.branchStripTitle}>{CONFIG.BRANCH.NAME}</Text>
+            <Text style={styles.branchStripMeta}>{CONFIG.OPENING_TIME} - {CONFIG.CLOSING_TIME} daily · Keffi</Text>
           </View>
-        </Card>
+          <TouchableOpacity onPress={handleOpenMaps} style={styles.directionsButton}>
+            <Text style={styles.directionsButtonText}>Map</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Featured Services */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular Services</Text>
+          <View>
+            <Text style={styles.sectionTitle}>Popular services</Text>
+            <Text style={styles.sectionHint}>Quick picks for your next visit</Text>
+          </View>
           <TouchableOpacity onPress={() => router.push('/(tabs)/services')}>
             <Text style={styles.seeAllLink}>View All</Text>
           </TouchableOpacity>
@@ -145,7 +154,10 @@ export function CustomerHomeView() {
 
         {/* Master Barbers Carousel */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Master Stylists</Text>
+          <View>
+            <Text style={styles.sectionTitle}>Meet your stylists</Text>
+            <Text style={styles.sectionHint}>Skilled hands, sharp results</Text>
+          </View>
         </View>
 
         {loadingBarbers ? (
@@ -213,6 +225,148 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginVertical: SPACING.lg,
+  },
+  welcomeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingTop: SPACING.sm,
+  },
+  welcomeCopy: {
+    flex: 1,
+    paddingRight: SPACING.md,
+  },
+  eyebrow: {
+    color: COLORS.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    marginBottom: 6,
+  },
+  welcomeTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: '800',
+    lineHeight: 31,
+  },
+  welcomeSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+    lineHeight: 19,
+    marginTop: 6,
+  },
+  openBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.successLight,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  openDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.success,
+    marginRight: 5,
+  },
+  openText: {
+    color: COLORS.success,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '800',
+  },
+  primaryAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.primary,
+  },
+  primaryActionCopy: {
+    flex: 1,
+    paddingRight: SPACING.sm,
+  },
+  primaryActionLabel: {
+    color: '#5C4610',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 1.1,
+    marginBottom: 4,
+  },
+  primaryActionTitle: {
+    color: '#0A0A0C',
+    fontSize: FONTS.sizes.lg,
+    fontWeight: '900',
+  },
+  primaryActionSubtitle: {
+    color: '#5C4610',
+    fontSize: FONTS.sizes.xs,
+    lineHeight: 16,
+    marginTop: 3,
+  },
+  primaryActionButton: {
+    backgroundColor: '#0A0A0C',
+    paddingHorizontal: 14,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  quickAction: {
+    flex: 1,
+    minHeight: 94,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  quickIcon: {
+    color: COLORS.primary,
+    fontSize: 22,
+    marginBottom: 5,
+  },
+  quickLabel: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: '800',
+  },
+  quickHint: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    marginTop: 2,
+  },
+  branchStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 3,
+  },
+  branchStripCopy: {
+    flex: 1,
+  },
+  branchStripTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: '700',
+  },
+  branchStripMeta: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    marginTop: 3,
+  },
+  directionsButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.surfaceHighlight,
+  },
+  directionsButtonText: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '800',
   },
   heroCard: {
     backgroundColor: COLORS.surfaceElevated,
@@ -315,6 +469,11 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '800',
+  },
+  sectionHint: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    marginTop: 3,
   },
   seeAllLink: {
     color: COLORS.primary,

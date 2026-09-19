@@ -13,7 +13,7 @@ interface AuthState {
   viewMode: 'customer' | 'barber';
 
   initializeAuth: () => Promise<void>;
-  login: (identity: string, password: string) => Promise<boolean>;
+  login: (identity: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   register: (payload: {
     name: string;
     username: string;
@@ -49,10 +49,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const user = await authApi.me();
       const isBarber = user.role === 'barber';
-      const barberProfile: BarberProfile | null = isBarber && (user as any).barber ? (user as any).barber : null;
+      const account = isBarber ? await barbersApi.getAccount() : null;
+      const barberProfile: BarberProfile | null = account?.barber || (isBarber ? (user as any).barber : null);
 
       set({
-        user,
+        user: account?.user || user,
         barber: barberProfile,
         token,
         isAuthenticated: true,
@@ -67,10 +68,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (identity, password) => {
+  login: async (identity, password, rememberMe = false) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await authApi.login(identity, password);
+      const res = await authApi.login(identity, password, rememberMe);
       const isBarber = res.user.role === 'barber';
       const barberProfile: BarberProfile | null = isBarber && (res.user as any).barber ? (res.user as any).barber : null;
 
@@ -154,8 +155,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const user = await authApi.me();
       const isBarber = user.role === 'barber';
-      const barberProfile: BarberProfile | null = isBarber && (user as any).barber ? (user as any).barber : null;
-      set({ user, barber: barberProfile, isBarber });
+      const account = isBarber ? await barbersApi.getAccount() : null;
+      const barberProfile: BarberProfile | null = account?.barber || (isBarber ? (user as any).barber : null);
+      set({ user: account?.user || user, barber: barberProfile, isBarber });
     } catch (e) {}
   },
 }));

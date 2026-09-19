@@ -52,6 +52,10 @@ class Setting extends Model
             return 'theme';
         }
 
+        if (str_starts_with($key, 'splash_') || str_starts_with($key, 'onboarding_') || str_starts_with($key, 'login_') || str_starts_with($key, 'app_') || str_starts_with($key, 'mobile_')) {
+            return 'mobile';
+        }
+
         return 'general';
     }
 }

@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { CONFIG } from '../../src/constants/config';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
@@ -26,6 +27,7 @@ const CHAIR_STATUSES: { label: string; value: ChairStatus }[] = [
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [logoutDialogVisible, setLogoutDialogVisible] = React.useState(false);
   const {
     user,
     barber,
@@ -38,17 +40,13 @@ export default function ProfileScreen() {
   } = useAuthStore();
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out of CandyCutz?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.replace('/(tabs)');
-        },
-      },
-    ]);
+    setLogoutDialogVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    setLogoutDialogVisible(false);
+    await logout();
+    router.replace('/(tabs)');
   };
 
   const openBranchLocation = () => {
@@ -125,6 +123,15 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
+              {isBarber && viewMode === 'barber' && (
+                <Button
+                  title="Edit profile"
+                  size="sm"
+                  variant="outline"
+                  onPress={() => router.push('/barber/profile-edit')}
+                  style={styles.editProfileButton}
+                />
+              )}
             </Card>
 
             {/* If Barber: Chair Status Strip & Today's Metrics */}
@@ -269,6 +276,15 @@ export default function ProfileScreen() {
           />
         )}
       </ScrollView>
+      <ConfirmDialog
+        visible={logoutDialogVisible}
+        title="Log out of CandyCutz?"
+        message="You will need to sign in again to manage bookings, payments, and your profile."
+        confirmLabel="Log out"
+        destructive
+        onCancel={() => setLogoutDialogVisible(false)}
+        onConfirm={confirmLogout}
+      />
     </SafeAreaView>
   );
 }
@@ -358,6 +374,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.xs,
     marginTop: 2,
+  },
+  editProfileButton: {
+    marginTop: SPACING.md,
   },
   userPhone: {
     color: COLORS.textMuted,

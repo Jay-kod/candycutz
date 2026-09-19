@@ -17,10 +17,12 @@ class UpdateSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'settings' => ['required', 'array'],
-            'settings.*.key' => ['required', 'string'],
-            'settings.*.value' => ['required', 'string'],
-            'settings.*.group' => ['required', 'string'],
+            'settings' => ['nullable', 'array'],
+            'settings.*' => ['nullable'],
+            'hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'splash_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'onboarding_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'login_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
         ];
     }
 }

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,11 +15,14 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { GoogleLogo } from '../../src/components/common/GoogleLogo';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { getStorageUrl } from '../../src/constants/config';
+import { mobileCmsStorage } from '../../src/utils/mobileCmsStorage';
 import { useAuthStore } from '../../src/store/authStore';
 
 export default function LoginScreen() {
@@ -26,14 +30,24 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { login, isLoading, error } = useAuthStore();
 
-  const [activeRoleTab, setActiveRoleTab] = useState<'customer' | 'barber'>('customer');
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [demoRole, setDemoRole] = useState<'customer' | 'barber' | null>(null);
+  const [loginBg, setLoginBg] = useState<string | null>(null);
+
+  useEffect(() => {
+    mobileCmsStorage.getStoredCms().then((cms) => {
+      if (cms.loginBg) {
+        setLoginBg(cms.loginBg);
+      }
+    });
+  }, []);
 
   const handleLogin = async () => {
     if (!identity.trim() || !password) return;
-    const success = await login(identity.trim(), password);
+    const success = await login(identity.trim(), password, rememberMe);
     if (success) {
       if (router.canGoBack()) {
         router.back();
@@ -43,17 +57,10 @@ export default function LoginScreen() {
     }
   };
 
-  const handleDemoLogin = async (demoIdentity: string, demoPass: string) => {
-    setIdentity(demoIdentity);
-    setPassword(demoPass);
-    const success = await login(demoIdentity, demoPass);
-    if (success) {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace('/(tabs)');
-      }
-    }
+  const handleDemoLogin = (role: 'customer' | 'barber') => {
+    setDemoRole(role);
+    setIdentity(role === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com');
+    setPassword(role === 'customer' ? 'customer123' : 'barber123');
   };
 
   const handleGoogleLogin = () => {
@@ -61,14 +68,26 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.rootContainer}>
+      <ImageBackground
+        source={loginBg ? { uri: getStorageUrl(loginBg) } : require('../../assets/images/splash-bg.jpg')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['rgba(10, 10, 12, 0.78)', 'rgba(10, 10, 12, 0.94)']}
+          style={StyleSheet.absoluteFill}
+        />
+      </ImageBackground>
+
+      <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top}
         style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.xl }]}
+          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + SPACING.sm }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -77,80 +96,13 @@ export default function LoginScreen() {
               <View style={styles.iconFrame}>
                 <Image source={require('../../assets/icon.png')} style={styles.systemIcon} resizeMode="contain" />
               </View>
-              <Text style={styles.brandName}>CandyCutz</Text>
               <Text style={styles.title}>Login</Text>
               <Text style={styles.subtitle}>Sign in to your account to continue</Text>
-            </View>
-
-            <View style={styles.roleTabsContainer}>
-              <TouchableOpacity
-                style={[styles.roleTab, activeRoleTab === 'customer' && styles.roleTabActive]}
-                onPress={() => setActiveRoleTab('customer')}
-              >
-                <Text style={[styles.roleTabText, activeRoleTab === 'customer' && styles.roleTabTextActive]}>
-                  Client / Customer
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.roleTab, activeRoleTab === 'barber' && styles.roleTabActive]}
-                onPress={() => setActiveRoleTab('barber')}
-              >
-                <Text style={[styles.roleTabText, activeRoleTab === 'barber' && styles.roleTabTextActive]}>
-                  Barber Staff Desk
-                </Text>
-              </TouchableOpacity>
             </View>
 
             {error && (
               <View style={styles.errorBox}>
                 <Text style={styles.errorText}>{error}</Text>
-              </View>
-            )}
-
-            {activeRoleTab === 'customer' ? (
-              <View style={styles.demoBox}>
-                <View style={styles.demoBadgeRow}>
-                  <View style={styles.demoBadge}>
-                    <Text style={styles.demoBadgeText}>CLIENT DEMO</Text>
-                  </View>
-                  <Text style={styles.demoSubtitle}>Test booking catalog & wallet</Text>
-                </View>
-                <Text style={styles.demoCredText}>
-                  <Text style={styles.demoCredLabel}>Account: </Text>jay@candycutz.com
-                </Text>
-                <Text style={styles.demoCredText}>
-                  <Text style={styles.demoCredLabel}>Password: </Text>customer123
-                </Text>
-                <Button
-                  title="⚡ 1-Tap Customer Demo Login"
-                  variant="outline"
-                  onPress={() => handleDemoLogin('jay@candycutz.com', 'customer123')}
-                  loading={isLoading}
-                  style={styles.demoBtn}
-                />
-              </View>
-            ) : (
-              <View style={[styles.demoBox, styles.barberDemoBox]}>
-                <View style={styles.demoBadgeRow}>
-                  <View style={[styles.demoBadge, styles.barberDemoBadge]}>
-                    <Text style={[styles.demoBadgeText, styles.barberDemoBadgeText]}>STAFF DEMO</Text>
-                  </View>
-                  <Text style={styles.demoSubtitle}>Test chair queue, timer & walk-ins</Text>
-                </View>
-                <Text style={styles.demoCredText}>
-                  <Text style={styles.demoCredLabel}>Account: </Text>obo@candycutz.com
-                </Text>
-                <Text style={styles.demoCredText}>
-                  <Text style={styles.demoCredLabel}>Password: </Text>barber123
-                </Text>
-                <Button
-                  title="✂ 1-Tap Barber Staff Demo Login"
-                  variant="outline"
-                  onPress={() => handleDemoLogin('obo@candycutz.com', 'barber123')}
-                  loading={isLoading}
-                  style={styles.demoBtn}
-                />
               </View>
             )}
 
@@ -164,7 +116,7 @@ export default function LoginScreen() {
               <Text style={styles.label}>Username or Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder={activeRoleTab === 'customer' ? 'customer@candycutz.com' : 'marcus or staff@candycutz.com'}
+                placeholder="you@example.com"
                 placeholderTextColor={COLORS.textMuted}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -196,16 +148,63 @@ export default function LoginScreen() {
                 >
                   {isPasswordVisible ? <EyeOff size={20} color={COLORS.textMuted} /> : <Eye size={20} color={COLORS.textMuted} />}
                 </TouchableOpacity>
+
+            <TouchableOpacity
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: rememberMe }}
+              onPress={() => setRememberMe((checked) => !checked)}
+              style={styles.rememberMeRow}
+            >
+              <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                {rememberMe && <Text style={styles.checkboxMark}>✓</Text>}
+              </View>
+              <Text style={styles.rememberMeText}>Remember me</Text>
+            </TouchableOpacity>
               </View>
             </View>
 
             <Button
-              title={activeRoleTab === 'customer' ? 'Sign In as Customer' : 'Sign In to Staff Desk'}
+              title="Login"
               onPress={handleLogin}
               loading={isLoading}
+              loadingTitle="Authenticating..."
               disabled={!identity || !password}
               style={styles.loginBtn}
             />
+
+            <View style={styles.demoRow}>
+              <Text style={styles.demoPrompt}>Need a quick look around?</Text>
+              <TouchableOpacity
+                onPress={() => handleDemoLogin('customer')}
+                disabled={isLoading}
+                accessibilityRole="button"
+                accessibilityLabel="Demo customer"
+              >
+                <Text style={styles.demoLink}>Demo customer</Text>
+              </TouchableOpacity>
+              <Text style={styles.demoSeparator}>or</Text>
+              <TouchableOpacity
+                onPress={() => handleDemoLogin('barber')}
+                disabled={isLoading}
+                accessibilityRole="button"
+                accessibilityLabel="Demo barber"
+              >
+                <Text style={styles.demoLink}>Demo barber</Text>
+              </TouchableOpacity>
+            </View>
+            {demoRole && (
+              <View style={styles.demoDetails}>
+                <Text style={styles.demoDetailsLabel}>
+                  {demoRole === 'customer' ? 'Customer demo' : 'Barber demo'}
+                </Text>
+                <Text style={styles.demoDetailsText}>
+                  Email: {demoRole === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com'}
+                </Text>
+                <Text style={styles.demoDetailsText}>
+                  Password: {demoRole === 'customer' ? 'customer123' : 'barber123'}
+                </Text>
+              </View>
+            )}
 
             <View style={styles.socialSection}>
               <View style={styles.dividerRow}>
@@ -235,18 +234,24 @@ export default function LoginScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  rootContainer: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   container: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.lg,
-    justifyContent: 'center',
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.sm,
+    justifyContent: 'flex-end',
     flexGrow: 1,
   },
   card: {
@@ -275,13 +280,6 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: RADIUS.full,
-  },
-  brandName: {
-    color: COLORS.primary,
-    fontSize: FONTS.sizes.xxl,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-    marginBottom: 2,
   },
   title: {
     color: COLORS.textPrimary,
@@ -390,6 +388,48 @@ const styles = StyleSheet.create({
   demoBtn: {
     marginTop: 10,
   },
+  demoRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  demoPrompt: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.xs,
+  },
+  demoSeparator: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.xs,
+    marginHorizontal: 5,
+  },
+  demoLink: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '800',
+    marginLeft: 4,
+  },
+  demoDetails: {
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.primaryLight,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  demoDetailsText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  demoDetailsLabel: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '800',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -449,6 +489,38 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 12,
     padding: 6,
+  },
+  rememberMeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+    marginBottom: 4,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  checkboxMark: {
+    color: COLORS.background,
+    fontSize: 14,
+    fontWeight: '800',
+    lineHeight: 16,
+  },
+  rememberMeText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '600',
   },
   loginBtn: {
     marginTop: 8,

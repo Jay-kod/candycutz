@@ -34,16 +34,24 @@ export const tokenStorage = {
       return memoryToken;
     }
   },
-  set: async (token: string): Promise<void> => {
+  set: async (token: string, persist = true): Promise<void> => {
     memoryToken = token;
     try {
       if (Platform.OS === 'web') {
         if (typeof localStorage !== 'undefined') {
-          localStorage.setItem(TOKEN_KEY, token);
+          if (persist) {
+            localStorage.setItem(TOKEN_KEY, token);
+          } else {
+            localStorage.removeItem(TOKEN_KEY);
+          }
         }
         return;
       }
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      if (persist) {
+        await SecureStore.setItemAsync(TOKEN_KEY, token);
+      } else {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      }
     } catch (e) {
       // Ignored fallback
     }
@@ -119,14 +127,14 @@ apiClient.interceptors.response.use(
 // Authentication Endpoints
 // ==========================================
 export const authApi = {
-  login: async (identity: string, password: string): Promise<{ token: string; user: User }> => {
+  login: async (identity: string, password: string, rememberMe = false): Promise<{ token: string; user: User }> => {
     const res = await apiClient.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
       identity,
       password,
     });
     const data = res.data.data || (res.data as any);
     if (data.token) {
-      await tokenStorage.set(data.token);
+      await tokenStorage.set(data.token, rememberMe);
     }
     return data;
   },
@@ -209,6 +217,59 @@ export const barbersApi = {
 
   updateChairStatus: async (status: ChairStatus): Promise<Barber> => {
     const res = await apiClient.patch<ApiResponse<Barber>>('/barbers/chair-status', { status });
+    return res.data.data || (res.data as any);
+  },
+
+  getAccount: async (): Promise<{ user: User; barber: Barber | null }> => {
+    const res = await apiClient.get<ApiResponse<{ user: User; barber: Barber | null }>>('/barbers/account');
+    return res.data.data || (res.data as any);
+  },
+
+  updateAccount: async (payload: {
+    name?: string;
+    phone?: string;
+    bio?: string | null;
+    specialties?: string[];
+    experience_years?: number;
+    instagram_url?: string | null;
+  }): Promise<{ user: User; barber: Barber | null }> => {
+    const res = await apiClient.put<ApiResponse<{ user: User; barber: Barber | null }>>('/barbers/account', payload);
+    return res.data.data || (res.data as any);
+  },
+
+  updateAccountWithImages: async (payload: {
+    name?: string;
+    phone?: string;
+    bio?: string | null;
+    specialties?: string[];
+    experience_years?: number;
+    instagram_url?: string | null;
+    avatarUri?: string;
+    coverImageUri?: string;
+  }): Promise<{ user: User; barber: Barber | null }> => {
+    const formData = new FormData();
+    formData.append('name', payload.name || '');
+    formData.append('phone', payload.phone || '');
+    formData.append('bio', payload.bio || '');
+    formData.append('experience_years', String(payload.experience_years ?? 0));
+    (payload.specialties || []).forEach((specialty) => formData.append('specialties[]', specialty));
+    formData.append('instagram_url', payload.instagram_url || '');
+
+    if (payload.avatarUri) {
+      formData.append('avatar', { uri: payload.avatarUri, name: 'avatar.jpg', type: 'image/jpeg' } as any);
+    }
+    if (payload.coverImageUri) {
+      formData.append('cover_image', { uri: payload.coverImageUri, name: 'cover.jpg', type: 'image/jpeg' } as any);
+    }
+
+    const res = await apiClient.post<ApiResponse<{ user: User; barber: Barber | null }>>('/barbers/account', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data || (res.data as any);
+  },
+
+  updateUsername: async (username: string): Promise<User> => {
+    const res = await apiClient.patch<ApiResponse<User>>('/barbers/account/username', { username });
     return res.data.data || (res.data as any);
   },
 

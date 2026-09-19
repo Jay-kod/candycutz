@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -14,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { servicesApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { LoadingState } from '../../src/components/common/LoadingState';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { Service } from '../../src/types';
 
@@ -117,9 +117,7 @@ export default function ServicesScreen() {
 
       {/* Service List */}
       {isLoading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
+        <LoadingState message="Loading our signature services" />
       ) : (
         <FlatList
           data={filteredServices}

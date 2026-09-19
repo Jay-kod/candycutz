@@ -18,7 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/barbers/dashboard', [BarberApiController::class, 'dashboard']);
     Route::get('/barbers/analytics', [BarberApiController::class, 'analytics']);
     Route::get('/barbers/account', [BarberApiController::class, 'account']);
+    Route::post('/barbers/account', [BarberApiController::class, 'updateAccount']);
     Route::put('/barbers/account', [BarberApiController::class, 'updateAccount']);
+    Route::patch('/barbers/account/username', [BarberApiController::class, 'updateUsername']);
     Route::get('/barbers/schedule', [BarberApiController::class, 'schedule']);
     Route::put('/barbers/schedule', [BarberApiController::class, 'updateSchedule']);
     Route::get('/barbers/blocked-periods', [BarberApiController::class, 'blockedPeriods']);

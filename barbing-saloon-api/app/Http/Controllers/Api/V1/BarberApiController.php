@@ -13,8 +13,10 @@ use App\Domain\Identity\Actions\UpdateBarber;
 use App\Domain\Identity\Actions\UpdateBarberAccount;
 use App\Domain\Identity\Actions\UpdateBarberSchedule;
 use App\Domain\Identity\Actions\UpdateBarberStatus;
+use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Resources\BarberResource;
+use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
@@ -81,7 +83,7 @@ class BarberApiController
         ], 'Account details loaded');
     }
 
-    public function updateAccount(Request $request, UpdateBarberAccount $action): JsonResponse
+    public function updateAccount(Request $request, UpdateBarberAccount $action, SecureImageUpload $imageUpload): JsonResponse
     {
         $user = $request->user();
         $barber = $user->barber;
@@ -94,9 +96,21 @@ class BarberApiController
             'name' => 'sometimes|string',
             'phone' => 'sometimes|string',
             'bio' => 'sometimes|string|nullable',
-            'specialties' => 'sometimes|string|nullable',
+            'specialties' => 'sometimes|array',
+            'specialties.*' => 'string|max:50',
+            'experience_years' => 'sometimes|integer|min:0|max:80',
             'instagram_url' => 'sometimes|string|nullable',
+            'avatar' => 'sometimes|image|max:5120',
+            'cover_image' => 'sometimes|image|max:5120',
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = '/storage/'.$imageUpload->execute($request->file('avatar'), 'uploads/avatars');
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = '/storage/'.$imageUpload->execute($request->file('cover_image'), 'uploads/covers');
+        }
 
         $action->execute($user, $data);
 
@@ -104,6 +118,21 @@ class BarberApiController
             'user' => $user->refresh(),
             'barber' => $barber ? new BarberResource($barber->refresh()) : null,
         ], 'Account updated');
+    }
+
+    public function updateUsername(Request $request, UsernameIdentityService $service): JsonResponse
+    {
+        $validated = $request->validate([
+            'username' => ['required', 'string', 'min:3', 'max:30'],
+        ]);
+
+        try {
+            $user = $service->updateUsername($request->user(), $validated['username']);
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage(), [], 422, 'USERNAME_UPDATE_FAILED');
+        }
+
+        return ApiResponse::success($user->refresh(), 'Username updated');
     }
 
     public function show(int $id): JsonResponse

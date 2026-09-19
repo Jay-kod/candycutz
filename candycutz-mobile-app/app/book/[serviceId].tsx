@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { availabilityApi, barbersApi, bookingsApi, servicesApi, zonesApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { LoadingState } from '../../src/components/common/LoadingState';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { Barber, ServiceZone, TimeSlot } from '../../src/types';
@@ -145,11 +146,7 @@ export default function BookingWizardScreen() {
   };
 
   if (loadingService) {
-    return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </SafeAreaView>
-    );
+    return <LoadingState message="Preparing your booking" />;
   }
 
   const basePrice = Number(service?.price || 0);

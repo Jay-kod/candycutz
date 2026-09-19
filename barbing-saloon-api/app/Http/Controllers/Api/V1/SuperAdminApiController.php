@@ -6,6 +6,7 @@ use App\Domain\Admin\Services\DashboardService;
 use App\Domain\Content\Actions\UpdateSettings;
 use App\Domain\Content\Services\SettingsService;
 use App\Domain\Identity\Actions\ManageUsers;
+use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Http\Requests\Api\V1\SuperAdmin\StoreUserRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
@@ -60,7 +61,45 @@ class SuperAdminApiController
 
     public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService): JsonResponse
     {
-        $action->execute($request->validated());
+        $settings = $request->validated('settings', []);
+
+        if ($request->hasFile('hero_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('hero_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'hero_image',
+                'value' => '/storage/'.$path,
+                'group' => 'hero',
+            ];
+        }
+
+        if ($request->hasFile('splash_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('splash_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'splash_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('onboarding_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('onboarding_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'onboarding_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('login_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('login_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'login_background_image',
+                'value' => '/storage/'.$path,
+                'group' => 'mobile',
+            ];
+        }
+
+        $action->execute(['settings' => $settings]);
 
         return ApiResponse::success($settingsService->settings(), 'Settings updated');
     }

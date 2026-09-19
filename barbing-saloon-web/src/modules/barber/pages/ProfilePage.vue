@@ -183,21 +183,16 @@ function handleImageUpload(e) {
 async function submit() {
   saving.value = true
   try {
-    const formData = new FormData()
-    formData.append('name', form.name)
-    formData.append('phone', form.phone)
-    formData.append('bio', form.bio)
-    formData.append('instagram_url', form.instagram_url)
-    formData.append('specialties', JSON.stringify(form.specialties))
-    
-    const fileInputEl = fileInput.value
-    if (fileInputEl && fileInputEl.files.length > 0) {
-      formData.append('profile_image', fileInputEl.files[0])
-    }
-    
-    const response = await barberApi.updateProfile(formData)
-    if (response.data?.profile_image) {
-      form.profile_image = getStorageUrl(response.data.profile_image)
+    const response = await barberApi.updateProfile({
+      name: form.name,
+      phone: form.phone,
+      bio: form.bio,
+      instagram_url: form.instagram_url,
+      specialties: form.specialties
+    })
+    const profile = response.data?.data?.barber
+    if (profile?.avatar_url) {
+      form.profile_image = profile.avatar_url
     }
     await authStore.fetchUser()
     toast.success('Profile saved successfully!')
@@ -211,7 +206,7 @@ async function submit() {
 onMounted(async () => {
   try {
     const response = await barberApi.profile()
-    const profile = response.data?.data || {}
+    const profile = response.data?.data?.barber || {}
     
     form.name = profile.name || 'Obo Shadow'
     form.phone = profile.phone || '+234 800 123 4567'
@@ -229,7 +224,7 @@ onMounted(async () => {
           'Accessible Care Cut'
         ]
       
-    form.profile_image = profile.profile_image ? getStorageUrl(profile.profile_image) : null
+    form.profile_image = profile.avatar_url || (profile.avatar ? getStorageUrl(profile.avatar) : null)
     
   } catch (e) {
     form.name = 'Obo Shadow'

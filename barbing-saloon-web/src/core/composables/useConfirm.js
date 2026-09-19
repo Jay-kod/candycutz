@@ -4,6 +4,8 @@ const isOpen = ref(false);
 const message = ref('');
 const title = ref('');
 const confirmButtonText = ref('Confirm');
+const cancelButtonText = ref('Cancel');
+const variant = ref('danger'); // 'danger' | 'warning' | 'info' | 'primary'
 const resolvePromise = ref(null);
 
 export function useConfirm() {
@@ -12,11 +14,15 @@ export function useConfirm() {
       title.value = optionsOrTitle;
       message.value = messageText || 'Are you sure you want to proceed?';
       confirmButtonText.value = 'Confirm';
+      cancelButtonText.value = 'Cancel';
+      variant.value = 'danger';
     } else {
       const options = optionsOrTitle || {};
       title.value = options.title || 'Confirm Action';
       message.value = options.message || 'Are you sure you want to proceed?';
-      confirmButtonText.value = options.confirmText || 'Confirm';
+      confirmButtonText.value = options.confirmText || options.confirmButtonText || 'Confirm';
+      cancelButtonText.value = options.cancelText || options.cancelButtonText || 'Cancel';
+      variant.value = options.variant || options.type || (options.destructive ? 'danger' : 'primary');
     }
     isOpen.value = true;
 
@@ -35,5 +41,15 @@ export function useConfirm() {
     if (resolvePromise.value) resolvePromise.value(false);
   };
 
-  return { isOpen, title, message, confirmButtonText, confirm, agree, cancel };
+  return {
+    isOpen,
+    title,
+    message,
+    confirmButtonText,
+    cancelButtonText,
+    variant,
+    confirm,
+    agree,
+    cancel,
+  };
 }

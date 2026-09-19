@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,9 +13,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { getStorageUrl } from '../../src/constants/config';
+import { mobileCmsStorage } from '../../src/utils/mobileCmsStorage';
 import { useAuthStore } from '../../src/store/authStore';
 
 export default function RegisterScreen() {
@@ -28,6 +32,15 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [loginBg, setLoginBg] = useState<string | null>(null);
+
+  useEffect(() => {
+    mobileCmsStorage.getStoredCms().then((cms) => {
+      if (cms.loginBg) {
+        setLoginBg(cms.loginBg);
+      }
+    });
+  }, []);
 
   const handleRegister = async () => {
     if (!name.trim() || !username.trim() || !email.trim() || !password) return;
@@ -45,7 +58,19 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.rootContainer}>
+      <ImageBackground
+        source={loginBg ? { uri: getStorageUrl(loginBg) } : require('../../assets/images/splash-bg.jpg')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['rgba(10, 10, 12, 0.78)', 'rgba(10, 10, 12, 0.94)']}
+          style={StyleSheet.absoluteFill}
+        />
+      </ImageBackground>
+
+      <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top}
@@ -163,13 +188,18 @@ export default function RegisterScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  rootContainer: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
   container: {
     paddingHorizontal: SPACING.md,

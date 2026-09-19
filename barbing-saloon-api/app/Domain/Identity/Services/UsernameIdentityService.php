@@ -55,12 +55,12 @@ class UsernameIdentityService
             throw new Exception('This username is already taken. Please choose another.');
         }
 
-        // 4. 90-Day Cooldown enforcement (unless bypassed by Super Admin)
+        // 4. Monthly cooldown enforcement (unless bypassed by Super Admin)
         if (! $isSuperAdminOverride && $user->last_username_change_at) {
             $daysSinceChange = Carbon::parse($user->last_username_change_at)->diffInDays(now());
-            if ($daysSinceChange < 90) {
-                $daysRemaining = 90 - $daysSinceChange;
-                throw new Exception("Username can only be changed once every 90 days. {$daysRemaining} days remaining.");
+            if ($daysSinceChange < 30) {
+                $daysRemaining = 30 - $daysSinceChange;
+                throw new Exception("Username can only be changed once every 30 days. {$daysRemaining} days remaining.");
             }
         }
 

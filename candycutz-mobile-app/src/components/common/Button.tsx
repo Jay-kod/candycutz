@@ -15,6 +15,7 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
+  loadingTitle?: string;
   disabled?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
@@ -27,6 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   loading = false,
+  loadingTitle,
   disabled = false,
   style,
   textStyle,
@@ -96,7 +98,12 @@ export const Button: React.FC<ButtonProps> = ({
       style={[getContainerStyle(), style]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#0A0A0C' : COLORS.primary} />
+        <>
+          <ActivityIndicator color={variant === 'primary' ? '#0A0A0C' : COLORS.primary} />
+          {!!loadingTitle && (
+            <Text style={[getTextStyle(), { marginLeft: SPACING.sm }, textStyle]}>{loadingTitle}</Text>
+          )}
+        </>
       ) : (
         <>
           {icon && <>{icon}</>}

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +16,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { staffWalkInApi } from '../src/api/client';
 import { Button } from '../src/components/common/Button';
 import { Card } from '../src/components/common/Card';
+import { LoadingState } from '../src/components/common/LoadingState';
 import { COLORS, FONTS, RADIUS, SPACING } from '../src/constants/theme';
 import { useChairStore } from '../src/store/chairStore';
 import { Appointment, Service } from '../src/types';
@@ -121,7 +121,7 @@ export default function WalkInScreen() {
 
             <Text style={styles.fieldLabel}>Select Service *</Text>
             {loadingServices ? (
-              <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 10 }} />
+              <LoadingState compact message="Loading services" />
             ) : (
               <View style={styles.servicesGrid}>
                 {services.map((s: Service) => {
