@@ -43,7 +43,7 @@
               <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-ivory/60">
                 <span class="flex items-center gap-1.5"><ClockIcon class="w-4 h-4 text-gold/50" /> {{ service.duration_minutes }} mins</span>
                 <span class="hidden sm:inline text-theme-border">•</span>
-                <span class="flex items-center gap-1.5 font-bold text-theme-text"><CurrencyDollarIcon class="w-4 h-4 text-gold/50" /> ₦{{ Number(service.price).toLocaleString() }}</span>
+                <span class="flex items-center gap-1.5 font-bold text-theme-text"><CurrencyDollarIcon class="w-4 h-4 text-gold/50" /> {{ formatCurrency(service.price) }}</span>
               </div>
             </div>
           </div>
@@ -97,6 +97,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { formatCurrency } from '@/core/utils'
 import { useRoute, useRouter } from 'vue-router'
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
 import { publicApi } from '@/shared/api/old_publicApi'

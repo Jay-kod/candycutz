@@ -56,6 +56,7 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [customOnboardingBg, setCustomOnboardingBg] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const isFinishingRef = useRef(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -68,13 +69,15 @@ export default function OnboardingScreen() {
     });
   }, []);
 
-  const handleFinishOnboarding = async (destination: 'login' | 'register' = 'login') => {
-    await onboardingStorage.setHasSeenOnboarding(true);
-    if (isAuthenticated) {
-      router.replace('/(tabs)');
-    } else {
-      router.replace(`/auth/${destination}`);
-    }
+  const handleFinishOnboarding = (destination: 'login' | 'register' = 'login') => {
+    if (isFinishingRef.current) return;
+    isFinishingRef.current = true;
+
+    const target = isAuthenticated ? '/(tabs)' : `/auth/${destination}`;
+    router.replace(target as '/(tabs)' | '/auth/login' | '/auth/register');
+
+    // Persist independently so SecureStore cannot delay or cancel navigation.
+    void onboardingStorage.setHasSeenOnboarding(true).catch(() => {});
   };
 
   const handleNext = async () => {
@@ -83,7 +86,7 @@ export default function OnboardingScreen() {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
       setCurrentIndex(nextIndex);
     } else {
-      await handleFinishOnboarding();
+      handleFinishOnboarding();
     }
   };
 
@@ -270,6 +273,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     zIndex: 10,
+    elevation: 10,
   },
   paginationRow: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 lg:p-10 shadow-2xl">
+  <div class="relative overflow-hidden rounded-3xl border border-admin/30 bg-gradient-to-br from-[#010304] via-[#040608] to-[#120500] p-8 lg:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
     <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-admin/5 blur-[100px]"></div>
     <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-admin/8 blur-[80px]"></div>
     <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle_at_top_right,rgba(255,103,0,0.06),transparent_70%)]"></div>

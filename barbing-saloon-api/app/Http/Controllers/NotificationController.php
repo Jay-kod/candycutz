@@ -78,6 +78,46 @@ class NotificationController
     }
 
     /**
+     * Get unread notification count (lightweight for badge polling)
+     */
+    public function unreadCount(): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $role = $this->getUserRoleString($user);
+        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
+
+        if ($role === 'customer') {
+            $broadcastTypes[] = 'all_customers';
+        } elseif ($role === 'barber') {
+            $broadcastTypes[] = 'all_barbers';
+        } elseif ($role === 'admin' || $role === 'super_admin') {
+            $broadcastTypes[] = 'all_admins';
+            $broadcastTypes[] = 'admin';
+        }
+
+        $count = Notification::query()
+            ->where('is_read', false)
+            ->where(function ($q) use ($user, $broadcastTypes) {
+                $q->where('recipient_id', $user->id)
+                    ->orWhere(function ($sub) use ($broadcastTypes) {
+                        $sub->whereIn('recipient_type', $broadcastTypes)
+                            ->whereNull('recipient_id');
+                    });
+            })
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => ['count' => $count],
+        ]);
+    }
+
+    /**
      * Create a notification (used by barbers, admins, or internal events)
      */
     public function store(Request $request): JsonResponse
@@ -238,6 +278,8 @@ class NotificationController
 
         $validated = $request->validate([
             'notify_appointments' => 'boolean',
+            'notify_bookings' => 'boolean',
+            'notify_system' => 'boolean',
             'notify_promotions' => 'boolean',
             'notify_wishlist' => 'boolean',
             'notify_blog' => 'boolean',

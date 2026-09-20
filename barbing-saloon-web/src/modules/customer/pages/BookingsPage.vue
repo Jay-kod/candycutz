@@ -117,7 +117,7 @@
                 <template v-if="booking.status === 'pending'">
                   <div v-if="!booking.payment_status || booking.payment_status === 'pending'">
                     <button v-if="!showUploader[booking.id]" class="w-full rounded-xl bg-gold py-3 text-sm font-bold text-obsidian hover:bg-gold-light hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2" @click="startPayment(booking)">
-                      <CreditCardIcon class="h-5 w-5" /> Pay & Upload Receipt (₦{{ (booking.service?.price || 0).toLocaleString() }})
+                      <CreditCardIcon class="h-5 w-5" /> Pay & Upload Receipt ({{ formatCurrency(booking.service?.price || 0) }})
                     </button>
                     <ReceiptUploader v-else :appointmentId="booking.id" @uploaded="onReceiptUploaded" />
                   </div>
@@ -159,6 +159,7 @@ import ReceiptUploader from '../../../core/components/ReceiptUploader.vue';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
+import { formatCurrency } from '../../../core/utils';
 import { 
   ArrowPathIcon, 
   UserIcon, 

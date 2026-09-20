@@ -34,7 +34,7 @@
               </div>
               <div>
                 <p class="text-xs uppercase tracking-wider text-white/50 font-semibold mb-0.5">Price</p>
-                <p class="font-display text-2xl font-bold text-emerald-400">₦{{ Number(service.price).toLocaleString() }}</p>
+                <p class="font-display text-2xl font-bold text-emerald-400">{{ formatCurrency(service.price) }}</p>
               </div>
             </div>
           </div>
@@ -82,6 +82,7 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import { formatCurrency } from '@/core/utils'
 
 defineProps({
   service: { type: Object, required: true },

@@ -2,56 +2,37 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { BellIcon, CheckIcon } from '@heroicons/vue/24/outline'
-import api from '@/shared/api/client'
+import { useNotifications } from '@/core/composables/useNotifications'
 
 const router = useRouter()
 const route = useRoute()
 
-const notifications = ref([])
-const unreadCount = ref(0)
+const {
+  notifications,
+  unreadCount,
+  isLoading,
+  fetchNotifications,
+  markAsRead,
+  markAllRead,
+  requestBrowserPermission,
+  startPolling,
+  stopPolling,
+} = useNotifications()
+
 const isOpen = ref(false)
-let pollInterval = null
-
-const fetchNotifications = async () => {
-  try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    if (!token) return
-    
-    const res = await api.get('/v1/notifications')
-    const list = res.data?.data || []
-    notifications.value = list
-    unreadCount.value = list.filter(n => !n.is_read).length
-  } catch (err) {
-    console.error('Failed to fetch notifications:', err)
-  }
-}
-
-const markAsRead = async (id) => {
-  try {
-    await api.patch(`/v1/notifications/${id}/read`)
-    // Optimistic update
-    const n = notifications.value.find(n => n.id === id)
-    if (n) {
-      n.is_read = true
-      unreadCount.value = Math.max(0, unreadCount.value - 1)
-    }
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-const markAllRead = async () => {
-  try {
-    await api.patch('/v1/notifications/read-all')
-    notifications.value.forEach(n => { n.is_read = true })
-    unreadCount.value = 0
-  } catch (err) {
-    notifications.value.filter(n => !n.is_read).forEach(n => markAsRead(n.id))
-  }
-}
+const hasNotificationSupport = typeof window !== 'undefined' && 'Notification' in window
+const permissionState = ref(hasNotificationSupport ? Notification.permission : 'denied')
 
 const toggleOpen = () => {
   isOpen.value = !isOpen.value
+  if (isOpen.value) {
+    fetchNotifications()
+  }
+}
+
+const enableDesktopNotifications = async () => {
+  const granted = await requestBrowserPermission()
+  permissionState.value = granted ? 'granted' : 'denied'
 }
 
 // Close when clicking outside
@@ -63,12 +44,12 @@ const closeOnClickOutside = (e) => {
 
 onMounted(() => {
   fetchNotifications()
-  pollInterval = setInterval(fetchNotifications, 30000) // Poll every 30s
+  startPolling(30000)
   document.addEventListener('click', closeOnClickOutside)
 })
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval)
+  stopPolling()
   document.removeEventListener('click', closeOnClickOutside)
 })
 

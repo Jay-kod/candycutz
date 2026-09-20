@@ -46,7 +46,9 @@ class AuthenticateUser
             throw new RuntimeException('Your account is currently inactive or suspended. Please contact support.');
         }
 
-        $tokenName = $data['device_name'] ?? 'web-client';
+        $clientType = request()?->header('X-Client-Type');
+        $defaultDeviceName = $clientType === 'mobile' ? 'mobile-app' : 'web-client';
+        $tokenName = $data['device_name'] ?? $defaultDeviceName;
         $expiresAt = $user->role === UserRole::customer
             ? now()->addDays(30)
             : now()->addHours(12);

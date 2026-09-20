@@ -1,5 +1,8 @@
 <template>
-  <header class="flex h-20 items-center justify-between border-b border-theme-border px-6 backdrop-blur-md sticky top-0 z-30 bg-theme-bg/90">
+  <header 
+    class="flex h-20 items-center justify-between border-b border-white/[0.05] px-6 backdrop-blur-xl sticky top-0 z-30 shrink-0"
+    :class="themeClasses.headerBg || 'bg-theme-bg/90'"
+  >
     <div class="flex items-center gap-4">
       <!-- Mobile Hamburger -->
       <button

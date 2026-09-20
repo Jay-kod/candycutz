@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-sm overflow-hidden">
+  <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
     <div class="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between">
       <h3 class="text-sm font-bold text-theme-text flex items-center gap-2">
         <ClipboardDocumentListIcon class="h-4 w-4 text-admin" />

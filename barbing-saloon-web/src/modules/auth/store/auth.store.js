@@ -97,16 +97,20 @@ export const useAuthStore = defineStore('auth', {
         const intendedRoute = this.intendedRoute;
         this.intendedRoute = null;
 
+        const isSuperAdminRoute = intendedRoute.startsWith('/superadmin');
         const isAdminRoute = intendedRoute.startsWith('/admin');
         const isBarberRoute = intendedRoute.startsWith('/barber');
 
-        if ((role === 'admin' || role === 'super_admin') && isAdminRoute) {
+        if (role === 'super_admin' && (isSuperAdminRoute || isAdminRoute)) {
+          return intendedRoute;
+        }
+        if (role === 'admin' && isAdminRoute) {
           return intendedRoute;
         }
         if (role === 'barber' && isBarberRoute) {
           return intendedRoute;
         }
-        if (role === 'customer' && !isAdminRoute && !isBarberRoute) {
+        if (role === 'customer' && !isAdminRoute && !isBarberRoute && !isSuperAdminRoute) {
           return intendedRoute;
         }
       }
@@ -115,12 +119,16 @@ export const useAuthStore = defineStore('auth', {
         return preferredRoute;
       }
 
-      if (role === 'barber') {
-        return '/barber/dashboard';
+      if (role === 'super_admin') {
+        return '/superadmin/dashboard';
       }
 
-      if (role === 'admin' || role === 'super_admin') {
+      if (role === 'admin') {
         return '/admin/dashboard';
+      }
+
+      if (role === 'barber') {
+        return '/barber/dashboard';
       }
 
       return '/customer/dashboard';

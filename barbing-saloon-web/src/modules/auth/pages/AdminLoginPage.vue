@@ -59,17 +59,27 @@
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-theme-text font-semibold flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-admin inline-block"></span>
-                Official Admin Credentials
+                Official Credentials
               </span>
-              <button 
-                type="button" 
-                @click="quickFillAdmin" 
-                class="text-[11px] font-bold text-admin hover:underline flex items-center gap-1 cursor-pointer">
-                🛡 Quick Fill
-              </button>
+              <div class="flex items-center gap-2">
+                <button 
+                  type="button" 
+                  @click="quickFillAdmin" 
+                  class="text-[11px] font-bold text-admin hover:underline flex items-center gap-1 cursor-pointer">
+                  🛡 Admin
+                </button>
+                <button 
+                  type="button" 
+                  @click="quickFillSuperAdmin" 
+                  class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
+                  👑 Super Admin
+                </button>
+              </div>
             </div>
-            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> superadmin@candycutz.com</p>
-            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> superadmin123</p>
+            <div class="space-y-1">
+              <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Admin:</span> webadmin@candycutz.com / admin123</p>
+              <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Super Admin:</span> websuperadmin@candycutz.com / superadmin123</p>
+            </div>
           </div>
         </div>
 
@@ -154,14 +164,22 @@
               </span>
             </button>
 
-            <button 
-              type="button"
-              @click="demoAdminLogin"
-              :disabled="loading" 
-              class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-2.5 text-sm font-bold text-theme-text transition-all duration-300 hover:border-admin hover:text-admin disabled:opacity-70 flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
-              Use Admin Demo
-            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                type="button"
+                @click="demoAdminLogin"
+                :disabled="loading" 
+                class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-2 py-2.5 text-xs font-bold text-theme-text transition-all duration-300 hover:border-admin hover:text-admin disabled:opacity-70 flex items-center justify-center gap-1.5">
+                🛡 Admin Demo
+              </button>
+              <button 
+                type="button"
+                @click="demoSuperAdminLogin"
+                :disabled="loading" 
+                class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-2 py-2.5 text-xs font-bold text-theme-text transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-70 flex items-center justify-center gap-1.5">
+                👑 Super Admin
+              </button>
+            </div>
           </div>
         </form>
 
@@ -197,8 +215,8 @@ isDark.value = true;
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
-const email = ref('superadmin@candycutz.com');
-const password = ref('superadmin123');
+const email = ref('webadmin@candycutz.com');
+const password = ref('admin123');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -214,7 +232,15 @@ const schema = object({
 });
 
 const quickFillAdmin = () => {
-  email.value = 'superadmin@candycutz.com';
+  email.value = 'webadmin@candycutz.com';
+  password.value = 'admin123';
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+};
+
+const quickFillSuperAdmin = () => {
+  email.value = 'websuperadmin@candycutz.com';
   password.value = 'superadmin123';
   generalError.value = '';
   errors.email = '';
@@ -227,7 +253,11 @@ const demoAdminLogin = async () => {
   await submitForm();
 };
 
-
+const demoSuperAdminLogin = async () => {
+  quickFillSuperAdmin();
+  rememberMe.value = true;
+  await submitForm();
+};
 
 async function submitForm() {
   loading.value = true;
@@ -238,7 +268,7 @@ async function submitForm() {
   try {
     await schema.validate({ email: email.value, password: password.value }, { abortEarly: false });
     await login({ email: email.value, password: password.value });
-    await router.push(redirectAfterLogin('/admin/dashboard'));
+    await router.push(redirectAfterLogin());
   } catch (error) {
     if (error.inner) {
       error.inner.forEach((item) => {

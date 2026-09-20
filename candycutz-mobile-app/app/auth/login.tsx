@@ -49,11 +49,7 @@ export default function LoginScreen() {
     if (!identity.trim() || !password) return;
     const success = await login(identity.trim(), password, rememberMe);
     if (success) {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace('/(tabs)');
-      }
+      router.replace('/(tabs)');
     }
   };
 
@@ -260,6 +256,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     padding: SPACING.lg,
     borderRadius: RADIUS.lg,
+    backgroundColor: 'rgba(26, 26, 34, 0.9)',
   },
   brandBlock: {
     alignItems: 'center',

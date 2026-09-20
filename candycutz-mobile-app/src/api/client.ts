@@ -77,6 +77,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    'X-Client-Type': 'mobile',
   },
   timeout: 15000,
 });
@@ -410,6 +411,11 @@ export const notificationsApi = {
     return res.data.data || (res.data as any) || [];
   },
 
+  getUnreadCount: async (): Promise<number> => {
+    const res = await apiClient.get<ApiResponse<{ count: number }>>('/notifications/unread-count');
+    return res.data?.data?.count ?? 0;
+  },
+
   markAsRead: async (id: number): Promise<void> => {
     await apiClient.patch(`/notifications/${id}/read`);
   },
@@ -432,6 +438,16 @@ export const notificationsApi = {
     await apiClient.delete('/notifications/device-token', {
       data: { token },
     });
+  },
+
+  getSettings: async (): Promise<Record<string, boolean>> => {
+    const res = await apiClient.get<ApiResponse<Record<string, boolean>>>('/notification-settings');
+    return res.data?.data || {};
+  },
+
+  updateSettings: async (settings: Record<string, boolean>): Promise<Record<string, boolean>> => {
+    const res = await apiClient.post<ApiResponse<Record<string, boolean>>>('/notification-settings', settings);
+    return res.data?.data || {};
   },
 };
 

@@ -11,6 +11,7 @@ export function setupAxiosInterceptors() {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      'X-Client-Type': 'web',
     },
   });
 

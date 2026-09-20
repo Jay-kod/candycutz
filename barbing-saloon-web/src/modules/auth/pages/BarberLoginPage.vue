@@ -68,7 +68,7 @@
                 ✂ Quick Fill
               </button>
             </div>
-            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> marcus@candycutz.com</p>
+            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> mark@barber.com</p>
             <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> barber123</p>
           </div>
         </div>
@@ -200,7 +200,7 @@ isDark.value = true;
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
-const email = ref('marcus@candycutz.com');
+const email = ref('mark@barber.com');
 const password = ref('barber123');
 const showPassword = ref(false);
 const rememberMe = ref(false);
@@ -217,7 +217,7 @@ const schema = object({
 });
 
 const quickFillBarber = () => {
-  email.value = 'marcus@candycutz.com';
+  email.value = 'mark@barber.com';
   password.value = 'barber123';
   generalError.value = '';
   errors.email = '';

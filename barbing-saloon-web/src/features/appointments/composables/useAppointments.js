@@ -20,7 +20,8 @@ export function useAppointments() {
     
     try {
       const response = await adminApi.appointments();
-      appointments.value = response.data.data;
+      const raw = response.data?.data;
+      appointments.value = Array.isArray(raw) ? raw : (raw?.items || []);
     } catch (err) {
       if (!silent) toast.error('Failed to load appointments');
     } finally {

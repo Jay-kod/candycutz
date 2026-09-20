@@ -47,14 +47,14 @@ class GenerateOpenApiSpec extends Command
         $openApi = $this->buildOpenApiStructure($v1Routes);
 
         // Ensure directories exist
-        $docsDir = base_path('../docs');
+        $docsDir = base_path('docs');
         if (! is_dir($docsDir)) {
-            mkdir($docsDir, 0755, true);
+            @mkdir($docsDir, 0755, true);
         }
 
         $publicDir = public_path();
         if (! is_dir($publicDir)) {
-            mkdir($publicDir, 0755, true);
+            @mkdir($publicDir, 0755, true);
         }
 
         // 1. Write docs/openapi.json

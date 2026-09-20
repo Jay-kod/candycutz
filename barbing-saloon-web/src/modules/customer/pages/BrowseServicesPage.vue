@@ -117,7 +117,7 @@
                 </p>
               </RouterLink>
               <div class="flex shrink-0 flex-col items-end text-right">
-                <span class="font-display text-lg font-bold text-gold drop-shadow-sm">₦{{ Number(service.price).toLocaleString() }}</span>
+                <span class="font-display text-lg font-bold text-gold drop-shadow-sm">{{ formatCurrency(service.price) }}</span>
                 <span class="text-[10px] uppercase tracking-widest text-theme-muted mt-1 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{{ service.duration_minutes }} mins</span>
               </div>
             </div>
@@ -168,6 +168,7 @@ import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { customerApi } from '@/shared/api/old_customerApi';
 import { useToast } from '../../../core/composables/useToast';
+import { formatCurrency } from '../../../core/utils';
 
 const toast = useToast();
 const services = ref([]);

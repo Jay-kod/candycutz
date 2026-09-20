@@ -46,6 +46,45 @@ class TestimonialApiController
         return ApiResponse::success(TestimonialResource::collection($testimonials), 'Testimonials retrieved successfully');
     }
 
+    public function store(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'required_without:comment|string|nullable',
+            'comment' => 'nullable|string',
+            'service_id' => 'nullable|integer',
+            'barber_id' => 'nullable|integer',
+        ]);
+
+        $testimonial = Testimonial::create([
+            'customer_id' => $user->id,
+            'client_name' => $user->name,
+            'client_avatar' => $user->avatar,
+            'rating' => $validated['rating'],
+            'review' => $validated['review'] ?? $validated['comment'] ?? '',
+            'service_id' => $validated['service_id'] ?? null,
+            'barber_id' => $validated['barber_id'] ?? null,
+            'is_approved' => false,
+            'is_featured' => false,
+        ]);
+
+        return ApiResponse::success(new TestimonialResource($testimonial), 'Review submitted successfully. Awaiting approval.', 201);
+    }
+
+    public function customerReviews(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $testimonials = Testimonial::query()
+            ->with(['service', 'barber.user'])
+            ->where('customer_id', $user->id)
+            ->latest()
+            ->get();
+
+        return ApiResponse::success(TestimonialResource::collection($testimonials), 'Customer reviews loaded');
+    }
+
     public function update(Request $request, int $id): JsonResponse
     {
         $testimonial = Testimonial::findOrFail($id);

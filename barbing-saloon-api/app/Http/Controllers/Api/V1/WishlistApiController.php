@@ -16,7 +16,22 @@ class WishlistApiController
         $user = $request->user();
         $items = DB::table('wishlists')
             ->where('customer_id', $user->id)
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($item) {
+                $mapped = (array) $item;
+                if ($item->item_type === 'service') {
+                    $service = DB::table('services')->where('id', $item->item_id)->first();
+                    $mapped['service_name'] = $service?->name ?? 'Service';
+                    $mapped['service_image'] = $service?->image;
+                    $mapped['price'] = (float) ($service?->price ?? 0);
+                } elseif ($item->item_type === 'gallery') {
+                    $gallery = DB::table('gallery')->where('id', $item->item_id)->first();
+                    $mapped['gallery_title'] = $gallery?->title ?? 'Style';
+                    $mapped['gallery_image'] = $gallery?->image_url ?? $gallery?->image;
+                }
+                return $mapped;
+            });
 
         return ApiResponse::success($items, 'Wishlist loaded');
     }

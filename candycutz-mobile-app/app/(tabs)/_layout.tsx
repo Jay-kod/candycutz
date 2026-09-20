@@ -121,6 +121,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />
+
     </Tabs>
   );
 }

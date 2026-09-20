@@ -21,6 +21,9 @@ export function registerRouteGuards(router) {
 
     if (requiresAuth && ! auth.isAuthenticated) {
       auth.setIntendedRoute(to.fullPath);
+      if (to.path.startsWith('/superadmin')) {
+        return '/superadmin/login';
+      }
       if (routeRoles.includes('admin') || routeRoles.includes('super_admin')) {
         return '/admin/login';
       }

@@ -41,9 +41,9 @@ class AdminApiController
         return ApiResponse::success($action->execute(), 'Admin dashboard loaded');
     }
 
-    public function reports(GetReports $action): JsonResponse
+    public function reports(Request $request, GetReports $action): JsonResponse
     {
-        return ApiResponse::success($action->execute(), 'Reports loaded');
+        return ApiResponse::success($action->execute($request->query('range', '7d')), 'Reports loaded');
     }
 
     public function settings(GetSettings $action): JsonResponse
@@ -179,7 +179,7 @@ class AdminApiController
 
     public function analytics(Request $request, GetReports $action): JsonResponse
     {
-        return ApiResponse::success($action->execute(), 'Analytics loaded');
+        return ApiResponse::success($action->execute($request->query('range', '7d')), 'Analytics loaded');
     }
 
     public function testEmail(Request $request): JsonResponse

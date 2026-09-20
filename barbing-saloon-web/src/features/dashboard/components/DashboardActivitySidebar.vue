@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Quick Actions -->
-    <div class="rounded-2xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-sm p-5">
+    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm p-5">
       <h3 class="text-sm font-bold text-theme-text mb-4 flex items-center gap-2">
         <BoltIcon class="h-4 w-4 text-admin" />
         Quick Actions
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Recent Activity Feed -->
-    <div class="rounded-2xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-sm overflow-hidden">
+    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
       <div class="border-b border-white/[0.04] px-6 py-4">
         <h3 class="text-sm font-bold text-theme-text flex items-center gap-2">
           <ClockIcon class="h-4 w-4 text-cyan-400" />

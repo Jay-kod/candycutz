@@ -1,5 +1,8 @@
 <template>
-  <div class="flex h-screen text-theme-text font-sans overflow-hidden bg-theme-bg">
+  <div 
+    class="flex h-screen h-[100dvh] text-theme-text font-sans overflow-hidden"
+    :class="props.theme === 'admin' ? 'bg-[#010405]' : 'bg-theme-bg'"
+  >
     <!-- Decomposed Sidebar -->
     <DashboardSidebar
       ref="sidebarRef"
@@ -11,14 +14,19 @@
       :is-sidebar-collapsed="isSidebarCollapsed"
       :is-mobile-sidebar-open="isMobileSidebarOpen"
       :is-active-route="isActiveRoute"
+      :user-avatar-url="userAvatarUrl"
+      :user-initials="userInitials"
+      :user-name="authStore.user?.name || 'User'"
+      :user-email="authStore.user?.email || ''"
       @close-mobile="isMobileSidebarOpen = false"
       @logout="handleLogout"
     />
 
     <!-- Main Content Area -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="flex flex-1 flex-col h-full min-h-0 min-w-0 overflow-hidden">
       <!-- Decomposed Header -->
       <DashboardHeader
+        class="shrink-0"
         :current-route-name="currentRouteName"
         :is-sidebar-collapsed="isSidebarCollapsed"
         :theme-classes="themeClasses"
@@ -30,8 +38,13 @@
       />
 
       <!-- Scrollable Main Content -->
-      <main id="main-scroll-container" class="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-10 custom-scrollbar bg-theme-bg">
-        <div class="mx-auto max-w-7xl min-h-full">
+      <main 
+        id="main-scroll-container" 
+        tabindex="0"
+        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 lg:p-10 custom-scrollbar overscroll-contain focus:outline-none"
+        :class="props.theme === 'admin' ? 'bg-[#010405]' : 'bg-theme-bg'"
+      >
+        <div class="mx-auto max-w-7xl min-h-full pb-24">
           <slot />
         </div>
       </main>
@@ -76,6 +89,12 @@ const groupedNavItems = computed(() => {
   const items = props.navItems;
   if (!items || items.length === 0) return [];
 
+  const customerSections = {
+    'Menu': ['Dashboard', 'Browse Services', 'My Bookings', 'My Codes'],
+    'Discover': ['Wishlist', 'Reviews', 'Gallery', 'Blog'],
+    'Activity': ['Notifications', 'Notification Settings', 'Analytics', 'Reports'],
+  };
+
   const barberSections = {
     'Overview': ['Dashboard'],
     'Clients': ['Walk-In', 'Payments', 'Appointments'],
@@ -92,7 +111,8 @@ const groupedNavItems = computed(() => {
     'Security': ['Verifications', 'System Logs', 'Notifications'],
   };
 
-  const sections = props.theme === 'admin' ? adminSections : barberSections;
+  const sections = props.theme === 'admin' ? adminSections : 
+                   props.theme === 'customer' ? customerSections : barberSections;
   const groups = [];
   const used = new Set();
 
@@ -119,6 +139,30 @@ const groupedNavItems = computed(() => {
 });
 
 const themeClasses = computed(() => {
+  if (props.theme === 'customer') {
+    return {
+      text: 'text-gold',
+      textLight: 'text-gold-light',
+      textLight70: 'text-gold-light/70',
+      bg: 'bg-gold',
+      bgRaw: 'bg-gold',
+      bg10: 'bg-gold/10',
+      bg15: 'bg-gold/15',
+      bg20: 'bg-gold/20',
+      gradient: 'from-gold to-gold-dark',
+      shadowLogo: 'shadow-[0_0_15px_rgba(212,175,55,0.3)]',
+      shadowNavLine: 'shadow-[0_0_10px_rgba(255,153,0,0.5)]',
+      shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]',
+      borderHover: 'hover:border-gold/30',
+      hoverTextLight: 'group-hover:text-gold-light',
+      hoverText: 'hover:text-gold',
+      bodyBg: 'bg-charcoal',
+      surfaceBg: 'bg-obsidian',
+      headerBg: 'bg-charcoal/90',
+      mainBg: 'bg-obsidian/90'
+    };
+  }
+
   if (props.theme === 'admin') {
     return {
       text: 'text-admin',
@@ -136,10 +180,10 @@ const themeClasses = computed(() => {
       borderHover: 'hover:border-admin/30',
       hoverTextLight: 'group-hover:text-admin-light',
       hoverText: 'hover:text-admin',
-      bodyBg: 'bg-admin-bg',
-      surfaceBg: 'bg-admin-bg',
-      headerBg: 'bg-admin-bg/90',
-      mainBg: 'bg-admin-bg/90'
+      bodyBg: 'bg-[#010405]',
+      surfaceBg: 'bg-[#030608]',
+      headerBg: 'bg-[#010405]/95',
+      mainBg: 'bg-[#010405]'
     };
   }
 
@@ -254,17 +298,24 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 103, 0, 0.45) rgba(0, 0, 0, 0.4);
+}
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
+  background-color: rgba(255, 103, 0, 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.12);
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 103, 0, 0.75);
 }
 </style>

@@ -2,7 +2,7 @@
   <div>
     <!-- KPI Row 1 - Primary Metrics -->
     <div class="grid gap-5 grid-cols-2 lg:grid-cols-4 mb-5">
-      <article v-for="card in kpis" :key="card.label" @click="card.link && $router.push(card.link)" class="group relative overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1" :class="[card.bgClass || 'bg-charcoal border-white/[0.08] hover:border-white/20', card.link ? 'cursor-pointer' : '']">
+      <article v-for="card in kpis" :key="card.label" @click="card.link && $router.push(card.link)" class="group relative overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1" :class="[card.bgClass || 'bg-[#040709] border-white/[0.05] hover:border-admin/40 hover:bg-[#060b0e]', card.link ? 'cursor-pointer' : '']">
         
         <!-- Watermark icon top-right background -->
         <div class="absolute -right-4 -top-4 opacity-[0.06] transition-all duration-700 group-hover:opacity-[0.12] group-hover:scale-110 group-hover:rotate-6 pointer-events-none" :class="card.iconColor">
@@ -40,7 +40,7 @@
 
     <!-- Revenue Row -->
     <div v-if="revenueCards && revenueCards.length" class="grid gap-5 grid-cols-1 sm:grid-cols-3">
-      <article v-for="rev in revenueCards" :key="rev.label" class="group relative overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-[#112419] to-[#0a120d] p-6 backdrop-blur-xl transition-all duration-500 hover:border-emerald-400/30 hover:shadow-[0_8px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1">
+      <article v-for="rev in revenueCards" :key="rev.label" class="group relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#021007] to-[#010603] p-6 backdrop-blur-xl transition-all duration-500 hover:border-emerald-400/40 hover:shadow-[0_8px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1">
         <!-- Background mesh -->
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.08),transparent_50%)] opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
         <div class="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-[40px] group-hover:bg-emerald-500/20 transition-colors duration-500"></div>

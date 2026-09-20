@@ -70,12 +70,7 @@ export interface Barber {
   experience_years?: number;
   bio?: string | null;
   specialties?: string[];
-  instagram_url?: string | null;
   avatar?: string | null;
-  avatar_url?: string | null;
-  cover_image?: string | null;
-  cover_image_url?: string | null;
-  background_image_url?: string | null;
 }
 
 export interface Address {
@@ -312,4 +307,8 @@ export interface TimeSlot {
 export interface BarberProfile extends Barber {
   today_cuts_count?: number;
   today_earnings?: number;
+  instagram_url?: string | null;
+  avatar_url?: string | null;
+  cover_image_url?: string | null;
+  cover_image?: string | null;
 }

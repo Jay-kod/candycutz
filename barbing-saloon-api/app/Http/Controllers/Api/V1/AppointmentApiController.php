@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Booking\Actions\CreateBooking;
+use App\Domain\Booking\Actions\CreateWalkInAppointment;
 use App\Domain\Booking\Actions\GetAppointments;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
@@ -25,6 +27,8 @@ class AppointmentApiController
     use AuthorizesRequests;
 
     public function __construct(
+        protected CreateBooking $createBooking,
+        protected CreateWalkInAppointment $createWalkIn,
         protected BookingService $bookingService
     ) {}
 
@@ -36,15 +40,42 @@ class AppointmentApiController
             (int) $request->input('per_page', 15)
         );
 
-        return ApiResponse::success([
-            'items' => AppointmentResource::collection($appointments->getCollection()),
+        $items = AppointmentResource::collection($appointments->getCollection());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appointments retrieved successfully',
+            'data' => $items,
+            'items' => $items,
             'pagination' => [
                 'current_page' => $appointments->currentPage(),
                 'last_page' => $appointments->lastPage(),
                 'per_page' => $appointments->perPage(),
                 'total' => $appointments->total(),
             ],
-        ], 'Appointments retrieved successfully');
+        ], 200);
+    }
+
+    public function complete(Request $request, int $id): JsonResponse
+    {
+        $appointment = Appointment::findOrFail($id);
+        $this->authorize('complete', $appointment);
+
+        $reason = $request->input('reason', 'Completed by barber');
+        $this->bookingService->transitionStatus($appointment, AppointmentStatus::completed->value, $request->user(), $reason);
+
+        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment marked as completed.');
+    }
+
+    public function noShow(Request $request, int $id): JsonResponse
+    {
+        $appointment = Appointment::findOrFail($id);
+        $this->authorize('markNoShow', $appointment);
+
+        $reason = $request->input('reason', 'Marked no-show by barber');
+        $this->bookingService->transitionStatus($appointment, AppointmentStatus::no_show->value, $request->user(), $reason);
+
+        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment marked as no-show.');
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -61,7 +92,7 @@ class AppointmentApiController
     public function store(StoreAppointmentRequest $request): JsonResponse
     {
         try {
-            $appointment = $this->bookingService->createBooking(
+            $appointment = $this->createBooking->execute(
                 $request->user(),
                 BookingData::fromRequest($request)
             );
@@ -116,7 +147,7 @@ class AppointmentApiController
         $barberId = $barber?->id ?? ($request->barber_id ?? (Barber::value('id') ?? 1));
 
         try {
-            $appointment = $this->bookingService->createWalkIn(
+            $appointment = $this->createWalkIn->execute(
                 $request->user(),
                 Barber::findOrFail((int) $barberId),
                 BookingData::fromRequest($request)

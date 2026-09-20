@@ -40,6 +40,10 @@ class GetDashboardStats
             ->whereDate('appointment_date', $today)
             ->whereIn('status', [AppointmentStatus::confirmed->value, AppointmentStatus::completed->value])
             ->sum('total_price');
+        $weekRevenue = (float) Appointment::query()
+            ->whereBetween('appointment_date', [today()->startOfWeek()->toDateString(), today()->endOfWeek()->toDateString()])
+            ->whereIn('status', [AppointmentStatus::confirmed->value, AppointmentStatus::completed->value])
+            ->sum('total_price');
         $monthRevenue = (float) Appointment::query()
             ->whereYear('appointment_date', $today->year)
             ->whereMonth('appointment_date', $today->month)
@@ -102,9 +106,39 @@ class GetDashboardStats
                     'name' => $s->name,
                     'category' => $s->category?->name ?? 'General',
                     'bookings' => $s->appointments_count,
+                    'count' => $s->appointments_count,
                     'revenue' => $revenue,
                 ];
             })
+            ->all();
+
+        // Top barbers (matches DashboardTopEntities and ReportsTopPerformers)
+        $topBarbers = Barber::query()
+            ->with('user')
+            ->withCount(['appointments as total_appointments'])
+            ->get()
+            ->map(function ($b) {
+                $revenue = (float) Appointment::query()
+                    ->where('barber_id', $b->id)
+                    ->whereIn('status', [AppointmentStatus::confirmed->value, AppointmentStatus::completed->value])
+                    ->sum('total_price');
+
+                $completed = Appointment::query()
+                    ->where('barber_id', $b->id)
+                    ->where('status', AppointmentStatus::completed->value)
+                    ->count();
+
+                return [
+                    'id' => $b->id,
+                    'name' => $b->user?->name ?? 'Master Barber',
+                    'bookings' => (int) $b->getAttribute('total_appointments'),
+                    'completed_appointments' => $completed,
+                    'rating' => (float) ($b->getAttribute('rating') ?: 5.0),
+                    'revenue' => $revenue,
+                ];
+            })
+            ->sortByDesc('bookings')
+            ->values()
             ->all();
 
         // Recent appointments
@@ -113,7 +147,29 @@ class GetDashboardStats
             ->latest('appointment_date')
             ->latest('appointment_time')
             ->limit(6)
-            ->get();
+            ->get()
+            ->map(function ($appt) {
+                return [
+                    'id' => $appt->id,
+                    'client_name' => $appt->client_name ?: ($appt->customer?->name ?? 'Walk-In Client'),
+                    'appointment_date' => $appt->appointment_date?->toDateString(),
+                    'appointment_time' => substr((string) $appt->appointment_time, 0, 5),
+                    'status' => $appt->status?->value ?? $appt->status,
+                    'service' => $appt->service ? [
+                        'id' => $appt->service->id,
+                        'name' => $appt->service->name,
+                    ] : null,
+                    'barber' => $appt->barber ? [
+                        'id' => $appt->barber->id,
+                        'name' => $appt->barber->user?->name ?? 'Master Barber',
+                    ] : null,
+                    'customer' => $appt->customer ? [
+                        'id' => $appt->customer->id,
+                        'name' => $appt->customer->name,
+                    ] : null,
+                ];
+            })
+            ->all();
 
         // Recent activity from AuditLog
         $recentActivity = AuditLog::query()
@@ -133,29 +189,15 @@ class GetDashboardStats
             ->all();
 
         // Barber performance
-        $barberPerformance = Barber::query()
-            ->with('user')
-            ->withCount(['appointments as total_appointments'])
-            ->get()
-            ->map(function ($b) {
-                $completed = Appointment::query()
-                    ->where('barber_id', $b->id)
-                    ->where('status', AppointmentStatus::completed->value)
-                    ->count();
-
-                return [
-                    'id' => $b->id,
-                    'name' => $b->user?->name ?? 'Barber '.$b->id,
-                    'total_appointments' => (int) $b->getAttribute('total_appointments'),
-                    'completed_appointments' => $completed,
-                    'rating' => (float) $b->getAttribute('rating') ?: 5.0,
-                ];
-            })
-            ->all();
+        $barberPerformance = $topBarbers;
 
         return [
             'stats' => [
                 'appointments_today' => Appointment::query()->whereDate('appointment_date', $today)->count(),
+                'today_appointments' => Appointment::query()->whereDate('appointment_date', $today)->count(),
+                'today_revenue' => $todayRevenue,
+                'week_revenue' => $weekRevenue,
+                'month_revenue' => $monthRevenue,
                 'appointments_yesterday' => Appointment::query()->whereDate('appointment_date', $yesterday)->count(),
                 'pending_appointments' => Appointment::query()->where('status', AppointmentStatus::pending->value)->count(),
                 'total_customers' => $totalCustomers,
@@ -171,12 +213,14 @@ class GetDashboardStats
             'revenue' => [
                 'total_revenue' => $totalRevenue,
                 'today_revenue' => $todayRevenue,
+                'week_revenue' => $weekRevenue,
                 'month_revenue' => $monthRevenue,
             ],
             'revenue_trend' => $revenueTrend,
             'booking_trend' => $bookingTrend,
             'status_breakdown' => $statusBreakdown,
             'top_services' => $topServices,
+            'top_barbers' => $topBarbers,
             'recent_appointments' => $recentAppointments,
             'recent_activity' => $recentActivity,
             'barber_performance' => $barberPerformance,

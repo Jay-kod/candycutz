@@ -53,7 +53,7 @@ export default function RegisterScreen() {
       password_confirmation: passwordConfirmation || password,
     });
     if (success) {
-      router.back();
+      router.replace('/(tabs)');
     }
   };
 

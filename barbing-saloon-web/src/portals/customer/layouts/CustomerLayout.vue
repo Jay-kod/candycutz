@@ -4,6 +4,7 @@
     homeRoute="/customer/dashboard"
     profileRoute="/customer/dashboard/profile"
     :navItems="navItems"
+    theme="customer"
   >
     <slot />
   </DashboardLayout>

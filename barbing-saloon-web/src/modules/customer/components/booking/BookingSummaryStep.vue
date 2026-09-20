@@ -29,7 +29,7 @@
           <div class="flex justify-between"><span class="text-ivory/50">Barber</span><span class="text-theme-text font-semibold">{{ selectedBarberName }}</span></div>
           <div class="flex justify-between"><span class="text-ivory/50">Date</span><span class="text-theme-text font-semibold">{{ formatDate(appointmentDate) }}</span></div>
           <div class="flex justify-between"><span class="text-ivory/50">Time</span><span class="text-gold font-bold">{{ appointmentTime }}</span></div>
-          <div class="flex justify-between border-t border-gold/20 pt-2 mt-2"><span class="text-ivory/50">Total</span><span class="text-gold font-display text-lg font-bold">₦{{ Number(service.price).toLocaleString() }}</span></div>
+          <div class="flex justify-between border-t border-gold/20 pt-2 mt-2"><span class="text-ivory/50">Total</span><span class="text-gold font-display text-lg font-bold">{{ formatCurrency(service.price) }}</span></div>
         </div>
       </div>
 
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { formatCurrency } from '@/core/utils'
 
 defineProps({
   notes: { type: String, default: '' },

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   AlertTriangle,
   ArrowRight,
+  Bell,
   Calendar,
   Check,
   CheckCircle2,
@@ -37,6 +38,7 @@ import { CONFIG } from '../../constants/config';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useChairStore } from '../../store/chairStore';
+import { useNotifications } from '../../hooks/useNotifications';
 import { Appointment, ChairStatus } from '../../types';
 
 type QueueFilterTab = 'upcoming' | 'completed' | 'all';
@@ -53,6 +55,7 @@ export function BarberQueueView() {
   const queryClient = useQueryClient();
   const { barber, isAuthenticated, setChairStatus } = useAuthStore();
   const { activeClient, elapsedSeconds, setActiveClient, tickTimer } = useChairStore();
+  const { unreadCount } = useNotifications(isAuthenticated);
 
   const [activeTab, setActiveTab] = useState<QueueFilterTab>('upcoming');
   const [pendingApproval, setPendingApproval] = useState<{
@@ -280,6 +283,25 @@ export function BarberQueueView() {
         </View>
 
         <View style={styles.headerRightActions}>
+          <Pressable
+            onPress={() => router.push('/notifications')}
+            style={({ pressed }) => [
+              styles.notifBellBtn,
+              pressed && styles.btnPressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Notifications"
+          >
+            <Bell size={18} color="#FFFFFF" />
+            {unreadCount > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+
           <Pressable
             onPress={() => router.push('/walkin')}
             style={({ pressed }) => [
@@ -913,6 +935,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  notifBellBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#14141B',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    backgroundColor: '#E5BA73',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  notifBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#0A0A0C',
   },
   walkInQuickBtn: {
     flexDirection: 'row',

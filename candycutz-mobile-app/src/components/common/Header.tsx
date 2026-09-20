@@ -1,8 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Bell } from 'lucide-react-native';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { useNotifications } from '../../hooks/useNotifications';
 
 interface HeaderProps {
   title?: string;
@@ -15,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const { unreadCount } = useNotifications(isAuthenticated);
 
   return (
     <View style={styles.container}>
@@ -24,23 +27,44 @@ export const Header: React.FC<HeaderProps> = ({
           <Text style={styles.tagline}>LUXURY GROOMING</Text>
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => (isAuthenticated ? router.push('/(tabs)/profile') : router.push('/auth/login'))}
-          style={styles.avatarButton}
-        >
-          {isAuthenticated && user ? (
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {(user.real_name || user.name || 'U').charAt(0).toUpperCase()}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.loginPill}>
-              <Text style={styles.loginPillText}>Sign In</Text>
-            </View>
+        <View style={styles.headerActions}>
+          {isAuthenticated && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/notifications')}
+              style={styles.bellButton}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
+              <Bell size={20} color={COLORS.textPrimary} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => (isAuthenticated ? router.push('/(tabs)/profile') : router.push('/auth/login'))}
+            style={styles.avatarButton}
+          >
+            {isAuthenticated && user ? (
+              <View style={styles.avatarContainer}>
+                <Text style={styles.avatarText}>
+                  {(user.real_name || user.name || 'U').charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.loginPill}>
+                <Text style={styles.loginPillText}>Sign In</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {showLocationBadge && (
@@ -83,6 +107,39 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     letterSpacing: 1.5,
     marginTop: -2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  bellButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: COLORS.primary,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#0A0A0C',
   },
   avatarButton: {
     padding: 4,

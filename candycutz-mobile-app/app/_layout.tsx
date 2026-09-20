@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthStore } from '../src/store/authStore';
+import { usePushNotificationSetup } from '../src/services/notifications';
 import { COLORS } from '../src/constants/theme';
 import { SplashScreenView } from '../src/components/common/SplashScreenView';
 import { NavigationLoadingOverlay } from '../src/components/common/NavigationLoadingOverlay';
@@ -30,6 +31,9 @@ export default function RootLayout() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const router = useRouter();
   const segments = useSegments();
+
+  // Initialize push notifications when authenticated
+  usePushNotificationSetup();
 
   // Splash screen lifecycle states
   const [isSplashActive, setIsSplashActive] = useState(true);
@@ -188,6 +192,14 @@ export default function RootLayout() {
             options={{
               title: 'New Walk-In Client',
               presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="notifications"
+            options={{
+              title: 'Notifications',
+              headerShown: false,
+              presentation: 'card',
             }}
           />
         </Stack>

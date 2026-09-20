@@ -31,6 +31,7 @@ class BarberResource extends JsonResource
             'specialties' => $specialties,
             'bio' => $this->bio ?? 'Expert master barber with precision razor craft.',
             'instagram_url' => $this->instagram_url,
+            'status' => $this->status ?? ($this->is_available ? 'active' : 'suspended'),
             'is_available' => (bool) $this->is_available,
             'is_active' => (bool) ($u?->is_active ?? true),
             'working_hours' => $this->whenLoaded('workingHours'),

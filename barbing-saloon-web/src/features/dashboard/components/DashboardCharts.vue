@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Weekly Revenue Chart -->
-    <div class="rounded-2xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-sm overflow-hidden">
+    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
       <div class="flex items-center justify-between border-b border-white/[0.04] px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-admin/10 border border-admin/15">
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Weekly Bookings Chart -->
-    <div class="rounded-2xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-sm overflow-hidden">
+    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
       <div class="flex items-center justify-between border-b border-white/[0.04] px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/15">

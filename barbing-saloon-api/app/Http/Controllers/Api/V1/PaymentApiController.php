@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Notification\NotificationDispatcher;
+use App\Domain\Payment\Actions\ConfirmPayment;
+use App\Domain\Payment\Actions\InitiateCheckout;
 use App\Domain\Payment\Actions\UploadReceipt;
+use App\Domain\Payment\Actions\VerifyReceipt;
 use App\Domain\Payment\Services\PaymentService;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Resources\Api\V1\PaymentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentApiController
 {
     public function __construct(
-        protected PaymentService $paymentService,
+        protected InitiateCheckout $initiateCheckout,
+        protected ConfirmPayment $confirmPayment,
         protected UploadReceipt $uploadReceiptAction
     ) {}
 
@@ -27,7 +34,7 @@ class PaymentApiController
 
         $appointment = Appointment::where('id', $appointmentId)->where('customer_id', $user->id)->firstOrFail();
 
-        $checkoutDetails = $this->paymentService->initializePayment($appointment, $paymentMethod);
+        $checkoutDetails = $this->initiateCheckout->execute($user, $appointment, $paymentMethod);
 
         return ApiResponse::success([
             'checkout' => $checkoutDetails,
@@ -65,9 +72,59 @@ class PaymentApiController
 
         $payment = $this->uploadReceiptAction->execute($appointment, $file);
 
+        // Dispatch notification to barber + admin
+        try {
+            app(NotificationDispatcher::class)->paymentReceived($appointment);
+        } catch (\Throwable $e) {
+            Log::warning('Could not dispatch paymentReceived notification: '.$e->getMessage());
+        }
+
         return ApiResponse::success(
             new PaymentResource($payment),
             'Receipt uploaded successfully. Awaiting verification.'
+        );
+    }
+
+    public function verifyPayment(Request $request, int $id, VerifyReceipt $verifyReceipt): JsonResponse
+    {
+        $appointment = Appointment::with(['payment', 'barber'])->findOrFail($id);
+        $user = $request->user();
+
+        $isAssignedBarber = $appointment->barber?->user_id === $user->id;
+        $role = $user->role instanceof \BackedEnum ? $user->role->value : $user->role;
+        $isStaff = in_array($role, ['admin', 'super_admin'], true);
+
+        if (! $isAssignedBarber && ! $isStaff) {
+            return ApiResponse::error('Unauthorized to verify payment for this appointment.', [], 403, 'FORBIDDEN');
+        }
+
+        $payment = $appointment->payment;
+        if (! $payment) {
+            return ApiResponse::error('No payment record found for this appointment.', [], 404, 'PAYMENT_NOT_FOUND');
+        }
+
+        $action = strtolower((string) $request->input('action', 'approve'));
+        $approve = in_array($action, ['approve', 'approved', 'verify', 'verified'], true);
+        $reason = $request->input('reason', $approve ? 'Payment verified by barber' : 'Payment rejected by barber');
+
+        $updatedPayment = $verifyReceipt->execute($payment, $approve, $reason, $user->id);
+
+        if ($approve && in_array($appointment->status?->value ?? $appointment->status, [AppointmentStatus::pending->value], true)) {
+            $appointment->update(['status' => AppointmentStatus::confirmed->value]);
+        }
+
+        // Dispatch notification to customer
+        try {
+            if ($approve) {
+                app(NotificationDispatcher::class)->paymentVerified($appointment);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Could not dispatch paymentVerified notification: '.$e->getMessage());
+        }
+
+        return ApiResponse::success(
+            new PaymentResource($updatedPayment),
+            $approve ? 'Payment verified successfully.' : 'Payment rejected.'
         );
     }
 }

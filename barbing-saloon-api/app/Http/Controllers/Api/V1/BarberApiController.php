@@ -175,6 +175,38 @@ class BarberApiController
         return ApiResponse::success(new BarberResource($barber->refresh()), 'Chair status updated successfully');
     }
 
+    public function updateMyStatus(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $barber = $user->barber;
+
+        if (! $barber) {
+            return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
+        }
+
+        $this->authorize('update', $barber);
+
+        $status = (string) $request->input('status', 'active');
+        $isAvailable = $request->boolean('is_available', in_array($status, ['active', 'free'], true));
+        $chairStatus = match ($status) {
+            'active', 'free' => 'free',
+            'on_leave', 'offline' => 'offline',
+            'suspended' => 'offline',
+            default => 'busy',
+        };
+
+        $barber->update([
+            'is_available' => $isAvailable,
+            'chair_status' => $chairStatus,
+        ]);
+
+        return ApiResponse::success([
+            'status' => $isAvailable ? 'active' : 'on_leave',
+            'is_available' => (bool) $barber->is_available,
+            'chair_status' => $barber->chair_status,
+        ], 'Barber status updated');
+    }
+
     public function schedule(Request $request, GetBarberSchedule $action): JsonResponse
     {
         $user = $request->user();

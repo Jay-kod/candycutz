@@ -18,7 +18,7 @@ class AppointmentPolicy
 
     public function view(User $user, Appointment $appointment): bool
     {
-        return $appointment->customer_id === $user->id;
+        return $appointment->customer_id === $user->id || $appointment->barber?->user_id === $user->id;
     }
 
     public function update(User $user, Appointment $appointment): bool
@@ -28,7 +28,7 @@ class AppointmentPolicy
 
     public function cancel(User $user, Appointment $appointment): bool
     {
-        return $appointment->customer_id === $user->id;
+        return $appointment->customer_id === $user->id || $appointment->barber?->user_id === $user->id;
     }
 
     public function manageForBarber(User $user, Appointment $appointment): bool

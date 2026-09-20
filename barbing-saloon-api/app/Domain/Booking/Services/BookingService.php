@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Booking\Services;
 
 use App\Domain\Booking\DataObjects\BookingData;
+use App\Domain\Notification\NotificationDispatcher;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Jobs\SendBookingCancellation;
@@ -207,6 +208,13 @@ class BookingService
                 Log::warning("Could not dispatch booking confirmation mail for appointment {$appointment->id}: ".$e->getMessage());
             }
 
+            // 9. Dispatch in-app + push notifications
+            try {
+                app(NotificationDispatcher::class)->bookingCreated($appointment);
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch booking notification for appointment {$appointment->id}: ".$e->getMessage());
+            }
+
             return $appointment->load(['service.category', 'barber.user', 'serviceZone']);
         });
     }
@@ -318,6 +326,21 @@ class BookingService
             } catch (\Throwable $e) {
                 Log::warning('Could not dispatch cancellation mail: '.$e->getMessage());
             }
+        }
+
+        // Dispatch in-app + push notifications based on new status
+        try {
+            $dispatcher = app(NotificationDispatcher::class);
+
+            match ($newStatus) {
+                'confirmed' => $dispatcher->bookingApproved($appointment),
+                'cancelled' => $dispatcher->bookingCancelled($appointment, $actor),
+                'completed' => $dispatcher->bookingCompleted($appointment),
+                'no_show'   => $dispatcher->bookingNoShow($appointment),
+                default     => null,
+            };
+        } catch (\Throwable $e) {
+            Log::warning("Could not dispatch status-transition notification: ".$e->getMessage());
         }
 
         return $appointment;

@@ -46,9 +46,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/blog', [BlogApiController::class, 'store']);
         Route::put('/blog/{id}', [BlogApiController::class, 'update'])->whereNumber('id');
         Route::delete('/blog/{id}', [BlogApiController::class, 'destroy'])->whereNumber('id');
-        Route::post('/blog/{id}/react', [BlogApiController::class, 'react'])->whereNumber('id');
-        Route::delete('/blog/{id}/react', [BlogApiController::class, 'removeReaction'])->whereNumber('id');
+    });
 
+    // Blog reactions (any authenticated user)
+    Route::post('/blog/{id}/react', [BlogApiController::class, 'react'])->whereNumber('id');
+    Route::delete('/blog/{id}/react', [BlogApiController::class, 'removeReaction'])->whereNumber('id');
+
+    Route::middleware('check.role:admin,super_admin')->group(function () {
         // Testimonials CRUD
         Route::put('/testimonials/{id}', [TestimonialApiController::class, 'update'])->whereNumber('id');
         Route::patch('/testimonials/{id}/approve', [TestimonialApiController::class, 'approve'])->whereNumber('id');
