@@ -48,6 +48,10 @@ class Setting extends Model
             return 'seo';
         }
 
+        if ($key === 'brevo_api_key' || str_starts_with($key, 'mail_')) {
+            return 'notifications';
+        }
+
         if (str_starts_with($key, 'theme_') || in_array($key, ['primary_color', 'accent_color'], true)) {
             return 'theme';
         }

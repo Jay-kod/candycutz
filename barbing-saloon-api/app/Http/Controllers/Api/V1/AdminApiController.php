@@ -33,6 +33,7 @@ use App\Models\Holiday;
 use App\Models\WorkingHour;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Domain\Notification\Services\BrevoApiClient;
 
 class AdminApiController
 {
@@ -182,9 +183,15 @@ class AdminApiController
         return ApiResponse::success($action->execute($request->query('range', '7d')), 'Analytics loaded');
     }
 
-    public function testEmail(Request $request): JsonResponse
+    public function testEmail(Request $request, BrevoApiClient $brevo): JsonResponse
     {
-        $to = $request->input('to');
+        $to = (string) $request->validate(['to' => ['required', 'email']])['to'];
+
+        try {
+            $brevo->send($to, 'CandyCutz Brevo connection test', '<p>Your CandyCutz Brevo connection is working.</p>');
+        } catch (\Throwable $exception) {
+            return ApiResponse::error($exception->getMessage(), [], 422, 'BREVO_EMAIL_FAILED');
+        }
 
         return ApiResponse::success(['sent_to' => $to], 'Test email sent successfully');
     }

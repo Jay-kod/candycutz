@@ -17,7 +17,7 @@
         <span>{{ flash }}</span>
       </div>
 
-      <!-- Email / SMTP -->
+      <!-- Email / Brevo API -->
       <div class="rounded-2xl border border-white/10 bg-black/20 overflow-hidden">
         <div class="flex items-center justify-between gap-4 px-6 py-4 bg-white/[0.02] border-b border-white/5">
           <div class="flex items-center gap-3">
@@ -26,7 +26,7 @@
             </div>
             <div>
               <h2 class="font-display text-lg text-theme-text">Email Notifications</h2>
-              <p class="text-xs text-ivory/40">Brevo SMTP. Drives signup, login, and password-reset emails.</p>
+              <p class="text-xs text-ivory/40">Brevo API. Drives signup, login, and password-reset emails.</p>
             </div>
           </div>
           <span :class="['px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider', mailConfigured ? 'bg-green-500/15 text-green-400 border border-green-500/30' : 'bg-white/5 text-ivory/50 border border-white/10']">
@@ -36,20 +36,9 @@
         <div class="p-6 space-y-4">
           <div class="grid md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">SMTP Host</label>
-              <input v-model="form.mail_host" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin focus:ring-1 focus:ring-admin outline-none" placeholder="smtp-relay.brevo.com" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">SMTP Port</label>
-              <input v-model="form.mail_port" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin focus:ring-1 focus:ring-admin outline-none" placeholder="587" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">SMTP Username</label>
-              <input v-model="form.mail_username" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin focus:ring-1 focus:ring-admin outline-none" placeholder="your smtp username" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">SMTP Password</label>
-              <input v-model="form.mail_password" type="password" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin focus:ring-1 focus:ring-admin outline-none" placeholder="your smtp password" />
+              <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">Brevo API Key</label>
+              <input v-model="form.brevo_api_key" type="password" autocomplete="new-password" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin focus:ring-1 focus:ring-admin outline-none" placeholder="xkeysib-..." />
+              <p class="text-[11px] text-ivory/40 mt-1.5">Create it in Brevo: SMTP &amp; API → API Keys → Generate a new API key.</p>
             </div>
             <div>
               <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">From Email</label>
@@ -145,10 +134,7 @@ import { adminApi } from '@/shared/api/old_adminApi';
 import { EnvelopeIcon, GlobeAltIcon, PaperAirplaneIcon } from '@heroicons/vue/24/outline';
 
 const form = reactive({
-  mail_host: 'smtp-relay.brevo.com',
-  mail_port: '587',
-  mail_username: '',
-  mail_password: '',
+  brevo_api_key: '',
   mail_from: '',
   mail_from_name: 'CandyCutz',
   google_client_id: '',
@@ -164,7 +150,7 @@ const testEmail = ref('');
 const flash = ref('');
 const flashType = ref('info');
 
-const mailConfigured = computed(() => Boolean(form.mail_username) && Boolean(form.mail_from));
+const mailConfigured = computed(() => Boolean(form.brevo_api_key) && Boolean(form.mail_from));
 
 function setFlash(message, type = 'info') {
   flash.value = message;
@@ -174,10 +160,7 @@ function setFlash(message, type = 'info') {
 
 function applySettings(all) {
   const s = all || {};
-  form.mail_host = s.mail_host || 'smtp-relay.brevo.com';
-  form.mail_port = s.mail_port || '587';
-  form.mail_username = s.mail_username || '';
-  form.mail_password = s.mail_password || '';
+  form.brevo_api_key = s.brevo_api_key || '';
   form.mail_from = s.mail_from || '';
   form.mail_from_name = s.mail_from_name || 'CandyCutz';
   form.google_client_id = s.google_client_id || '';

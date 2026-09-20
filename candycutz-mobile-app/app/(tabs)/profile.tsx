@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   Linking,
@@ -27,7 +27,7 @@ const CHAIR_STATUSES: { label: string; value: ChairStatus }[] = [
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [logoutDialogVisible, setLogoutDialogVisible] = React.useState(false);
+  const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   const {
     user,
     barber,
@@ -39,6 +39,8 @@ export default function ProfileScreen() {
     setViewMode,
   } = useAuthStore();
 
+  const isStaffDesk = isBarber && viewMode === 'barber';
+
   const handleLogout = () => {
     setLogoutDialogVisible(true);
   };
@@ -49,153 +51,306 @@ export default function ProfileScreen() {
     router.replace('/(tabs)');
   };
 
-  const openBranchLocation = () => {
-    Linking.openURL(CONFIG.BRANCH.MAPS_URL);
-  };
-
-  const callBranchPhone = () => {
-    Linking.openURL(`tel:${CONFIG.BRANCH.PHONE}`);
-  };
-
   const toggleViewMode = () => {
     if (viewMode === 'barber') {
       setViewMode('customer');
       Alert.alert('Client View Active', 'You are now viewing the app as a client would see it.');
     } else {
       setViewMode('barber');
-      Alert.alert('Barber Staff Desk Active', 'Switched back to Barber Staff Desk and Queue.');
+      Alert.alert('Barber Staff Desk Active', 'Switched back to Barber Staff Desk.');
     }
     router.replace('/(tabs)');
+  };
+
+  const handleContactSupport = () => {
+    Alert.alert(
+      'Support & Concierge',
+      `${CONFIG.BRANCH.NAME}\n${CONFIG.BRANCH.ADDRESS}\n\nPhone: ${CONFIG.BRANCH.PHONE}`,
+      [
+        {
+          text: '📞 Call Saloon',
+          onPress: () => Linking.openURL(`tel:${CONFIG.BRANCH.PHONE}`),
+        },
+        {
+          text: '🗺 Open Location',
+          onPress: () => Linking.openURL(CONFIG.BRANCH.MAPS_URL),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.headerTitle}>
-          {isBarber && viewMode === 'barber' ? 'Stylist Desk & Profile' : 'My Profile'}
+          {isStaffDesk ? 'Staff Desk' : 'Profile'}
         </Text>
-
-        {/* Staff Role Switcher Banner (if user is a barber) */}
-        {isBarber && (
-          <Card style={styles.roleSwitchCard} elevated>
-            <View style={styles.roleSwitchHeader}>
-              <View>
-                <Text style={styles.roleSwitchTag}>ROLE & VIEW CONTROLLER</Text>
-                <Text style={styles.roleSwitchTitle}>
-                  {viewMode === 'barber' ? 'Active: Barber Staff Mode' : 'Active: Customer Preview Mode'}
-                </Text>
-              </View>
-              <Button
-                title={viewMode === 'barber' ? '👁 View as Client' : '✂ Return to Desk'}
-                size="sm"
-                variant={viewMode === 'barber' ? 'outline' : 'primary'}
-                onPress={toggleViewMode}
-              />
-            </View>
-            <Text style={styles.roleSwitchDesc}>
-              {viewMode === 'barber'
-                ? 'Preview the client catalog, service prices, and booking experience without logging out.'
-                : 'You are currently previewing the client view. Switch back when ready to service appointments.'}
-            </Text>
-          </Card>
-        )}
 
         {isAuthenticated && user ? (
           <>
-            {/* User or Barber Info Card */}
-            <Card style={styles.userCard} elevated>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {(user.real_name || user.name || barber?.name || 'U').charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.real_name || user.name || barber?.name}</Text>
-                <Text style={styles.userUsername}>@{user.username || barber?.username}</Text>
-                <Text style={styles.userEmail}>{user.email || barber?.email}</Text>
-                {user.phone && <Text style={styles.userPhone}>{user.phone}</Text>}
-                {isBarber && barber && (
-                  <View style={styles.ratingRow}>
-                    <Text style={styles.star}>★</Text>
-                    <Text style={styles.ratingText}>
-                      {Number(barber.rating || 5.0).toFixed(1)} Rating ({barber.total_reviews || 48} reviews)
+            {/* Customer Header: [Avatar / Name / Email] */}
+            {!isStaffDesk && (
+              <Card style={styles.profileCard} elevated>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {(user.real_name || user.name || 'C').charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.profileDetails}>
+                  <Text style={styles.profileName}>{user.real_name || user.name}</Text>
+                  <Text style={styles.profileEmail}>{user.email}</Text>
+                  {user.phone && <Text style={styles.profilePhone}>{user.phone}</Text>}
+                </View>
+              </Card>
+            )}
+
+            {/* Barber Header: [Avatar / Name / Chair status toggle] */}
+            {isStaffDesk && (
+              <Card style={styles.barberHeaderCard} elevated>
+                <View style={styles.barberProfileRow}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {(barber?.name || user.real_name || user.name || 'B').charAt(0).toUpperCase()}
                     </Text>
                   </View>
-                )}
-              </View>
-              {isBarber && viewMode === 'barber' && (
-                <Button
-                  title="Edit profile"
-                  size="sm"
-                  variant="outline"
-                  onPress={() => router.push('/barber/profile-edit')}
-                  style={styles.editProfileButton}
-                />
-              )}
-            </Card>
+                  <View style={styles.profileDetails}>
+                    <Text style={styles.profileName}>{barber?.name || user.real_name || user.name}</Text>
+                    <Text style={styles.barberRoleTag}>MASTER STYLIST</Text>
+                    <Text style={styles.profileEmail}>{user.email || barber?.email}</Text>
+                  </View>
+                </View>
 
-            {/* If Barber: Chair Status Strip & Today's Metrics */}
-            {isBarber && viewMode === 'barber' && (
-              <>
-                <Text style={styles.sectionHeader}>Chair Availability</Text>
-                <Card style={styles.chairStatusCard}>
-                  <View style={styles.statusChips}>
+                {/* Chair Status Toggle */}
+                <View style={styles.chairToggleSection}>
+                  <Text style={styles.chairSectionLabel}>CHAIR STATUS</Text>
+                  <View style={styles.chairChipsRow}>
                     {CHAIR_STATUSES.map((s) => {
                       const isSelected = barber?.chair_status === s.value;
                       return (
                         <TouchableOpacity
                           key={s.value}
-                          style={[styles.statusChip, isSelected && styles.statusChipActive]}
+                          style={[styles.chairChip, isSelected && styles.chairChipActive]}
                           onPress={() => setChairStatus(s.value)}
                         >
-                          <Text style={[styles.statusChipText, isSelected && styles.statusChipTextActive]}>
+                          <Text style={[styles.chairChipText, isSelected && styles.chairChipTextActive]}>
                             {s.label}
                           </Text>
                         </TouchableOpacity>
                       );
                     })}
                   </View>
+                </View>
+              </Card>
+            )}
+
+            {/* Customer Navigation Menu */}
+            {!isStaffDesk && (
+              <>
+                {/* Group 1: Bookings, Wishlist, Notifications, Reviews */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/(tabs)/bookings')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>📅</Text>
+                      <Text style={styles.menuText}>My Bookings</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/wishlist')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>❤️</Text>
+                      <Text style={styles.menuText}>Wishlist</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/notifications')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>🔔</Text>
+                      <Text style={styles.menuText}>Notifications</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/reviews')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>★</Text>
+                      <Text style={styles.menuText}>My Reviews</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
                 </Card>
 
-                <Text style={styles.sectionHeader}>Today's Performance</Text>
-                <View style={styles.metricsGrid}>
-                  <Card style={styles.metricCard} elevated>
-                    <Text style={styles.metricVal}>{barber?.today_cuts_count || 6}</Text>
-                    <Text style={styles.metricLabel}>Cuts Done</Text>
-                  </Card>
-                  <Card style={styles.metricCard} elevated>
-                    <Text style={[styles.metricVal, { color: COLORS.primary }]}>
-                      ₦{Number(barber?.today_earnings || 32000).toLocaleString()}
-                    </Text>
-                    <Text style={styles.metricLabel}>Commission</Text>
-                  </Card>
-                </View>
+                {/* Group 2: Settings */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/settings')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>⚙️</Text>
+                      <Text style={styles.menuText}>Settings</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+                </Card>
+
+                {/* Group 3: Support / Contact Us & Sign Out */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleContactSupport}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>📞</Text>
+                      <Text style={styles.menuText}>Support / Contact Us</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleLogout}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>🚪</Text>
+                      <Text style={[styles.menuText, styles.dangerText]}>Sign Out</Text>
+                    </View>
+                    <Text style={[styles.menuArrow, styles.dangerText]}>&rarr;</Text>
+                  </TouchableOpacity>
+                </Card>
               </>
             )}
 
-            {/* If Customer: Wallet Balance Card */}
-            {(!isBarber || viewMode === 'customer') && (
-              <Card style={styles.walletCard} elevated>
-                <View>
-                  <Text style={styles.walletLabel}>CANDYCUTZ WALLET BALANCE</Text>
-                  <Text style={styles.walletAmount}>
-                    ₦{Number(user.wallet_balance || 0).toLocaleString()}
-                  </Text>
-                </View>
-                <Button
-                  title="Top Up"
-                  size="sm"
-                  variant="outline"
-                  onPress={() => Alert.alert('Wallet Top-up', 'Instant online wallet top-up via Paystack / Flutterwave.')}
-                />
-              </Card>
+            {/* Barber Staff Desk Navigation Menu */}
+            {isStaffDesk && (
+              <>
+                {/* Group 1: Services, Gallery, Blog, Analytics */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/services')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>✂️</Text>
+                      <Text style={styles.menuText}>My Services</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/gallery')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>📸</Text>
+                      <Text style={styles.menuText}>Gallery</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/blog')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>📖</Text>
+                      <Text style={styles.menuText}>Blog Posts</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/analytics')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>📊</Text>
+                      <Text style={styles.menuText}>Analytics</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+                </Card>
+
+                {/* Group 2: Settings (Shared with customer) */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/settings')}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>⚙️</Text>
+                      <Text style={styles.menuText}>Settings</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+                </Card>
+
+                {/* Group 3: Switch to Client View & Sign Out */}
+                <Card style={styles.menuCard} elevated>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={toggleViewMode}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>👁</Text>
+                      <Text style={styles.menuText}>Switch to Client View</Text>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.divider} />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleLogout}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <Text style={styles.menuIcon}>🚪</Text>
+                      <Text style={[styles.menuText, styles.dangerText]}>Sign Out</Text>
+                    </View>
+                    <Text style={[styles.menuArrow, styles.dangerText]}>&rarr;</Text>
+                  </TouchableOpacity>
+                </Card>
+              </>
             )}
           </>
         ) : (
+          /* Guest State */
           <Card style={styles.guestCard} elevated>
             <Text style={styles.guestTitle}>Welcome to CandyCutz</Text>
             <Text style={styles.guestSubtitle}>
-              Sign in or create an account to book your appointments, track live queue progress, and save your home service addresses.
+              Sign in or create an account to book your appointments, manage preferences, and view your loyalty perks.
             </Text>
             <View style={styles.authButtonsRow}>
               <Button
@@ -210,76 +365,26 @@ export default function ProfileScreen() {
                 style={styles.authBtn}
               />
             </View>
+            <View style={styles.divider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleContactSupport}
+            >
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuIcon}>📞</Text>
+                <Text style={styles.menuText}>Support / Contact Us</Text>
+              </View>
+              <Text style={styles.menuArrow}>&rarr;</Text>
+            </TouchableOpacity>
           </Card>
         )}
-
-        {/* Physical Branch Information */}
-        <Text style={styles.sectionHeader}>Flagship Saloon</Text>
-        <Card style={styles.branchCard} elevated>
-          <Text style={styles.branchName}>{CONFIG.BRANCH.NAME}</Text>
-          <Text style={styles.branchAddress}>{CONFIG.BRANCH.ADDRESS}</Text>
-          
-          <View style={styles.branchActions}>
-            <TouchableOpacity onPress={openBranchLocation} style={styles.branchActionBtn}>
-              <Text style={styles.branchActionText}>🗺 Open Google Maps</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={callBranchPhone} style={styles.branchActionBtn}>
-              <Text style={styles.branchActionText}>📞 Call {CONFIG.BRANCH.PHONE}</Text>
-            </TouchableOpacity>
-          </View>
-        </Card>
-
-        {/* Staff Guidelines or Customer Policies */}
-        {isBarber && viewMode === 'barber' ? (
-          <>
-            <Text style={styles.sectionHeader}>Staff Operational Guidelines</Text>
-            <Card style={styles.guidelinesCard}>
-              <Text style={styles.guidelineText}>• Sanitize all clippers and blades between clients.</Text>
-              <Text style={styles.guidelineText}>• Confirm customer check-in upon arrival to chair.</Text>
-              <Text style={styles.guidelineText}>• Notify concierge 1 hour prior to taking unscheduled breaks.</Text>
-            </Card>
-          </>
-        ) : (
-          <>
-            <Text style={styles.sectionHeader}>Support & Details</Text>
-            <Card style={styles.menuCard}>
-              <TouchableOpacity
-                style={styles.menuRow}
-                onPress={() => Linking.openURL('https://candycutz.ng/terms')}
-              >
-                <Text style={styles.menuLabel}>Terms of Service & Booking Policy</Text>
-                <Text style={styles.menuArrow}>&rarr;</Text>
-              </TouchableOpacity>
-              <View style={styles.menuDivider} />
-              <TouchableOpacity
-                style={styles.menuRow}
-                onPress={() => Linking.openURL('https://candycutz.ng/privacy')}
-              >
-                <Text style={styles.menuLabel}>Privacy Policy</Text>
-                <Text style={styles.menuArrow}>&rarr;</Text>
-              </TouchableOpacity>
-              <View style={styles.menuDivider} />
-              <View style={styles.menuRow}>
-                <Text style={styles.menuLabel}>App Version</Text>
-                <Text style={styles.menuValue}>1.0.0 (Production Unified Build)</Text>
-              </View>
-            </Card>
-          </>
-        )}
-
-        {isAuthenticated && (
-          <Button
-            title="Sign Out"
-            variant="danger"
-            onPress={handleLogout}
-            style={styles.logoutBtn}
-          />
-        )}
       </ScrollView>
+
+      {/* Logout Confirmation Dialog */}
       <ConfirmDialog
         visible={logoutDialogVisible}
         title="Log out of CandyCutz?"
-        message="You will need to sign in again to manage bookings, payments, and your profile."
+        message="You will need to sign in again to access your bookings and profile."
         confirmLabel="Log out"
         destructive
         onCancel={() => setLogoutDialogVisible(false)}
@@ -297,53 +402,31 @@ const styles = StyleSheet.create({
   container: {
     padding: SPACING.md,
     paddingBottom: 40,
+    gap: SPACING.md,
   },
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: FONTS.sizes.hero - 8,
     fontWeight: '800',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xs,
   },
-  roleSwitchCard: {
-    padding: SPACING.md,
-    backgroundColor: '#1E1B10',
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    marginBottom: SPACING.md,
-  },
-  roleSwitchHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  roleSwitchTag: {
-    color: COLORS.primary,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  roleSwitchTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.sm,
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  roleSwitchDesc: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  userCard: {
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.md,
-    marginBottom: SPACING.md,
+  },
+  barberHeaderCard: {
+    padding: SPACING.md,
+    gap: SPACING.md,
+  },
+  barberProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: COLORS.surfaceHighlight,
     borderWidth: 2,
     borderColor: COLORS.primary,
@@ -356,218 +439,123 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xxl,
     fontWeight: '800',
   },
-  userInfo: {
+  profileDetails: {
     flex: 1,
   },
-  userName: {
+  profileName: {
     color: COLORS.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
   },
-  userUsername: {
+  barberRoleTag: {
     color: COLORS.primary,
-    fontSize: FONTS.sizes.sm,
-    fontWeight: '600',
-    marginTop: 1,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginTop: 2,
   },
-  userEmail: {
+  profileEmail: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.xs,
     marginTop: 2,
   },
-  editProfileButton: {
-    marginTop: SPACING.md,
-  },
-  userPhone: {
+  profilePhone: {
     color: COLORS.textMuted,
     fontSize: FONTS.sizes.xs,
     marginTop: 1,
   },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
+  chairToggleSection: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: 12,
   },
-  star: {
+  chairSectionLabel: {
     color: COLORS.primary,
-    fontSize: 13,
-    marginRight: 4,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 8,
   },
-  ratingText: {
-    color: COLORS.textPrimary,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  chairStatusCard: {
-    padding: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  statusChips: {
+  chairChipsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 6,
   },
-  statusChip: {
+  chairChip: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     backgroundColor: COLORS.surfaceHighlight,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  statusChipActive: {
+  chairChipActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  statusChipText: {
+  chairChipText: {
     color: COLORS.textSecondary,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
   },
-  statusChipTextActive: {
+  chairChipTextActive: {
     color: '#0A0A0C',
   },
-  metricsGrid: {
+  menuCard: {
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.md,
+  },
+  menuItem: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: SPACING.lg,
-  },
-  metricCard: {
-    flex: 1,
-    padding: SPACING.md,
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
   },
-  metricVal: {
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuIcon: {
+    fontSize: 18,
+    width: 24,
+    textAlign: 'center',
+  },
+  menuText: {
     color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.xl,
-    fontWeight: '900',
-    marginBottom: 4,
-  },
-  metricLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.xs,
+    fontSize: FONTS.sizes.md,
     fontWeight: '600',
   },
-  walletCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+  menuArrow: {
+    color: COLORS.textMuted,
+    fontSize: 18,
   },
-  walletLabel: {
-    color: COLORS.primary,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
+  dangerText: {
+    color: '#EF4444',
   },
-  walletAmount: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.xl,
-    fontWeight: '800',
-    marginTop: 2,
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.border,
   },
   guestCard: {
     padding: SPACING.lg,
-    marginBottom: SPACING.lg,
+    gap: SPACING.md,
   },
   guestTitle: {
     color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.lg,
+    fontSize: FONTS.sizes.xl,
     fontWeight: '800',
-    marginBottom: 6,
   },
   guestSubtitle: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
     lineHeight: 20,
-    marginBottom: 16,
   },
   authButtonsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: SPACING.md,
   },
   authBtn: {
     flex: 1,
-  },
-  sectionHeader: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.xs,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: SPACING.sm,
-    marginTop: SPACING.xs,
-  },
-  branchCard: {
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  branchName: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.md,
-    fontWeight: '700',
-  },
-  branchAddress: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.sm,
-    lineHeight: 20,
-    marginVertical: 8,
-  },
-  branchActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 6,
-  },
-  branchActionBtn: {
-    backgroundColor: COLORS.surfaceHighlight,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: RADIUS.sm,
-  },
-  branchActionText: {
-    color: COLORS.primary,
-    fontSize: FONTS.sizes.xs,
-    fontWeight: '600',
-  },
-  guidelinesCard: {
-    padding: SPACING.md,
-    marginBottom: SPACING.xl,
-  },
-  guidelineText: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.xs,
-    lineHeight: 18,
-    marginBottom: 6,
-  },
-  menuCard: {
-    padding: 0,
-    marginBottom: SPACING.xl,
-  },
-  menuRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.md,
-  },
-  menuLabel: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.sm,
-  },
-  menuArrow: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.md,
-  },
-  menuValue: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.xs,
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-  },
-  logoutBtn: {
-    marginTop: SPACING.sm,
   },
 });

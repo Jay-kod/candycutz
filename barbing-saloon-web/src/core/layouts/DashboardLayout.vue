@@ -96,19 +96,15 @@ const groupedNavItems = computed(() => {
   };
 
   const barberSections = {
-    'Overview': ['Dashboard'],
-    'Clients': ['Walk-In', 'Payments', 'Appointments'],
-    'Work': ['Schedule', 'Services', 'Gallery'],
-    'Content': ['Blog', 'Notifications'],
-    'Insights': ['Analytics', 'Reports'],
+    'Operations': ['Dashboard', 'Appointments', 'Walk-In', 'Schedule'],
+    'Services & Portfolio': ['Services', 'Gallery', 'Payments', 'Blog'],
+    'Activity & Insights': ['Notifications', 'Analytics', 'Reports'],
   };
 
   const adminSections = {
-    'Overview': ['Dashboard', 'Website'],
-    'Operations': ['Walk-In', 'Appointments', 'Customers', 'Barbers'],
-    'Content': ['Services', 'Gallery', 'Testimonials', 'Blog'],
-    'Management': ['Working Hours', 'Analytics', 'Reports'],
-    'Security': ['Verifications', 'System Logs', 'Notifications'],
+    'Overview & Operations': ['Dashboard', 'Website', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Blog'],
+    'Management & Security': ['Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
   };
 
   const sections = props.theme === 'admin' ? adminSections : 

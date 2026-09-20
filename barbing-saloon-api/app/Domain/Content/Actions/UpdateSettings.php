@@ -26,6 +26,10 @@ class UpdateSettings
                     ]
                 );
             } elseif (is_string($key)) {
+                if ($key === 'brevo_api_key' && is_string($setting) && str_starts_with($setting, '••••••••')) {
+                    continue;
+                }
+
                 Setting::updateOrCreate(
                     ['key' => $key],
                     [
