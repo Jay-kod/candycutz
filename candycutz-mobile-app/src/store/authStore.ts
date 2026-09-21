@@ -9,6 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isBarber: boolean;
   isLoading: boolean;
+  isLoggingOut: boolean;
   error: string | null;
   viewMode: 'customer' | 'barber';
 
@@ -23,6 +24,7 @@ interface AuthState {
     password_confirmation: string;
   }) => Promise<boolean>;
   logout: () => Promise<void>;
+  finishLogout: () => void;
   setChairStatus: (status: ChairStatus) => Promise<void>;
   setViewMode: (mode: 'customer' | 'barber') => void;
   refreshProfile: () => Promise<void>;
@@ -35,6 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isBarber: false,
   isLoading: true,
+  isLoggingOut: false,
   error: null,
   viewMode: 'customer',
 
@@ -116,6 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    set({ isLoggingOut: true });
     try {
       await authApi.logout();
     } catch (e) {
@@ -131,6 +135,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         viewMode: 'customer',
       });
     }
+  },
+
+  finishLogout: () => {
+    set({ isLoggingOut: false });
   },
 
   setChairStatus: async (status: ChairStatus) => {

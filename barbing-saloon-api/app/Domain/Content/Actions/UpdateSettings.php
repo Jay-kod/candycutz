@@ -26,7 +26,7 @@ class UpdateSettings
                     ]
                 );
             } elseif (is_string($key)) {
-                if ($key === 'brevo_api_key' && is_string($setting) && str_starts_with($setting, '••••••••')) {
+                if (in_array($key, ['brevo_api_key', 'mail_password'], true) && is_string($setting) && str_starts_with($setting, '••••••••')) {
                     continue;
                 }
 

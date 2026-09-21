@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
-import { COLORS, RADIUS, SPACING } from '../../constants/theme';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 interface CardProps {
   children: React.ReactNode;
@@ -15,11 +16,13 @@ export const Card: React.FC<CardProps> = ({
   onPress,
   elevated = false,
 }) => {
+  const { colors } = useAppTheme();
+
   const containerStyle: ViewStyle = {
-    backgroundColor: elevated ? COLORS.surfaceElevated : COLORS.surface,
+    backgroundColor: elevated ? colors.surfaceElevated : colors.surface,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     padding: SPACING.md,
     overflow: 'hidden',
   };

@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { NotificationSkeletons } from '../src/components/common/Skeleton';
 import { COLORS, FONTS, RADIUS, SPACING } from '../src/constants/theme';
 import { useNotifications } from '../src/hooks/useNotifications';
 import { Notification } from '../src/api/types';
@@ -142,7 +143,11 @@ export default function NotificationsScreen() {
   );
 
   const renderSectionData = useCallback(() => {
-    if (sections.length === 0 && !isLoading) {
+    if (isLoading) {
+      return <NotificationSkeletons count={6} />;
+    }
+
+    if (sections.length === 0) {
       return (
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>🔔</Text>

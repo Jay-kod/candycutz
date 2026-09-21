@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,11 +12,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { availabilityApi, barbersApi, bookingsApi, servicesApi, zonesApi } from '../../src/api/client';
+import { ActionDialog } from '../../src/components/common/ActionDialog';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
-import { LoadingState } from '../../src/components/common/LoadingState';
+import { BookingFlowSkeleton } from '../../src/components/common/Skeleton';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 import { Barber, ServiceZone, TimeSlot } from '../../src/types';
 
 export default function BookingWizardScreen() {
@@ -25,6 +26,8 @@ export default function BookingWizardScreen() {
   const { serviceId } = useLocalSearchParams<{ serviceId: string }>();
   const { isAuthenticated } = useAuthStore();
   const insets = useSafeAreaInsets();
+  const showToast = useToastStore((state) => state.show);
+  const [authDialogVisible, setAuthDialogVisible] = useState(false);
 
   const [step, setStep] = useState<number>(1);
   const [appointmentType, setAppointmentType] = useState<'in_shop' | 'home_service'>('in_shop');
@@ -119,26 +122,35 @@ export default function BookingWizardScreen() {
       });
     },
     onError: (e: any) => {
-      Alert.alert('Booking Error', e.response?.data?.message || 'Could not complete your booking.');
+      showToast({
+        variant: 'error',
+        title: 'Booking Error',
+        message: e.response?.data?.message || 'Could not complete your booking.',
+      });
     },
   });
 
   const handleSubmit = () => {
     if (!isAuthenticated) {
-      Alert.alert('Sign In Required', 'Please sign in or create an account to finalize your booking.', [
-        { text: 'Sign In', onPress: () => router.push('/auth/login') },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
+      setAuthDialogVisible(true);
       return;
     }
 
     if (appointmentType === 'home_service' && (!streetAddress || !landmark)) {
-      Alert.alert('Address Missing', 'Please enter your street address and landmark in Keffi.');
+      showToast({
+        variant: 'warning',
+        title: 'Address Missing',
+        message: 'Please enter your street address and landmark in Keffi.',
+      });
       return;
     }
 
     if (!selectedTime) {
-      Alert.alert('Time Missing', 'Please select an appointment time slot.');
+      showToast({
+        variant: 'warning',
+        title: 'Time Missing',
+        message: 'Please select an appointment time slot.',
+      });
       return;
     }
 
@@ -146,7 +158,11 @@ export default function BookingWizardScreen() {
   };
 
   if (loadingService) {
-    return <LoadingState message="Preparing your booking" />;
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+        <BookingFlowSkeleton />
+      </SafeAreaView>
+    );
   }
 
   const basePrice = Number(service?.price || 0);
@@ -389,6 +405,25 @@ export default function BookingWizardScreen() {
           style={styles.submitBtn}
         />
       </ScrollView>
+
+      {/* Sign In Required Dialog */}
+      <ActionDialog
+        visible={authDialogVisible}
+        title="Sign In Required"
+        message="Please sign in or create an account to finalize your booking."
+        variant="primary"
+        actions={[
+          {
+            label: 'Sign In',
+            onPress: () => {
+              setAuthDialogVisible(false);
+              router.push('/auth/login');
+            },
+          },
+        ]}
+        dismissLabel="Cancel"
+        onDismiss={() => setAuthDialogVisible(false)}
+      />
     </SafeAreaView>
   );
 }

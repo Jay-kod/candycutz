@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   RefreshControl,
   ScrollView,
@@ -17,7 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { staffScheduleApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { ScheduleSkeletons } from '../../src/components/common/Skeleton';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useToastStore } from '../../src/store/toastStore';
 import { BlockedPeriod, WeeklyScheduleDay } from '../../src/types';
 
 const DEFAULT_DAYS: WeeklyScheduleDay[] = [
@@ -33,6 +34,7 @@ const DEFAULT_DAYS: WeeklyScheduleDay[] = [
 export default function BarberScheduleScreen() {
   const queryClient = useQueryClient();
   const [modalVisible, setModalVisible] = useState(false);
+  const showToast = useToastStore((s) => s.show);
 
   // Block period form states
   const [blockDate, setBlockDate] = useState(new Date().toISOString().split('T')[0]);
@@ -44,7 +46,7 @@ export default function BarberScheduleScreen() {
     data: weeklyDays = DEFAULT_DAYS,
     isLoading: loadingSchedule,
     refetch: refetchSchedule,
-  } = useQuery({
+  } = useQuery<WeeklyScheduleDay[]>({
     queryKey: ['weeklySchedule'],
     queryFn: staffScheduleApi.getSchedule,
   });
@@ -53,25 +55,34 @@ export default function BarberScheduleScreen() {
     data: blockedPeriods = [],
     isLoading: loadingBlocked,
     refetch: refetchBlocked,
-  } = useQuery({
+  } = useQuery<BlockedPeriod[]>({
     queryKey: ['blockedPeriods'],
     queryFn: staffScheduleApi.getBlockedPeriods,
   });
 
   const addBlockMutation = useMutation({
-    mutationFn: staffScheduleApi.addBlockedPeriod,
+    mutationFn: (payload: { start_datetime: string; end_datetime: string; reason: string }) =>
+      staffScheduleApi.addBlockedPeriod(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blockedPeriods'] });
       setModalVisible(false);
-      Alert.alert('Time Blocked', 'Your schedule has been successfully updated.');
+      showToast({
+        variant: 'success',
+        title: 'Time Blocked',
+        message: 'Your schedule has been successfully updated.',
+      });
     },
     onError: (e: any) => {
-      Alert.alert('Error', e.response?.data?.message || 'Failed to block time.');
+      showToast({
+        variant: 'error',
+        title: 'Error',
+        message: e.response?.data?.message || 'Failed to block time.',
+      });
     },
   });
 
   const deleteBlockMutation = useMutation({
-    mutationFn: staffScheduleApi.deleteBlockedPeriod,
+    mutationFn: (id: number) => staffScheduleApi.deleteBlockedPeriod(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blockedPeriods'] });
     },
@@ -114,52 +125,58 @@ export default function BarberScheduleScreen() {
           />
         </View>
 
-        {/* Weekly Shifts */}
-        <Card style={styles.daysCard} elevated>
-          {(weeklyDays.length ? weeklyDays : DEFAULT_DAYS).map((day) => (
-            <View key={day.day_of_week} style={styles.dayRow}>
-              <View style={styles.dayInfo}>
-                <Text style={styles.dayName}>{day.day_name}</Text>
-                <Text style={styles.dayHours}>
-                  {day.is_working ? `${day.start_time} - ${day.end_time}` : 'Day Off'}
-                </Text>
-              </View>
-              <Switch
-                value={day.is_working}
-                trackColor={{ false: COLORS.border, true: COLORS.primary }}
-                thumbColor={day.is_working ? '#0A0A0C' : '#9CA3AF'}
-              />
-            </View>
-          ))}
-        </Card>
-
-        {/* Blocked Periods Section */}
-        <Text style={styles.sectionTitle}>Active Blocked Hours / Time-Off</Text>
-        <Text style={styles.sectionDesc}>
-          Time blocks prevent customers from booking slots during breaks, prayers, or off-site visits.
-        </Text>
-
-        {blockedPeriods.length === 0 ? (
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No blocked hours currently set.</Text>
-          </Card>
+        {loadingSchedule && loadingBlocked ? (
+          <ScheduleSkeletons />
         ) : (
-          blockedPeriods.map((item: BlockedPeriod) => (
-            <Card key={item.id} style={styles.blockedCard} elevated>
-              <View style={styles.blockedHeader}>
-                <Text style={styles.blockedReason}>{item.reason || 'Blocked Out of Shop'}</Text>
-                <TouchableOpacity
-                  onPress={() => deleteBlockMutation.mutate(item.id)}
-                  style={styles.deleteBtn}
-                >
-                  <Text style={styles.deleteText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.blockedTime}>
-                {item.start_datetime} &rarr; {item.end_datetime}
-              </Text>
+          <>
+            {/* Weekly Shifts */}
+            <Card style={styles.daysCard} elevated>
+              {(weeklyDays.length ? weeklyDays : DEFAULT_DAYS).map((day) => (
+                <View key={day.day_of_week} style={styles.dayRow}>
+                  <View style={styles.dayInfo}>
+                    <Text style={styles.dayName}>{day.day_name}</Text>
+                    <Text style={styles.dayHours}>
+                      {day.is_working ? `${day.start_time} - ${day.end_time}` : 'Day Off'}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={day.is_working}
+                    trackColor={{ false: COLORS.border, true: COLORS.primary }}
+                    thumbColor={day.is_working ? '#0A0A0C' : '#9CA3AF'}
+                  />
+                </View>
+              ))}
             </Card>
-          ))
+
+            {/* Blocked Periods Section */}
+            <Text style={styles.sectionTitle}>Active Blocked Hours / Time-Off</Text>
+            <Text style={styles.sectionDesc}>
+              Time blocks prevent customers from booking slots during breaks, prayers, or off-site visits.
+            </Text>
+
+            {blockedPeriods.length === 0 ? (
+              <Card style={styles.emptyCard}>
+                <Text style={styles.emptyText}>No blocked hours currently set.</Text>
+              </Card>
+            ) : (
+              blockedPeriods.map((item: BlockedPeriod) => (
+                <Card key={item.id} style={styles.blockedCard} elevated>
+                  <View style={styles.blockedHeader}>
+                    <Text style={styles.blockedReason}>{item.reason || 'Blocked Out of Shop'}</Text>
+                    <TouchableOpacity
+                      onPress={() => deleteBlockMutation.mutate(item.id)}
+                      style={styles.deleteBtn}
+                    >
+                      <Text style={styles.deleteText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.blockedTime}>
+                    {item.start_datetime} &rarr; {item.end_datetime}
+                  </Text>
+                </Card>
+              ))
+            )}
+          </>
         )}
 
         {/* Add Block Modal */}

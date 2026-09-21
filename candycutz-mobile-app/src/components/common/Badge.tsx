@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { Text, TextStyle, View, ViewStyle } from 'react-native';
+import { FONTS, RADIUS } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { AppointmentStatus } from '../../types';
 
 interface BadgeProps {
@@ -10,29 +11,31 @@ interface BadgeProps {
 }
 
 export const Badge: React.FC<BadgeProps> = ({ status, label, size = 'sm' }) => {
+  const { colors } = useAppTheme();
+
   const getBadgeColors = () => {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return { bg: COLORS.primaryLight, text: COLORS.primary, border: COLORS.primary };
+        return { bg: colors.primaryLight, text: colors.primary, border: colors.primary };
       case 'in_progress':
-        return { bg: COLORS.infoLight, text: COLORS.info, border: COLORS.info };
+        return { bg: colors.infoLight, text: colors.info, border: colors.info };
       case 'completed':
-        return { bg: COLORS.successLight, text: COLORS.success, border: COLORS.success };
+        return { bg: colors.successLight, text: colors.success, border: colors.success };
       case 'cancelled':
       case 'no_show':
-        return { bg: COLORS.errorLight, text: COLORS.error, border: COLORS.error };
+        return { bg: colors.errorLight, text: colors.error, border: colors.error };
       case 'pending':
       default:
-        return { bg: COLORS.warningLight, text: COLORS.warning, border: COLORS.warning };
+        return { bg: colors.warningLight, text: colors.warning, border: colors.warning };
     }
   };
 
-  const colors = getBadgeColors();
+  const badgeColors = getBadgeColors();
   const displayLabel = label || status.replace('_', ' ').toUpperCase();
 
   const containerStyle: ViewStyle = {
-    backgroundColor: colors.bg,
-    borderColor: colors.border,
+    backgroundColor: badgeColors.bg,
+    borderColor: badgeColors.border,
     borderWidth: 1,
     borderRadius: RADIUS.full,
     paddingHorizontal: size === 'sm' ? 8 : 12,
@@ -41,7 +44,7 @@ export const Badge: React.FC<BadgeProps> = ({ status, label, size = 'sm' }) => {
   };
 
   const textStyle: TextStyle = {
-    color: colors.text,
+    color: badgeColors.text,
     fontSize: size === 'sm' ? FONTS.sizes.xs : FONTS.sizes.sm,
     fontWeight: '700',
     letterSpacing: 0.5,

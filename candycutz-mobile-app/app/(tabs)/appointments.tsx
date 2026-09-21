@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Linking,
   Pressable,
@@ -29,9 +28,10 @@ import { staffQueueApi } from '../../src/api/client';
 import { Badge } from '../../src/components/common/Badge';
 import { Card } from '../../src/components/common/Card';
 import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
-import { LoadingState } from '../../src/components/common/LoadingState';
+import { AppointmentSkeletons } from '../../src/components/common/Skeleton';
 import { CONFIG } from '../../src/constants/config';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useToastStore } from '../../src/store/toastStore';
 import { Appointment } from '../../src/types';
 
 const STATUS_FILTERS = ['All', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
@@ -68,6 +68,8 @@ export default function BarberAppointmentsScreen() {
       }),
   });
 
+  const showToast = useToastStore((s) => s.show);
+
   // Mutation to accept or decline/cancel appointment
   const transitionMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: any }) =>
@@ -78,16 +80,25 @@ export default function BarberAppointmentsScreen() {
       queryClient.invalidateQueries({ queryKey: ['barberPendingBookings'] });
 
       if (variables.status === 'confirmed') {
-        Alert.alert(
-          'Booking Accepted',
-          'The customer has been notified that you accepted the booking. They can now prepare for the service!'
-        );
+        showToast({
+          variant: 'success',
+          title: 'Booking Accepted',
+          message: 'The customer has been notified that you accepted the booking.',
+        });
       } else if (variables.status === 'cancelled') {
-        Alert.alert('Booking Declined', 'The appointment request has been declined.');
+        showToast({
+          variant: 'info',
+          title: 'Booking Declined',
+          message: 'The appointment request has been declined.',
+        });
       }
     },
     onError: (err: any) => {
-      Alert.alert('Error', err.response?.data?.message || 'Failed to update appointment status.');
+      showToast({
+        variant: 'error',
+        title: 'Error',
+        message: err.response?.data?.message || 'Failed to update appointment status.',
+      });
     },
   });
 
@@ -288,7 +299,7 @@ export default function BarberAppointmentsScreen() {
       </View>
 
       {isLoading ? (
-        <LoadingState message="Loading your appointment book" />
+        <AppointmentSkeletons />
       ) : (
         <FlatList
           data={appointments}

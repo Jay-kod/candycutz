@@ -13,7 +13,7 @@ class UpdateBarberAccount
      */
     public function execute(User $user, array $data): void
     {
-        $userData = array_intersect_key($data, array_flip(['name', 'phone', 'avatar', 'cover_image']));
+        $userData = array_intersect_key($data, array_flip(['name', 'email', 'phone', 'avatar', 'cover_image', 'bio']));
         if (! empty($userData)) {
             $user->update($userData);
         }

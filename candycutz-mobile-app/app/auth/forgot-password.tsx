@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -19,17 +18,23 @@ import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { GoogleLogo } from '../../src/components/common/GoogleLogo';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const showToast = useToastStore((state) => state.show);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async () => {
     if (!email.trim()) {
-      Alert.alert('Required', 'Please enter your registered email address.');
+      showToast({
+        variant: 'warning',
+        title: 'Required',
+        message: 'Please enter your registered email address.',
+      });
       return;
     }
 
@@ -39,7 +44,11 @@ export default function ForgotPasswordScreen() {
       setIsSubmitted(true);
     } catch (e: any) {
       const msg = e.response?.data?.message || 'Failed to send password reset link.';
-      Alert.alert('Error', msg);
+      showToast({
+        variant: 'error',
+        title: 'Error',
+        message: msg,
+      });
     } finally {
       setIsLoading(false);
     }

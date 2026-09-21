@@ -77,9 +77,8 @@
               <p v-if="!canChangeUsername" class="text-[10px] text-red-400">You can only change your username once every 30 days. Try again in {{ usernameChangeCountdown }} day{{ usernameChangeCountdown !== 1 ? 's' : '' }}.</p>
             </div>
             <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-theme-muted">Real Name</label>
-              <input v-model="form.name" placeholder="Not set" disabled class="w-full rounded-xl border border-theme-border bg-theme-bg/50 px-4 py-3 text-theme-muted cursor-not-allowed outline-none" />
-              <p class="text-[10px] text-theme-muted">Real name cannot be changed.</p>
+              <label class="text-xs font-semibold uppercase tracking-widest text-theme-muted">Real Name / Display Name</label>
+              <input v-model="form.name" placeholder="Not set" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" />
             </div>
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-theme-muted">Email</label>
@@ -89,6 +88,10 @@
             <div class="space-y-2">
               <label class="text-xs font-semibold uppercase tracking-widest text-theme-muted">Phone</label>
               <input v-model="form.phone" placeholder="Not set" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-semibold uppercase tracking-widest text-theme-muted">Bio & Grooming Preferences</label>
+              <textarea v-model="form.bio" rows="3" placeholder="Tell your barber about your style preferences, skin sensitivities, or grooming notes..." class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 resize-none"></textarea>
             </div>
           </div>
           <button class="mt-8 w-full rounded-xl bg-gradient-to-r from-gold to-gold-dark py-4 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02]">
@@ -128,7 +131,7 @@ import { getStorageUrl } from '@/core/utils/url';
 
 const toast = useToast();
 const authStore = useAuthStore();
-const form = reactive({ name: '', username: '', email: '', phone: '', avatar: null });
+const form = reactive({ name: '', username: '', email: '', phone: '', bio: '', avatar: null });
 const status = ref('');
 const history = ref({});
 const originalProfile = ref({});
@@ -193,6 +196,7 @@ async function submit() {
   payload.append('phone', form.phone || '');
   payload.append('username', form.username || '');
   payload.append('email', form.email || '');
+  payload.append('bio', form.bio || '');
 
   if (form.avatar) {
     payload.append('avatar', form.avatar);
@@ -217,6 +221,7 @@ async function loadProfile() {
   form.username = profile.username || '';
   form.email = profile.email || '';
   form.phone = profile.phone || '';
+  form.bio = profile.bio || '';
   history.value = response.data.data.history;
 
   if (profile.avatar) {

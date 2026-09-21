@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,9 +15,10 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { staffWalkInApi } from '../src/api/client';
 import { Button } from '../src/components/common/Button';
 import { Card } from '../src/components/common/Card';
-import { LoadingState } from '../src/components/common/LoadingState';
+import { WalkInSkeleton } from '../src/components/common/Skeleton';
 import { COLORS, FONTS, RADIUS, SPACING } from '../src/constants/theme';
 import { useChairStore } from '../src/store/chairStore';
+import { useToastStore } from '../src/store/toastStore';
 import { Appointment, Service } from '../src/types';
 
 export default function WalkInScreen() {
@@ -26,6 +26,7 @@ export default function WalkInScreen() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const setActiveClient = useChairStore((state) => state.setActiveClient);
+  const showToast = useToastStore((state) => state.show);
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -52,21 +53,37 @@ export default function WalkInScreen() {
       if (takeImmediately) {
         setActiveClient(appointment);
       }
-      Alert.alert('Walk-In Added', `Client ${customerName} has been queued successfully.`);
+      showToast({
+        variant: 'success',
+        title: 'Walk-In Added',
+        message: `Client ${customerName} has been queued successfully.`,
+      });
       router.back();
     },
     onError: (e: any) => {
-      Alert.alert('Error', e.response?.data?.message || 'Failed to add walk-in client.');
+      showToast({
+        variant: 'error',
+        title: 'Error',
+        message: e.response?.data?.message || 'Failed to add walk-in client.',
+      });
     },
   });
 
   const handleSubmit = () => {
     if (!customerName.trim()) {
-      Alert.alert('Name Required', 'Please enter the client name.');
+      showToast({
+        variant: 'warning',
+        title: 'Name Required',
+        message: 'Please enter the client name.',
+      });
       return;
     }
     if (!selectedServiceId) {
-      Alert.alert('Service Required', 'Please select a haircut or grooming service.');
+      showToast({
+        variant: 'warning',
+        title: 'Service Required',
+        message: 'Please select a haircut or grooming service.',
+      });
       return;
     }
 
@@ -99,30 +116,30 @@ export default function WalkInScreen() {
           </Text>
 
           {/* Client Details */}
-          <Card style={styles.formCard} elevated>
-            <Text style={styles.fieldLabel}>Client Name *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Ibrahim Keffi"
-              placeholderTextColor={COLORS.textMuted}
-              value={customerName}
-              onChangeText={setCustomerName}
-            />
+          {loadingServices ? (
+            <WalkInSkeleton />
+          ) : (
+            <Card style={styles.formCard} elevated>
+              <Text style={styles.fieldLabel}>Client Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Ibrahim Keffi"
+                placeholderTextColor={COLORS.textMuted}
+                value={customerName}
+                onChangeText={setCustomerName}
+              />
 
-            <Text style={styles.fieldLabel}>Phone Number (Optional)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0803 000 0000"
-              placeholderTextColor={COLORS.textMuted}
-              keyboardType="phone-pad"
-              value={customerPhone}
-              onChangeText={setCustomerPhone}
-            />
+              <Text style={styles.fieldLabel}>Phone Number (Optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="0803 000 0000"
+                placeholderTextColor={COLORS.textMuted}
+                keyboardType="phone-pad"
+                value={customerPhone}
+                onChangeText={setCustomerPhone}
+              />
 
-            <Text style={styles.fieldLabel}>Select Service *</Text>
-            {loadingServices ? (
-              <LoadingState compact message="Loading services" />
-            ) : (
+              <Text style={styles.fieldLabel}>Select Service *</Text>
               <View style={styles.servicesGrid}>
                 {services.map((s: Service) => {
                   const isSelected = selectedServiceId === s.id;
@@ -142,53 +159,53 @@ export default function WalkInScreen() {
                   );
                 })}
               </View>
-            )}
 
-            <Text style={styles.fieldLabel}>Payment Collected Via *</Text>
-            <View style={styles.paymentRow}>
-              <TouchableOpacity
-                style={[styles.payPill, paymentMethod === 'cash' && styles.payPillActive]}
-                onPress={() => setPaymentMethod('cash')}
-              >
-                <Text style={[styles.payText, paymentMethod === 'cash' && styles.payTextActive]}>
-                  💵 Cash in Hand
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.payPill, paymentMethod === 'pos' && styles.payPillActive]}
-                onPress={() => setPaymentMethod('pos')}
-              >
-                <Text style={[styles.payText, paymentMethod === 'pos' && styles.payTextActive]}>
-                  💳 POS Card Terminal
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.fieldLabel}>Notes / Style Instructions</Text>
-            <TextInput
-              style={[styles.input, { height: 60 }]}
-              placeholder="e.g. Skin fade with beard shape-up"
-              placeholderTextColor={COLORS.textMuted}
-              multiline
-              value={notes}
-              onChangeText={setNotes}
-            />
-
-            {selectedService && (
-              <View style={styles.totalBox}>
-                <Text style={styles.totalLabel}>Grand Total:</Text>
-                <Text style={styles.totalAmount}>₦{Number(selectedService.price).toLocaleString()}</Text>
+              <Text style={styles.fieldLabel}>Payment Collected Via *</Text>
+              <View style={styles.paymentRow}>
+                <TouchableOpacity
+                  style={[styles.payPill, paymentMethod === 'cash' && styles.payPillActive]}
+                  onPress={() => setPaymentMethod('cash')}
+                >
+                  <Text style={[styles.payText, paymentMethod === 'cash' && styles.payTextActive]}>
+                    💵 Cash in Hand
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.payPill, paymentMethod === 'pos' && styles.payPillActive]}
+                  onPress={() => setPaymentMethod('pos')}
+                >
+                  <Text style={[styles.payText, paymentMethod === 'pos' && styles.payTextActive]}>
+                    💳 POS Card Terminal
+                  </Text>
+                </TouchableOpacity>
               </View>
-            )}
 
-            <Button
-              title={walkInMutation.isPending ? 'Queuing Client...' : 'Confirm & Add Walk-In'}
-              onPress={handleSubmit}
-              loading={walkInMutation.isPending}
-              disabled={!customerName || !selectedServiceId}
-              style={styles.submitBtn}
-            />
-          </Card>
+              <Text style={styles.fieldLabel}>Notes / Style Instructions</Text>
+              <TextInput
+                style={[styles.input, { height: 60 }]}
+                placeholder="e.g. Skin fade with beard shape-up"
+                placeholderTextColor={COLORS.textMuted}
+                multiline
+                value={notes}
+                onChangeText={setNotes}
+              />
+
+              {selectedService && (
+                <View style={styles.totalBox}>
+                  <Text style={styles.totalLabel}>Grand Total:</Text>
+                  <Text style={styles.totalAmount}>₦{Number(selectedService.price).toLocaleString()}</Text>
+                </View>
+              )}
+
+              <Button
+                title={walkInMutation.isPending ? 'Queuing Client...' : 'Confirm & Add Walk-In'}
+                onPress={handleSubmit}
+                loading={walkInMutation.isPending}
+                disabled={!customerName || !selectedServiceId}
+                style={styles.submitBtn}
+              />
+            </Card>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

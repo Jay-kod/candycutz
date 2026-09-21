@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Linking,
+  Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -12,8 +12,8 @@ import {
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
-  AlertTriangle,
   ArrowRight,
   Bell,
   Calendar,
@@ -27,17 +27,21 @@ import {
   Plus,
   Power,
   Scissors,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   User,
   X,
 } from 'lucide-react-native';
+
 import { staffQueueApi } from '../../api/client';
 import { ConfirmDialog } from '../common/ConfirmDialog';
+import { QueueSkeletons } from '../common/Skeleton';
 import { CONFIG } from '../../constants/config';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useChairStore } from '../../store/chairStore';
+import { useToastStore } from '../../store/toastStore';
 import { useNotifications } from '../../hooks/useNotifications';
 import { Appointment, ChairStatus } from '../../types';
 
@@ -56,6 +60,7 @@ export function BarberQueueView() {
   const { barber, isAuthenticated, setChairStatus } = useAuthStore();
   const { activeClient, elapsedSeconds, setActiveClient, tickTimer } = useChairStore();
   const { unreadCount } = useNotifications(isAuthenticated);
+  const showToast = useToastStore((s) => s.show);
 
   const [activeTab, setActiveTab] = useState<QueueFilterTab>('upcoming');
   const [pendingApproval, setPendingApproval] = useState<{
@@ -75,7 +80,7 @@ export function BarberQueueView() {
     refetchInterval: 15000,
   });
 
-  // Dedicated Pending Bookings Query for this specific barber (e.g. In-Shop & Home Service requests)
+  // Dedicated Pending Bookings Query for this specific barber
   const {
     data: pendingBookings = [],
     isLoading: isPendingLoading,
@@ -117,16 +122,25 @@ export function BarberQueueView() {
         setActiveClient(null);
         setChairStatus('free');
       } else if (updated.status === 'confirmed') {
-        Alert.alert(
-          'Booking Accepted',
-          `You have accepted the booking for ${updated.customer?.name || 'the customer'}. They have been notified to prepare for the service!`
-        );
+        showToast({
+          variant: 'success',
+          title: 'Booking Accepted',
+          message: `You have accepted the booking for ${updated.customer?.name || 'the customer'}. They have been notified to prepare!`,
+        });
       } else if (updated.status === 'cancelled') {
-        Alert.alert('Booking Declined', 'The booking request has been declined.');
+        showToast({
+          variant: 'info',
+          title: 'Booking Declined',
+          message: 'The booking request has been declined.',
+        });
       }
     },
     onError: (err: any) => {
-      Alert.alert('Error', err.response?.data?.message || 'Failed to update appointment status.');
+      showToast({
+        variant: 'error',
+        title: 'Error',
+        message: err.response?.data?.message || 'Failed to update appointment status.',
+      });
     },
   });
 
@@ -181,26 +195,26 @@ export function BarberQueueView() {
     {
       label: 'Ready',
       value: 'free',
-      icon: <Check size={14} color="#10B981" strokeWidth={2.5} />,
-      activeColor: '#10B981',
+      icon: <Check size={13} color={COLORS.success} strokeWidth={2.5} />,
+      activeColor: COLORS.success,
     },
     {
       label: 'In Chair',
       value: 'busy',
-      icon: <Scissors size={14} color="#E5BA73" strokeWidth={2.5} />,
-      activeColor: '#E5BA73',
+      icon: <Scissors size={13} color={COLORS.primary} strokeWidth={2.5} />,
+      activeColor: COLORS.primary,
     },
     {
       label: 'Break',
       value: 'break',
-      icon: <Coffee size={14} color="#F59E0B" strokeWidth={2.5} />,
-      activeColor: '#F59E0B',
+      icon: <Coffee size={13} color={COLORS.warning} strokeWidth={2.5} />,
+      activeColor: COLORS.warning,
     },
     {
       label: 'Offline',
       value: 'offline',
-      icon: <Power size={14} color="#9CA3AF" strokeWidth={2.5} />,
-      activeColor: '#6B7280',
+      icon: <Power size={13} color={COLORS.textSecondary} strokeWidth={2.5} />,
+      activeColor: COLORS.textMuted,
     },
   ];
 
@@ -245,9 +259,9 @@ export function BarberQueueView() {
           <View style={styles.unauthIconHalo}>
             <Scissors size={32} color={COLORS.primary} />
           </View>
-          <Text style={styles.unauthTitle}>Barber Workspace</Text>
+          <Text style={styles.unauthTitle}>Barber Workstation</Text>
           <Text style={styles.unauthDesc}>
-            Sign in to access your live chair queue, manage walk-ins, and track today's appointments.
+            Sign in to manage your live chair queue, record walk-ins, and oversee today's appointments.
           </Text>
           <Pressable
             style={({ pressed }) => [
@@ -256,7 +270,7 @@ export function BarberQueueView() {
             ]}
             onPress={() => router.push('/auth/login')}
           >
-            <Text style={styles.primaryGoldBtnText}>Sign In to Workspace</Text>
+            <Text style={styles.primaryGoldBtnText}>Sign In to Workstation</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -275,7 +289,10 @@ export function BarberQueueView() {
             <Text style={styles.avatarText}>{getInitials(barber?.name)}</Text>
           </View>
           <View>
-            <Text style={styles.greetingText}>Welcome back,</Text>
+            <View style={styles.greetingEyebrowRow}>
+              <Sparkles size={11} color={COLORS.primary} />
+              <Text style={styles.greetingEyebrow}>MASTER STYLIST</Text>
+            </View>
             <Text style={styles.barberName} numberOfLines={1}>
               {barber?.name || 'Master Barber'}
             </Text>
@@ -292,7 +309,7 @@ export function BarberQueueView() {
             accessibilityRole="button"
             accessibilityLabel="Notifications"
           >
-            <Bell size={18} color="#FFFFFF" />
+            <Bell size={18} color={COLORS.textPrimary} />
             {unreadCount > 0 && (
               <View style={styles.notifBadge}>
                 <Text style={styles.notifBadgeText}>
@@ -311,13 +328,13 @@ export function BarberQueueView() {
             accessibilityRole="button"
             accessibilityLabel="Add walk in client"
           >
-            <Plus size={16} color="#0A0A0C" strokeWidth={3} />
+            <Plus size={15} color="#0A0A0C" strokeWidth={3} />
             <Text style={styles.walkInBtnText}>Walk-In</Text>
           </Pressable>
         </View>
       </View>
 
-      {/* 2. Sleek Chair Status Segmented Hub */}
+      {/* 2. Modern Chair Status Segmented Hub */}
       <View style={styles.chairStatusHub}>
         <View style={styles.statusSegmentContainer}>
           {CHAIR_OPTIONS.map((opt) => {
@@ -344,7 +361,7 @@ export function BarberQueueView() {
                 <Text
                   style={[
                     styles.statusSegmentText,
-                    isSelected && { color: '#FFFFFF', fontWeight: '700' },
+                    isSelected && { color: COLORS.textPrimary, fontWeight: '700' },
                   ]}
                 >
                   {opt.label}
@@ -355,9 +372,12 @@ export function BarberQueueView() {
         </View>
       </View>
 
-      {/* 3. Main Scrollable Content */}
-      <FlatList
-        data={filteredQueue}
+      {/* 3. Main Scrollable Queue Content */}
+      {isQueueLoading && queue.length === 0 ? (
+        <QueueSkeletons count={3} />
+      ) : (
+        <FlatList
+          data={filteredQueue}
         keyExtractor={(item) => String(item.id)}
         refreshControl={
           <RefreshControl
@@ -370,11 +390,11 @@ export function BarberQueueView() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.headerComponentWrapper}>
-            {/* Shift Snapshot Bar (3 Glanceable KPIs) */}
+            {/* Shift Snapshot KPIs (3 Live KPI Cards) */}
             <View style={styles.kpiRow}>
               <View style={styles.kpiCard}>
                 <View style={styles.kpiIconBox}>
-                  <Clock size={16} color="#E5BA73" />
+                  <Clock size={16} color={COLORS.primary} />
                 </View>
                 <View>
                   <Text style={styles.kpiValue}>{stats.waiting}</Text>
@@ -383,8 +403,8 @@ export function BarberQueueView() {
               </View>
 
               <View style={styles.kpiCard}>
-                <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-                  <CheckCircle2 size={16} color="#10B981" />
+                <View style={[styles.kpiIconBox, { backgroundColor: COLORS.successLight }]}>
+                  <CheckCircle2 size={16} color={COLORS.success} />
                 </View>
                 <View>
                   <Text style={styles.kpiValue}>{stats.completed}</Text>
@@ -393,8 +413,8 @@ export function BarberQueueView() {
               </View>
 
               <View style={styles.kpiCard}>
-                <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.12)' }]}>
-                  <TrendingUp size={16} color="#3B82F6" />
+                <View style={[styles.kpiIconBox, { backgroundColor: COLORS.infoLight }]}>
+                  <TrendingUp size={16} color={COLORS.info} />
                 </View>
                 <View>
                   <Text style={styles.kpiValue}>{formatMoney(stats.earnedKobo)}</Text>
@@ -403,7 +423,7 @@ export function BarberQueueView() {
               </View>
             </View>
 
-            {/* 3B. High-Priority Pending Booking Requests Stage */}
+            {/* High-Priority Pending Booking Requests Stage */}
             {pendingBookings.length > 0 && primaryPendingBooking && (
               <Pressable
                 onPress={navigateToPendingBookings}
@@ -414,178 +434,190 @@ export function BarberQueueView() {
                 accessibilityRole="button"
                 accessibilityLabel="View pending booking requests"
               >
-                {/* Glowing Top Amber Accent Rim */}
-                <View style={styles.pendingCardRim} />
+                <LinearGradient
+                  colors={['#272115', '#19171F', '#111015']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.pendingGradientContent}
+                >
+                  <View style={styles.pendingCardRim} />
 
-                <View style={styles.pendingCardHeader}>
-                  <View style={styles.pendingNoticePill}>
-                    <View style={styles.pendingPulseDot} />
-                    <Text style={styles.pendingNoticeText}>ACTION REQUIRED</Text>
-                  </View>
-                  <View style={styles.pendingCountBadge}>
-                    <Text style={styles.pendingCountBadgeText}>
-                      {pendingBookings.length} {pendingBookings.length === 1 ? 'Request' : 'Requests'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Latest Pending Booking Info */}
-                <View style={styles.pendingBookingDetails}>
-                  <View style={styles.pendingClientAvatar}>
-                    <Text style={styles.pendingClientAvatarText}>
-                      {getInitials(primaryPendingBooking.customer?.name)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.pendingClientName} numberOfLines={1}>
-                      {primaryPendingBooking.customer?.name || 'New Customer'}
-                    </Text>
-                    <Text style={styles.pendingScheduleText}>
-                      📅 {primaryPendingBooking.appointment_date} at {primaryPendingBooking.start_time.substring(0, 5)}
-                    </Text>
-                    <Text style={styles.pendingServiceText}>
-                      {primaryPendingBooking.service?.name || 'Haircut Service'} • {formatMoney(primaryPendingBooking.grand_total || primaryPendingBooking.service?.price || 0)}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Service Mode Badge (In-Shop vs Home Service) */}
-                <View style={styles.serviceModeBadgeRow}>
-                  <View
-                    style={[
-                      styles.modeBadgePill,
-                      primaryPendingBooking.appointment_type === 'home_service'
-                        ? styles.homeServicePill
-                        : styles.inShopPill,
-                    ]}
-                  >
-                    {primaryPendingBooking.appointment_type === 'home_service' ? (
-                      <>
-                        <Home size={13} color="#E5BA73" />
-                        <Text style={styles.homeServicePillText}>
-                          🏠 Home Service Request
-                        </Text>
-                      </>
-                    ) : (
-                      <>
-                        <Scissors size={13} color="#D1D5DB" />
-                        <Text style={styles.inShopPillText}>
-                          ✂ In-Shop Appointment
-                        </Text>
-                      </>
-                    )}
-                  </View>
-
-                  {/* Redirection indicator */}
-                  <View style={styles.viewDetailsPrompt}>
-                    <Text style={styles.viewDetailsText}>View & Decide</Text>
-                    <ArrowRight size={13} color="#E5BA73" />
-                  </View>
-                </View>
-
-                {/* Destination Landmark if Home Service */}
-                {primaryPendingBooking.appointment_type === 'home_service' &&
-                  primaryPendingBooking.destination_address && (
-                    <View style={styles.landmarkBox}>
-                      <MapPin size={13} color="#E5BA73" />
-                      <Text style={styles.landmarkText} numberOfLines={1}>
-                        Location: {primaryPendingBooking.destination_address.area_landmark}, {primaryPendingBooking.destination_address.street_address}
+                  <View style={styles.pendingCardHeader}>
+                    <View style={styles.pendingNoticePill}>
+                      <View style={styles.pendingPulseDot} />
+                      <Text style={styles.pendingNoticeText}>ACTION REQUIRED</Text>
+                    </View>
+                    <View style={styles.pendingCountBadge}>
+                      <Text style={styles.pendingCountBadgeText}>
+                        {pendingBookings.length} {pendingBookings.length === 1 ? 'Request' : 'Requests'}
                       </Text>
                     </View>
-                  )}
+                  </View>
 
-                {/* Direct Action Buttons on Card */}
-                <View style={styles.pendingCardActionButtons}>
-                  <Pressable
-                    onPress={() =>
-                      setPendingApproval({
-                        appointment: primaryPendingBooking,
-                        status: 'cancelled',
-                      })
-                    }
-                    style={({ pressed }) => [
-                      styles.pendingDeclineBtn,
-                      pressed && styles.btnPressed,
-                    ]}
-                  >
-                    <X size={15} color="#EF4444" strokeWidth={2.5} />
-                    <Text style={styles.pendingDeclineBtnText}>Decline</Text>
-                  </Pressable>
+                  {/* Latest Pending Booking Details */}
+                  <View style={styles.pendingBookingDetails}>
+                    <View style={styles.pendingClientAvatar}>
+                      <Text style={styles.pendingClientAvatarText}>
+                        {getInitials(primaryPendingBooking.customer?.name)}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.pendingClientName} numberOfLines={1}>
+                        {primaryPendingBooking.customer?.name || 'New Customer'}
+                      </Text>
+                      <Text style={styles.pendingScheduleText}>
+                        📅 {primaryPendingBooking.appointment_date} at {(primaryPendingBooking.start_time || '').substring(0, 5)}
+                      </Text>
+                      <Text style={styles.pendingServiceText}>
+                        {primaryPendingBooking.service?.name || 'Haircut Service'} • {formatMoney(primaryPendingBooking.grand_total || primaryPendingBooking.service?.price || 0)}
+                      </Text>
+                    </View>
+                  </View>
 
-                  <Pressable
-                    onPress={() =>
-                      setPendingApproval({
-                        appointment: primaryPendingBooking,
-                        status: 'confirmed',
-                      })
-                    }
-                    style={({ pressed }) => [
-                      styles.pendingAcceptBtn,
-                      pressed && styles.btnPressed,
-                    ]}
-                  >
-                    <Check size={16} color="#0A0A0C" strokeWidth={3} />
-                    <Text style={styles.pendingAcceptBtnText}>Accept Booking</Text>
-                  </Pressable>
-                </View>
+                  {/* Service Mode Badge (In-Shop vs Home Service) */}
+                  <View style={styles.serviceModeBadgeRow}>
+                    <View
+                      style={[
+                        styles.modeBadgePill,
+                        primaryPendingBooking.appointment_type === 'home_service'
+                          ? styles.homeServicePill
+                          : styles.inShopPill,
+                      ]}
+                    >
+                      {primaryPendingBooking.appointment_type === 'home_service' ? (
+                        <>
+                          <Home size={13} color={COLORS.primary} />
+                          <Text style={styles.homeServicePillText}>
+                            🏠 Home Service Request
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Scissors size={13} color={COLORS.textSecondary} />
+                          <Text style={styles.inShopPillText}>
+                            ✂ In-Shop Appointment
+                          </Text>
+                        </>
+                      )}
+                    </View>
+
+                    <View style={styles.viewDetailsPrompt}>
+                      <Text style={styles.viewDetailsText}>View & Decide</Text>
+                      <ArrowRight size={13} color={COLORS.primary} />
+                    </View>
+                  </View>
+
+                  {/* Destination Landmark if Home Service */}
+                  {primaryPendingBooking.appointment_type === 'home_service' &&
+                    primaryPendingBooking.destination_address && (
+                      <View style={styles.landmarkBox}>
+                        <MapPin size={13} color={COLORS.primary} />
+                        <Text style={styles.landmarkText} numberOfLines={1}>
+                          Location: {primaryPendingBooking.destination_address.area_landmark}, {primaryPendingBooking.destination_address.street_address}
+                        </Text>
+                      </View>
+                    )}
+
+                  {/* Direct Action Buttons on Pending Card */}
+                  <View style={styles.pendingCardActionButtons}>
+                    <Pressable
+                      onPress={() =>
+                        setPendingApproval({
+                          appointment: primaryPendingBooking,
+                          status: 'cancelled',
+                        })
+                      }
+                      style={({ pressed }) => [
+                        styles.pendingDeclineBtn,
+                        pressed && styles.btnPressed,
+                      ]}
+                    >
+                      <X size={15} color={COLORS.error} strokeWidth={2.5} />
+                      <Text style={styles.pendingDeclineBtnText}>Decline</Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={() =>
+                        setPendingApproval({
+                          appointment: primaryPendingBooking,
+                          status: 'confirmed',
+                        })
+                      }
+                      style={({ pressed }) => [
+                        styles.pendingAcceptBtn,
+                        pressed && styles.btnPressed,
+                      ]}
+                    >
+                      <Check size={16} color="#0A0A0C" strokeWidth={3} />
+                      <Text style={styles.pendingAcceptBtnText}>Accept Booking</Text>
+                    </Pressable>
+                  </View>
+                </LinearGradient>
               </Pressable>
             )}
 
-            {/* 4. "Now In Chair" Spotlight Stage */}
+            {/* "Now In Chair" Spotlight Stage */}
             {activeClient ? (
               <View style={styles.activeSpotlightCard}>
-                <View style={styles.activeCardRim} />
-
-                <View style={styles.activeCardTopRow}>
-                  <View style={styles.livePulsePill}>
-                    <View style={styles.livePulseDot} />
-                    <Text style={styles.livePulseText}>NOW IN CHAIR</Text>
-                  </View>
-                  <View style={styles.timerBadge}>
-                    <Clock size={14} color="#E5BA73" />
-                    <Text style={styles.timerDigits}>{formatTimer(elapsedSeconds)}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.activeClientDetails}>
-                  <View style={styles.clientAvatarLarge}>
-                    <Text style={styles.clientAvatarText}>
-                      {getInitials(activeClient.customer?.name)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.activeClientName} numberOfLines={1}>
-                      {activeClient.customer?.name || 'Walk-In Guest'}
-                    </Text>
-                    <Text style={styles.activeServiceName}>
-                      {activeClient.service?.name || 'Standard Cut'} • {formatMoney(activeClient.grand_total || activeClient.service?.price || 0)}
-                    </Text>
-                    <Text style={styles.activeRefNumber}>
-                      Ref: {activeClient.booking_reference}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Primary Finish CTA */}
-                <Pressable
-                  onPress={() => setPendingApproval({ appointment: activeClient, status: 'completed' })}
-                  style={({ pressed }) => [
-                    styles.finishServiceBtn,
-                    pressed && styles.btnPressed,
-                  ]}
+                <LinearGradient
+                  colors={['#272115', '#18171F', '#111015']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.activeGradientContent}
                 >
-                  <CheckCircle2 size={18} color="#0A0A0C" strokeWidth={2.5} />
-                  <Text style={styles.finishServiceBtnText}>
-                    Finish Cut & Check Out
-                  </Text>
-                </Pressable>
+                  <View style={styles.activeCardRim} />
+
+                  <View style={styles.activeCardTopRow}>
+                    <View style={styles.livePulsePill}>
+                      <View style={styles.livePulseDot} />
+                      <Text style={styles.livePulseText}>NOW IN CHAIR</Text>
+                    </View>
+                    <View style={styles.timerBadge}>
+                      <Clock size={14} color={COLORS.primary} />
+                      <Text style={styles.timerDigits}>{formatTimer(elapsedSeconds)}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.activeClientDetails}>
+                    <View style={styles.clientAvatarLarge}>
+                      <Text style={styles.clientAvatarText}>
+                        {getInitials(activeClient.customer?.name)}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.activeClientName} numberOfLines={1}>
+                        {activeClient.customer?.name || 'Walk-In Guest'}
+                      </Text>
+                      <Text style={styles.activeServiceName}>
+                        {activeClient.service?.name || 'Standard Cut'} • {formatMoney(activeClient.grand_total || activeClient.service?.price || 0)}
+                      </Text>
+                      <Text style={styles.activeRefNumber}>
+                        Ref: {activeClient.booking_reference}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Primary Finish CTA */}
+                  <Pressable
+                    onPress={() => setPendingApproval({ appointment: activeClient, status: 'completed' })}
+                    style={({ pressed }) => [
+                      styles.finishServiceBtn,
+                      pressed && styles.btnPressed,
+                    ]}
+                  >
+                    <CheckCircle2 size={18} color="#0A0A0C" strokeWidth={2.5} />
+                    <Text style={styles.finishServiceBtnText}>
+                      Finish Cut & Check Out
+                    </Text>
+                  </Pressable>
+                </LinearGradient>
               </View>
             ) : (
               /* Chair Available Card */
               <View style={styles.chairAvailableCard}>
                 <View style={styles.chairAvailableHeader}>
                   <View style={styles.chairReadyBadge}>
-                    <Sparkles size={14} color="#10B981" />
+                    <Sparkles size={14} color={COLORS.success} />
                     <Text style={styles.chairReadyText}>CHAIR IS READY</Text>
                   </View>
                   <Text style={styles.dateLabel}>{getTodayFormattedDate()}</Text>
@@ -593,12 +625,12 @@ export function BarberQueueView() {
 
                 {nextUpClient ? (
                   <View style={styles.nextUpPromptBox}>
-                    <View style={{ flex: 1 }}>
+                    <View style={{ flex: 1, paddingRight: 8 }}>
                       <Text style={styles.nextUpLead}>Next Client in Queue:</Text>
                       <Text style={styles.nextUpName} numberOfLines={1}>
-                        {nextUpClient.customer?.name || 'Guest'} ({nextUpClient.start_time.substring(0, 5)})
+                        {nextUpClient.customer?.name || 'Guest'} ({(nextUpClient.start_time || '').substring(0, 5)})
                       </Text>
-                      <Text style={styles.nextUpService}>
+                      <Text style={styles.nextUpService} numberOfLines={1}>
                         {nextUpClient.service?.name || 'Haircut Service'}
                       </Text>
                     </View>
@@ -621,7 +653,7 @@ export function BarberQueueView() {
               </View>
             )}
 
-            {/* 5. Queue Segment Filter Tabs */}
+            {/* Queue Segment Filter Tabs */}
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>Today's Lineup</Text>
               <View style={styles.filterPillsContainer}>
@@ -688,9 +720,9 @@ export function BarberQueueView() {
             <View style={styles.queueItemCard}>
               <View style={styles.queueCardHeader}>
                 <View style={styles.timeBadge}>
-                  <Clock size={12} color="#E5BA73" />
+                  <Clock size={12} color={COLORS.primary} />
                   <Text style={styles.timeBadgeText}>
-                    {item.start_time.substring(0, 5)}
+                    {(item.start_time || '').substring(0, 5)}
                   </Text>
                 </View>
 
@@ -705,9 +737,9 @@ export function BarberQueueView() {
                   <Text
                     style={[
                       styles.itemStatusText,
-                      isCompleted && { color: '#10B981' },
-                      isConfirmed && { color: '#E5BA73' },
-                      isPending && { color: '#F59E0B' },
+                      isCompleted && { color: COLORS.success },
+                      isConfirmed && { color: COLORS.primary },
+                      isPending && { color: COLORS.warning },
                     ]}
                   >
                     {item.status.replace('_', ' ').toUpperCase()}
@@ -738,14 +770,14 @@ export function BarberQueueView() {
                     accessibilityRole="button"
                     accessibilityLabel="Call client"
                   >
-                    <Phone size={16} color="#9CA3AF" />
+                    <Phone size={16} color={COLORS.textSecondary} />
                   </Pressable>
                 )}
               </View>
 
               {item.destination_address && (
                 <View style={styles.homeDeliveryBox}>
-                  <MapPin size={13} color="#E5BA73" />
+                  <MapPin size={13} color={COLORS.primary} />
                   <Text style={styles.homeDeliveryText} numberOfLines={1}>
                     VIP Home: {item.destination_address.street_address}, {item.destination_address.area_landmark}
                   </Text>
@@ -796,7 +828,7 @@ export function BarberQueueView() {
         ListEmptyComponent={
           <View style={styles.emptyQueueContainer}>
             <View style={styles.emptyIconHalo}>
-              <CheckCircle2 size={30} color="#E5BA73" />
+              <CheckCircle2 size={28} color={COLORS.primary} />
             </View>
             <Text style={styles.emptyQueueTitle}>
               {activeTab === 'upcoming'
@@ -825,8 +857,9 @@ export function BarberQueueView() {
           </View>
         }
       />
+      )}
 
-      {/* 6. High-End Redesigned Confirmation Dialog */}
+      {/* 4. Confirmation Dialog */}
       <ConfirmDialog
         visible={Boolean(pendingApproval)}
         title={
@@ -890,15 +923,15 @@ export function BarberQueueView() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0C',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.sm,
   },
   barberProfileBlock: {
     flexDirection: 'row',
@@ -909,25 +942,32 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1C1C26',
-    borderWidth: 1.5,
-    borderColor: '#E5BA73',
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 16,
     fontWeight: '800',
   },
-  greetingText: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    fontWeight: '500',
+  greetingEyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  greetingEyebrow: {
+    color: COLORS.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
   barberName: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.lg,
     fontWeight: '800',
     letterSpacing: 0.2,
   },
@@ -937,12 +977,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   notifBellBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#14141B',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.border,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -951,7 +991,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -3,
     right: -3,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -968,11 +1008,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 8,
     paddingHorizontal: 14,
-    borderRadius: 20,
-    shadowColor: '#E5BA73',
+    borderRadius: RADIUS.full,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -987,20 +1027,20 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   cardPressed: {
-    opacity: 0.9,
+    opacity: 0.92,
     transform: [{ scale: 0.99 }],
   },
   chairStatusHub: {
-    paddingHorizontal: 20,
-    paddingBottom: 14,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
   statusSegmentContainer: {
     flexDirection: 'row',
-    backgroundColor: '#14141B',
-    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
     padding: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: COLORS.border,
   },
   statusSegmentItem: {
     flex: 1,
@@ -1009,7 +1049,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: 'transparent',
   },
@@ -1019,69 +1059,70 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   statusDotActive: {
-    transform: [{ scale: 1.2 }],
+    transform: [{ scale: 1.25 }],
   },
   statusSegmentText: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
   scrollList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.md,
     paddingBottom: 40,
   },
   headerComponentWrapper: {
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   kpiRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   kpiCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#14141B',
+    backgroundColor: COLORS.surface,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: COLORS.border,
   },
   kpiIconBox: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    backgroundColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   kpiValue: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 15,
     fontWeight: '800',
   },
   kpiLabel: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 10,
     fontWeight: '500',
     marginTop: 1,
   },
   pendingBannerCard: {
-    backgroundColor: '#181611',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: 'rgba(229, 186, 115, 0.45)',
-    marginBottom: 16,
+    borderRadius: RADIUS.lg,
+    marginBottom: SPACING.md,
     overflow: 'hidden',
-    shadowColor: '#E5BA73',
+    borderWidth: 1.5,
+    borderColor: 'rgba(212, 175, 55, 0.45)',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 4,
+  },
+  pendingGradientContent: {
+    padding: SPACING.md,
   },
   pendingCardRim: {
     position: 'absolute',
@@ -1089,7 +1130,7 @@ const styles = StyleSheet.create({
     left: '15%',
     right: '15%',
     height: 2,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
   },
   pendingCardHeader: {
     flexDirection: 'row',
@@ -1101,33 +1142,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(229, 186, 115, 0.15)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.3)',
+    borderColor: 'rgba(212, 175, 55, 0.3)',
   },
   pendingPulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
   },
   pendingNoticeText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
   pendingCountBadge: {
-    backgroundColor: '#262217',
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   pendingCountBadgeText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -1141,30 +1182,30 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#2A2416',
+    backgroundColor: COLORS.surfaceHighlight,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.4)',
+    borderColor: 'rgba(212, 175, 55, 0.4)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   pendingClientAvatarText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 14,
     fontWeight: '800',
   },
   pendingClientName: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '800',
   },
   pendingScheduleText: {
-    color: '#D1D5DB',
+    color: COLORS.textSecondary,
     fontSize: 12,
     marginTop: 2,
     fontWeight: '500',
   },
   pendingServiceText: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 12,
     marginTop: 1,
   },
@@ -1180,23 +1221,23 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   homeServicePill: {
-    backgroundColor: 'rgba(229, 186, 115, 0.15)',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.3)',
+    borderColor: 'rgba(212, 175, 55, 0.3)',
   },
   inShopPill: {
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   homeServicePillText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '700',
   },
   inShopPillText: {
-    color: '#D1D5DB',
+    color: COLORS.textSecondary,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -1206,7 +1247,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   viewDetailsText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -1214,14 +1255,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(229, 186, 115, 0.08)',
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
     paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
     marginVertical: 4,
   },
   landmarkText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '500',
     flex: 1,
@@ -1241,13 +1282,13 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 9,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.35)',
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    backgroundColor: COLORS.errorLight,
   },
   pendingDeclineBtnText: {
-    color: '#EF4444',
+    color: COLORS.error,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -1257,11 +1298,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 9,
     paddingHorizontal: 16,
-    borderRadius: 10,
-    shadowColor: '#E5BA73',
+    borderRadius: RADIUS.md,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -1273,18 +1314,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   activeSpotlightCard: {
-    backgroundColor: '#161512',
-    borderRadius: 20,
-    padding: 18,
+    borderRadius: RADIUS.lg,
     borderWidth: 1.5,
-    borderColor: '#E5BA73',
-    marginBottom: 20,
+    borderColor: COLORS.primary,
+    marginBottom: SPACING.lg,
     overflow: 'hidden',
-    shadowColor: '#E5BA73',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 14,
     elevation: 6,
+  },
+  activeGradientContent: {
+    padding: SPACING.md,
   },
   activeCardRim: {
     position: 'absolute',
@@ -1292,7 +1334,7 @@ const styles = StyleSheet.create({
     left: '20%',
     right: '20%',
     height: 2,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
   },
   activeCardTopRow: {
     flexDirection: 'row',
@@ -1304,21 +1346,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(229, 186, 115, 0.12)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.3)',
+    borderColor: 'rgba(212, 175, 55, 0.3)',
   },
   livePulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
   },
   livePulseText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1,
@@ -1330,10 +1372,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.full,
   },
   timerDigits: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 15,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
@@ -1348,29 +1390,29 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#26241D',
+    backgroundColor: COLORS.surfaceHighlight,
     borderWidth: 1,
-    borderColor: '#E5BA73',
+    borderColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   clientAvatarText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 16,
     fontWeight: '800',
   },
   activeClientName: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 17,
     fontWeight: '800',
   },
   activeServiceName: {
-    color: '#D1D5DB',
+    color: COLORS.textSecondary,
     fontSize: 13,
     marginTop: 2,
   },
   activeRefNumber: {
-    color: '#6B7280',
+    color: COLORS.textMuted,
     fontSize: 11,
     marginTop: 2,
   },
@@ -1379,10 +1421,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 13,
-    borderRadius: 14,
-    shadowColor: '#E5BA73',
+    borderRadius: RADIUS.md,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -1394,12 +1436,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   chairAvailableCard: {
-    backgroundColor: '#14141B',
-    borderRadius: 18,
-    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.07)',
-    marginBottom: 20,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.lg,
   },
   chairAvailableHeader: {
     flexDirection: 'row',
@@ -1411,19 +1453,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: COLORS.successLight,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.full,
   },
   chairReadyText: {
-    color: '#10B981',
+    color: COLORS.success,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
   dateLabel: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -1432,25 +1474,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 14,
+    borderRadius: RADIUS.md,
     padding: 12,
     marginTop: 4,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   nextUpLead: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 11,
     fontWeight: '600',
   },
   nextUpName: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 14,
     fontWeight: '700',
     marginTop: 2,
   },
   nextUpService: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 12,
     marginTop: 1,
   },
@@ -1458,10 +1500,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 9,
     paddingHorizontal: 14,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
   },
   seatNextBtnText: {
     color: '#0A0A0C',
@@ -1469,7 +1511,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   emptyChairSub: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 13,
     lineHeight: 18,
   },
@@ -1480,40 +1522,42 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionHeading: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '800',
   },
   filterPillsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#14141B',
+    backgroundColor: COLORS.surface,
     padding: 3,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     gap: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   filterPill: {
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   filterPillActive: {
-    backgroundColor: '#232330',
+    backgroundColor: COLORS.surfaceHighlight,
   },
   filterPillText: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 11,
     fontWeight: '600',
   },
   filterPillTextActive: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontWeight: '700',
   },
   queueItemCard: {
-    backgroundColor: '#14141B',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: COLORS.border,
     marginBottom: 12,
   },
   queueCardHeader: {
@@ -1526,30 +1570,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   timeBadgeText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '700',
   },
   itemStatusPill: {
     paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   statusPillCompleted: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: COLORS.successLight,
   },
   statusPillConfirmed: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    backgroundColor: COLORS.primaryLight,
   },
   statusPillPending: {
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    backgroundColor: COLORS.warningLight,
   },
   itemStatusText: {
     fontSize: 10,
@@ -1565,29 +1609,29 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#1F1F2C',
+    backgroundColor: COLORS.surfaceHighlight,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.border,
   },
   clientAvatarSmallText: {
-    color: '#D1D5DB',
+    color: COLORS.textSecondary,
     fontSize: 13,
     fontWeight: '700',
   },
   queueClientName: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 15,
     fontWeight: '700',
   },
   queueServiceDetails: {
-    color: '#9CA3AF',
+    color: COLORS.textSecondary,
     fontSize: 13,
     marginTop: 2,
   },
   queueRefText: {
-    color: '#6B7280',
+    color: COLORS.textMuted,
     fontSize: 11,
     marginTop: 1,
   },
@@ -1595,7 +1639,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: COLORS.surfaceHighlight,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1603,16 +1649,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(212, 175, 55, 0.06)',
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
     paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: RADIUS.sm,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.15)',
+    borderColor: 'rgba(212, 175, 55, 0.2)',
   },
   homeDeliveryText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '500',
     flex: 1,
@@ -1623,7 +1669,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: COLORS.border,
   },
   startCutBtn: {
     flex: 1,
@@ -1631,9 +1677,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
   },
   startCutBtnText: {
     color: '#0A0A0C',
@@ -1644,29 +1690,29 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#232330',
+    backgroundColor: COLORS.surfaceHighlight,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.border,
   },
   checkInBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 13,
     fontWeight: '700',
   },
   noShowBtn: {
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.35)',
-    backgroundColor: 'rgba(239, 68, 68, 0.06)',
+    backgroundColor: COLORS.errorLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   noShowBtnText: {
-    color: '#EF4444',
+    color: COLORS.error,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -1677,22 +1723,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emptyIconHalo: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primaryLight,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyQueueTitle: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 17,
     fontWeight: '700',
     marginBottom: 6,
   },
   emptyQueueSubtitle: {
-    color: '#9CA3AF',
+    color: COLORS.textMuted,
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
@@ -1702,10 +1750,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: 14,
+    borderRadius: RADIUS.full,
   },
   emptyStateAddWalkInText: {
     color: '#0A0A0C',
@@ -1722,7 +1770,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
     borderColor: COLORS.primary,
     alignItems: 'center',
@@ -1730,13 +1778,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   unauthTitle: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 22,
     fontWeight: '800',
     marginBottom: 10,
   },
   unauthDesc: {
-    color: '#9CA3AF',
+    color: COLORS.textSecondary,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 22,
@@ -1744,9 +1792,9 @@ const styles = StyleSheet.create({
   },
   primaryGoldBtn: {
     width: '100%',
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: RADIUS.lg,
     alignItems: 'center',
   },
   primaryGoldBtnText: {

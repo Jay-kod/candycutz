@@ -39,6 +39,8 @@ export interface User {
   phone?: string | null;
   role: 'customer' | 'barber' | 'admin' | 'super_admin';
   avatar?: string | null;
+  cover_image?: string | null;
+  bio?: string | null;
   wallet_balance?: number;
   notification_preferences?: Record<string, any> | null;
   barber?: Barber;

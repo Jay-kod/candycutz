@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Linking,
   RefreshControl,
@@ -22,12 +21,14 @@ import { Card } from '../../src/components/common/Card';
 import { CONFIG } from '../../src/constants/config';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 import { Appointment } from '../../src/types';
 
 export default function BookingsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
+  const showToast = useToastStore((s) => s.show);
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
   const [pendingCancellation, setPendingCancellation] = useState<Appointment | null>(null);
 
@@ -45,10 +46,18 @@ export default function BookingsScreen() {
     mutationFn: (id: number) => bookingsApi.cancel(id, 'Cancelled via customer mobile app'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      Alert.alert('Booking Cancelled', 'Your appointment has been successfully cancelled.');
+      showToast({
+        variant: 'success',
+        title: 'Booking Cancelled',
+        message: 'Your appointment has been successfully cancelled.',
+      });
     },
     onError: (e: any) => {
-      Alert.alert('Cancellation Failed', e.response?.data?.message || 'Could not cancel booking.');
+      showToast({
+        variant: 'error',
+        title: 'Cancellation Failed',
+        message: e.response?.data?.message || 'Could not cancel booking.',
+      });
     },
   });
 
@@ -224,9 +233,14 @@ export default function BookingsScreen() {
         confirmLabel="Cancel Booking"
         destructive
         onCancel={() => setPendingCancellation(null)}
-        onConfirm={() => {
-          if (pendingCancellation) cancelMutation.mutate(pendingCancellation.id);
-          setPendingCancellation(null);
+        onConfirm={async () => {
+          if (!pendingCancellation) return;
+          try {
+            await cancelMutation.mutateAsync(pendingCancellation.id);
+            setPendingCancellation(null);
+          } catch {
+            // Keep the dialog open so the customer can review or retry.
+          }
         }}
       />
     </SafeAreaView>

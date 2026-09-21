@@ -5,13 +5,16 @@ import * as SplashScreen from 'expo-splash-screen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthStore } from '../src/store/authStore';
+import { useThemeStore } from '../src/store/themeStore';
 import { usePushNotificationSetup } from '../src/services/notifications';
-import { COLORS } from '../src/constants/theme';
+import { useAppTheme } from '../src/hooks/useAppTheme';
 import { SplashScreenView } from '../src/components/common/SplashScreenView';
 import { NavigationLoadingOverlay } from '../src/components/common/NavigationLoadingOverlay';
+import { LogoutTransitionOverlay } from '../src/components/common/LogoutTransitionOverlay';
 import { onboardingStorage } from '../src/utils/onboardingStorage';
 import { mobileCmsStorage } from '../src/utils/mobileCmsStorage';
 import { apiClient } from '../src/api/client';
+import { AppToast } from '../src/components/common/AppToast';
 
 // Prevent native OS splash from auto-hiding before JS splash is mounted
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -29,6 +32,9 @@ export default function RootLayout() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const isLoggingOut = useAuthStore((state) => state.isLoggingOut);
+  const { colors, isDark } = useAppTheme();
+  const initializeTheme = useThemeStore((state) => state.initializeTheme);
   const router = useRouter();
   const segments = useSegments();
 
@@ -55,8 +61,9 @@ export default function RootLayout() {
 
     const init = async () => {
       try {
-        const [_, seen] = await Promise.all([
+        const [_, __, seen] = await Promise.all([
           initializeAuth(),
+          initializeTheme(),
           onboardingStorage.hasSeenOnboarding().catch(() => false),
           // Background sync of mobile CMS settings
           apiClient
@@ -116,6 +123,8 @@ export default function RootLayout() {
     if (isSplashActive || isLoading || hasSeenOnboarding === null) return;
 
     const currentSegment = segments[0] as string | undefined;
+    if (!currentSegment || onboardingStorage.isHandoffPending()) return;
+
     const inAuthStack = currentSegment === 'auth';
     const inOnboarding = currentSegment === 'onboarding';
 
@@ -124,34 +133,46 @@ export default function RootLayout() {
         router.replace('/onboarding');
       }
     } else if (!isAuthenticated && !inAuthStack) {
-      router.replace('/auth/login');
+      // Let LogoutTransitionOverlay handle navigation smoothly during logout
+      if (!isLoggingOut) {
+        router.replace('/auth/login');
+      }
     } else if (isAuthenticated && (inAuthStack || inOnboarding)) {
       router.replace('/(tabs)');
     }
-  }, [isSplashActive, isLoading, hasSeenOnboarding, isAuthenticated, router, segments]);
+  }, [isSplashActive, isLoading, hasSeenOnboarding, isAuthenticated, isLoggingOut, router, segments]);
 
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style="light" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <Stack
           screenOptions={{
             headerStyle: {
-              backgroundColor: COLORS.background,
+              backgroundColor: colors.background,
             },
-            headerTintColor: COLORS.primary,
+            headerTintColor: colors.primary,
             headerTitleStyle: {
               fontWeight: '700',
-              color: COLORS.textPrimary,
+              color: colors.textPrimary,
             },
             contentStyle: {
-              backgroundColor: COLORS.background,
+              backgroundColor: colors.background,
             },
           }}
         >
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/edit" options={{ title: 'Edit Profile', presentation: 'modal' }} />
           <Stack.Screen name="barber/profile-edit" options={{ title: 'Edit Profile', presentation: 'modal' }} />
+          <Stack.Screen name="profile/wishlist" options={{ title: 'Wishlist' }} />
+          <Stack.Screen name="profile/notifications" options={{ title: 'Notifications' }} />
+          <Stack.Screen name="profile/reviews" options={{ title: 'My Reviews' }} />
+          <Stack.Screen name="profile/settings" options={{ title: 'Settings' }} />
+          <Stack.Screen name="profile/services" options={{ title: 'My Services' }} />
+          <Stack.Screen name="profile/gallery" options={{ title: 'Gallery' }} />
+          <Stack.Screen name="profile/blog" options={{ title: 'Blog Posts' }} />
+          <Stack.Screen name="profile/analytics" options={{ title: 'Analytics' }} />
           <Stack.Screen
             name="book/[serviceId]"
             options={{
@@ -213,6 +234,8 @@ export default function RootLayout() {
           />
         )}
         {!isSplashActive && <NavigationLoadingOverlay />}
+        <LogoutTransitionOverlay />
+        <AppToast />
       </QueryClientProvider>
     </SafeAreaProvider>
   );

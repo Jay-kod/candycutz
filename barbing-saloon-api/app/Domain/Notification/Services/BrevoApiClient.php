@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\Notification\Services;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Http;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mime\Email;
 use RuntimeException;
 
 class BrevoApiClient
@@ -15,29 +17,32 @@ class BrevoApiClient
      */
     public function send(string $recipient, string $subject, string $htmlContent): void
     {
-        $apiKey = (string) Setting::query()->where('key', 'brevo_api_key')->value('value');
-        $senderEmail = (string) Setting::query()->where('key', 'mail_from')->value('value');
-        $senderName = (string) (Setting::query()->where('key', 'mail_from_name')->value('value') ?: 'CandyCutz');
+        $settings = Setting::query()
+            ->whereIn('key', ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_from', 'mail_from_name'])
+            ->pluck('value', 'key');
 
-        if ($apiKey === '' || $senderEmail === '') {
-            throw new RuntimeException('Brevo API key and sender email must be configured.');
+        $host = (string) ($settings['mail_host'] ?? 'smtp-relay.brevo.com');
+        $port = (int) ($settings['mail_port'] ?? 587);
+        $username = (string) ($settings['mail_username'] ?? '');
+        $password = (string) ($settings['mail_password'] ?? '');
+        $senderEmail = (string) ($settings['mail_from'] ?? '');
+        $senderName = (string) ($settings['mail_from_name'] ?? 'CandyCutz');
+
+        if ($host === '' || $port < 1 || $username === '' || $password === '' || $senderEmail === '') {
+            throw new RuntimeException('Brevo SMTP host, port, login, password, and sender email must be configured.');
         }
 
-        $response = Http::timeout(15)
-            ->withHeaders([
-                'accept' => 'application/json',
-                'api-key' => $apiKey,
-                'content-type' => 'application/json',
-            ])
-            ->post('https://api.brevo.com/v3/smtp/email', [
-                'sender' => ['email' => $senderEmail, 'name' => $senderName],
-                'to' => [['email' => $recipient]],
-                'subject' => $subject,
-                'htmlContent' => $htmlContent,
-            ]);
+        // Brevo port 587 requires STARTTLS before authentication.
+        $transport = new EsmtpTransport($host, $port, true);
+        $transport->setUsername($username);
+        $transport->setPassword($password);
 
-        if ($response->failed()) {
-            throw new RuntimeException('Brevo rejected the email request.');
-        }
+        $email = (new Email())
+            ->from(sprintf('%s <%s>', $senderName, $senderEmail))
+            ->to($recipient)
+            ->subject($subject)
+            ->html($htmlContent);
+
+        (new Mailer($transport))->send($email);
     }
 }

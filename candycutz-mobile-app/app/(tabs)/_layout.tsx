@@ -1,43 +1,37 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, FONTS } from '../../src/constants/theme';
+import { FONTS } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
+import { UIcon, UIconName } from '../../src/components/common/UIcon';
 
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-  const getSymbol = () => {
-    switch (name) {
-      case 'home':
-        return '✂';
-      case 'services':
-        return '★';
-      case 'bookings':
-        return '📅';
-      case 'queue':
-        return '💺';
-      case 'all-appointments':
-        return '📋';
-      case 'schedule':
-        return '🕒';
-      case 'profile':
-        return '👤';
-      default:
-        return '•';
-    }
-  };
-
+function TabIcon({
+  name,
+  focused,
+  activeColor,
+  inactiveColor,
+}: {
+  name: UIconName;
+  focused: boolean;
+  activeColor: string;
+  inactiveColor: string;
+}) {
   return (
     <View style={styles.iconContainer}>
-      <Text style={[styles.iconText, { color: focused ? COLORS.primary : COLORS.textMuted }]}>
-        {getSymbol()}
-      </Text>
+      <UIcon
+        name={name}
+        size={22}
+        color={focused ? activeColor : inactiveColor}
+      />
     </View>
   );
 }
 
 export default function TabLayout() {
   const { user, isAuthenticated, viewMode } = useAuthStore();
+  const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const isBarber = isAuthenticated && user?.role === 'barber' && viewMode === 'barber';
   const tabBarContentHeight = 56;
@@ -47,15 +41,15 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.surface,
-          borderTopColor: COLORS.border,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           height: tabBarContentHeight + insets.bottom,
           paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 8,
         },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           fontSize: FONTS.sizes.xs,
           fontWeight: '700',
@@ -68,7 +62,12 @@ export default function TabLayout() {
         options={{
           title: isBarber ? 'Chair Queue' : 'Home',
           tabBarIcon: ({ focused }) => (
-            <TabIcon name={isBarber ? 'queue' : 'home'} focused={focused} />
+            <TabIcon
+              name={isBarber ? 'chair' : 'home'}
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
           ),
         }}
       />
@@ -79,7 +78,14 @@ export default function TabLayout() {
         options={{
           title: 'Services',
           href: isBarber ? null : '/services',
-          tabBarIcon: ({ focused }) => <TabIcon name="services" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="scissors"
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
+          ),
         }}
       />
 
@@ -89,7 +95,14 @@ export default function TabLayout() {
         options={{
           title: 'My Bookings',
           href: isBarber ? null : '/bookings',
-          tabBarIcon: ({ focused }) => <TabIcon name="bookings" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="calendar"
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
+          ),
         }}
       />
 
@@ -99,7 +112,14 @@ export default function TabLayout() {
         options={{
           title: 'All Bookings',
           href: isBarber ? '/appointments' : null,
-          tabBarIcon: ({ focused }) => <TabIcon name="all-appointments" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="clipboardList"
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
+          ),
         }}
       />
 
@@ -109,7 +129,14 @@ export default function TabLayout() {
         options={{
           title: 'Schedule',
           href: isBarber ? '/schedule' : null,
-          tabBarIcon: ({ focused }) => <TabIcon name="schedule" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="calendarClock"
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
+          ),
         }}
       />
 
@@ -118,10 +145,16 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: isBarber ? 'Staff Desk' : 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="user"
+              focused={focused}
+              activeColor={colors.primary}
+              inactiveColor={colors.textMuted}
+            />
+          ),
         }}
       />
-
     </Tabs>
   );
 }
@@ -130,8 +163,5 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconText: {
-    fontSize: 20,
   },
 });

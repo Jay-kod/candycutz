@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
-import { LoadingState } from '../../src/components/common/LoadingState';
+import { ProfileEditSkeleton } from '../../src/components/common/Skeleton';
 import { barbersApi } from '../../src/api/client';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function BarberProfileEditScreen() {
   const router = useRouter();
   const { user, barber, refreshProfile } = useAuthStore();
+  const showToast = useToastStore((state) => state.show);
   const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || barber?.email || '');
   const [username, setUsername] = useState(user?.username || '');
   const [phone, setPhone] = useState(user?.phone || barber?.phone || '');
   const [experience, setExperience] = useState(String(barber?.experience_years || ''));
@@ -30,6 +33,7 @@ export default function BarberProfileEditScreen() {
   useEffect(() => {
     if (!user || !barber) return;
     setName(user.name || '');
+    setEmail(user.email || barber.email || '');
     setUsername(user.username || '');
     setPhone(user.phone || barber.phone || '');
     setExperience(String(barber.experience_years || ''));
@@ -40,12 +44,22 @@ export default function BarberProfileEditScreen() {
     setCoverImage(barber.cover_image_url || barber.cover_image || null);
   }, [barber, user]);
 
-  if (!user || !barber) return <LoadingState message="Loading your barber profile" />;
+  if (!user || !barber) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ProfileEditSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   const pickImage = async (kind: 'profile' | 'cover') => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow photo access to choose an image for your profile.');
+      showToast({
+        variant: 'warning',
+        title: 'Permission needed',
+        message: 'Allow photo access to choose an image for your profile.',
+      });
       return;
     }
 
@@ -70,7 +84,11 @@ export default function BarberProfileEditScreen() {
   const saveProfile = async () => {
     const experienceYears = Number(experience);
     if (!Number.isInteger(experienceYears) || experienceYears < 0 || experienceYears > 80) {
-      Alert.alert('Check experience', 'Enter a whole number between 0 and 80 years.');
+      showToast({
+        variant: 'warning',
+        title: 'Check experience',
+        message: 'Enter a whole number between 0 and 80 years.',
+      });
       return;
     }
 
@@ -78,6 +96,7 @@ export default function BarberProfileEditScreen() {
     try {
       const payload = {
         name: name.trim(),
+        email: email.trim(),
         phone: phone.trim(),
         bio: bio.trim() || null,
         experience_years: experienceYears,
@@ -90,9 +109,17 @@ export default function BarberProfileEditScreen() {
         await barbersApi.updateAccount(payload);
       }
       await refreshProfile();
-      Alert.alert('Profile updated', 'Your barber profile has been saved.');
+      showToast({
+        variant: 'success',
+        title: 'Profile updated',
+        message: 'Your barber profile has been saved.',
+      });
     } catch (error: any) {
-      Alert.alert('Could not save profile', error.response?.data?.message || 'Please try again.');
+      showToast({
+        variant: 'error',
+        title: 'Could not save profile',
+        message: error.response?.data?.message || 'Please try again.',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -103,9 +130,17 @@ export default function BarberProfileEditScreen() {
     try {
       await barbersApi.updateUsername(username.trim());
       await refreshProfile();
-      Alert.alert('Username updated', 'Your username has been changed.');
+      showToast({
+        variant: 'success',
+        title: 'Username updated',
+        message: 'Your username has been changed.',
+      });
     } catch (error: any) {
-      Alert.alert('Could not change username', error.response?.data?.message || 'Username changes are limited to once every 30 days.');
+      showToast({
+        variant: 'error',
+        title: 'Could not change username',
+        message: error.response?.data?.message || 'Username changes are limited to once every 30 days.',
+      });
     } finally {
       setIsChangingUsername(false);
     }
@@ -131,6 +166,7 @@ export default function BarberProfileEditScreen() {
             <Text style={styles.imageHint}>JPG, PNG, or WEBP up to 5MB.</Text>
             <Text style={styles.sectionTitle}>About you</Text>
             <Field label="Display name" value={name} onChangeText={setName} />
+            <Field label="Email address" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
             <Field label="Mobile number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
             <Field label="Years of experience" value={experience} onChangeText={setExperience} keyboardType="number-pad" />
             <Field label="Specialties" hint="Separate specialties with commas" value={specialties} onChangeText={setSpecialties} />

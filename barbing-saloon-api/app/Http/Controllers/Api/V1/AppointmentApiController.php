@@ -9,6 +9,7 @@ use App\Domain\Booking\Actions\CreateWalkInAppointment;
 use App\Domain\Booking\Actions\GetAppointments;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Http\Requests\StoreAppointmentRequest;
@@ -34,10 +35,16 @@ class AppointmentApiController
 
     public function index(Request $request, GetAppointments $action): JsonResponse
     {
+        $source = $request->query('source');
+        if ($source && in_array($source, ['web', 'app', 'walk_in'], true)) {
+            $source = AppointmentSource::tryFrom($source);
+        }
+
         $appointments = $action->execute(
             $request->user(),
             $request->query('status'),
-            (int) $request->input('per_page', 15)
+            (int) $request->input('per_page', 15),
+            $source
         );
 
         $items = AppointmentResource::collection($appointments->getCollection());
@@ -94,7 +101,8 @@ class AppointmentApiController
         try {
             $appointment = $this->createBooking->execute(
                 $request->user(),
-                BookingData::fromRequest($request)
+                BookingData::fromRequest($request),
+                \App\Domain\Shared\Enums\AppointmentSource::app
             );
 
             return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);

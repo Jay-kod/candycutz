@@ -1,4 +1,4 @@
-export const COLORS = {
+export const DARK_COLORS = {
   // Brand Gold
   primary: '#D4AF37',
   primaryHover: '#C59F2D',
@@ -36,6 +36,50 @@ export const COLORS = {
   // Overlays
   overlay: 'rgba(0, 0, 0, 0.75)',
 };
+
+export const LIGHT_COLORS: typeof DARK_COLORS = {
+  // Brand Gold (Deep Metallic Gold tuned for light background contrast)
+  primary: '#C59B27',
+  primaryHover: '#B3891F',
+  primaryDark: '#946E13',
+  primaryLight: 'rgba(197, 155, 39, 0.12)',
+  primaryGlow: 'rgba(197, 155, 39, 0.25)',
+  accent: '#D4AF37',
+
+  // Alabaster Light Theme
+  background: '#F8F8F6',
+  surface: '#FFFFFF',
+  surfaceElevated: '#F1F1F4',
+  surfaceHighlight: '#E7E7EC',
+
+  // Borders
+  border: '#E4E4E7',
+  borderLight: '#D4D4D8',
+
+  // Text
+  textPrimary: '#0F0F12',
+  textSecondary: '#4B5563',
+  textMuted: '#9CA3AF',
+  textGold: '#C59B27',
+
+  // Status & Feedback
+  success: '#059669',
+  successLight: 'rgba(5, 150, 105, 0.12)',
+  warning: '#D97706',
+  warningLight: 'rgba(217, 119, 6, 0.12)',
+  error: '#DC2626',
+  errorLight: 'rgba(220, 38, 38, 0.12)',
+  info: '#2563EB',
+  infoLight: 'rgba(37, 99, 235, 0.12)',
+
+  // Overlays
+  overlay: 'rgba(0, 0, 0, 0.5)',
+};
+
+export type ThemeColors = typeof DARK_COLORS;
+
+// Default export retained for backward compatibility
+export const COLORS: ThemeColors = DARK_COLORS;
 
 export const SPACING = {
   xs: 4,

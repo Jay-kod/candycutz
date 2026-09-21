@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -11,88 +10,152 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from '../../src/components/common/Card';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { user, isBarber } = useAuthStore();
+  const { colors, themePreference, setThemePreference } = useAppTheme();
+  const showToast = useToastStore((state) => state.show);
 
   const [pushNotifs, setPushNotifs] = useState(true);
   const [smsNotifs, setSmsNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(false);
-  const [marketingNotifs, setMarketingNotifs] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>←</Text>
+          <Text style={[styles.backArrow, { color: colors.textPrimary }]}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Account Settings</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Account Settings</Text>
         <View style={styles.headerRight} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Appearance / Theme Selection */}
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Appearance</Text>
+        <Card style={styles.card} elevated>
+          <Text style={[styles.rowLabel, { color: colors.textPrimary, marginBottom: 4 }]}>
+            Theme Mode
+          </Text>
+          <Text style={[styles.rowDesc, { color: colors.textSecondary, marginBottom: SPACING.sm }]}>
+            Choose between Obsidian Night, Warm Alabaster Day, or follow your device settings automatically.
+          </Text>
+
+          <View style={styles.themeOptionsRow}>
+            {[
+              { id: 'system', label: 'System', desc: 'Auto Sync' },
+              { id: 'dark', label: 'Night', desc: 'Obsidian' },
+              { id: 'light', label: 'Day', desc: 'Alabaster' },
+            ].map((option) => {
+              const isSelected = themePreference === option.id;
+              return (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.themeOptionBtn,
+                    {
+                      backgroundColor: isSelected ? colors.surfaceElevated : colors.surface,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                      borderWidth: isSelected ? 2 : 1,
+                    },
+                  ]}
+                  onPress={() => setThemePreference(option.id as 'system' | 'dark' | 'light')}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`Select ${option.label} theme`}
+                >
+                  <Text
+                    style={[
+                      styles.themeOptionLabel,
+                      { color: isSelected ? colors.primary : colors.textPrimary },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeOptionDesc,
+                      { color: isSelected ? colors.primary : colors.textMuted },
+                    ]}
+                  >
+                    {option.desc}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </Card>
+
         {/* Notification Preferences */}
-        <Text style={styles.sectionTitle}>Notifications</Text>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Notifications</Text>
         <Card style={styles.card} elevated>
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowLabel}>Push Notifications</Text>
-              <Text style={styles.rowDesc}>Real-time updates on appointment queue and chair status</Text>
+              <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Push Notifications</Text>
+              <Text style={[styles.rowDesc, { color: colors.textSecondary }]}>Real-time updates on appointment queue and chair status</Text>
             </View>
             <Switch
               value={pushNotifs}
               onValueChange={setPushNotifs}
-              trackColor={{ false: COLORS.border, true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor="#FFF"
             />
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowLabel}>SMS Alerts</Text>
-              <Text style={styles.rowDesc}>Direct SMS reminders 1 hour before scheduled time</Text>
+              <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>SMS Alerts</Text>
+              <Text style={[styles.rowDesc, { color: colors.textSecondary }]}>Direct SMS reminders 1 hour before scheduled time</Text>
             </View>
             <Switch
               value={smsNotifs}
               onValueChange={setSmsNotifs}
-              trackColor={{ false: COLORS.border, true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor="#FFF"
             />
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowLabel}>Email Receipts & Invoices</Text>
-              <Text style={styles.rowDesc}>Automatic PDF receipts sent after service payment</Text>
+              <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Email Receipts & Invoices</Text>
+              <Text style={[styles.rowDesc, { color: colors.textSecondary }]}>Automatic PDF receipts sent after service payment</Text>
             </View>
             <Switch
               value={emailNotifs}
               onValueChange={setEmailNotifs}
-              trackColor={{ false: COLORS.border, true: COLORS.primary }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor="#FFF"
             />
           </View>
         </Card>
 
         {/* Security & Account */}
-        <Text style={styles.sectionTitle}>Security & Privacy</Text>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Security & Privacy</Text>
         <Card style={styles.card} elevated>
           <TouchableOpacity
             style={styles.navRow}
-            onPress={() => Alert.alert('Change Password', 'A secure password reset link has been sent to your registered email.')}
+            onPress={() =>
+              showToast({
+                variant: 'success',
+                title: 'Password Reset Sent',
+                message: 'A secure password reset link has been sent to your registered email.',
+              })
+            }
           >
-            <Text style={styles.navLabel}>Change Password</Text>
-            <Text style={styles.navArrow}>&rarr;</Text>
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Change Password</Text>
+            <Text style={[styles.navArrow, { color: colors.textMuted }]}>&rarr;</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
           {isBarber && (
             <>
@@ -100,33 +163,39 @@ export default function SettingsScreen() {
                 style={styles.navRow}
                 onPress={() => router.push('/barber/profile-edit')}
               >
-                <Text style={styles.navLabel}>Edit Stylist Bio & Credentials</Text>
-                <Text style={styles.navArrow}>&rarr;</Text>
+                <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Edit Stylist Bio & Credentials</Text>
+                <Text style={[styles.navArrow, { color: colors.textMuted }]}>&rarr;</Text>
               </TouchableOpacity>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
             </>
           )}
 
           <TouchableOpacity
             style={styles.navRow}
-            onPress={() => Alert.alert('Biometric Login', 'Biometric authentication is managed via your device system settings.')}
+            onPress={() =>
+              showToast({
+                variant: 'info',
+                title: 'Biometric Login',
+                message: 'Biometric authentication is managed via your device system settings.',
+              })
+            }
           >
-            <Text style={styles.navLabel}>Biometric Sign-In</Text>
-            <Text style={styles.navArrow}>&rarr;</Text>
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Biometric Sign-In</Text>
+            <Text style={[styles.navArrow, { color: colors.textMuted }]}>&rarr;</Text>
           </TouchableOpacity>
         </Card>
 
         {/* App Info */}
-        <Text style={styles.sectionTitle}>Application</Text>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Application</Text>
         <Card style={styles.card} elevated>
           <View style={styles.navRow}>
-            <Text style={styles.navLabel}>App Version</Text>
-            <Text style={styles.navValue}>1.0.0 (Unified Build)</Text>
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>App Version</Text>
+            <Text style={[styles.navValue, { color: colors.textSecondary }]}>1.0.0 (Unified Build)</Text>
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <View style={styles.navRow}>
-            <Text style={styles.navLabel}>Environment</Text>
-            <Text style={styles.navValue}>Production (Lagos / Keffi)</Text>
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Environment</Text>
+            <Text style={[styles.navValue, { color: colors.textSecondary }]}>Production (Lagos / Keffi)</Text>
           </View>
         </Card>
       </ScrollView>
@@ -137,7 +206,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
@@ -146,18 +214,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   backBtn: {
     padding: SPACING.xs,
   },
   backArrow: {
-    color: COLORS.textPrimary,
     fontSize: 22,
     fontWeight: '700',
   },
   headerTitle: {
-    color: COLORS.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
   },
@@ -169,7 +234,6 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   sectionTitle: {
-    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
@@ -180,6 +244,28 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: SPACING.md,
+  },
+  themeOptionsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: 4,
+  },
+  themeOptionBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: RADIUS.md,
+  },
+  themeOptionLabel: {
+    fontSize: FONTS.sizes.sm,
+    fontWeight: '700',
+  },
+  themeOptionDesc: {
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 2,
   },
   row: {
     flexDirection: 'row',
@@ -192,12 +278,10 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.md,
   },
   rowLabel: {
-    color: COLORS.textPrimary,
     fontSize: FONTS.sizes.md,
     fontWeight: '600',
   },
   rowDesc: {
-    color: COLORS.textSecondary,
     fontSize: FONTS.sizes.xs,
     marginTop: 2,
   },
@@ -208,22 +292,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   navLabel: {
-    color: COLORS.textPrimary,
     fontSize: FONTS.sizes.md,
     fontWeight: '600',
   },
   navArrow: {
-    color: COLORS.textMuted,
     fontSize: 18,
   },
   navValue: {
-    color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '600',
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
     marginVertical: 4,
   },
 });

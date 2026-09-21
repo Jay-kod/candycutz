@@ -47,20 +47,30 @@
               </div>
               <div>
                 <h3 class="text-sm font-bold text-theme-text">Profile Picture</h3>
-                <p class="text-xs text-ivory/40 mt-1 max-w-sm">Upload a professional headshot or avatar. PNG, JPG up to 5MB. (Currently a placeholder feature)</p>
+                <p class="text-xs text-ivory/40 mt-1 max-w-sm">Upload a professional headshot or avatar. PNG, JPG or WebP up to 5MB.</p>
                 <button type="button" @click="$refs.fileInput.click()" class="mt-3 px-4 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-theme-text transition-colors">
                   Change Image
                 </button>
               </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-6">
+            <div class="grid sm:grid-cols-3 gap-6">
               <label class="block">
                 <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Full Name</span>
                 <input
                   v-model="form.name"
                   class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
                   placeholder="e.g. Obo Shadow"
+                  required
+                />
+              </label>
+              <label class="block">
+                <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Email Address</span>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
+                  placeholder="e.g. barber@candycutz.com"
                   required
                 />
               </label>
@@ -137,6 +147,7 @@ const authStore = useAuthStore()
 
 const form = reactive({ 
   name: '', 
+  email: '',
   phone: '', 
   bio: '', 
   instagram_url: '', 
@@ -145,6 +156,7 @@ const form = reactive({
 })
 const saving = ref(false)
 const fileInput = ref(null)
+const avatarFile = ref(null)
 
 const allStyles = [
   'Classic Fade', 'High Fade', 'Taper Fade', 'Textured Crop',
@@ -175,29 +187,46 @@ function handleImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('Image must be under 5MB')
+    return
+  }
+
+  avatarFile.value = file
   const objectUrl = URL.createObjectURL(file)
   form.profile_image = objectUrl
-  toast.success('Image selected! Make sure to save the profile.')
+  toast.success('Image selected! Click "Save Changes" to update.')
 }
 
 async function submit() {
   saving.value = true
   try {
-    const response = await barberApi.updateProfile({
-      name: form.name,
-      phone: form.phone,
-      bio: form.bio,
-      instagram_url: form.instagram_url,
-      specialties: form.specialties
+    const payload = new FormData()
+    payload.append('name', form.name)
+    payload.append('email', form.email)
+    payload.append('phone', form.phone || '')
+    payload.append('bio', form.bio || '')
+    payload.append('instagram_url', form.instagram_url || '')
+    
+    form.specialties.forEach((spec, idx) => {
+      payload.append(`specialties[${idx}]`, spec)
     })
-    const profile = response.data?.data?.barber
+
+    if (avatarFile.value) {
+      payload.append('avatar', avatarFile.value)
+    }
+
+    const response = await barberApi.updateProfile(payload)
+    const profile = response.data?.data?.barber || response.data?.data?.user
     if (profile?.avatar_url) {
       form.profile_image = profile.avatar_url
+    } else if (profile?.avatar) {
+      form.profile_image = getStorageUrl(profile.avatar)
     }
     await authStore.fetchUser()
     toast.success('Profile saved successfully!')
   } catch (e) {
-    toast.error('Failed to save profile')
+    toast.error(e.response?.data?.message || 'Failed to save profile')
   } finally {
     saving.value = false
   }
@@ -206,11 +235,13 @@ async function submit() {
 onMounted(async () => {
   try {
     const response = await barberApi.profile()
+    const user = response.data?.data?.user || authStore.user || {}
     const profile = response.data?.data?.barber || {}
     
-    form.name = profile.name || 'Obo Shadow'
-    form.phone = profile.phone || '+234 800 123 4567'
-    form.bio = profile.bio || 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups. I believe every haircut is an art form.'
+    form.name = profile.name || user.name || 'Obo Shadow'
+    form.email = profile.email || user.email || ''
+    form.phone = profile.phone || user.phone || '+234 800 123 4567'
+    form.bio = profile.bio || user.bio || 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups. I believe every haircut is an art form.'
     form.instagram_url = profile.instagram_url || 'obo_shadow_cuts'
     form.specialties = profile.specialties && profile.specialties.length > 0 
       ? profile.specialties 
@@ -224,10 +255,11 @@ onMounted(async () => {
           'Accessible Care Cut'
         ]
       
-    form.profile_image = profile.avatar_url || (profile.avatar ? getStorageUrl(profile.avatar) : null)
+    form.profile_image = profile.avatar_url || (profile.avatar ? getStorageUrl(profile.avatar) : (user.avatar ? getStorageUrl(user.avatar) : null))
     
   } catch (e) {
-    form.name = 'Obo Shadow'
+    form.name = authStore.user?.name || 'Obo Shadow'
+    form.email = authStore.user?.email || ''
     form.bio = 'Master Barber with over 5 years of experience specializing in sharp fades and crisp line-ups.'
     form.specialties = [
       'Classic Fade', 'High Fade', 'Taper Fade', 'Textured Crop',

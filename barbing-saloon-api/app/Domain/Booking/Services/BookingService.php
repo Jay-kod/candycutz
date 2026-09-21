@@ -6,6 +6,7 @@ namespace App\Domain\Booking\Services;
 
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Notification\NotificationDispatcher;
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Jobs\SendBookingCancellation;
@@ -32,7 +33,7 @@ class BookingService
      *
      * @throws BookingSlotUnavailableException
      */
-    public function createBooking(User $customer, BookingData $data): Appointment
+    public function createBooking(User $customer, BookingData $data, AppointmentSource $source = AppointmentSource::web): Appointment
     {
         return DB::transaction(function () use ($customer, $data) {
             // 1. Resolve & normalize appointment parameters
@@ -178,6 +179,7 @@ class BookingService
                 'notes' => $data->notes,
                 'deposit_paid' => $data->paymentMethod === 'pay_at_venue',
                 'deposit_amount' => 0.0,
+                'source' => $source->value,
             ]);
 
             // 6. Record items if table exists
@@ -224,7 +226,7 @@ class BookingService
      *
      * @throws BookingSlotUnavailableException
      */
-    public function createWalkIn(User $actor, Barber $barber, BookingData $data): Appointment
+    public function createWalkIn(User $actor, Barber $barber, BookingData $data, AppointmentSource $source = AppointmentSource::walk_in): Appointment
     {
         return DB::transaction(function () use ($actor, $barber, $data) {
             $service = Service::findOrFail($data->serviceId);
@@ -279,6 +281,7 @@ class BookingService
                 'deposit_paid' => true,
                 'deposit_amount' => (float) $service->price,
                 'notes' => $data->notes ?? 'Walk-in guest',
+                'source' => $source->value,
             ]);
 
             // Audit

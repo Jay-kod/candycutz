@@ -6,6 +6,7 @@ namespace App\Domain\Booking\Actions;
 
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\User;
@@ -23,6 +24,6 @@ class CreateWalkInAppointment
      */
     public function execute(User $actor, Barber $barber, BookingData $data): Appointment
     {
-        return $this->bookingService->createWalkIn($actor, $barber, $data);
+        return $this->bookingService->createWalkIn($actor, $barber, $data, AppointmentSource::walk_in);
     }
 }

@@ -46,7 +46,7 @@ const SLIDES: SlideItem[] = [
   },
   {
     id: '3',
-    image: require('../assets/images/onboarding-3.png'),
+    image: require('../assets/images/onboarding-3.jpg'),
     title: 'A Sharper Standard, Every Day',
     subtitle: 'Elevate your confidence with CandyCutz. Step in for a fresh cut and walk out feeling your absolute best.',
   },
@@ -59,7 +59,6 @@ export default function OnboardingScreen() {
   const isFinishingRef = useRef(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   React.useEffect(() => {
     mobileCmsStorage.getStoredCms().then((cms) => {
@@ -69,15 +68,17 @@ export default function OnboardingScreen() {
     });
   }, []);
 
-  const handleFinishOnboarding = (destination: 'login' | 'register' = 'login') => {
+  const handleFinishOnboarding = async (destination: 'login' | 'register' = 'login') => {
     if (isFinishingRef.current) return;
     isFinishingRef.current = true;
+    onboardingStorage.beginHandoff();
 
-    const target = isAuthenticated ? '/(tabs)' : `/auth/${destination}`;
-    router.replace(target as '/(tabs)' | '/auth/login' | '/auth/register');
-
-    // Persist independently so SecureStore cannot delay or cancel navigation.
-    void onboardingStorage.setHasSeenOnboarding(true).catch(() => {});
+    const target = `/auth/${destination}`;
+    try {
+      await onboardingStorage.setHasSeenOnboarding(true);
+    } finally {
+      router.replace(target as '/(tabs)' | '/auth/login' | '/auth/register');
+    }
   };
 
   const handleNext = async () => {
@@ -86,7 +87,7 @@ export default function OnboardingScreen() {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
       setCurrentIndex(nextIndex);
     } else {
-      handleFinishOnboarding();
+      void handleFinishOnboarding();
     }
   };
 
@@ -141,7 +142,7 @@ export default function OnboardingScreen() {
       {/* Top Skip Button */}
       <View style={[styles.topBar, { top: insets.top + (Platform.OS === 'ios' ? 12 : 16) }]}>
         <Pressable
-          onPress={() => handleFinishOnboarding()}
+          onPress={() => void handleFinishOnboarding()}
           style={({ pressed }) => [styles.skipButton, pressed && styles.skipButtonPressed]}
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding"
@@ -171,7 +172,7 @@ export default function OnboardingScreen() {
         {currentIndex === SLIDES.length - 1 ? (
           <View style={styles.authActions}>
             <Pressable
-              onPress={() => handleFinishOnboarding('login')}
+              onPress={() => void handleFinishOnboarding('login')}
               style={({ pressed }) => [styles.authButton, styles.loginButton, pressed && styles.authButtonPressed]}
               accessibilityRole="button"
               accessibilityLabel="Sign in"
@@ -179,7 +180,7 @@ export default function OnboardingScreen() {
               <Text style={styles.loginButtonText}>Sign in</Text>
             </Pressable>
             <Pressable
-              onPress={() => handleFinishOnboarding('register')}
+              onPress={() => void handleFinishOnboarding('register')}
               style={({ pressed }) => [styles.authButton, styles.registerButton, pressed && styles.authButtonPressed]}
               accessibilityRole="button"
               accessibilityLabel="Create account"

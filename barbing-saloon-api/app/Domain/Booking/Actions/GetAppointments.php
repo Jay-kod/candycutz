@@ -2,6 +2,7 @@
 
 namespace App\Domain\Booking\Actions;
 
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\User;
@@ -12,7 +13,7 @@ class GetAppointments
     /**
      * @return LengthAwarePaginator<Appointment>
      */
-    public function execute(User $user, ?string $status = null, int $perPage = 15): LengthAwarePaginator
+    public function execute(User $user, ?string $status = null, int $perPage = 15, ?AppointmentSource $source = null): LengthAwarePaginator
     {
         $role = $user->role?->value ?? $user->role;
         $query = Appointment::query()->with(['service.category', 'barber.user', 'serviceZone', 'customer']);
@@ -23,6 +24,10 @@ class GetAppointments
             $query->where('customer_id', $user->id);
         }
 
+        if ($source !== null) {
+            $query->where('source', $source->value);
+        }
+
         if ($status && $status !== 'all') {
             if ($status === 'upcoming') {
                 $query->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
@@ -31,6 +36,8 @@ class GetAppointments
                 $query->where('status', AppointmentStatus::completed->value);
             } elseif ($status === 'cancelled') {
                 $query->where('status', AppointmentStatus::cancelled->value);
+            } else {
+                $query->where('status', $status);
             }
         }
 

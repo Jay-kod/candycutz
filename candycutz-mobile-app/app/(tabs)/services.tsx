@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Animated,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -13,7 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { servicesApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
-import { LoadingState } from '../../src/components/common/LoadingState';
+import { ServiceSkeletons } from '../../src/components/common/Skeleton';
+import { useSkeletonTransition } from '../../src/hooks/useSkeletonTransition';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { Service } from '../../src/types';
 
@@ -31,6 +33,8 @@ export default function ServicesScreen() {
     queryKey: ['services'],
     queryFn: servicesApi.getAll,
   });
+
+  const contentOpacity = useSkeletonTransition(isLoading);
 
   const filteredServices = services.filter((service: Service) => {
     if (selectedCategory === 'All') return true;
@@ -117,26 +121,28 @@ export default function ServicesScreen() {
 
       {/* Service List */}
       {isLoading ? (
-        <LoadingState message="Loading our signature services" />
+        <ServiceSkeletons count={5} />
       ) : (
-        <FlatList
-          data={filteredServices}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderServiceItem}
-          contentContainerStyle={styles.servicesList}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refetch}
-              tintColor={COLORS.primary}
-            />
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No services found in this category.</Text>
-            </View>
-          }
-        />
+        <Animated.View style={{ flex: 1, opacity: contentOpacity }}>
+          <FlatList
+            data={filteredServices}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderServiceItem}
+            contentContainerStyle={styles.servicesList}
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={refetch}
+                tintColor={COLORS.primary}
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No services found in this category.</Text>
+              </View>
+            }
+          />
+        </Animated.View>
       )}
     </SafeAreaView>
   );

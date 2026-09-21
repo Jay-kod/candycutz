@@ -94,6 +94,7 @@ class BarberApiController
 
         $data = $request->validate([
             'name' => 'sometimes|string',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$request->user()->id,
             'phone' => 'sometimes|string',
             'bio' => 'sometimes|string|nullable',
             'specialties' => 'sometimes|array',

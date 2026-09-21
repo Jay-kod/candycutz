@@ -5,8 +5,15 @@ const ONBOARDING_KEY = 'candycutz_has_seen_onboarding';
 
 // In-memory fallback
 let memorySeen: boolean | null = null;
+let handoffPending = false;
 
 export const onboardingStorage = {
+  beginHandoff: (): void => {
+    handoffPending = true;
+  },
+
+  isHandoffPending: (): boolean => handoffPending,
+
   hasSeenOnboarding: async (): Promise<boolean> => {
     try {
       if (Platform.OS === 'web') {
@@ -41,6 +48,7 @@ export const onboardingStorage = {
 
   resetOnboarding: async (): Promise<void> => {
     memorySeen = false;
+    handoffPending = false;
     try {
       if (Platform.OS === 'web') {
         if (typeof localStorage !== 'undefined') {

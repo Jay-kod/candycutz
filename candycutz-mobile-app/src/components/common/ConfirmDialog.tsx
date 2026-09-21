@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
+  ActivityIndicator,
   Modal,
   Pressable,
   StyleSheet,
@@ -15,7 +16,8 @@ import {
   Info,
   Trash2,
 } from 'lucide-react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 export type ConfirmDialogVariant = 'danger' | 'warning' | 'info' | 'primary';
 
@@ -28,7 +30,7 @@ export interface ConfirmDialogProps {
   destructive?: boolean;
   variant?: ConfirmDialogVariant;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }
 
 export function ConfirmDialog({
@@ -42,6 +44,9 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
+  const { colors, isDark } = useAppTheme();
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
   // Determine active visual variant
   const effectiveVariant: ConfirmDialogVariant =
     variant || (destructive ? 'danger' : 'primary');
@@ -52,6 +57,7 @@ export function ConfirmDialog({
   const cardOpacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (!visible) setIsProcessing(false);
     if (visible) {
       Animated.parallel([
         Animated.timing(backdropAnim, {
@@ -92,6 +98,16 @@ export function ConfirmDialog({
     }
   }, [visible, backdropAnim, cardScaleAnim, cardOpacityAnim]);
 
+  const handleConfirm = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Icon and Accent Color Resolution
   const getVariantStyles = () => {
     switch (effectiveVariant) {
@@ -131,14 +147,14 @@ export function ConfirmDialog({
       case 'primary':
       default:
         return {
-          icon: <HelpCircle size={28} color="#E5BA73" strokeWidth={2.2} />,
-          haloBg: 'rgba(212, 175, 55, 0.12)',
-          ringBorder: 'rgba(229, 186, 115, 0.3)',
-          glowShadow: 'rgba(212, 175, 55, 0.35)',
-          confirmBtnBg: '#E5BA73',
-          confirmBtnPressedBg: '#D4AF37',
-          confirmText: '#0A0A0C',
-          topRimColor: 'rgba(229, 186, 115, 0.45)',
+          icon: <HelpCircle size={28} color={colors.primary} strokeWidth={2.2} />,
+          haloBg: isDark ? 'rgba(212, 175, 55, 0.12)' : 'rgba(197, 155, 39, 0.12)',
+          ringBorder: isDark ? 'rgba(229, 186, 115, 0.3)' : 'rgba(197, 155, 39, 0.28)',
+          glowShadow: isDark ? 'rgba(212, 175, 55, 0.35)' : 'rgba(197, 155, 39, 0.25)',
+          confirmBtnBg: colors.primary,
+          confirmBtnPressedBg: colors.primaryDark,
+          confirmText: isDark ? '#0A0A0C' : '#FFFFFF',
+          topRimColor: isDark ? 'rgba(229, 186, 115, 0.45)' : 'rgba(197, 155, 39, 0.4)',
         };
     }
   };
@@ -160,6 +176,7 @@ export function ConfirmDialog({
             styles.backdrop,
             {
               opacity: backdropAnim,
+              backgroundColor: isDark ? 'rgba(5, 5, 8, 0.78)' : 'rgba(15, 15, 18, 0.6)',
             },
           ]}
         >
@@ -171,6 +188,8 @@ export function ConfirmDialog({
           style={[
             styles.card,
             {
+              backgroundColor: colors.surfaceElevated,
+              borderColor: colors.border,
               opacity: cardOpacityAnim,
               transform: [{ scale: cardScaleAnim }],
             },
@@ -199,8 +218,8 @@ export function ConfirmDialog({
 
           {/* Title & Message */}
           <View style={styles.textBlock}>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.message}>{message}</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+            <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
           </View>
 
           {/* Action Buttons */}
@@ -208,19 +227,27 @@ export function ConfirmDialog({
             {/* Cancel Button */}
             <Pressable
               onPress={onCancel}
+              disabled={isProcessing}
               style={({ pressed }) => [
                 styles.cancelButton,
-                pressed && styles.cancelButtonPressed,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'rgba(0, 0, 0, 0.04)',
+                  borderColor: colors.border,
+                },
+                pressed && (isDark ? styles.cancelButtonPressedDark : styles.cancelButtonPressedLight),
               ]}
               accessibilityRole="button"
               accessibilityLabel={cancelLabel}
             >
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
+              <Text style={[styles.cancelText, { color: colors.textSecondary }]}>{cancelLabel}</Text>
             </Pressable>
 
             {/* Confirm Button */}
             <Pressable
-              onPress={onConfirm}
+              onPress={handleConfirm}
+              disabled={isProcessing}
               style={({ pressed }) => [
                 styles.confirmButton,
                 {
@@ -234,14 +261,18 @@ export function ConfirmDialog({
               accessibilityRole="button"
               accessibilityLabel={confirmLabel}
             >
-              <Text
+              {isProcessing ? (
+                <ActivityIndicator size="small" color={currentTheme.confirmText} />
+              ) : (
+                <Text
                 style={[
                   styles.confirmText,
                   { color: currentTheme.confirmText },
                 ]}
-              >
-                {confirmLabel}
-              </Text>
+                >
+                  {confirmLabel}
+                </Text>
+              )}
             </Pressable>
           </View>
         </Animated.View>
@@ -263,7 +294,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(5, 5, 8, 0.78)',
   },
   card: {
     width: '100%',
@@ -273,12 +303,10 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     paddingHorizontal: 24,
     borderRadius: 24,
-    backgroundColor: '#14141B',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.09)',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.25,
     shadowRadius: 24,
     elevation: 16,
     overflow: 'hidden',
@@ -310,7 +338,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    color: '#FFFFFF',
     fontSize: 19,
     fontWeight: '700',
     textAlign: 'center',
@@ -319,7 +346,6 @@ const styles = StyleSheet.create({
   },
   message: {
     marginTop: 8,
-    color: '#9CA3AF',
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
@@ -336,16 +362,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 13,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  cancelButtonPressed: {
+  cancelButtonPressedDark: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     transform: [{ scale: 0.98 }],
   },
+  cancelButtonPressedLight: {
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    transform: [{ scale: 0.98 }],
+  },
   cancelText: {
-    color: '#D1D5DB',
     fontSize: 15,
     fontWeight: '600',
   },

@@ -1,10 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Bell } from 'lucide-react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifications } from '../../hooks/useNotifications';
+import { UIcon } from './UIcon';
 
 interface HeaderProps {
   title?: string;
@@ -16,15 +17,16 @@ export const Header: React.FC<HeaderProps> = ({
   showLocationBadge = true,
 }) => {
   const router = useRouter();
+  const { colors } = useAppTheme();
   const { user, isAuthenticated } = useAuthStore();
   const { unreadCount } = useNotifications(isAuthenticated);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
       <View style={styles.topRow}>
         <View>
-          <Text style={styles.logo}>CANDYCUTZ</Text>
-          <Text style={styles.tagline}>LUXURY GROOMING</Text>
+          <Text style={[styles.logo, { color: colors.primary }]}>CANDYCUTZ</Text>
+          <Text style={[styles.tagline, { color: colors.textMuted }]}>LUXURY GROOMING</Text>
         </View>
 
         <View style={styles.headerActions}>
@@ -32,14 +34,17 @@ export const Header: React.FC<HeaderProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => router.push('/notifications')}
-              style={styles.bellButton}
+              style={[
+                styles.bellButton,
+                { backgroundColor: colors.surfaceElevated, borderColor: colors.border },
+              ]}
               accessibilityRole="button"
               accessibilityLabel="Notifications"
             >
-              <Bell size={20} color={COLORS.textPrimary} />
+              <UIcon name="bell" size={20} color={colors.textPrimary} />
               {unreadCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
+                <View style={[styles.badge, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.badgeText, { color: '#0A0A0C' }]}>
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </Text>
                 </View>
@@ -53,14 +58,24 @@ export const Header: React.FC<HeaderProps> = ({
             style={styles.avatarButton}
           >
             {isAuthenticated && user ? (
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatarText}>
+              <View
+                style={[
+                  styles.avatarContainer,
+                  { backgroundColor: colors.surfaceElevated, borderColor: colors.primary },
+                ]}
+              >
+                <Text style={[styles.avatarText, { color: colors.primary }]}>
                   {(user.real_name || user.name || 'U').charAt(0).toUpperCase()}
                 </Text>
               </View>
             ) : (
-              <View style={styles.loginPill}>
-                <Text style={styles.loginPillText}>Sign In</Text>
+              <View
+                style={[
+                  styles.loginPill,
+                  { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+                ]}
+              >
+                <Text style={[styles.loginPillText, { color: colors.primary }]}>Sign In</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -68,15 +83,20 @@ export const Header: React.FC<HeaderProps> = ({
       </View>
 
       {showLocationBadge && (
-        <View style={styles.locationBanner}>
-          <View style={styles.statusDot} />
-          <Text style={styles.locationText}>
+        <View
+          style={[
+            styles.locationBanner,
+            { backgroundColor: colors.surfaceElevated, borderColor: colors.border },
+          ]}
+        >
+          <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+          <Text style={[styles.locationText, { color: colors.textSecondary }]}>
             Open • Angwan Kare, BCG, Keffi Branch
           </Text>
         </View>
       )}
 
-      {title && <Text style={styles.title}>{title}</Text>}
+      {title && <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>}
     </View>
   );
 };
@@ -87,8 +107,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    backgroundColor: COLORS.background,
   },
   topRow: {
     flexDirection: 'row',
@@ -98,13 +116,11 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: FONTS.sizes.xl,
     fontWeight: '900',
-    color: COLORS.primary,
     letterSpacing: 2,
   },
   tagline: {
     fontSize: 9,
     fontWeight: '700',
-    color: COLORS.textMuted,
     letterSpacing: 1.5,
     marginTop: -2,
   },
@@ -117,9 +133,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.surfaceElevated,
     borderWidth: 1,
-    borderColor: COLORS.border,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -128,7 +142,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: COLORS.primary,
     borderRadius: 9,
     minWidth: 18,
     height: 18,
@@ -139,7 +152,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#0A0A0C',
   },
   avatarButton: {
     padding: 4,
@@ -148,27 +160,21 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.surfaceElevated,
     borderWidth: 1.5,
-    borderColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: COLORS.primary,
     fontWeight: '800',
     fontSize: FONTS.sizes.md,
   },
   loginPill: {
-    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: COLORS.primary,
     borderRadius: RADIUS.full,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   loginPillText: {
-    color: COLORS.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
@@ -176,30 +182,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 10,
-    backgroundColor: COLORS.surfaceElevated,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: RADIUS.full,
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   statusDot: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: COLORS.success,
     marginRight: 6,
   },
   locationText: {
-    color: COLORS.textSecondary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '500',
   },
   title: {
     fontSize: FONTS.sizes.xxl,
     fontWeight: '800',
-    color: COLORS.textPrimary,
     marginTop: SPACING.md,
   },
 });

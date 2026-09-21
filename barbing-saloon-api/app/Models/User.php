@@ -24,6 +24,7 @@ class User extends Authenticatable
         'avatar',
         'cover_image',
         'phone',
+        'bio',
         'auth_provider',
         'provider_id',
         'last_username_change_at',

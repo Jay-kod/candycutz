@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
+  Animated,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -24,11 +24,13 @@ import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { getStorageUrl } from '../../src/constants/config';
 import { mobileCmsStorage } from '../../src/utils/mobileCmsStorage';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { login, isLoading, error } = useAuthStore();
+  const showToast = useToastStore((state) => state.show);
 
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +38,25 @@ export default function LoginScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [demoRole, setDemoRole] = useState<'customer' | 'barber' | null>(null);
   const [loginBg, setLoginBg] = useState<string | null>(null);
+
+  const entranceOpacity = useRef(new Animated.Value(0)).current;
+  const entranceTranslateY = useRef(new Animated.Value(24)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(entranceOpacity, {
+        toValue: 1,
+        duration: 450,
+        useNativeDriver: true,
+      }),
+      Animated.spring(entranceTranslateY, {
+        toValue: 0,
+        friction: 8,
+        tension: 65,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [entranceOpacity, entranceTranslateY]);
 
   useEffect(() => {
     mobileCmsStorage.getStoredCms().then((cms) => {
@@ -60,7 +81,11 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = () => {
-    Alert.alert('Google Sign-In', 'Google sign-in will be available after the Google client is configured.');
+    showToast({
+      variant: 'info',
+      title: 'Google Sign-In',
+      message: 'Google sign-in will be available after the Google client is configured.',
+    });
   };
 
   return (
@@ -87,146 +112,155 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Card style={styles.card} elevated>
-            <View style={styles.brandBlock}>
-              <View style={styles.iconFrame}>
-                <Image source={require('../../assets/icon.png')} style={styles.systemIcon} resizeMode="contain" />
+          <Animated.View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+              opacity: entranceOpacity,
+              transform: [{ translateY: entranceTranslateY }],
+            }}
+          >
+            <Card style={styles.card} elevated>
+              <View style={styles.brandBlock}>
+                <View style={styles.iconFrame}>
+                  <Image source={require('../../assets/icon.png')} style={styles.systemIcon} resizeMode="contain" />
+                </View>
+                <Text style={styles.title}>Login</Text>
+                <Text style={styles.subtitle}>Sign in to your account to continue</Text>
               </View>
-              <Text style={styles.title}>Login</Text>
-              <Text style={styles.subtitle}>Sign in to your account to continue</Text>
-            </View>
 
-            {error && (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            )}
+              {error && (
+                <View style={styles.errorBox}>
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
 
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR SIGN IN MANUALLY</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Username or Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="you@example.com"
-                placeholderTextColor={COLORS.textMuted}
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={identity}
-                onChangeText={setIdentity}
-              />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <View style={styles.passwordLabelRow}>
-                <Text style={styles.label}>Password</Text>
-                <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
-                  <Text style={styles.forgotPasswordLink}>Forgot?</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.passwordInputRow}>
-                <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="••••••••"
-                  placeholderTextColor={COLORS.textMuted}
-                  secureTextEntry={!isPasswordVisible}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
-                  onPress={() => setIsPasswordVisible((visible) => !visible)}
-                  style={styles.passwordToggle}
-                >
-                  {isPasswordVisible ? <EyeOff size={20} color={COLORS.textMuted} /> : <Eye size={20} color={COLORS.textMuted} />}
-                </TouchableOpacity>
-
-            <TouchableOpacity
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: rememberMe }}
-              onPress={() => setRememberMe((checked) => !checked)}
-              style={styles.rememberMeRow}
-            >
-              <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                {rememberMe && <Text style={styles.checkboxMark}>✓</Text>}
-              </View>
-              <Text style={styles.rememberMeText}>Remember me</Text>
-            </TouchableOpacity>
-              </View>
-            </View>
-
-            <Button
-              title="Login"
-              onPress={handleLogin}
-              loading={isLoading}
-              loadingTitle="Authenticating..."
-              disabled={!identity || !password}
-              style={styles.loginBtn}
-            />
-
-            <View style={styles.demoRow}>
-              <Text style={styles.demoPrompt}>Need a quick look around?</Text>
-              <TouchableOpacity
-                onPress={() => handleDemoLogin('customer')}
-                disabled={isLoading}
-                accessibilityRole="button"
-                accessibilityLabel="Demo customer"
-              >
-                <Text style={styles.demoLink}>Demo customer</Text>
-              </TouchableOpacity>
-              <Text style={styles.demoSeparator}>or</Text>
-              <TouchableOpacity
-                onPress={() => handleDemoLogin('barber')}
-                disabled={isLoading}
-                accessibilityRole="button"
-                accessibilityLabel="Demo barber"
-              >
-                <Text style={styles.demoLink}>Demo barber</Text>
-              </TouchableOpacity>
-            </View>
-            {demoRole && (
-              <View style={styles.demoDetails}>
-                <Text style={styles.demoDetailsLabel}>
-                  {demoRole === 'customer' ? 'Customer demo' : 'Barber demo'}
-                </Text>
-                <Text style={styles.demoDetailsText}>
-                  Email: {demoRole === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com'}
-                </Text>
-                <Text style={styles.demoDetailsText}>
-                  Password: {demoRole === 'customer' ? 'customer123' : 'barber123'}
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.socialSection}>
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
+                <Text style={styles.dividerText}>OR SIGN IN MANUALLY</Text>
                 <View style={styles.dividerLine} />
               </View>
-              <TouchableOpacity
-                accessibilityLabel="Continue with Google"
-                onPress={handleGoogleLogin}
-                style={styles.googleButton}
-              >
-                <View style={styles.googleLogoFrame}>
-                  <GoogleLogo size={20} />
-                </View>
-                <Text style={styles.googleButtonText}>Continue with Google</Text>
-              </TouchableOpacity>
-            </View>
 
-            <View style={styles.footerRow}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => router.replace('/auth/register')}>
-                <Text style={styles.registerLink}>Sign Up</Text>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Username or Email</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor={COLORS.textMuted}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={identity}
+                  onChangeText={setIdentity}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <View style={styles.passwordLabelRow}>
+                  <Text style={styles.label}>Password</Text>
+                  <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
+                    <Text style={styles.forgotPasswordLink}>Forgot?</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.passwordInputRow}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="••••••••"
+                    placeholderTextColor={COLORS.textMuted}
+                    secureTextEntry={!isPasswordVisible}
+                    value={password}
+                    onChangeText={setPassword}
+                  />
+                  <TouchableOpacity
+                    accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                    onPress={() => setIsPasswordVisible((visible) => !visible)}
+                    style={styles.passwordToggle}
+                  >
+                    {isPasswordVisible ? <EyeOff size={20} color={COLORS.textMuted} /> : <Eye size={20} color={COLORS.textMuted} />}
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: rememberMe }}
+                onPress={() => setRememberMe((checked) => !checked)}
+                style={styles.rememberMeRow}
+              >
+                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                  {rememberMe && <Text style={styles.checkboxMark}>✓</Text>}
+                </View>
+                <Text style={styles.rememberMeText}>Remember me</Text>
               </TouchableOpacity>
-            </View>
-          </Card>
+
+              <Button
+                title="Login"
+                onPress={handleLogin}
+                loading={isLoading}
+                loadingTitle="Authenticating..."
+                disabled={!identity || !password}
+                style={styles.loginBtn}
+              />
+
+              <View style={styles.demoRow}>
+                <Text style={styles.demoPrompt}>Need a quick look around?</Text>
+                <TouchableOpacity
+                  onPress={() => handleDemoLogin('customer')}
+                  disabled={isLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Demo customer"
+                >
+                  <Text style={styles.demoLink}>Demo customer</Text>
+                </TouchableOpacity>
+                <Text style={styles.demoSeparator}>or</Text>
+                <TouchableOpacity
+                  onPress={() => handleDemoLogin('barber')}
+                  disabled={isLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Demo barber"
+                >
+                  <Text style={styles.demoLink}>Demo barber</Text>
+                </TouchableOpacity>
+              </View>
+              {demoRole && (
+                <View style={styles.demoDetails}>
+                  <Text style={styles.demoDetailsLabel}>
+                    {demoRole === 'customer' ? 'Customer demo' : 'Barber demo'}
+                  </Text>
+                  <Text style={styles.demoDetailsText}>
+                    Email: {demoRole === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com'}
+                  </Text>
+                  <Text style={styles.demoDetailsText}>
+                    Password: {demoRole === 'customer' ? 'customer123' : 'barber123'}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.socialSection}>
+                <View style={styles.dividerRow}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+                <TouchableOpacity
+                  accessibilityLabel="Continue with Google"
+                  onPress={handleGoogleLogin}
+                  style={styles.googleButton}
+                >
+                  <View style={styles.googleLogoFrame}>
+                    <GoogleLogo size={20} />
+                  </View>
+                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.footerRow}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => router.replace('/auth/register')}>
+                  <Text style={styles.registerLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

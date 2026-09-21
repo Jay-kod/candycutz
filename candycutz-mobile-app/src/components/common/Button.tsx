@@ -1,13 +1,13 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TextStyle,
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 interface ButtonProps {
   title: string;
@@ -34,6 +34,8 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   icon,
 }) => {
+  const { colors } = useAppTheme();
+
   const getContainerStyle = (): ViewStyle => {
     let base: ViewStyle = {
       flexDirection: 'row',
@@ -53,15 +55,25 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Variants
     if (variant === 'primary') {
-      base = { ...base, backgroundColor: COLORS.primary };
+      base = { ...base, backgroundColor: colors.primary };
     } else if (variant === 'secondary') {
-      base = { ...base, backgroundColor: COLORS.surfaceElevated, borderWidth: 1, borderColor: COLORS.border };
+      base = {
+        ...base,
+        backgroundColor: colors.surfaceElevated,
+        borderWidth: 1,
+        borderColor: colors.border,
+      };
     } else if (variant === 'outline') {
-      base = { ...base, backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.primary };
+      base = {
+        ...base,
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: colors.primary,
+      };
     } else if (variant === 'ghost') {
       base = { ...base, backgroundColor: 'transparent' };
     } else if (variant === 'danger') {
-      base = { ...base, backgroundColor: COLORS.error };
+      base = { ...base, backgroundColor: colors.error };
     }
 
     if (disabled || loading) {
@@ -83,9 +95,9 @@ export const Button: React.FC<ButtonProps> = ({
     else base.fontSize = FONTS.sizes.md;
 
     if (variant === 'primary') base.color = '#0A0A0C';
-    else if (variant === 'outline') base.color = COLORS.primary;
-    else if (variant === 'ghost') base.color = COLORS.textSecondary;
-    else base.color = COLORS.textPrimary;
+    else if (variant === 'outline') base.color = colors.primary;
+    else if (variant === 'ghost') base.color = colors.textSecondary;
+    else base.color = colors.textPrimary;
 
     return base;
   };
@@ -99,9 +111,11 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <>
-          <ActivityIndicator color={variant === 'primary' ? '#0A0A0C' : COLORS.primary} />
+          <ActivityIndicator color={variant === 'primary' ? '#0A0A0C' : colors.primary} />
           {!!loadingTitle && (
-            <Text style={[getTextStyle(), { marginLeft: SPACING.sm }, textStyle]}>{loadingTitle}</Text>
+            <Text style={[getTextStyle(), { marginLeft: SPACING.sm }, textStyle]}>
+              {loadingTitle}
+            </Text>
           )}
         </>
       ) : (

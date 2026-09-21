@@ -228,6 +228,7 @@ export const barbersApi = {
 
   updateAccount: async (payload: {
     name?: string;
+    email?: string;
     phone?: string;
     bio?: string | null;
     specialties?: string[];
@@ -240,6 +241,7 @@ export const barbersApi = {
 
   updateAccountWithImages: async (payload: {
     name?: string;
+    email?: string;
     phone?: string;
     bio?: string | null;
     specialties?: string[];
@@ -250,6 +252,7 @@ export const barbersApi = {
   }): Promise<{ user: User; barber: Barber | null }> => {
     const formData = new FormData();
     formData.append('name', payload.name || '');
+    if (payload.email) formData.append('email', payload.email);
     formData.append('phone', payload.phone || '');
     formData.append('bio', payload.bio || '');
     formData.append('experience_years', String(payload.experience_years ?? 0));
@@ -300,6 +303,45 @@ export const barbersApi = {
 
   deleteBlockedPeriod: async (id: number): Promise<void> => {
     await apiClient.delete(`/barbers/blocked-periods/${id}`);
+  },
+};
+
+// ==========================================
+// Customer Account & Profile Endpoints
+// ==========================================
+export const accountApi = {
+  getProfile: async (): Promise<{ profile: User; history?: any }> => {
+    const res = await apiClient.get<ApiResponse<{ profile: User; history?: any }>>('/customer/profile');
+    return res.data.data || (res.data as any);
+  },
+
+  updateProfile: async (payload: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    bio?: string;
+    avatarUri?: string;
+  }): Promise<User> => {
+    if (payload.avatarUri) {
+      const formData = new FormData();
+      if (payload.name) formData.append('name', payload.name);
+      if (payload.email) formData.append('email', payload.email);
+      if (payload.phone) formData.append('phone', payload.phone);
+      if (payload.bio) formData.append('bio', payload.bio);
+      formData.append('avatar', {
+        uri: payload.avatarUri,
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      } as any);
+
+      const res = await apiClient.post<ApiResponse<User>>('/customer/profile', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data.data || (res.data as any);
+    }
+
+    const res = await apiClient.post<ApiResponse<User>>('/customer/profile', payload);
+    return res.data.data || (res.data as any);
   },
 };
 

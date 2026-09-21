@@ -12,7 +12,7 @@ test('Splash Screen & Onboarding Verification Suite', async (t) => {
       'splash-bg.jpg',
       'onboarding-1.jpg',
       'onboarding-2.jpg',
-      'onboarding-3.png',
+      'onboarding-3.jpg',
     ];
 
     for (const file of expectedAssets) {
@@ -51,11 +51,14 @@ test('Splash Screen & Onboarding Verification Suite', async (t) => {
     assert.ok(fs.existsSync(onboardingPath), 'app/onboarding.tsx must exist');
 
     const content = fs.readFileSync(onboardingPath, 'utf8');
-    assert.ok(content.includes('The Professional Specialists in near by'), 'Slide 1 title must match');
-    assert.ok(content.includes('Find near by Salons & book services'), 'Slide 2 title must match');
-    assert.ok(content.includes('Style that fit your daily lifestyle'), 'Slide 3 title must match');
+    assert.ok(content.includes('Master Barbers at Your Service'), 'Slide 1 title must match');
+    assert.ok(content.includes('Effortless Real-Time Booking'), 'Slide 2 title must match');
+    assert.ok(content.includes('A Sharper Standard, Every Day'), 'Slide 3 title must match');
     assert.ok(content.includes('pagingEnabled'), 'FlatList must enable paging');
-    assert.ok(content.includes('onboardingStorage.setHasSeenOnboarding(true)'), 'Must persist onboarding completion');
+    assert.ok(content.includes('await onboardingStorage.setHasSeenOnboarding(true)'), 'Must persist onboarding completion before navigation');
+    assert.ok(content.includes('onboardingStorage.beginHandoff()'), 'Must lock the root guard during auth handoff');
+    assert.ok(content.includes("const target = `/auth/${destination}`"), 'Must honor the selected login or register destination');
+    assert.ok(content.includes("router.replace(target"), 'Must replace directly with the selected destination');
     assert.ok(content.includes('ArrowRight'), 'Must display circular action button with arrow');
   });
 

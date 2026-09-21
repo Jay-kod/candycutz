@@ -34,11 +34,12 @@ class AccountApiController
 
     public function updateProfile(Request $request): JsonResponse
     {
-        // Ported from UpdateProfileRequest in Customer module
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$request->user()->id],
             'phone' => ['nullable', 'string', 'max:30'],
+            'bio' => ['nullable', 'string', 'max:1000'],
+            'username' => ['nullable', 'string', 'max:30', 'unique:users,username,'.$request->user()->id],
             'avatar' => ['nullable', 'image', 'max:5120'],
         ]);
 
