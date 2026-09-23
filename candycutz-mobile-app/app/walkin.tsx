@@ -16,13 +16,17 @@ import { staffWalkInApi } from '../src/api/client';
 import { Button } from '../src/components/common/Button';
 import { Card } from '../src/components/common/Card';
 import { WalkInSkeleton } from '../src/components/common/Skeleton';
-import { COLORS, FONTS, RADIUS, SPACING } from '../src/constants/theme';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../src/constants/theme';
+import { useAppTheme } from '../src/hooks/useAppTheme';
 import { useChairStore } from '../src/store/chairStore';
 import { useToastStore } from '../src/store/toastStore';
 import { Appointment, Service } from '../src/types';
 
 export default function WalkInScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const COLORS = colors;
+  const styles = createStyles(colors);
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const setActiveClient = useChairStore((state) => state.setActiveClient);
@@ -212,7 +216,10 @@ export default function WalkInScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const COLORS = colors;
+
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -334,4 +341,5 @@ const styles = StyleSheet.create({
   submitBtn: {
     marginTop: 18,
   },
-});
+  });
+};

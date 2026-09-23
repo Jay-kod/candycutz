@@ -16,13 +16,15 @@ import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { ServiceSkeletons } from '../../src/components/common/Skeleton';
 import { useSkeletonTransition } from '../../src/hooks/useSkeletonTransition';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { Service } from '../../src/types';
 
 const CATEGORIES = ['All', 'Haircut', 'Beard', 'Packages', 'Home VIP'];
 
 export default function ServicesScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const {
@@ -35,6 +37,7 @@ export default function ServicesScreen() {
   });
 
   const contentOpacity = useSkeletonTransition(isLoading);
+  const styles = createStyles(colors);
 
   const filteredServices = services.filter((service: Service) => {
     if (selectedCategory === 'All') return true;
@@ -133,7 +136,7 @@ export default function ServicesScreen() {
               <RefreshControl
                 refreshing={isLoading}
                 onRefresh={refetch}
-                tintColor={COLORS.primary}
+                tintColor={colors.primary}
               />
             }
             ListEmptyComponent={
@@ -148,10 +151,11 @@ export default function ServicesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: SPACING.md,
@@ -159,12 +163,12 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   title: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.hero - 8,
     fontWeight: '800',
   },
   subtitle: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
     marginTop: 2,
   },
@@ -179,21 +183,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
   },
   categoryPillActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   categoryText: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
   categoryTextActive: {
-    color: '#0A0A0C',
+    color: colors.onPrimary,
   },
   servicesList: {
     padding: SPACING.md,
@@ -213,20 +217,20 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   serviceName: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
     marginBottom: 4,
   },
   serviceDuration: {
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     fontSize: FONTS.sizes.xs,
     fontWeight: '500',
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: RADIUS.md,
@@ -234,18 +238,18 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212, 175, 55, 0.3)',
   },
   currencySymbol: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '800',
     marginRight: 2,
   },
   priceAmount: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.md,
     fontWeight: '800',
   },
   serviceDescription: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
     lineHeight: 20,
     marginVertical: 10,
@@ -253,18 +257,18 @@ const styles = StyleSheet.create({
   homeServiceRateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceHighlight,
+    backgroundColor: colors.surfaceHighlight,
     padding: 8,
     borderRadius: RADIUS.sm,
     marginBottom: 12,
   },
   homeServiceLabel: {
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     fontSize: FONTS.sizes.xs,
     marginRight: 6,
   },
   homeServicePrice: {
-    color: COLORS.textGold,
+    color: colors.textGold,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
@@ -284,7 +288,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     fontSize: FONTS.sizes.sm,
   },
-});
+  });
+}

@@ -12,7 +12,6 @@ import {
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Scissors,
   Calendar,
@@ -41,7 +40,8 @@ import {
   Skeleton,
 } from '../common/Skeleton';
 import { CONFIG } from '../../constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 import { Appointment, Barber, Service } from '../../types';
@@ -50,6 +50,8 @@ export function CustomerHomeView() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const showToast = useToastStore((state) => state.show);
+  const { colors, isDark } = useAppTheme();
+  const styles = createStyles(colors);
   const [activeVerificationCode, setActiveVerificationCode] = useState<string | null>(null);
 
   const {
@@ -131,7 +133,7 @@ export function CustomerHomeView() {
   const featuredServices = services.slice(0, 4);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Clean top navigation header */}
       <Header showLocationBadge={false} />
 
@@ -143,7 +145,7 @@ export function CustomerHomeView() {
           <RefreshControl
             refreshing={loadingServices || loadingBarbers || loadingAppointments}
             onRefresh={onRefresh}
-            tintColor={COLORS.primary}
+            tintColor={colors.primary}
           />
         }
       >
@@ -151,7 +153,7 @@ export function CustomerHomeView() {
         <View style={styles.greetingBar}>
           <View style={styles.greetingCopy}>
             <View style={styles.eyebrowRow}>
-              <Sparkles size={11} color={COLORS.primary} />
+              <Sparkles size={11} color={colors.primary} />
               <Text style={styles.eyebrowText}>
                 {isAuthenticated ? 'VIP CLIENT' : 'WELCOME TO CANDYCUTZ'}
               </Text>
@@ -176,40 +178,37 @@ export function CustomerHomeView() {
           <HomeAppointmentSkeleton />
         ) : nextAppointment ? (
           <Card style={styles.spotlightCard} elevated>
-            <LinearGradient
-              colors={['#242016', '#141419', '#0E0E12']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.spotlightGradient}
+            <View
+              style={[styles.spotlightGradient, { backgroundColor: colors.surfaceElevated }]}
             >
               <View style={styles.spotlightHeader}>
                 <View style={styles.spotlightTagRow}>
-                  <Sparkles size={12} color={COLORS.primary} />
+                  <Sparkles size={12} color={colors.primary} />
                   <Text style={styles.spotlightTag}>UPCOMING APPOINTMENT</Text>
                 </View>
                 <Badge status={nextAppointment.status} />
               </View>
 
-              <Text style={styles.spotlightServiceName}>
+              <Text style={[styles.spotlightServiceName, { color: colors.textPrimary }]}>
                 {nextAppointment.service?.name || 'Signature Haircut'}
               </Text>
 
               <View style={styles.spotlightDetailsRow}>
                 <View style={styles.spotlightDetail}>
-                  <Calendar size={13} color={COLORS.primary} />
-                  <Text style={styles.spotlightDetailText}>
+                  <Calendar size={13} color={colors.primary} />
+                  <Text style={[styles.spotlightDetailText, { color: colors.textSecondary }]}>
                     {nextAppointment.appointment_date}
                   </Text>
                 </View>
                 <View style={styles.spotlightDetail}>
-                  <Clock size={13} color={COLORS.primary} />
-                  <Text style={styles.spotlightDetailText}>
+                  <Clock size={13} color={colors.primary} />
+                  <Text style={[styles.spotlightDetailText, { color: colors.textSecondary }]}>
                     {nextAppointment.start_time || (nextAppointment as any).appointment_time}
                   </Text>
                 </View>
                 <View style={styles.spotlightDetail}>
-                  <UserIcon size={13} color={COLORS.primary} />
-                  <Text style={styles.spotlightDetailText} numberOfLines={1}>
+                  <UserIcon size={13} color={colors.primary} />
+                  <Text style={[styles.spotlightDetailText, { color: colors.textSecondary }]} numberOfLines={1}>
                     {nextAppointment.barber?.name || 'Stylist'}
                   </Text>
                 </View>
@@ -222,7 +221,7 @@ export function CustomerHomeView() {
                   style={styles.codeContainer}
                 >
                   <View style={styles.codeLeft}>
-                    <ShieldCheck size={16} color={COLORS.success} />
+                    <ShieldCheck size={16} color={colors.success} />
                     <View>
                       <Text style={styles.codeLabel}>CHAIR VERIFICATION CODE</Text>
                       <Text style={styles.codeValue}>
@@ -250,30 +249,27 @@ export function CustomerHomeView() {
                   variant="outline"
                   onPress={handleOpenMaps}
                   style={styles.spotlightBtn}
-                  icon={<Navigation size={13} color={COLORS.primary} />}
+                  icon={<Navigation size={13} color={colors.primary} />}
                 />
               </View>
-            </LinearGradient>
+            </View>
           </Card>
         ) : (
           <Card style={styles.heroCard} elevated>
-            <LinearGradient
-              colors={['#242017', '#17161D', '#0F0F13']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.heroGradient}
+            <View
+              style={[styles.heroGradient, { backgroundColor: colors.surfaceElevated }]}
             >
               <View style={styles.heroBadgeRow}>
-                <Sparkles size={11} color={COLORS.primary} />
+                <Sparkles size={11} color={colors.primary} />
                 <Text style={styles.heroBadgeText}>FLAGSHIP GROOMING EXPERIENCE</Text>
               </View>
 
-              <Text style={styles.heroTitle}>
+              <Text style={[styles.heroTitle, { color: colors.textPrimary }]}>
                 Precision Cuts,{'\n'}
                 <Text style={styles.goldText}>Zero Wait Time.</Text>
               </Text>
 
-              <Text style={styles.heroSubtitle}>
+              <Text style={[styles.heroSubtitle, { color: colors.textSecondary }]}>
                 Reserve your master barber chair at CandyCutz Keffi Lounge in seconds.
               </Text>
 
@@ -283,60 +279,60 @@ export function CustomerHomeView() {
                 variant="primary"
                 onPress={() => router.push('/(tabs)/services')}
                 style={styles.heroCtaBtn}
-                icon={<Calendar size={16} color="#0A0A0C" />}
+                icon={<Calendar size={16} color={colors.onPrimary} />}
               />
-            </LinearGradient>
+            </View>
           </Card>
         )}
 
         {/* Quick Action Navigation Tiles */}
-        <View style={styles.quickGrid}>
+          <View style={styles.quickGrid}>
           <TouchableOpacity
-            style={styles.quickTile}
+            style={[styles.quickTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.8}
             onPress={() => router.push('/(tabs)/services')}
           >
             <View style={styles.quickIconCircle}>
-              <Scissors size={18} color={COLORS.primary} />
+              <Scissors size={18} color={colors.primary} />
             </View>
-            <Text style={styles.quickTileTitle}>Services</Text>
-            <Text style={styles.quickTileHint}>Browse Menu</Text>
+            <Text style={[styles.quickTileTitle, { color: colors.textPrimary }]}>Services</Text>
+            <Text style={[styles.quickTileHint, { color: colors.textMuted }]}>Browse Menu</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.quickTile}
+            style={[styles.quickTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.8}
             onPress={() => router.push('/(tabs)/bookings')}
           >
             <View style={styles.quickIconCircle}>
-              <Calendar size={18} color={COLORS.primary} />
+              <Calendar size={18} color={colors.primary} />
             </View>
-            <Text style={styles.quickTileTitle}>Bookings</Text>
-            <Text style={styles.quickTileHint}>My Visits</Text>
+            <Text style={[styles.quickTileTitle, { color: colors.textPrimary }]}>Bookings</Text>
+            <Text style={[styles.quickTileHint, { color: colors.textMuted }]}>My Visits</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.quickTile}
+            style={[styles.quickTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.8}
             onPress={() => router.push('/(tabs)/services')}
           >
             <View style={styles.quickIconCircle}>
-              <Sparkles size={18} color={COLORS.primary} />
+              <Sparkles size={18} color={colors.primary} />
             </View>
-            <Text style={styles.quickTileTitle}>Concierge</Text>
-            <Text style={styles.quickTileHint}>Home Service</Text>
+            <Text style={[styles.quickTileTitle, { color: colors.textPrimary }]}>Concierge</Text>
+            <Text style={[styles.quickTileHint, { color: colors.textMuted }]}>Home Service</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.quickTile}
+            style={[styles.quickTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.8}
             onPress={handleOpenMaps}
           >
             <View style={styles.quickIconCircle}>
-              <MapPin size={18} color={COLORS.primary} />
+              <MapPin size={18} color={colors.primary} />
             </View>
-            <Text style={styles.quickTileTitle}>Location</Text>
-            <Text style={styles.quickTileHint}>Directions</Text>
+            <Text style={[styles.quickTileTitle, { color: colors.textPrimary }]}>Location</Text>
+            <Text style={[styles.quickTileHint, { color: colors.textMuted }]}>Directions</Text>
           </TouchableOpacity>
         </View>
 
@@ -352,7 +348,7 @@ export function CustomerHomeView() {
             style={styles.seeAllButton}
           >
             <Text style={styles.seeAllText}>View All</Text>
-            <ChevronRight size={14} color={COLORS.primary} />
+            <ChevronRight size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -363,11 +359,11 @@ export function CustomerHomeView() {
             {featuredServices.map((service: Service) => (
               <Card
                 key={service.id}
-                style={styles.serviceCard}
+                style={[styles.serviceCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={() => router.push(`/book/${service.id}`)}
               >
                 <View style={styles.serviceCardTop}>
-                  <Text style={styles.serviceName}>{service.name}</Text>
+                  <Text style={[styles.serviceName, { color: colors.textPrimary }]}>{service.name}</Text>
                   <View style={styles.pricePill}>
                     <Text style={styles.priceText}>
                       ₦{Number(service.price).toLocaleString()}
@@ -375,19 +371,19 @@ export function CustomerHomeView() {
                   </View>
                 </View>
 
-                <Text style={styles.serviceDesc} numberOfLines={2}>
+                <Text style={[styles.serviceDesc, { color: colors.textSecondary }]} numberOfLines={2}>
                   {service.description || 'Premium grooming tailored to perfection.'}
                 </Text>
 
                 <View style={styles.serviceCardBottom}>
                   <View style={styles.durationChip}>
-                    <Clock size={12} color={COLORS.textSecondary} />
+                    <Clock size={12} color={colors.textSecondary} />
                     <Text style={styles.durationText}>{service.duration_minutes} mins</Text>
                   </View>
 
                   <View style={styles.bookActionRow}>
                     <Text style={styles.bookActionText}>Book</Text>
-                    <ArrowRight size={12} color={COLORS.primary} />
+                    <ArrowRight size={12} color={colors.primary} />
                   </View>
                 </View>
               </Card>
@@ -413,7 +409,7 @@ export function CustomerHomeView() {
             contentContainerStyle={styles.barbersScrollContent}
           >
             {barbers.map((barber: Barber) => (
-              <Card key={barber.id} style={styles.barberCard}>
+              <Card key={barber.id} style={[styles.barberCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.barberAvatarWrapper}>
                   <View style={styles.barberAvatar}>
                     <Text style={styles.barberInitials}>
@@ -421,11 +417,11 @@ export function CustomerHomeView() {
                     </Text>
                   </View>
                   <View style={styles.verifiedBadge}>
-                    <CheckCircle2 size={12} color="#0A0A0C" />
+                    <CheckCircle2 size={12} color={colors.onPrimary} />
                   </View>
                 </View>
 
-                <Text style={styles.barberName} numberOfLines={1}>
+                <Text style={[styles.barberName, { color: colors.textPrimary }]} numberOfLines={1}>
                   {barber.name}
                 </Text>
                 <Text style={styles.specialtyText} numberOfLines={1}>
@@ -433,7 +429,7 @@ export function CustomerHomeView() {
                 </Text>
 
                 <View style={styles.ratingRow}>
-                  <Star size={12} color={COLORS.primary} fill={COLORS.primary} />
+                  <Star size={12} color={colors.primary} fill={colors.primary} />
                   <Text style={styles.ratingText}>
                     {Number(barber.rating || 5.0).toFixed(1)}
                   </Text>
@@ -456,22 +452,19 @@ export function CustomerHomeView() {
 
         {/* VIP Concierge Home Service Card */}
         <Card style={styles.conciergeCard} elevated>
-          <LinearGradient
-            colors={['#1F1B12', '#14131A', '#0D0C10']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.conciergeGradient}
+          <View
+            style={[styles.conciergeGradient, { backgroundColor: colors.surfaceElevated }]}
           >
             <View style={styles.conciergeBadge}>
-              <Sparkles size={11} color={COLORS.primary} />
+              <Sparkles size={11} color={colors.primary} />
               <Text style={styles.conciergeBadgeText}>VIP CONCIERGE</Text>
             </View>
 
-            <Text style={styles.conciergeTitle}>
+            <Text style={[styles.conciergeTitle, { color: colors.textPrimary }]}>
               Luxury Barbing at Your Doorstep
             </Text>
 
-            <Text style={styles.conciergeDesc}>
+            <Text style={[styles.conciergeDesc, { color: colors.textSecondary }]}>
               Certified master barbers travel directly to your home or office across Keffi:
               Angwan Kare, High Court, Total, Gidan Zakara, and NSUK campuses.
             </Text>
@@ -483,14 +476,14 @@ export function CustomerHomeView() {
               onPress={() => router.push('/(tabs)/services')}
               style={styles.conciergeBtn}
             />
-          </LinearGradient>
+          </View>
         </Card>
 
         {/* Keffi Lounge Information & Directions */}
-        <Card style={styles.loungeCard}>
+        <Card style={[styles.loungeCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.loungeHeader}>
             <View style={styles.loungeIconCircle}>
-              <MapPin size={18} color={COLORS.primary} />
+              <MapPin size={18} color={colors.primary} />
             </View>
             <View style={styles.loungeInfo}>
               <Text style={styles.loungeTitle}>{CONFIG.BRANCH.NAME}</Text>
@@ -508,7 +501,7 @@ export function CustomerHomeView() {
             onPress={handleOpenMaps}
             style={styles.loungeActionBtn}
           >
-            <Navigation size={14} color={COLORS.primary} />
+            <Navigation size={14} color={colors.primary} />
             <Text style={styles.loungeActionText}>Open in Google Maps</Text>
           </TouchableOpacity>
         </Card>
@@ -540,7 +533,8 @@ export function CustomerHomeView() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(COLORS: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -770,7 +764,7 @@ const styles = StyleSheet.create({
   quickTile: {
     flex: 1,
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingVertical: 14,
@@ -779,12 +773,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quickIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -1038,7 +1026,7 @@ const styles = StyleSheet.create({
   // Lounge Info & Hours
   loungeCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: SPACING.md,
@@ -1049,12 +1037,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loungeIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -1095,4 +1077,5 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
-});
+  });
+}

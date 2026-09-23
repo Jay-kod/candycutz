@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,12 +12,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
-import { getStorageUrl } from '../../src/constants/config';
-import { mobileCmsStorage } from '../../src/utils/mobileCmsStorage';
 import { useAuthStore } from '../../src/store/authStore';
 
 export default function RegisterScreen() {
@@ -32,15 +28,6 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [loginBg, setLoginBg] = useState<string | null>(null);
-
-  useEffect(() => {
-    mobileCmsStorage.getStoredCms().then((cms) => {
-      if (cms.loginBg) {
-        setLoginBg(cms.loginBg);
-      }
-    });
-  }, []);
 
   const handleRegister = async () => {
     if (!name.trim() || !username.trim() || !email.trim() || !password) return;
@@ -59,17 +46,6 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.rootContainer}>
-      <ImageBackground
-        source={loginBg ? { uri: getStorageUrl(loginBg) } : require('../../assets/images/splash-bg.jpg')}
-        style={StyleSheet.absoluteFill}
-        resizeMode="cover"
-      >
-        <LinearGradient
-          colors={['rgba(10, 10, 12, 0.78)', 'rgba(10, 10, 12, 0.94)']}
-          style={StyleSheet.absoluteFill}
-        />
-      </ImageBackground>
-
       <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -183,6 +159,19 @@ export default function RegisterScreen() {
               <TouchableOpacity onPress={() => router.replace('/auth/login')}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.legalLinksRow}>
+              <Text style={styles.legalNoticeText}>By signing up, you agree to our</Text>
+              <View style={styles.legalNoticeLinks}>
+                <TouchableOpacity onPress={() => router.push('/policy/terms' as any)}>
+                  <Text style={styles.legalLinkText}>Terms of Service</Text>
+                </TouchableOpacity>
+                <Text style={styles.legalLinkDot}>&</Text>
+                <TouchableOpacity onPress={() => router.push('/policy/privacy' as any)}>
+                  <Text style={styles.legalLinkText}>Privacy Policy</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Card>
         </ScrollView>
@@ -303,5 +292,29 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
+  },
+  legalLinksRow: {
+    marginTop: 16,
+    alignItems: 'center',
+    gap: 4,
+  },
+  legalNoticeText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+  },
+  legalNoticeLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legalLinkText: {
+    color: COLORS.primary,
+    fontSize: 11,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  legalLinkDot: {
+    color: COLORS.textMuted,
+    fontSize: 10,
   },
 });

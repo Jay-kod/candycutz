@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,21 +9,113 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Fingerprint } from 'lucide-react-native';
 import { Card } from '../../src/components/common/Card';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useToastStore } from '../../src/store/toastStore';
+import { biometricService, BiometricSupportInfo } from '../../src/services/biometricService';
+import { tokenStorage } from '../../src/api/client';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user, isBarber } = useAuthStore();
+  const { user, isBarber, token } = useAuthStore();
   const { colors, themePreference, setThemePreference } = useAppTheme();
   const showToast = useToastStore((state) => state.show);
 
   const [pushNotifs, setPushNotifs] = useState(true);
   const [smsNotifs, setSmsNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(false);
+
+  const [biometricsEnabled, setBiometricsEnabled] = useState(false);
+  const [biometricSupport, setBiometricSupport] = useState<BiometricSupportInfo>({
+    hasHardware: false,
+    isEnrolled: false,
+    supportedTypes: [],
+    biometricName: 'Fingerprint',
+  });
+  const [isTogglingBiometrics, setIsTogglingBiometrics] = useState(false);
+
+  const currentRole: 'customer' | 'barber' = isBarber ? 'barber' : 'customer';
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const support = await biometricService.checkSupport();
+      const enabled = await biometricService.isEnabled(currentRole);
+      if (isMounted) {
+        setBiometricSupport(support);
+        setBiometricsEnabled(enabled);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentRole]);
+
+  const handleToggleBiometrics = async (enable: boolean) => {
+    if (enable) {
+      if (!biometricSupport.hasHardware) {
+        showToast({
+          variant: 'warning',
+          title: 'Not Supported',
+          message: 'This device does not have biometric hardware.',
+        });
+        return;
+      }
+      if (!biometricSupport.isEnrolled) {
+        showToast({
+          variant: 'warning',
+          title: 'Setup Required',
+          message: 'No fingerprints enrolled on this device. Please register them in phone Settings.',
+        });
+        return;
+      }
+
+      setIsTogglingBiometrics(true);
+      const currentToken = token || (await tokenStorage.get());
+      if (!currentToken) {
+        setIsTogglingBiometrics(false);
+        showToast({
+          variant: 'error',
+          title: 'Session Error',
+          message: 'Unable to retrieve active session token. Please re-login.',
+        });
+        return;
+      }
+
+      const result = await biometricService.enable(currentToken, {
+        name: user?.name,
+        email: user?.email,
+        role: currentRole,
+      });
+
+      setIsTogglingBiometrics(false);
+      if (result.success) {
+        setBiometricsEnabled(true);
+        showToast({
+          variant: 'success',
+          title: `${biometricSupport.biometricName} Enabled (${isBarber ? 'Barber' : 'Customer'})`,
+          message: `You can now use your ${biometricSupport.biometricName.toLowerCase()} to sign in to your ${isBarber ? 'Barber Staff Desk' : 'Customer account'}.`,
+        });
+      } else {
+        showToast({
+          variant: 'error',
+          title: 'Biometrics Failed',
+          message: result.message || 'Verification was cancelled or failed.',
+        });
+      }
+    } else {
+      await biometricService.disable(currentRole);
+      setBiometricsEnabled(false);
+      showToast({
+        variant: 'info',
+        title: `${biometricSupport.biometricName} Disabled (${isBarber ? 'Barber' : 'Customer'})`,
+        message: 'Biometric sign-in has been turned off for this account. Password login will be required.',
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -43,14 +135,14 @@ export default function SettingsScreen() {
             Theme Mode
           </Text>
           <Text style={[styles.rowDesc, { color: colors.textSecondary, marginBottom: SPACING.sm }]}>
-            Choose between Obsidian Night, Warm Alabaster Day, or follow your device settings automatically.
+            Choose light mode, dark mode, or follow your system setting.
           </Text>
 
           <View style={styles.themeOptionsRow}>
             {[
-              { id: 'system', label: 'System', desc: 'Auto Sync' },
-              { id: 'dark', label: 'Night', desc: 'Obsidian' },
-              { id: 'light', label: 'Day', desc: 'Alabaster' },
+              { id: 'light', label: 'Light mode', desc: 'Light appearance' },
+              { id: 'dark', label: 'Dark mode', desc: 'Dark appearance' },
+              { id: 'system', label: 'System', desc: 'Use device setting' },
             ].map((option) => {
               const isSelected = themePreference === option.id;
               return (
@@ -170,17 +262,52 @@ export default function SettingsScreen() {
             </>
           )}
 
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <Fingerprint size={18} color={colors.primary} />
+                <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>
+                  {biometricSupport.biometricName} Login ({isBarber ? 'Barber' : 'Customer'})
+                </Text>
+              </View>
+              <Text style={[styles.rowDesc, { color: colors.textSecondary }]}>
+                {!biometricSupport.hasHardware
+                  ? 'Biometric hardware is not supported on this device'
+                  : !biometricSupport.isEnrolled
+                  ? 'No fingerprints registered on device. Set up in phone Settings.'
+                  : `Sign in instantly to your ${isBarber ? 'Barber Staff Desk' : 'Customer account'} using your ${biometricSupport.biometricName.toLowerCase()}`}
+              </Text>
+            </View>
+            <Switch
+              value={biometricsEnabled}
+              disabled={!biometricSupport.hasHardware || !biometricSupport.isEnrolled || isTogglingBiometrics}
+              onValueChange={handleToggleBiometrics}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFF"
+            />
+          </View>
+        </Card>
+
+        {/* Legal & Policies */}
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Legal & Policies</Text>
+        <Card style={styles.card} elevated>
           <TouchableOpacity
             style={styles.navRow}
-            onPress={() =>
-              showToast({
-                variant: 'info',
-                title: 'Biometric Login',
-                message: 'Biometric authentication is managed via your device system settings.',
-              })
-            }
+            onPress={() => router.push('/policy/terms' as any)}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Biometric Sign-In</Text>
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Terms of Service</Text>
+            <Text style={[styles.navArrow, { color: colors.textMuted }]}>&rarr;</Text>
+          </TouchableOpacity>
+
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+          <TouchableOpacity
+            style={styles.navRow}
+            onPress={() => router.push('/policy/privacy' as any)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.navLabel, { color: colors.textPrimary }]}>Privacy Policy</Text>
             <Text style={[styles.navArrow, { color: colors.textMuted }]}>&rarr;</Text>
           </TouchableOpacity>
         </Card>

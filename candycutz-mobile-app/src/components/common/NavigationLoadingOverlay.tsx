@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, StyleSheet, View } from 'react-native';
 import { usePathname } from 'expo-router';
-import { COLORS, RADIUS } from '../../constants/theme';
+import { RADIUS } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 const TRANSITION_DURATION = 420;
 
 export function NavigationLoadingOverlay() {
+  const { colors } = useAppTheme();
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
@@ -80,10 +82,20 @@ export function NavigationLoadingOverlay() {
 
   return (
     <Animated.View pointerEvents="none" style={[styles.overlay, { opacity }]}>
-      <View style={styles.track}>
-        <Animated.View style={[styles.progress, { transform: [{ scaleX: progress }] }]} />
+      <View style={[styles.track, { backgroundColor: colors.border }]}>
+        <Animated.View style={[styles.progress, { backgroundColor: colors.primary, transform: [{ scaleX: progress }] }]} />
       </View>
-      <Animated.View style={[styles.badge, { opacity: badgePulse }]}>
+      <Animated.View
+        style={[
+          styles.badge,
+          {
+            backgroundColor: colors.surfaceElevated,
+            borderColor: colors.primary,
+            shadowColor: colors.primary,
+            opacity: badgePulse,
+          },
+        ]}
+      >
         <Image
           source={require('../../../assets/favicon.png')}
           style={styles.badgeIcon}
@@ -106,12 +118,10 @@ const styles = StyleSheet.create({
     right: 0,
     height: 3,
     overflow: 'hidden',
-    backgroundColor: COLORS.border,
   },
   progress: {
     width: '100%',
     height: '100%',
-    backgroundColor: COLORS.primary,
     transformOrigin: 'left',
   },
   badge: {
@@ -123,10 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surfaceElevated,
     borderWidth: 1,
-    borderColor: COLORS.primary,
-    shadowColor: COLORS.primary,
     shadowOpacity: 0.35,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },

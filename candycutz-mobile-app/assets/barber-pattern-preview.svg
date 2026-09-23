@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6b4711"/>
+      <stop offset=".48" stop-color="#f7d77e"/>
+      <stop offset="1" stop-color="#9d6c1c"/>
+    </linearGradient>
+    <pattern id="grain" width="74" height="74" patternUnits="userSpaceOnUse">
+      <path d="M0 24C18 13 42 13 74 27M-8 57C18 42 49 44 82 61" fill="none" stroke="#e4b954" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="390" height="844" fill="#08090b"/>
+  <rect width="390" height="844" fill="url(#grain)"/>
+  <g fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+    <g opacity=".78" transform="translate(25 48) rotate(-18)">
+      <circle cx="10" cy="34" r="7" stroke-width="2"/><circle cx="34" cy="34" r="7" stroke-width="2"/>
+      <path d="M15 29 43 2M29 29 4 4" stroke-width="2.2"/><circle cx="29" cy="29" r="2.5" stroke-width="1.5"/>
+    </g>
+    <g opacity=".65" transform="translate(166 25) rotate(12)">
+      <rect x="8" y="5" width="34" height="48" rx="9" stroke-width="2"/><path d="M15 5v-8h20v8M15 43h20M19 13h12M19 21h12M19 30h12" stroke-width="2"/>
+      <circle cx="25" cy="38" r="2" stroke-width="1.5"/>
+    </g>
+    <g opacity=".6" transform="translate(278 48) rotate(-22)">
+      <path d="M2 8q20-7 56 0l-2 12q-31-5-52 1z" stroke-width="2"/><path d="m9 17-3 17m11-18-2 19m10-20-1 21m9-21v20m8-19 1 18m7-17 2 15" stroke-width="2"/>
+    </g>
+    <g opacity=".62" transform="translate(67 150) rotate(18)">
+      <path d="M6 8h41l10 10-10 10H6Q0 18 6 8zM25 28l17 27q3 5-2 8l-9 3-13-38" stroke-width="2"/><path d="M14 18h31" stroke-width="1.5"/>
+    </g>
+    <g opacity=".78" transform="translate(246 158) rotate(34)">
+      <circle cx="10" cy="34" r="7" stroke-width="2"/><circle cx="34" cy="34" r="7" stroke-width="2"/><path d="M15 29 43 2M29 29 4 4" stroke-width="2.2"/>
+    </g>
+    <g opacity=".58" transform="translate(0 286) rotate(-8)">
+      <path d="M2 8q20-7 56 0l-2 12q-31-5-52 1z" stroke-width="2"/><path d="m9 17-3 17m11-18-2 19m10-20-1 21m9-21v20m8-19 1 18m7-17 2 15" stroke-width="2"/>
+    </g>
+    <g opacity=".62" transform="translate(180 275) rotate(-28)">
+      <rect x="8" y="5" width="34" height="48" rx="9" stroke-width="2"/><path d="M15 5v-8h20v8M15 43h20M19 13h12M19 21h12M19 30h12" stroke-width="2"/>
+    </g>
+    <g opacity=".72" transform="translate(56 460) rotate(22)">
+      <circle cx="10" cy="34" r="7" stroke-width="2"/><circle cx="34" cy="34" r="7" stroke-width="2"/><path d="M15 29 43 2M29 29 4 4" stroke-width="2.2"/>
+    </g>
+    <g opacity=".58" transform="translate(235 452) rotate(-18)">
+      <path d="M2 8q20-7 56 0l-2 12q-31-5-52 1z" stroke-width="2"/><path d="m9 17-3 17m11-18-2 19m10-20-1 21m9-21v20m8-19 1 18m7-17 2 15" stroke-width="2"/>
+    </g>
+    <g opacity=".62" transform="translate(18 605) rotate(16)">
+      <rect x="8" y="5" width="34" height="48" rx="9" stroke-width="2"/><path d="M15 5v-8h20v8M15 43h20M19 13h12M19 21h12M19 30h12" stroke-width="2"/>
+    </g>
+    <g opacity=".62" transform="translate(150 590) rotate(-26)">
+      <path d="M6 8h41l10 10-10 10H6Q0 18 6 8zM25 28l17 27q3 5-2 8l-9 3-13-38" stroke-width="2"/><path d="M14 18h31" stroke-width="1.5"/>
+    </g>
+    <g opacity=".74" transform="translate(286 655) rotate(-14)">
+      <circle cx="10" cy="34" r="7" stroke-width="2"/><circle cx="34" cy="34" r="7" stroke-width="2"/><path d="M15 29 43 2M29 29 4 4" stroke-width="2.2"/>
+    </g>
+    <ellipse cx="195" cy="422" rx="118" ry="118" stroke-width="1" opacity=".2"/>
+    <circle cx="195" cy="422" r="84" stroke-width="1" opacity=".14"/>
+  </g>
+</svg>

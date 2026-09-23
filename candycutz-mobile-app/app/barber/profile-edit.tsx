@@ -5,14 +5,20 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
+import { ActionDialog, ActionDialogVariant } from '../../src/components/common/ActionDialog';
 import { ProfileEditSkeleton } from '../../src/components/common/Skeleton';
 import { barbersApi } from '../../src/api/client';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { getStorageUrl } from '../../src/constants/config';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useToastStore } from '../../src/store/toastStore';
 
 export default function BarberProfileEditScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const COLORS = colors;
+  const styles = createStyles(colors);
   const { user, barber, refreshProfile } = useAuthStore();
   const showToast = useToastStore((state) => state.show);
   const [name, setName] = useState(user?.name || '');
@@ -23,28 +29,39 @@ export default function BarberProfileEditScreen() {
   const [bio, setBio] = useState(barber?.bio || '');
   const [specialties, setSpecialties] = useState((barber?.specialties || []).join(', '));
   const [instagramUrl, setInstagramUrl] = useState(barber?.instagram_url || '');
-  const [profileImage, setProfileImage] = useState(barber?.avatar_url || barber?.avatar || null);
-  const [coverImage, setCoverImage] = useState(barber?.cover_image_url || barber?.cover_image || null);
+  const [profileImage, setProfileImage] = useState(getStorageUrl(barber?.avatar_url || barber?.avatar || user?.avatar || null));
+  const [coverImage, setCoverImage] = useState(getStorageUrl(barber?.cover_image_url || barber?.cover_image || user?.cover_image || null));
   const [selectedProfileImage, setSelectedProfileImage] = useState<string>();
   const [selectedCoverImage, setSelectedCoverImage] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingUsername, setIsChangingUsername] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    variant: ActionDialogVariant;
+    title: string;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
-    if (!user || !barber) return;
+    if (!user) return;
     setName(user.name || '');
-    setEmail(user.email || barber.email || '');
+    setEmail(user.email || barber?.email || '');
     setUsername(user.username || '');
-    setPhone(user.phone || barber.phone || '');
-    setExperience(String(barber.experience_years || ''));
-    setBio(barber.bio || '');
-    setSpecialties((barber.specialties || []).join(', '));
-    setInstagramUrl(barber.instagram_url || '');
-    setProfileImage(barber.avatar_url || barber.avatar || null);
-    setCoverImage(barber.cover_image_url || barber.cover_image || null);
+    setPhone(user.phone || barber?.phone || '');
+    setExperience(String(barber?.experience_years || ''));
+    setBio(barber?.bio || user.bio || '');
+    setSpecialties((barber?.specialties || []).join(', '));
+    setInstagramUrl(barber?.instagram_url || '');
+    setProfileImage(getStorageUrl(barber?.avatar_url || barber?.avatar || user.avatar || null));
+    setCoverImage(getStorageUrl(barber?.cover_image_url || barber?.cover_image || user.cover_image || null));
   }, [barber, user]);
 
-  if (!user || !barber) {
+  useEffect(() => {
+    if (user && !barber) {
+      void refreshProfile();
+    }
+  }, [barber, refreshProfile, user]);
+
+  if (!user) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ProfileEditSkeleton />
@@ -109,14 +126,14 @@ export default function BarberProfileEditScreen() {
         await barbersApi.updateAccount(payload);
       }
       await refreshProfile();
-      showToast({
+      setFeedback({
         variant: 'success',
-        title: 'Profile updated',
-        message: 'Your barber profile has been saved.',
+        title: 'Profile saved',
+        message: 'Your barber profile is now up to date.',
       });
     } catch (error: any) {
-      showToast({
-        variant: 'error',
+      setFeedback({
+        variant: 'danger',
         title: 'Could not save profile',
         message: error.response?.data?.message || 'Please try again.',
       });
@@ -156,11 +173,11 @@ export default function BarberProfileEditScreen() {
           <Card style={styles.card} elevated>
             <Text style={styles.sectionTitle}>Profile images</Text>
             <TouchableOpacity style={styles.coverPicker} onPress={() => pickImage('cover')} activeOpacity={0.8}>
-              {coverImage ? <Image source={{ uri: coverImage }} style={styles.coverImage} /> : <Text style={styles.imagePlaceholder}>Add cover image</Text>}
+              {coverImage ? <Image source={{ uri: getStorageUrl(coverImage) }} style={styles.coverImage} /> : <Text style={styles.imagePlaceholder}>Add cover image</Text>}
               <View style={styles.imageOverlay}><Text style={styles.imageOverlayText}>Change cover</Text></View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.avatarPicker} onPress={() => pickImage('profile')} activeOpacity={0.8}>
-              {profileImage ? <Image source={{ uri: profileImage }} style={styles.avatarImage} /> : <Text style={styles.imagePlaceholder}>Add photo</Text>}
+              {profileImage ? <Image source={{ uri: getStorageUrl(profileImage) }} style={styles.avatarImage} /> : <Text style={styles.imagePlaceholder}>Add photo</Text>}
               <View style={styles.imageOverlay}><Text style={styles.imageOverlayText}>Change photo</Text></View>
             </TouchableOpacity>
             <Text style={styles.imageHint}>JPG, PNG, or WEBP up to 5MB.</Text>
@@ -174,6 +191,20 @@ export default function BarberProfileEditScreen() {
             <Field label="Instagram URL" value={instagramUrl} onChangeText={setInstagramUrl} autoCapitalize="none" />
             <Button title="Save profile" onPress={saveProfile} loading={isSaving} loadingTitle="Saving..." style={styles.saveButton} />
           </Card>
+
+          <ActionDialog
+            visible={feedback !== null}
+            variant={feedback?.variant}
+            title={feedback?.title || ''}
+            message={feedback?.message || ''}
+            actions={[
+              {
+                label: feedback?.variant === 'success' ? 'Done' : 'Try again',
+                onPress: () => setFeedback(null),
+              },
+            ]}
+            onDismiss={() => setFeedback(null)}
+          />
 
           <Card style={styles.card}>
             <Text style={styles.sectionTitle}>Username</Text>
@@ -190,16 +221,22 @@ export default function BarberProfileEditScreen() {
 }
 
 function Field({ label, hint, multiline, ...props }: { label: string; hint?: string; multiline?: boolean } & React.ComponentProps<typeof TextInput>) {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       {hint && <Text style={styles.hint}>{hint}</Text>}
-      <TextInput {...props} multiline={multiline} style={[styles.input, multiline && styles.multiline]} placeholderTextColor={COLORS.textMuted} />
+      <TextInput {...props} multiline={multiline} style={[styles.input, multiline && styles.multiline]} placeholderTextColor={colors.textMuted} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const COLORS = colors;
+
+  return StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.background },
   flex: { flex: 1 },
   container: { padding: SPACING.md, gap: SPACING.md, paddingBottom: SPACING.xl },
@@ -212,7 +249,7 @@ const styles = StyleSheet.create({
   avatarPicker: { width: 112, height: 112, borderRadius: 56, overflow: 'hidden', backgroundColor: COLORS.surfaceHighlight, borderWidth: 2, borderColor: COLORS.primary, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.sm },
   avatarImage: { width: '100%', height: '100%' },
   imagePlaceholder: { color: COLORS.textMuted, fontSize: FONTS.sizes.sm },
-  imageOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingVertical: 7, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center' },
+  imageOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingVertical: 7, backgroundColor: colors.scrim, alignItems: 'center' },
   imageOverlayText: { color: COLORS.textPrimary, fontSize: FONTS.sizes.xs, fontWeight: '700' },
   imageHint: { color: COLORS.textMuted, fontSize: FONTS.sizes.xs, marginBottom: SPACING.md },
   helper: { color: COLORS.textMuted, fontSize: FONTS.sizes.xs, lineHeight: 18, marginTop: -8, marginBottom: SPACING.md },
@@ -222,4 +259,5 @@ const styles = StyleSheet.create({
   input: { backgroundColor: COLORS.surfaceHighlight, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: 12, color: COLORS.textPrimary, fontSize: FONTS.sizes.sm },
   multiline: { minHeight: 94, textAlignVertical: 'top' },
   saveButton: { marginTop: SPACING.sm },
-});
+  });
+};

@@ -94,7 +94,7 @@ export const Button: React.FC<ButtonProps> = ({
     else if (size === 'lg') base.fontSize = FONTS.sizes.lg;
     else base.fontSize = FONTS.sizes.md;
 
-    if (variant === 'primary') base.color = '#0A0A0C';
+    if (variant === 'primary') base.color = colors.onPrimary;
     else if (variant === 'outline') base.color = colors.primary;
     else if (variant === 'ghost') base.color = colors.textSecondary;
     else base.color = colors.textPrimary;
@@ -111,7 +111,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <>
-          <ActivityIndicator color={variant === 'primary' ? '#0A0A0C' : colors.primary} />
+          <ActivityIndicator color={variant === 'primary' ? colors.onPrimary : colors.primary} />
           {!!loadingTitle && (
             <Text style={[getTextStyle(), { marginLeft: SPACING.sm }, textStyle]}>
               {loadingTitle}

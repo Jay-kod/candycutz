@@ -9,12 +9,15 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from '../../src/components/common/Card';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
 
 export default function AnalyticsScreen() {
   const router = useRouter();
   const { barber } = useAuthStore();
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -35,7 +38,7 @@ export default function AnalyticsScreen() {
             <Text style={styles.metricLabel}>Cuts Completed</Text>
           </Card>
           <Card style={styles.metricCard} elevated>
-            <Text style={[styles.metricValue, { color: COLORS.primary }]}>
+            <Text style={[styles.metricValue, { color: colors.primary }]}>
               ₦{Number(barber?.today_earnings || 32000).toLocaleString()}
             </Text>
             <Text style={styles.metricLabel}>Daily Commission</Text>
@@ -57,7 +60,7 @@ export default function AnalyticsScreen() {
           <View style={styles.divider} />
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Customer Satisfaction</Text>
-            <Text style={[styles.statVal, { color: COLORS.primary }]}>
+            <Text style={[styles.statVal, { color: colors.primary }]}>
               ★ {Number(barber?.rating || 4.9).toFixed(1)} / 5.0
             </Text>
           </View>
@@ -91,10 +94,11 @@ export default function AnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -103,18 +107,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   backBtn: {
     padding: SPACING.xs,
   },
   backArrow: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: 22,
     fontWeight: '700',
   },
   headerTitle: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
   },
@@ -126,7 +130,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   sectionTitle: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
@@ -146,13 +150,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   metricValue: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.xl,
     fontWeight: '900',
     marginBottom: 4,
   },
   metricLabel: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '600',
   },
@@ -166,11 +170,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   statLabel: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
   },
   statVal: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
   },
@@ -181,18 +185,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   serviceName: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '600',
   },
   serviceCount: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     marginVertical: 2,
   },
-});
+  });
+}

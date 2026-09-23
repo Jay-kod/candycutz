@@ -20,7 +20,7 @@ export const Card: React.FC<CardProps> = ({
 
   const containerStyle: ViewStyle = {
     backgroundColor: elevated ? colors.surfaceElevated : colors.surface,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: colors.border,
     padding: SPACING.md,

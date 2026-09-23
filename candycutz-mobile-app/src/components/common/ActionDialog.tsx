@@ -14,6 +14,7 @@ import {
   HelpCircle,
   Info,
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAppTheme } from '../../hooks/useAppTheme';
 
@@ -161,9 +162,7 @@ export function ActionDialog({
             styles.backdrop,
             {
               opacity: backdropAnim,
-              backgroundColor: isDark
-                ? 'rgba(5, 5, 8, 0.78)'
-                : 'rgba(15, 15, 18, 0.6)',
+              backgroundColor: colors.scrim,
             },
           ]}
         >
@@ -173,86 +172,79 @@ export function ActionDialog({
         {/* Card */}
         <Animated.View
           style={[
-            styles.card,
+            styles.cardShell,
             {
-              backgroundColor: colors.surfaceElevated,
-              borderColor: colors.border,
               opacity: cardOpacityAnim,
               transform: [{ scale: cardScaleAnim }],
             },
           ]}
         >
-          {/* Top accent rim */}
-          <View
-            style={[styles.topRimLight, { backgroundColor: vs.topRimColor }]}
-          />
-
-          {/* Icon halo */}
-          <View
-            style={[
-              styles.iconHalo,
-              {
-                backgroundColor: vs.haloBg,
-                borderColor: vs.ringBorder,
-              },
-            ]}
+          <LinearGradient
+            colors={isDark ? [colors.surfaceHighlight, colors.surfaceElevated] : [colors.surface, colors.surfaceElevated]}
+            style={[styles.card, { borderColor: colors.border }]}
           >
-            <View style={styles.iconInnerDisc}>{vs.icon}</View>
-          </View>
+            <View style={[styles.statusRule, { backgroundColor: vs.topRimColor }]} />
 
-          {/* Title & Message */}
-          <View style={styles.textBlock}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-              {title}
-            </Text>
-            <Text style={[styles.message, { color: colors.textSecondary }]}>
-              {message}
-            </Text>
-          </View>
+            {/* Icon halo */}
+            <View
+              style={[
+                styles.iconHalo,
+                {
+                  backgroundColor: vs.haloBg,
+                  borderColor: vs.ringBorder,
+                },
+              ]}
+            >
+              <View style={styles.iconInnerDisc}>{vs.icon}</View>
+            </View>
 
-          {/* Action buttons stacked vertically */}
-          <View style={styles.actionsColumn}>
-            {actions.map((action, index) => (
+            {/* Title & Message */}
+            <View style={styles.textBlock}>
+              <Text style={[styles.statusLabel, { color: vs.topRimColor }]}>ACCOUNT UPDATE</Text>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+              <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
+            </View>
+
+            {/* Primary action and dismiss stay side by side */}
+            <View style={styles.actionsRow}>
               <Pressable
-                key={index}
-                onPress={() => {
-                  action.onPress();
-                  onDismiss();
-                }}
+                onPress={onDismiss}
                 style={({ pressed }) => [
-                  styles.actionButton,
-                  {
-                    backgroundColor: pressed
-                      ? action.destructive
-                        ? '#B91C1C'
-                        : vs.actionPressedBg
-                      : action.destructive
-                      ? '#DC2626'
-                      : vs.actionBg,
-                  },
-                  pressed && styles.actionButtonPressed,
+                  styles.dismissButton,
+                  pressed && { opacity: 0.6 },
                 ]}
-                accessibilityRole="button"
-                accessibilityLabel={action.label}
+                hitSlop={12}
               >
-                <Text style={styles.actionButtonText}>{action.label}</Text>
+                <Text style={[styles.dismissText, { color: colors.textMuted }]}>{dismissLabel}</Text>
               </Pressable>
-            ))}
-          </View>
-
-          {/* Dismiss link */}
-          <Pressable
-            onPress={onDismiss}
-            style={({ pressed }) => [
-              styles.dismissButton,
-              pressed && { opacity: 0.6 },
-            ]}
-            hitSlop={12}
-          >
-            <Text style={[styles.dismissText, { color: colors.textMuted }]}>
-              {dismissLabel}
-            </Text>
-          </Pressable>
+              {actions.map((action, index) => (
+                <Pressable
+                  key={index}
+                  onPress={() => {
+                    action.onPress();
+                    onDismiss();
+                  }}
+                  style={({ pressed }) => [
+                    styles.actionButton,
+                    {
+                      backgroundColor: pressed
+                        ? action.destructive
+                          ? '#B91C1C'
+                          : vs.actionPressedBg
+                        : action.destructive
+                        ? '#DC2626'
+                        : vs.actionBg,
+                    },
+                    pressed && styles.actionButtonPressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={action.label}
+                >
+                  <Text style={styles.actionButtonText}>{action.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </LinearGradient>
         </Animated.View>
       </View>
     </Modal>
@@ -273,29 +265,31 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  cardShell: {
+    width: '100%',
+    maxWidth: 380,
+    borderRadius: 24,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.3,
+    shadowRadius: 28,
+    elevation: 20,
+  },
   card: {
     width: '100%',
-    maxWidth: 350,
     alignItems: 'center',
-    paddingTop: 32,
+    paddingTop: 18,
     paddingBottom: 20,
     paddingHorizontal: 24,
     borderRadius: 24,
     borderWidth: 1,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 16,
     overflow: 'hidden',
   },
-  topRimLight: {
-    position: 'absolute',
-    top: 0,
-    left: '20%',
-    right: '20%',
+  statusRule: {
+    width: '100%',
     height: 2,
     borderRadius: 1,
+    marginBottom: 22,
   },
   iconHalo: {
     width: 68,
@@ -315,6 +309,12 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 24,
   },
+  statusLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    marginBottom: 7,
+  },
   title: {
     fontSize: 19,
     fontWeight: '700',
@@ -329,16 +329,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 4,
   },
-  actionsColumn: {
+  actionsRow: {
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
-    marginBottom: 12,
   },
   actionButton: {
-    width: '100%',
+    flex: 1,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -356,8 +359,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   dismissButton: {
+    flex: 1,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(127, 127, 127, 0.22)',
   },
   dismissText: {
     fontSize: 14,

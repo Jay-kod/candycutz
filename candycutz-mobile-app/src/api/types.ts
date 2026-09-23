@@ -43,6 +43,7 @@ export interface User {
   bio?: string | null;
   wallet_balance?: number;
   notification_preferences?: Record<string, any> | null;
+  last_username_change_at?: string | null;
   barber?: Barber;
   created_at?: string;
 }
@@ -314,3 +315,64 @@ export interface BarberProfile extends Barber {
   cover_image_url?: string | null;
   cover_image?: string | null;
 }
+
+export interface GalleryItem {
+  id: number;
+  title: string;
+  description: string;
+  image_url: string | null;
+  category: string;
+  barber: {
+    id: number;
+    name: string;
+    avatar_url: string | null;
+  } | null;
+  is_featured: boolean;
+}
+
+export interface Testimonial {
+  id: number;
+  customer_name: string;
+  avatar_url: string | null;
+  rating: number;
+  review: string;
+  comment: string;
+  service_id: number | null;
+  service: {
+    id: number;
+    name: string;
+    slug: string | null;
+    price: number;
+  } | null;
+  barber_id: number | null;
+  barber: {
+    id: number;
+    name: string;
+  } | null;
+  created_at: string | null;
+  is_approved: boolean;
+  is_featured: boolean;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  body: string;
+  featured_image_url: string | null;
+  featured_image: string | null;
+  is_published: number;
+  status: string;
+  author: {
+    id: number | null;
+    name: string;
+  };
+  author_display: string;
+  created_at: string | null;
+  loves_count: number;
+  dislikes_count: number;
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';

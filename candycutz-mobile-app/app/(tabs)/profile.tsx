@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Fingerprint } from 'lucide-react-native';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { ActionDialog } from '../../src/components/common/ActionDialog';
-import { CONFIG } from '../../src/constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { CONFIG, getStorageUrl } from '../../src/constants/config';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { UIcon } from '../../src/components/common/UIcon';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
@@ -32,6 +33,7 @@ const CHAIR_STATUSES: { label: string; value: ChairStatus }[] = [
 export default function ProfileScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   const [supportDialogVisible, setSupportDialogVisible] = useState(false);
   const showToast = useToastStore((s) => s.show);
@@ -101,7 +103,7 @@ export default function ProfileScreen() {
                     activeOpacity={0.8}
                   >
                     {user.avatar ? (
-                      <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+                      <Image source={{ uri: getStorageUrl(user.avatar) }} style={styles.avatarImage} />
                     ) : (
                       <View style={styles.avatar}>
                         <Text style={[styles.avatarText, { color: colors.primary }]}>
@@ -159,7 +161,7 @@ export default function ProfileScreen() {
                     activeOpacity={0.8}
                   >
                     {(barber?.avatar || user.avatar) ? (
-                      <Image source={{ uri: barber?.avatar || user.avatar! }} style={styles.avatarImage} />
+                      <Image source={{ uri: getStorageUrl(barber?.avatar || user.avatar!) }} style={styles.avatarImage} />
                     ) : (
                       <View style={styles.avatar}>
                         <Text style={styles.avatarText}>
@@ -256,10 +258,12 @@ export default function ProfileScreen() {
                     style={styles.customerMenuItem}
                     onPress={() => router.push('/profile/settings')}
                   >
-                    <View style={[styles.customerMenuIcon, { backgroundColor: colors.primaryLight }]}><UIcon name="settings" size={17} color={colors.primary} /></View>
+                    <View style={[styles.customerMenuIcon, { backgroundColor: colors.primaryLight }]}>
+                      <Fingerprint size={17} color={colors.primary} />
+                    </View>
                     <View style={styles.customerMenuCopy}>
-                      <Text style={[styles.customerMenuTitle, { color: colors.textPrimary }]}>Settings</Text>
-                      <Text style={[styles.customerMenuSubtitle, { color: colors.textMuted }]}>Theme, alerts, and security</Text>
+                      <Text style={[styles.customerMenuTitle, { color: colors.textPrimary }]}>Fingerprint & Settings</Text>
+                      <Text style={[styles.customerMenuSubtitle, { color: colors.textMuted }]}>Biometric sign-in, alerts & security</Text>
                     </View>
                     <Text style={[styles.customerMenuArrow, { color: colors.textMuted }]}>&rsaquo;</Text>
                   </TouchableOpacity>
@@ -352,15 +356,31 @@ export default function ProfileScreen() {
                   </TouchableOpacity>
                 </Card>
 
-                {/* Group 2: Settings (Shared with customer) */}
+                {/* Group 2: Settings & Fingerprint Biometrics */}
                 <Card style={styles.menuCard} elevated>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => router.push('/profile/settings')}
                   >
                     <View style={styles.menuItemLeft}>
+                      <View style={{ width: 24, alignItems: 'center' }}>
+                        <Fingerprint size={20} color={colors.primary} />
+                      </View>
+                      <View style={{ marginLeft: 8 }}>
+                        <Text style={styles.menuText}>Fingerprint Login</Text>
+                        <Text style={[styles.menuSubtitle, { color: colors.textMuted }]}>Barber staff biometrics</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.menuArrow}>&rarr;</Text>
+                  </TouchableOpacity>
+                  <View style={[styles.customerDivider, { backgroundColor: colors.border }]} />
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => router.push('/profile/settings')}
+                  >
+                    <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>⚙️</Text>
-                      <Text style={styles.menuText}>Settings</Text>
+                      <Text style={styles.menuText}>Account Settings</Text>
                     </View>
                     <Text style={styles.menuArrow}>&rarr;</Text>
                   </TouchableOpacity>
@@ -464,7 +484,8 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(COLORS: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -652,6 +673,10 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
     fontWeight: '600',
   },
+  menuSubtitle: {
+    fontSize: FONTS.sizes.xs,
+    marginTop: 1,
+  },
   menuArrow: {
     color: COLORS.textMuted,
     fontSize: 18,
@@ -821,4 +846,5 @@ const styles = StyleSheet.create({
     height: 1,
     marginLeft: 52,
   },
-});
+  });
+}

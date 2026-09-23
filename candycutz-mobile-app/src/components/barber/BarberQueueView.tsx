@@ -12,7 +12,6 @@ import {
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   ArrowRight,
   Bell,
@@ -38,7 +37,8 @@ import { staffQueueApi } from '../../api/client';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { QueueSkeletons } from '../common/Skeleton';
 import { CONFIG } from '../../constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { useAuthStore } from '../../store/authStore';
 import { useChairStore } from '../../store/chairStore';
 import { useToastStore } from '../../store/toastStore';
@@ -56,6 +56,9 @@ interface ChairStatusOption {
 
 export function BarberQueueView() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const COLORS = colors;
+  const styles = createStyles(colors);
   const queryClient = useQueryClient();
   const { barber, isAuthenticated, setChairStatus } = useAuthStore();
   const { activeClient, elapsedSeconds, setActiveClient, tickTimer } = useChairStore();
@@ -284,7 +287,15 @@ export function BarberQueueView() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* 1. Executive Luxury Header */}
       <View style={styles.header}>
-        <View style={styles.barberProfileBlock}>
+        <Pressable
+          onPress={() => {
+            useAuthStore.getState().setViewMode('barber');
+            router.push('/(tabs)/profile');
+          }}
+          style={({ pressed }) => [styles.barberProfileBlock, pressed && styles.cardPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Open barber staff desk"
+        >
           <View style={styles.avatarRing}>
             <Text style={styles.avatarText}>{getInitials(barber?.name)}</Text>
           </View>
@@ -297,7 +308,7 @@ export function BarberQueueView() {
               {barber?.name || 'Master Barber'}
             </Text>
           </View>
-        </View>
+        </Pressable>
 
         <View style={styles.headerRightActions}>
           <Pressable
@@ -328,7 +339,7 @@ export function BarberQueueView() {
             accessibilityRole="button"
             accessibilityLabel="Add walk in client"
           >
-            <Plus size={15} color="#0A0A0C" strokeWidth={3} />
+            <Plus size={15} color={colors.onPrimary} strokeWidth={3} />
             <Text style={styles.walkInBtnText}>Walk-In</Text>
           </Pressable>
         </View>
@@ -346,7 +357,7 @@ export function BarberQueueView() {
                 style={[
                   styles.statusSegmentItem,
                   isSelected && {
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    backgroundColor: colors.surfaceHighlight,
                     borderColor: opt.activeColor,
                   },
                 ]}
@@ -434,14 +445,9 @@ export function BarberQueueView() {
                 accessibilityRole="button"
                 accessibilityLabel="View pending booking requests"
               >
-                <LinearGradient
-                  colors={['#272115', '#19171F', '#111015']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.pendingGradientContent}
+                <View
+                  style={[styles.pendingGradientContent, { backgroundColor: colors.surfaceElevated }]}
                 >
-                  <View style={styles.pendingCardRim} />
-
                   <View style={styles.pendingCardHeader}>
                     <View style={styles.pendingNoticePill}>
                       <View style={styles.pendingPulseDot} />
@@ -548,25 +554,20 @@ export function BarberQueueView() {
                         pressed && styles.btnPressed,
                       ]}
                     >
-                      <Check size={16} color="#0A0A0C" strokeWidth={3} />
+                      <Check size={16} color={colors.onPrimary} strokeWidth={3} />
                       <Text style={styles.pendingAcceptBtnText}>Accept Booking</Text>
                     </Pressable>
                   </View>
-                </LinearGradient>
+                </View>
               </Pressable>
             )}
 
             {/* "Now In Chair" Spotlight Stage */}
             {activeClient ? (
               <View style={styles.activeSpotlightCard}>
-                <LinearGradient
-                  colors={['#272115', '#18171F', '#111015']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.activeGradientContent}
+                <View
+                  style={[styles.activeGradientContent, { backgroundColor: colors.surfaceElevated }]}
                 >
-                  <View style={styles.activeCardRim} />
-
                   <View style={styles.activeCardTopRow}>
                     <View style={styles.livePulsePill}>
                       <View style={styles.livePulseDot} />
@@ -605,12 +606,12 @@ export function BarberQueueView() {
                       pressed && styles.btnPressed,
                     ]}
                   >
-                    <CheckCircle2 size={18} color="#0A0A0C" strokeWidth={2.5} />
+                    <CheckCircle2 size={18} color={colors.onPrimary} strokeWidth={2.5} />
                     <Text style={styles.finishServiceBtnText}>
                       Finish Cut & Check Out
                     </Text>
                   </Pressable>
-                </LinearGradient>
+                </View>
               </View>
             ) : (
               /* Chair Available Card */
@@ -641,7 +642,7 @@ export function BarberQueueView() {
                         pressed && styles.btnPressed,
                       ]}
                     >
-                      <Scissors size={15} color="#0A0A0C" strokeWidth={2.5} />
+                      <Scissors size={15} color={colors.onPrimary} strokeWidth={2.5} />
                       <Text style={styles.seatNextBtnText}>Seat Now</Text>
                     </Pressable>
                   </View>
@@ -806,7 +807,7 @@ export function BarberQueueView() {
                         pressed && styles.btnPressed,
                       ]}
                     >
-                      <Scissors size={15} color="#0A0A0C" strokeWidth={2.5} />
+                      <Scissors size={15} color={colors.onPrimary} strokeWidth={2.5} />
                       <Text style={styles.startCutBtnText}>Seat in Chair</Text>
                     </Pressable>
                   )}
@@ -850,7 +851,7 @@ export function BarberQueueView() {
                   pressed && styles.btnPressed,
                 ]}
               >
-                <Plus size={16} color="#0A0A0C" strokeWidth={3} />
+                <Plus size={16} color={colors.onPrimary} strokeWidth={3} />
                 <Text style={styles.emptyStateAddWalkInText}>Add Walk-In Client</Text>
               </Pressable>
             )}
@@ -920,7 +921,10 @@ export function BarberQueueView() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const COLORS = colors;
+
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -1002,7 +1006,7 @@ const styles = StyleSheet.create({
   notifBadgeText: {
     fontSize: 9,
     fontWeight: '800',
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
   },
   walkInQuickBtn: {
     flexDirection: 'row',
@@ -1019,7 +1023,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   walkInBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -1110,16 +1114,11 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   pendingBannerCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     marginBottom: SPACING.md,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(212, 175, 55, 0.45)',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   pendingGradientContent: {
     padding: SPACING.md,
@@ -1147,7 +1146,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderColor: COLORS.primaryGlow,
   },
   pendingPulseDot: {
     width: 6,
@@ -1162,7 +1161,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   pendingCountBadge: {
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: RADIUS.sm,
@@ -1184,7 +1183,7 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     backgroundColor: COLORS.surfaceHighlight,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.4)',
+    borderColor: COLORS.primaryGlow,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1226,10 +1225,10 @@ const styles = StyleSheet.create({
   homeServicePill: {
     backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderColor: COLORS.primaryGlow,
   },
   inShopPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: COLORS.surfaceHighlight,
   },
   homeServicePillText: {
     color: COLORS.primary,
@@ -1255,7 +1254,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: RADIUS.sm,
@@ -1273,7 +1272,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.07)',
+    borderTopColor: COLORS.border,
   },
   pendingDeclineBtn: {
     flexDirection: 'row',
@@ -1309,21 +1308,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   pendingAcceptBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 13,
     fontWeight: '800',
   },
   activeSpotlightCard: {
-    borderRadius: RADIUS.lg,
-    borderWidth: 1.5,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
     borderColor: COLORS.primary,
     marginBottom: SPACING.lg,
     overflow: 'hidden',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    elevation: 6,
   },
   activeGradientContent: {
     padding: SPACING.md,
@@ -1351,7 +1345,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderColor: COLORS.primaryGlow,
   },
   livePulseDot: {
     width: 6,
@@ -1369,7 +1363,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: COLORS.surfaceHighlight,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: RADIUS.full,
@@ -1431,7 +1425,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   finishServiceBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -1473,12 +1467,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: COLORS.surfaceHighlight,
     borderRadius: RADIUS.md,
     padding: 12,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: COLORS.border,
   },
   nextUpLead: {
     color: COLORS.textMuted,
@@ -1506,7 +1500,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   seatNextBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -1584,7 +1578,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: RADIUS.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: COLORS.surfaceHighlight,
   },
   statusPillCompleted: {
     backgroundColor: COLORS.successLight,
@@ -1649,13 +1643,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: RADIUS.sm,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: COLORS.primaryLight,
   },
   homeDeliveryText: {
     color: COLORS.primary,
@@ -1682,7 +1676,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   startCutBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -1728,7 +1722,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    borderColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -1756,7 +1750,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   emptyStateAddWalkInText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -1798,8 +1792,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryGoldBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 15,
     fontWeight: '800',
   },
-});
+  });
+};

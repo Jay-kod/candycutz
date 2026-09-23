@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Linking } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,9 +16,31 @@ import { onboardingStorage } from '../src/utils/onboardingStorage';
 import { mobileCmsStorage } from '../src/utils/mobileCmsStorage';
 import { apiClient } from '../src/api/client';
 import { AppToast } from '../src/components/common/AppToast';
+import { ThemePatternOverlay } from '../src/components/common/ThemePatternOverlay';
+import { ErrorScreen } from '../src/components/common/ErrorScreen';
+import { useSystemStatusStore } from '../src/store/systemStatusStore';
+import { reportCrash, initGlobalErrorHandler } from '../src/services/telemetry';
 
 // Prevent native OS splash from auto-hiding before JS splash is mounted
 SplashScreen.preventAutoHideAsync().catch(() => {});
+initGlobalErrorHandler();
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  useEffect(() => {
+    if (error) {
+      reportCrash(error);
+    }
+  }, [error]);
+
+  return (
+    <ErrorScreen
+      variant="server"
+      title="Application Error"
+      message={error?.message || 'An unexpected error occurred in the application.'}
+      onRetry={retry}
+    />
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,8 +58,15 @@ export default function RootLayout() {
   const isLoggingOut = useAuthStore((state) => state.isLoggingOut);
   const { colors, isDark } = useAppTheme();
   const initializeTheme = useThemeStore((state) => state.initializeTheme);
+  const isThemeInitialized = useThemeStore((state) => state.isInitialized);
   const router = useRouter();
   const segments = useSegments();
+
+  const isMaintenance = useSystemStatusStore((state) => state.isMaintenance);
+  const maintenanceMessage = useSystemStatusStore((state) => state.maintenanceMessage);
+  const isUpgradeRequired = useSystemStatusStore((state) => state.isUpgradeRequired);
+  const upgradeData = useSystemStatusStore((state) => state.upgradeData);
+  const clearStatus = useSystemStatusStore((state) => state.clearStatus);
 
   // Initialize push notifications when authenticated
   usePushNotificationSetup();
@@ -120,7 +150,7 @@ export default function RootLayout() {
 
   // Post-splash routing logic
   useEffect(() => {
-    if (isSplashActive || isLoading || hasSeenOnboarding === null) return;
+    if (isSplashActive || isLoading || !isThemeInitialized || hasSeenOnboarding === null) return;
 
     const currentSegment = segments[0] as string | undefined;
     if (!currentSegment || onboardingStorage.isHandoffPending()) return;
@@ -140,7 +170,45 @@ export default function RootLayout() {
     } else if (isAuthenticated && (inAuthStack || inOnboarding)) {
       router.replace('/(tabs)');
     }
-  }, [isSplashActive, isLoading, hasSeenOnboarding, isAuthenticated, isLoggingOut, router, segments]);
+  }, [isSplashActive, isLoading, isThemeInitialized, hasSeenOnboarding, isAuthenticated, isLoggingOut, router, segments]);
+
+  if (isUpgradeRequired) {
+    return (
+      <SafeAreaProvider>
+        <ErrorScreen
+          variant="upgrade"
+          title="Update Required"
+          message={
+            upgradeData?.release_notes ||
+            `A newer version (${upgradeData?.latest_version || 'latest'}) of CandyCutz is required to continue. Please update your app to the latest release.`
+          }
+          onRetry={() => {
+            if (upgradeData?.store_url) {
+              Linking.openURL(upgradeData.store_url).catch(() => {});
+            }
+          }}
+          showSupportLink={false}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (isMaintenance) {
+    return (
+      <SafeAreaProvider>
+        <ErrorScreen
+          variant="maintenance"
+          title="Under Maintenance"
+          message={maintenanceMessage || 'CandyCutz is undergoing scheduled maintenance to upgrade your experience. We will be back shortly!'}
+          onRetry={() => {
+            clearStatus();
+            apiClient.get('/settings').catch(() => {});
+          }}
+          showSupportLink={false}
+        />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -223,7 +291,38 @@ export default function RootLayout() {
               presentation: 'card',
             }}
           />
+          <Stack.Screen
+            name="policy/terms"
+            options={{
+              title: 'Terms of Service',
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="policy/privacy"
+            options={{
+              title: 'Privacy Policy',
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="+not-found"
+            options={{
+              title: 'Page Not Found',
+              headerShown: false,
+            }}
+          />
         </Stack>
+
+        <ThemePatternOverlay
+          visible={
+            !isSplashActive &&
+            segments[0] !== 'onboarding' &&
+            segments.join('/') !== 'auth/login'
+          }
+        />
 
         {isSplashActive && (
           <SplashScreenView

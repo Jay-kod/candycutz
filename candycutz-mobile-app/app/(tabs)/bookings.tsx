@@ -19,15 +19,18 @@ import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { CONFIG } from '../../src/constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useToastStore } from '../../src/store/toastStore';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { Appointment } from '../../src/types';
 
 export default function BookingsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const showToast = useToastStore((s) => s.show);
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
   const [pendingCancellation, setPendingCancellation] = useState<Appointment | null>(null);
@@ -136,7 +139,7 @@ export default function BookingsScreen() {
 
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Total Paid / Due:</Text>
-          <Text style={[styles.detailValue, { color: COLORS.primary, fontWeight: '800' }]}>
+          <Text style={[styles.detailValue, { color: colors.primary, fontWeight: '800' }]}>
             ₦{Number(item.grand_total).toLocaleString()}
           </Text>
         </View>
@@ -206,7 +209,7 @@ export default function BookingsScreen() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={refetch}
-              tintColor={COLORS.primary}
+                tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -247,10 +250,11 @@ export default function BookingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: SPACING.md,
@@ -258,14 +262,14 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   title: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.hero - 8,
     fontWeight: '800',
   },
   tabBar: {
     flexDirection: 'row',
     marginHorizontal: SPACING.md,
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: RADIUS.md,
     padding: 4,
     marginBottom: SPACING.md,
@@ -277,15 +281,15 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   tabItemActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   tabText: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
   },
   tabTextActive: {
-    color: '#0A0A0C',
+    color: colors.onPrimary,
   },
   listContent: {
     padding: SPACING.md,
@@ -301,20 +305,20 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   refText: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '800',
     letterSpacing: 1,
   },
   serviceName: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
     marginTop: 2,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     marginVertical: 12,
   },
   detailRow: {
@@ -323,34 +327,34 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   detailLabel: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
   },
   detailValue: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '600',
   },
   locationLink: {
-    backgroundColor: COLORS.surfaceHighlight,
+    backgroundColor: colors.surfaceHighlight,
     padding: 10,
     borderRadius: RADIUS.sm,
     marginTop: 8,
   },
   locationLinkText: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '600',
   },
   cardFooter: {
     marginTop: 14,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: colors.border,
     paddingTop: 12,
     alignItems: 'flex-end',
   },
   cancelBtn: {
-    borderColor: COLORS.error,
+    borderColor: colors.error,
   },
   centerContainer: {
     flex: 1,
@@ -362,13 +366,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyTitle: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.lg,
     fontWeight: '700',
     marginBottom: 6,
   },
   emptyDesc: {
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     fontSize: FONTS.sizes.sm,
     textAlign: 'center',
     marginBottom: 20,
@@ -387,14 +391,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   unauthTitle: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.xxl,
     fontWeight: '800',
     textAlign: 'center',
     marginBottom: 8,
   },
   unauthDesc: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
     textAlign: 'center',
     lineHeight: 20,
@@ -403,4 +407,5 @@ const styles = StyleSheet.create({
   unauthBtn: {
     width: '100%',
   },
-});
+  });
+}

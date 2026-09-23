@@ -12,10 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { CONFIG } from '../../src/constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 
 export default function BookingConfirmationScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
   const params = useLocalSearchParams<{
     reference: string;
     date: string;
@@ -29,6 +31,7 @@ export default function BookingConfirmationScreen() {
   };
 
   const isInShop = params.type === 'in_shop' || !params.type;
+  const styles = createStyles(colors);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -67,7 +70,7 @@ export default function BookingConfirmationScreen() {
 
           <View style={styles.row}>
             <Text style={styles.label}>Total Amount:</Text>
-            <Text style={[styles.val, { color: COLORS.primary, fontWeight: '800' }]}>
+            <Text style={[styles.val, { color: colors.primary, fontWeight: '800' }]}>
               ₦{Number(params.total || 0).toLocaleString()}
             </Text>
           </View>
@@ -101,10 +104,11 @@ export default function BookingConfirmationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ReturnType<typeof useAppTheme>['colors']) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   container: {
     padding: SPACING.lg,
@@ -116,26 +120,26 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: colors.primaryLight,
     borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.md,
   },
   checkIcon: {
     fontSize: 40,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '900',
   },
   confirmedTitle: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.hero - 6,
     fontWeight: '900',
     textAlign: 'center',
   },
   confirmedSubtitle: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
     textAlign: 'center',
     marginTop: 6,
@@ -152,13 +156,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   refLabel: {
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.5,
   },
   refValue: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xl,
     fontWeight: '900',
     letterSpacing: 1,
@@ -166,7 +170,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     marginVertical: 12,
   },
   row: {
@@ -175,11 +179,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   label: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.sm,
   },
   val: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '600',
   },
@@ -188,15 +192,15 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     marginBottom: SPACING.xl,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+    borderLeftColor: colors.primary,
   },
   locationTitle: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
   },
   locationAddress: {
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     fontSize: FONTS.sizes.xs,
     lineHeight: 18,
     marginVertical: 6,
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   mapsBtnText: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: FONTS.sizes.xs,
     fontWeight: '700',
   },
@@ -216,4 +220,5 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: '100%',
   },
-});
+  });
+}

@@ -30,7 +30,8 @@ import { Card } from '../../src/components/common/Card';
 import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { AppointmentSkeletons } from '../../src/components/common/Skeleton';
 import { CONFIG } from '../../src/constants/config';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useToastStore } from '../../src/store/toastStore';
 import { Appointment } from '../../src/types';
 
@@ -39,6 +40,9 @@ const STATUS_FILTERS = ['All', 'pending', 'confirmed', 'in_progress', 'completed
 export default function BarberAppointmentsScreen() {
   const params = useLocalSearchParams<{ status?: string }>();
   const queryClient = useQueryClient();
+  const { colors } = useAppTheme();
+  const COLORS = colors;
+  const styles = createStyles(colors);
 
   const [selectedStatus, setSelectedStatus] = useState<string>(
     params.status && STATUS_FILTERS.includes(params.status) ? params.status : 'All'
@@ -123,7 +127,7 @@ export default function BarberAppointmentsScreen() {
         {/* Pending Action Banner */}
         {isPending && (
           <View style={styles.actionRequiredBanner}>
-            <AlertTriangle size={14} color="#E5BA73" />
+            <AlertTriangle size={14} color={colors.primary} />
             <Text style={styles.actionRequiredText}>
               ACTION REQUIRED: Accept or decline this customer's booking request
             </Text>
@@ -143,7 +147,7 @@ export default function BarberAppointmentsScreen() {
         {/* Date & Time */}
         <View style={styles.detailRow}>
           <View style={styles.rowLabelGroup}>
-            <Clock size={13} color="#9CA3AF" />
+            <Clock size={13} color={colors.textMuted} />
             <Text style={styles.detailLabel}>Schedule:</Text>
           </View>
           <Text style={styles.detailValue}>
@@ -154,7 +158,7 @@ export default function BarberAppointmentsScreen() {
         {/* Service */}
         <View style={styles.detailRow}>
           <View style={styles.rowLabelGroup}>
-            <Scissors size={13} color="#9CA3AF" />
+            <Scissors size={13} color={colors.textMuted} />
             <Text style={styles.detailLabel}>Service:</Text>
           </View>
           <Text style={styles.detailValue}>{item.service?.name || 'Standard Cut'}</Text>
@@ -164,9 +168,9 @@ export default function BarberAppointmentsScreen() {
         <View style={styles.detailRow}>
           <View style={styles.rowLabelGroup}>
             {isHomeService ? (
-              <Home size={13} color="#E5BA73" />
+              <Home size={13} color={colors.primary} />
             ) : (
-              <Scissors size={13} color="#9CA3AF" />
+              <Scissors size={13} color={colors.textMuted} />
             )}
             <Text style={styles.detailLabel}>Service Mode:</Text>
           </View>
@@ -179,7 +183,7 @@ export default function BarberAppointmentsScreen() {
             <Text
               style={[
                 styles.modePillText,
-                isHomeService ? { color: '#E5BA73' } : { color: '#D1D5DB' },
+                isHomeService ? { color: colors.primary } : { color: colors.textSecondary },
               ]}
             >
               {isHomeService ? '🏠 Home Service' : '✂ In-Shop'}
@@ -190,7 +194,7 @@ export default function BarberAppointmentsScreen() {
         {/* Home Service Delivery Address & Landmark */}
         {isHomeService && item.destination_address && (
           <View style={styles.homeAddressCard}>
-            <MapPin size={14} color="#E5BA73" />
+            <MapPin size={14} color={colors.primary} />
             <View style={{ flex: 1 }}>
               <Text style={styles.homeAddressHeader}>Customer Location:</Text>
               <Text style={styles.homeAddressBody}>
@@ -231,7 +235,7 @@ export default function BarberAppointmentsScreen() {
               accessibilityRole="button"
               accessibilityLabel="Decline booking request"
             >
-              <X size={15} color="#EF4444" strokeWidth={2.5} />
+              <X size={15} color={colors.error} strokeWidth={2.5} />
               <Text style={styles.declineBtnText}>Decline</Text>
             </Pressable>
 
@@ -244,7 +248,7 @@ export default function BarberAppointmentsScreen() {
               accessibilityRole="button"
               accessibilityLabel="Accept booking request"
             >
-              <Check size={16} color="#0A0A0C" strokeWidth={3} />
+              <Check size={16} color={colors.onPrimary} strokeWidth={3} />
               <Text style={styles.acceptBtnText}>Accept Booking</Text>
             </Pressable>
           </View>
@@ -287,7 +291,7 @@ export default function BarberAppointmentsScreen() {
                   style={[
                     styles.filterText,
                     isSelected && styles.filterTextActive,
-                    isPendingTab && !isSelected && { color: '#E5BA73' },
+                    isPendingTab && !isSelected && { color: colors.primary },
                   ]}
                 >
                   {item === 'pending' ? 'PENDING REQUESTS' : item.toUpperCase()}
@@ -350,7 +354,10 @@ export default function BarberAppointmentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const COLORS = colors;
+
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -383,17 +390,17 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     paddingHorizontal: 14,
     borderRadius: RADIUS.full,
-    backgroundColor: '#14141B',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.border,
   },
   filterChipActive: {
-    backgroundColor: '#E5BA73',
-    borderColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   filterChipPendingAlert: {
-    borderColor: 'rgba(229, 186, 115, 0.4)',
-    backgroundColor: 'rgba(229, 186, 115, 0.1)',
+    borderColor: COLORS.primaryGlow,
+    backgroundColor: COLORS.primaryLight,
   },
   filterText: {
     color: COLORS.textSecondary,
@@ -402,7 +409,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   filterTextActive: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontWeight: '800',
   },
   listContent: {
@@ -413,28 +420,28 @@ const styles = StyleSheet.create({
   card: {
     padding: 16,
     borderRadius: 18,
-    backgroundColor: '#14141B',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.07)',
+    borderColor: COLORS.border,
   },
   pendingCardHighlight: {
-    borderColor: 'rgba(229, 186, 115, 0.35)',
-    backgroundColor: '#161513',
+    borderColor: COLORS.primaryGlow,
+    backgroundColor: COLORS.surfaceHighlight,
   },
   actionRequiredBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(229, 186, 115, 0.12)',
+    backgroundColor: COLORS.primaryLight,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.25)',
+    borderColor: COLORS.primaryGlow,
   },
   actionRequiredText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '700',
     flex: 1,
@@ -445,7 +452,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   refText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
@@ -458,7 +465,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: COLORS.border,
     marginVertical: 12,
   },
   detailRow: {
@@ -487,12 +494,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   homeModePill: {
-    backgroundColor: 'rgba(229, 186, 115, 0.15)',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.3)',
+    borderColor: COLORS.primaryGlow,
   },
   shopModePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: COLORS.surfaceHighlight,
   },
   modePillText: {
     fontSize: 11,
@@ -502,28 +509,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    backgroundColor: 'rgba(229, 186, 115, 0.07)',
+    backgroundColor: COLORS.primaryLight,
     padding: 10,
     borderRadius: 10,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 186, 115, 0.18)',
+    borderColor: COLORS.primaryLight,
   },
   homeAddressHeader: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '700',
     marginBottom: 2,
   },
   homeAddressBody: {
-    color: '#D1D5DB',
+    color: COLORS.textSecondary,
     fontSize: 12,
     lineHeight: 17,
   },
   phoneButton: {
     marginTop: 6,
     marginBottom: 4,
-    backgroundColor: '#1E1E28',
+    backgroundColor: COLORS.surfaceHighlight,
     paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -533,7 +540,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   phoneText: {
-    color: '#E5BA73',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -543,7 +550,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.07)',
+    borderTopColor: COLORS.border,
   },
   declineBtn: {
     flexDirection: 'row',
@@ -554,11 +561,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.35)',
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderColor: COLORS.error,
+    backgroundColor: COLORS.errorLight,
   },
   declineBtnText: {
-    color: '#EF4444',
+    color: COLORS.error,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -568,18 +575,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#E5BA73',
+    backgroundColor: COLORS.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
-    shadowColor: '#E5BA73',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 3,
   },
   acceptBtnText: {
-    color: '#0A0A0C',
+    color: COLORS.onPrimary,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -596,4 +603,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-});
+  });
+};

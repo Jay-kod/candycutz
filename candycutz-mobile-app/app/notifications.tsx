@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { NotificationSkeletons } from '../src/components/common/Skeleton';
-import { COLORS, FONTS, RADIUS, SPACING } from '../src/constants/theme';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../src/constants/theme';
+import { useAppTheme } from '../src/hooks/useAppTheme';
 import { useNotifications } from '../src/hooks/useNotifications';
 import { Notification } from '../src/api/types';
 
@@ -89,6 +90,9 @@ function NotificationItem({
   item: Notification;
   onPress: () => void;
 }) {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+
   return (
     <Pressable
       onPress={onPress}
@@ -122,6 +126,8 @@ function NotificationItem({
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const {
     notifications,
     unreadCount,
@@ -202,8 +208,8 @@ export default function NotificationsScreen() {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={refetch}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -212,10 +218,10 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -224,8 +230,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    backgroundColor: COLORS.surface,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -236,22 +242,22 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.surfaceHighlight,
+    backgroundColor: colors.surfaceHighlight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   backButtonText: {
     fontSize: FONTS.sizes.xl,
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
   },
   headerTitle: {
     fontSize: FONTS.sizes.xl,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
   },
   headerSubtitle: {
     fontSize: FONTS.sizes.xs,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '600',
     marginTop: 2,
   },
@@ -259,12 +265,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: colors.primaryLight,
   },
   markAllText: {
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: colors.primary,
   },
   listContent: {
     paddingBottom: SPACING.xxl,
@@ -272,7 +278,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONTS.sizes.xs,
     fontWeight: '800',
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     paddingHorizontal: SPACING.lg,
@@ -285,24 +291,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
     gap: SPACING.md,
   },
   notifItemUnread: {
-    backgroundColor: 'rgba(212, 175, 55, 0.04)',
+    backgroundColor: colors.primaryLight,
   },
   notifItemPressed: {
-    backgroundColor: COLORS.surfaceHighlight,
+    backgroundColor: colors.surfaceHighlight,
   },
   notifIcon: {
     width: 42,
     height: 42,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: colors.surfaceElevated,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
   },
   notifIconText: {
     fontSize: 20,
@@ -318,29 +324,29 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: FONTS.sizes.md,
     fontWeight: '600',
-    color: COLORS.textSecondary,
+    color: colors.textSecondary,
     flex: 1,
   },
   notifTitleUnread: {
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     fontWeight: '700',
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     marginLeft: SPACING.sm,
   },
   notifMessage: {
     fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     marginTop: SPACING.xs,
     lineHeight: 20,
   },
   notifTime: {
     fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     marginTop: SPACING.xs,
     opacity: 0.7,
   },
@@ -357,12 +363,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONTS.sizes.xl,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   emptySubtitle: {
     fontSize: FONTS.sizes.md,
-    color: COLORS.textMuted,
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: SPACING.sm,
     lineHeight: 22,

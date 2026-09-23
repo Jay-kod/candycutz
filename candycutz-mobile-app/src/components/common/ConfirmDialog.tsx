@@ -153,7 +153,7 @@ export function ConfirmDialog({
           glowShadow: isDark ? 'rgba(212, 175, 55, 0.35)' : 'rgba(197, 155, 39, 0.25)',
           confirmBtnBg: colors.primary,
           confirmBtnPressedBg: colors.primaryDark,
-          confirmText: isDark ? '#0A0A0C' : '#FFFFFF',
+          confirmText: colors.onPrimary,
           topRimColor: isDark ? 'rgba(229, 186, 115, 0.45)' : 'rgba(197, 155, 39, 0.4)',
         };
     }
@@ -176,7 +176,7 @@ export function ConfirmDialog({
             styles.backdrop,
             {
               opacity: backdropAnim,
-              backgroundColor: isDark ? 'rgba(5, 5, 8, 0.78)' : 'rgba(15, 15, 18, 0.6)',
+              backgroundColor: colors.scrim,
             },
           ]}
         >

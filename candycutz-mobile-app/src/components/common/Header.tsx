@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { getStorageUrl } from '../../constants/config';
 import { FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAppTheme } from '../../hooks/useAppTheme';
 import { useAuthStore } from '../../store/authStore';
@@ -58,16 +59,26 @@ export const Header: React.FC<HeaderProps> = ({
             style={styles.avatarButton}
           >
             {isAuthenticated && user ? (
-              <View
-                style={[
-                  styles.avatarContainer,
-                  { backgroundColor: colors.surfaceElevated, borderColor: colors.primary },
-                ]}
-              >
-                <Text style={[styles.avatarText, { color: colors.primary }]}>
-                  {(user.real_name || user.name || 'U').charAt(0).toUpperCase()}
-                </Text>
-              </View>
+              user.avatar ? (
+                <Image
+                  source={{ uri: getStorageUrl(user.avatar) }}
+                  style={[
+                    styles.avatarContainer,
+                    { borderColor: colors.primary },
+                  ]}
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.avatarContainer,
+                    { backgroundColor: colors.surfaceElevated, borderColor: colors.primary },
+                  ]}
+                >
+                  <Text style={[styles.avatarText, { color: colors.primary }]}>
+                    {(user.real_name || user.name || 'U').charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )
             ) : (
               <View
                 style={[

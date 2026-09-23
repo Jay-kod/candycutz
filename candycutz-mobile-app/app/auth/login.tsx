@@ -16,20 +16,20 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff, Fingerprint } from 'lucide-react-native';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
-import { GoogleLogo } from '../../src/components/common/GoogleLogo';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { getStorageUrl } from '../../src/constants/config';
 import { mobileCmsStorage } from '../../src/utils/mobileCmsStorage';
 import { useAuthStore } from '../../src/store/authStore';
 import { useToastStore } from '../../src/store/toastStore';
+import { biometricService, BiometricSupportInfo, BiometricUserInfo, BiometricProfiles } from '../../src/services/biometricService';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { login, isLoading, error } = useAuthStore();
+  const { login, biometricLogin, isLoading, error } = useAuthStore();
   const showToast = useToastStore((state) => state.show);
 
   const [identity, setIdentity] = useState('');
@@ -38,6 +38,12 @@ export default function LoginScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [demoRole, setDemoRole] = useState<'customer' | 'barber' | null>(null);
   const [loginBg, setLoginBg] = useState<string | null>(null);
+
+  const [biometricsEnabled, setBiometricsEnabled] = useState(false);
+  const [biometricSupport, setBiometricSupport] = useState<BiometricSupportInfo | null>(null);
+  const [biometricUser, setBiometricUser] = useState<BiometricUserInfo | null>(null);
+  const [biometricProfiles, setBiometricProfiles] = useState<BiometricProfiles>({ customer: null, barber: null });
+  const [isAuthenticatingBiometric, setIsAuthenticatingBiometric] = useState(false);
 
   const entranceOpacity = useRef(new Animated.Value(0)).current;
   const entranceTranslateY = useRef(new Animated.Value(24)).current;
@@ -66,6 +72,25 @@ export default function LoginScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const support = await biometricService.checkSupport();
+      const enabled = await biometricService.isEnabled();
+      const savedUser = await biometricService.getSavedUser();
+      const profiles = await biometricService.getSavedProfiles();
+      if (isMounted) {
+        setBiometricSupport(support);
+        setBiometricsEnabled(enabled);
+        setBiometricUser(savedUser);
+        setBiometricProfiles(profiles);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleLogin = async () => {
     if (!identity.trim() || !password) return;
     const success = await login(identity.trim(), password, rememberMe);
@@ -76,16 +101,23 @@ export default function LoginScreen() {
 
   const handleDemoLogin = (role: 'customer' | 'barber') => {
     setDemoRole(role);
-    setIdentity(role === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com');
+    setIdentity(role === 'customer' ? 'fonetestcuz@candycutz.com' : 'fonetestbar@candycutz.com');
     setPassword(role === 'customer' ? 'customer123' : 'barber123');
   };
 
-  const handleGoogleLogin = () => {
-    showToast({
-      variant: 'info',
-      title: 'Google Sign-In',
-      message: 'Google sign-in will be available after the Google client is configured.',
-    });
+  const handleBiometricLogin = async (role?: 'customer' | 'barber') => {
+    setIsAuthenticatingBiometric(true);
+    const success = await biometricLogin(role);
+    setIsAuthenticatingBiometric(false);
+    if (success) {
+      router.replace('/(tabs)');
+    } else {
+      showToast({
+        variant: 'error',
+        title: 'Biometric Login',
+        message: 'Biometric verification cancelled or failed.',
+      });
+    }
   };
 
   return (
@@ -227,7 +259,7 @@ export default function LoginScreen() {
                     {demoRole === 'customer' ? 'Customer demo' : 'Barber demo'}
                   </Text>
                   <Text style={styles.demoDetailsText}>
-                    Email: {demoRole === 'customer' ? 'jay@candycutz.com' : 'obo@candycutz.com'}
+                    Email: {demoRole === 'customer' ? 'fonetestcuz@candycutz.com' : 'fonetestbar@candycutz.com'}
                   </Text>
                   <Text style={styles.demoDetailsText}>
                     Password: {demoRole === 'customer' ? 'customer123' : 'barber123'}
@@ -235,28 +267,108 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              <View style={styles.socialSection}>
-                <View style={styles.dividerRow}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-                <TouchableOpacity
-                  accessibilityLabel="Continue with Google"
-                  onPress={handleGoogleLogin}
-                  style={styles.googleButton}
-                >
-                  <View style={styles.googleLogoFrame}>
-                    <GoogleLogo size={20} />
+              {biometricsEnabled && (
+                <View style={styles.socialSection}>
+                  <View style={styles.dividerRow}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>OR QUICK FINGERPRINT LOGIN</Text>
+                    <View style={styles.dividerLine} />
                   </View>
-                  <Text style={styles.googleButtonText}>Continue with Google</Text>
-                </TouchableOpacity>
-              </View>
+
+                  {biometricProfiles.customer && biometricProfiles.barber ? (
+                    <View style={styles.multiBiometricContainer}>
+                      <TouchableOpacity
+                        accessibilityLabel={`Sign in as Customer with ${biometricSupport?.biometricName || 'Fingerprint'}`}
+                        onPress={() => handleBiometricLogin('customer')}
+                        disabled={isLoading || isAuthenticatingBiometric}
+                        style={[styles.biometricButton, styles.biometricHalfButton]}
+                      >
+                        <View style={styles.biometricIconFrame}>
+                          <Fingerprint size={20} color={COLORS.primary} />
+                        </View>
+                        <View style={styles.biometricTextContainer}>
+                          <Text style={styles.biometricButtonText}>Customer</Text>
+                          <Text style={styles.biometricSubtext} numberOfLines={1}>
+                            {biometricProfiles.customer.name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        accessibilityLabel={`Sign in as Barber with ${biometricSupport?.biometricName || 'Fingerprint'}`}
+                        onPress={() => handleBiometricLogin('barber')}
+                        disabled={isLoading || isAuthenticatingBiometric}
+                        style={[styles.biometricButton, styles.biometricHalfButton, styles.barberBiometricButton]}
+                      >
+                        <View style={[styles.biometricIconFrame, styles.barberIconFrame]}>
+                          <Fingerprint size={20} color={COLORS.accent} />
+                        </View>
+                        <View style={styles.biometricTextContainer}>
+                          <Text style={[styles.biometricButtonText, { color: COLORS.accent }]}>Barber Staff</Text>
+                          <Text style={styles.biometricSubtext} numberOfLines={1}>
+                            {biometricProfiles.barber.name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ) : biometricProfiles.barber ? (
+                    <TouchableOpacity
+                      accessibilityLabel={`Sign in as Barber with ${biometricSupport?.biometricName || 'Fingerprint'}`}
+                      onPress={() => handleBiometricLogin('barber')}
+                      disabled={isLoading || isAuthenticatingBiometric}
+                      style={[styles.biometricButton, styles.barberBiometricButton]}
+                    >
+                      <View style={[styles.biometricIconFrame, styles.barberIconFrame]}>
+                        <Fingerprint size={22} color={COLORS.accent} />
+                      </View>
+                      <View style={styles.biometricTextContainer}>
+                        <Text style={[styles.biometricButtonText, { color: COLORS.accent }]}>
+                          Sign in as Barber ({biometricSupport?.biometricName || 'Fingerprint'})
+                        </Text>
+                        <Text style={styles.biometricSubtext}>
+                          Welcome back, {biometricProfiles.barber.name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      accessibilityLabel={`Sign in with ${biometricSupport?.biometricName || 'Fingerprint'}`}
+                      onPress={() => handleBiometricLogin(biometricProfiles.customer ? 'customer' : undefined)}
+                      disabled={isLoading || isAuthenticatingBiometric}
+                      style={styles.biometricButton}
+                    >
+                      <View style={styles.biometricIconFrame}>
+                        <Fingerprint size={22} color={COLORS.primary} />
+                      </View>
+                      <View style={styles.biometricTextContainer}>
+                        <Text style={styles.biometricButtonText}>
+                          Sign in with {biometricSupport?.biometricName || 'Fingerprint'}
+                        </Text>
+                        {(biometricProfiles.customer?.name || biometricUser?.name) ? (
+                          <Text style={styles.biometricSubtext}>
+                            Welcome back, {biometricProfiles.customer?.name || biometricUser?.name}
+                          </Text>
+                        ) : null}
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
 
               <View style={styles.footerRow}>
                 <Text style={styles.footerText}>Don't have an account? </Text>
                 <TouchableOpacity onPress={() => router.replace('/auth/register')}>
                   <Text style={styles.registerLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.legalLinksRow}>
+                <TouchableOpacity onPress={() => router.push('/policy/terms' as any)}>
+                  <Text style={styles.legalLinkText}>Terms of Service</Text>
+                </TouchableOpacity>
+                <Text style={styles.legalLinkDot}>•</Text>
+                <TouchableOpacity onPress={() => router.push('/policy/privacy' as any)}>
+                  <Text style={styles.legalLinkText}>Privacy Policy</Text>
                 </TouchableOpacity>
               </View>
             </Card>
@@ -559,30 +671,60 @@ const styles = StyleSheet.create({
   socialSection: {
     marginTop: SPACING.md,
   },
-  googleButton: {
-    minHeight: 48,
+  biometricButton: {
+    minHeight: 52,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.borderLight,
-    backgroundColor: COLORS.surface,
+    borderColor: 'rgba(198, 161, 91, 0.4)',
+    backgroundColor: 'rgba(198, 161, 91, 0.08)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
   },
-  googleLogoFrame: {
-    width: 26,
-    height: 26,
+  multiBiometricContainer: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  biometricHalfButton: {
+    flex: 1,
+    minHeight: 52,
+    paddingHorizontal: SPACING.sm,
+  },
+  barberBiometricButton: {
+    borderColor: 'rgba(235, 185, 90, 0.45)',
+    backgroundColor: 'rgba(235, 185, 90, 0.08)',
+  },
+  biometricIconFrame: {
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(198, 161, 91, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(198, 161, 91, 0.3)',
     marginRight: SPACING.sm,
   },
-  googleButtonText: {
-    color: COLORS.textPrimary,
+  barberIconFrame: {
+    backgroundColor: 'rgba(235, 185, 90, 0.15)',
+    borderColor: 'rgba(235, 185, 90, 0.35)',
+  },
+  biometricTextContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  biometricButtonText: {
+    color: COLORS.primary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
+  },
+  biometricSubtext: {
+    color: COLORS.textSecondary,
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 2,
   },
   footerRow: {
     flexDirection: 'row',
@@ -597,5 +739,21 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '700',
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 14,
+    gap: 8,
+  },
+  legalLinkText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    textDecorationLine: 'underline',
+  },
+  legalLinkDot: {
+    color: COLORS.textMuted,
+    fontSize: 10,
   },
 });

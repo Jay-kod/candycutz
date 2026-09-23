@@ -15,6 +15,7 @@ export const CONFIG = {
   STORAGE_BASE_URL,
   API_WEB_URL: (process.env.EXPO_PUBLIC_WEB_URL || 'http://localhost:5173').trim().replace(/\/+$/, ''),
   APP_NAME: 'CandyCutz',
+  APP_VERSION: '1.0.0',
   DEFAULT_CURRENCY: 'NGN',
   CURRENCY_SYMBOL: '₦',
   
@@ -43,7 +44,7 @@ export function getStorageUrl(path?: string | null, fallback = ''): string {
     return fallback;
   }
 
-  if (/^(https?:|\/\/|data:)/i.test(path)) {
+  if (/^(https?:|\/\/|data:|file:|content:|blob:)/i.test(path)) {
     return path;
   }
 
@@ -56,5 +57,13 @@ export function getStorageUrl(path?: string | null, fallback = ''): string {
 
   const cleanPath = path.replace(/^\/+/, '');
   return `${CONFIG.STORAGE_BASE_URL}/${cleanPath}`;
+}
+
+export function normalizeMediaUrl(path?: string | null, fallback = ''): string {
+  if (!path) {
+    return fallback;
+  }
+
+  return getStorageUrl(path, fallback);
 }
 

@@ -9,14 +9,19 @@ import {
   Barber,
   BarberProfile,
   BlockedPeriod,
+  BlogPost,
   ChairStatus,
+  GalleryItem,
   Notification,
   Service,
   ServiceZone,
+  Testimonial,
   TimeSlot,
   User,
   WeeklyScheduleDay,
 } from '../types';
+
+import { useSystemStatusStore } from '../store/systemStatusStore';
 
 const TOKEN_KEY = 'candycutz_auth_token';
 
@@ -78,6 +83,8 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
     'X-Client-Type': 'mobile',
+    'X-App-Version': CONFIG.APP_VERSION,
+    'X-App-Platform': Platform.OS,
   },
   timeout: 15000,
 });
@@ -99,6 +106,9 @@ apiClient.interceptors.request.use(
     }
 
     try {
+      config.headers['X-App-Version'] = CONFIG.APP_VERSION;
+      config.headers['X-App-Platform'] = Platform.OS;
+      config.headers['X-Client-Type'] = 'mobile';
       const token = await tokenStorage.get();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -111,14 +121,28 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for auth expiration
+// Response interceptor for auth expiration and system status (426 / 503)
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // If successful request from an app that previously had upgrade / maintenance set, clear if needed
+    return response;
+  },
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
       try {
         await tokenStorage.remove();
       } catch (e) {}
+    } else if (error.response?.status === 426) {
+      // HTTP 426 Upgrade Required
+      const resData = (error.response?.data as any);
+      useSystemStatusStore.getState().setUpgradeRequired(true, resData?.data);
+    } else if (error.response?.status === 503) {
+      // HTTP 503 Service Unavailable / Maintenance Mode
+      const resData = (error.response?.data as any);
+      const isMaintenance = resData?.maintenance || resData?.code === 'MAINTENANCE_MODE';
+      if (isMaintenance) {
+        useSystemStatusStore.getState().setMaintenance(true, resData?.message);
+      }
     }
     return Promise.reject(error);
   }
@@ -199,6 +223,32 @@ export const servicesApi = {
   getById: async (id: number): Promise<Service> => {
     const res = await apiClient.get<ApiResponse<Service>>(`/services/${id}`);
     return res.data.data || (res.data as any);
+  },
+  create: async (payload: {
+    name: string;
+    description?: string;
+    price: number;
+    duration_minutes: number;
+    category_id?: number;
+    image1?: string;
+  }): Promise<Service> => {
+    const formData = new FormData();
+    formData.append('name', payload.name);
+    if (payload.description) formData.append('description', payload.description);
+    formData.append('price', String(payload.price));
+    formData.append('duration_minutes', String(payload.duration_minutes));
+    if (payload.category_id) formData.append('category_id', String(payload.category_id));
+    if (payload.image1) {
+      formData.append('image1', { uri: payload.image1, name: 'service.jpg', type: 'image/jpeg' } as any);
+    }
+    const res = await apiClient.post<ApiResponse<Service>>('/services', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data || (res.data as any);
+  },
+  getCategories: async (): Promise<{ id: number; name: string }[]> => {
+    const res = await apiClient.get<ApiResponse<{ id: number; name: string }[]>>('/service-categories');
+    return res.data.data || (res.data as any) || [];
   },
 };
 
@@ -317,6 +367,7 @@ export const accountApi = {
 
   updateProfile: async (payload: {
     name?: string;
+    username?: string;
     email?: string;
     phone?: string;
     bio?: string;
@@ -325,6 +376,7 @@ export const accountApi = {
     if (payload.avatarUri) {
       const formData = new FormData();
       if (payload.name) formData.append('name', payload.name);
+      if (payload.username) formData.append('username', payload.username);
       if (payload.email) formData.append('email', payload.email);
       if (payload.phone) formData.append('phone', payload.phone);
       if (payload.bio) formData.append('bio', payload.bio);
@@ -509,4 +561,134 @@ export const staffWalkInApi = {
 
 export const staffAuthApi = authApi;
 export const barberTokenStorage = tokenStorage;
+
+// ==========================================
+// Gallery API
+// ==========================================
+export const galleryApi = {
+  getAll: async (): Promise<GalleryItem[]> => {
+    const res = await apiClient.get<ApiResponse<GalleryItem[]>>('/gallery');
+    return res.data.data || (res.data as any) || [];
+  },
+  upload: async (payload: {
+    title: string;
+    description?: string;
+    category?: string;
+    imageUri: string;
+  }): Promise<GalleryItem> => {
+    const formData = new FormData();
+    formData.append('title', payload.title);
+    if (payload.description) formData.append('description', payload.description);
+    formData.append('category', payload.category || 'haircut');
+    formData.append('image', { uri: payload.imageUri, name: 'gallery.jpg', type: 'image/jpeg' } as any);
+    const res = await apiClient.post<ApiResponse<GalleryItem>>('/gallery', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data || (res.data as any);
+  },
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`/gallery/${id}`);
+  },
+};
+
+// ==========================================
+// Testimonials / Reviews API
+// ==========================================
+export const testimonialsApi = {
+  getAll: async (params?: { service_id?: number; barber_id?: number; featured?: boolean }): Promise<Testimonial[]> => {
+    const res = await apiClient.get<ApiResponse<Testimonial[]>>('/testimonials', { params });
+    return res.data.data || (res.data as any) || [];
+  },
+  getMyReviews: async (): Promise<Testimonial[]> => {
+    const res = await apiClient.get<ApiResponse<Testimonial[]>>('/reviews/me');
+    return res.data.data || (res.data as any) || [];
+  },
+  submit: async (payload: {
+    rating: number;
+    review: string;
+    service_id?: number;
+    barber_id?: number;
+  }): Promise<Testimonial> => {
+    const res = await apiClient.post<ApiResponse<Testimonial>>('/testimonials', payload);
+    return res.data.data || (res.data as any);
+  },
+};
+
+// ==========================================
+// Blog API
+// ==========================================
+export const blogApi = {
+  getAll: async (): Promise<BlogPost[]> => {
+    const res = await apiClient.get<ApiResponse<BlogPost[]>>('/blog');
+    return res.data.data || (res.data as any) || [];
+  },
+  getBySlug: async (slug: string): Promise<BlogPost> => {
+    const res = await apiClient.get<ApiResponse<BlogPost>>(`/blog/${slug}`);
+    return res.data.data || (res.data as any);
+  },
+  create: async (payload: {
+    title: string;
+    excerpt?: string;
+    content: string;
+    imageUri?: string;
+    status?: string;
+  }): Promise<BlogPost> => {
+    const formData = new FormData();
+    formData.append('title', payload.title);
+    if (payload.excerpt) formData.append('excerpt', payload.excerpt);
+    formData.append('content', payload.content);
+    formData.append('status', payload.status || 'published');
+    if (payload.imageUri) {
+      formData.append('featured_image', { uri: payload.imageUri, name: 'blog.jpg', type: 'image/jpeg' } as any);
+    }
+    const res = await apiClient.post<ApiResponse<BlogPost>>('/blog', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data || (res.data as any);
+  },
+  react: async (id: number, type: string = 'love'): Promise<void> => {
+    await apiClient.post(`/blog/${id}/react`, { reaction_type: type });
+  },
+  removeReaction: async (id: number): Promise<void> => {
+    await apiClient.delete(`/blog/${id}/react`);
+  },
+};
+
+// ==========================================
+// CMS / Policy Settings API
+// ==========================================
+export const cmsApi = {
+  getSettings: async (): Promise<Record<string, any>> => {
+    const res = await apiClient.get<ApiResponse<Record<string, any>>>('/settings');
+    return res.data.data || (res.data as any) || {};
+  },
+};
+
+// ==========================================
+// Feature Flags API
+// ==========================================
+export const featureFlagsApi = {
+  getFlags: async (): Promise<Record<string, boolean>> => {
+    const res = await apiClient.get<ApiResponse<Record<string, boolean>>>('/feature-flags');
+    return res.data?.data || {};
+  },
+};
+
+// ==========================================
+// App Telemetry API
+// ==========================================
+export const appTelemetryApi = {
+  reportCrash: async (payload: {
+    error_message: string;
+    stack_trace?: string | null;
+    component_stack?: string | null;
+    app_version?: string;
+    platform?: string;
+    device_info?: Record<string, any>;
+  }): Promise<{ crash_id: number }> => {
+    const res = await apiClient.post<ApiResponse<{ crash_id: number }>>('/app/crashes', payload);
+    return res.data?.data || (res.data as any);
+  },
+};
+
 

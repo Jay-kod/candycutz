@@ -17,7 +17,8 @@ import { staffScheduleApi } from '../../src/api/client';
 import { Button } from '../../src/components/common/Button';
 import { Card } from '../../src/components/common/Card';
 import { ScheduleSkeletons } from '../../src/components/common/Skeleton';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { FONTS, RADIUS, SPACING, ThemeColors } from '../../src/constants/theme';
+import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useToastStore } from '../../src/store/toastStore';
 import { BlockedPeriod, WeeklyScheduleDay } from '../../src/types';
 
@@ -33,6 +34,9 @@ const DEFAULT_DAYS: WeeklyScheduleDay[] = [
 
 export default function BarberScheduleScreen() {
   const queryClient = useQueryClient();
+  const { colors } = useAppTheme();
+  const COLORS = colors;
+  const styles = createStyles(colors);
   const [modalVisible, setModalVisible] = useState(false);
   const showToast = useToastStore((s) => s.show);
 
@@ -142,7 +146,7 @@ export default function BarberScheduleScreen() {
                   <Switch
                     value={day.is_working}
                     trackColor={{ false: COLORS.border, true: COLORS.primary }}
-                    thumbColor={day.is_working ? '#0A0A0C' : '#9CA3AF'}
+                    thumbColor={day.is_working ? colors.onPrimary : colors.textMuted}
                   />
                 </View>
               ))}
@@ -256,7 +260,10 @@ export default function BarberScheduleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const COLORS = colors;
+
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -360,7 +367,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    backgroundColor: colors.scrim,
     justifyContent: 'center',
     padding: SPACING.lg,
   },
@@ -408,4 +415,5 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: SPACING.md,
   },
-});
+  });
+};

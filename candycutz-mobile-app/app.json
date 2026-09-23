@@ -47,7 +47,8 @@
           "color": "#D4AF37",
           "defaultChannel": "candycutz-default"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "scheme": "candycutz",
     "extra": {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 export type UIconName =
   | 'home'
@@ -65,9 +66,10 @@ export interface UIconProps {
 export const UIcon: React.FC<UIconProps> = ({
   name,
   size = 24,
-  color = '#FFFFFF',
+  color,
   style,
 }) => {
+  const { colors } = useAppTheme();
   const pathData = UICON_PATHS[name];
   if (!pathData) return null;
 
@@ -79,7 +81,7 @@ export const UIcon: React.FC<UIconProps> = ({
       style={style}
       accessibilityRole="image"
     >
-      <Path d={pathData} fill={color} fillRule="evenodd" />
+      <Path d={pathData} fill={color || colors.textPrimary} fillRule="evenodd" />
     </Svg>
   );
 };

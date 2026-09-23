@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { FONTS, RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 interface LoadingStateProps {
   message?: string;
@@ -8,6 +9,7 @@ interface LoadingStateProps {
 }
 
 export function LoadingState({ message = 'Preparing your experience', compact = false }: LoadingStateProps) {
+  const { colors } = useAppTheme();
   const rotation = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0.7)).current;
 
@@ -47,14 +49,14 @@ export function LoadingState({ message = 'Preparing your experience', compact = 
   };
 
   return (
-    <View style={[styles.container, compact && styles.compactContainer]} accessibilityRole="progressbar">
-      <View style={[styles.loader, compact && styles.compactLoader]}>
-        <Animated.View style={[styles.arc, compact && styles.compactArc, spinStyle]} />
-        <Animated.View style={[styles.core, compact && styles.compactCore, { opacity: pulse }]}>
-          <Text style={[styles.mark, compact && styles.compactMark]}>CC</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }, compact && styles.compactContainer]} accessibilityRole="progressbar">
+      <View style={[styles.loader, { backgroundColor: colors.surface, borderColor: colors.border }, compact && styles.compactLoader]}>
+        <Animated.View style={[styles.arc, { borderColor: colors.primary, borderRightColor: 'transparent', borderBottomColor: 'transparent' }, compact && styles.compactArc, spinStyle]} />
+        <Animated.View style={[styles.core, { backgroundColor: colors.primaryLight, opacity: pulse }, compact && styles.compactCore]}>
+          <Text style={[styles.mark, { color: colors.primary }, compact && styles.compactMark]}>CC</Text>
         </Animated.View>
       </View>
-      {!!message && <Text style={[styles.message, compact && styles.compactMessage]}>{message}</Text>}
+      {!!message && <Text style={[styles.message, { color: colors.textSecondary }, compact && styles.compactMessage]}>{message}</Text>}
     </View>
   );
 }
@@ -65,7 +67,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.xl,
-    backgroundColor: COLORS.background,
   },
   compactContainer: {
     flex: 0,
@@ -77,9 +78,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   compactLoader: {
     width: 48,
@@ -91,7 +90,6 @@ const styles = StyleSheet.create({
     height: 76,
     borderRadius: RADIUS.full,
     borderWidth: 3,
-    borderColor: COLORS.primary,
     borderRightColor: 'transparent',
     borderBottomColor: 'transparent',
   },
@@ -106,14 +104,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primaryLight,
   },
   compactCore: {
     width: 30,
     height: 30,
   },
   mark: {
-    color: COLORS.primary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '900',
     letterSpacing: 1,
@@ -123,7 +119,6 @@ const styles = StyleSheet.create({
   },
   message: {
     marginTop: SPACING.md,
-    color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
     fontWeight: '600',
     textAlign: 'center',

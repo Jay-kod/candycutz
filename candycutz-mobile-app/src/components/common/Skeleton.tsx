@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, DimensionValue, Dimensions, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { COLORS, RADIUS, SPACING } from '../../constants/theme';
+import { RADIUS, SPACING } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SHIMMER_WIDTH = SCREEN_WIDTH * 0.6;
@@ -15,6 +16,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ style, width, height, variant = 'rect' }: SkeletonProps) {
+  const { colors } = useAppTheme();
   const pulse = useRef(new Animated.Value(0.45)).current;
   const shimmer = useRef(new Animated.Value(-SHIMMER_WIDTH)).current;
 
@@ -52,6 +54,7 @@ export function Skeleton({ style, width, height, variant = 'rect' }: SkeletonPro
   return (
     <Animated.View
       style={[
+        { backgroundColor: colors.skeletonBase },
         baseStyles.block,
         variantStyle,
         style,
@@ -64,6 +67,7 @@ export function Skeleton({ style, width, height, variant = 'rect' }: SkeletonPro
       <Animated.View
         style={[
           baseStyles.shimmer,
+          { backgroundColor: colors.skeletonHighlight },
           { transform: [{ translateX: shimmer }] },
         ]}
       />
@@ -73,7 +77,6 @@ export function Skeleton({ style, width, height, variant = 'rect' }: SkeletonPro
 
 const baseStyles = StyleSheet.create({
   block: {
-    backgroundColor: COLORS.surfaceHighlight,
     borderRadius: RADIUS.sm,
     overflow: 'hidden',
   },
@@ -82,23 +85,21 @@ const baseStyles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: SHIMMER_WIDTH,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
 });
 
 // ─── Helper: Skeleton Card Wrapper ───────────────────────────────────────────
 
 function SkeletonCard({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
-  return <View style={[cardStyles.card, style]}>{children}</View>;
+  const { colors } = useAppTheme();
+  return <View style={[cardStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }, style]}>{children}</View>;
 }
 
 const cardStyles = StyleSheet.create({
   card: {
     padding: SPACING.md,
     borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
 });
 
@@ -250,7 +251,6 @@ const schedStyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   dayInfo: { flex: 1 },
   blockedRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -372,7 +372,6 @@ const notifStyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
     gap: SPACING.sm,
   },
   textCol: { flex: 1 },

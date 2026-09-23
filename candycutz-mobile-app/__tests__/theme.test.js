@@ -17,8 +17,11 @@ test('Theme System & Night/Day Dynamic Mode Suite', async (t) => {
     // Color values check
     assert.ok(content.includes("'#0A0A0C'"), 'DARK_COLORS must feature obsidian dark background');
     assert.ok(content.includes("'#D4AF37'"), 'DARK_COLORS must feature luminous gold');
-    assert.ok(content.includes("'#F8F8F6'"), 'LIGHT_COLORS must feature alabaster background');
-    assert.ok(content.includes("'#C59B27'"), 'LIGHT_COLORS must feature deep metallic gold for contrast');
+    assert.ok(content.includes("'#F2F4F7'"), 'LIGHT_COLORS must feature a cool pearl background');
+    assert.ok(content.includes("'#9A6A16'"), 'LIGHT_COLORS must feature a restrained bronze-gold accent');
+    for (const token of ['onPrimary', 'inputBackground', 'scrim', 'patternDot', 'patternDotGlow', 'skeletonBase', 'skeletonHighlight']) {
+      assert.ok(content.includes(`${token}:`), `Theme palettes must define ${token}`);
+    }
   });
 
   await t.test('themeStore.ts uses expo-secure-store and does NOT use AsyncStorage', () => {
@@ -43,6 +46,16 @@ test('Theme System & Night/Day Dynamic Mode Suite', async (t) => {
     assert.ok(content.includes('export function useAppTheme'), 'useAppTheme must be exported');
     assert.ok(content.includes('DARK_COLORS'), 'useAppTheme must reference DARK_COLORS');
     assert.ok(content.includes('LIGHT_COLORS'), 'useAppTheme must reference LIGHT_COLORS');
+    assert.ok(content.includes("themePreference === 'dark'"), 'Manual dark preference must override system scheme');
+    assert.ok(content.includes("themePreference === 'light'"), 'Manual light preference must override system scheme');
+    assert.ok(content.includes("systemColorScheme !== 'light'"), 'System mode must resolve from the OS scheme');
+  });
+
+  await t.test('theme hydration is part of root startup gating', () => {
+    const rootPath = path.resolve(__dirname, '../app/_layout.tsx');
+    const content = fs.readFileSync(rootPath, 'utf8');
+    assert.ok(content.includes('isThemeInitialized'), 'Root layout must read theme hydration state');
+    assert.ok(content.includes('!isThemeInitialized'), 'Routing must wait for theme hydration');
   });
 
   await t.test('Common components consume dynamic useAppTheme', () => {
