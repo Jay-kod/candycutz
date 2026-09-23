@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Models\DeviceToken;
+use App\Models\PushDeliveryStat;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -79,6 +81,10 @@ class SendExpoPush implements ShouldQueue
 
         // Expo Push API supports batch — up to 100 messages per request
         $chunks = array_chunk($messages, 100);
+        $totalSent = 0;
+        $totalDelivered = 0;
+        $totalFailed = 0;
+        $failureReasons = [];
 
         foreach ($chunks as $chunk) {
             try {
@@ -88,7 +94,12 @@ class SendExpoPush implements ShouldQueue
                     'Accept-Encoding' => 'gzip, deflate',
                 ])->post('https://exp.host/--/api/v2/push/send', $chunk);
 
+                $chunkCount = count($chunk);
+                $totalSent += $chunkCount;
+
                 if ($response->failed()) {
+                    $totalFailed += $chunkCount;
+                    $failureReasons['HttpRequestFailed'] = ($failureReasons['HttpRequestFailed'] ?? 0) + $chunkCount;
                     Log::warning('Expo Push API error', [
                         'status' => $response->status(),
                         'body' => $response->body(),
@@ -97,11 +108,24 @@ class SendExpoPush implements ShouldQueue
                     $responseData = $response->json('data') ?? [];
                     foreach ($responseData as $index => $ticket) {
                         if (($ticket['status'] ?? '') === 'error') {
+                            $totalFailed++;
+                            $errCode = $ticket['details']['error'] ?? $ticket['message'] ?? 'UnknownError';
+                            $failureReasons[$errCode] = ($failureReasons[$errCode] ?? 0) + 1;
+
+                            if ($errCode === 'DeviceNotRegistered') {
+                                $unregToken = $chunk[$index]['to'] ?? null;
+                                if ($unregToken) {
+                                    DeviceToken::where('token', $unregToken)->update(['is_revoked' => true]);
+                                }
+                            }
+
                             Log::warning('Expo push ticket error', [
                                 'token' => $chunk[$index]['to'] ?? 'unknown',
                                 'error' => $ticket['message'] ?? 'Unknown error',
                                 'details' => $ticket['details'] ?? [],
                             ]);
+                        } else {
+                            $totalDelivered++;
                         }
                     }
 
@@ -111,9 +135,48 @@ class SendExpoPush implements ShouldQueue
                     ]);
                 }
             } catch (\Throwable $e) {
+                $totalFailed += count($chunk);
+                $failureReasons['ExceptionThrown'] = ($failureReasons['ExceptionThrown'] ?? 0) + count($chunk);
                 Log::error('Expo Push API request failed: '.$e->getMessage());
                 throw $e; // Let the queue retry
             }
+        }
+
+        // Record aggregated stats for today
+        try {
+            $today = now()->toDateString();
+            $totalTokens = DeviceToken::where('is_revoked', false)->count();
+            $activeUsersWithToken = DeviceToken::where('is_revoked', false)->distinct('user_id')->count('user_id');
+
+            $stat = PushDeliveryStat::firstOrCreate(
+                ['date' => $today],
+                [
+                    'total_tokens' => $totalTokens,
+                    'valid_tokens' => $totalTokens,
+                    'expired_tokens' => 0,
+                    'sent_count' => 0,
+                    'delivered_count' => 0,
+                    'failed_count' => 0,
+                    'failure_reasons' => [],
+                    'active_users_with_token' => $activeUsersWithToken,
+                ]
+            );
+
+            $existingReasons = $stat->failure_reasons ?? [];
+            foreach ($failureReasons as $reason => $count) {
+                $existingReasons[$reason] = ($existingReasons[$reason] ?? 0) + $count;
+            }
+
+            $stat->increment('sent_count', $totalSent);
+            $stat->increment('delivered_count', $totalDelivered);
+            $stat->increment('failed_count', $totalFailed);
+            $stat->total_tokens = $totalTokens;
+            $stat->valid_tokens = $totalTokens;
+            $stat->active_users_with_token = $activeUsersWithToken;
+            $stat->failure_reasons = $existingReasons;
+            $stat->save();
+        } catch (\Throwable $e) {
+            Log::warning('Failed to record push delivery stats: '.$e->getMessage());
         }
     }
 }

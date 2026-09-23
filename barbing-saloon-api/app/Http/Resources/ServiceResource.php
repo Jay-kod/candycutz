@@ -34,6 +34,13 @@ class ServiceResource extends JsonResource
             'category_name' => $this->category?->name ?? 'General Grooming',
             'image_url' => $imageUrl,
             'is_active' => (bool) $this->is_active,
+            'approval_status' => $this->approval_status ?? 'approved',
+            'barber_id' => $this->barber_id,
+            'barber' => $this->barber ? [
+                'id' => $this->barber->id,
+                'name' => $this->barber->name ?? $this->barber->user?->name ?? 'Barber',
+                'avatar_url' => $this->barber->avatar ?? $this->barber->user?->avatar,
+            ] : null,
             'is_home_service_eligible' => (bool) $this->home_service_allowed,
         ];
     }

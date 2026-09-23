@@ -12,7 +12,9 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Http\Middleware\CheckAppVersion;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -29,6 +31,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'security.headers' => SecurityHeaders::class,
             'log.api.request' => LogApiRequest::class,
             'api.gate' => ApiGateMiddleware::class,
+            'check.app.version' => CheckAppVersion::class,
+        ]);
+
+        $middleware->api(append: [
+            CheckAppVersion::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -53,6 +60,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return ApiResponse::error('The given data was invalid.', $e->errors(), 422, 'VALIDATION_FAILED');
+            }
+        });
+
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if ($e->getStatusCode() === 503 && ($request->is('api/*') || $request->expectsJson())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The server is temporarily undergoing maintenance. Please check back shortly.',
+                    'code' => 'MAINTENANCE_MODE',
+                    'maintenance' => true,
+                    'retry_after' => $e->getHeaders()['Retry-After'] ?? null,
+                ], 503);
             }
         });
     })->create();

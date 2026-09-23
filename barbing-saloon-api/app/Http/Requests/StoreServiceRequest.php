@@ -21,12 +21,13 @@ class StoreServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'duration_minutes' => 'nullable|integer',
+            'price' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:5|max:480',
             'category_id' => 'required|integer|exists:service_categories,id',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:5120',
+            'image1' => 'nullable|image|max:5120',
             'is_active' => 'nullable|boolean',
         ];
     }

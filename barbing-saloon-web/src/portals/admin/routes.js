@@ -1,6 +1,9 @@
 export default [
 	{ path: '/admin/dashboard', name: 'admin-dashboard', component: () => import('../../modules/admin/pages/DashboardPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/appointments', name: 'admin-appointments', component: () => import('@/features/appointments/pages/AdminAppointmentsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
+	{ path: '/admin/mobile-app', name: 'admin-mobile-app', component: () => import('../../modules/admin/pages/MobileAppManagementPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
+	{ path: '/admin/mobile-app/pages/:pageId?', name: 'admin-mobile-app-pages', component: () => import('../../modules/admin/pages/AppPageInspector.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
+	{ path: '/admin/feature-flags', name: 'admin-feature-flags', component: () => import('../../modules/admin/pages/FeatureFlagsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/walk-in', name: 'admin-walk-in', component: () => import('../../modules/admin/pages/WalkInPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/barbers', name: 'admin-barbers', component: () => import('../../modules/admin/pages/BarbersPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
 	{ path: '/admin/barbers/new', name: 'admin-barber-new', component: () => import('@/features/barbers/pages/BarberFormPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },
@@ -34,6 +37,7 @@ export default [
 			{ path: 'contact', name: 'admin-cms-contact', component: () => import('../../modules/admin/pages/cms/ContactPage.vue') },
 			{ path: 'privacy', name: 'admin-cms-privacy', component: () => import('../../modules/admin/pages/cms/PrivacyPage.vue') },
 			{ path: 'terms', name: 'admin-cms-terms', component: () => import('../../modules/admin/pages/cms/TermsPage.vue') },
+			{ path: 'account-deletion', name: 'admin-cms-account-deletion', component: () => import('../../modules/admin/pages/cms/AccountDeletionPage.vue') },
 		]
 	},
 	{ path: '/admin/system-logs', name: 'admin-system-logs', component: () => import('../../modules/admin/pages/SystemLogsPage.vue'), meta: { requiresAuth: true, roles: ['admin', 'super_admin'] } },

@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\FeatureFlagApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\GateApiController;
 use App\Http\Controllers\Api\V1\SuperAdminApiController;
@@ -72,6 +74,26 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/blog', [BlogApiController::class, 'store']);
     Route::match(['post', 'put'], '/admin/blog/{id}', [BlogApiController::class, 'update'])->whereNumber('id');
     Route::delete('/admin/blog/{id}', [BlogApiController::class, 'destroy'])->whereNumber('id');
+
+    // Admin Mobile App Management & Telemetry
+    Route::get('/admin/app/overview', [AppManagementApiController::class, 'overview']);
+    Route::get('/admin/app/versions', [AppManagementApiController::class, 'versions']);
+    Route::post('/admin/app/versions', [AppManagementApiController::class, 'storeVersion']);
+    Route::get('/admin/app/sessions', [AppManagementApiController::class, 'sessions']);
+    Route::delete('/admin/app/sessions/{id}', [AppManagementApiController::class, 'revokeSession'])->whereNumber('id');
+    Route::delete('/admin/app/sessions/user/{userId}', [AppManagementApiController::class, 'revokeUserSessions'])->whereNumber('userId');
+    Route::get('/admin/app/push-health', [AppManagementApiController::class, 'pushHealth']);
+    Route::post('/admin/app/push-test', [AppManagementApiController::class, 'pushTest']);
+    Route::get('/admin/app/crashes', [AppManagementApiController::class, 'crashes']);
+    Route::patch('/admin/app/crashes/{id}/resolve', [AppManagementApiController::class, 'resolveCrash'])->whereNumber('id');
+    Route::post('/admin/app/maintenance', [AppManagementApiController::class, 'toggleMaintenance']);
+
+    // Admin Feature Flags Management
+    Route::get('/admin/feature-flags', [FeatureFlagApiController::class, 'index']);
+    Route::post('/admin/feature-flags', [FeatureFlagApiController::class, 'store']);
+    Route::put('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/admin/feature-flags/{id}/toggle', [FeatureFlagApiController::class, 'toggle'])->whereNumber('id');
+    Route::delete('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'destroy'])->whereNumber('id');
 });
 
 Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {

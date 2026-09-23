@@ -81,8 +81,8 @@ const isSidebarCollapsed = ref(false);
 const sidebarRef = ref(null);
 
 const isActiveRoute = (to) => {
-  if (to === props.homeRoute) return route.path === to;
-  return route.path.startsWith(to);
+  if (to === props.homeRoute || to === '/admin/mobile-app' || to === '/admin/websites') return route.path === to;
+  return route.path === to || route.path.startsWith(to + '/');
 };
 
 const groupedNavItems = computed(() => {
@@ -102,9 +102,47 @@ const groupedNavItems = computed(() => {
   };
 
   const adminSections = {
-    'Overview & Operations': ['Dashboard', 'Website', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'Overview & Operations': ['Dashboard', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'The Website': [
+      'Website Overview',
+      'Home Page',
+      'About Us Page',
+      'Services Page',
+      'Gallery Page',
+      'Contact Page',
+      'Privacy Policy Page',
+      'Terms of Service Page',
+      'Account Deletion Page'
+    ],
+    'The App': [
+      'App Control Center',
+      'Onboarding',
+      'Home / Discover',
+      'Services Catalog',
+      'Book Appointment',
+      'Booking Confirmation',
+      'Walk-In Queue',
+      'My Bookings',
+      'Barber Appointments',
+      'Barber Schedule',
+      'Customer Profile',
+      'Edit Profile',
+      'Barber Profile',
+      'Wishlist',
+      'Reviews & Ratings',
+      'Hairstyle Gallery',
+      'Grooming Blog',
+      'Push Notifications',
+      'App Settings & Theme',
+      'Personal Analytics',
+      'Sign In',
+      'Sign Up',
+      'Forgot Password',
+      'Privacy Policy',
+      'Terms of Service'
+    ],
     'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Blog'],
-    'Management & Security': ['Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
+    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
   };
 
   const sections = props.theme === 'admin' ? adminSections : 

@@ -75,16 +75,20 @@ export function useServiceForm() {
     loadingData.value = true;
     try {
       try {
-        const catRes = await client.get(`/v1/${portal.value}/service-categories`);
-        serviceCategories.value = catRes.data.data || [];
+        const catRes = await client.get('/service-categories');
+        serviceCategories.value = catRes.data?.data || catRes.data || [];
       } catch (e) {
-        // If category fails, it's fine. Not all portals might have categories endpoint, though both admin and barber likely do, or maybe barber doesn't.
-        // Wait, old barberApi didn't have serviceCategories. But maybe the generic `/v1/barber/service-categories` exists. If not, we just ignore.
+        try {
+          const catRes = await client.get(`/v1/${portal.value}/service-categories`);
+          serviceCategories.value = catRes.data?.data || [];
+        } catch (err) {
+          serviceCategories.value = [];
+        }
       }
 
       if (isEditing.value) {
         const res = await client.get(`/v1/${portal.value}/services`);
-        const allServices = res.data.data || [];
+        const allServices = res.data?.data || res.data || [];
         const service = allServices.find(s => String(s.id) === String(serviceId.value));
 
         if (service) {
@@ -97,7 +101,7 @@ export function useServiceForm() {
             is_available: service.is_available !== undefined ? Boolean(Number(service.is_available)) : true
           };
           
-          if (service.image) images.value.url1 = service.image;
+          if (service.image || service.image_url) images.value.url1 = service.image_url || service.image;
           if (service.image2) images.value.url2 = service.image2;
           if (service.image3) images.value.url3 = service.image3;
         } else {
@@ -132,8 +136,9 @@ export function useServiceForm() {
         payload.append('category_id', form.value.category_id);
       }
       
-      payload.append('is_available', form.value.is_available ? 1 : 0);
+      payload.append('is_active', form.value.is_available ? 1 : 0);
       
+      if (images.value.file1) payload.append('image', images.value.file1);
       if (images.value.file1) payload.append('image1', images.value.file1);
       if (images.value.file2) payload.append('image2', images.value.file2);
       if (images.value.file3) payload.append('image3', images.value.file3);
@@ -143,25 +148,20 @@ export function useServiceForm() {
       if (images.value.remove3) payload.append('remove_image3', 'true');
 
       if (isEditing.value) {
-        // use POST with _method=PUT to support file uploads in Laravel
-        // wait, the old API used `client.post(\`/admin/services/\${id}\`, data)` for admin 
-        // and `client.put(\`/barber/services/\${id}\`, data)` for barber.
-        // Actually, for file uploads, PUT doesn't work well with FormData in Laravel unless you do POST with _method=PUT.
-        // We'll use POST and append _method=PUT.
         payload.append('_method', 'PUT');
-        await client.post(`/v1/${portal.value}/services/${serviceId.value}`, payload, {
+        const res = await client.post(`/services/${serviceId.value}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        toast.success('Service updated successfully!');
+        toast.success(res.data?.message || 'Service updated successfully!');
       } else {
-        await client.post(`/v1/${portal.value}/services`, payload, {
+        const res = await client.post('/services', payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        toast.success('Service created successfully!');
+        toast.success(res.data?.message || (portal.value === 'barber' ? 'Service submitted and pending admin approval!' : 'Service created successfully!'));
       }
       router.push(`/${portal.value}/services`);
     } catch (error) {
-      toast.error(error.response?.data?.error || `Failed to ${isEditing.value ? 'update' : 'create'} service`);
+      toast.error(error.response?.data?.message || error.response?.data?.error || `Failed to ${isEditing.value ? 'update' : 'create'} service`);
     } finally {
       submitting.value = false;
     }

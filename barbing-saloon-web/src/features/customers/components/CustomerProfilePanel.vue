@@ -38,6 +38,9 @@
                 <div>
                   <h3 class="text-lg font-bold text-white">{{ profileData.name }}</h3>
                   <p class="text-xs text-white/40 mt-0.5">Customer since {{ formatDate(profileData.created_at) }}</p>
+                  <span :class="profileData.auth_provider && profileData.auth_provider !== 'local' ? 'text-blue-300 bg-blue-500/10 border-blue-500/20' : 'text-white/40 bg-white/5 border-white/10'" class="inline-flex mt-1 rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">
+                    Registered via {{ profileData.registered_via || 'Registration form' }}
+                  </span>
                 </div>
               </div>
               <div class="flex flex-col items-end gap-1.5 shrink-0">

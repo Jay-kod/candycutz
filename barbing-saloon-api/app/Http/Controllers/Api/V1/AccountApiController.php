@@ -13,6 +13,9 @@ use App\Models\Appointment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use App\Domain\Identity\Services\UsernameIdentityService;
+use Illuminate\Validation\ValidationException;
+
 class AccountApiController
 {
     public function __construct(
@@ -32,27 +35,41 @@ class AccountApiController
         ], 'Profile loaded');
     }
 
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(Request $request, UsernameIdentityService $usernameService): JsonResponse
     {
+        $user = $request->user();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$request->user()->id],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['nullable', 'string', 'max:30'],
             'bio' => ['nullable', 'string', 'max:1000'],
-            'username' => ['nullable', 'string', 'max:30', 'unique:users,username,'.$request->user()->id],
+            'username' => ['nullable', 'string', 'min:3', 'max:30'],
             'avatar' => ['nullable', 'image', 'max:5120'],
         ]);
-
-        $user = $request->user();
 
         if ($request->hasFile('avatar')) {
             $path = (new SecureImageUpload)->execute($request->file('avatar'), 'uploads/avatars');
             $validated['avatar'] = '/storage/'.$path;
         }
 
+        // Handle username update through domain service with cooldown enforcement
+        if (! empty($validated['username']) && strtolower(trim($validated['username'])) !== strtolower((string) $user->username)) {
+            try {
+                $usernameService->updateUsername($user, $validated['username']);
+            } catch (\Exception $e) {
+                throw ValidationException::withMessages([
+                    'username' => [$e->getMessage()],
+                ]);
+            }
+        }
+        unset($validated['username']);
+
+        $validated['real_name'] = $validated['name'];
+
         $user->update($validated);
 
-        return ApiResponse::success(new UserProfileResource($user->loadCount(['appointments', 'testimonials'])), 'Profile updated');
+        return ApiResponse::success(new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
     }
 
     public function analytics(Request $request): JsonResponse

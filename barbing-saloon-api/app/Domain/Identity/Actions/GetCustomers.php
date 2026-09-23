@@ -31,6 +31,8 @@ class GetCustomers
                     'name' => $u->name,
                     'email' => $u->email,
                     'phone' => $u->phone ?? 'N/A',
+                    'auth_provider' => $u->auth_provider ?: 'local',
+                    'registered_via' => $u->auth_provider && $u->auth_provider !== 'local' ? ucfirst($u->auth_provider) : 'Registration form',
                     'avatar' => $u->avatar,
                     'created_at' => $u->created_at?->toIso8601String(),
                     'total_bookings' => (int) $u->getAttribute('total_bookings'),

@@ -18,24 +18,27 @@ class SecureImageUpload
     {
         $this->validateMime($file);
 
-        // Process through Intervention Image (which automatically strips EXIF by default when re-encoding)
-        $manager = new ImageManager(new Driver);
-
-        try {
-            $image = $manager->read($file->getRealPath());
-        } catch (\Exception $e) {
-            throw ValidationException::withMessages([
-                'image' => ['The uploaded file is not a valid image.'],
-            ]);
+        // Process through Intervention Image if available and GD extension loaded
+        if (class_exists(ImageManager::class) && extension_loaded('gd')) {
+            try {
+                $manager = new ImageManager(new Driver);
+                $image = $manager->read($file->getRealPath());
+                $encoded = $image->toWebp(90);
+                $filename = Str::random(40).'.webp';
+                $path = trim($directory, '/').'/'.$filename;
+                Storage::disk('public')->put($path, (string) $encoded);
+                return $path;
+            } catch (\Exception $e) {
+                throw ValidationException::withMessages([
+                    'image' => ['The uploaded file is not a valid image.'],
+                ]);
+            }
         }
 
-        // Re-encode to webp to neutralize payloads and strip metadata
-        $encoded = $image->toWebp(90);
-
-        $filename = Str::random(40).'.webp';
+        $extension = $file->guessExtension() ?: 'jpg';
+        $filename = Str::random(40).'.'.$extension;
         $path = trim($directory, '/').'/'.$filename;
-
-        Storage::disk('public')->put($path, (string) $encoded);
+        Storage::disk('public')->putFileAs(trim($directory, '/'), $file, $filename);
 
         return $path;
     }

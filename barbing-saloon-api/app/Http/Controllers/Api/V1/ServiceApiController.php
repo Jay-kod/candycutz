@@ -28,9 +28,37 @@ class ServiceApiController
 
     public function index(Request $request): JsonResponse
     {
-        $query = Service::query()
-            ->with(['category'])
-            ->where('is_active', true);
+        $user = $request->user('sanctum');
+        $role = $user ? ($user->role?->value ?? $user->role) : null;
+
+        $query = Service::query()->with(['category', 'barber.user']);
+
+        if ($role === 'barber') {
+            $barberId = $user->barber?->id;
+            if ($request->boolean('my_services_only') || $request->is('api/v1/barber/*') || $request->is('api/barber/*')) {
+                $query->where('barber_id', $barberId);
+            } else {
+                $query->where(function ($q) use ($barberId) {
+                    $q->where(function ($q2) {
+                        $q2->where('approval_status', 'approved')->where('is_active', true);
+                    });
+                    if ($barberId) {
+                        $q->orWhere('barber_id', $barberId);
+                    }
+                });
+            }
+        } elseif (in_array($role, ['admin', 'super_admin'])) {
+            if ($request->has('approval_status') && $request->approval_status !== 'all') {
+                $query->where('approval_status', $request->approval_status);
+            }
+            if ($request->has('is_active')) {
+                $query->where('is_active', $request->boolean('is_active'));
+            }
+        } else {
+            // Public / Customer: strictly approved and active only!
+            $query->where('approval_status', 'approved')
+                ->where('is_active', true);
+        }
 
         if ($request->has('category_id') && is_numeric($request->category_id)) {
             $query->where('category_id', (int) $request->category_id);
@@ -52,8 +80,8 @@ class ServiceApiController
     public function show(string $idOrSlug): JsonResponse
     {
         $service = is_numeric($idOrSlug)
-            ? Service::query()->with('category')->find((int) $idOrSlug)
-            : Service::query()->with('category')->where('slug', $idOrSlug)->first();
+            ? Service::query()->with(['category', 'barber.user'])->find((int) $idOrSlug)
+            : Service::query()->with(['category', 'barber.user'])->where('slug', $idOrSlug)->first();
 
         if (! $service) {
             return ApiResponse::error("Service '{$idOrSlug}' not found.", [], 404, 'RESOURCE_NOT_FOUND');
@@ -65,7 +93,7 @@ class ServiceApiController
     public function categories(): JsonResponse
     {
         $categories = ServiceCategory::query()
-            ->withCount(['services' => fn ($q) => $q->where('is_active', true)])
+            ->withCount(['services' => fn ($q) => $q->where('approval_status', 'approved')->where('is_active', true)])
             ->orderBy('display_order')
             ->orderBy('name')
             ->get();
@@ -83,14 +111,37 @@ class ServiceApiController
 
     public function store(StoreServiceRequest $request): JsonResponse
     {
-        $service = Service::create(ServiceData::fromRequest($request)->toArray());
+        $user = $request->user();
+        $isBarber = ($user->role?->value ?? $user->role) === 'barber';
 
-        if ($request->hasFile('image')) {
-            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/services');
+        $data = ServiceData::fromRequest($request)->toArray();
+        unset($data['image_url']);
+
+        if ($isBarber) {
+            $barber = $user->barber;
+            $data['barber_id'] = $barber?->id;
+            $data['approval_status'] = 'pending';
+            $data['is_active'] = false;
+        } else {
+            $data['approval_status'] = 'approved';
+            $data['is_active'] = $request->boolean('is_active', true);
+        }
+
+        $data['slug'] = Str::slug($data['name']).'-'.time();
+
+        $service = Service::create($data);
+
+        $imageFile = $request->file('image') ?? $request->file('image1');
+        if ($imageFile) {
+            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/services');
             $service->update(['image' => '/storage/'.$path]);
         }
 
-        return ApiResponse::success(new ServiceResource($service), 'Service created', 201);
+        $message = $isBarber
+            ? 'Service submitted successfully and is pending admin approval.'
+            : 'Service created successfully.';
+
+        return ApiResponse::success(new ServiceResource($service->load(['category', 'barber.user'])), $message, 201);
     }
 
     public function update(UpdateServiceRequest $request, int $id): JsonResponse
@@ -141,5 +192,46 @@ class ServiceApiController
         $action->execute($serviceCategory);
 
         return ApiResponse::success(null, 'Service category deleted');
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+            return ApiResponse::error('Unauthorized', [], 403);
+        }
+
+        $service = Service::findOrFail($id);
+        $service->update([
+            'approval_status' => 'approved',
+            'is_active' => true,
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        if ($service->barber_id) {
+            \App\Models\BarberService::firstOrCreate(
+                ['barber_id' => $service->barber_id, 'service_id' => $service->id],
+                ['is_offered' => true]
+            );
+        }
+
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service approved successfully');
+    }
+
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+            return ApiResponse::error('Unauthorized', [], 403);
+        }
+
+        $service = Service::findOrFail($id);
+        $service->update([
+            'approval_status' => 'rejected',
+            'is_active' => false,
+        ]);
+
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service rejected');
     }
 }

@@ -12,13 +12,13 @@
           {{ item.barber_name ? item.barber_name.charAt(0).toUpperCase() : '?' }}
         </div>
         <div>
-          <p class="text-theme-text font-semibold text-sm group-hover:text-gold transition-colors">{{ item.barber_name || 'Unknown Barber' }}</p>
-          <div class="flex items-center gap-2 mt-0.5">
-            <p v-if="item.service_name" class="text-gold/70 text-xs font-medium flex items-center gap-1">
+          <p class="text-theme-text font-semibold text-sm group-hover:text-gold transition-colors">{{ item.barber_name || item.barber?.name || 'Unknown Barber' }}</p>
+          <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+            <span v-if="item.service?.name || item.service_name" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gold/10 border border-gold/20 text-gold text-[11px] font-semibold">
               <ScissorsIcon class="h-3 w-3" />
-              {{ item.service_name }}
-            </p>
-            <span v-if="item.service_name" class="text-theme-border text-xs">•</span>
+              {{ item.service?.name || item.service_name }}
+            </span>
+            <span v-if="item.service?.name || item.service_name" class="text-theme-border text-xs">•</span>
             <p class="text-theme-muted text-xs flex items-center gap-1">
               <CalendarIcon class="h-3 w-3" />
               {{ formatDate(item.created_at) }}
@@ -50,7 +50,7 @@
     <!-- Review text -->
     <div class="pl-[52px]">
       <p class="text-sm text-theme-muted leading-relaxed italic border-l-2 border-gold/20 pl-3 py-1">
-        "{{ item.comment }}"
+        "{{ item.review || item.comment }}"
       </p>
     </div>
   </article>

@@ -6,19 +6,57 @@
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/5 blur-3xl"></div>
         <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl"></div>
         
-        <div class="relative z-10">
-          <p class="text-xs uppercase tracking-[0.3em] text-admin/70 font-bold">Testimonials</p>
-          <h1 class="mt-2 font-display text-4xl text-theme-text drop-shadow-lg flex items-center gap-3">
-            Review <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Moderation</span>
-            <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ testimonials.length }}</span>
-          </h1>
-          <p class="mt-2 text-sm text-ivory/60">Manage and approve client feedback before it goes live on the public site.</p>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-admin/70 font-bold">Testimonials</p>
+            <h1 class="mt-2 font-display text-4xl text-theme-text drop-shadow-lg flex items-center gap-3">
+              Review <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Moderation</span>
+              <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ filteredTestimonials.length }}</span>
+            </h1>
+            <p class="mt-2 text-sm text-ivory/60">Manage and approve client feedback before it goes live on the public site.</p>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex rounded-xl bg-black/40 p-1 border border-white/10">
+              <button
+                @click="activeStatusFilter = 'all'"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                :class="activeStatusFilter === 'all' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
+              >
+                All
+              </button>
+              <button
+                @click="activeStatusFilter = 'pending'"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                :class="activeStatusFilter === 'pending' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
+              >
+                Pending
+                <span v-if="pendingCount > 0" class="h-4 w-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-extrabold">{{ pendingCount }}</span>
+              </button>
+              <button
+                @click="activeStatusFilter = 'approved'"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                :class="activeStatusFilter === 'approved' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
+              >
+                Approved
+              </button>
+            </div>
+
+            <select
+              v-model="activeServiceFilter"
+              class="bg-black/60 border border-admin/30 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-admin"
+            >
+              <option value="all">All Services</option>
+              <option v-for="s in services" :key="s.id" :value="s.id">{{ s.name }}</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <div class="grid gap-5">
         <article 
-          v-for="item in testimonials" 
+          v-for="item in filteredTestimonials" 
           :key="item.id" 
           class="group relative overflow-hidden rounded-2xl border bg-black/20 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-black/40"
           :class="item.is_approved ? 'border-white/5 hover:border-admin/20' : 'border-admin/30 bg-admin/5'"
@@ -29,11 +67,16 @@
             <div class="flex-1">
               <div class="flex items-center gap-4 mb-3">
                 <div class="h-12 w-12 rounded-full bg-admin/20 border border-admin/30 flex items-center justify-center text-admin font-display text-xl shrink-0">
-                  {{ item.client_name.charAt(0).toUpperCase() }}
+                  {{ (item.client_name || item.customer_name || 'C').charAt(0).toUpperCase() }}
                 </div>
                 <div>
-                  <h2 class="font-display text-xl text-theme-text group-hover:text-admin-light transition-colors">{{ item.client_name }}</h2>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h2 class="font-display text-xl text-theme-text group-hover:text-admin-light transition-colors">{{ item.client_name || item.customer_name }}</h2>
+                    <span v-if="item.service?.name || item.service_name" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-admin/20 border border-admin/30 text-admin-light text-xs font-semibold">
+                      ✂️ {{ item.service?.name || item.service_name }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2 mt-1">
                     <div class="flex text-admin">
                       <span v-for="i in 5" :key="i">
                         <svg v-if="i <= item.rating" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
@@ -50,7 +93,7 @@
               
               <div class="relative">
                 <ChatBubbleBottomCenterTextIcon class="absolute -left-2 -top-2 h-8 w-8 text-white/5 rotate-180" />
-                <p class="text-ivory/80 leading-relaxed italic relative z-10 pl-6 border-l-2 border-admin/20 py-1">"{{ item.comment }}"</p>
+                <p class="text-ivory/80 leading-relaxed italic relative z-10 pl-6 border-l-2 border-admin/20 py-1">"{{ item.review || item.comment }}"</p>
               </div>
             </div>
 
@@ -94,8 +137,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
+import client from '@/shared/api/client';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { useToast } from '../../../core/composables/useToast';
@@ -105,11 +149,42 @@ const { confirm } = useConfirm();
 const toast = useToast();
 
 const testimonials = ref([]);
+const services = ref([]);
+const activeStatusFilter = ref('all');
+const activeServiceFilter = ref('all');
+
+const pendingCount = computed(() => {
+  return testimonials.value.filter(t => !t.is_approved).length;
+});
+
+const filteredTestimonials = computed(() => {
+  let list = testimonials.value;
+  if (activeStatusFilter.value === 'pending') {
+    list = list.filter(t => !t.is_approved);
+  } else if (activeStatusFilter.value === 'approved') {
+    list = list.filter(t => t.is_approved);
+  }
+
+  if (activeServiceFilter.value !== 'all') {
+    list = list.filter(t => (t.service_id == activeServiceFilter.value || t.service?.id == activeServiceFilter.value));
+  }
+
+  return list;
+});
+
+const loadServices = async () => {
+  try {
+    const response = await client.get('/services');
+    services.value = response.data?.data || response.data || [];
+  } catch (err) {
+    console.error('Failed to load services', err);
+  }
+};
 
 const loadTestimonials = async () => {
   try {
     const response = await adminApi.testimonials();
-    testimonials.value = response.data.data;
+    testimonials.value = response.data?.data || response.data || [];
   } catch (error) {
     console.error("Failed to load testimonials", error);
     toast.error('Failed to load testimonials');
@@ -148,6 +223,7 @@ const deleteReview = async (id) => {
 };
 
 onMounted(() => {
+  loadServices();
   loadTestimonials();
 });
 </script>

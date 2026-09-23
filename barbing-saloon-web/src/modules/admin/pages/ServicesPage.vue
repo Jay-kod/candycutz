@@ -31,30 +31,63 @@
         </div>
       </div>
 
-      <!-- Category Filter Tabs -->
-      <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
-        <button
-          @click="activeCategory = 'all'"
-          class="shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all"
-          :class="activeCategory === 'all'
-            ? 'bg-admin/20 text-admin border-admin/30 shadow-[0_0_15px_rgba(255,103,0,0.1)]'
-            : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
-        >
-          All Services
-          <span class="ml-1.5 text-[10px] opacity-60">{{ services.length }}</span>
-        </button>
-        <button
-          v-for="cat in categories"
-          :key="cat"
-          @click="activeCategory = cat"
-          class="shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all"
-          :class="activeCategory === cat
-            ? 'bg-admin/20 text-admin border-admin/30 shadow-[0_0_15px_rgba(255,103,0,0.1)]'
-            : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
-        >
-          {{ cat }}
-          <span class="ml-1.5 text-[10px] opacity-60">{{ services.filter(s => (s.category_name || 'General') === cat).length }}</span>
-        </button>
+      <!-- Filters Bar: Category & Approval Status -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <!-- Approval Filter -->
+        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/5">
+          <button
+            @click="approvalFilter = 'all'"
+            class="rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
+            :class="approvalFilter === 'all'
+              ? 'bg-admin text-obsidian shadow-lg'
+              : 'text-white/50 hover:text-white'"
+          >
+            All ({{ services.length }})
+          </button>
+          <button
+            @click="approvalFilter = 'pending'"
+            class="rounded-xl px-3.5 py-2 text-xs font-bold transition-all flex items-center gap-1.5"
+            :class="approvalFilter === 'pending'
+              ? 'bg-amber-500 text-obsidian shadow-lg'
+              : 'text-amber-400/80 hover:text-amber-400'"
+          >
+            <span v-if="pendingCount > 0" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+            Pending Approval ({{ pendingCount }})
+          </button>
+          <button
+            @click="approvalFilter = 'approved'"
+            class="rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
+            :class="approvalFilter === 'approved'
+              ? 'bg-emerald-500 text-obsidian shadow-lg'
+              : 'text-white/50 hover:text-white'"
+          >
+            Approved
+          </button>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide max-w-full">
+          <button
+            @click="activeCategory = 'all'"
+            class="shrink-0 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider border transition-all"
+            :class="activeCategory === 'all'
+              ? 'bg-admin/20 text-admin border-admin/30'
+              : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
+          >
+            All Cats
+          </button>
+          <button
+            v-for="cat in categories"
+            :key="cat"
+            @click="activeCategory = cat"
+            class="shrink-0 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider border transition-all"
+            :class="activeCategory === cat
+              ? 'bg-admin/20 text-admin border-admin/30'
+              : 'bg-white/[0.02] text-white/40 border-white/[0.05] hover:bg-white/[0.05] hover:text-white/60'"
+          >
+            {{ cat }}
+          </button>
+        </div>
       </div>
 
       <!-- Services Grid -->
@@ -80,9 +113,9 @@
             <div class="absolute inset-0 rounded-full border border-dashed border-white/10 animate-[spin_10s_linear_infinite]"></div>
             <SparklesIcon class="h-8 w-8 text-white/20" />
           </div>
-          <h3 class="text-xl font-bold text-white mb-2">{{ activeCategory !== 'all' ? 'No Services in This Category' : 'No Services Found' }}</h3>
+          <h3 class="text-xl font-bold text-white mb-2">{{ approvalFilter === 'pending' ? 'No Pending Approvals' : 'No Services Found' }}</h3>
           <p class="text-sm text-white/40 max-w-sm mx-auto mb-6">
-            {{ activeCategory !== 'all' ? 'Try selecting a different category or add a new service.' : 'Add your first service to start accepting bookings from customers.' }}
+            {{ approvalFilter === 'pending' ? 'All barber-submitted services have been reviewed.' : 'Add your first service to start accepting bookings from customers.' }}
           </p>
           <router-link to="/admin/services/new" class="text-admin hover:text-admin-light text-sm font-semibold transition-colors flex items-center gap-2">
             <PlusIcon class="h-4 w-4" /> Add your first service
@@ -96,31 +129,31 @@
               v-for="service in filteredServices"
               :key="service.id"
               class="group relative overflow-hidden rounded-3xl border border-white/[0.05] bg-gradient-to-br from-white/[0.02] to-transparent transition-all duration-300 hover:border-admin/20 hover:from-white/[0.04] hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex flex-col"
+              :class="{'border-amber-500/30 bg-amber-500/[0.02]': service.approval_status === 'pending'}"
             >
-              <!-- Glow accent -->
-              <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-admin to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity z-20"></div>
+              <!-- Glowing Accent Bar -->
+              <div class="absolute top-0 left-0 right-0 h-1 transition-opacity z-20"
+                :class="service.approval_status === 'pending' ? 'bg-amber-400 opacity-100' : 'bg-gradient-to-r from-admin to-amber-400 opacity-0 group-hover:opacity-100'"></div>
 
               <!-- Cover Image (if exists) -->
-              <div v-if="service.image" class="relative w-full h-40 bg-black overflow-hidden shrink-0">
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay z-10"></div>
-                <img :src="service.image" :alt="service.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div v-if="service.image || service.image_url" class="relative w-full h-40 bg-black overflow-hidden shrink-0">
+                <img :src="service.image_url || service.image" :alt="service.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/50 to-transparent z-10"></div>
                 
-                <!-- Category badge moved to image overlay -->
-                <div class="absolute top-4 left-4 z-20">
-                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-admin/20 bg-admin/10 text-admin/90 backdrop-blur-md">
+                <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-admin/20 bg-admin/10 text-admin backdrop-blur-md">
                     <TagIcon class="h-3 w-3" />
-                    {{ service.category_name || 'General' }}
+                    {{ service.category_name || service.category || 'General' }}
                   </span>
                 </div>
               </div>
 
-              <div class="relative z-20 flex flex-col flex-1 p-6" :class="{'pt-2': service.image}">
+              <div class="relative z-20 flex flex-col flex-1 p-6" :class="{'pt-2': service.image || service.image_url}">
                 <!-- Header row (no image state) -->
-                <div v-if="!service.image" class="flex items-start justify-between gap-4 mb-4">
-                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-admin/20 bg-admin/10 text-admin/90">
+                <div v-if="!service.image && !service.image_url" class="flex items-start justify-between gap-4 mb-4">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-admin/20 bg-admin/10 text-admin">
                     <TagIcon class="h-3 w-3" />
-                    {{ service.category_name || 'General' }}
+                    {{ service.category_name || service.category || 'General' }}
                   </span>
 
                   <div class="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -132,9 +165,9 @@
                     </button>
                   </div>
                 </div>
-                
+
                 <!-- Floating action buttons (with image state) -->
-                <div v-if="service.image" class="absolute top-4 right-4 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                <div v-if="service.image || service.image_url" class="absolute top-4 right-4 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
                   <router-link :to="`/admin/services/${service.id}/edit`" class="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors" title="Edit Service">
                     <PencilSquareIcon class="h-4 w-4" />
                   </router-link>
@@ -143,21 +176,63 @@
                   </button>
                 </div>
 
+                <!-- Barber creator tag -->
+                <div v-if="service.barber" class="mb-2 flex items-center gap-1.5 text-xs text-amber-400/90 font-medium">
+                  <span class="text-white/40">Created by barber:</span>
+                  <span class="font-bold underline">{{ service.barber.name }}</span>
+                </div>
+
                 <!-- Name & Description -->
                 <h2 class="font-display text-2xl text-white mb-2 group-hover:text-admin-light transition-colors leading-tight drop-shadow-sm">{{ service.name }}</h2>
                 <p v-if="service.description" class="text-sm text-white/50 line-clamp-2 mb-auto leading-relaxed">{{ service.description }}</p>
                 <p v-else class="text-sm text-white/20 italic mb-auto">No description provided</p>
 
-                <!-- Availability -->
-                <div class="mt-4 mb-4">
+                <!-- Status Badges -->
+                <div class="mt-4 mb-4 flex items-center gap-2 flex-wrap">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5"
+                    :class="{
+                      'bg-amber-500/15 text-amber-400 border-amber-500/30': service.approval_status === 'pending',
+                      'bg-emerald-500/15 text-emerald-400 border-emerald-500/30': service.approval_status === 'approved' || !service.approval_status,
+                      'bg-rose-500/15 text-rose-400 border-rose-500/30': service.approval_status === 'rejected'
+                    }"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full" :class="{
+                      'bg-amber-400 animate-pulse': service.approval_status === 'pending',
+                      'bg-emerald-400': service.approval_status === 'approved' || !service.approval_status,
+                      'bg-rose-400': service.approval_status === 'rejected'
+                    }"></span>
+                    {{ service.approval_status === 'pending' ? 'Pending Approval' : (service.approval_status === 'rejected' ? 'Rejected' : 'Approved') }}
+                  </span>
+
                   <span
                     class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border"
-                    :class="service.is_available
+                    :class="service.is_active
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : 'bg-red-500/10 text-red-400 border-red-500/20'"
+                      : 'bg-white/5 text-white/40 border-white/10'"
                   >
-                    {{ service.is_available ? 'Available' : 'Unavailable' }}
+                    {{ service.is_active ? 'Active' : 'Inactive' }}
                   </span>
+                </div>
+
+                <!-- Admin Quick Actions for Pending Services -->
+                <div v-if="service.approval_status === 'pending'" class="mb-4 pt-3 border-t border-white/10 flex items-center gap-2">
+                  <button
+                    @click="approveService(service)"
+                    :disabled="approvingId === service.id"
+                    class="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-obsidian text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-[0_0_15px_rgba(16,185,129,0.3)] disabled:opacity-50"
+                  >
+                    <CheckIcon class="h-4 w-4" />
+                    Approve
+                  </button>
+                  <button
+                    @click="rejectService(service)"
+                    :disabled="approvingId === service.id"
+                    class="py-2 px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-xs font-bold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                  >
+                    <XMarkIcon class="h-4 w-4" />
+                    Reject
+                  </button>
                 </div>
 
                 <!-- Price & Duration -->
@@ -183,6 +258,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
+import client from '@/shared/api/client';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
@@ -192,7 +268,9 @@ import {
   ClockIcon,
   PencilSquareIcon,
   TrashIcon,
-  PlusIcon
+  PlusIcon,
+  CheckIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
@@ -201,26 +279,72 @@ const { confirm } = useConfirm();
 const services = ref([]);
 const loading = ref(true);
 const activeCategory = ref('all');
+const approvalFilter = ref('all');
+const approvingId = ref(null);
+
+const pendingCount = computed(() => {
+  return services.value.filter(s => s.approval_status === 'pending').length;
+});
 
 const categories = computed(() => {
-  const cats = new Set(services.value.map(s => s.category_name || 'General'));
+  const cats = new Set(services.value.map(s => s.category_name || s.category || 'General'));
   return [...cats].sort();
 });
 
 const filteredServices = computed(() => {
-  if (activeCategory.value === 'all') return services.value;
-  return services.value.filter(s => (s.category_name || 'General') === activeCategory.value);
+  let list = services.value;
+
+  if (approvalFilter.value === 'pending') {
+    list = list.filter(s => s.approval_status === 'pending');
+  } else if (approvalFilter.value === 'approved') {
+    list = list.filter(s => s.approval_status === 'approved' || !s.approval_status);
+  }
+
+  if (activeCategory.value !== 'all') {
+    list = list.filter(s => (s.category_name || s.category || 'General') === activeCategory.value);
+  }
+
+  return list;
 });
 
 async function loadServices() {
   loading.value = true;
   try {
-    const response = await adminApi.services();
-    services.value = response.data.data;
+    const response = await client.get('/services');
+    services.value = response.data?.data || response.data || [];
   } catch (err) {
     toast.error('Failed to fetch services');
   } finally {
     loading.value = false;
+  }
+}
+
+async function approveService(service) {
+  approvingId.value = service.id;
+  try {
+    const res = await client.patch(`/services/${service.id}/approve`);
+    toast.success(res.data?.message || `"${service.name}" approved successfully!`);
+    await loadServices();
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to approve service');
+  } finally {
+    approvingId.value = null;
+  }
+}
+
+async function rejectService(service) {
+  const ok = await confirm('Reject Service', `Are you sure you want to reject "${service.name}"?`);
+  if (!ok) return;
+
+  approvingId.value = service.id;
+  try {
+    const res = await client.patch(`/services/${service.id}/reject`);
+    toast.success(res.data?.message || `"${service.name}" rejected.`);
+    await loadServices();
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to reject service');
+  } finally {
+    approvingId.value = null;
   }
 }
 

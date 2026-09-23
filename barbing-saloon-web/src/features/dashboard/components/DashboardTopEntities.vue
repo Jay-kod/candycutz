@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
     <!-- Top Barbers -->
-    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
-      <div class="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between">
+    <div class="rounded-xl border border-theme-border bg-theme-surface overflow-hidden">
+      <div class="border-b border-theme-border px-6 py-4 flex items-center justify-between">
         <h3 class="text-sm font-bold text-theme-text flex items-center gap-2">
           <TrophyIcon class="h-4 w-4 text-amber-400" />
           Top Barbers
@@ -12,7 +12,7 @@
       <div class="divide-y divide-white/[0.03]">
         <div v-for="(barber, idx) in topBarbers" :key="barber.id" class="flex items-center gap-3 px-6 py-3.5 hover:bg-white/[0.02] transition-colors">
           <span class="text-xs font-bold w-5 text-center" :class="idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-gray-400' : idx === 2 ? 'text-amber-700' : 'text-ivory/20'">#{{ idx + 1 }}</span>
-          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-admin/20 to-purple-500/20 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+          <div class="h-9 w-9 rounded-full bg-admin/10 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             {{ getInitials(barber.name) }}
           </div>
           <div class="flex-1 min-w-0">
@@ -29,8 +29,8 @@
     </div>
 
     <!-- Top Services -->
-    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
-      <div class="border-b border-white/[0.04] px-6 py-4">
+    <div class="rounded-xl border border-theme-border bg-theme-surface overflow-hidden">
+      <div class="border-b border-theme-border px-6 py-4">
         <h3 class="text-sm font-bold text-theme-text flex items-center gap-2">
           <SparklesIcon class="h-4 w-4 text-purple-400" />
           Popular Services
@@ -43,7 +43,7 @@
             <span class="text-[10px] text-ivory/40 font-bold tabular-nums">{{ service.bookings || 0 }} booked</span>
           </div>
           <div class="h-1.5 w-full rounded-full bg-white/[0.04] overflow-hidden">
-            <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-admin transition-all duration-700 group-hover:opacity-90"
+            <div class="h-full rounded-full bg-admin transition-all duration-700 group-hover:opacity-90"
                  :style="{ width: `${serviceBarWidth(service)}%` }"></div>
           </div>
         </div>
@@ -69,7 +69,7 @@ const getInitials = (name) => {
 };
 
 const formatCurrency = (value) => {
-  return Number(value || 0).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  return new Intl.NumberFormat('en-NG', { maximumFractionDigits: 0 }).format(Number(value || 0));
 };
 
 const serviceBarWidth = (service) => {

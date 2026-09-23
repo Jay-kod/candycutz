@@ -28,16 +28,19 @@ class ServicePolicy
 
     public function create(User $user): bool
     {
-        return false; // Handled by before() for admins
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber';
     }
 
     public function update(User $user, Service $service): bool
     {
-        return false; // Handled by before() for admins
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber' && $service->barber_id !== null && $service->barber_id === $user->barber?->id;
     }
 
     public function delete(User $user, Service $service): bool
     {
-        return false; // Handled by before() for admins
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber' && $service->barber_id !== null && $service->barber_id === $user->barber?->id;
     }
 }

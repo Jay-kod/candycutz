@@ -80,3 +80,29 @@ it('enforces the monthly barber username cooldown', function () {
     $response->assertStatus(422)->assertJsonPath('success', false);
     expect($response->json('message'))->toContain('30 days');
 });
+
+it('allows a barber to upload avatar and cover image', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+
+    $barber = Barber::factory()->create();
+    $user = User::findOrFail($barber->user_id);
+
+    $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
+    $avatar = \Illuminate\Http\UploadedFile::fake()->createWithContent('my_avatar.jpg', $jpegBytes);
+    $cover = \Illuminate\Http\UploadedFile::fake()->createWithContent('my_cover.jpg', $jpegBytes);
+
+    $response = $this->actingAs($user)->post('/api/v1/barbers/account', [
+        'name' => 'Barber With Images',
+        'avatar' => $avatar,
+        'cover_image' => $cover,
+    ]);
+
+    $response->assertOk();
+    $user->refresh();
+    expect($user->avatar)->not->toBeNull();
+    expect($user->cover_image)->not->toBeNull();
+
+    $barberData = $response->json('data.barber');
+    expect($barberData['avatar_url'])->not->toContain('storage/storage');
+    expect($barberData['cover_image_url'])->not->toContain('storage/storage');
+});

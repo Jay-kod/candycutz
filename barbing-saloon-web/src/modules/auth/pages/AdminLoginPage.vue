@@ -213,7 +213,7 @@ const isDark = useDark({
 isDark.value = true;
 
 const router = useRouter();
-const { login, redirectAfterLogin } = useAuth();
+const { login, redirectAfterLogin, user, logout } = useAuth();
 
 const email = ref('webadmin@candycutz.com');
 const password = ref('admin123');
@@ -268,6 +268,14 @@ async function submitForm() {
   try {
     await schema.validate({ email: email.value, password: password.value }, { abortEarly: false });
     await login({ email: email.value, password: password.value });
+
+    const role = user.value?.role?.value ?? user.value?.role;
+    if (role !== 'admin' && role !== 'super_admin') {
+      await logout();
+      generalError.value = 'Access denied. Only administrators can access this portal.';
+      return;
+    }
+
     await router.push(redirectAfterLogin());
   } catch (error) {
     if (error.inner) {

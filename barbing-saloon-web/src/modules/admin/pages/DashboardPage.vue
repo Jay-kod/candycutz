@@ -10,7 +10,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="grid gap-5 grid-cols-2 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="h-36 rounded-2xl bg-white/[0.03] animate-pulse border border-white/[0.04]"></div>
+        <div v-for="i in 8" :key="i" class="h-36 rounded-xl bg-white/[0.03] animate-pulse border border-white/[0.04]"></div>
       </div>
 
       <template v-else>
@@ -88,7 +88,7 @@ onUnmounted(() => {
 });
 
 // Format numbers
-const formatNumber = (value) => Number(value || 0).toLocaleString('en-US');
+const formatNumber = (value) => new Intl.NumberFormat('en-NG').format(Number(value || 0));
 
 const statsCards = computed(() => {
   const stats = dashboard.value.stats || {};

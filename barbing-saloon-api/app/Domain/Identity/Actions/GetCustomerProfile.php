@@ -40,6 +40,8 @@ class GetCustomerProfile
                 'name' => $customer->name,
                 'email' => $customer->email,
                 'phone' => $customer->phone ?? 'N/A',
+                'auth_provider' => $customer->auth_provider ?: 'local',
+                'registered_via' => $customer->auth_provider && $customer->auth_provider !== 'local' ? ucfirst($customer->auth_provider) : 'Registration form',
                 'avatar' => $customer->avatar,
                 'created_at' => $customer->created_at?->toIso8601String(),
             ],

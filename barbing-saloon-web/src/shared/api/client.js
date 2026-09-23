@@ -51,20 +51,41 @@ export function setupAxiosInterceptors() {
 
       // Handle specific status codes
       if (error.response?.status === 401) {
-        // Unauthorized - redirect to login
         localStorage.removeItem('candycutz_auth_token');
-        const path = window.location.pathname;
-        window.location.href = path.startsWith('/admin')
-          ? '/admin/login'
-          : path.startsWith('/barber')
-            ? '/barber/login'
-            : '/customer/login';
-        toast.error('Session expired. Please log in again.');
+
+        const requestUrl = error.config?.url || '';
+        const isAuthRequest = requestUrl.includes('/auth/login') ||
+                              requestUrl.includes('/auth/register') ||
+                              requestUrl.includes('/auth/social-login');
+
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+        const isAlreadyOnAuthPage = currentPath.includes('/login') ||
+                                    currentPath.includes('/register') ||
+                                    currentPath.includes('/forgot-password');
+
+        if (!isAuthRequest && !isAlreadyOnAuthPage) {
+          const redirectPath = currentPath.startsWith('/superadmin')
+            ? '/superadmin/login'
+            : currentPath.startsWith('/admin')
+              ? '/admin/login'
+              : currentPath.startsWith('/barber')
+                ? '/barber/login'
+                : '/customer/login';
+
+          toast.error('Session expired. Please log in again.');
+          window.location.href = redirectPath;
+        }
+
+        return Promise.reject(error);
       } else if (error.response?.status === 403) {
         // Forbidden
         toast.error('You do not have permission to perform this action.');
       } else if (error.response?.status === 422) {
         // Validation error - don't show generic toast, let component handle it
+        return Promise.reject(error);
+      } else if (error.response?.status === 404) {
+        // Log 404 warning in console without triggering disruptive UI toasts
+        console.warn(`[API 404] ${error.config?.method?.toUpperCase()} ${error.config?.url}: ${message}`);
         return Promise.reject(error);
       } else if (error.response?.status === 500) {
         toast.error('Server error. Please contact support.');

@@ -45,4 +45,24 @@ export const adminApi = {
   gateMetrics: () => client.get('/admin/gate/metrics'),
   gateLogs: (params) => client.get('/admin/gate/logs', { params }),
   flushGate: (data) => client.post('/admin/gate/flush', data),
+
+  // ── App Management ──
+  appOverview: () => client.get('/admin/app/overview'),
+  appVersions: () => client.get('/admin/app/versions'),
+  storeAppVersion: (data) => client.post('/admin/app/versions', data),
+  appSessions: (params) => client.get('/admin/app/sessions', { params }),
+  revokeSession: (id) => client.delete(`/admin/app/sessions/${id}`),
+  revokeUserSessions: (userId) => client.delete(`/admin/app/sessions/user/${userId}`),
+  pushHealth: () => client.get('/admin/app/push-health'),
+  pushTest: (data) => client.post('/admin/app/push-test', data),
+  appCrashes: (params) => client.get('/admin/app/crashes', { params }),
+  resolveCrash: (id) => client.patch(`/admin/app/crashes/${id}/resolve`),
+  toggleMaintenance: (data) => client.post('/admin/app/maintenance', data),
+
+  // ── Feature Flags ──
+  featureFlags: () => client.get('/admin/feature-flags'),
+  createFeatureFlag: (data) => client.post('/admin/feature-flags', data),
+  updateFeatureFlag: (id, data) => client.put(`/admin/feature-flags/${id}`, data),
+  toggleFeatureFlag: (id) => client.patch(`/admin/feature-flags/${id}/toggle`),
+  deleteFeatureFlag: (id) => client.delete(`/admin/feature-flags/${id}`),
 };

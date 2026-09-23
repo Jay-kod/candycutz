@@ -60,6 +60,10 @@ class Setting extends Model
             return 'mobile';
         }
 
+        if (str_starts_with($key, 'terms_') || str_starts_with($key, 'privacy_')) {
+            return 'legal';
+        }
+
         return 'general';
     }
 }

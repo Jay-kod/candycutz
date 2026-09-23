@@ -1,13 +1,13 @@
 <template>
   <div class="space-y-6">
     <!-- Quick Actions -->
-    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm p-5">
+    <div class="rounded-xl border border-theme-border bg-theme-surface p-5">
       <h3 class="text-sm font-bold text-theme-text mb-4 flex items-center gap-2">
         <BoltIcon class="h-4 w-4 text-admin" />
         Quick Actions
       </h3>
       <div class="grid grid-cols-2 gap-2.5">
-        <RouterLink v-for="action in quickActions" :key="action.label" :to="action.to" class="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.02] p-4 border border-white/[0.04] hover:bg-admin/8 hover:border-admin/20 transition-all group/action">
+        <RouterLink v-for="action in quickActions" :key="action.label" :to="action.to" class="flex flex-col items-center justify-center gap-1.5 rounded-lg bg-white/[0.02] p-4 border border-theme-border hover:bg-admin/8 hover:border-admin/20 transition-all group/action">
           <component :is="action.icon" class="h-5 w-5 text-ivory/40 group-hover/action:text-admin transition-colors" />
           <span class="text-[10px] font-bold text-ivory/50 uppercase tracking-wider group-hover/action:text-admin-light transition-colors">{{ action.label }}</span>
         </RouterLink>
@@ -15,8 +15,8 @@
     </div>
 
     <!-- Recent Activity Feed -->
-    <div class="rounded-2xl border border-white/[0.05] bg-[#040709]/95 backdrop-blur-sm overflow-hidden">
-      <div class="border-b border-white/[0.04] px-6 py-4">
+    <div class="rounded-xl border border-theme-border bg-theme-surface overflow-hidden">
+      <div class="border-b border-theme-border px-6 py-4">
         <h3 class="text-sm font-bold text-theme-text flex items-center gap-2">
           <ClockIcon class="h-4 w-4 text-cyan-400" />
           Recent Activity

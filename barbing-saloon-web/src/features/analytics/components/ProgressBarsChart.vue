@@ -3,7 +3,7 @@
     <div v-for="item in normalizedItems" :key="item.label" class="group">
       <div class="flex justify-between text-sm mb-1">
         <span class="text-ivory/80 font-medium">{{ item.label }}</span>
-        <span class="font-bold" :class="valueClass">{{ item.value }} {{ unit }}</span>
+        <span class="font-bold tabular-nums" :class="valueClass">{{ item.value }} {{ unit }}</span>
       </div>
       <div class="h-2 w-full bg-theme-bg rounded-full overflow-hidden border border-theme-border">
         <div class="h-full transition-all duration-1000 ease-out"
@@ -47,7 +47,7 @@ const props = defineProps({
   },
   barClass: {
     type: String,
-    default: 'bg-gradient-to-r from-gold to-gold-light'
+    default: 'bg-gold'
   }
 });
 

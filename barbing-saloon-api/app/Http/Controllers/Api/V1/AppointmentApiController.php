@@ -99,10 +99,20 @@ class AppointmentApiController
     public function store(StoreAppointmentRequest $request): JsonResponse
     {
         try {
+            $sourceInput = $request->input('source');
+            $source = match ($sourceInput) {
+                'app' => AppointmentSource::app,
+                'walk_in' => AppointmentSource::walk_in,
+                'web' => AppointmentSource::web,
+                default => ($request->header('X-Client-Type') === 'mobile' || $request->hasHeader('X-App-Version'))
+                    ? AppointmentSource::app
+                    : AppointmentSource::web,
+            };
+
             $appointment = $this->createBooking->execute(
                 $request->user(),
                 BookingData::fromRequest($request),
-                \App\Domain\Shared\Enums\AppointmentSource::app
+                $source
             );
 
             return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);

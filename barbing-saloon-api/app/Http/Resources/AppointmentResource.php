@@ -17,6 +17,12 @@ class AppointmentResource extends JsonResource
         $service = $this->service;
         $barber = $this->barber;
         $statusVal = $this->status?->value ?? $this->status;
+        $sourceVal = $this->source?->value ?? (is_string($this->source) ? $this->source : 'web');
+        $sourceLabel = $this->source instanceof \App\Domain\Shared\Enums\AppointmentSource ? $this->source->label() : (match ($sourceVal) {
+            'app' => 'Mobile App',
+            'walk_in' => 'Walk-In',
+            default => 'Website',
+        });
 
         return [
             'id' => $this->id,
@@ -31,6 +37,8 @@ class AppointmentResource extends JsonResource
             'end_time' => $this->end_time ? substr((string) $this->end_time, 0, 5) : null,
             'appointment_type' => $this->appointment_type ?? 'in_shop',
             'booking_type' => (str_contains($this->client_name ?? '', 'Walk-In') || $this->customer_id === null) ? 'walk_in' : 'online',
+            'source' => $sourceVal,
+            'source_label' => $sourceLabel,
             'status' => $statusVal,
             'verification_code' => $this->verification_code,
             'payment_status' => $this->deposit_paid ? 'paid' : 'pending',

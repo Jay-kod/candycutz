@@ -58,25 +58,32 @@ class GalleryApiController
 
         $user = $request->user();
         $barber = $user->barber;
+        $barberId = $barber?->id ?? ($request->has('barber_id') ? (int) $request->barber_id : null);
 
         $validated = $request->validate([
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'nullable|string',
             'image' => 'required|image|max:5120',
         ]);
 
+        $category = $validated['category'] ?? 'haircut';
+        $validCategories = ['haircut', 'beard', 'combo', 'before_after', 'shop'];
+        if (! in_array($category, $validCategories)) {
+            $category = 'haircut';
+        }
+
         $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/gallery');
 
         $gallery = Gallery::create([
-            'barber_id' => $barber->id,
+            'barber_id' => $barberId,
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'category' => $validated['category'] ?? null,
+            'category' => $category,
             'image_path' => '/storage/'.$path,
         ]);
 
-        return ApiResponse::success(new GalleryResource($gallery), 'Gallery item created', 201);
+        return ApiResponse::success(new GalleryResource($gallery->load('barber.user')), 'Gallery item created', 201);
     }
 
     public function destroy(Request $request, int $id): JsonResponse

@@ -24,6 +24,7 @@
               <th class="px-6 py-4 font-bold">Client Details</th>
               <th class="px-6 py-4 font-bold">Service & Barber</th>
               <th class="px-6 py-4 font-bold">Schedule</th>
+              <th class="px-6 py-4 font-bold">Source</th>
               <th class="px-6 py-4 font-bold">Status</th>
               <th class="px-6 py-4 text-right font-bold">Actions</th>
             </tr>
@@ -61,6 +62,22 @@
                   <p class="text-sm text-white/90 font-medium flex items-center gap-1.5"><CalendarDaysIcon class="h-4 w-4 text-white/30" /> {{ formatDate(appointment.appointment_date) }}</p>
                   <p class="text-xs text-admin font-bold flex items-center gap-1.5"><ClockIcon class="h-4 w-4 opacity-60" /> {{ appointment.appointment_time }}</p>
                 </div>
+              </td>
+
+              <!-- Source -->
+              <td class="px-6 py-5 align-middle">
+                <span v-if="appointment.source === 'app'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-sm">
+                  <DevicePhoneMobileIcon class="h-3.5 w-3.5" />
+                  App
+                </span>
+                <span v-else-if="appointment.source === 'walk_in' || appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm">
+                  <UserPlusIcon class="h-3.5 w-3.5" />
+                  Walk-In
+                </span>
+                <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20 shadow-sm">
+                  <GlobeAltIcon class="h-3.5 w-3.5" />
+                  Website
+                </span>
               </td>
 
               <!-- Status -->
@@ -151,7 +168,7 @@
 import { 
   BanknotesIcon, UserIcon, DocumentTextIcon, CheckIcon, XMarkIcon, 
   ClipboardDocumentCheckIcon, HashtagIcon, ClockIcon, CalendarDaysIcon, 
-  UserPlusIcon, GlobeAltIcon, ShieldCheckIcon
+  UserPlusIcon, GlobeAltIcon, ShieldCheckIcon, DevicePhoneMobileIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({

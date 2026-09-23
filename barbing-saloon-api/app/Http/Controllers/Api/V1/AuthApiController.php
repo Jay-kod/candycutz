@@ -19,6 +19,7 @@ use App\Http\Resources\BarberResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class AuthApiController
@@ -69,7 +70,19 @@ class AuthApiController
                 'token' => $payload['token'],
             ], 'Social login successful');
         } catch (RuntimeException $e) {
-            return ApiResponse::error($e->getMessage(), [], 400);
+            return ApiResponse::error($e->getMessage(), [], 400, 'SOCIAL_LOGIN_FAILED');
+        } catch (\Throwable $e) {
+            Log::error('Social login failed unexpectedly', [
+                'provider' => $validated['provider'],
+                'exception' => $e,
+            ]);
+
+            return ApiResponse::error(
+                'Google sign-in could not be completed. Please try again.',
+                [],
+                422,
+                'SOCIAL_LOGIN_FAILED'
+            );
         }
     }
 

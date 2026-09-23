@@ -104,6 +104,42 @@
                 <input v-model="form.google_client_id" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin outline-none" placeholder="1234567890-abcdef.apps.googleusercontent.com" />
                 <p class="text-[11px] text-ivory/40 mt-1.5">Create in Google Cloud Console: APIs &amp; Services → Credentials → OAuth 2.0 Client ID (Web).</p>
               </div>
+              <div class="md:col-span-2">
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">Google Android Client ID</label>
+                <input v-model="form.google_android_client_id" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text placeholder-ivory/30 focus:border-admin outline-none" placeholder="1234567890-abcdef.apps.googleusercontent.com" />
+                <p class="text-[11px] text-ivory/40 mt-1.5">Create a separate OAuth 2.0 Client ID with application type Android using the setup details below.</p>
+              </div>
+              <div class="md:col-span-2 rounded-2xl border border-admin/20 bg-admin/5 p-4 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div>
+                    <h4 class="text-sm font-bold text-theme-text">Android OAuth setup details</h4>
+                    <p class="text-[11px] text-ivory/45 mt-1">Use these values when creating the Android client in Google Cloud Console.</p>
+                  </div>
+                  <button @click="generateGoogleAndroidDetails" type="button" class="px-3 py-2 rounded-lg text-xs font-bold text-admin border border-admin/30 bg-admin/10 hover:bg-admin/20 transition-colors">
+                    Generate Setup Details
+                  </button>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">Application name</label>
+                    <input v-model="form.google_android_name" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text focus:border-admin outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">Package name</label>
+                    <div class="flex gap-2">
+                      <input v-model="form.google_android_package" class="min-w-0 flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text focus:border-admin outline-none" />
+                      <button @click="copyGoogleValue(form.google_android_package, 'Package name')" type="button" class="px-3 rounded-xl border border-white/10 text-xs text-ivory/70 hover:text-white hover:border-admin/40">Copy</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-ivory/50 mb-1.5">SHA-1 fingerprint</label>
+                    <div class="flex gap-2">
+                      <input v-model="form.google_android_sha1" class="min-w-0 flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-theme-text focus:border-admin outline-none" />
+                      <button @click="copyGoogleValue(form.google_android_sha1, 'SHA-1 fingerprint')" type="button" class="px-3 rounded-xl border border-white/10 text-xs text-ivory/70 hover:text-white hover:border-admin/40">Copy</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="border-t border-white/5 pt-6">
@@ -154,6 +190,10 @@ const form = reactive({
   mail_from: '',
   mail_from_name: 'CandyCutz',
   google_client_id: '',
+  google_android_client_id: '',
+  google_android_name: 'CandyCutz Android Debug',
+  google_android_package: 'com.candycutz.app',
+  google_android_sha1: '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25',
   apple_client_id: '',
   apple_team_id: '',
   apple_key_id: '',
@@ -183,10 +223,30 @@ function applySettings(all) {
   form.mail_from = s.mail_from || '';
   form.mail_from_name = s.mail_from_name || 'CandyCutz';
   form.google_client_id = s.google_client_id || '';
+  form.google_android_client_id = s.google_android_client_id || '';
+  form.google_android_name = s.google_android_name || 'CandyCutz Android Debug';
+  form.google_android_package = s.google_android_package || 'com.candycutz.app';
+  form.google_android_sha1 = s.google_android_sha1 || '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25';
   form.apple_client_id = s.apple_client_id || '';
   form.apple_team_id = s.apple_team_id || '';
   form.apple_key_id = s.apple_key_id || '';
   form.app_url = s.app_url || '';
+}
+
+function generateGoogleAndroidDetails() {
+  form.google_android_name = 'CandyCutz Android Debug';
+  form.google_android_package = 'com.candycutz.app';
+  form.google_android_sha1 = '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25';
+  setFlash('Google Android setup details generated. Save the integration settings to keep edits.');
+}
+
+async function copyGoogleValue(value, label) {
+  try {
+    await navigator.clipboard.writeText(value || '');
+    setFlash(`${label} copied.`);
+  } catch (error) {
+    setFlash(`Could not copy ${label.toLowerCase()}.`, 'error');
+  }
 }
 
 async function loadSettings() {

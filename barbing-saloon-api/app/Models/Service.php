@@ -25,6 +25,9 @@ class Service extends Model
         'home_service_allowed',
         'is_available',
         'is_active',
+        'approval_status',
+        'approved_by',
+        'approved_at',
         'is_featured',
         'display_order',
     ];
@@ -36,6 +39,7 @@ class Service extends Model
         'is_active' => 'boolean',
         'is_available' => 'boolean',
         'is_featured' => 'boolean',
+        'approved_at' => 'datetime',
     ];
 
     public function branch(): BelongsTo
@@ -46,6 +50,16 @@ class Service extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceCategory::class, 'category_id');
+    }
+
+    public function barber(): BelongsTo
+    {
+        return $this->belongsTo(Barber::class);
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function appointments(): HasMany

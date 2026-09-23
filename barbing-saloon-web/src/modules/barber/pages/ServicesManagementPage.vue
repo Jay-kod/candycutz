@@ -148,15 +148,31 @@
                 <p v-if="service.description" class="text-sm text-white/50 line-clamp-2 mb-auto leading-relaxed">{{ service.description }}</p>
                 <p v-else class="text-sm text-white/20 italic mb-auto">No description provided</p>
 
-                <!-- Availability -->
-                <div class="mt-4 mb-4">
+                <!-- Status and Approval Badges -->
+                <div class="mt-4 mb-4 flex items-center gap-2 flex-wrap">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5"
+                    :class="{
+                      'bg-amber-500/10 text-amber-400 border-amber-500/20': service.approval_status === 'pending',
+                      'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': service.approval_status === 'approved' || !service.approval_status,
+                      'bg-rose-500/10 text-rose-400 border-rose-500/20': service.approval_status === 'rejected'
+                    }"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full" :class="{
+                      'bg-amber-400 animate-pulse': service.approval_status === 'pending',
+                      'bg-emerald-400': service.approval_status === 'approved' || !service.approval_status,
+                      'bg-rose-400': service.approval_status === 'rejected'
+                    }"></span>
+                    {{ service.approval_status === 'pending' ? 'Pending Approval' : (service.approval_status === 'rejected' ? 'Rejected' : 'Approved') }}
+                  </span>
+
                   <span
                     class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border"
-                    :class="service.is_available
+                    :class="service.is_active
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : 'bg-red-500/10 text-red-400 border-red-500/20'"
+                      : 'bg-white/5 text-white/40 border-white/10'"
                   >
-                    {{ service.is_available ? 'Available' : 'Unavailable' }}
+                    {{ service.is_active ? 'Active on Chair' : 'Inactive' }}
                   </span>
                 </div>
 

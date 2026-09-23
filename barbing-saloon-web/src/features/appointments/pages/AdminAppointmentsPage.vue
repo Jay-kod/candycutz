@@ -13,6 +13,7 @@
       <AppointmentsFilters
         :tabs="tabs"
         v-model:currentFilter="currentFilter"
+        v-model:sourceFilter="sourceFilter"
         v-model:sortOrder="sortOrder"
       />
 
@@ -99,6 +100,7 @@ const {
 
 const search = ref('');
 const currentFilter = ref('all');
+const sourceFilter = ref('all');
 const sortOrder = ref('newest_created');
 const selectedBooking = ref(null);
 const detailsModal = ref(null);
@@ -136,6 +138,14 @@ const filteredAppointments = computed(() => {
       result = result.filter(a => a.status === currentFilter.value);
     }
   }
+
+  // Apply source filter
+  if (sourceFilter.value !== 'all') {
+    result = result.filter(a => {
+      const src = a.source || (a.booking_type === 'walk_in' ? 'walk_in' : 'web');
+      return src === sourceFilter.value;
+    });
+  }
   
   // Apply search filter
   if (search.value) {
@@ -170,6 +180,7 @@ const filteredAppointments = computed(() => {
 function resetFilters() {
   search.value = '';
   currentFilter.value = 'all';
+  sourceFilter.value = 'all';
 }
 
 const viewReceipt = (booking) => {

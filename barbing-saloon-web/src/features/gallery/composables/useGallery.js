@@ -13,14 +13,10 @@ export function useGallery(role = 'admin') {
   const gallery = ref([]);
   const barbers = ref([]);
   
-  const getBaseUrl = () => {
-    return role === 'admin' ? '/v1/admin' : '/v1/barber';
-  };
-
   const fetchGallery = async () => {
     try {
       loading.value = true;
-      const res = await api.get(`${getBaseUrl()}/gallery`);
+      const res = await api.get('/gallery');
       gallery.value = res.data.data || [];
     } catch (err) {
       toast.error('Failed to load gallery');
@@ -32,7 +28,7 @@ export function useGallery(role = 'admin') {
   const fetchBarbers = async () => {
     if (role !== 'admin') return;
     try {
-      const res = await api.get('/v1/admin/barbers');
+      const res = await api.get('/barbers');
       barbers.value = res.data.data || [];
     } catch (err) {
       console.error('Failed to load barbers', err);
@@ -43,12 +39,15 @@ export function useGallery(role = 'admin') {
     saving.value = true;
     try {
       if (editingId) {
-        await api.post(`${getBaseUrl()}/gallery/${editingId}`, formData, {
+        if (formData instanceof FormData) {
+          formData.append('_method', 'PUT');
+        }
+        await api.post(`/gallery/${editingId}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         toast.success('Image updated successfully');
       } else {
-        await api.post(`${getBaseUrl()}/gallery`, formData, {
+        await api.post('/gallery', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         toast.success('Image added to gallery');
@@ -56,7 +55,7 @@ export function useGallery(role = 'admin') {
       await fetchGallery();
       return true;
     } catch (err) {
-      const errorMsg = err.response?.data?.error || (editingId ? 'Failed to update image' : 'Failed to upload image');
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || (editingId ? 'Failed to update image' : 'Failed to upload image');
       toast.error(errorMsg);
       return false;
     } finally {
@@ -74,7 +73,7 @@ export function useGallery(role = 'admin') {
     if (!ok) return false;
     
     try {
-      await api.delete(`${getBaseUrl()}/gallery/${id}`);
+      await api.delete(`/gallery/${id}`);
       gallery.value = gallery.value.filter(g => g.id !== id);
       toast.success('Image deleted');
       return true;

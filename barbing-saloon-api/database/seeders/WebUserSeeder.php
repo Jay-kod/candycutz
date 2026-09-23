@@ -139,5 +139,54 @@ class WebUserSeeder extends Seeder
                 'is_featured' => true,
             ]
         );
+
+        // ── 3. Designated Mobile Demo Accounts ────────────────────
+        
+        // Customer: fonetestcuz@candycutz.com / customer123
+        User::updateOrCreate(
+            ['email' => 'fonetestcuz@candycutz.com'],
+            [
+                'name' => 'Demo Phone Customer',
+                'real_name' => 'Demo Phone Customer',
+                'username' => 'fonetestcuz',
+                'password' => Hash::make('customer123'),
+                'role' => UserRole::customer->value,
+                'phone' => '08091112233',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        // Barber: fonetestbar@candycutz.com / barber123
+        $phoneBarber = User::updateOrCreate(
+            ['email' => 'fonetestbar@candycutz.com'],
+            [
+                'name' => 'Demo Phone Barber',
+                'real_name' => 'Demo Phone Barber',
+                'username' => 'fonetestbar',
+                'password' => Hash::make('barber123'),
+                'role' => UserRole::barber->value,
+                'phone' => '08094445566',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        Barber::updateOrCreate(
+            ['user_id' => $phoneBarber->id],
+            [
+                'bio' => 'Flagship resident barber for mobile app testing and appointments.',
+                'specialties' => ['fade', 'scissor cut', 'beard styling', 'vip grooming'],
+                'years_experience' => 6,
+                'experience_years' => 6,
+                'is_available' => true,
+                'is_home_service_ready' => true,
+                'chair_status' => 'free',
+                'rating' => 5.00,
+                'total_reviews' => 18,
+                'is_featured' => true,
+            ]
+        );
     }
 }
+

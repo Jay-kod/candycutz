@@ -28,16 +28,19 @@ class BlogPostPolicy
 
     public function create(User $user): bool
     {
-        return false;
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber';
     }
 
     public function update(User $user, BlogPost $blogPost): bool
     {
-        return false;
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber' && $blogPost->author_id === $user->id;
     }
 
     public function delete(User $user, BlogPost $blogPost): bool
     {
-        return false;
+        $role = $user->role?->value ?? $user->role;
+        return $role === 'barber' && $blogPost->author_id === $user->id;
     }
 }

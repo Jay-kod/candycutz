@@ -62,24 +62,33 @@
 
         <!-- Review History -->
         <div class="rounded-2xl border border-theme-border bg-theme-surface/80 p-8 backdrop-blur-sm">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-3">
               <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 border border-gold/20">
                 <ClockIcon class="h-5 w-5 text-gold" />
               </div>
               <div>
                 <h2 class="font-display text-2xl text-theme-text">Your <span class="text-gold">History</span></h2>
-                <p class="text-xs text-theme-muted mt-0.5">{{ reviewsList.length }} review{{ reviewsList.length !== 1 ? 's' : '' }} submitted</p>
+                <p class="text-xs text-theme-muted mt-0.5">{{ filteredReviewsList.length }} review{{ filteredReviewsList.length !== 1 ? 's' : '' }} submitted</p>
               </div>
             </div>
-            <button 
-              class="rounded-xl p-2.5 text-theme-muted hover:bg-gold/10 hover:text-gold transition-all border border-transparent hover:border-gold/20" 
-              @click="loadReviews" 
-              title="Refresh"
-              :class="{ 'animate-spin': loadingReviews }"
-            >
-              <ArrowPathIcon class="h-5 w-5" />
-            </button>
+            <div class="flex items-center gap-3">
+              <select 
+                v-model="selectedServiceFilter"
+                class="bg-theme-bg/80 border border-theme-border text-theme-text text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-gold/50"
+              >
+                <option value="all">All Services</option>
+                <option v-for="s in services" :key="s.id" :value="s.id">{{ s.name }}</option>
+              </select>
+              <button 
+                class="rounded-xl p-2.5 text-theme-muted hover:bg-gold/10 hover:text-gold transition-all border border-transparent hover:border-gold/20" 
+                @click="loadReviews" 
+                title="Refresh"
+                :class="{ 'animate-spin': loadingReviews }"
+              >
+                <ArrowPathIcon class="h-5 w-5" />
+              </button>
+            </div>
           </div>
           
           <!-- Loading State -->
@@ -103,7 +112,7 @@
           <!-- Review Cards -->
           <div v-else class="mt-6 space-y-4">
             <CustomerReviewItem
-              v-for="(item, index) in reviewsList"
+              v-for="(item, index) in filteredReviewsList"
               :key="item.id"
               :item="item"
               :index="index"
@@ -111,12 +120,12 @@
             />
             
             <!-- Empty State -->
-            <div v-if="reviewsList.length === 0" class="rounded-xl border border-dashed border-theme-border p-12 text-center">
+            <div v-if="filteredReviewsList.length === 0" class="rounded-xl border border-dashed border-theme-border p-12 text-center">
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-theme-surface border border-theme-border text-theme-muted/30 mb-4">
                 <ChatBubbleBottomCenterTextIcon class="h-8 w-8" />
               </div>
-              <p class="text-sm font-medium text-theme-muted">No reviews yet</p>
-              <p class="text-xs text-theme-muted/70 mt-1">Your submitted reviews will appear here</p>
+              <p class="text-sm font-medium text-theme-muted">No reviews found</p>
+              <p class="text-xs text-theme-muted/70 mt-1">Try selecting another service or submit your first review</p>
             </div>
           </div>
         </div>
@@ -149,10 +158,16 @@ const services = ref([])
 const status = ref('')
 const loadingReviews = ref(true)
 const submitting = ref(false)
+const selectedServiceFilter = ref('all')
 
 const ratingLabels = ['Poor', 'Fair', 'Good', 'Great', 'Excellent']
 
 const reviewsList = computed(() => reviews.value.data || reviews.value)
+const filteredReviewsList = computed(() => {
+  const list = reviewsList.value
+  if (selectedServiceFilter.value === 'all') return list
+  return list.filter(r => (r.service_id == selectedServiceFilter.value || r.service?.id == selectedServiceFilter.value))
+})
 const totalReviews = computed(() => reviewsList.value.length)
 
 const averageRating = computed(() => {
