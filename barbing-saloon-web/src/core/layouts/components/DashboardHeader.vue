@@ -1,7 +1,7 @@
 <template>
   <header 
-    class="flex h-20 items-center justify-between border-b border-white/[0.05] px-6 backdrop-blur-xl sticky top-0 z-30 shrink-0"
-    :class="themeClasses.headerBg || 'bg-theme-bg/90'"
+    class="flex h-20 items-center justify-between border-b px-6 backdrop-blur-xl sticky top-0 z-30 shrink-0"
+    :class="[themeClasses.headerBg || 'bg-theme-bg/90', themeClasses.headerBorder || 'border-white/[0.05]']"
   >
     <div class="flex items-center gap-4">
       <!-- Mobile Hamburger -->
@@ -22,7 +22,7 @@
       </button>
 
       <!-- Breadcrumb/Title -->
-      <h2 class="font-display text-xl text-theme-text hidden sm:block">
+      <h2 class="font-display text-xl hidden sm:block" :class="themeClasses.headerTitle || 'text-theme-text'">
         {{ currentRouteName }}
       </h2>
     </div>
@@ -33,21 +33,25 @@
         <NotificationBell />
 
         <!-- Theme Toggle -->
-        <button @click="toggleDark()" class="p-2 text-theme-muted hover:text-theme-text transition-colors" aria-label="Toggle theme">
+        <button
+          @click="toggleDark()"
+          :class="['p-2 transition-colors rounded-lg', themeClasses.iconBtn || 'text-theme-muted hover:text-theme-text']"
+          aria-label="Toggle theme"
+        >
           <SunIcon v-if="isDark" class="h-6 w-6" />
           <MoonIcon v-else class="h-6 w-6" />
         </button>
       </div>
 
       <!-- User Profile Snippet -->
-      <div class="flex items-center gap-3 rounded-full border border-theme-border py-1.5 pl-1.5 pr-4 bg-theme-surface">
+      <div :class="['flex items-center gap-3 rounded-full border py-1.5 pl-1.5 pr-4', themeClasses.userPill || 'border-theme-border bg-theme-surface']">
         <div v-if="userAvatarUrl" class="h-8 w-8 rounded-full overflow-hidden border border-theme-border">
           <img :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
         </div>
         <div v-else :class="['flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold', themeClasses.bg20, themeClasses.text]">
           {{ userInitials }}
         </div>
-        <span class="text-sm font-medium text-theme-text hidden md:block">{{ userName }}</span>
+        <span class="text-sm font-medium hidden md:block" :class="themeClasses.headerTitle || 'text-theme-text'">{{ userName }}</span>
       </div>
     </div>
   </header>

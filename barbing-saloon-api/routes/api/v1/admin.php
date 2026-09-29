@@ -104,6 +104,7 @@ Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function ()
     Route::patch('/super-admin/users/{user}', [SuperAdminApiController::class, 'updateUser']);
     Route::patch('/super-admin/users/{user}/activate', [SuperAdminApiController::class, 'activateUser']);
     Route::patch('/super-admin/users/{user}/deactivate', [SuperAdminApiController::class, 'deactivateUser']);
+    Route::post('/super-admin/users/{user}/reset-password', [SuperAdminApiController::class, 'resetPassword']);
     Route::delete('/super-admin/users/{user}', [SuperAdminApiController::class, 'deleteUser']);
     Route::get('/super-admin/settings', [SuperAdminApiController::class, 'settings']);
     Route::post('/super-admin/settings', [SuperAdminApiController::class, 'updateSettings']);
@@ -116,6 +117,7 @@ Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function ()
     Route::patch('/superadmin/users/{user}', [SuperAdminApiController::class, 'updateUser']);
     Route::patch('/superadmin/users/{user}/activate', [SuperAdminApiController::class, 'activateUser']);
     Route::patch('/superadmin/users/{user}/deactivate', [SuperAdminApiController::class, 'deactivateUser']);
+    Route::post('/superadmin/users/{user}/reset-password', [SuperAdminApiController::class, 'resetPassword']);
     Route::delete('/superadmin/users/{user}', [SuperAdminApiController::class, 'deleteUser']);
     Route::get('/superadmin/settings', [SuperAdminApiController::class, 'settings']);
     Route::post('/superadmin/settings', [SuperAdminApiController::class, 'updateSettings']);

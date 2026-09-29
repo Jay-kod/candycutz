@@ -54,6 +54,18 @@ class ManageUsers
         return $user->refresh();
     }
 
+    public function adminResetPassword(User $user, string $newPassword): User
+    {
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($newPassword),
+        ]);
+        
+        // Invalidate existing tokens so they are forced to log in again
+        $user->tokens()->delete();
+        
+        return $user->refresh();
+    }
+
     public function deleteUser(User $user): void
     {
         $user->delete();

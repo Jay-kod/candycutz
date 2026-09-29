@@ -14,7 +14,8 @@
         'lg:static lg:h-full lg:max-h-full lg:translate-x-0',
         'sidebar-panel backdrop-blur-xl',
         themeClasses.surfaceBg || 'bg-[#090a0d]/95',
-        'border-r border-white/[0.07]',
+        'border-r',
+        portalConfig.sidebarBorder || 'border-white/[0.07]',
         isMobileSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/80' : '-translate-x-full',
         isSidebarCollapsed ? 'lg:w-[88px]' : 'w-72'
       ]"
@@ -26,7 +27,7 @@
       </div>
 
       <!-- Sidebar Header / Brand Emblem -->
-      <div class="relative z-10 flex h-20 shrink-0 items-center justify-between px-5 border-b border-white/[0.06]">
+      <div :class="['relative z-10 flex h-20 shrink-0 items-center justify-between px-5 border-b', portalConfig.headerBorder || 'border-white/[0.06]']">
         <RouterLink :to="homeRoute" class="flex items-center gap-3 group min-w-0">
           <!-- Logo Emblem with Luxury Rim -->
           <div class="relative flex items-center justify-center shrink-0">
@@ -44,7 +45,7 @@
               isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100'
             ]"
           >
-            <div class="font-display text-xl font-bold tracking-tight text-white leading-none">
+            <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-white']">
               Candy<span :class="themeClasses.text || 'text-amber-400'">Cutz</span>
             </div>
             <div :class="['inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border', portalConfig.badgeClass]">
@@ -57,7 +58,7 @@
         <!-- Mobile Close Button -->
         <button
           @click="$emit('closeMobile')"
-          class="lg:hidden p-2 text-white/50 hover:text-white transition-colors rounded-xl hover:bg-white/5"
+          :class="['lg:hidden p-2 transition-colors rounded-xl', portalConfig.closeBtn || 'text-white/50 hover:text-white hover:bg-white/5']"
           aria-label="Close sidebar"
         >
           <XMarkIcon class="h-5 w-5" />
@@ -83,7 +84,7 @@
             </p>
             <div
               v-if="!isSidebarCollapsed"
-              class="h-px flex-1 ml-3 bg-gradient-to-r from-white/[0.08] to-transparent"
+              :class="['h-px flex-1 ml-3', portalConfig.sectionLine || 'bg-gradient-to-r from-white/[0.08] to-transparent']"
             ></div>
           </div>
 
@@ -104,7 +105,7 @@
                       portalConfig.activeBorder,
                       'shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]'
                     ]
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06]'
+                  : (portalConfig.navInactive || 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06]')
               ]"
               :title="isSidebarCollapsed ? item.name : ''"
             >
@@ -120,7 +121,7 @@
                   'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
                   isActiveRoute(item.to)
                     ? [portalConfig.iconActive, 'border']
-                    : ['bg-transparent text-white/40 group-hover:bg-white/[0.05]', portalConfig.iconHover]
+                    : (portalConfig.iconInactive || ['bg-transparent text-white/40 group-hover:bg-white/[0.05]', portalConfig.iconHover])
                 ]"
               >
                 <component
@@ -134,7 +135,7 @@
                 :class="[
                   'text-[13px] tracking-wide whitespace-nowrap transition-all duration-200',
                   isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto',
-                  isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-white'] : 'font-medium group-hover:text-white'
+                  isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-white'] : ['font-medium', portalConfig.navLabelHover || 'group-hover:text-white']
                 ]"
               >
                 {{ item.name }}
@@ -159,11 +160,11 @@
       </div>
 
       <!-- Profile Card & Sign Out Footer (Pinned) -->
-      <div class="relative z-10 shrink-0 mt-auto border-t border-white/[0.07] p-3">
+      <div :class="['relative z-10 shrink-0 mt-auto border-t p-3', portalConfig.profileBorder || 'border-white/[0.07]']">
         <!-- Expanded Profile Card -->
         <div
           v-if="!isSidebarCollapsed"
-          class="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2.5 transition-all duration-200 hover:border-white/[0.14] hover:bg-white/[0.05]"
+          :class="['rounded-2xl border p-2.5 transition-all duration-200', portalConfig.profileCard || 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]']"
         >
           <div class="flex items-center gap-3">
             <!-- User Avatar with Status Indicator -->
@@ -195,14 +196,14 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['block truncate text-[13px] font-semibold text-white transition-colors', portalConfig.hoverText]"
+                :class="['block truncate text-[13px] font-semibold transition-colors', portalConfig.profileName || 'text-white', portalConfig.hoverText]"
               >
                 {{ userName }}
               </RouterLink>
-              <span v-else class="block truncate text-[13px] font-semibold text-white">
+              <span v-else :class="['block truncate text-[13px] font-semibold', portalConfig.profileName || 'text-white']">
                 {{ userName }}
               </span>
-              <p class="truncate text-[11px] text-white/40">
+              <p :class="['truncate text-[11px]', portalConfig.profileEmail || 'text-white/40']">
                 {{ userEmail || (portalName + ' Staff') }}
               </p>
             </div>
@@ -212,14 +213,14 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/10 transition-colors', portalConfig.hoverText]"
+                :class="['flex h-7 w-7 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-white/40 hover:bg-white/10', portalConfig.hoverText]"
                 title="Settings"
               >
                 <Cog6ToothIcon class="h-4 w-4" />
               </RouterLink>
               <button
                 @click="$emit('logout')"
-                class="flex h-7 w-7 items-center justify-center rounded-lg text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-7 w-7 text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
                 title="Sign Out"
               >
                 <ArrowRightOnRectangleIcon class="h-4 w-4" />
@@ -245,7 +246,7 @@
 
           <button
             @click="$emit('logout')"
-            class="flex h-9 w-9 items-center justify-center rounded-xl text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            :class="['flex h-9 w-9 items-center justify-center rounded-xl transition-colors', portalConfig.logoutBtn || 'text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
             title="Sign Out"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4" />
@@ -258,6 +259,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useDark } from '@vueuse/core';
 import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
@@ -282,8 +284,80 @@ const props = defineProps({
 
 defineEmits(['closeMobile', 'logout']);
 
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'data-theme',
+  valueDark: 'dark',
+  valueLight: 'light',
+});
+
 const portalConfig = computed(() => {
   const p = props.portalName?.toLowerCase() || '';
+  if (p === 'super admin') {
+    if (isDark.value) {
+      // Night Mode: Complete Red & Jet Black
+      return {
+        title: 'Command Center',
+        badgeClass: 'bg-red-500/15 text-red-400 border-red-500/30',
+        dotClass: 'bg-red-500 animate-pulse',
+        rimGradient: 'from-red-500/60 via-red-600/20 to-transparent shadow-[0_0_20px_rgba(239,68,68,0.3)]',
+        activeGradient: 'bg-gradient-to-r from-red-500/20 via-red-500/10 to-transparent',
+        activeBorder: 'border-red-500/30',
+        activeIndicator: 'bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_12px_rgba(239,68,68,0.9)]',
+        iconActive: 'bg-red-500/20 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.35)]',
+        iconHover: 'group-hover:text-red-400',
+        avatarRing: 'border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.25)]',
+        avatarText: 'text-red-400',
+        chevronColor: 'text-red-500/70',
+        hoverText: 'hover:text-red-400',
+        sidebarBorder: 'border-red-950/60',
+        headerBorder: 'border-red-950/60',
+        brandText: 'text-white',
+        navInactive: 'text-white/60 hover:text-white hover:bg-red-500/[0.08] border border-transparent hover:border-red-500/20',
+        iconInactive: 'bg-transparent text-white/40 group-hover:bg-red-500/15 group-hover:text-red-400',
+        navLabelHover: 'group-hover:text-white',
+        sectionLine: 'bg-gradient-to-r from-red-900/40 to-transparent',
+        profileBorder: 'border-red-950/60',
+        profileCard: 'border-red-950/60 bg-red-950/20 hover:border-red-500/30 hover:bg-red-950/30',
+        profileName: 'text-white',
+        profileEmail: 'text-white/40',
+        profileActionBtn: 'text-white/40 hover:bg-white/10 hover:text-white',
+        logoutBtn: 'h-7 w-7 text-red-400/60 hover:bg-red-500/10 hover:text-red-400',
+        closeBtn: 'text-white/50 hover:text-white hover:bg-white/5',
+      };
+    } else {
+      // Light Mode: Complete Green & Crisp White
+      return {
+        title: 'Command Center',
+        badgeClass: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30',
+        dotClass: 'bg-emerald-500 animate-pulse',
+        rimGradient: 'from-emerald-500/60 via-emerald-600/20 to-transparent shadow-[0_0_20px_rgba(16,185,129,0.25)]',
+        activeGradient: 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent',
+        activeBorder: 'border-emerald-500/30',
+        activeIndicator: 'bg-gradient-to-b from-emerald-500 to-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.8)]',
+        iconActive: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.25)]',
+        iconHover: 'group-hover:text-emerald-700',
+        avatarRing: 'border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]',
+        avatarText: 'text-emerald-700',
+        chevronColor: 'text-emerald-600/70',
+        hoverText: 'hover:text-emerald-600',
+        sidebarBorder: 'border-emerald-100',
+        headerBorder: 'border-emerald-100',
+        brandText: 'text-slate-900',
+        navInactive: 'text-slate-600 hover:text-slate-900 hover:bg-emerald-50/80 border border-transparent hover:border-emerald-200/60',
+        iconInactive: 'bg-transparent text-slate-400 group-hover:bg-emerald-100/50 group-hover:text-emerald-700',
+        navLabelHover: 'group-hover:text-slate-900',
+        sectionLine: 'bg-gradient-to-r from-emerald-200/70 to-transparent',
+        profileBorder: 'border-emerald-100',
+        profileCard: 'border-emerald-200/60 bg-emerald-50/50 hover:border-emerald-300 hover:bg-emerald-50/80',
+        profileName: 'text-slate-900',
+        profileEmail: 'text-slate-500',
+        profileActionBtn: 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
+        logoutBtn: 'h-7 w-7 text-red-500/70 hover:bg-red-50 hover:text-red-600',
+        closeBtn: 'text-slate-500 hover:text-slate-800 hover:bg-slate-100',
+      };
+    }
+  }
   if (p === 'admin') {
     return {
       title: 'Admin Center',

@@ -1,7 +1,7 @@
 <template>
   <div 
     class="flex h-screen h-[100dvh] text-theme-text font-sans overflow-hidden"
-    :class="props.theme === 'admin' ? 'bg-[#010405]' : 'bg-theme-bg'"
+    :class="layoutBgClass"
   >
     <!-- Decomposed Sidebar -->
     <DashboardSidebar
@@ -42,7 +42,7 @@
         id="main-scroll-container" 
         tabindex="0"
         class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 lg:p-10 custom-scrollbar overscroll-contain focus:outline-none"
-        :class="props.theme === 'admin' ? 'bg-[#010405]' : 'bg-theme-bg'"
+        :class="mainBgClass"
       >
         <div class="mx-auto max-w-7xl min-h-full pb-24">
           <slot />
@@ -55,6 +55,7 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useDark } from '@vueuse/core';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
@@ -79,6 +80,33 @@ const { confirm } = useConfirm();
 const isMobileSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const sidebarRef = ref(null);
+
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'data-theme',
+  valueDark: 'dark',
+  valueLight: 'light',
+});
+
+const layoutBgClass = computed(() => {
+  if (props.theme === 'superadmin') {
+    return isDark.value ? 'bg-black text-white' : 'bg-white text-slate-900';
+  }
+  if (props.theme === 'admin') {
+    return 'bg-[#010405]';
+  }
+  return 'bg-theme-bg';
+});
+
+const mainBgClass = computed(() => {
+  if (props.theme === 'superadmin') {
+    return isDark.value ? 'bg-black text-white' : 'bg-slate-50 text-slate-900';
+  }
+  if (props.theme === 'admin') {
+    return 'bg-[#010405]';
+  }
+  return 'bg-theme-bg';
+});
 
 const isActiveRoute = (to) => {
   if (to === props.homeRoute || to === '/admin/mobile-app' || to === '/admin/websites') return route.path === to;
@@ -145,7 +173,17 @@ const groupedNavItems = computed(() => {
     'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
   };
 
-  const sections = props.theme === 'admin' ? adminSections : 
+  const superAdminSections = {
+    'Overview': ['Dashboard', 'Users', 'Audit Logs'],
+    'Platform Operations': ['Appointments', 'Walk-In Queue', 'Customers', 'Barbers', 'Services'],
+    'Content Management': ['Gallery', 'Testimonials', 'Blog'],
+    'System Governance': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'System Logs', 'Verifications'],
+    'Analytics & Reports': ['Analytics', 'Reports'],
+    'Configuration': ['Settings'],
+  };
+
+  const sections = props.theme === 'superadmin' ? superAdminSections :
+                   props.theme === 'admin' ? adminSections : 
                    props.theme === 'customer' ? customerSections : barberSections;
   const groups = [];
   const used = new Set();
@@ -173,6 +211,64 @@ const groupedNavItems = computed(() => {
 });
 
 const themeClasses = computed(() => {
+  if (props.theme === 'superadmin') {
+    if (isDark.value) {
+      // Night Mode: Complete Red & Jet Black
+      return {
+        text: 'text-red-500',
+        textLight: 'text-red-400',
+        textLight70: 'text-red-400/80',
+        bg: 'bg-red-600',
+        bgRaw: 'bg-red-600',
+        bg10: 'bg-red-500/10',
+        bg15: 'bg-red-500/15',
+        bg20: 'bg-red-500/20',
+        gradient: 'from-red-600 via-red-700 to-red-900',
+        shadowLogo: 'shadow-[0_0_20px_rgba(239,68,68,0.45)]',
+        shadowNavLine: 'shadow-[0_0_12px_rgba(239,68,68,0.9)]',
+        shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(239,68,68,0.3)]',
+        borderHover: 'hover:border-red-500/40',
+        hoverTextLight: 'group-hover:text-red-400',
+        hoverText: 'hover:text-red-500',
+        bodyBg: 'bg-black',
+        surfaceBg: 'bg-black',
+        headerBg: 'bg-black/95',
+        headerBorder: 'border-red-950/60',
+        headerTitle: 'text-white',
+        iconBtn: 'text-red-400/70 hover:text-red-400',
+        userPill: 'border-red-950/60 bg-red-950/30 text-white',
+        mainBg: 'bg-black'
+      };
+    } else {
+      // Light Mode: Complete Green & Crisp White
+      return {
+        text: 'text-emerald-600',
+        textLight: 'text-emerald-500',
+        textLight70: 'text-emerald-700/80',
+        bg: 'bg-emerald-600',
+        bgRaw: 'bg-emerald-600',
+        bg10: 'bg-emerald-500/10',
+        bg15: 'bg-emerald-500/15',
+        bg20: 'bg-emerald-500/20',
+        gradient: 'from-emerald-600 to-green-700',
+        shadowLogo: 'shadow-[0_0_20px_rgba(16,185,129,0.3)]',
+        shadowNavLine: 'shadow-[0_0_12px_rgba(16,185,129,0.8)]',
+        shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(16,185,129,0.25)]',
+        borderHover: 'hover:border-emerald-500/40',
+        hoverTextLight: 'group-hover:text-emerald-600',
+        hoverText: 'hover:text-emerald-600',
+        bodyBg: 'bg-white',
+        surfaceBg: 'bg-white',
+        headerBg: 'bg-white/95',
+        headerBorder: 'border-emerald-100',
+        headerTitle: 'text-slate-900',
+        iconBtn: 'text-emerald-700/70 hover:text-emerald-800',
+        userPill: 'border-emerald-200/60 bg-emerald-50/60 text-slate-800',
+        mainBg: 'bg-slate-50'
+      };
+    }
+  }
+
   if (props.theme === 'customer') {
     return {
       text: 'text-gold',

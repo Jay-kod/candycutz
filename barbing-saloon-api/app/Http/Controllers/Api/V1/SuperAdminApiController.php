@@ -47,6 +47,15 @@ class SuperAdminApiController
         return ApiResponse::success(new UserResource($manageUsers->deactivateUser($user)), 'User deactivated');
     }
 
+    public function resetPassword(User $user, \Illuminate\Http\Request $request, ManageUsers $manageUsers): JsonResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        return ApiResponse::success(new UserResource($manageUsers->adminResetPassword($user, $validated['password'])), 'User password reset successfully');
+    }
+
     public function deleteUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
         $manageUsers->deleteUser($user);
