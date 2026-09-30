@@ -14,7 +14,7 @@ class PublicApiController
 {
     public function settings(SettingsService $settingsService): JsonResponse
     {
-        return ApiResponse::success($settingsService->settings(), 'Public settings loaded');
+        return ApiResponse::success($settingsService->publicSettings(), 'Public settings loaded');
     }
 
     public function services(CatalogueService $catalogueService): JsonResponse

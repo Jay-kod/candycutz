@@ -12,6 +12,17 @@ class BarberResource extends JsonResource
         $u = $this->user;
         $specialties = is_array($this->specialties) ? $this->specialties : (json_decode($this->specialties ?? '[]', true) ?: []);
 
+        $formatStorageUrl = function (?string $path): ?string {
+            if (! $path) {
+                return null;
+            }
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+            $clean = ltrim($path, '/');
+            return url(str_starts_with($clean, 'storage/') ? $clean : 'storage/'.$clean);
+        };
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -21,9 +32,9 @@ class BarberResource extends JsonResource
             'email' => $u?->email ?? '',
             'phone' => $u?->phone ?? '',
             'avatar' => $u?->avatar,
-            'avatar_url' => $u?->avatar ? (str_starts_with($u->avatar, 'http') ? $u->avatar : url('storage/'.ltrim($u->avatar, '/'))) : null,
+            'avatar_url' => $formatStorageUrl($u?->avatar),
             'cover_image' => $u?->cover_image,
-            'cover_image_url' => $u?->cover_image ? (str_starts_with($u->cover_image, 'http') ? $u->cover_image : url('storage/'.ltrim($u->cover_image, '/'))) : null,
+            'cover_image_url' => $formatStorageUrl($u?->cover_image),
             'rating' => (float) ($this->rating ?? 5.0),
             'total_reviews' => (int) ($this->testimonials()->count() ?: 12),
             'experience_years' => (int) ($this->experience_years ?? $this->years_experience ?? 5),

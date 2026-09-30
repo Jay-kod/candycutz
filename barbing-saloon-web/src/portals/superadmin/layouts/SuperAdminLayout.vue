@@ -32,6 +32,9 @@ import {
   PresentationChartLineIcon,
   ChartBarIcon,
   ScissorsIcon,
+  HeartIcon,
+  BugAntIcon,
+  ArchiveBoxIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -53,6 +56,9 @@ const navItems = [
   { name: 'Blog', to: '/superadmin/blog', icon: DocumentTextIcon },
 
   // System Governance
+  { name: 'Health Checker', to: '/superadmin/health', icon: HeartIcon },
+  { name: 'System Errors', to: '/superadmin/system-errors', icon: BugAntIcon },
+  { name: 'Backup & Restore', to: '/superadmin/backups', icon: ArchiveBoxIcon },
   { name: 'Feature Flags', to: '/superadmin/feature-flags', icon: FlagIcon },
   { name: 'Working Hours', to: '/superadmin/working-hours', icon: ClockIcon },
   { name: 'Integrations', to: '/superadmin/integrations', icon: KeyIcon },

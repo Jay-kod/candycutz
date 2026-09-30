@@ -23,15 +23,16 @@ class CreateBarber
             abort(409, 'A user with this email already exists');
         }
 
-        $user = User::create([
+        $user = new User([
             'name' => $data['name'],
             'email' => $email,
             'password' => Hash::make($password),
             'phone' => $data['phone'] ?? null,
-            'role' => 'barber',
-            'status' => $data['status'] ?? 'active',
-            'is_active' => true,
         ]);
+        $user->role = 'barber';
+        $user->status = $data['status'] ?? 'active';
+        $user->is_active = true;
+        $user->save();
 
         $specialties = $data['specialties'] ?? [];
         if (is_string($specialties)) {

@@ -173,6 +173,9 @@ import {
   Cog6ToothIcon,
   PresentationChartLineIcon,
   FlagIcon,
+  HeartIcon,
+  BugAntIcon,
+  ArchiveBoxIcon,
 } from '@heroicons/vue/24/outline';
 
 const isDark = useDark({
@@ -417,6 +420,30 @@ const quickActions = computed(() => {
       icon: FlagIcon,
       iconColor: dark ? 'text-purple-400' : 'text-purple-600',
       iconWrap: dark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-500/10 border-purple-500/20',
+    },
+    {
+      label: 'Health Checker',
+      sub: 'System health & diagnostic test runner',
+      to: '/superadmin/health',
+      icon: HeartIcon,
+      iconColor: dark ? 'text-rose-400' : 'text-rose-600',
+      iconWrap: dark ? 'bg-rose-500/10 border-rose-500/20' : 'bg-rose-500/10 border-rose-500/20',
+    },
+    {
+      label: 'System Errors',
+      sub: 'Error observability & trace inspect',
+      to: '/superadmin/system-errors',
+      icon: BugAntIcon,
+      iconColor: dark ? 'text-orange-400' : 'text-orange-600',
+      iconWrap: dark ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-500/10 border-orange-500/20',
+    },
+    {
+      label: 'Backup & Restore',
+      sub: 'Database snapshot and recovery',
+      to: '/superadmin/backups',
+      icon: ArchiveBoxIcon,
+      iconColor: dark ? 'text-indigo-400' : 'text-indigo-600',
+      iconWrap: dark ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-indigo-500/10 border-indigo-500/20',
     },
     {
       label: 'System Logs',

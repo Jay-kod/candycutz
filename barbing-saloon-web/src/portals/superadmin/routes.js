@@ -23,6 +23,9 @@ export default [
   { path: '/superadmin/api', name: 'superadmin-api', component: () => import('../../modules/admin/pages/ApiReferencePage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/system-logs', name: 'superadmin-system-logs', component: () => import('../../modules/admin/pages/SystemLogsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/verifications', name: 'superadmin-verifications', component: () => import('@/features/verification/pages/AdminVerificationPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/health', name: 'superadmin-health-checker', component: () => import('../../modules/admin/pages/HealthCheckerPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/system-errors', name: 'superadmin-system-errors', component: () => import('../../modules/admin/pages/SystemErrorsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/backups', name: 'superadmin-backups', component: () => import('../../modules/admin/pages/BackupRestorePage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
 
   // Analytics & Reports
   { path: '/superadmin/analytics', name: 'superadmin-analytics', component: () => import('@/features/analytics/pages/AdminAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },

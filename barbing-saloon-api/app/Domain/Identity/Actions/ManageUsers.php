@@ -22,7 +22,19 @@ class ManageUsers
      */
     public function storeUser(array $data): User
     {
-        return User::create($data);
+        // Extract privilege fields before mass-assigning
+        $role = $data['role'] ?? 'customer';
+        $isActive = $data['is_active'] ?? true;
+        $status = $data['status'] ?? 'active';
+        unset($data['role'], $data['is_active'], $data['status']);
+
+        $user = new User($data);
+        $user->role = $role;
+        $user->is_active = $isActive;
+        $user->status = $status;
+        $user->save();
+
+        return $user;
     }
 
     /**
@@ -30,25 +42,42 @@ class ManageUsers
      */
     public function updateUser(User $user, array $data): User
     {
-        $user->update($data);
+        // Extract and apply privilege fields explicitly
+        if (array_key_exists('role', $data)) {
+            $user->role = $data['role'];
+            unset($data['role']);
+        }
+        if (array_key_exists('is_active', $data)) {
+            $user->is_active = $data['is_active'];
+            unset($data['is_active']);
+        }
+        if (array_key_exists('status', $data)) {
+            $user->status = $data['status'];
+            unset($data['status']);
+        }
+
+        $user->fill($data);
+        $user->save();
 
         return $user->refresh();
     }
 
     public function activateUser(User $user): User
     {
-        $user->update(['is_active' => true]);
+        $user->is_active = true;
+        $user->status = 'active';
+        $user->save();
 
         return $user->refresh();
     }
 
     public function deactivateUser(User $user): User
     {
-        $user->update([
-            'is_active' => false,
-            'status' => 'deactivated',
-            'deactivated_at' => now(),
-        ]);
+        $user->is_active = false;
+        $user->status = 'deactivated';
+        $user->deactivated_at = now();
+        $user->save();
+
         $user->tokens()->delete();
 
         return $user->refresh();

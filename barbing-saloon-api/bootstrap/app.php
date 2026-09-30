@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ApiGateMiddleware;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\EnsureUserActive;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\LogApiRequest;
 use App\Http\Middleware\SecurityHeaders;
@@ -32,46 +33,42 @@ return Application::configure(basePath: dirname(__DIR__))
             'log.api.request' => LogApiRequest::class,
             'api.gate' => ApiGateMiddleware::class,
             'check.app.version' => CheckAppVersion::class,
+            'ensure.active' => EnsureUserActive::class,
+            'request.context' => \App\Http\Middleware\RequestContextMiddleware::class,
+        ]);
+
+        $middleware->api(prepend: [
+            \App\Http\Middleware\RequestContextMiddleware::class,
         ]);
 
         $middleware->api(append: [
             CheckAppVersion::class,
+            EnsureUserActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return ApiResponse::error('Unauthenticated.', [], 401, 'UNAUTHENTICATED');
+        $exceptions->shouldRenderJsonWhen(fn ($request) => $request->is('api/*') || $request->expectsJson());
+
+        $exceptions->render(function (\Throwable $e, Request $r) {
+            if ($r->is('api/*') || $r->expectsJson()) {
+                return app(\App\Support\Errors\ApiExceptionRenderer::class)->render($e, $r);
             }
+            return null;
         });
 
-        $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return ApiResponse::error($e->getMessage() ?: 'Forbidden.', [], 403, 'FORBIDDEN_ROLE');
-            }
+        $exceptions->report(function (\Throwable $e) {
+            app(\App\Support\Errors\ErrorReporter::class)->report($e);
         });
 
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return ApiResponse::error('The requested resource was not found.', [], 404, 'RESOURCE_NOT_FOUND');
-            }
+        $exceptions->context(function () {
+            return app()->bound(\App\Support\RequestContext::class)
+                ? app(\App\Support\RequestContext::class)->toArray()
+                : [];
         });
 
-        $exceptions->render(function (ValidationException $e, Request $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return ApiResponse::error('The given data was invalid.', $e->errors(), 422, 'VALIDATION_FAILED');
-            }
-        });
-
-        $exceptions->render(function (HttpException $e, Request $request) {
-            if ($e->getStatusCode() === 503 && ($request->is('api/*') || $request->expectsJson())) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The server is temporarily undergoing maintenance. Please check back shortly.',
-                    'code' => 'MAINTENANCE_MODE',
-                    'maintenance' => true,
-                    'retry_after' => $e->getHeaders()['Retry-After'] ?? null,
-                ], 503);
-            }
+        $exceptions->throttle(function (\Throwable $e) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by(
+                get_class($e).'|'.$e->getFile().$e->getLine()
+            );
         });
     })->create();

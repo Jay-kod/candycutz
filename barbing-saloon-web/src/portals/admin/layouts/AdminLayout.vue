@@ -46,7 +46,9 @@ import {
   ScissorsIcon,
   InformationCircleIcon,
   EnvelopeIcon,
-  TrashIcon
+  TrashIcon,
+  BugAntIcon,
+  ArchiveBoxIcon
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -110,6 +112,9 @@ const navItems = [
   { name: 'Reports', to: '/admin/reports', icon: ChartBarIcon },
   { name: 'Verifications', to: '/admin/verifications', icon: ShieldCheckIcon },
   { name: 'System Logs', to: '/admin/system-logs', icon: ClipboardDocumentListIcon },
+  { name: 'Health Checker', to: '/admin/health', icon: HeartIcon },
+  { name: 'System Errors', to: '/admin/system-errors', icon: BugAntIcon },
+  { name: 'Backup & Restore', to: '/admin/backups', icon: ArchiveBoxIcon },
   { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
 ];
 </script>

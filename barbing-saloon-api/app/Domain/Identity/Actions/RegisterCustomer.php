@@ -36,18 +36,19 @@ class RegisterCustomer
             $username = $this->usernameService->generateUniqueUsername($name);
         }
 
-        $user = User::create([
+        $user = new User([
             'name' => $name,
             'real_name' => $name,
             'username' => $username,
             'email' => strtolower(trim($data['email'])),
             'phone' => trim($data['phone']),
             'password' => Hash::make($data['password']),
-            'role' => UserRole::customer,
-            'is_active' => true,
-            'status' => 'active',
             'last_username_change_at' => now(),
         ]);
+        $user->role = UserRole::customer;
+        $user->is_active = true;
+        $user->status = 'active';
+        $user->save();
 
         $tokenName = $data['device_name'] ?? 'web-client';
         $token = $user->createToken($tokenName)->plainTextToken;

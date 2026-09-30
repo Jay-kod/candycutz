@@ -43,4 +43,7 @@ export default [
 	{ path: '/admin/system-logs', name: 'admin-system-logs', component: () => import('../../modules/admin/pages/SystemLogsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/verifications', name: 'admin-verifications', component: () => import('@/features/verification/pages/AdminVerificationPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/notifications', name: 'admin-notifications', component: () => import('../../modules/admin/pages/NotificationsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/health', name: 'admin-health-checker', component: () => import('../../modules/admin/pages/HealthCheckerPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/system-errors', name: 'admin-system-errors', component: () => import('../../modules/admin/pages/SystemErrorsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/backups', name: 'admin-backups', component: () => import('../../modules/admin/pages/BackupRestorePage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 ];

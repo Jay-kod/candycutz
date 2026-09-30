@@ -30,9 +30,6 @@ class User extends Authenticatable
         'last_username_change_at',
         'deactivated_at',
         'notification_preferences',
-        'role',
-        'is_active',
-        'status',
     ];
 
     protected $hidden = [

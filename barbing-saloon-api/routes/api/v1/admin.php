@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
+use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
+use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
@@ -94,6 +96,23 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::put('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'update'])->whereNumber('id');
     Route::patch('/admin/feature-flags/{id}/toggle', [FeatureFlagApiController::class, 'toggle'])->whereNumber('id');
     Route::delete('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'destroy'])->whereNumber('id');
+
+    // System Health, Diagnostics & Observability
+    Route::get('/admin/system/overview', [SystemHealthApiController::class, 'overview']);
+    Route::get('/admin/system/health/detail', [SystemHealthApiController::class, 'healthDetail']);
+    Route::post('/admin/system/health/test', [SystemHealthApiController::class, 'runSelfTest']);
+    Route::get('/admin/system/errors', [SystemHealthApiController::class, 'errors']);
+    Route::get('/admin/system/errors/{id}', [SystemHealthApiController::class, 'showError'])->whereNumber('id');
+    Route::patch('/admin/system/errors/{id}', [SystemHealthApiController::class, 'updateError'])->whereNumber('id');
+    Route::get('/admin/system/trace/{requestId}', [SystemHealthApiController::class, 'trace']);
+
+    // System Backups & Recovery
+    Route::get('/admin/system/backups', [SystemBackupApiController::class, 'index']);
+    Route::post('/admin/system/backups', [SystemBackupApiController::class, 'create']);
+    Route::post('/admin/system/backups/restore', [SystemBackupApiController::class, 'restore']);
+    Route::post('/admin/system/backups/upload', [SystemBackupApiController::class, 'upload']);
+    Route::get('/admin/system/backups/{filename}/download', [SystemBackupApiController::class, 'download']);
+    Route::delete('/admin/system/backups/{filename}', [SystemBackupApiController::class, 'destroy']);
 });
 
 Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {

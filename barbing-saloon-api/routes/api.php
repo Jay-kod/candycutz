@@ -10,6 +10,7 @@ Route::prefix('v1')
     ->middleware(['api.gate', 'throttle:api', 'security.headers'])
     ->group(function () {
         Route::get('/health', [HealthApiController::class, 'health']);
+        Route::get('/health/ready', [\App\Http\Controllers\Api\V1\Admin\SystemHealthApiController::class, 'healthDetail']);
 
         require base_path('routes/api/v1/auth.php');
         require base_path('routes/api/v1/catalogue.php');

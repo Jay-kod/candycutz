@@ -65,4 +65,23 @@ export const adminApi = {
   updateFeatureFlag: (id, data) => client.put(`/admin/feature-flags/${id}`, data),
   toggleFeatureFlag: (id) => client.patch(`/admin/feature-flags/${id}/toggle`),
   deleteFeatureFlag: (id) => client.delete(`/admin/feature-flags/${id}`),
+
+  // ── System Health & Diagnostics ──
+  systemOverview: () => client.get('/admin/system/overview'),
+  healthDetail: () => client.get('/admin/system/health/detail'),
+  runSelfTest: (type) => client.post('/admin/system/health/test', { type }),
+
+  // ── System Errors & Observability ──
+  systemErrors: (params) => client.get('/admin/system/errors', { params }),
+  systemErrorDetail: (id) => client.get(`/admin/system/errors/${id}`),
+  updateSystemError: (id, data) => client.patch(`/admin/system/errors/${id}`, data),
+  traceRequest: (requestId) => client.get(`/admin/system/trace/${requestId}`),
+
+  // ── System Backups & Recovery ──
+  backups: () => client.get('/admin/system/backups'),
+  createBackup: (data) => client.post('/admin/system/backups', data),
+  restoreBackup: (data) => client.post('/admin/system/backups/restore', data),
+  uploadBackup: (formData) => client.post('/admin/system/backups/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }),
+  downloadBackup: (filename) => client.get(`/admin/system/backups/${filename}/download`, { responseType: 'blob' }),
+  deleteBackup: (filename) => client.delete(`/admin/system/backups/${filename}`),
 };
