@@ -80,7 +80,7 @@
               </div>
               <div class="flex items-center gap-2 text-zinc-400">
                 <ClockIcon class="h-4 w-4 text-gold shrink-0" />
-                <span>Mon – Sat: 8:00 AM – 9:00 PM • Sun: 12:00 PM – 8:00 PM</span>
+                <span class="whitespace-pre-line leading-snug">{{ contactHours }}</span>
               </div>
             </div>
           </div>
@@ -174,6 +174,7 @@ const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGol
 const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
 const shopPhone = ref('+234 812 345 6789');
 const shopEmail = ref('info@candycutz.com');
+const contactHours = ref('Mon - Sat: 9:00 AM - 8:00 PM\nSun: Closed');
 
 const socialSettings = ref({
   whatsapp: '',
@@ -244,6 +245,9 @@ const fetchSettings = async () => {
     });
     if (settings.address || settings.contact_address) {
       shopAddress.value = settings.address || settings.contact_address;
+    }
+    if (settings.contact_hours !== undefined && settings.contact_hours !== null) {
+      contactHours.value = settings.contact_hours;
     }
     if (settings.phone || settings.contact_phone) {
       shopPhone.value = settings.phone || settings.contact_phone;

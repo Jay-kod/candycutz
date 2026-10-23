@@ -428,7 +428,9 @@ const fetchSettings = async () => {
       if (settings.contact_form_email_placeholder) formPlaceholders.email = settings.contact_form_email_placeholder;
       if (settings.contact_form_phone_placeholder) formPlaceholders.phone = settings.contact_form_phone_placeholder;
       if (settings.contact_form_message_placeholder) formPlaceholders.message = settings.contact_form_message_placeholder;
-      if (settings.contact_hours) contactHours.value = settings.contact_hours;
+      if (settings.contact_hours !== undefined && settings.contact_hours !== null) {
+        contactHours.value = settings.contact_hours;
+      }
       if (settings.contact_phone) contactPhone.value = settings.contact_phone;
       if (settings.contact_email) contactEmail.value = settings.contact_email;
       if (settings.contact_map_iframe) contactMapIframe.value = settings.contact_map_iframe;
