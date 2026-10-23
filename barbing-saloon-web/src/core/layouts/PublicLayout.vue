@@ -96,7 +96,7 @@
           </div>
 
           <!-- Section 2: Explore -->
-          <div class="md:col-span-1">
+          <div class="md:col-span-1 md:pl-6 lg:pl-10">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Explore</h3>
             <ul class="flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
               <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
