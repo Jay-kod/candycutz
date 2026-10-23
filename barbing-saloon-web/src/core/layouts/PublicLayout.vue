@@ -98,7 +98,7 @@
           <!-- Section 2: Explore -->
           <div class="md:col-span-1">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Explore</h3>
-            <ul class="flex flex-col items-center space-y-2.5 text-xs sm:text-sm">
+            <ul class="flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
               <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
               <li><RouterLink to="/services" class="hover:text-gold transition-colors">Services</RouterLink></li>
               <li><RouterLink to="/gallery" class="hover:text-gold transition-colors">Gallery</RouterLink></li>
@@ -110,7 +110,7 @@
           <!-- Section 3: Legal & Policies -->
           <div class="md:col-span-1">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Legal & Policies</h3>
-            <ul class="flex flex-col items-center space-y-2.5 text-xs sm:text-sm">
+            <ul class="flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
               <li><RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink></li>
               <li><RouterLink to="/terms" class="hover:text-gold transition-colors">Terms of Service</RouterLink></li>
               <li><RouterLink to="/account-deletion" class="hover:text-gold transition-colors">Account Deletion</RouterLink></li>
