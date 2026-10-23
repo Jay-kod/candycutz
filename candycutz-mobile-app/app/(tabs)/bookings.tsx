@@ -208,8 +208,10 @@ export default function BookingsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={refetch}
-                tintColor={colors.primary}
+              onRefresh={() => {
+                void refetch();
+              }}
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={

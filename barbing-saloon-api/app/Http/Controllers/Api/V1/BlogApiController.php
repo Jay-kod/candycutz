@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Services\CatalogueCache;
 use App\Http\Resources\BlogPostResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\BlogPost;
+use App\Models\BlogReaction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +25,7 @@ class BlogApiController
         $query = BlogPost::query()->with(['author', 'reactions']);
 
         $user = $request->user();
-        $userRole = $user?->role instanceof \App\Domain\Shared\Enums\UserRole
+        $userRole = $user?->role instanceof UserRole
             ? $user->role->value
             : (string) ($user?->role ?? '');
 
@@ -65,7 +68,7 @@ class BlogApiController
         }
 
         $type = $request->input('reaction_type') ?? $request->input('type') ?? 'love';
-        \App\Models\BlogReaction::updateOrCreate(
+        BlogReaction::updateOrCreate(
             ['post_id' => $post->id, 'customer_id' => $user->id],
             ['reaction_type' => $type]
         );
@@ -77,7 +80,7 @@ class BlogApiController
     {
         $user = $request->user();
         if ($user) {
-            \App\Models\BlogReaction::where('post_id', $id)->where('customer_id', $user->id)->delete();
+            BlogReaction::where('post_id', $id)->where('customer_id', $user->id)->delete();
         }
 
         return ApiResponse::success(null, 'Reaction removed');
@@ -123,6 +126,8 @@ class BlogApiController
             $path = (new SecureImageUpload)->execute($imageFile, 'uploads/blog');
             $post->update(['featured_image' => '/storage/'.$path]);
         }
+
+        CatalogueCache::bust('blog');
 
         return ApiResponse::success(new BlogPostResource($post), 'Blog post created', 201);
     }
@@ -172,6 +177,8 @@ class BlogApiController
 
         $post->save();
 
+        CatalogueCache::bust('blog');
+
         return ApiResponse::success(new BlogPostResource($post->refresh()), 'Blog post updated');
     }
 
@@ -181,6 +188,8 @@ class BlogApiController
         $this->authorize('delete', $post);
 
         $post->delete();
+
+        CatalogueCache::bust('blog');
 
         return ApiResponse::success(null, 'Blog post deleted');
     }

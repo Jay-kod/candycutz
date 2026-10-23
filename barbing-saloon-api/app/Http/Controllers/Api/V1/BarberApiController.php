@@ -13,10 +13,12 @@ use App\Domain\Identity\Actions\UpdateBarber;
 use App\Domain\Identity\Actions\UpdateBarberAccount;
 use App\Domain\Identity\Actions\UpdateBarberSchedule;
 use App\Domain\Identity\Actions\UpdateBarberStatus;
+use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Http\Resources\Api\V1\AuthUserResource;
 use App\Http\Resources\BarberResource;
-use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
@@ -78,7 +80,7 @@ class BarberApiController
         $barber = $user->barber;
 
         return ApiResponse::success([
-            'user' => $user,
+            'user' => new AuthUserResource($user),
             'barber' => $barber ? new BarberResource($barber) : null,
         ], 'Account details loaded');
     }
@@ -106,17 +108,17 @@ class BarberApiController
         ]);
 
         if ($request->hasFile('avatar')) {
-            $data['avatar'] = '/storage/'.$imageUpload->execute($request->file('avatar'), 'uploads/avatars');
+            $data['avatar'] = $imageUpload->execute($request->file('avatar'), 'user-media/'.$user->id.'/avatar', 'local');
         }
 
         if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = '/storage/'.$imageUpload->execute($request->file('cover_image'), 'uploads/covers');
+            $data['cover_image'] = $imageUpload->execute($request->file('cover_image'), 'user-media/'.$user->id.'/cover', 'local');
         }
 
         $action->execute($user, $data);
 
         return ApiResponse::success([
-            'user' => $user->refresh(),
+            'user' => new AuthUserResource($user->refresh()),
             'barber' => $barber ? new BarberResource($barber->refresh()) : null,
         ], 'Account updated');
     }
@@ -133,7 +135,7 @@ class BarberApiController
             return ApiResponse::error($e->getMessage(), [], 422, 'USERNAME_UPDATE_FAILED');
         }
 
-        return ApiResponse::success($user->refresh(), 'Username updated');
+        return ApiResponse::success(new AuthUserResource($user->refresh()), 'Username updated');
     }
 
     public function show(int $id): JsonResponse
@@ -319,6 +321,7 @@ class BarberApiController
         ]);
 
         $barber = $action->execute($data);
+        CatalogueCache::bust('barbers');
 
         return ApiResponse::success(new BarberResource($barber), 'Barber created', 201);
     }
@@ -340,6 +343,7 @@ class BarberApiController
         ]);
 
         $updatedBarber = $action->execute($id, $data);
+        CatalogueCache::bust('barbers');
 
         return ApiResponse::success(new BarberResource($updatedBarber), 'Barber updated');
     }
@@ -351,6 +355,7 @@ class BarberApiController
 
         $status = $request->input('status', 'active');
         $updatedBarber = $action->execute($id, $status);
+        CatalogueCache::bust('barbers');
 
         return ApiResponse::success(new BarberResource($updatedBarber), 'Barber status updated');
     }
@@ -361,6 +366,7 @@ class BarberApiController
         $this->authorize('delete', $barber);
 
         $action->execute($id);
+        CatalogueCache::bust('barbers');
 
         return ApiResponse::success(null, 'Barber deleted');
     }

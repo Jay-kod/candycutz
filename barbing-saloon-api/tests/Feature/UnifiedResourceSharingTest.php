@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Barber;
-use App\Models\BlogPost;
 use App\Models\Gallery;
 use App\Models\Service;
 use App\Models\ServiceCategory;
@@ -121,6 +120,38 @@ it('supports service-tagged testimonials and filters by service', function () {
     $firstItem = $items->firstWhere('id', $testimonialId);
     expect($firstItem['service']['id'])->toBe($service->id);
     expect($firstItem['service']['name'])->toBe($service->name);
+});
+
+it('allows admins to feature and unfeature testimonials through the approval flow', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $customer = User::factory()->create(['role' => 'customer']);
+    $service = Service::factory()->create([
+        'approval_status' => 'approved',
+        'is_active' => true,
+    ]);
+
+    $testimonial = Testimonial::factory()->create([
+        'customer_id' => $customer->id,
+        'service_id' => $service->id,
+        'barber_id' => $service->barber_id,
+        'is_approved' => true,
+        'is_featured' => false,
+    ]);
+
+    $featureResponse = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature");
+    $featureResponse->assertOk();
+    expect($featureResponse->json('data.is_featured'))->toBeTrue();
+    expect($testimonial->fresh()->is_featured)->toBeTrue();
+
+    $featuredList = $this->getJson('/api/v1/testimonials?featured=true');
+    $featuredList->assertOk();
+    $ids = collect($featuredList->json('data'))->pluck('id')->all();
+    expect($ids)->toContain($testimonial->id);
+
+    $toggleBack = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature");
+    $toggleBack->assertOk();
+    expect($toggleBack->json('data.is_featured'))->toBeFalse();
+    expect($testimonial->fresh()->is_featured)->toBeFalse();
 });
 
 it('allows barbers to author blog posts and syncs to blog feed', function () {

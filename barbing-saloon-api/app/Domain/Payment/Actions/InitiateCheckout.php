@@ -19,9 +19,9 @@ class InitiateCheckout
      *
      * @return array<string, mixed>
      */
-    public function execute(User $customer, Appointment $appointment, string $paymentMethod): array
+    public function execute(User $customer, Appointment $appointment, string $paymentMethod, string $client = 'web'): array
     {
-        $checkoutDetails = $this->paymentService->initializePayment($appointment, $paymentMethod);
+        $checkoutDetails = $this->paymentService->initializePayment($appointment, $paymentMethod, $client);
 
         return array_merge($checkoutDetails, [
             'payment_id' => $checkoutDetails['payment_id'] ?? null,

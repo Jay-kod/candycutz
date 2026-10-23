@@ -54,7 +54,7 @@ return new class extends Migration
         }
 
         // Add currency column to payment_transactions if not exists
-        if (Schema::hasTable('payment_transactions') && !Schema::hasColumn('payment_transactions', 'currency')) {
+        if (Schema::hasTable('payment_transactions') && ! Schema::hasColumn('payment_transactions', 'currency')) {
             Schema::table('payment_transactions', function (Blueprint $table) {
                 $table->string('currency', 3)->default('NGN')->after('amount');
             });

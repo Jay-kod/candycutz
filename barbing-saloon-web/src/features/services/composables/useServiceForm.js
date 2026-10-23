@@ -149,14 +149,10 @@ export function useServiceForm() {
 
       if (isEditing.value) {
         payload.append('_method', 'PUT');
-        const res = await client.post(`/services/${serviceId.value}`, payload, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const res = await client.post(`/services/${serviceId.value}`, payload);
         toast.success(res.data?.message || 'Service updated successfully!');
       } else {
-        const res = await client.post('/services', payload, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const res = await client.post('/services', payload);
         toast.success(res.data?.message || (portal.value === 'barber' ? 'Service submitted and pending admin approval!' : 'Service created successfully!'));
       }
       router.push(`/${portal.value}/services`);

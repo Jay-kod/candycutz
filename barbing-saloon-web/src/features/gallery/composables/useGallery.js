@@ -42,14 +42,10 @@ export function useGallery(role = 'admin') {
         if (formData instanceof FormData) {
           formData.append('_method', 'PUT');
         }
-        await api.post(`/gallery/${editingId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post(`/gallery/${editingId}`, formData);
         toast.success('Image updated successfully');
       } else {
-        await api.post('/gallery', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/gallery', formData);
         toast.success('Image added to gallery');
       }
       await fetchGallery();

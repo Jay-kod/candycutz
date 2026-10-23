@@ -11,7 +11,6 @@ use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
-use App\Exceptions\BookingSlotUnavailableException;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\StoreWalkInRequest;
 use App\Http\Requests\UpdateAppointmentStatusRequest;
@@ -22,6 +21,7 @@ use App\Models\Barber;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentApiController
 {
@@ -98,40 +98,29 @@ class AppointmentApiController
 
     public function store(StoreAppointmentRequest $request): JsonResponse
     {
-        try {
-            $sourceInput = $request->input('source');
-            $source = match ($sourceInput) {
-                'app' => AppointmentSource::app,
-                'walk_in' => AppointmentSource::walk_in,
-                'web' => AppointmentSource::web,
-                default => ($request->header('X-Client-Type') === 'mobile' || $request->hasHeader('X-App-Version'))
-                    ? AppointmentSource::app
-                    : AppointmentSource::web,
-            };
+        $sourceInput = $request->input('source');
+        $source = match ($sourceInput) {
+            'app' => AppointmentSource::app,
+            'walk_in' => AppointmentSource::walk_in,
+            'web' => AppointmentSource::web,
+            default => ($request->header('X-Client-Type') === 'mobile' || $request->hasHeader('X-App-Version'))
+                ? AppointmentSource::app
+                : AppointmentSource::web,
+        };
 
-            $appointment = $this->createBooking->execute(
-                $request->user(),
-                BookingData::fromRequest($request),
-                $source
-            );
+        $appointment = $this->createBooking->execute(
+            $request->user(),
+            BookingData::fromRequest($request),
+            $source
+        );
 
-            return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);
-        } catch (BookingSlotUnavailableException $e) {
-            return $e->render($request);
-        } catch (\Throwable $e) {
-            return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
-        }
+        return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);
     }
 
     public function cancel(Request $request, int $id): JsonResponse
     {
         $appointment = Appointment::findOrFail($id);
         $this->authorize('cancel', $appointment);
-
-        $currentStatus = $appointment->status->value;
-        if (in_array($currentStatus, ['completed', 'cancelled'], true)) {
-            return ApiResponse::error("Cannot cancel an appointment that is already {$currentStatus}.", [], 422, 'INVALID_TRANSITION');
-        }
 
         $reason = $request->input('reason', 'Customer requested cancellation');
         $this->bookingService->transitionStatus($appointment, AppointmentStatus::cancelled->value, $request->user(), $reason);
@@ -144,16 +133,8 @@ class AppointmentApiController
         $appointment = Appointment::findOrFail($id);
         $this->authorize('manageForBarber', $appointment);
 
-        $dbStatus = match ($request->status) {
-            'checked_in', 'in_progress' => AppointmentStatus::confirmed->value,
-            'completed' => AppointmentStatus::completed->value,
-            'no_show' => AppointmentStatus::no_show->value,
-            'cancelled' => AppointmentStatus::cancelled->value,
-            default => AppointmentStatus::confirmed->value,
-        };
-
         $reason = $request->reason ?? "Status updated to {$request->status}";
-        $this->bookingService->transitionStatus($appointment, $dbStatus, $request->user(), $reason);
+        $this->bookingService->transitionStatus($appointment, $request->status, $request->user(), $reason);
         $appointment->load(['service.category', 'barber.user', 'serviceZone']);
 
         return ApiResponse::success(new AppointmentResource($appointment), "Appointment status updated to {$request->status}.");
@@ -162,21 +143,21 @@ class AppointmentApiController
     public function storeWalkIn(StoreWalkInRequest $request): JsonResponse
     {
         $barber = $request->user()->barber;
-        $barberId = $barber?->id ?? ($request->barber_id ?? (Barber::value('id') ?? 1));
+        $barberId = $barber?->id ?? $request->barber_id;
 
-        try {
-            $appointment = $this->createWalkIn->execute(
-                $request->user(),
-                Barber::findOrFail((int) $barberId),
-                BookingData::fromRequest($request)
-            );
-
-            return ApiResponse::success(new AppointmentResource($appointment), 'Walk-in client booked successfully.', 201);
-        } catch (BookingSlotUnavailableException $e) {
-            return $e->render($request);
-        } catch (\Throwable $e) {
-            return ApiResponse::error($e->getMessage(), [], 422, 'BOOKING_FAILED');
+        if (! $barberId) {
+            throw ValidationException::withMessages([
+                'barber_id' => ['A valid barber_id is required for walk-in appointments.'],
+            ]);
         }
+
+        $appointment = $this->createWalkIn->execute(
+            $request->user(),
+            Barber::findOrFail((int) $barberId),
+            BookingData::fromRequest($request)
+        );
+
+        return ApiResponse::success(new AppointmentResource($appointment), 'Walk-in client booked successfully.', 201);
     }
 
     public function approve(Request $request, int $id): JsonResponse

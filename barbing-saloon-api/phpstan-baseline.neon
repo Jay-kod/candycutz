@@ -1,14 +1,29 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Property App\\\\Models\\\\User\\:\\:\\$role \\(App\\\\Domain\\\\Shared\\\\Enums\\\\UserRole\\) does not accept string\\.$#"
+			count: 1
+			path: app/Domain/Identity/Actions/CreateBarber.php
+
+		-
+			message: "#^Using nullsafe property access on non\\-nullable type Laravel\\\\Sanctum\\\\PersonalAccessToken\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Domain/Identity/Actions/ManageUserTokens.php
+
+		-
+			message: "#^Method App\\\\Domain\\\\Notification\\\\NotificationDispatcher\\:\\:queuePush\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Domain/Notification/NotificationDispatcher.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$to$#"
+			count: 1
+			path: app/Domain/Notification/Services/BrevoApiClient.php
+
+		-
 			message: "#^Access to an undefined property Stripe\\\\StripeObject\\:\\:\\$object\\.$#"
 			count: 1
 			path: app/Domain/Payment/Gateways/StripeGateway.php
-
-		-
-			message: "#^Call to method read\\(\\) on an unknown class Intervention\\\\Image\\\\ImageManager\\.$#"
-			count: 1
-			path: app/Domain/Shared/Actions/SecureImageUpload.php
 
 		-
 			message: "#^Instantiated class Intervention\\\\Image\\\\Drivers\\\\Gd\\\\Driver not found\\.$#"
@@ -16,9 +31,29 @@ parameters:
 			path: app/Domain/Shared/Actions/SecureImageUpload.php
 
 		-
-			message: "#^Instantiated class Intervention\\\\Image\\\\ImageManager not found\\.$#"
+			message: "#^Method App\\\\Domain\\\\Shared\\\\Enums\\\\AppointmentStatus\\:\\:activeStatuses\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/Domain/Shared/Actions/SecureImageUpload.php
+			path: app/Domain/Shared/Enums/AppointmentStatus.php
+
+		-
+			message: "#^Method App\\\\Domain\\\\Shared\\\\Enums\\\\AppointmentStatus\\:\\:terminalStatuses\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Domain/Shared/Enums/AppointmentStatus.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Domain/System/Actions/GetDashboardStats.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$is_active\\.$#"
+			count: 1
+			path: app/Http/Middleware/EnsureUserActive.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Middleware/EnsureUserActive.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$avatar\\.$#"
@@ -76,8 +111,13 @@ parameters:
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$is_available\\.$#"
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$instagram_url\\.$#"
 			count: 1
+			path: app/Http/Resources/BarberResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$is_available\\.$#"
+			count: 2
 			path: app/Http/Resources/BarberResource.php
 
 		-
@@ -151,69 +191,29 @@ parameters:
 			path: app/Http/Resources/ServiceResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$barber\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$client_avatar\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$comment\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$created_at\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$customer\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$is_approved\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$is_featured\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$rating\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:\\$service\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\TestimonialResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Http/Resources/TestimonialResource.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:error\\(\\) has parameter \\$errors with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Http/Responses/ApiResponse.php
-
-		-
 			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:paginated\\(\\) has parameter \\$data with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator but does not specify its types\\: TItem$#"
 			count: 1
 			path: app/Http/Responses/ApiResponse.php
+
+		-
+			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:paginated\\(\\) has parameter \\$headers with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Http/Responses/ApiResponse.php
+
+		-
+			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:success\\(\\) has parameter \\$headers with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Http/Responses/ApiResponse.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Http\\\\Request\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Http/Responses/ApiResponse.php
+
+		-
+			message: "#^Method App\\\\Jobs\\\\SendExpoPush\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Jobs/SendExpoPush.php
 
 		-
 			message: "#^Method App\\\\Mail\\\\AdminNotification\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -249,6 +249,76 @@ parameters:
 			message: "#^Method App\\\\Models\\\\Address\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Address.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ApiRequestLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ApiRequestLog.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AppCrash uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeResolved\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeResolved\\(\\) has parameter \\$query with no type specified\\.$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeUnresolved\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeUnresolved\\(\\) has parameter \\$query with no type specified\\.$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/AppCrash.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AppVersion uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeForPlatform\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeForPlatform\\(\\) has parameter \\$query with no type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeLatestVersion\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeLatestVersion\\(\\) has parameter \\$query with no type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeMinimum\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeMinimum\\(\\) has parameter \\$query with no type specified\\.$#"
+			count: 1
+			path: app/Models/AppVersion.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Appointment uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -506,6 +576,36 @@ parameters:
 			path: app/Models/DeviceToken.php
 
 		-
+			message: "#^Method App\\\\Models\\\\ErrorEvent\\:\\:group\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ErrorEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ErrorEvent\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ErrorEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:assignee\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ErrorGroup.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:events\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ErrorGroup.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:resolvedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/ErrorGroup.php
+
+		-
+			message: "#^Class App\\\\Models\\\\FeatureFlag uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/FeatureFlag.php
+
+		-
 			message: "#^Class App\\\\Models\\\\Gallery uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Gallery.php
@@ -519,6 +619,16 @@ parameters:
 			message: "#^Class App\\\\Models\\\\Holiday uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Holiday.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IdempotencyKey uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/IdempotencyKey.php
+
+		-
+			message: "#^Method App\\\\Models\\\\IdempotencyKey\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/IdempotencyKey.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Notification uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -566,6 +676,11 @@ parameters:
 			path: app/Models/PaymentTransaction.php
 
 		-
+			message: "#^Class App\\\\Models\\\\PushDeliveryStat uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/PushDeliveryStat.php
+
+		-
 			message: "#^Class App\\\\Models\\\\Service uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Service.php
@@ -577,6 +692,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Service\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:approvedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Service\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Service.php
 
@@ -734,3 +859,48 @@ parameters:
 			message: "#^Method App\\\\Models\\\\WorkingHour\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/WorkingHour.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\AuthException\\:\\:socialVerificationFailed\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/AuthException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:failed\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/BookingException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:invalidTransition\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/BookingException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:slotTaken\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/BookingException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\ErrorReporter\\:\\:redactData\\(\\) should return array\\<string, mixed\\> but returns mixed\\.$#"
+			count: 1
+			path: app/Support/Errors/ErrorReporter.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Http\\\\Request\\. Use \\-\\> instead\\.$#"
+			count: 9
+			path: app/Support/Errors/ErrorReporter.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\ExternalServiceException\\:\\:serviceError\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/ExternalServiceException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\PaymentException\\:\\:providerError\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/PaymentException.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Errors\\\\UploadException\\:\\:invalidFile\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Errors/UploadException.php

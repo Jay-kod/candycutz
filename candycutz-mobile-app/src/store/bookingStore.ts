@@ -9,7 +9,7 @@ interface BookingState {
   startTime: string; // HH:mm
   address: Address | null;
   selectedZone: ServiceZone | null;
-  paymentMethod: 'pay_at_venue' | 'stripe' | 'wallet';
+  paymentMethod: 'pay_at_venue' | 'paystack';
   notes: string;
 
   // Actions
@@ -20,7 +20,7 @@ interface BookingState {
   setStartTime: (time: string) => void;
   setAddress: (address: Address | null) => void;
   setSelectedZone: (zone: ServiceZone | null) => void;
-  setPaymentMethod: (method: 'pay_at_venue' | 'stripe' | 'wallet') => void;
+  setPaymentMethod: (method: 'pay_at_venue' | 'paystack') => void;
   setNotes: (notes: string) => void;
   resetBooking: () => void;
 

@@ -45,4 +45,14 @@ class AppointmentPolicy
     {
         return $appointment->barber?->user_id === $user->id;
     }
+
+    public function verifyPayment(User $user, Appointment $appointment): bool
+    {
+        return $appointment->barber?->user_id === $user->id;
+    }
+
+    public function pay(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,6 +44,9 @@ class Appointment extends Model
         'deposit_paid',
         'deposit_amount',
         'source',
+        'payment_status',
+        'amount_due_minor',
+        'payment_due_at',
     ];
 
     protected $casts = [
@@ -57,6 +61,9 @@ class Appointment extends Model
         'total_price' => 'integer',
         'deposit_amount' => 'integer',
         'source' => AppointmentSource::class,
+        'payment_status' => AppointmentPaymentStatus::class,
+        'amount_due_minor' => 'integer',
+        'payment_due_at' => 'datetime',
     ];
 
     public function branch(): BelongsTo

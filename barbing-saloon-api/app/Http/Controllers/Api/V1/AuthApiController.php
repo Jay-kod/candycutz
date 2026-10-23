@@ -17,6 +17,8 @@ use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\AuthUserResource;
 use App\Http\Resources\BarberResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -40,11 +42,7 @@ class AuthApiController
 
     public function login(LoginRequest $request, AuthenticateUser $action): JsonResponse
     {
-        try {
-            $payload = $action->execute($request->validated());
-        } catch (RuntimeException $e) {
-            return ApiResponse::error($e->getMessage(), [], 401);
-        }
+        $payload = $action->execute($request->validated());
 
         return ApiResponse::success([
             'user' => new AuthUserResource($payload['user']),
@@ -120,6 +118,33 @@ class AuthApiController
         }
     }
 
+    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
+            return ApiResponse::error('Invalid email verification link.', [], 403, 'EMAIL_VERIFICATION_INVALID');
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+        }
+
+        return ApiResponse::success(null, 'Email address verified successfully.');
+    }
+
+    public function sendVerificationNotification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            return ApiResponse::success(null, 'Email address is already verified.');
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return ApiResponse::success(null, 'Email verification link sent.');
+    }
+
     public function changePassword(Request $request, ChangePassword $action): JsonResponse
     {
         $validated = $request->validate([
@@ -148,6 +173,20 @@ class AuthApiController
         $action->logoutAll($request->user());
 
         return ApiResponse::success(null, 'Logged out from all devices successfully');
+    }
+
+    public function sessions(Request $request, ManageUserTokens $action): JsonResponse
+    {
+        $sessions = $action->listSessions($request->user());
+
+        return ApiResponse::success($sessions, 'Active sessions retrieved successfully');
+    }
+
+    public function revokeSession(Request $request, int|string $id, ManageUserTokens $action): JsonResponse
+    {
+        $action->revokeSession($request->user(), $id);
+
+        return ApiResponse::success(null, 'Session revoked successfully');
     }
 
     public function me(Request $request): JsonResponse

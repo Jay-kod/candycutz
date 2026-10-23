@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support\Errors;
 
-use Throwable;
-
 class AuthException extends AppException
 {
     public static function invalidCredentials(?string $message = null): self

@@ -26,7 +26,7 @@
             class="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl font-display text-xl sm:text-2xl font-bold border shadow-inner overflow-hidden"
             :class="avatarClasses(appointment.status)"
           >
-            <img v-if="appointment.customer_avatar" :src="`http://localhost:8000${appointment.customer_avatar}`" alt="Customer" class="w-full h-full object-cover" />
+            <img v-if="appointment.customer_avatar" :src="appointment.customer_avatar" alt="Customer" class="w-full h-full object-cover" />
             <span v-else>{{ initials(appointment.customer_name) }}</span>
           </div>
           <div class="min-w-0 flex-1">

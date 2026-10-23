@@ -5,6 +5,7 @@ namespace App\Domain\Identity\Actions;
 use App\Models\Barber;
 use App\Models\User;
 use App\Models\WorkingHour;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class CreateBarber
@@ -15,6 +16,8 @@ class CreateBarber
      */
     public function execute(array $data): array
     {
+        Gate::authorize('manage-barber-accounts');
+
         $password = ! empty($data['password']) ? $data['password'] : 'BarberPass123!';
         $email = $data['email'];
 

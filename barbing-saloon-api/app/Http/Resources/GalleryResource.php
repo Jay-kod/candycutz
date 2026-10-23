@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Domain\Shared\Services\UserMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,9 +12,15 @@ class GalleryResource extends JsonResource
     {
         $imageUrl = null;
         if ($this->image_path) {
-            $imageUrl = str_starts_with($this->image_path, 'http')
-                ? $this->image_path
-                : url('storage/'.ltrim($this->image_path, '/'));
+            if (str_starts_with($this->image_path, 'http')) {
+                $imageUrl = $this->image_path;
+            } else {
+                $normalized = ltrim($this->image_path, '/');
+                if (str_starts_with($normalized, 'storage/')) {
+                    $normalized = substr($normalized, strlen('storage/'));
+                }
+                $imageUrl = url('storage/'.$normalized);
+            }
         }
 
         return [
@@ -25,7 +32,7 @@ class GalleryResource extends JsonResource
             'barber' => $this->barber ? [
                 'id' => $this->barber->id,
                 'name' => $this->barber->user?->name ?? 'Unknown',
-                'avatar_url' => $this->barber->user?->avatar ? url('storage/'.ltrim($this->barber->user->avatar, '/')) : null,
+                'avatar_url' => app(UserMediaUrl::class)->for($this->barber->user, $this->barber->user?->avatar),
             ] : null,
             'is_featured' => (bool) $this->is_featured,
         ];

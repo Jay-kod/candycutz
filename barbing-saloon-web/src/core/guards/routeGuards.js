@@ -1,7 +1,7 @@
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 
 function matchesRole(routeRoles, userRole) {
-  if (! routeRoles || routeRoles.length === 0) {
+  if (!routeRoles || routeRoles.length === 0) {
     return true;
   }
 
@@ -15,28 +15,36 @@ export function registerRouteGuards(router) {
     const requiresAuth = Boolean(to.meta.requiresAuth);
     const isPublic = Boolean(to.meta.public);
 
+    // Public routes mount immediately without waiting for auth resolution
     if (isPublic) {
       return true;
     }
 
-    if (requiresAuth && ! auth.isAuthenticated) {
-      auth.setIntendedRoute(to.fullPath);
-      if (to.path.startsWith('/superadmin')) {
-        return '/superadmin/login';
+    if (requiresAuth) {
+      // Only await auth readiness when trying to enter protected areas
+      if (auth.status === 'booting') {
+        await auth.ready;
       }
-      if (routeRoles.includes('admin') || routeRoles.includes('super_admin')) {
-        return '/admin/login';
+
+      if (!auth.isAuthenticated) {
+        auth.setIntendedRoute(to.fullPath);
+        if (to.path.startsWith('/superadmin')) {
+          return '/superadmin/login';
+        }
+        if (routeRoles.includes('admin') || routeRoles.includes('super_admin')) {
+          return '/admin/login';
+        }
+        if (routeRoles.includes('barber')) {
+          return '/barber/login';
+        }
+        return '/customer/login';
       }
-      if (routeRoles.includes('barber')) {
-        return '/barber/login';
-      }
-      return '/customer/login';
     }
 
     if (routeRoles.length > 0) {
       const currentRole = auth.user?.role?.value ?? auth.user?.role;
 
-      if (! matchesRole(routeRoles, currentRole)) {
+      if (!matchesRole(routeRoles, currentRole)) {
         return '/403';
       }
     }

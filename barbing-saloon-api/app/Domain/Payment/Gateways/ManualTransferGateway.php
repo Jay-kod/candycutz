@@ -51,13 +51,29 @@ class ManualTransferGateway implements PaymentGateway
             throw new RuntimeException("Payment reference {$reference} not found.");
         }
 
+        $statusVal = $payment->status instanceof \BackedEnum ? $payment->status->value : (string) $payment->status;
+
         return new GatewayResult(
             reference: $reference,
-            status: $payment->status === 'successful' ? 'success' : ($payment->status === 'failed' ? 'failed' : 'pending'),
+            status: in_array($statusVal, ['successful', 'verified'], true) ? 'success' : (in_array($statusVal, ['failed', 'rejected'], true) ? 'failed' : 'pending'),
             amount_kobo: (int) $payment->amount,
             gateway: 'manual_transfer',
             gateway_event_id: 'internal_verify',
-            raw_payload: ['internal_status' => $payment->status],
+            raw_payload: ['internal_status' => $statusVal],
+        );
+    }
+
+    public function refund(Payment $payment, int $amountMinor, string $reason = 'Customer refund requested by admin'): GatewayResult
+    {
+        return new GatewayResult(
+            reference: $payment->transaction_ref ?: $payment->reference ?: $payment->gateway_reference ?: 'manual_refund',
+            status: 'failed',
+            amount_kobo: $amountMinor,
+            gateway: 'manual_transfer',
+            raw_payload: [
+                'message' => 'Manual transfer refunds must be processed outside this payment gateway.',
+                'reason' => $reason,
+            ],
         );
     }
 

@@ -15,6 +15,7 @@ class SettingsService
     private const PUBLIC_GROUPS = [
         'general',
         'hero',
+        'about',
         'contact',
         'booking',
         'social',
@@ -31,10 +32,19 @@ class SettingsService
      */
     public function settings(): array
     {
-        return Setting::all()
+        $settings = Setting::all();
+
+        $grouped = $settings
             ->groupBy('group')
             ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
             ->all();
+
+        $flat = $settings
+            ->keyBy('key')
+            ->map(fn ($item) => $item->value)
+            ->all();
+
+        return array_merge($flat, $grouped);
     }
 
     /**
@@ -44,11 +54,18 @@ class SettingsService
      */
     public function publicSettings(): array
     {
-        return Setting::whereIn('group', self::PUBLIC_GROUPS)
-            ->get()
+        $settings = Setting::whereIn('group', self::PUBLIC_GROUPS)->get();
+
+        $grouped = $settings
             ->groupBy('group')
             ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
             ->all();
+
+        $flat = $settings
+            ->keyBy('key')
+            ->map(fn ($item) => $item->value)
+            ->all();
+
+        return array_merge($flat, $grouped);
     }
 }
-

@@ -107,9 +107,7 @@ export function useCmsSettings() {
         formData.append('about_teaser_image', aboutImageFile.value);
       }
 
-      const response = await api.post('/v1/admin/settings', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.post('/v1/admin/settings', formData);
       toast.success('Settings updated successfully');
       
       const updatedData = response.data.data;

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\UserRegistered;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
@@ -16,7 +18,8 @@ class RegisterCustomer
     use HasAuditLog;
 
     public function __construct(
-        protected UsernameIdentityService $usernameService
+        protected UsernameIdentityService $usernameService,
+        protected ApiTokenIssuer $tokenIssuer
     ) {}
 
     /**
@@ -49,15 +52,18 @@ class RegisterCustomer
         $user->is_active = true;
         $user->status = 'active';
         $user->save();
+        $user->sendEmailVerificationNotification();
 
         $tokenName = $data['device_name'] ?? 'web-client';
-        $token = $user->createToken($tokenName)->plainTextToken;
+        $token = $this->tokenIssuer->issue($user, $tokenName)->plainTextToken;
 
         $this->logAction('auth.register', $user, [], [
             'email' => $user->email,
             'username' => $user->username,
             'role' => $user->role?->value ?? $user->role,
         ]);
+
+        UserRegistered::dispatch($user);
 
         return [
             'user' => $user->loadMissing('barber'),

@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
-use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
+use App\Support\Errors\AuthException;
 use Illuminate\Support\Facades\Hash;
-use RuntimeException;
 
 class AuthenticateUser
 {
     use HasAuditLog;
+
+    public function __construct(
+        protected ApiTokenIssuer $tokenIssuer
+    ) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -39,21 +43,24 @@ class AuthenticateUser
 
         if (! $user || ! Hash::check($password, $user->password)) {
             $this->logFailure($identifier);
-            throw new RuntimeException('Invalid credentials. Please check your username, email, or password.');
+            throw AuthException::invalidCredentials(
+                'Invalid credentials. Please check your username, email, or password.'
+            );
         }
 
         if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
-            throw new RuntimeException('Your account is currently inactive or suspended. Please contact support.');
+            throw AuthException::accountSuspended(
+                'Your account is currently inactive or suspended. Please contact support.'
+            );
         }
 
-        $clientType = request()?->header('X-Client-Type');
-        $defaultDeviceName = $clientType === 'mobile' ? 'mobile-app' : 'web-client';
-        $tokenName = $data['device_name'] ?? $defaultDeviceName;
-        $expiresAt = $user->role === UserRole::customer
-            ? now()->addDays(30)
-            : now()->addHours(12);
+        $client = request()->header('X-Client')
+            ?? (request()->header('X-Client-Type') === 'mobile' || request()->hasHeader('X-App-Version') ? 'mobile' : 'web');
+        $deviceLabel = $data['device_name'] ?? ($data['device_id'] ?? ($client === 'mobile' ? 'mobile-device' : 'browser'));
+        $tokenName = "{$client}:{$deviceLabel}";
 
-        $token = $user->createToken($tokenName, ['*'], $expiresAt)->plainTextToken;
+        $clientType = str_contains((string) $client, 'mobile') ? 'mobile' : 'web';
+        $token = $this->tokenIssuer->issue($user, $tokenName, $clientType)->plainTextToken;
         $this->logAction('auth.login', $user, [], [
             'email' => $user->email,
             'username' => $user->username,

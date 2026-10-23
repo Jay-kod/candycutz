@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Identity\Actions;
 
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\PasswordChanged;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
@@ -27,6 +28,8 @@ class ChangePassword
         ]);
 
         $this->logAction('auth.change_password', $user, [], ['email' => $user->email]);
+
+        PasswordChanged::dispatch($user);
 
         return true;
     }

@@ -9,18 +9,20 @@ use App\Models\ErrorGroup;
 use App\Support\RequestContext;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use PDOException;
 use Throwable;
 
 class ErrorReporter
 {
     private const SENSITIVE_REGEX = '/(password|token|secret|authorization|cookie|card|cvv|id_token|otp|api_key|receipt)/i';
+
     private const MAX_TRACE_BYTES = 16384;
+
     private const MAX_BODY_BYTES = 4096;
+
     private const MAX_EVENTS_PER_HOUR = 20;
 
     public function report(Throwable $e, ?Request $request = null, ?ErrorCode $errorCode = null): void
@@ -32,9 +34,33 @@ class ErrorReporter
         }
     }
 
+    /**
+     * Ingest client-reported errors (web or mobile).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function reportClientEvent(array $payload, ?Request $request = null): void
+    {
+        try {
+            $this->processClientReport($payload, $request);
+        } catch (Throwable $fallbackEx) {
+            $date = Carbon::now()->format('Y-m-d');
+            $filePath = storage_path("logs/error-fallback-{$date}.log");
+            File::append($filePath, json_encode([
+                'timestamp' => Carbon::now()->toIso8601String(),
+                'fallback_reason' => 'client_report_fallback: '.$fallbackEx->getMessage(),
+                'error_code' => $payload['error_code'] ?? 'CLIENT_ERROR',
+                'exception_class' => $payload['name'] ?? 'ClientError',
+                'message' => $payload['message'] ?? 'Client reported error',
+                'source' => $payload['source'] ?? 'client_web',
+                'request_id' => $payload['request_id'] ?? RequestContext::generateRequestId(),
+            ])."\n");
+        }
+    }
+
     private function processReport(Throwable $e, ?Request $request, ?ErrorCode $errorCode): void
     {
-        if ($e instanceof \Illuminate\Http\Exceptions\HttpResponseException) {
+        if ($e instanceof HttpResponseException) {
             return;
         }
 
@@ -152,6 +178,130 @@ class ErrorReporter
         $event->save();
     }
 
+    /**
+     * Process and store a client error event with storm control & idempotency.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function processClientReport(array $payload, ?Request $request): void
+    {
+        $eventId = $payload['event_id'] ?? null;
+        if ($eventId) {
+            $exists = ErrorEvent::query()
+                ->where('context->event_id', $eventId)
+                ->exists();
+            if ($exists) {
+                return; // Idempotent skip
+            }
+        }
+
+        $source = (string) ($payload['source'] ?? 'client_web');
+        $name = (string) ($payload['name'] ?? 'ClientError');
+        $rawMessage = (string) ($payload['message'] ?? 'Unknown client error');
+        $errorCode = (string) ($payload['error_code'] ?? 'CLIENT_ERROR');
+        $severity = (string) ($payload['level'] ?? $payload['severity'] ?? 'error');
+        $route = (string) ($payload['route'] ?? ($request?->path() ?? '/'));
+        $requestId = (string) ($payload['request_id'] ?? RequestContext::generateRequestId());
+
+        $sampleMessage = $this->normaliseMessage($rawMessage);
+        $fingerprint = sha1($source.'|'.$errorCode.'|'.$name.'|'.$route);
+
+        $now = isset($payload['occurred_at']) ? Carbon::parse($payload['occurred_at']) : Carbon::now();
+
+        // 1. Error Group
+        $group = ErrorGroup::query()->where('fingerprint', $fingerprint)->first();
+        if (! $group) {
+            $group = new ErrorGroup([
+                'fingerprint' => $fingerprint,
+                'error_code' => $errorCode,
+                'category' => 'client',
+                'severity' => in_array($severity, ['critical', 'error', 'warning', 'info'], true) ? $severity : 'error',
+                'exception_class' => $name,
+                'sample_message' => $sampleMessage,
+                'source' => $source,
+                'status' => 'open',
+                'occurrences' => 1,
+                'first_seen_at' => $now,
+                'last_seen_at' => $now,
+                'last_request_id' => $requestId,
+                'affected_users_count' => ($request?->user()?->id ? 1 : 0),
+            ]);
+            $group->save();
+            $shouldStoreEvent = true;
+        } else {
+            $group->occurrences++;
+            $group->last_seen_at = $now;
+            $group->last_request_id = $requestId;
+            if ($group->status === 'resolved') {
+                $group->status = 'open';
+                $group->regressed_at = $now;
+            }
+            if ($request?->user()?->id) {
+                $alreadyCounted = ErrorEvent::query()
+                    ->where('group_id', $group->id)
+                    ->where('user_id', $request->user()->id)
+                    ->exists();
+                if (! $alreadyCounted) {
+                    $group->affected_users_count++;
+                }
+            }
+            $group->save();
+
+            $recentEventsCount = ErrorEvent::query()
+                ->where('group_id', $group->id)
+                ->where('occurred_at', '>=', $now->copy()->subHour())
+                ->count();
+            $shouldStoreEvent = ($recentEventsCount < self::MAX_EVENTS_PER_HOUR);
+        }
+
+        if (! $shouldStoreEvent) {
+            return;
+        }
+
+        // 2. Error Event
+        $ip = $request?->ip();
+        $ipHash = $ip ? hash_hmac('sha256', $ip, (string) config('app.key', 'candycutz_salt')) : null;
+
+        $stack = (string) ($payload['stack'] ?? '');
+        if (strlen($stack) > 8192) {
+            $stack = substr($stack, 0, 8192)."\n... [stack truncated]";
+        }
+
+        $contextData = [
+            'event_id' => $eventId,
+            'network_state' => $payload['network_state'] ?? null,
+            'platform' => $payload['platform'] ?? null,
+            'breadcrumbs' => $this->redactData($payload['breadcrumbs'] ?? []),
+        ];
+
+        $event = new ErrorEvent([
+            'group_id' => $group->id,
+            'request_id' => $requestId,
+            'occurred_at' => $now,
+            'http_status' => (int) ($payload['http_status'] ?? 0),
+            'method' => (string) ($payload['method'] ?? 'CLIENT'),
+            'route_uri' => $route,
+            'url_redacted' => $route,
+            'user_id' => $request?->user()?->id,
+            'role' => $request?->user()?->role instanceof \BackedEnum ? $request->user()->role->value : (string) ($request?->user()?->role ?? ''),
+            'client' => $source,
+            'app_version' => (string) ($payload['app_version'] ?? $request?->header('X-App-Version') ?? ''),
+            'device_label' => (string) ($payload['device'] ?? $request?->header('X-Device-Id') ?? ''),
+            'ip_hash' => $ipHash,
+            'user_agent' => $request?->userAgent(),
+            'exception_class' => $name,
+            'message' => $rawMessage,
+            'file' => null,
+            'line' => null,
+            'trace' => $stack,
+            'context' => $contextData,
+            'duration_ms' => null,
+            'memory_mb' => null,
+        ]);
+
+        $event->save();
+    }
+
     private function resolveErrorCode(Throwable $e): ErrorCode
     {
         if ($e instanceof AppException) {
@@ -160,6 +310,7 @@ class ErrorReporter
 
         if ($e instanceof QueryException) {
             $state = $e->getCode();
+
             return match ($state) {
                 '2002', '2006', 'HY000' => ErrorCode::DB_UNAVAILABLE,
                 '40001', '1213' => ErrorCode::DB_DEADLOCK,
@@ -175,6 +326,7 @@ class ErrorReporter
     private function normalisePath(string $file): string
     {
         $base = base_path();
+
         return str_replace([$base.DIRECTORY_SEPARATOR, $base.'/'], '', $file);
     }
 
@@ -182,6 +334,7 @@ class ErrorReporter
     {
         // Strip UUIDs
         $msg = preg_replace('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i', '<uuid>', $message) ?? $message;
+
         // Strip standalone numeric IDs
         return preg_replace('/\b\d+\b/', '<num>', $msg) ?? $msg;
     }
@@ -196,6 +349,7 @@ class ErrorReporter
             if (preg_match(self::SENSITIVE_REGEX, $matches[2])) {
                 return $matches[1].$matches[2].'=[REDACTED]';
             }
+
             return $matches[0];
         }, $url);
     }
@@ -214,6 +368,7 @@ class ErrorReporter
                     $redacted[$key] = $this->redactData($value);
                 }
             }
+
             return $redacted;
         }
 

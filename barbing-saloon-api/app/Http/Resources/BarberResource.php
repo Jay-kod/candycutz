@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Domain\Shared\Services\UserMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,16 +13,7 @@ class BarberResource extends JsonResource
         $u = $this->user;
         $specialties = is_array($this->specialties) ? $this->specialties : (json_decode($this->specialties ?? '[]', true) ?: []);
 
-        $formatStorageUrl = function (?string $path): ?string {
-            if (! $path) {
-                return null;
-            }
-            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-                return $path;
-            }
-            $clean = ltrim($path, '/');
-            return url(str_starts_with($clean, 'storage/') ? $clean : 'storage/'.$clean);
-        };
+        $mediaUrl = app(UserMediaUrl::class);
 
         return [
             'id' => $this->id,
@@ -31,10 +23,10 @@ class BarberResource extends JsonResource
             'username' => $u?->username ?? 'barber',
             'email' => $u?->email ?? '',
             'phone' => $u?->phone ?? '',
-            'avatar' => $u?->avatar,
-            'avatar_url' => $formatStorageUrl($u?->avatar),
-            'cover_image' => $u?->cover_image,
-            'cover_image_url' => $formatStorageUrl($u?->cover_image),
+            'avatar' => $mediaUrl->for($u, $u?->avatar),
+            'avatar_url' => $mediaUrl->for($u, $u?->avatar),
+            'cover_image' => $mediaUrl->for($u, $u?->cover_image),
+            'cover_image_url' => $mediaUrl->for($u, $u?->cover_image),
             'rating' => (float) ($this->rating ?? 5.0),
             'total_reviews' => (int) ($this->testimonials()->count() ?: 12),
             'experience_years' => (int) ($this->experience_years ?? $this->years_experience ?? 5),

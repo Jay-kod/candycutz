@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Domain\Catalog\DataObjects\ServiceData;
 use App\Domain\Catalogue\Actions\CreateServiceCategory;
 use App\Domain\Catalogue\Actions\DeleteServiceCategory;
 use App\Domain\Catalogue\Actions\UpdateServiceCategory;
+use App\Domain\Catalogue\DataObjects\ServiceData;
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\CatalogueCache;
 use App\Http\Requests\Api\V1\Admin\StoreServiceCategoryRequest;
 use App\Http\Requests\Api\V1\Admin\UpdateServiceCategoryRequest;
 use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\BarberService;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -70,7 +72,14 @@ class ServiceApiController
             }
         }
 
-        $services = $query->orderBy('display_order')->orderBy('name')->get();
+        if (! $role || $role === 'customer') {
+            $cacheKey = 'query:'.md5(json_encode($request->all()));
+            $services = CatalogueCache::remember('services', $cacheKey, function () use ($query) {
+                return $query->orderBy('display_order')->orderBy('name')->get();
+            });
+        } else {
+            $services = $query->orderBy('display_order')->orderBy('name')->get();
+        }
 
         $data = ServiceResource::collection($services);
 
@@ -141,6 +150,8 @@ class ServiceApiController
             ? 'Service submitted successfully and is pending admin approval.'
             : 'Service created successfully.';
 
+        CatalogueCache::bust('services');
+
         return ApiResponse::success(new ServiceResource($service->load(['category', 'barber.user'])), $message, 201);
     }
 
@@ -155,10 +166,13 @@ class ServiceApiController
 
         $service->update($validated);
 
-        if ($request->hasFile('image')) {
-            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/services');
+        $imageFile = $request->file('image') ?? $request->file('image1');
+        if ($imageFile) {
+            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/services');
             $service->update(['image' => '/storage/'.$path]);
         }
+
+        CatalogueCache::bust('services');
 
         return ApiResponse::success(new ServiceResource($service->refresh()), 'Service updated');
     }
@@ -169,6 +183,8 @@ class ServiceApiController
         $this->authorize('delete', $service);
         $service->delete();
 
+        CatalogueCache::bust('services');
+
         return ApiResponse::success(null, 'Service deleted');
     }
 
@@ -176,20 +192,28 @@ class ServiceApiController
     {
         $this->authorize('create', ServiceCategory::class);
 
-        return ApiResponse::success($action->execute($request->validated()), 'Service category created', 201);
+        $category = $action->execute($request->validated());
+        CatalogueCache::bust('categories');
+
+        return ApiResponse::success($category, 'Service category created', 201);
     }
 
     public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action): JsonResponse
     {
         $this->authorize('update', $serviceCategory);
 
-        return ApiResponse::success($action->execute($serviceCategory, $request->validated()), 'Service category updated');
+        $category = $action->execute($serviceCategory, $request->validated());
+        CatalogueCache::bust('categories');
+
+        return ApiResponse::success($category, 'Service category updated');
     }
 
     public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action): JsonResponse
     {
         $this->authorize('delete', $serviceCategory);
         $action->execute($serviceCategory);
+
+        CatalogueCache::bust('categories');
 
         return ApiResponse::success(null, 'Service category deleted');
     }
@@ -210,11 +234,13 @@ class ServiceApiController
         ]);
 
         if ($service->barber_id) {
-            \App\Models\BarberService::firstOrCreate(
+            BarberService::firstOrCreate(
                 ['barber_id' => $service->barber_id, 'service_id' => $service->id],
                 ['is_offered' => true]
             );
         }
+
+        CatalogueCache::bust('services');
 
         return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service approved successfully');
     }
@@ -231,6 +257,8 @@ class ServiceApiController
             'approval_status' => 'rejected',
             'is_active' => false,
         ]);
+
+        CatalogueCache::bust('services');
 
         return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service rejected');
     }

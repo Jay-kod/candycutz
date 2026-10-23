@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   SafeAreaView,
@@ -17,6 +16,7 @@ import { Card } from '../../src/components/common/Card';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 import { servicesApi } from '../../src/api/client';
 import type { Service } from '../../src/api/types';
 
@@ -24,6 +24,7 @@ export default function ServicesScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { colors } = useAppTheme();
+  const showToast = useToastStore((state) => state.show);
   const styles = createStyles(colors);
 
   const isBarber = user?.role === 'barber';
@@ -57,7 +58,7 @@ export default function ServicesScreen() {
 
   const handleSubmitService = async () => {
     if (!formName.trim() || !formPrice.trim() || !formDuration.trim()) {
-      Alert.alert('Missing Fields', 'Please fill in service name, price, and duration.');
+      showToast({ variant: 'warning', title: 'Missing Fields', message: 'Please fill in service name, price, and duration.' });
       return;
     }
 
@@ -69,7 +70,7 @@ export default function ServicesScreen() {
         price: parseFloat(formPrice),
         duration_minutes: parseInt(formDuration, 10),
       });
-      Alert.alert('Request Submitted', 'Your service request has been sent for admin approval.');
+      showToast({ variant: 'success', title: 'Request Submitted', message: 'Your service request has been sent for admin approval.' });
       setShowModal(false);
       setFormName('');
       setFormDesc('');
@@ -78,7 +79,7 @@ export default function ServicesScreen() {
       fetchServices();
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Failed to submit service request.';
-      Alert.alert('Error', msg);
+      showToast({ variant: 'error', title: 'Submission Failed', message: msg });
     } finally {
       setSubmitting(false);
     }

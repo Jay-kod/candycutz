@@ -57,7 +57,7 @@ it('initiates manual transfer checkout and creates payment in awaiting_transfer 
 
     $payment = Payment::where('appointment_id', $appointment->id)->first();
     expect($payment)->not->toBeNull();
-    expect($payment->status)->toBe('awaiting_transfer');
+    expect($payment->status->value)->toBe('awaiting_transfer');
     expect($payment->payment_method)->toBe('manual_transfer');
 });
 
@@ -78,7 +78,7 @@ it('progresses receipt upload through state machine to under_review with SLA tra
     $response->assertStatus(200);
 
     $payment = Payment::where('appointment_id', $appointment->id)->first();
-    expect($payment->status)->toBe('under_review');
+    expect($payment->status->value)->toBe('under_review');
     expect($payment->receipt_url)->not->toBeNull();
     expect($payment->receipt_uploaded_at)->not->toBeNull();
     expect($payment->sla_expires_at)->not->toBeNull();
@@ -116,7 +116,7 @@ it('verifies receipt approving payment, confirming appointment, and logging audi
     $verifyAction = app(VerifyReceipt::class);
     $verifiedPayment = $verifyAction->execute($payment, approve: true, reason: 'Payment confirmed in bank statement', actorId: $admin->id);
 
-    expect($verifiedPayment->status)->toBe('successful');
+    expect($verifiedPayment->status->value)->toBe('successful');
     expect($verifiedPayment->verified_by_user_id)->toBe($admin->id);
     expect($verifiedPayment->verified_at)->not->toBeNull();
 
@@ -156,7 +156,7 @@ it('rejects receipt and records reason in audit trail', function () {
     $verifyAction = app(VerifyReceipt::class);
     $rejectedPayment = $verifyAction->execute($payment, approve: false, reason: 'Unclear transaction reference on image', actorId: $admin->id);
 
-    expect($rejectedPayment->status)->toBe('failed');
+    expect($rejectedPayment->status->value)->toBe('failed');
     expect($rejectedPayment->error_message)->toBe('Unclear transaction reference on image');
     expect($rejectedPayment->verified_by_user_id)->toBe($admin->id);
 

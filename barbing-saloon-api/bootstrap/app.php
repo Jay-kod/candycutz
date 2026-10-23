@@ -1,22 +1,24 @@
 <?php
 
 use App\Http\Middleware\ApiGateMiddleware;
+use App\Http\Middleware\CheckAppVersion;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\ClientGateMiddleware;
 use App\Http\Middleware\EnsureUserActive;
+use App\Http\Middleware\FeatureGateMiddleware;
 use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\LogApiRequest;
+use App\Http\Middleware\RequestContextMiddleware;
 use App\Http\Middleware\SecurityHeaders;
-use App\Http\Responses\ApiResponse;
-use Illuminate\Auth\AuthenticationException;
+use App\Support\Errors\ApiExceptionRenderer;
+use App\Support\Errors\ErrorReporter;
+use App\Support\RequestContext;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use App\Http\Middleware\CheckAppVersion;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'check.role' => CheckRole::class,
             'force.https' => ForceHttps::class,
@@ -34,40 +38,46 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.gate' => ApiGateMiddleware::class,
             'check.app.version' => CheckAppVersion::class,
             'ensure.active' => EnsureUserActive::class,
-            'request.context' => \App\Http\Middleware\RequestContextMiddleware::class,
+            'request.context' => RequestContextMiddleware::class,
+            'idempotent' => IdempotencyMiddleware::class,
+            'client.gate' => ClientGateMiddleware::class,
+            'feature' => FeatureGateMiddleware::class,
         ]);
 
         $middleware->api(prepend: [
-            \App\Http\Middleware\RequestContextMiddleware::class,
+            RequestContextMiddleware::class,
+            ClientGateMiddleware::class,
         ]);
 
         $middleware->api(append: [
             CheckAppVersion::class,
             EnsureUserActive::class,
+            IdempotencyMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(fn ($request) => $request->is('api/*') || $request->expectsJson());
 
-        $exceptions->render(function (\Throwable $e, Request $r) {
+        $exceptions->render(function (Throwable $e, Request $r) {
             if ($r->is('api/*') || $r->expectsJson()) {
-                return app(\App\Support\Errors\ApiExceptionRenderer::class)->render($e, $r);
+                return app(ApiExceptionRenderer::class)->render($e, $r);
             }
+
             return null;
         });
 
-        $exceptions->report(function (\Throwable $e) {
-            app(\App\Support\Errors\ErrorReporter::class)->report($e);
+        $exceptions->report(function (Throwable $e) {
+            app(ErrorReporter::class)->report($e);
         });
 
         $exceptions->context(function () {
-            return app()->bound(\App\Support\RequestContext::class)
-                ? app(\App\Support\RequestContext::class)->toArray()
+            return app()->bound(RequestContext::class)
+                ? app(RequestContext::class)->toArray()
                 : [];
         });
 
-        $exceptions->throttle(function (\Throwable $e) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by(
+        $exceptions->throttle(function (Throwable $e) {
+            return Limit::perMinute(30)->by(
                 get_class($e).'|'.$e->getFile().$e->getLine()
             );
         });

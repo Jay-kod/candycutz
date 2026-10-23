@@ -80,7 +80,7 @@ export async function reportCrash(
  * Initializes global JS exception handling where supported.
  */
 export function initGlobalErrorHandler(): void {
-  const globalErrorUtils = (global as any).ErrorUtils;
+  const globalErrorUtils = (globalThis as any).ErrorUtils;
   if (globalErrorUtils && typeof globalErrorUtils.getGlobalHandler === 'function') {
     const defaultHandler = globalErrorUtils.getGlobalHandler();
 

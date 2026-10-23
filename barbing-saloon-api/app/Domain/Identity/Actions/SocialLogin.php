@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
 use Exception;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +22,8 @@ class SocialLogin
     use HasAuditLog;
 
     public function __construct(
-        protected UsernameIdentityService $usernameService
+        protected UsernameIdentityService $usernameService,
+        protected ApiTokenIssuer $tokenIssuer
     ) {}
 
     /**
@@ -41,6 +44,7 @@ class SocialLogin
 
         $providerId = (string) ($claims['sub'] ?? '');
         $email = strtolower(trim((string) ($claims['email'] ?? '')));
+        $providerVerifiedEmail = filter_var($claims['email_verified'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $name = trim((string) ($data['user_data']['name'] ?? $claims['name'] ?? 'VIP Customer'));
         $avatar = $claims['picture'] ?? null;
 
@@ -63,6 +67,7 @@ class SocialLogin
             }
         }
 
+        $createdUser = false;
         if (! $user) {
             $baseForUsername = ! empty($email) ? explode('@', $email)[0] : $name;
             $username = $this->usernameService->generateUniqueUsername($baseForUsername);
@@ -83,6 +88,7 @@ class SocialLogin
             $user->is_active = true;
             $user->status = 'active';
             $user->save();
+            $createdUser = true;
 
             $this->logAction('auth.social_register', $user, [], [
                 'provider' => $provider,
@@ -90,11 +96,19 @@ class SocialLogin
             ]);
         }
 
+        if ($providerVerifiedEmail && $email !== '' && strcasecmp($user->email, $email) === 0 && ! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            $user->save();
+            event(new Verified($user));
+        } elseif ($createdUser && $email !== '') {
+            $user->sendEmailVerificationNotification();
+        }
+
         if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
             throw new RuntimeException('Your account is currently inactive or suspended.');
         }
 
-        $token = $user->createToken($deviceName)->plainTextToken;
+        $token = $this->tokenIssuer->issue($user, $deviceName)->plainTextToken;
 
         $this->logAction('auth.social_login', $user, [], [
             'provider' => $provider,

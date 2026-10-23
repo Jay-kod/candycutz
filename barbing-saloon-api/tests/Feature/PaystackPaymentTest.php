@@ -140,7 +140,7 @@ it('processes paystack webhook with valid signature and confirms appointment ide
     ]);
 
     // Verify database state: payment is successful, appointment confirmed, deposit paid
-    expect($payment->fresh()->status)->toBe('successful');
+    expect($payment->fresh()->status->value)->toBe('successful');
     expect($appointment->fresh()->status->value)->toBe('confirmed');
     expect((bool) $appointment->fresh()->deposit_paid)->toBeTrue();
 
@@ -164,7 +164,7 @@ it('processes paystack webhook with valid signature and confirms appointment ide
     $response2->assertStatus(200);
     // Should NOT create duplicate transactions
     expect(PaymentTransaction::where('gateway_event_id', '987654321')->count())->toBe(1);
-    expect($payment->fresh()->status)->toBe('successful');
+    expect($payment->fresh()->status->value)->toBe('successful');
 });
 
 it('rejects paystack webhook with invalid signature', function () {

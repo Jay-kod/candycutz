@@ -84,22 +84,27 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const getTextStyle = (): TextStyle => {
-    let base: TextStyle = {
+    const base: TextStyle = {
       fontFamily: FONTS.bold,
       fontWeight: '700',
       textAlign: 'center',
     };
 
-    if (size === 'sm') base.fontSize = FONTS.sizes.sm;
-    else if (size === 'lg') base.fontSize = FONTS.sizes.lg;
-    else base.fontSize = FONTS.sizes.md;
+    const fontSize = size === 'sm' ? FONTS.sizes.sm : size === 'lg' ? FONTS.sizes.lg : FONTS.sizes.md;
+    const color =
+      variant === 'primary'
+        ? colors.onPrimary
+        : variant === 'outline'
+          ? colors.primary
+          : variant === 'ghost'
+            ? colors.textSecondary
+            : colors.textPrimary;
 
-    if (variant === 'primary') base.color = colors.onPrimary;
-    else if (variant === 'outline') base.color = colors.primary;
-    else if (variant === 'ghost') base.color = colors.textSecondary;
-    else base.color = colors.textPrimary;
-
-    return base;
+    return {
+      ...base,
+      fontSize,
+      color,
+    };
   };
 
   return (

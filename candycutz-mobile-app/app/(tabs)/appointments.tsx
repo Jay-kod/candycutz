@@ -313,7 +313,9 @@ export default function BarberAppointmentsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={refetch}
+              onRefresh={() => {
+                void refetch();
+              }}
               tintColor={COLORS.primary}
             />
           }

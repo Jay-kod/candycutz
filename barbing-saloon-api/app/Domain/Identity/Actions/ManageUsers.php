@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Events\PasswordChanged;
+use App\Events\UserSuspended;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 
 class ManageUsers
 {
@@ -14,6 +18,8 @@ class ManageUsers
      */
     public function listUsers(): LengthAwarePaginator
     {
+        Gate::authorize('manage-users');
+
         return User::latest()->paginate(15);
     }
 
@@ -22,6 +28,8 @@ class ManageUsers
      */
     public function storeUser(array $data): User
     {
+        Gate::authorize('manage-users');
+
         // Extract privilege fields before mass-assigning
         $role = $data['role'] ?? 'customer';
         $isActive = $data['is_active'] ?? true;
@@ -42,6 +50,8 @@ class ManageUsers
      */
     public function updateUser(User $user, array $data): User
     {
+        Gate::authorize('manage-users');
+
         // Extract and apply privilege fields explicitly
         if (array_key_exists('role', $data)) {
             $user->role = $data['role'];
@@ -64,6 +74,8 @@ class ManageUsers
 
     public function activateUser(User $user): User
     {
+        Gate::authorize('manage-users');
+
         $user->is_active = true;
         $user->status = 'active';
         $user->save();
@@ -73,30 +85,38 @@ class ManageUsers
 
     public function deactivateUser(User $user): User
     {
+        Gate::authorize('manage-users');
+
         $user->is_active = false;
         $user->status = 'deactivated';
         $user->deactivated_at = now();
         $user->save();
 
         $user->tokens()->delete();
+        UserSuspended::dispatch($user, auth()->user(), 'Admin deactivated user account');
 
         return $user->refresh();
     }
 
     public function adminResetPassword(User $user, string $newPassword): User
     {
+        Gate::authorize('manage-users');
+
         $user->update([
-            'password' => \Illuminate\Support\Facades\Hash::make($newPassword),
+            'password' => Hash::make($newPassword),
         ]);
-        
+
         // Invalidate existing tokens so they are forced to log in again
         $user->tokens()->delete();
-        
+        PasswordChanged::dispatch($user);
+
         return $user->refresh();
     }
 
     public function deleteUser(User $user): void
     {
+        Gate::authorize('manage-users');
+
         $user->delete();
     }
 }

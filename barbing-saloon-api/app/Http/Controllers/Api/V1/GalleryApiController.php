@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\CatalogueCache;
 use App\Http\Resources\GalleryResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Gallery;
@@ -83,7 +84,63 @@ class GalleryApiController
             'image_path' => '/storage/'.$path,
         ]);
 
+        CatalogueCache::bust('gallery');
+
         return ApiResponse::success(new GalleryResource($gallery->load('barber.user')), 'Gallery item created', 201);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $item = Gallery::where('id', $id)->first();
+        if (! $item) {
+            return ApiResponse::error("Gallery item #{$id} not found.", [], 404, 'RESOURCE_NOT_FOUND');
+        }
+
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'nullable|string',
+            'image' => 'nullable|image|max:5120',
+            'image_url' => 'nullable|string',
+            'barber_id' => 'nullable|integer|exists:barbers,id',
+        ]);
+
+        if (isset($validated['category'])) {
+            $category = $validated['category'];
+            $validCategories = ['haircut', 'beard', 'combo', 'before_after', 'shop'];
+            if (! in_array($category, $validCategories, true)) {
+                $category = 'haircut';
+            }
+            $item->category = $category;
+        }
+
+        if (isset($validated['title'])) {
+            $item->title = $validated['title'];
+        }
+
+        if (array_key_exists('description', $validated)) {
+            $item->description = $validated['description'];
+        }
+
+        $userRole = $request->user()->role?->value ?? $request->user()->role;
+        if (in_array($userRole, ['admin', 'super_admin'], true) && array_key_exists('barber_id', $validated)) {
+            $item->barber_id = $validated['barber_id'] ? (int) $validated['barber_id'] : null;
+        }
+
+        if ($request->hasFile('image')) {
+            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/gallery');
+            $item->image_path = '/storage/'.$path;
+        } elseif (! empty($validated['image_url']) && empty($item->image_path)) {
+            $item->image_path = $validated['image_url'];
+        }
+
+        $item->save();
+
+        CatalogueCache::bust('gallery');
+
+        return ApiResponse::success(new GalleryResource($item->load('barber.user')), 'Gallery item updated');
     }
 
     public function destroy(Request $request, int $id): JsonResponse
@@ -96,6 +153,7 @@ class GalleryApiController
         $this->authorize('delete', $item);
 
         $item->delete();
+        CatalogueCache::bust('gallery');
 
         return ApiResponse::success(null, 'Gallery item deleted');
     }

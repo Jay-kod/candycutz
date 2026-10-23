@@ -41,7 +41,6 @@ export interface User {
   avatar?: string | null;
   cover_image?: string | null;
   bio?: string | null;
-  wallet_balance?: number;
   notification_preferences?: Record<string, any> | null;
   last_username_change_at?: string | null;
   barber?: Barber;

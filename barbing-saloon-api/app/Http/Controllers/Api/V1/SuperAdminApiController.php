@@ -14,6 +14,7 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SuperAdminApiController
 {
@@ -24,7 +25,12 @@ class SuperAdminApiController
 
     public function users(ManageUsers $manageUsers): JsonResponse
     {
-        return ApiResponse::paginated($manageUsers->listUsers(), 'Users loaded');
+        $users = $manageUsers->listUsers();
+        $users->setCollection($users->getCollection()->map(
+            fn (User $user): User => $user
+        ));
+
+        return ApiResponse::paginated($users, 'Users loaded');
     }
 
     public function storeUser(StoreUserRequest $request, ManageUsers $manageUsers): JsonResponse
@@ -47,7 +53,7 @@ class SuperAdminApiController
         return ApiResponse::success(new UserResource($manageUsers->deactivateUser($user)), 'User deactivated');
     }
 
-    public function resetPassword(User $user, \Illuminate\Http\Request $request, ManageUsers $manageUsers): JsonResponse
+    public function resetPassword(User $user, Request $request, ManageUsers $manageUsers): JsonResponse
     {
         $validated = $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -78,6 +84,15 @@ class SuperAdminApiController
                 'key' => 'hero_image',
                 'value' => '/storage/'.$path,
                 'group' => 'hero',
+            ];
+        }
+
+        if ($request->hasFile('about_teaser_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'about_teaser_image',
+                'value' => '/storage/'.$path,
+                'group' => 'about',
             ];
         }
 

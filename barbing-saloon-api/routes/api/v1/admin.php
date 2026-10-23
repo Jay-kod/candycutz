@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
+use App\Http\Controllers\Api\V1\AdminPaymentApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
@@ -113,6 +114,14 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/system/backups/upload', [SystemBackupApiController::class, 'upload']);
     Route::get('/admin/system/backups/{filename}/download', [SystemBackupApiController::class, 'download']);
     Route::delete('/admin/system/backups/{filename}', [SystemBackupApiController::class, 'destroy']);
+
+    // Admin Payments & Webhook Events
+    Route::get('/admin/payments', [AdminPaymentApiController::class, 'index']);
+    Route::get('/admin/payments/{id}', [AdminPaymentApiController::class, 'show'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reverify', [AdminPaymentApiController::class, 'reverify'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/refund', [AdminPaymentApiController::class, 'refund'])->whereNumber('id');
+    Route::get('/admin/webhook-events', [AdminPaymentApiController::class, 'webhookEvents']);
+    Route::post('/admin/webhook-events/{id}/replay', [AdminPaymentApiController::class, 'replayWebhookEvent'])->whereNumber('id');
 });
 
 Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {

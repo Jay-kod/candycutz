@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Domain\Shared\Enums\AppointmentSource;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,11 +16,12 @@ class AppointmentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $userMediaUrl = app(UserMediaUrl::class);
         $service = $this->service;
         $barber = $this->barber;
         $statusVal = $this->status?->value ?? $this->status;
         $sourceVal = $this->source?->value ?? (is_string($this->source) ? $this->source : 'web');
-        $sourceLabel = $this->source instanceof \App\Domain\Shared\Enums\AppointmentSource ? $this->source->label() : (match ($sourceVal) {
+        $sourceLabel = $this->source instanceof AppointmentSource ? $this->source->label() : (match ($sourceVal) {
             'app' => 'Mobile App',
             'walk_in' => 'Walk-In',
             default => 'Website',
@@ -55,9 +58,9 @@ class AppointmentResource extends JsonResource
                 'name' => $this->customer->name,
                 'email' => $this->customer->email,
                 'phone' => $this->customer->phone,
-                'avatar' => $this->customer->avatar,
+                'avatar' => $userMediaUrl->for($this->customer, $this->customer->avatar),
             ] : null,
-            'customer_avatar' => $this->customer?->avatar,
+            'customer_avatar' => $userMediaUrl->for($this->customer, $this->customer?->avatar),
             'service' => $service ? [
                 'id' => $service->id,
                 'name' => $service->name,

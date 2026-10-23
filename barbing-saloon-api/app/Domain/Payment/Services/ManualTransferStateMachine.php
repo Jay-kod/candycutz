@@ -6,6 +6,8 @@ namespace App\Domain\Payment\Services;
 
 use App\Domain\Payment\Enums\ManualTransferState;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Events\PaymentConfirmed;
+use App\Events\PaymentFailed;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
@@ -20,8 +22,12 @@ class ManualTransferStateMachine
      */
     public function getCurrentState(Payment $payment): ManualTransferState
     {
-        return match ($payment->status) {
-            'awaiting_transfer', 'pending' => ManualTransferState::awaiting_transfer,
+        $statusVal = $payment->status instanceof \BackedEnum
+            ? $payment->status->value
+            : (string) ($payment->status ?? '');
+
+        return match ($statusVal) {
+            'awaiting_transfer', 'pending', 'initiated' => ManualTransferState::awaiting_transfer,
             'receipt_uploaded' => ManualTransferState::receipt_uploaded,
             'under_review' => ManualTransferState::under_review,
             'successful', 'verified' => ManualTransferState::verified,
@@ -129,7 +135,11 @@ class ManualTransferStateMachine
                     } catch (\Throwable $e) {
                         Log::warning('Could not record status history for verified receipt: '.$e->getMessage());
                     }
+
+                    PaymentConfirmed::dispatch($payment, $appointment);
                 }
+            } elseif ($targetState === ManualTransferState::rejected) {
+                PaymentFailed::dispatch($payment, $reason ?? 'Receipt rejected');
             }
 
             return $payment->refresh();

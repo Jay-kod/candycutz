@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Support\Errors;
 
+use App\Exceptions\BookingSlotUnavailableException;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -34,12 +34,28 @@ class ApiExceptionRenderer
         // 1. Domain Typed Exceptions
         if ($e instanceof AppException) {
             $code = $e->getErrorCode();
+
             return ApiResponse::error(
                 message: $e->getMessage(),
                 errors: $e->getDetails(),
                 status: $code->status(),
                 errorCode: $code,
                 context: $e->getCustomContext()
+            );
+        }
+
+        // 1b. Legacy Booking Slot Unavailable Exception
+        if ($e instanceof BookingSlotUnavailableException) {
+            $details = $e->getSlotDetails() ? ['slot' => [$e->getSlotDetails()]] : [];
+
+            return ApiResponse::error(
+                message: $e->getMessage(),
+                errors: $details,
+                status: 409,
+                errorCode: ErrorCode::BOOKING_SLOT_TAKEN,
+                action: 'fix_input',
+                retryable: false,
+                context: $e->getSlotDetails() ? ['slot' => $e->getSlotDetails()] : []
             );
         }
 
@@ -95,6 +111,7 @@ class ApiExceptionRenderer
         // 6. Not Found
         if ($e instanceof ModelNotFoundException) {
             $modelName = class_basename($e->getModel());
+
             return ApiResponse::error(
                 message: "The requested {$modelName} was not found.",
                 errors: [],

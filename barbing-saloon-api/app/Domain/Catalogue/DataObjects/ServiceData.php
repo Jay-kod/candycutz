@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Catalog\DataObjects;
+namespace App\Domain\Catalogue\DataObjects;
 
 use Illuminate\Http\Request;
 

@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Identity\Services\CustomerService;
+use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Http\Resources\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
-use App\Domain\Identity\Services\UsernameIdentityService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AccountApiController
@@ -49,8 +50,11 @@ class AccountApiController
         ]);
 
         if ($request->hasFile('avatar')) {
-            $path = (new SecureImageUpload)->execute($request->file('avatar'), 'uploads/avatars');
-            $validated['avatar'] = '/storage/'.$path;
+            $validated['avatar'] = (new SecureImageUpload)->execute(
+                $request->file('avatar'),
+                'user-media/'.$user->id.'/avatar',
+                'local'
+            );
         }
 
         // Handle username update through domain service with cooldown enforcement
@@ -80,11 +84,17 @@ class AccountApiController
             ->where('status', AppointmentStatus::completed->value)
             ->sum('total_price');
 
+        $monthExpr = match (DB::getDriverName()) {
+            'pgsql' => "TRIM(TO_CHAR(appointment_date, 'Month'))",
+            'sqlite' => "strftime('%m', appointment_date)",
+            default => 'MONTHNAME(appointment_date)',
+        };
+
         $monthlyBookings = Appointment::query()
             ->where('customer_id', $user->id)
             ->where('appointment_date', '>=', now()->subMonths(6)->startOfMonth())
-            ->selectRaw('MONTHNAME(appointment_date) as month, COUNT(*) as bookings, SUM(total_price) as spent')
-            ->groupBy('month')
+            ->selectRaw("{$monthExpr} as month, COUNT(*) as bookings, SUM(total_price) as spent")
+            ->groupBy(DB::raw($monthExpr))
             ->get();
 
         return ApiResponse::success([
@@ -111,7 +121,7 @@ class AccountApiController
                 'service_name' => $a->service?->name,
                 'service_image' => $a->service?->image,
                 'barber_name' => $a->barber?->user?->name,
-                'barber_avatar' => $a->barber?->user?->avatar,
+                'barber_avatar' => app(UserMediaUrl::class)->for($a->barber?->user, $a->barber?->user?->avatar),
             ]);
 
         return ApiResponse::success($codes, 'My verification codes loaded');

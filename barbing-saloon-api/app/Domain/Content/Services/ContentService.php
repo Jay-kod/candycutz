@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Content\Services;
 
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Barber;
 use App\Models\BlogPost;
 use App\Models\Gallery;
@@ -16,22 +18,26 @@ class ContentService
      */
     public function gallery(?string $category = null): array
     {
-        return Gallery::query()
-            ->with('barber.user')
-            ->when($category, fn ($query) => $query->where('category', $category))
-            ->orderBy('display_order')
-            ->get()
-            ->map(fn (Gallery $gallery) => [
-                'id' => $gallery->id,
-                'title' => $gallery->title,
-                'description' => $gallery->description,
-                'image_path' => $gallery->image_path,
-                'category' => $gallery->category?->value ?? $gallery->category,
-                'is_featured' => $gallery->is_featured,
-                'display_order' => $gallery->display_order,
-                'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
-            ])
-            ->all();
+        $key = $category ? "cat:{$category}" : 'all';
+
+        return CatalogueCache::remember('gallery', $key, function () use ($category) {
+            return Gallery::query()
+                ->with('barber.user')
+                ->when($category, fn ($query) => $query->where('category', $category))
+                ->orderBy('display_order')
+                ->get()
+                ->map(fn (Gallery $gallery) => [
+                    'id' => $gallery->id,
+                    'title' => $gallery->title,
+                    'description' => $gallery->description,
+                    'image_path' => $gallery->image_path,
+                    'category' => $gallery->category?->value ?? $gallery->category,
+                    'is_featured' => $gallery->is_featured,
+                    'display_order' => $gallery->display_order,
+                    'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
+                ])
+                ->all();
+        });
     }
 
     /**
@@ -39,22 +45,24 @@ class ContentService
      */
     public function testimonials(): array
     {
-        return Testimonial::query()
-            ->with(['barber.user', 'customer'])
-            ->where('is_approved', true)
-            ->orderByDesc('rating')
-            ->latest()
-            ->get()
-            ->map(fn (Testimonial $testimonial) => [
-                'id' => $testimonial->id,
-                'client_name' => $testimonial->customer?->name ?? 'Anonymous',
-                'client_avatar' => $testimonial->customer?->avatar ?? null,
-                'rating' => $testimonial->rating,
-                'review' => $testimonial->review,
-                'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,
-                'created_at' => $testimonial->created_at,
-            ])
-            ->all();
+        return CatalogueCache::remember('testimonials', 'all', function () {
+            return Testimonial::query()
+                ->with(['barber.user', 'customer'])
+                ->where('is_approved', true)
+                ->orderByDesc('rating')
+                ->latest()
+                ->get()
+                ->map(fn (Testimonial $testimonial) => [
+                    'id' => $testimonial->id,
+                    'client_name' => $testimonial->customer?->name ?? 'Anonymous',
+                    'client_avatar' => app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer?->avatar),
+                    'rating' => $testimonial->rating,
+                    'review' => $testimonial->review,
+                    'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,
+                    'created_at' => $testimonial->created_at,
+                ])
+                ->all();
+        });
     }
 
     /**
@@ -62,13 +70,15 @@ class ContentService
      */
     public function blogPosts(): array
     {
-        return BlogPost::query()
-            ->with('author')
-            ->where('status', 'published')
-            ->latest()
-            ->get()
-            ->map(fn (BlogPost $post) => $this->blogData($post))
-            ->all();
+        return CatalogueCache::remember('blog', 'all', function () {
+            return BlogPost::query()
+                ->with('author')
+                ->where('status', 'published')
+                ->latest()
+                ->get()
+                ->map(fn (BlogPost $post) => $this->blogData($post))
+                ->all();
+        });
     }
 
     /**
@@ -76,9 +86,11 @@ class ContentService
      */
     public function blogPostBySlug(string $slug): ?array
     {
-        $post = BlogPost::query()->with('author')->where('slug', $slug)->first();
+        return CatalogueCache::remember('blog', "slug:{$slug}", function () use ($slug) {
+            $post = BlogPost::query()->with('author')->where('slug', $slug)->first();
 
-        return $post ? $this->blogData($post) : null;
+            return $post ? $this->blogData($post) : null;
+        });
     }
 
     /**
@@ -101,10 +113,12 @@ class ContentService
      */
     protected function barberData($barber): array
     {
+        $avatar = app(UserMediaUrl::class)->for($barber->user, $barber->user?->avatar);
+
         return [
             'id' => $barber->id,
             'name' => $barber->user?->name,
-            'avatar' => $barber->user?->avatar,
+            'avatar' => $avatar,
             'bio' => $barber->bio,
             'specialties' => $barber->specialties ?? [],
             'experience_years' => $barber->experience_years,

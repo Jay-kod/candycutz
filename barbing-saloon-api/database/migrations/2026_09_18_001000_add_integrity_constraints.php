@@ -35,11 +35,16 @@ return new class extends Migration
             $table->index(['appointment_id', 'status'], 'payments_appointment_status_idx');
         });
 
-        // In MariaDB 10.4, functional indexes are not supported. We create a virtual column and index it.
+        // In MariaDB 10.4, functional indexes are not supported. We create a virtual/stored column and index it.
         Schema::table('appointments', function (Blueprint $table) {
-            $table->string('active_status', 10)
-                ->virtualAs("CASE WHEN status NOT IN ('cancelled', 'no_show') THEN 'active' ELSE NULL END")
-                ->nullable();
+            $driver = Schema::getConnection()->getDriverName();
+            $expression = "CASE WHEN status NOT IN ('cancelled', 'no_show') THEN 'active' ELSE NULL END";
+
+            if ($driver === 'pgsql') {
+                $table->string('active_status', 10)->storedAs($expression)->nullable();
+            } else {
+                $table->string('active_status', 10)->virtualAs($expression)->nullable();
+            }
 
             $table->unique(['barber_id', 'appointment_date', 'appointment_time', 'active_status'], 'appointments_barber_datetime_unique');
         });

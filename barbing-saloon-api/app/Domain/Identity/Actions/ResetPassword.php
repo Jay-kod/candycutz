@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\PasswordChanged;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +16,10 @@ use RuntimeException;
 class ResetPassword
 {
     use HasAuditLog;
+
+    public function __construct(
+        protected ApiTokenIssuer $tokenIssuer
+    ) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -50,9 +56,11 @@ class ResetPassword
 
         DB::table('password_reset_tokens')->where('email', $email)->delete();
         $user->tokens()->delete();
-        $freshToken = $user->createToken('web-client')->plainTextToken;
+        $freshToken = $this->tokenIssuer->issue($user, 'web-client')->plainTextToken;
 
         $this->logAction('auth.reset_password', $user, [], ['email' => $user->email]);
+
+        PasswordChanged::dispatch($user);
 
         return [
             'user' => $user->loadMissing('barber'),

@@ -19,6 +19,7 @@ use App\Domain\Identity\Actions\GetWorkingHours;
 use App\Domain\Identity\Actions\UpdateBarberWorkingHours;
 use App\Domain\Identity\Actions\UpdateHoliday;
 use App\Domain\Identity\Actions\UpdateWorkingHour;
+use App\Domain\Notification\Services\BrevoApiClient;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\System\Actions\GetDashboardStats;
 use App\Domain\System\Actions\GetReports;
@@ -33,7 +34,6 @@ use App\Models\Holiday;
 use App\Models\WorkingHour;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Domain\Notification\Services\BrevoApiClient;
 
 class AdminApiController
 {
@@ -52,7 +52,7 @@ class AdminApiController
         return ApiResponse::success($action->execute(), 'Settings loaded');
     }
 
-    public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action): JsonResponse
+    public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, GetSettings $getSettings): JsonResponse
     {
         $settings = $request->validated('settings', []);
 
@@ -62,6 +62,15 @@ class AdminApiController
                 'key' => 'hero_image',
                 'value' => '/storage/'.$path,
                 'group' => 'hero',
+            ];
+        }
+
+        if ($request->hasFile('about_teaser_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'about_teaser_image',
+                'value' => '/storage/'.$path,
+                'group' => 'about',
             ];
         }
 
@@ -94,7 +103,7 @@ class AdminApiController
 
         $action->execute(['settings' => $settings]);
 
-        return ApiResponse::success(null, 'Settings updated');
+        return ApiResponse::success($getSettings->execute(), 'Settings updated');
     }
 
     public function workingHours(GetWorkingHours $action): JsonResponse

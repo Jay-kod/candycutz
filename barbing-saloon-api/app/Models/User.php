@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Domain\Shared\Enums\UserRole;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,9 +12,24 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::updating(function (User $user): void {
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
+        });
+
+        static::updated(function (User $user): void {
+            if ($user->wasChanged('email')) {
+                $user->sendEmailVerificationNotification();
+            }
+        });
+    }
 
     protected $fillable = [
         'username',

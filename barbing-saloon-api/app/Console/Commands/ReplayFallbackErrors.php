@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\ErrorGroup;
 use App\Models\ErrorEvent;
+use App\Models\ErrorGroup;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\File;
 class ReplayFallbackErrors extends Command
 {
     protected $signature = 'errors:replay';
+
     protected $description = 'Replay fallback error log entries into the error_groups and error_events tables';
 
     public function handle(): int
@@ -22,6 +23,7 @@ class ReplayFallbackErrors extends Command
 
         if (empty($files)) {
             $this->info('No fallback error logs found.');
+
             return self::SUCCESS;
         }
 
@@ -33,6 +35,7 @@ class ReplayFallbackErrors extends Command
 
             if (! $lines) {
                 File::delete($filePath);
+
                 continue;
             }
 
@@ -96,6 +99,7 @@ class ReplayFallbackErrors extends Command
         }
 
         $this->info("Replayed {$replayedCount} fallback errors successfully.");
+
         return self::SUCCESS;
     }
 }

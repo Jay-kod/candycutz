@@ -30,6 +30,7 @@ class WishlistApiController
                     $mapped['gallery_title'] = $gallery?->title ?? 'Style';
                     $mapped['gallery_image'] = $gallery?->image_url ?? $gallery?->image;
                 }
+
                 return $mapped;
             });
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Domain\Shared\Services\UserMediaUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
@@ -13,7 +14,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'avatar' => $this->avatar,
+            'avatar' => app(UserMediaUrl::class)->for($this->resource, $this->avatar),
             'role' => $this->role?->value ?? $this->role,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,

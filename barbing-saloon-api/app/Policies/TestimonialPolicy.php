@@ -28,16 +28,16 @@ class TestimonialPolicy
 
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     public function update(User $user, Testimonial $testimonial): bool
     {
-        return false;
+        return $testimonial->customer_id === $user->id || $user->role->value === 'admin' || $user->role->value === 'super_admin';
     }
 
     public function delete(User $user, Testimonial $testimonial): bool
     {
-        return false;
+        return $testimonial->customer_id === $user->id || $user->role->value === 'admin' || $user->role->value === 'super_admin';
     }
 }

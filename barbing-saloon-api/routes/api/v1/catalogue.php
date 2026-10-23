@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AppTelemetryApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
-use App\Http\Controllers\Api\V1\AppTelemetryApiController;
 use App\Http\Controllers\Api\V1\FeatureFlagApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\PublicApiController;
@@ -54,12 +54,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('check.role:barber,admin,super_admin')->group(function () {
         // Gallery CRUD
         Route::post('/gallery', [GalleryApiController::class, 'store']);
-        Route::put('/gallery/{id}', [GalleryApiController::class, 'update'])->whereNumber('id');
+        Route::match(['put', 'post'], '/gallery/{id}', [GalleryApiController::class, 'update'])->whereNumber('id');
         Route::delete('/gallery/{id}', [GalleryApiController::class, 'destroy'])->whereNumber('id');
 
         // Services CRUD (barbers submit pending services; admin directly creates)
         Route::post('/services', [ServiceApiController::class, 'store']);
-        Route::put('/services/{id}', [ServiceApiController::class, 'update'])->whereNumber('id');
+        Route::match(['put', 'post'], '/services/{id}', [ServiceApiController::class, 'update'])->whereNumber('id');
         Route::delete('/services/{id}', [ServiceApiController::class, 'destroy'])->whereNumber('id');
 
         // Blog CRUD (barbers and admin can create/edit their blog posts)

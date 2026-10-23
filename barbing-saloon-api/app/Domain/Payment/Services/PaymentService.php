@@ -8,20 +8,18 @@ use App\Domain\Payment\Contracts\PaymentGateway;
 use App\Domain\Payment\Gateways\ManualTransferGateway;
 use App\Domain\Payment\Gateways\PaystackGateway;
 use App\Domain\Payment\Gateways\StripeGateway;
-use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Events\PaymentFailed;
 use App\Models\Appointment;
-use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
-use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PaymentService
 {
     public function __construct(
-        protected PaymentGateway $gateway
+        protected PaymentGateway $gateway,
+        protected PricingService $pricingService
     ) {}
 
     public function resolveGateway(string $paymentMethod): PaymentGateway
@@ -39,20 +37,28 @@ class PaymentService
      *
      * @return array<string, mixed>
      */
-    public function initializePayment(Appointment $appointment, string $paymentMethod = 'paystack'): array
+    public function initializePayment(Appointment $appointment, string $paymentMethod = 'paystack', string $client = 'web'): array
     {
-        $amount = (int) ($appointment->grand_total ?: $appointment->total_price);
+        $amount = $this->pricingService->amountDue($appointment);
         $currency = 'NGN';
         $initialStatus = $paymentMethod === 'manual_transfer' ? 'awaiting_transfer' : 'pending';
+        $provider = $paymentMethod === 'manual_transfer' ? 'manual_transfer' : 'paystack';
+        $reference = 'CC-'.strtoupper(Str::random(12));
 
         $payment = Payment::create([
             'appointment_id' => $appointment->id,
             'customer_id' => $appointment->customer_id ?? 1,
             'amount' => $amount,
+            'amount_minor' => $amount,
             'currency' => $currency,
             'status' => $initialStatus,
+            'provider' => $provider,
             'payment_method' => $paymentMethod,
-            'transaction_ref' => 'TXN-'.strtoupper(Str::random(12)),
+            'reference' => $reference,
+            'transaction_ref' => $reference,
+            'client' => $client,
+            'customer_email' => $appointment->customer?->email ?? $appointment->client_email,
+            'expires_at' => now()->addMinutes(30),
         ]);
 
         $gateway = $this->resolveGateway($paymentMethod);
@@ -60,11 +66,17 @@ class PaymentService
 
         $payment->update([
             'gateway_reference' => $checkout->reference,
+            'reference' => $checkout->reference ?: $reference,
+            'access_code' => $checkout->access_code,
+            'authorization_url' => $checkout->authorization_url,
         ]);
 
         return array_merge($checkout->toArray(), [
             'payment_id' => $payment->id,
             'transaction_ref' => $payment->transaction_ref,
+            'reference' => $payment->reference,
+            'access_code' => $payment->access_code,
+            'authorization_url' => $payment->authorization_url,
         ]);
     }
 
@@ -75,110 +87,10 @@ class PaymentService
      */
     public function confirmPaymentFromWebhook(string $gatewayReference, string $eventId, array $rawPayload): Payment
     {
-        return DB::transaction(function () use ($gatewayReference, $eventId, $rawPayload) {
-            // Idempotency check: Has this exact event already been processed?
-            $existingTxn = PaymentTransaction::where('gateway_event_id', $eventId)->first();
-            if ($existingTxn) {
-                Log::info("Idempotent webhook skipped for event: {$eventId}");
+        $payloadData = $rawPayload['data'] ?? $rawPayload;
+        $payloadData['id'] = $eventId;
 
-                return $existingTxn->payment;
-            }
-
-            // Find payment by gateway reference
-            $payment = Payment::where('gateway_reference', $gatewayReference)->first();
-
-            // If payment record wasn't created yet, check appointment metadata in payload
-            if (! $payment) {
-                $object = $rawPayload['data'] ?? $rawPayload;
-                $metadata = $object['metadata'] ?? [];
-
-                $bookingRef = $metadata['booking_reference'] ?? null;
-                $appointmentId = $metadata['appointment_id'] ?? null;
-
-                $appointment = null;
-                if ($bookingRef) {
-                    $appointment = Appointment::where('booking_reference', $bookingRef)->first();
-                } elseif ($appointmentId) {
-                    $appointment = Appointment::find($appointmentId);
-                }
-
-                if ($appointment) {
-                    $amount = isset($object['amount']) ? (int) $object['amount'] : (int) $appointment->grand_total;
-
-                    $payment = Payment::create([
-                        'appointment_id' => $appointment->id,
-                        'customer_id' => $appointment->customer_id ?? 1,
-                        'amount' => $amount ?: (int) $appointment->grand_total,
-                        'currency' => strtoupper((string) ($object['currency'] ?? 'NGN')),
-                        'status' => 'pending',
-                        'payment_method' => config('payments.default'),
-                        'gateway_reference' => $gatewayReference,
-                        'transaction_ref' => 'TXN-'.strtoupper(Str::random(12)),
-                    ]);
-                }
-            }
-
-            if (! $payment) {
-                throw new Exception("Payment record for reference {$gatewayReference} not found.");
-            }
-
-            if ($payment->status === 'successful') {
-                // Ensure transaction log entry exists for this event
-                PaymentTransaction::firstOrCreate(
-                    ['gateway_event_id' => $eventId],
-                    [
-                        'payment_id' => $payment->id,
-                        'transaction_type' => 'capture',
-                        'gateway' => config('payments.default'),
-                        'amount' => $payment->amount,
-                        'raw_payload' => $rawPayload,
-                        'status' => 'success',
-                        'created_at' => now(),
-                    ]
-                );
-
-                return $payment;
-            }
-
-            $payment->update([
-                'status' => 'successful',
-            ]);
-
-            PaymentTransaction::create([
-                'payment_id' => $payment->id,
-                'transaction_type' => 'capture',
-                'gateway' => config('payments.default'),
-                'gateway_event_id' => $eventId,
-                'amount' => $payment->amount,
-                'raw_payload' => $rawPayload,
-                'status' => 'success',
-                'created_at' => now(),
-            ]);
-
-            // Update associated appointment to confirmed
-            $appointment = $payment->appointment;
-            if ($appointment) {
-                $appointment->update([
-                    'status' => AppointmentStatus::confirmed->value,
-                    'deposit_paid' => true,
-                ]);
-
-                try {
-                    AppointmentStatusHistory::create([
-                        'appointment_id' => $appointment->id,
-                        'previous_status' => AppointmentStatus::pending->value,
-                        'new_status' => AppointmentStatus::confirmed->value,
-                        'changed_by_user_id' => $payment->customer_id ?? 1,
-                        'reason' => "Payment captured (Event {$eventId})",
-                        'created_at' => now(),
-                    ]);
-                } catch (\Throwable $e) {
-                    Log::warning('Could not record status history for payment: '.$e->getMessage());
-                }
-            }
-
-            return $payment;
-        });
+        return app(PaymentConfirmer::class)->confirm($gatewayReference, 'webhook', $payloadData);
     }
 
     /**
@@ -211,6 +123,8 @@ class PaymentService
                     'status' => 'failed',
                     'created_at' => now(),
                 ]);
+
+                PaymentFailed::dispatch($payment, $errorMessage ?? 'Payment failed via webhook');
             }
 
             return $payment;

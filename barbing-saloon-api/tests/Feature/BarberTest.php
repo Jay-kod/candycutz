@@ -1,8 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\Barber;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 it('characterises GET /barbers', function () {
     $response = $this->getJson('/api/v1/barbers');
@@ -82,14 +84,14 @@ it('enforces the monthly barber username cooldown', function () {
 });
 
 it('allows a barber to upload avatar and cover image', function () {
-    \Illuminate\Support\Facades\Storage::fake('public');
+    Storage::fake('public');
 
     $barber = Barber::factory()->create();
     $user = User::findOrFail($barber->user_id);
 
     $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
-    $avatar = \Illuminate\Http\UploadedFile::fake()->createWithContent('my_avatar.jpg', $jpegBytes);
-    $cover = \Illuminate\Http\UploadedFile::fake()->createWithContent('my_cover.jpg', $jpegBytes);
+    $avatar = UploadedFile::fake()->createWithContent('my_avatar.jpg', $jpegBytes);
+    $cover = UploadedFile::fake()->createWithContent('my_cover.jpg', $jpegBytes);
 
     $response = $this->actingAs($user)->post('/api/v1/barbers/account', [
         'name' => 'Barber With Images',

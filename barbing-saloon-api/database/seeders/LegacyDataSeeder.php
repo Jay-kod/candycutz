@@ -149,8 +149,15 @@ SQL
         $driver = DB::connection()->getDriverName();
 
         foreach ($sqls as $sql) {
-            // Replace DATE_ADD syntax for SQLite
-            if ($driver === 'sqlite') {
+            if ($driver === 'pgsql') {
+                $sql = str_replace('`', '"', $sql);
+                $sql = preg_replace('/DATE_ADD\(CURDATE\(\),\s*INTERVAL\s*(\d+)\s*DAY\)/', "(CURRENT_DATE + INTERVAL '\$1 day')", $sql);
+                if (str_contains($sql, 'INSERT IGNORE INTO')) {
+                    $sql = str_replace('INSERT IGNORE INTO', 'INSERT INTO', $sql);
+                    $sql = rtrim(trim($sql), ';').' ON CONFLICT DO NOTHING;';
+                }
+            } elseif ($driver === 'sqlite') {
+                $sql = str_replace('`', '', $sql);
                 $sql = str_replace('INSERT IGNORE INTO', 'INSERT OR IGNORE INTO', $sql);
                 // In sqlite, NOW() is usually fine as a string but better to use CURRENT_TIMESTAMP or let Laravel format it
                 $sql = str_replace('NOW()', 'CURRENT_TIMESTAMP', $sql);

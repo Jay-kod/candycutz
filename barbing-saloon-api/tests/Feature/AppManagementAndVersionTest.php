@@ -1,11 +1,13 @@
 <?php
 
-use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Enums\AppointmentSource;
+use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Http\Resources\AppointmentResource;
 use App\Models\AppCrash;
+use App\Models\Appointment;
 use App\Models\AppVersion;
 use App\Models\FeatureFlag;
 use App\Models\Setting;
-use App\Models\User;
 
 it('returns 426 upgrade required when mobile app version is lower than minimum version', function () {
     AppVersion::create([
@@ -105,15 +107,15 @@ it('returns active feature flags via public API', function () {
 });
 
 it('formats appointment source and source_label in AppointmentResource', function () {
-    $appointment = new \App\Models\Appointment([
+    $appointment = new Appointment([
         'id' => 101,
         'appointment_date' => '2026-09-25',
         'appointment_time' => '10:00',
-        'source' => \App\Domain\Shared\Enums\AppointmentSource::app,
-        'status' => \App\Domain\Shared\Enums\AppointmentStatus::confirmed,
+        'source' => AppointmentSource::app,
+        'status' => AppointmentStatus::confirmed,
     ]);
 
-    $resource = (new \App\Http\Resources\AppointmentResource($appointment))->toArray(request());
+    $resource = (new AppointmentResource($appointment))->toArray(request());
 
     expect($resource['source'])->toBe('app');
     expect($resource['source_label'])->toBe('Mobile App');

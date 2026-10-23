@@ -10,8 +10,10 @@ use Throwable;
 class AppException extends RuntimeException
 {
     protected ErrorCode $errorCode;
+
     /** @var array<string, mixed> */
     protected array $details;
+
     /** @var array<string, mixed> */
     protected array $customContext;
 

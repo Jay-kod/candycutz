@@ -13,7 +13,9 @@ composer.phar
 # Environment files
 .env
 .env.*
+.env.docker
 !.env.example
+!.env.*.example
 
 # Logs and runtime caches
 *.log

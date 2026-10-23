@@ -34,7 +34,7 @@ export default function BookingWizardScreen() {
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedBarberId, setSelectedBarberId] = useState<number | undefined>(undefined);
-  const [paymentMethod, setPaymentMethod] = useState<'pay_at_venue' | 'stripe' | 'wallet'>('pay_at_venue');
+  const [paymentMethod, setPaymentMethod] = useState<'pay_at_venue' | 'paystack'>('pay_at_venue');
   const [notes, setNotes] = useState<string>('');
 
   // Home service address state
@@ -358,23 +358,12 @@ export default function BookingWizardScreen() {
           <TouchableOpacity
             style={[
               styles.paymentOption,
-              paymentMethod === 'stripe' && styles.paymentOptionActive,
+              paymentMethod === 'paystack' && styles.paymentOptionActive,
             ]}
-            onPress={() => setPaymentMethod('stripe')}
+            onPress={() => setPaymentMethod('paystack')}
           >
-            <Text style={styles.paymentTitle}>💳 Card / Online Payment</Text>
-            <Text style={styles.paymentSub}>Instant debit card checkout via Stripe / Paystack</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              paymentMethod === 'wallet' && styles.paymentOptionActive,
-            ]}
-            onPress={() => setPaymentMethod('wallet')}
-          >
-            <Text style={styles.paymentTitle}>👛 CandyCutz Wallet</Text>
-            <Text style={styles.paymentSub}>Deduct instantly from your wallet balance</Text>
+            <Text style={styles.paymentTitle}>💳 Pay Online (Paystack)</Text>
+            <Text style={styles.paymentSub}>Pay online: card, bank transfer or USSD</Text>
           </TouchableOpacity>
         </View>
 

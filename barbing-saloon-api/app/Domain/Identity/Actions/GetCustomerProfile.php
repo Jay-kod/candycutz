@@ -3,6 +3,7 @@
 namespace App\Domain\Identity\Actions;
 
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
 use App\Models\User;
 
@@ -42,7 +43,7 @@ class GetCustomerProfile
                 'phone' => $customer->phone ?? 'N/A',
                 'auth_provider' => $customer->auth_provider ?: 'local',
                 'registered_via' => $customer->auth_provider && $customer->auth_provider !== 'local' ? ucfirst($customer->auth_provider) : 'Registration form',
-                'avatar' => $customer->avatar,
+                'avatar' => app(UserMediaUrl::class)->for($customer, $customer->avatar),
                 'created_at' => $customer->created_at?->toIso8601String(),
             ],
             'total_bookings' => $appointments->count(),

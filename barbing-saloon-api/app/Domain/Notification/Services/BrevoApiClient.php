@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Notification\Services;
 
 use App\Models\Setting;
+use RuntimeException;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mime\Email;
-use RuntimeException;
 
 class BrevoApiClient
 {
@@ -37,7 +37,7 @@ class BrevoApiClient
         $transport->setUsername($username);
         $transport->setPassword($password);
 
-        $email = (new Email())
+        $email = (new Email)
             ->from(sprintf('%s <%s>', $senderName, $senderEmail))
             ->to($recipient)
             ->subject($subject)

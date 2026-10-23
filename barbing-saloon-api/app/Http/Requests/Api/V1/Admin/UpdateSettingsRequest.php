@@ -19,10 +19,11 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'settings' => ['nullable', 'array'],
             'settings.*' => ['nullable'],
-            'hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
-            'splash_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
-            'onboarding_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
-            'login_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'about_teaser_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'splash_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'onboarding_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'login_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ];
     }
 }

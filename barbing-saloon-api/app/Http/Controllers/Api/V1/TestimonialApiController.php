@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Domain\Content\Actions\ApproveTestimonial;
 use App\Domain\Content\Actions\DeleteTestimonial;
 use App\Domain\Content\Actions\FeatureTestimonial;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Events\ReviewSubmitted;
 use App\Http\Resources\TestimonialResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Testimonial;
@@ -23,7 +25,6 @@ class TestimonialApiController
         $query = Testimonial::query()
             ->with(['customer', 'service', 'barber.user']);
 
-        // Allow fetching unapproved if admin (optional, logic might be more complex)
         $user = $request->user('sanctum');
         if (! $user || ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
             $query->where('is_approved', true);
@@ -70,6 +71,8 @@ class TestimonialApiController
             'is_featured' => false,
         ]);
 
+        ReviewSubmitted::dispatch($testimonial);
+
         return ApiResponse::success(new TestimonialResource($testimonial), 'Review submitted successfully. Awaiting approval.', 201);
     }
 
@@ -96,6 +99,7 @@ class TestimonialApiController
         ]);
 
         $testimonial->update($validated);
+        CatalogueCache::bust('testimonials');
 
         return ApiResponse::success(new TestimonialResource($testimonial->refresh()), 'Testimonial updated');
     }
@@ -105,7 +109,10 @@ class TestimonialApiController
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
 
-        return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial approved');
+        $result = $action->execute($testimonial);
+        CatalogueCache::bust('testimonials');
+
+        return ApiResponse::success(new TestimonialResource($result), 'Testimonial approved');
     }
 
     public function feature(int $id, FeatureTestimonial $action): JsonResponse
@@ -113,7 +120,10 @@ class TestimonialApiController
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
 
-        return ApiResponse::success(new TestimonialResource($action->execute($testimonial)), 'Testimonial feature toggled');
+        $result = $action->execute($testimonial);
+        CatalogueCache::bust('testimonials');
+
+        return ApiResponse::success(new TestimonialResource($result), 'Testimonial feature toggled');
     }
 
     public function destroy(int $id, DeleteTestimonial $action): JsonResponse
@@ -122,6 +132,7 @@ class TestimonialApiController
         $this->authorize('delete', $testimonial);
 
         $action->execute($testimonial);
+        CatalogueCache::bust('testimonials');
 
         return ApiResponse::success(null, 'Testimonial deleted');
     }

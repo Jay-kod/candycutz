@@ -8,11 +8,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B0B0B"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.candycutz.app",
@@ -48,7 +43,10 @@
           "defaultChannel": "candycutz-default"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font",
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "scheme": "candycutz",
     "extra": {

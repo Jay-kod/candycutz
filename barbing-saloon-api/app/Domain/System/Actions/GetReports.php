@@ -65,7 +65,7 @@ class GetReports
             ->with('user')
             ->withCount(['appointments as bookings' => function ($q) use ($startDate) {
                 $q->where('appointment_date', '>=', $startDate->toDateString())
-                  ->where('status', AppointmentStatus::completed->value);
+                    ->where('status', AppointmentStatus::completed->value);
             }])
             ->get()
             ->map(function ($b) use ($startDate) {

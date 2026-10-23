@@ -198,7 +198,7 @@ return new class extends Migration
             $table->decimal('tip_amount', 10, 2)->default(0.00);
             $table->decimal('discount_amount', 10, 2)->default(0.00);
             $table->decimal('grand_total', 10, 2)->default(0.00);
-            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'checked_in', 'in_progress', 'completed', 'cancelled', 'no_show'])->default('pending');
             $table->text('notes')->nullable();
             $table->text('cancellation_reason')->nullable();
             $table->decimal('total_price', 8, 2);

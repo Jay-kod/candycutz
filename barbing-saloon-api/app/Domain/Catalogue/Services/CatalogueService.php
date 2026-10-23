@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Catalogue\Services;
 
 use App\Domain\Booking\Services\SlotHelper;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Barber;
 use App\Models\Service;
 use App\Models\ServiceCategory;
@@ -18,13 +20,15 @@ class CatalogueService
      */
     public function services(): array
     {
-        return Service::query()
-            ->with('category')
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Service $service) => $this->serviceData($service))
-            ->all();
+        return CatalogueCache::remember('services', 'all', function () {
+            return Service::query()
+                ->with('category')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Service $service) => $this->serviceData($service))
+                ->all();
+        });
     }
 
     /**
@@ -32,9 +36,11 @@ class CatalogueService
      */
     public function serviceBySlug(string $slug): ?array
     {
-        $service = Service::query()->with('category')->find($slug);
+        return CatalogueCache::remember('services', "slug:{$slug}", function () use ($slug) {
+            $service = Service::query()->with('category')->find($slug);
 
-        return $service ? $this->serviceData($service) : null;
+            return $service ? $this->serviceData($service) : null;
+        });
     }
 
     /**
@@ -42,17 +48,19 @@ class CatalogueService
      */
     public function serviceCategories(): array
     {
-        return ServiceCategory::query()
-            ->withCount(['services as services_count' => fn ($query) => $query->where('is_active', true)])
-            ->orderBy('name')
-            ->get()
-            ->map(/** @return array<string, mixed> */ fn (ServiceCategory $category): array => [
-                'id' => $category->id,
-                'name' => $category->name,
-                'icon' => $category->icon,
-                'services_count' => $category->services_count,
-            ])
-            ->all();
+        return CatalogueCache::remember('categories', 'all', function () {
+            return ServiceCategory::query()
+                ->withCount(['services as services_count' => fn ($query) => $query->where('is_active', true)])
+                ->orderBy('name')
+                ->get()
+                ->map(/** @return array<string, mixed> */ fn (ServiceCategory $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'icon' => $category->icon,
+                    'services_count' => $category->services_count,
+                ])
+                ->all();
+        });
     }
 
     /**
@@ -60,13 +68,15 @@ class CatalogueService
      */
     public function barbers(): array
     {
-        return Barber::query()
-            ->with(['user'])
-            ->where('is_available', true)
-            ->orderBy('rating', 'desc')
-            ->get()
-            ->map(fn (Barber $barber) => $this->barberData($barber))
-            ->all();
+        return CatalogueCache::remember('barbers', 'all', function () {
+            return Barber::query()
+                ->with(['user'])
+                ->where('is_available', true)
+                ->orderBy('rating', 'desc')
+                ->get()
+                ->map(fn (Barber $barber) => $this->barberData($barber))
+                ->all();
+        });
     }
 
     /**
@@ -74,9 +84,11 @@ class CatalogueService
      */
     public function barberById(int $id): ?array
     {
-        $barber = Barber::query()->with(['user'])->find($id);
+        return CatalogueCache::remember('barbers', "id:{$id}", function () use ($id) {
+            $barber = Barber::query()->with(['user'])->find($id);
 
-        return $barber ? $this->barberData($barber) : null;
+            return $barber ? $this->barberData($barber) : null;
+        });
     }
 
     /**
@@ -84,21 +96,23 @@ class CatalogueService
      */
     public function workingHours(): array
     {
-        return WorkingHour::query()
-            ->with('barber.user')
-            ->orderBy('day_of_week')
-            ->orderBy('open_time')
-            ->get()
-            ->map(fn (WorkingHour $hour) => [
-                'id' => $hour->id,
-                'barber_id' => $hour->barber_id,
-                'day_of_week' => $hour->day_of_week,
-                'open_time' => $hour->open_time,
-                'close_time' => $hour->close_time,
-                'is_closed' => $hour->is_closed,
-                'barber' => $hour->barber ? $this->barberData($hour->barber) : null,
-            ])
-            ->all();
+        return CatalogueCache::remember('working_hours', 'all', function () {
+            return WorkingHour::query()
+                ->with('barber.user')
+                ->orderBy('day_of_week')
+                ->orderBy('open_time')
+                ->get()
+                ->map(fn (WorkingHour $hour) => [
+                    'id' => $hour->id,
+                    'barber_id' => $hour->barber_id,
+                    'day_of_week' => $hour->day_of_week,
+                    'open_time' => $hour->open_time,
+                    'close_time' => $hour->close_time,
+                    'is_closed' => $hour->is_closed,
+                    'barber' => $hour->barber ? $this->barberData($hour->barber) : null,
+                ])
+                ->all();
+        });
     }
 
     /**
@@ -123,10 +137,12 @@ class CatalogueService
      */
     protected function barberData(Barber $barber): array
     {
+        $avatar = app(UserMediaUrl::class)->for($barber->user, $barber->user?->avatar);
+
         return [
             'id' => $barber->id,
             'name' => $barber->user?->name,
-            'avatar' => $barber->user?->avatar,
+            'avatar' => $avatar,
             'bio' => $barber->bio,
             'specialties' => $barber->specialties ?? [],
             'experience_years' => $barber->experience_years,

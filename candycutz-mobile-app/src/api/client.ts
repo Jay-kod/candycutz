@@ -429,7 +429,7 @@ export const bookingsApi = {
       state: string;
       service_zone_id?: number;
     };
-    payment_method: 'pay_at_venue' | 'stripe' | 'wallet';
+    payment_method: 'pay_at_venue' | 'paystack';
     notes?: string;
   }): Promise<Appointment> => {
     const res = await apiClient.post<ApiResponse<Appointment>>('/appointments', payload);

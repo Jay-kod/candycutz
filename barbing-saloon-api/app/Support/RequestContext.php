@@ -10,15 +10,25 @@ use Illuminate\Support\Str;
 class RequestContext
 {
     private string $requestId;
+
     private ?string $client;
+
     private ?string $appVersion;
+
     private ?string $deviceId;
+
     private ?int $userId = null;
+
     private ?string $role = null;
+
     private ?string $ip = null;
+
     private ?string $userAgent = null;
+
     private ?string $routeUri = null;
+
     private ?string $method = null;
+
     private float $startTime;
 
     public function __construct(

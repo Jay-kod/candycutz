@@ -27,6 +27,14 @@ interface PaymentGateway
     public function verify(string $reference): GatewayResult;
 
     /**
+     * Refund a successful payment through the provider.
+     *
+     * Returns a structured result so the caller can apply the local payment state
+     * only after the provider confirms the refund has been accepted.
+     */
+    public function refund(Payment $payment, int $amountMinor, string $reason = 'Customer refund requested by admin'): GatewayResult;
+
+    /**
      * Parse and verify an incoming webhook payload.
      *
      * Validates the signature/authenticity and returns a structured event.

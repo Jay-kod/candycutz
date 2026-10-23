@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   SafeAreaView,
@@ -19,6 +18,7 @@ import { Card } from '../../src/components/common/Card';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function ReviewsScreen() {
   const router = useRouter();
@@ -67,7 +67,11 @@ export default function ReviewsScreen() {
 
   const handleSubmitReview = async () => {
     if (!formReview.trim()) {
-      Alert.alert('Review Required', 'Please share details of your grooming experience.');
+      useToastStore.getState().show({
+        variant: 'warning',
+        title: 'Review Required',
+        message: 'Please share details of your grooming experience.',
+      });
       return;
     }
 
@@ -79,10 +83,11 @@ export default function ReviewsScreen() {
         service_id: formServiceId || undefined,
       });
 
-      Alert.alert(
-        'Review Submitted',
-        'Thank you! Your feedback has been submitted for moderation and will appear once approved.'
-      );
+      useToastStore.getState().show({
+        variant: 'success',
+        title: 'Review Submitted',
+        message: 'Thank you! Your feedback has been submitted for moderation and will appear once approved.',
+      });
       setShowModal(false);
       setFormReview('');
       setFormRating(5);
@@ -90,7 +95,11 @@ export default function ReviewsScreen() {
       loadData();
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Failed to submit review.';
-      Alert.alert('Error', msg);
+      useToastStore.getState().show({
+        variant: 'error',
+        title: 'Error',
+        message: msg,
+      });
     } finally {
       setSubmitting(false);
     }

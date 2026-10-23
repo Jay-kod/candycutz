@@ -45,7 +45,7 @@ class CleanPlatformSeeder extends Seeder
         DB::table('users')->truncate();
 
         // 3. Create the 3 authoritative accounts with clean IDs (1, 2, 3)
-        $superAdmin = User::create([
+        $superAdmin = $this->createUserWithPrivileges([
             'id' => 1,
             'name' => 'Super Admin',
             'real_name' => 'Super Admin',
@@ -58,7 +58,7 @@ class CleanPlatformSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $barberUser = User::create([
+        $barberUser = $this->createUserWithPrivileges([
             'id' => 2,
             'name' => 'Marcus Vance',
             'real_name' => 'Marcus Vance',
@@ -71,7 +71,7 @@ class CleanPlatformSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $customer = User::create([
+        $customer = $this->createUserWithPrivileges([
             'id' => 3,
             'name' => 'Chinedu Okafor',
             'real_name' => 'Chinedu Okafor',
@@ -193,5 +193,25 @@ class CleanPlatformSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->command->info('Database cleanup and seed completed successfully!');
+    }
+
+    private function createUserWithPrivileges(array $attributes): User
+    {
+        $id = $attributes['id'] ?? null;
+        $role = $attributes['role'];
+        $status = $attributes['status'];
+        $isActive = $attributes['is_active'];
+        unset($attributes['id'], $attributes['role'], $attributes['status'], $attributes['is_active']);
+
+        $user = new User($attributes);
+        if ($id !== null) {
+            $user->id = $id;
+        }
+        $user->role = $role;
+        $user->status = $status;
+        $user->is_active = $isActive;
+        $user->save();
+
+        return $user;
     }
 }

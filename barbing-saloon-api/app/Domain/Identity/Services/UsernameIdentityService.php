@@ -67,11 +67,12 @@ class UsernameIdentityService
         }
 
         // 5. Apply update
-        $user->update([
-            'username' => $normalized,
-            'status' => ($user->status === 'username_pending') ? 'active' : $user->status,
-            'last_username_change_at' => now(),
-        ]);
+        $user->username = $normalized;
+        if ($user->status === 'username_pending') {
+            $user->status = 'active';
+        }
+        $user->last_username_change_at = now();
+        $user->save();
 
         return $user;
     }

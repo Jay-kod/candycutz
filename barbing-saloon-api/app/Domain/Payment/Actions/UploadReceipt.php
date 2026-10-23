@@ -9,6 +9,7 @@ use App\Domain\Payment\Services\ManualTransferStateMachine;
 use App\Models\Appointment;
 use App\Models\Payment;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UploadReceipt
@@ -33,8 +34,10 @@ class UploadReceipt
             ]);
         }
 
-        // 2. Store to private disk securely
-        $path = $file->store("receipts/{$appointment->id}", 'local');
+        // 2. Store to private disk securely with random unguessable UUID filename
+        $extension = $file->guessExtension() ?: 'bin';
+        $uuidName = (string) Str::uuid().'.'.$extension;
+        $path = $file->storeAs("receipts/{$appointment->id}", $uuidName, 'local');
 
         // 3. Find or initialize payment
         $payment = Payment::firstOrCreate(

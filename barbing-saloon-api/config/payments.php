@@ -24,9 +24,9 @@ return [
             'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/api/v1/payments/webhook'),
         ],
         'manual_transfer' => [
-            'default_bank_name' => env('MANUAL_TRANSFER_BANK', 'Guaranty Trust Bank (GTB)'),
-            'default_account_name' => env('MANUAL_TRANSFER_ACCOUNT_NAME', 'Candy Cutz Saloon'),
-            'default_account_number' => env('MANUAL_TRANSFER_ACCOUNT_NUMBER', '0123456789'),
+            'default_bank_name' => env('MANUAL_TRANSFER_BANK'),
+            'default_account_name' => env('MANUAL_TRANSFER_ACCOUNT_NAME'),
+            'default_account_number' => env('MANUAL_TRANSFER_ACCOUNT_NUMBER'),
         ],
         'stripe' => [
             'secret_key' => env('STRIPE_SECRET_KEY', ''),

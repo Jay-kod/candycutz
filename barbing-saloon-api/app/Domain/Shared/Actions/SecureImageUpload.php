@@ -14,7 +14,7 @@ use Symfony\Component\Mime\MimeTypes;
 
 class SecureImageUpload
 {
-    public function execute(UploadedFile $file, string $directory = 'uploads'): string
+    public function execute(UploadedFile $file, string $directory = 'uploads', string $disk = 'public'): string
     {
         $this->validateMime($file);
 
@@ -26,7 +26,8 @@ class SecureImageUpload
                 $encoded = $image->toWebp(90);
                 $filename = Str::random(40).'.webp';
                 $path = trim($directory, '/').'/'.$filename;
-                Storage::disk('public')->put($path, (string) $encoded);
+                Storage::disk($disk)->put($path, (string) $encoded);
+
                 return $path;
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
@@ -38,7 +39,7 @@ class SecureImageUpload
         $extension = $file->guessExtension() ?: 'jpg';
         $filename = Str::random(40).'.'.$extension;
         $path = trim($directory, '/').'/'.$filename;
-        Storage::disk('public')->putFileAs(trim($directory, '/'), $file, $filename);
+        Storage::disk($disk)->putFileAs(trim($directory, '/'), $file, $filename);
 
         return $path;
     }

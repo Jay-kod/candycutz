@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,11 +24,11 @@ class AuthUserResource extends JsonResource
             'username' => $this->username ?? strtolower(explode('@', $this->email)[0]),
             'email' => $this->email,
             'role' => $this->role?->value ?? $this->role,
-            'avatar' => $this->avatar,
+            'avatar' => app(UserMediaUrl::class)->for($this->resource, $this->avatar),
+            'cover_image' => app(UserMediaUrl::class)->for($this->resource, $this->cover_image),
             'phone' => $this->phone,
             'status' => $this->status ?? 'active',
             'is_active' => (bool) $this->is_active,
-            'wallet_balance' => (float) ($this->wallet_balance ?? 0),
         ];
 
         if ($this->barber) {

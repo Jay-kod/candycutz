@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\Services;
 
+use App\Domain\Booking\AppointmentStateMachine;
 use App\Domain\Booking\DataObjects\BookingData;
-use App\Domain\Notification\NotificationDispatcher;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\UserRole;
+use App\Events\AppointmentStatusChanged;
+use App\Events\BookingCreated;
 use App\Exceptions\BookingSlotUnavailableException;
-use App\Jobs\SendBookingCancellation;
-use App\Jobs\SendBookingConfirmation;
 use App\Models\Appointment;
 use App\Models\AppointmentItem;
 use App\Models\AppointmentStatusHistory;
@@ -20,6 +21,9 @@ use App\Models\Service;
 use App\Models\ServiceZone;
 use App\Models\User;
 use App\Models\WorkingHour;
+use App\Support\Errors\AuthException;
+use App\Support\Errors\BookingException;
+use App\Support\Errors\ErrorCode;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +39,7 @@ class BookingService
      */
     public function createBooking(User $customer, BookingData $data, AppointmentSource $source = AppointmentSource::web): Appointment
     {
-        return DB::transaction(function () use ($customer, $data) {
+        return DB::transaction(function () use ($customer, $data, $source) {
             // 1. Resolve & normalize appointment parameters
             $dateStr = $data->appointmentDate;
             if (! $dateStr) {
@@ -203,19 +207,8 @@ class BookingService
                 'created_at' => now(),
             ]);
 
-            // 8. Dispatch async confirmation email (safe in local dev)
-            try {
-                SendBookingConfirmation::dispatch($appointment);
-            } catch (\Throwable $e) {
-                Log::warning("Could not dispatch booking confirmation mail for appointment {$appointment->id}: ".$e->getMessage());
-            }
-
-            // 9. Dispatch in-app + push notifications
-            try {
-                app(NotificationDispatcher::class)->bookingCreated($appointment);
-            } catch (\Throwable $e) {
-                Log::warning("Could not dispatch booking notification for appointment {$appointment->id}: ".$e->getMessage());
-            }
+            // 8. Dispatch domain event — listeners handle email + notifications
+            BookingCreated::dispatch($appointment, $customer);
 
             return $appointment->load(['service.category', 'barber.user', 'serviceZone']);
         });
@@ -228,7 +221,7 @@ class BookingService
      */
     public function createWalkIn(User $actor, Barber $barber, BookingData $data, AppointmentSource $source = AppointmentSource::walk_in): Appointment
     {
-        return DB::transaction(function () use ($actor, $barber, $data) {
+        return DB::transaction(function () use ($actor, $barber, $data, $source) {
             $service = Service::findOrFail($data->serviceId);
             $date = Carbon::parse($data->appointmentDate)->toDateString();
             $startTime = substr(trim((string) $data->appointmentTime), 0, 5);
@@ -307,7 +300,30 @@ class BookingService
      */
     public function transitionStatus(Appointment $appointment, string $newStatus, User $actor, ?string $reason = null): Appointment
     {
-        $previousStatus = $appointment->status->value;
+        $previousStatus = $appointment->status instanceof AppointmentStatus
+            ? $appointment->status->value
+            : (string) $appointment->status;
+
+        // 1. Enforce State Machine allowed transitions
+        if (! AppointmentStateMachine::isAllowed($previousStatus, $newStatus)) {
+            throw BookingException::invalidTransition(
+                "Cannot transition appointment status from '{$previousStatus}' to '{$newStatus}'.",
+                [
+                    'appointment_id' => $appointment->id,
+                    'current_status' => $previousStatus,
+                    'requested_status' => $newStatus,
+                ]
+            );
+        }
+
+        // 2. Enforce Role Permissions for transition
+        $role = $actor->role instanceof UserRole ? $actor->role->value : (string) ($actor->role ?? 'customer');
+        if (! AppointmentStateMachine::isRoleAllowed($previousStatus, $newStatus, $role)) {
+            throw new AuthException(
+                ErrorCode::AUTH_FORBIDDEN_ROLE,
+                "Role '{$role}' is not authorized to transition appointment status from '{$previousStatus}' to '{$newStatus}'."
+            );
+        }
 
         $appointment->update([
             'status' => $newStatus,
@@ -323,28 +339,16 @@ class BookingService
             'created_at' => now(),
         ]);
 
-        if ($newStatus === 'cancelled' && $appointment->customer) {
-            try {
-                SendBookingCancellation::dispatch($appointment);
-            } catch (\Throwable $e) {
-                Log::warning('Could not dispatch cancellation mail: '.$e->getMessage());
-            }
-        }
+        // 3. Dispatch domain event
+        AppointmentStatusChanged::dispatch(
+            $appointment,
+            $previousStatus,
+            $newStatus,
+            $actor,
+            $reason
+        );
 
-        // Dispatch in-app + push notifications based on new status
-        try {
-            $dispatcher = app(NotificationDispatcher::class);
-
-            match ($newStatus) {
-                'confirmed' => $dispatcher->bookingApproved($appointment),
-                'cancelled' => $dispatcher->bookingCancelled($appointment, $actor),
-                'completed' => $dispatcher->bookingCompleted($appointment),
-                'no_show'   => $dispatcher->bookingNoShow($appointment),
-                default     => null,
-            };
-        } catch (\Throwable $e) {
-            Log::warning("Could not dispatch status-transition notification: ".$e->getMessage());
-        }
+        // Listeners (HandleAppointmentStatusChanged) handle notifications + emails
 
         return $appointment;
     }

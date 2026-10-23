@@ -8,9 +8,17 @@ use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\PaymentApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
+use App\Http\Controllers\Api\V1\UserMediaController;
 use App\Http\Controllers\Api\V1\WishlistApiController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController::class, 'show'])
+    ->whereNumber('user')
+    ->where('type', 'avatar|cover')
+    ->where('filename', '[A-Za-z0-9_.-]+')
+    ->middleware('signed')
+    ->name('user-media.show');
 
 Route::middleware('auth:sanctum')->group(function () {
     // -------------------------------------------------------------------------

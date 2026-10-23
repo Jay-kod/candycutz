@@ -28,7 +28,8 @@ class UpdateServiceRequest extends FormRequest
             'price' => 'sometimes|numeric',
             'duration_minutes' => 'nullable|integer',
             'category_id' => 'sometimes|integer|exists:service_categories,id',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:5120',
+            'image1' => 'nullable|image|max:5120',
             'is_active' => 'nullable|boolean',
         ];
     }

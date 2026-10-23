@@ -7,8 +7,6 @@ use App\Models\ErrorGroup;
 use App\Support\Errors\AuthException;
 use App\Support\Errors\BookingException;
 use App\Support\Errors\ErrorCode;
-use App\Support\Errors\ErrorReporter;
-use App\Support\RequestContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;

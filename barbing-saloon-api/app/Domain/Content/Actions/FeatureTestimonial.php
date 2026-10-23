@@ -8,7 +8,10 @@ class FeatureTestimonial
 {
     public function execute(Testimonial $testimonial): Testimonial
     {
-        // No is_featured in DB, just return the testimonial
+        $testimonial->update([
+            'is_featured' => ! $testimonial->is_featured,
+        ]);
+
         return $testimonial->refresh()->load(['barber.user', 'customer']);
     }
 }

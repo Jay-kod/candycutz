@@ -18,6 +18,8 @@ class PaymentTransaction extends Model
         'gateway',
         'gateway_event_id',
         'amount',
+        'amount_minor',
+        'idempotency_key',
         'raw_payload',
         'status',
         'created_at',
@@ -25,6 +27,7 @@ class PaymentTransaction extends Model
 
     protected $casts = [
         'amount' => 'integer',
+        'amount_minor' => 'integer',
         'raw_payload' => 'array',
         'created_at' => 'datetime',
     ];

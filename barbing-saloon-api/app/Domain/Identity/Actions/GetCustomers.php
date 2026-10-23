@@ -3,6 +3,7 @@
 namespace App\Domain\Identity\Actions;
 
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
 use App\Models\User;
 
@@ -13,11 +14,13 @@ class GetCustomers
      */
     public function execute(): array
     {
+        $mediaUrl = app(UserMediaUrl::class);
+
         return User::query()
             ->where('role', 'customer')
             ->withCount('appointments as total_bookings')
             ->get()
-            ->map(function ($u) {
+            ->map(function ($u) use ($mediaUrl) {
                 $totalSpent = (float) Appointment::where('customer_id', $u->id)
                     ->whereIn('status', [AppointmentStatus::confirmed->value, AppointmentStatus::completed->value])
                     ->sum('total_price');
@@ -33,7 +36,7 @@ class GetCustomers
                     'phone' => $u->phone ?? 'N/A',
                     'auth_provider' => $u->auth_provider ?: 'local',
                     'registered_via' => $u->auth_provider && $u->auth_provider !== 'local' ? ucfirst($u->auth_provider) : 'Registration form',
-                    'avatar' => $u->avatar,
+                    'avatar' => $mediaUrl->for($u, $u->avatar),
                     'created_at' => $u->created_at?->toIso8601String(),
                     'total_bookings' => (int) $u->getAttribute('total_bookings'),
                     'total_spent' => $totalSpent,

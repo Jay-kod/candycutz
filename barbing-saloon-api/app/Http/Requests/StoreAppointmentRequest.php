@@ -32,7 +32,7 @@ class StoreAppointmentRequest extends FormRequest
             'appointment_time' => ['required', 'string'],
             'appointment_type' => ['nullable', 'string', 'in:in_shop,home_service'],
             'destination_address' => ['nullable', 'array'],
-            'payment_method' => ['nullable', 'string', 'in:pay_at_venue,stripe,wallet'],
+            'payment_method' => ['nullable', 'string', 'in:pay_at_venue,paystack'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }

@@ -12,6 +12,7 @@ use App\Models\Payment;
 use RuntimeException;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Refund;
 use Stripe\Stripe;
 use Stripe\StripeObject;
 use Stripe\Webhook;
@@ -84,6 +85,47 @@ class StripeGateway implements PaymentGateway
             gateway_event_id: $session->payment_intent,
             raw_payload: $session->toArray(),
         );
+    }
+
+    public function refund(Payment $payment, int $amountMinor, string $reason = 'Customer refund requested by admin'): GatewayResult
+    {
+        $reference = $payment->transaction_ref ?: $payment->reference ?: $payment->gateway_reference;
+
+        if (empty($this->secretKey)) {
+            return new GatewayResult(
+                reference: $reference,
+                status: 'failed',
+                amount_kobo: $amountMinor,
+                gateway: 'stripe',
+                raw_payload: ['message' => 'Stripe refund unavailable: secret key not configured.'],
+            );
+        }
+
+        try {
+            $refund = Refund::create([
+                'payment_intent' => $payment->gateway_charge_id ?: $payment->provider_transaction_id ?: $reference,
+                'amount' => $amountMinor,
+                'reason' => 'requested_by_customer',
+                'metadata' => ['reason' => $reason],
+            ]);
+
+            return new GatewayResult(
+                reference: $reference,
+                status: $refund->status === 'succeeded' ? 'success' : 'failed',
+                amount_kobo: (int) ($refund->amount ?? $amountMinor),
+                gateway: 'stripe',
+                gateway_event_id: $refund->id,
+                raw_payload: $refund->toArray(),
+            );
+        } catch (\Throwable $e) {
+            return new GatewayResult(
+                reference: $reference,
+                status: 'failed',
+                amount_kobo: $amountMinor,
+                gateway: 'stripe',
+                raw_payload: ['message' => $e->getMessage()],
+            );
+        }
     }
 
     /**

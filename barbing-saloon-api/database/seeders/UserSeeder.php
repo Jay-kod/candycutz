@@ -11,7 +11,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // ── Super Admin Demo Accounts ──
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'superadmin@candycutz.com'],
             [
                 'name' => 'Super Admin',
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         );
 
         // ── Admin Account ──
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'admin@candycutz.com'],
             [
                 'name' => 'Admin Manager',
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
         );
 
         // ── Barber Demo Staff (O.B.O) ──
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'obo@candycutz.com'],
             [
                 'name' => 'O.B.O',
@@ -56,7 +56,7 @@ class UserSeeder extends Seeder
         );
 
         // ── Customer Demo Account ──
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'jay@candycutz.com'],
             [
                 'name' => 'Jay Customer',
@@ -70,5 +70,22 @@ class UserSeeder extends Seeder
             ]
         );
 
+    }
+
+    private function updateOrCreateUser(array $identity, array $attributes): User
+    {
+        $role = $attributes['role'];
+        $status = $attributes['status'];
+        $isActive = $attributes['is_active'];
+        unset($attributes['role'], $attributes['status'], $attributes['is_active']);
+
+        $user = User::firstOrNew($identity);
+        $user->fill($attributes);
+        $user->role = $role;
+        $user->status = $status;
+        $user->is_active = $isActive;
+        $user->save();
+
+        return $user;
     }
 }

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   Modal,
@@ -18,9 +17,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { galleryApi } from '../../src/api/client';
 import { GalleryItem } from '../../src/api/types';
 import { Card } from '../../src/components/common/Card';
+import { ActionDialog } from '../../src/components/common/ActionDialog';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 
 const CATEGORIES = [
   { key: 'all', label: 'All Cuts' },
@@ -43,6 +44,7 @@ export default function GalleryScreen() {
 
   // Upload modal state
   const [showModal, setShowModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<GalleryItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formTitle, setFormTitle] = useState('');
   const [formCategory, setFormCategory] = useState('haircut');
@@ -74,7 +76,11 @@ export default function GalleryScreen() {
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Camera roll access is needed to upload cut photos.');
+      useToastStore.getState().show({
+        variant: 'error',
+        title: 'Permission Denied',
+        message: 'Camera roll access is needed to upload cut photos.',
+      });
       return;
     }
 
@@ -92,11 +98,19 @@ export default function GalleryScreen() {
 
   const handleSubmitPhoto = async () => {
     if (!selectedImageUri) {
-      Alert.alert('Image Required', 'Please select a cut photo from your gallery.');
+      useToastStore.getState().show({
+        variant: 'warning',
+        title: 'Image Required',
+        message: 'Please select a cut photo from your gallery.',
+      });
       return;
     }
     if (!formTitle.trim()) {
-      Alert.alert('Title Required', 'Please enter a title for this haircut/style.');
+      useToastStore.getState().show({
+        variant: 'warning',
+        title: 'Title Required',
+        message: 'Please enter a title for this haircut/style.',
+      });
       return;
     }
 
@@ -109,7 +123,11 @@ export default function GalleryScreen() {
         imageUri: selectedImageUri,
       });
 
-      Alert.alert('Success', 'Cut photo published to the portfolio gallery!');
+      useToastStore.getState().show({
+        variant: 'success',
+        title: 'Success',
+        message: 'Cut photo published to the portfolio gallery!',
+      });
       setShowModal(false);
       setFormTitle('');
       setFormCategory('haircut');
@@ -118,32 +136,18 @@ export default function GalleryScreen() {
       fetchGallery();
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Failed to upload photo.';
-      Alert.alert('Error', msg);
+      useToastStore.getState().show({
+        variant: 'error',
+        title: 'Error',
+        message: msg,
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteItem = (item: GalleryItem) => {
-    Alert.alert(
-      'Delete Photo',
-      `Are you sure you want to remove "${item.title}" from your portfolio?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await galleryApi.delete(item.id);
-              setItems((prev) => prev.filter((i) => i.id !== item.id));
-            } catch {
-              Alert.alert('Error', 'Failed to delete gallery item.');
-            }
-          },
-        },
-      ]
-    );
+    setItemToDelete(item);
   };
 
   const filteredItems = items.filter((item) => {
@@ -349,6 +353,41 @@ export default function GalleryScreen() {
           </View>
         </View>
       </Modal>
+
+      <ActionDialog
+        visible={Boolean(itemToDelete)}
+        title="Delete Photo"
+        message={`Are you sure you want to remove "${itemToDelete?.title || 'this cut'}" from your portfolio?`}
+        variant="danger"
+        dismissLabel="Cancel"
+        onDismiss={() => setItemToDelete(null)}
+        actions={[
+          {
+            label: 'Delete',
+            destructive: true,
+            onPress: async () => {
+              if (!itemToDelete) return;
+              try {
+                await galleryApi.delete(itemToDelete.id);
+                setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+                useToastStore.getState().show({
+                  variant: 'success',
+                  title: 'Photo Deleted',
+                  message: 'Cut photo removed from portfolio.',
+                });
+              } catch {
+                useToastStore.getState().show({
+                  variant: 'error',
+                  title: 'Error',
+                  message: 'Failed to delete gallery item.',
+                });
+              } finally {
+                setItemToDelete(null);
+              }
+            },
+          },
+        ]}
+      />
     </SafeAreaView>
   );
 }

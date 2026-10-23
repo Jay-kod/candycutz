@@ -2,6 +2,7 @@
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Barber;
 
 class GetBarbers
@@ -11,14 +12,16 @@ class GetBarbers
      */
     public function execute(): array
     {
-        return Barber::with(['user'])->get()->map(function ($b) {
+        $mediaUrl = app(UserMediaUrl::class);
+
+        return Barber::with(['user'])->get()->map(function ($b) use ($mediaUrl) {
             return [
                 'id' => $b->id,
                 'user_id' => $b->user_id,
                 'name' => $b->user?->name ?? 'Barber #'.$b->id,
                 'email' => $b->user?->email ?? '',
                 'phone' => $b->user?->phone ?? '',
-                'avatar' => $b->user?->avatar,
+                'avatar' => $mediaUrl->for($b->user, $b->user?->avatar),
                 'status' => $b->status ?? ($b->user?->status ?? 'active'),
                 'experience_years' => $b->years_experience ?? $b->experience_years ?? 5,
                 'specialties' => $b->specialties ?? [],

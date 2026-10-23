@@ -64,7 +64,7 @@ class GetBarberDashboard
                     $pq->whereIn('status', ['awaiting_verification', 'pending']);
                 })->orWhere(function ($sq) {
                     $sq->where('status', AppointmentStatus::pending->value)
-                       ->whereNotNull('notes');
+                        ->whereNotNull('notes');
                 });
             })
             ->latest('appointment_date')

@@ -15,9 +15,9 @@ class WebUserSeeder extends Seeder
     public function run(): void
     {
         // ── 1. Web Accounts ──────────────────────────────────────
-        
+
         // Customer: kefas@customer.com / customer123
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'kefas@customer.com'],
             [
                 'name' => 'Kefas Customer',
@@ -32,7 +32,7 @@ class WebUserSeeder extends Seeder
         );
 
         // Barber: mark@barber.com / barber123 (with linked active Barber profile)
-        $markUser = User::updateOrCreate(
+        $markUser = $this->updateOrCreateUser(
             ['email' => 'mark@barber.com'],
             [
                 'name' => 'Mark Barber',
@@ -63,7 +63,7 @@ class WebUserSeeder extends Seeder
         );
 
         // Admin: webadmin@candycutz.com / admin123
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'webadmin@candycutz.com'],
             [
                 'name' => 'Web Administrator',
@@ -78,7 +78,7 @@ class WebUserSeeder extends Seeder
         );
 
         // Super Admin: websuperadmin@candycutz.com / superadmin123
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'websuperadmin@candycutz.com'],
             [
                 'name' => 'Web Super Admin',
@@ -93,9 +93,9 @@ class WebUserSeeder extends Seeder
         );
 
         // ── 2. Preserved Mobile App Accounts ──────────────────────
-        
+
         // Customer: jay@candycutz.com / customer123
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'jay@candycutz.com'],
             [
                 'name' => 'Jay Customer',
@@ -110,7 +110,7 @@ class WebUserSeeder extends Seeder
         );
 
         // Barber: obo@candycutz.com / barber123
-        $oboUser = User::updateOrCreate(
+        $oboUser = $this->updateOrCreateUser(
             ['email' => 'obo@candycutz.com'],
             [
                 'name' => 'O.B.O Barber',
@@ -141,9 +141,9 @@ class WebUserSeeder extends Seeder
         );
 
         // ── 3. Designated Mobile Demo Accounts ────────────────────
-        
+
         // Customer: fonetestcuz@candycutz.com / customer123
-        User::updateOrCreate(
+        $this->updateOrCreateUser(
             ['email' => 'fonetestcuz@candycutz.com'],
             [
                 'name' => 'Demo Phone Customer',
@@ -158,7 +158,7 @@ class WebUserSeeder extends Seeder
         );
 
         // Barber: fonetestbar@candycutz.com / barber123
-        $phoneBarber = User::updateOrCreate(
+        $phoneBarber = $this->updateOrCreateUser(
             ['email' => 'fonetestbar@candycutz.com'],
             [
                 'name' => 'Demo Phone Barber',
@@ -188,5 +188,21 @@ class WebUserSeeder extends Seeder
             ]
         );
     }
-}
 
+    private function updateOrCreateUser(array $identity, array $attributes): User
+    {
+        $role = $attributes['role'];
+        $status = $attributes['status'];
+        $isActive = $attributes['is_active'];
+        unset($attributes['role'], $attributes['status'], $attributes['is_active']);
+
+        $user = User::firstOrNew($identity);
+        $user->fill($attributes);
+        $user->role = $role;
+        $user->status = $status;
+        $user->is_active = $isActive;
+        $user->save();
+
+        return $user;
+    }
+}

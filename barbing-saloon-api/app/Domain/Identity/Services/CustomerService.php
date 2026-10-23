@@ -6,6 +6,7 @@ namespace App\Domain\Identity\Services;
 
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\Testimonial;
 use App\Models\User;
 
 class CustomerService
@@ -28,7 +29,7 @@ class CustomerService
             ->where('status', AppointmentStatus::completed->value)
             ->count();
 
-        $reviewsCount = \App\Models\Testimonial::where('customer_id', $user->id)->count();
+        $reviewsCount = Testimonial::where('customer_id', $user->id)->count();
 
         $upcomingAppointments = Appointment::query()
             ->with(['service', 'barber.user'])

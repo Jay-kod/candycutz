@@ -135,7 +135,9 @@ export default function ServicesScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={isLoading}
-                onRefresh={refetch}
+                onRefresh={() => {
+                  void refetch();
+                }}
                 tintColor={colors.primary}
               />
             }

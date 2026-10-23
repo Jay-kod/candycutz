@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   Modal,
@@ -22,6 +21,7 @@ import { Card } from '../../src/components/common/Card';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToastStore } from '../../src/store/toastStore';
 
 export default function BlogScreen() {
   const router = useRouter();
@@ -68,7 +68,11 @@ export default function BlogScreen() {
   const handlePickCoverImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Camera roll access is needed to select an article cover image.');
+      useToastStore.getState().show({
+        variant: 'error',
+        title: 'Permission Denied',
+        message: 'Camera roll access is needed to select an article cover image.',
+      });
       return;
     }
 
@@ -86,11 +90,19 @@ export default function BlogScreen() {
 
   const handleSubmitArticle = async () => {
     if (!formTitle.trim()) {
-      Alert.alert('Title Required', 'Please enter an article title.');
+      useToastStore.getState().show({
+        variant: 'warning',
+        title: 'Title Required',
+        message: 'Please enter an article title.',
+      });
       return;
     }
     if (!formContent.trim()) {
-      Alert.alert('Content Required', 'Please write some grooming content for the article.');
+      useToastStore.getState().show({
+        variant: 'warning',
+        title: 'Content Required',
+        message: 'Please write some grooming content for the article.',
+      });
       return;
     }
 
@@ -104,7 +116,11 @@ export default function BlogScreen() {
         status: isPublishImmediately ? 'published' : 'draft',
       });
 
-      Alert.alert('Article Published', 'Your article is now live across web and mobile blog feeds!');
+      useToastStore.getState().show({
+        variant: 'success',
+        title: 'Article Published',
+        message: 'Your article is now live across web and mobile blog feeds!',
+      });
       setShowModal(false);
       setFormTitle('');
       setFormExcerpt('');
@@ -114,7 +130,11 @@ export default function BlogScreen() {
       fetchPosts();
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Failed to publish article.';
-      Alert.alert('Error', msg);
+      useToastStore.getState().show({
+        variant: 'error',
+        title: 'Error',
+        message: msg,
+      });
     } finally {
       setSubmitting(false);
     }
