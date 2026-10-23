@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <!-- Social Arc Constellation (Works Where You Work - Exact Reference Design with Future Slots) -->
+        <!-- 9-Disc Honeycomb Constellation (Exact Reference Spacing from media_1792774438527_82a2316c.png) -->
         <div class="mt-8 pt-8 border-t border-theme-border" data-reveal>
           <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] via-[#0E0E11]/90 to-obsidian py-8 px-4 sm:px-6 text-center shadow-2xl backdrop-blur-xl">
             <!-- Background Soft Ambient Glow -->
@@ -65,28 +65,25 @@
               Connect with our master barbers, view signature drops, or locate our studio across your favourite platforms.
             </p>
 
-            <!-- 10-Disc Double-Layer Arched Constellation (Active Platforms + Empty Future Addition Slots) -->
+            <!-- 9-Disc Honeycomb Constellation (Exact Reference Spacing: D=70px, ΔX=132px, Air Gap=62px) -->
             <div class="relative mt-8 sm:mt-10 mb-4 flex items-center justify-center">
-              <div class="relative mx-auto h-28 sm:h-32 md:h-36 w-[310px] sm:w-[380px] md:w-[440px]">
+              <div class="relative mx-auto h-[160px] w-[470px] scale-[0.68] min-[400px]:scale-[0.8] min-[480px]:scale-90 sm:scale-100 origin-center transition-transform">
                 <template v-for="disc in allConstellationDiscs" :key="disc.id">
                   <!-- Empty / Future Addition Slot Disc -->
                   <div
                     v-if="disc.type === 'empty'"
-                    :style="{ left: disc.left, zIndex: disc.zIndex }"
-                    :class="[
-                      disc.topClass,
-                      'group/empty absolute -translate-x-1/2 flex size-11 sm:size-13 md:size-14 items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-b from-white/[0.035] via-[#121215]/90 to-[#0A0A0C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_18px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:border-gold/40 hover:shadow-[0_0_18px_rgba(255,153,0,0.25)] hover:z-40 cursor-default select-none'
-                    ]"
+                    :style="{ left: disc.left, top: disc.top, zIndex: disc.zIndex }"
+                    class="group/empty absolute -translate-x-1/2 flex h-[70px] w-[70px] items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-b from-white/[0.035] via-[#121215]/90 to-[#0A0A0C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_18px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:border-gold/40 hover:shadow-[0_0_18px_rgba(255,153,0,0.25)] hover:z-50 cursor-default select-none"
                   >
                     <!-- Specular Top Rim Light -->
                     <div
-                      class="pointer-events-none absolute top-1 inset-x-2.5 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full"
+                      class="pointer-events-none absolute top-1.5 inset-x-3 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent rounded-full"
                       aria-hidden="true"
                     ></div>
 
-                    <!-- Faint Future Slot Target Glyph (+) -->
-                    <div class="flex items-center justify-center text-white/20 group-hover/empty:text-gold/80 transition-colors duration-300">
-                      <svg class="size-3.5 sm:size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <!-- Faint Future Slot Target Glyph (+) on hover -->
+                    <div class="flex items-center justify-center text-white/10 group-hover/empty:text-gold/80 transition-colors duration-300">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
@@ -105,22 +102,19 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     :aria-label="disc.label"
-                    :style="{ left: disc.left, zIndex: disc.zIndex }"
-                    :class="[
-                      disc.topClass,
-                      'group/bubble absolute -translate-x-1/2 flex size-11 sm:size-13 md:size-14 items-center justify-center rounded-full border border-white/10 bg-gradient-to-b from-white/[0.08] via-[#161619] to-[#0E0E11] shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),0_10px_22px_-4px_rgba(0,0,0,0.85)] backdrop-blur-xl transition-all duration-300 ease-out hover:scale-115 hover:-translate-y-2 hover:border-gold/60 hover:shadow-[0_0_24px_rgba(255,153,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.3)] hover:z-40 focus:outline-none focus:ring-2 focus:ring-gold'
-                    ]"
+                    :style="{ left: disc.left, top: disc.top, zIndex: disc.zIndex }"
+                    class="group/bubble absolute -translate-x-1/2 flex h-[70px] w-[70px] items-center justify-center rounded-full border border-white/10 bg-gradient-to-b from-[#1C1C20] via-[#141417] to-[#0D0D0F] shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),0_10px_22px_-4px_rgba(0,0,0,0.85)] backdrop-blur-xl transition-all duration-300 ease-out hover:scale-110 hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-[0_0_24px_rgba(255,153,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.3)] hover:z-50 focus:outline-none focus:ring-2 focus:ring-gold"
                   >
                     <!-- Specular Top Rim Light -->
                     <div
-                      class="pointer-events-none absolute top-1 inset-x-2.5 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
+                      class="pointer-events-none absolute top-1.5 inset-x-3 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
                       aria-hidden="true"
                     ></div>
 
-                    <!-- Icon Glyphs with Vibrant Authentic Colors -->
+                    <!-- Icon Glyphs with Vibrant Authentic Colors (size-7 = 28px) -->
                     <div class="transition-transform duration-300 group-hover/bubble:scale-110 flex items-center justify-center">
                       <!-- Google Maps Pin (Matching Reference Image) -->
-                      <svg v-if="disc.key === 'maps'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none">
+                      <svg v-if="disc.key === 'maps'" class="size-7" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335" />
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 1.7.6 3.3 1.6 4.7L12 2z" fill="#4285F4" opacity="0.3" />
                         <circle cx="12" cy="9" r="3.2" fill="#fff" />
@@ -128,12 +122,12 @@
                       </svg>
 
                       <!-- WhatsApp (Vibrant Green) -->
-                      <svg v-else-if="disc.key === 'whatsapp'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="#25D366">
+                      <svg v-else-if="disc.key === 'whatsapp'" class="size-7" viewBox="0 0 24 24" fill="#25D366">
                         <path fill-rule="evenodd" d="M12.031 21.996c-1.63 0-3.235-.417-4.664-1.216L2.617 22l1.241-4.613a9.988 9.988 0 01-1.31-4.99c0-5.505 4.492-9.985 10.01-9.985 5.518 0 10.007 4.48 10.007 9.985 0 5.506-4.489 9.999-10.01 9.999zm-4.721-13.06c-.274-.775-.561-.79-.817-.803h-.696c-.237 0-.623.089-.95.446-.326.357-1.246 1.218-1.246 2.972 0 1.754 1.275 3.448 1.453 3.685.178.238 2.512 3.834 6.082 5.38 3.57 1.547 3.57 1.031 4.223.972.652-.06 2.106-.862 2.403-1.695.297-.833.297-1.547.208-1.696-.089-.148-.326-.238-.682-.416s-2.106-1.04-2.433-1.16c-.326-.118-.564-.178-.801.179-.237.357-.92 1.159-1.127 1.397-.208.238-.415.267-.771.089s-1.503-.553-2.863-1.77c-1.057-.946-1.771-2.116-1.979-2.473-.208-.356-.022-.55.156-.728.16-.16.356-.416.534-.624.178-.208.237-.356.356-.594.119-.237.06-.445-.03-.624-.089-.178-.801-1.93-1.098-2.644z" clip-rule="evenodd" />
                       </svg>
 
                       <!-- Instagram (Gradient Camera) -->
-                      <svg v-else-if="disc.key === 'instagram'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none">
+                      <svg v-else-if="disc.key === 'instagram'" class="size-7" viewBox="0 0 24 24" fill="none">
                         <defs>
                           <linearGradient id="ig-grad-contact" x1="0%" y1="100%" x2="100%" y2="0%">
                             <stop offset="0%" stop-color="#FEC053" />
@@ -147,25 +141,25 @@
                       </svg>
 
                       <!-- TikTok (Cyan & Magenta Offset Glyph) -->
-                      <svg v-else-if="disc.key === 'tiktok'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none">
+                      <svg v-else-if="disc.key === 'tiktok'" class="size-6" viewBox="0 0 24 24" fill="none">
                         <path d="M16.6 5.82s.51.5 1.4 1c1.02.58 2.05.74 2.05.74V4.02s-.97-.04-1.87-.41a4.8 4.8 0 01-1.58-1.18V.02h-3.9v14.4c0 1.8-1.46 3.26-3.26 3.26a3.26 3.26 0 01-3.26-3.26c0-1.8 1.46-3.26 3.26-3.26.35 0 .69.06 1.01.16V7.2a7.3 7.3 0 00-1.01-.07A7.26 7.26 0 002 14.39a7.26 7.26 0 007.26 7.26c4.01 0 7.26-3.25 7.26-7.26V5.82z" fill="#25F4EE" />
                         <path d="M17.8 5.4s.51.5 1.4 1c1.02.58 2.05.74 2.05.74V4.4s-.97-.04-1.87-.41a4.8 4.8 0 01-1.58-1.18V.4h-3.5v14.4c0 1.8-1.46 3.26-3.26 3.26a3.26 3.26 0 01-3.26-3.26c0-1.8 1.46-3.26 3.26-3.26.35 0 .69.06 1.01.16V7.6a7.3 7.3 0 00-1.01-.07A7.26 7.26 0 003.2 14.79a7.26 7.26 0 007.26 7.26c4.01 0 7.26-3.25 7.26-7.26V5.4z" fill="#FE2C55" opacity="0.8" />
                         <path d="M17.2 5.6s.51.5 1.4 1c1.02.58 2.05.74 2.05.74V3.8s-.97-.04-1.87-.41a4.8 4.8 0 01-1.58-1.18V-.2h-3.7v14.4c0 1.8-1.46 3.26-3.26 3.26a3.26 3.26 0 01-3.26-3.26c0-1.8 1.46-3.26 3.26-3.26.35 0 .69.06 1.01.16V7.4a7.3 7.3 0 00-1.01-.07A7.26 7.26 0 002.6 14.59a7.26 7.26 0 007.26 7.26c4.01 0 7.26-3.25 7.26-7.26V5.6z" fill="#FFFFFF" />
                       </svg>
 
                       <!-- YouTube (Red Icon) -->
-                      <svg v-else-if="disc.key === 'youtube'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="#FF0000">
+                      <svg v-else-if="disc.key === 'youtube'" class="size-7" viewBox="0 0 24 24" fill="#FF0000">
                         <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" />
                         <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff" />
                       </svg>
 
                       <!-- Facebook (Blue Icon) -->
-                      <svg v-else-if="disc.key === 'facebook'" class="size-5 sm:size-6" viewBox="0 0 24 24" fill="#1877F2">
+                      <svg v-else-if="disc.key === 'facebook'" class="size-7" viewBox="0 0 24 24" fill="#1877F2">
                         <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
                       </svg>
 
                       <!-- Twitter / X (Ivory Icon) -->
-                      <svg v-else class="size-4 sm:size-5" viewBox="0 0 24 24" fill="#FAFAF8">
+                      <svg v-else class="size-6" viewBox="0 0 24 24" fill="#FAFAF8">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.922H5.078z" />
                       </svg>
                     </div>
@@ -286,110 +280,118 @@ const parseBool = (val, defaultVal = true) => {
 };
 
 /**
- * 10-Disc Double-Layer Arched Constellation (Reference Architecture)
- * 5 Active Social Channels (foreground/peaks) + 5 Empty Discs for Future Additions (foundation/anchors)
+ * 9-Disc Staggered Honeycomb Constellation (Exact Reference Spacing from media_1792774438527_82a2316c.png)
+ *
+ * Measured Metrics:
+ * - Circle Diameter D = 70px
+ * - Horizontal Step ΔX = 132px (62px air gap between circles in the same row)
+ * - Row-to-Row Stagger = 66px (half of 132px)
+ * - Row 1 -> Row 2 ΔY = 42px (8.2px diagonal air gap)
+ * - Row 2 -> Row 3 ΔY = 37px (5.7px diagonal air gap)
+ * - Total Constellation Width = 466px, Height = 149px
+ *
+ * Geometry:
+ * - Row 1 (Top / Peaks, 2 Active Discs): Maps (calc(50% - 66px)), Instagram (calc(50% + 66px)) at top: 0px
+ * - Row 2 (Middle, 3 Active Discs): TikTok (calc(50% - 132px)), WhatsApp (50%), X/Social (calc(50% + 132px)) at top: 42px
+ * - Row 3 (Bottom, 4 Empty Discs): 4 Foundation slots at calc(50% - 198px), calc(50% - 66px), calc(50% + 66px), calc(50% + 198px) at top: 79px
  */
 const allConstellationDiscs = computed(() => {
   const s = socialSettings.value;
   return [
-    // 1. Far-Left Ghost Foundation Anchor
-    {
-      id: 'empty-1',
-      type: 'empty',
-      label: 'Future Addition Slot',
-      left: '0%',
-      topClass: 'top-10 sm:top-12 md:top-14',
-      zIndex: 10,
-    },
-    // 2. Active: TikTok (Shoulder Left)
-    {
-      id: 'tiktok',
-      type: 'active',
-      key: 'tiktok',
-      label: 'TikTok',
-      url: s.tiktok || 'https://tiktok.com/@candycutz',
-      left: '12%',
-      topClass: 'top-5 sm:top-6 md:top-7',
-      zIndex: 20,
-    },
-    // 3. Empty Foundation Disc (Between Left Shoulder and Peak)
-    {
-      id: 'empty-2',
-      type: 'empty',
-      label: 'Future Addition Slot',
-      left: '23%',
-      topClass: 'top-11 sm:top-13 md:top-15',
-      zIndex: 10,
-    },
-    // 4. Active: Google Maps Pin (Peak Left - Exact from Reference)
+    // --- ROW 1 (TOP / PEAKS, zIndex: 30) ---
+    // 1. Peak Left: Google Maps Pin (Directions)
     {
       id: 'maps',
       type: 'active',
       key: 'maps',
       label: 'Google Maps (Directions)',
       url: contactMapLink.value || 'https://maps.google.com/?q=Angwan+Kare,+BCG,+Keffi',
-      left: '32%',
-      topClass: 'top-0',
-      zIndex: 25,
+      left: 'calc(50% - 66px)',
+      top: '0px',
+      zIndex: 30,
     },
-    // 5. Empty Foundation Disc (Center Underneath)
-    {
-      id: 'empty-3',
-      type: 'empty',
-      label: 'Future Addition Slot',
-      left: '50%',
-      topClass: 'top-12 sm:top-14 md:top-16',
-      zIndex: 10,
-    },
-    // 6. Active: Instagram (Center Saddle)
+    // 2. Peak Right: Instagram (@CandyCutz)
     {
       id: 'instagram',
       type: 'active',
       key: 'instagram',
       label: 'Instagram (@CandyCutz)',
       url: s.instagram || 'https://instagram.com/candycutz',
-      left: '50%',
-      topClass: 'top-3 sm:top-3.5 md:top-4',
+      left: 'calc(50% + 66px)',
+      top: '0px',
       zIndex: 30,
     },
-    // 7. Active: WhatsApp (Peak Right)
+
+    // --- ROW 2 (MIDDLE / SHOULDERS & CENTER, zIndex: 20) ---
+    // 3. Middle Left: TikTok
+    {
+      id: 'tiktok',
+      type: 'active',
+      key: 'tiktok',
+      label: 'TikTok',
+      url: s.tiktok || 'https://tiktok.com/@candycutz',
+      left: 'calc(50% - 132px)',
+      top: '42px',
+      zIndex: 20,
+    },
+    // 4. Middle Center: WhatsApp (Instant Chat)
     {
       id: 'whatsapp',
       type: 'active',
       key: 'whatsapp',
       label: 'WhatsApp (Instant Chat)',
       url: formatWhatsAppUrl(s.whatsapp) || 'https://wa.me/2348123456789',
-      left: '68%',
-      topClass: 'top-0',
-      zIndex: 25,
+      left: '50%',
+      top: '42px',
+      zIndex: 20,
     },
-    // 8. Empty Foundation Disc (Between Right Shoulder and Peak)
+    // 5. Middle Right: X / YouTube / Facebook
     {
-      id: 'empty-4',
-      type: 'empty',
-      label: 'Future Addition Slot',
-      left: '77%',
-      topClass: 'top-11 sm:top-13 md:top-15',
-      zIndex: 10,
-    },
-    // 9. Active: X / YouTube / Facebook (Shoulder Right)
-    {
-      id: 'social-5',
+      id: 'social-right',
       type: 'active',
       key: s.youtube ? 'youtube' : (s.facebook ? 'facebook' : 'twitter'),
       label: s.youtube ? 'YouTube' : (s.facebook ? 'Facebook' : 'X (Twitter)'),
       url: s.youtube || s.facebook || s.twitter || 'https://x.com/candycutz',
-      left: '88%',
-      topClass: 'top-5 sm:top-6 md:top-7',
+      left: 'calc(50% + 132px)',
+      top: '42px',
       zIndex: 20,
     },
-    // 10. Far-Right Ghost Foundation Anchor
+
+    // --- ROW 3 (BOTTOM FOUNDATION, 4 EMPTY DISCS FOR FUTURE ADDITION, zIndex: 10) ---
+    // 6. Far-Left Empty Disc
     {
-      id: 'empty-5',
+      id: 'empty-1',
       type: 'empty',
       label: 'Future Addition Slot',
-      left: '100%',
-      topClass: 'top-10 sm:top-12 md:top-14',
+      left: 'calc(50% - 198px)',
+      top: '79px',
+      zIndex: 10,
+    },
+    // 7. Mid-Left Empty Disc (Directly below Maps at x = 50% - 66px)
+    {
+      id: 'empty-2',
+      type: 'empty',
+      label: 'Future Addition Slot',
+      left: 'calc(50% - 66px)',
+      top: '79px',
+      zIndex: 10,
+    },
+    // 8. Mid-Right Empty Disc (Directly below Instagram at x = 50% + 66px)
+    {
+      id: 'empty-3',
+      type: 'empty',
+      label: 'Future Addition Slot',
+      left: 'calc(50% + 66px)',
+      top: '79px',
+      zIndex: 10,
+    },
+    // 9. Far-Right Empty Disc
+    {
+      id: 'empty-4',
+      type: 'empty',
+      label: 'Future Addition Slot',
+      left: 'calc(50% + 198px)',
+      top: '79px',
       zIndex: 10,
     },
   ];

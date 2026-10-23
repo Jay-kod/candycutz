@@ -62,18 +62,18 @@
     <footer class="border-t border-white/10 bg-[#070708] pt-16 pb-12 text-zinc-400">
       <div class="mx-auto max-w-7xl px-4 md:px-6">
         <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
           <!-- Section 1: Brand & Shop Identity -->
-          <div class="md:col-span-2 lg:col-span-1 space-y-4">
-            <RouterLink to="/" class="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
+          <div class="md:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
+            <RouterLink to="/" class="inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
               <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
               <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </RouterLink>
-            <p class="text-xs sm:text-[13px] text-zinc-400 leading-relaxed max-w-sm">
+            <p class="max-w-sm text-xs leading-relaxed text-zinc-400 sm:text-[13px]">
               {{ brandTagline }}
             </p>
 
-            <div class="pt-1 space-y-2 text-xs text-zinc-400">
+            <div class="space-y-3 pt-1 text-xs text-zinc-400">
               <div v-if="shopAddress" class="flex items-start gap-2 text-zinc-400">
                 <MapPinIcon class="h-4 w-4 text-gold shrink-0 mt-0.5" />
                 <span class="leading-snug">{{ shopAddress }}</span>
@@ -96,9 +96,9 @@
           </div>
 
           <!-- Section 2: Explore -->
-          <div class="md:col-span-1 lg:border-l lg:border-white/10 lg:pl-10 xl:pl-12">
+          <div class="md:col-span-1">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Explore</h3>
-            <ul class="space-y-2.5 text-xs sm:text-sm">
+            <ul class="flex flex-col items-center space-y-2.5 text-xs sm:text-sm">
               <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
               <li><RouterLink to="/services" class="hover:text-gold transition-colors">Services</RouterLink></li>
               <li><RouterLink to="/gallery" class="hover:text-gold transition-colors">Gallery</RouterLink></li>
@@ -108,9 +108,9 @@
           </div>
 
           <!-- Section 3: Legal & Policies -->
-          <div class="md:col-span-1 md:border-l md:border-white/10 md:pl-8 lg:pl-10 xl:pl-12">
+          <div class="md:col-span-1">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Legal & Policies</h3>
-            <ul class="space-y-2.5 text-xs sm:text-sm">
+            <ul class="flex flex-col items-center space-y-2.5 text-xs sm:text-sm">
               <li><RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink></li>
               <li><RouterLink to="/terms" class="hover:text-gold transition-colors">Terms of Service</RouterLink></li>
               <li><RouterLink to="/account-deletion" class="hover:text-gold transition-colors">Account Deletion</RouterLink></li>
@@ -140,7 +140,7 @@
         </div>
 
         <!-- Centered Legal Links Separated by Pipes (Exact reference design) -->
-        <div class="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
+        <div class="mt-8 flex flex-wrap justify-start items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
           <RouterLink to="/legal" class="hover:text-gold transition-colors">Legal Stuff</RouterLink>
           <span class="text-white/20 select-none">|</span>
           <RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink>
@@ -151,8 +151,10 @@
         </div>
 
         <!-- Copyright Line -->
-        <p class="mt-4 text-center text-xs text-zinc-500">
-          Copyright &copy; {{ new Date().getFullYear() }} <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />, Inc.
+        <p class="footer-copyright mt-4 text-center text-xs text-zinc-500">
+          Copyright &copy; {{ new Date().getFullYear() }}
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />,
+          Inc.
         </p>
       </div>
     </footer>
@@ -344,6 +346,16 @@ onMounted(() => {
 
 .public-brand__name {
   color: inherit;
+}
+
+.footer-copyright {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 0.25rem;
+  text-align: center;
 }
 
 .public-brand__mark {
