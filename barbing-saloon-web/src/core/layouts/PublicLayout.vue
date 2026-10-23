@@ -140,7 +140,7 @@
         </div>
 
         <!-- Centered Legal Links Separated by Pipes (Exact reference design) -->
-        <div class="mt-8 flex flex-wrap justify-start items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
+        <div class="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
           <RouterLink to="/legal" class="hover:text-gold transition-colors">Legal Stuff</RouterLink>
           <span class="text-white/20 select-none">|</span>
           <RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink>
