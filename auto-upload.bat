@@ -2,7 +2,6 @@
 setlocal
 cd /d "%~dp0"
 
-title CandyCutz Auto-Upload Watcher
 echo =======================================================
 echo   CandyCutz Auto-Upload Watcher
 echo   Repository: https://github.com/Jay-kod/candycutz
@@ -20,5 +19,6 @@ if not errorlevel 1 (
     echo.
 )
 
-timeout /t 30 /nobreak >nul
+rem Wait 30 seconds using ping (works in both interactive and background non-interactive shells)
+ping 127.0.0.1 -n 31 >nul 2>&1
 goto loop
