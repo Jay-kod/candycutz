@@ -10,10 +10,11 @@ let loadingPromise = null;
 
 export const applyBrandSettings = (settings = {}) => {
   const name = settings.brand_name || settings.site_name;
-  const tagline = settings.brand_tagline || settings.site_description || settings.meta_description;
+  const taglineKey = ['brand_tagline', 'site_description', 'meta_description']
+    .find((key) => Object.prototype.hasOwnProperty.call(settings, key) && typeof settings[key] === 'string');
 
   if (typeof name === 'string' && name.trim()) brandName.value = name.trim();
-  if (typeof tagline === 'string' && tagline.trim()) brandTagline.value = tagline.trim();
+  if (taglineKey) brandTagline.value = settings[taglineKey].trim();
   if (typeof document !== 'undefined') document.title = brandName.value;
 };
 
