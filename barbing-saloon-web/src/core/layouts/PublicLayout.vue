@@ -282,6 +282,7 @@ onMounted(() => {
   right: 0;
   left: 0;
   padding: 0.5rem 1rem;
+  pointer-events: none;
 }
 
 .public-nav-shell {
@@ -292,7 +293,8 @@ onMounted(() => {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 1rem;
-  margin: 0 auto;
+  margin: 1.25rem auto 0;
+  pointer-events: auto;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   padding: 0.35rem 0.5rem 0.35rem 0.85rem;
