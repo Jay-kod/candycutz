@@ -48,7 +48,9 @@ import {
   EnvelopeIcon,
   TrashIcon,
   BugAntIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  RectangleStackIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -61,13 +63,20 @@ const navItems = [
 
   // The Website (All Website CMS Pages)
   { name: 'Website Overview', to: '/admin/websites', icon: GlobeAltIcon, badge: 'CMS' },
+  { name: 'Brand Identity', to: '/admin/brand-identity', icon: BuildingStorefrontIcon },
   { name: 'Home Page', to: '/admin/websites/home', icon: HomeIcon },
+  { name: 'Features Block', to: '/admin/websites/features', icon: SparklesIcon, badge: 'Block' },
+  { name: 'Homepage CTA', to: '/admin/websites/cta', icon: ScissorsIcon },
+  { name: 'Page Heroes', to: '/admin/websites/heroes', icon: RectangleStackIcon },
   { name: 'About Us Page', to: '/admin/websites/about', icon: InformationCircleIcon },
   { name: 'Services Page', to: '/admin/websites/services', icon: SparklesIcon },
   { name: 'Gallery Page', to: '/admin/websites/gallery', icon: PhotoIcon },
   { name: 'Contact Page', to: '/admin/websites/contact', icon: EnvelopeIcon },
   { name: 'Privacy Policy Page', to: '/admin/websites/privacy', icon: ShieldCheckIcon },
   { name: 'Terms of Service Page', to: '/admin/websites/terms', icon: DocumentTextIcon },
+  { name: 'Legal Stuff Page', to: '/admin/websites/legal', icon: DocumentTextIcon },
+  { name: 'Security Page', to: '/admin/websites/security', icon: ShieldCheckIcon },
+  { name: 'Manage Cookies Page', to: '/admin/websites/cookies', icon: Cog6ToothIcon },
   { name: 'Account Deletion Page', to: '/admin/websites/account-deletion', icon: TrashIcon },
 
   // The App (All Mobile App Pages)
@@ -101,6 +110,7 @@ const navItems = [
   { name: 'Services', to: '/admin/services', icon: SparklesIcon },
   { name: 'Gallery', to: '/admin/gallery', icon: PhotoIcon },
   { name: 'Testimonials', to: '/admin/testimonials', icon: ChatBubbleLeftRightIcon },
+  { name: 'Feedback Inbox', to: '/admin/feedback', icon: ChatBubbleLeftRightIcon },
   { name: 'Blog', to: '/admin/blog', icon: DocumentTextIcon },
 
   // Management & Security

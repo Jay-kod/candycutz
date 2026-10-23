@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Catalogue\Services\CatalogueService;
+use App\Domain\Content\Services\AnimationSettingsService;
 use App\Domain\Content\Services\ContentService;
 use App\Domain\Content\Services\SettingsService;
 use App\Http\Responses\ApiResponse;
@@ -15,6 +16,11 @@ class PublicApiController
     public function settings(SettingsService $settingsService): JsonResponse
     {
         return ApiResponse::success($settingsService->publicSettings(), 'Public settings loaded');
+    }
+
+    public function animations(AnimationSettingsService $service): JsonResponse
+    {
+        return ApiResponse::success($service->getResolvedSettings(), 'Animation settings loaded');
     }
 
     public function services(CatalogueService $catalogueService): JsonResponse

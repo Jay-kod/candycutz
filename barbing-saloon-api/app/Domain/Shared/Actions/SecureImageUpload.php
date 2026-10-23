@@ -18,8 +18,12 @@ class SecureImageUpload
     {
         $this->validateMime($file);
 
-        // Process through Intervention Image if available and GD extension loaded
-        if (class_exists(ImageManager::class) && extension_loaded('gd')) {
+        $actualMime = MimeTypes::getDefault()->guessMimeType($file->getRealPath());
+        $isIco = in_array($actualMime, ['image/x-icon', 'image/vnd.microsoft.icon', 'image/x-ico'], true)
+            || strtolower($file->getClientOriginalExtension()) === 'ico';
+
+        // Process through Intervention Image if available, GD extension loaded, and not an ICO file
+        if (! $isIco && class_exists(ImageManager::class) && extension_loaded('gd')) {
             try {
                 $manager = new ImageManager(new Driver);
                 $image = $manager->read($file->getRealPath());
@@ -36,7 +40,7 @@ class SecureImageUpload
             }
         }
 
-        $extension = $file->guessExtension() ?: 'jpg';
+        $extension = $file->guessExtension() ?: ($isIco ? 'ico' : 'jpg');
         $filename = Str::random(40).'.'.$extension;
         $path = trim($directory, '/').'/'.$filename;
         Storage::disk($disk)->putFileAs(trim($directory, '/'), $file, $filename);
@@ -46,12 +50,19 @@ class SecureImageUpload
 
     protected function validateMime(UploadedFile $file): void
     {
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/x-icon',
+            'image/vnd.microsoft.icon',
+            'image/x-ico',
+        ];
         $actualMime = MimeTypes::getDefault()->guessMimeType($file->getRealPath());
 
-        if (! in_array($actualMime, $allowedMimes, true) || ! in_array($file->getMimeType(), $allowedMimes, true)) {
+        if ((! in_array($actualMime, $allowedMimes, true) || ! in_array($file->getMimeType(), $allowedMimes, true)) && strtolower($file->getClientOriginalExtension()) !== 'ico') {
             throw ValidationException::withMessages([
-                'image' => ['Image must be a valid JPG, PNG, or WEBP.'],
+                'image' => ['Image must be a valid JPG, PNG, WEBP, or ICO.'],
             ]);
         }
 

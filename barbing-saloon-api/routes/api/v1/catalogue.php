@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Endpoints
 Route::get('/settings', [PublicApiController::class, 'settings']);
+Route::get('/animations', [PublicApiController::class, 'animations']);
 Route::get('/services', [ServiceApiController::class, 'index']);
 Route::get('/service-categories', [ServiceApiController::class, 'categories']);
 Route::get('/services/{idOrSlug}', [ServiceApiController::class, 'show']);
@@ -33,6 +34,7 @@ Route::post('/app/crashes', [AppTelemetryApiController::class, 'reportCrash']);
 // Public Aliases (/api/v1/public/*) for seamless backward compatibility
 Route::prefix('public')->group(function () {
     Route::get('/settings', [PublicApiController::class, 'settings']);
+    Route::get('/animations', [PublicApiController::class, 'animations']);
     Route::get('/services', [ServiceApiController::class, 'index']);
     Route::get('/service-categories', [ServiceApiController::class, 'categories']);
     Route::get('/services/{idOrSlug}', [ServiceApiController::class, 'show']);

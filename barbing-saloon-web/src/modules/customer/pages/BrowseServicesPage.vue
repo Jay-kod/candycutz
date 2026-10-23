@@ -8,10 +8,10 @@
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Browse</p>
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-white">
-              Our <span class="text-gold">Services</span> <span class="text-xl text-white/50">({{ services.length }})</span>
+              {{ pageTitle }} <span class="text-xl text-white/50">({{ services.length }})</span>
             </h1>
             <p class="mt-2 max-w-xl text-sm text-white/70 leading-relaxed">
-              Explore our menu of premium grooming services and book your next appointment directly.
+              {{ pageSubtitle }}
             </p>
           </div>
         </div>
@@ -171,6 +171,8 @@ import { useToast } from '../../../core/composables/useToast';
 import { formatCurrency } from '../../../core/utils';
 
 const toast = useToast();
+const pageTitle = ref('Our Services');
+const pageSubtitle = ref('Explore our menu of premium grooming services and book your next appointment directly.');
 const services = ref([]);
 const wishlist = ref([]);
 const activeCategory = ref('All');
@@ -226,10 +228,17 @@ async function toggleWishlist(id) {
 
 onMounted(async () => {
   try {
-    const [servicesRes, wishlistRes] = await Promise.all([
+    const [settingsRes, servicesRes, wishlistRes] = await Promise.all([
+      publicApi.settings().catch(() => ({ data: { data: {} } })),
       publicApi.services(),
-      customerApi.getWishlist().catch(() => ({ data: [] })) // Handle case where user is not logged in gracefully, though they should be
+      customerApi.getWishlist().catch(() => ({ data: [] }))
     ]);
+
+    const settings = settingsRes.data?.data;
+    if (settings) {
+      if (settings.services_title) pageTitle.value = settings.services_title;
+      if (settings.services_subtitle) pageSubtitle.value = settings.services_subtitle;
+    }
     
     services.value = servicesRes.data.data;
     

@@ -1,166 +1,275 @@
 <template>
   <div class="min-h-screen bg-theme-bg text-theme-text flex flex-col transition-colors duration-300">
-    <header 
-      class="fixed w-full top-0 z-50 transition-all duration-300"
-      :class="[(y > 20 || route.path !== '/') ? 'bg-theme-bg/95 backdrop-blur border-b border-theme-border shadow-sm' : 'bg-transparent border-transparent']"
-    >
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6 py-5 transition-all duration-300" :class="[(y > 20 || route.path !== '/') ? 'py-3' : 'py-5']">
-        <RouterLink to="/" class="font-display text-3xl font-bold text-gold tracking-wide flex items-center gap-2">
-          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-8 w-8 object-contain rounded-full" />
-          <span>CandyCutz</span>
+    <header class="public-header">
+      <div class="public-nav-shell" :class="{ 'public-nav-shell--scrolled': y > 20 || route.path !== '/' }">
+        <RouterLink to="/" class="public-brand" :aria-label="`${brandName} home`">
+          <img src="/images/logo-icon.png" alt="" class="public-brand__mark" />
+          <span class="public-brand__name">{{ brandName }}</span>
         </RouterLink>
-        
-        <!-- Desktop Nav -->
-        <nav class="hidden gap-8 md:flex items-center text-sm font-medium tracking-wide">
-          <RouterLink to="/" exact-active-class="text-gold" class="hover:text-gold transition-colors">Home</RouterLink>
-          <RouterLink to="/about" active-class="text-gold" class="hover:text-gold transition-colors">About us</RouterLink>
-          <RouterLink to="/contact" active-class="text-gold" class="hover:text-gold transition-colors">Contact</RouterLink>
-          
-          <button @click="toggleDark()" class="ml-4 p-2 text-theme-text hover:text-gold transition-colors" aria-label="Toggle theme">
-            <!-- Sun Icon (shown in dark mode) -->
-            <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-            </svg>
-            <!-- Moon Icon (shown in light mode) -->
-            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>
-          </button>
-          
-          <RouterLink to="/customer/login" class="ml-2 rounded-full bg-gold px-5 py-2 text-obsidian hover:bg-gold-light transition-colors">Book Now</RouterLink>
+
+        <nav class="public-nav-links" aria-label="Main navigation">
+          <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-nav-link">Home</RouterLink>
+          <RouterLink to="/about" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
+          <RouterLink to="/services" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
+          <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
+          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
         </nav>
 
-        <!-- Mobile Menu Toggle -->
-        <div class="flex items-center md:hidden gap-4">
-          <button @click="toggleDark()" class="p-2 text-theme-text hover:text-gold transition-colors">
-            <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>
-          </button>
-          <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gold focus:outline-none p-2">
-            <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div class="public-nav-actions flex items-center">
+          <ThemeToggleSwitch />
+          <RouterLink to="/customer/register" class="public-signup">Sign Up</RouterLink>
         </div>
-      </div>
 
-      <!-- Mobile Nav -->
-      <nav v-show="mobileMenuOpen" class="md:hidden border-t border-theme-border bg-theme-bg px-4 md:px-6 py-4 flex flex-col gap-4 text-base transition-colors duration-300">
-        <RouterLink to="/" @click="mobileMenuOpen = false" exact-active-class="text-gold" class="hover:text-gold transition-colors">Home</RouterLink>
-        <RouterLink to="/about" @click="mobileMenuOpen = false" active-class="text-gold" class="hover:text-gold transition-colors">About us</RouterLink>
-        <RouterLink to="/contact" @click="mobileMenuOpen = false" active-class="text-gold" class="hover:text-gold transition-colors">Contact</RouterLink>
-        <RouterLink to="/customer/login" @click="mobileMenuOpen = false" class="mt-2 text-center rounded-full bg-gold px-5 py-3 text-obsidian font-semibold">Book Now</RouterLink>
-      </nav>
+        <button
+          type="button"
+          class="public-menu-toggle"
+          :aria-expanded="mobileMenuOpen"
+          aria-controls="public-mobile-menu"
+          :aria-label="mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+          @click="mobileMenuOpen = !mobileMenuOpen"
+        >
+          <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+
+        <nav
+          id="public-mobile-menu"
+          v-show="mobileMenuOpen"
+          class="public-mobile-menu"
+          aria-label="Mobile navigation"
+        >
+          <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Home</RouterLink>
+          <RouterLink to="/about" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">About</RouterLink>
+          <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
+          <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
+          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
+          <div class="py-2 px-3 flex items-center justify-between border-y border-white/10 my-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-theme-muted">Theme</span>
+            <ThemeToggleSwitch />
+          </div>
+          <RouterLink to="/customer/register" class="public-mobile-signup" @click="mobileMenuOpen = false">Sign Up</RouterLink>
+        </nav>
+      </div>
     </header>
 
     <main class="flex-grow"><slot /></main>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/10 bg-obsidian py-16 text-ivory/80">
-      <div class="mx-auto max-w-7xl px-4 md:px-6 grid gap-12 md:grid-cols-4">
-        <div class="md:col-span-1">
-          <RouterLink to="/" class="font-display text-3xl font-bold text-gold tracking-wide flex items-center gap-2">
-            <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-8 w-8 object-contain rounded-full" />
-            <span>CandyCutz</span>
-          </RouterLink>
-          <p class="mt-4 text-sm leading-relaxed">Premium grooming with a sharper standard. Redefining the modern barbershop experience.</p>
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold tracking-widest uppercase text-gold">Explore</h3>
-          <ul class="mt-4 space-y-3 text-sm">
-            <li><RouterLink to="/about" class="hover:text-gold transition-colors">About us</RouterLink></li>
-            <li><RouterLink to="/contact" class="hover:text-gold transition-colors">Contact Us</RouterLink></li>
-            <li><RouterLink to="/customer/login" class="hover:text-gold transition-colors">Customer Portal</RouterLink></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold tracking-widest uppercase text-gold">Company</h3>
-          <ul class="mt-4 space-y-3 text-sm">
-            <li><RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink></li>
-            <li><RouterLink to="/terms" class="hover:text-gold transition-colors">Terms of Service</RouterLink></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold tracking-widest uppercase text-gold mb-4">Connect</h3>
-          <div class="flex flex-wrap gap-3">
-            <a v-if="socialWhatsapp" :href="socialWhatsapp" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 hover:bg-gold hover:text-obsidian hover:border-gold transition-all duration-300">
-              <span class="sr-only">WhatsApp</span>
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.031 21.996c-1.63 0-3.235-.417-4.664-1.216L2.617 22l1.241-4.613a9.988 9.988 0 01-1.31-4.99c0-5.505 4.492-9.985 10.01-9.985 5.518 0 10.007 4.48 10.007 9.985 0 5.506-4.489 9.999-10.01 9.999zm-4.721-13.06c-.274-.775-.561-.79-.817-.803h-.696c-.237 0-.623.089-.95.446-.326.357-1.246 1.218-1.246 2.972 0 1.754 1.275 3.448 1.453 3.685.178.238 2.512 3.834 6.082 5.38 3.57 1.547 3.57 1.031 4.223.972.652-.06 2.106-.862 2.403-1.695.297-.833.297-1.547.208-1.696-.089-.148-.326-.238-.682-.416s-2.106-1.04-2.433-1.16c-.326-.118-.564-.178-.801.179-.237.357-.92 1.159-1.127 1.397-.208.238-.415.267-.771.089s-1.503-.553-2.863-1.77c-1.057-.946-1.771-2.116-1.979-2.473-.208-.356-.022-.55.156-.728.16-.16.356-.416.534-.624.178-.208.237-.356.356-.594.119-.237.06-.445-.03-.624-.089-.178-.801-1.93-1.098-2.644z" clip-rule="evenodd" /></svg>
-            </a>
-            <a v-if="socialInstagram" :href="socialInstagram" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 hover:bg-gold hover:text-obsidian hover:border-gold transition-all duration-300">
-              <span class="sr-only">Instagram</span>
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" /></svg>
-            </a>
-            <a v-if="socialTiktok" :href="socialTiktok" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 hover:bg-gold hover:text-obsidian hover:border-gold transition-all duration-300">
-              <span class="sr-only">TikTok</span>
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.12-3.44-3.37-3.4-5.74.06-2.06.96-4.04 2.51-5.45 1.55-1.41 3.65-2.11 5.76-1.95v4.02c-1.14-.09-2.31.25-3.18.98-.87.72-1.32 1.83-1.28 2.96.04 1.13.56 2.19 1.41 2.92.85.73 1.98 1.05 3.08.91 1.54-.18 2.91-1.3 3.32-2.8.2-1.15.22-2.34.22-3.52V.02z" /></svg>
-            </a>
-            <a v-if="socialFacebook" :href="socialFacebook" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 hover:bg-gold hover:text-obsidian hover:border-gold transition-all duration-300">
-              <span class="sr-only">Facebook</span>
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
-            </a>
-            <a v-if="socialTwitter" :href="socialTwitter" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 hover:bg-gold hover:text-obsidian hover:border-gold transition-all duration-300">
-              <span class="sr-only">Twitter</span>
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.922H5.078z" /></svg>
-            </a>
-            <span v-if="!socialInstagram && !socialTwitter && !socialFacebook && !socialWhatsapp && !socialTiktok" class="text-sm text-ivory/30">No social links</span>
+    <!-- Redesigned Footer (Modern SaaS Structure with Real Website Content) -->
+    <footer class="border-t border-white/10 bg-[#070708] pt-16 pb-12 text-zinc-400">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start">
+          <!-- Section 1: Brand & Shop Identity -->
+          <div class="md:col-span-2 lg:col-span-1 space-y-4">
+            <RouterLink to="/" class="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
+              <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
+              <span class="tracking-tight">{{ brandName }}</span>
+            </RouterLink>
+            <p class="text-xs sm:text-[13px] text-zinc-400 leading-relaxed max-w-sm">
+              {{ brandTagline }}
+            </p>
+
+            <div class="pt-1 space-y-2 text-xs text-zinc-400">
+              <div v-if="shopAddress" class="flex items-start gap-2 text-zinc-400">
+                <MapPinIcon class="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                <span class="leading-snug">{{ shopAddress }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-zinc-400">
+                <ClockIcon class="h-4 w-4 text-gold shrink-0" />
+                <span>Mon – Sat: 8:00 AM – 9:00 PM • Sun: 12:00 PM – 8:00 PM</span>
+              </div>
+            </div>
+
+            <div class="pt-1">
+              <RouterLink
+                to="/customer/login"
+                class="inline-flex items-center gap-2 rounded-lg bg-gold/10 border border-gold/30 px-3.5 py-1.5 text-xs font-semibold text-gold transition-all duration-300 hover:bg-gold/20 hover:border-gold hover:shadow-[0_0_16px_rgba(255,153,0,0.2)]"
+              >
+                <span>Book Appointment</span>
+                <span class="text-xs font-bold">→</span>
+              </RouterLink>
+            </div>
+          </div>
+
+          <!-- Section 2: Explore -->
+          <div class="md:col-span-1 lg:border-l lg:border-white/10 lg:pl-10 xl:pl-12">
+            <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Explore</h3>
+            <ul class="space-y-2.5 text-xs sm:text-sm">
+              <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
+              <li><RouterLink to="/services" class="hover:text-gold transition-colors">Services</RouterLink></li>
+              <li><RouterLink to="/gallery" class="hover:text-gold transition-colors">Gallery</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-gold transition-colors">About Us</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-gold transition-colors">Contact Shop</RouterLink></li>
+            </ul>
+          </div>
+
+          <!-- Section 3: Legal & Policies -->
+          <div class="md:col-span-1 md:border-l md:border-white/10 md:pl-8 lg:pl-10 xl:pl-12">
+            <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Legal & Policies</h3>
+            <ul class="space-y-2.5 text-xs sm:text-sm">
+              <li><RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink></li>
+              <li><RouterLink to="/terms" class="hover:text-gold transition-colors">Terms of Service</RouterLink></li>
+              <li><RouterLink to="/account-deletion" class="hover:text-gold transition-colors">Account Deletion</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-gold transition-colors">Hygiene Standards</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-gold transition-colors">Support Desk</RouterLink></li>
+            </ul>
           </div>
         </div>
-      </div>
-      <div class="mx-auto max-w-7xl px-4 md:px-6 mt-16 pt-8 border-t border-white/5 text-xs text-ivory/50 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p>&copy; {{ new Date().getFullYear() }} CandyCutz. All rights reserved.</p>
-        <div class="flex gap-4">
-          <RouterLink to="/privacy" class="hover:text-ivory transition-colors">Privacy Policy</RouterLink>
-          <RouterLink to="/terms" class="hover:text-ivory transition-colors">Terms of Service</RouterLink>
+
+        <!-- Horizontal Divider with Centered Social Icons Embedded in the Line -->
+        <div class="relative flex items-center my-10">
+          <div class="flex-grow border-t border-white/10"></div>
+          <div v-if="activeFooterSocials.length > 0" class="flex items-center gap-4 px-4 sm:px-6 text-zinc-400">
+            <a
+              v-for="item in activeFooterSocials"
+              :key="item.key"
+              :href="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-gold transition-colors duration-200"
+              :aria-label="item.label"
+            >
+              <SocialIcon :name="item.key" class="h-4 w-4" />
+            </a>
+          </div>
+          <div class="flex-grow border-t border-white/10"></div>
         </div>
+
+        <!-- Centered Legal Links Separated by Pipes (Exact reference design) -->
+        <div class="mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
+          <RouterLink to="/legal" class="hover:text-gold transition-colors">Legal Stuff</RouterLink>
+          <span class="text-white/20 select-none">|</span>
+          <RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink>
+          <span class="text-white/20 select-none">|</span>
+          <RouterLink to="/security" class="hover:text-gold transition-colors">Security</RouterLink>
+          <span class="text-white/20 select-none">|</span>
+          <RouterLink to="/cookies" class="hover:text-gold transition-colors">Manage Cookies</RouterLink>
+        </div>
+
+        <!-- Copyright Line -->
+        <p class="mt-4 text-center text-xs text-zinc-500">
+          Copyright &copy; {{ new Date().getFullYear() }} {{ brandName }}, Inc.
+        </p>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { useDark, useToggle, useWindowScroll } from '@vueuse/core';
+import { useWindowScroll } from '@vueuse/core';
 import { publicApi } from '@/shared/api/old_publicApi';
+import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
+import SocialIcon from '@/components/SocialIcon.vue';
+import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
 
 const route = useRoute();
 const { y } = useWindowScroll();
 
 const mobileMenuOpen = ref(false);
-
-const socialInstagram = ref('');
-const socialFacebook = ref('');
-const socialTwitter = ref('');
-const socialWhatsapp = ref('');
-const socialTiktok = ref('');
-
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
+watch(() => route.fullPath, () => {
+  mobileMenuOpen.value = false;
 });
-const toggleDark = useToggle(isDark);
+
+const { brandName, brandTagline } = useBrandIdentity();
+const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
+const shopPhone = ref('+234 812 345 6789');
+const shopEmail = ref('info@candycutz.com');
+
+const socialSettings = ref({
+  whatsapp: '',
+  instagram: '',
+  facebook: '',
+  twitter: '',
+  tiktok: '',
+  youtube: '',
+  linkedin: '',
+  show_footer_whatsapp: true,
+  show_footer_instagram: true,
+  show_footer_facebook: true,
+  show_footer_twitter: true,
+  show_footer_tiktok: true,
+  show_footer_youtube: true,
+  show_footer_linkedin: true,
+});
+
+const formatWhatsAppUrl = (val) => {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  const digits = trimmed.replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : '';
+};
+
+const parseBool = (val, defaultVal = true) => {
+  if (val === undefined || val === null || val === '') return defaultVal;
+  return val === true || val === 'true' || val === 1 || val === '1';
+};
+
+const activeFooterSocials = computed(() => {
+  const s = socialSettings.value;
+  const list = [];
+  if (s.whatsapp && s.show_footer_whatsapp) {
+    list.push({ key: 'whatsapp', label: 'WhatsApp', url: formatWhatsAppUrl(s.whatsapp) });
+  }
+  if (s.instagram && s.show_footer_instagram) {
+    list.push({ key: 'instagram', label: 'Instagram', url: s.instagram });
+  }
+  if (s.facebook && s.show_footer_facebook) {
+    list.push({ key: 'facebook', label: 'Facebook', url: s.facebook });
+  }
+  if (s.twitter && s.show_footer_twitter) {
+    list.push({ key: 'twitter', label: 'X (formerly Twitter)', url: s.twitter });
+  }
+  if (s.tiktok && s.show_footer_tiktok) {
+    list.push({ key: 'tiktok', label: 'TikTok', url: s.tiktok });
+  }
+  if (s.youtube && s.show_footer_youtube) {
+    list.push({ key: 'youtube', label: 'YouTube', url: s.youtube });
+  }
+  if (s.linkedin && s.show_footer_linkedin) {
+    list.push({ key: 'linkedin', label: 'LinkedIn', url: s.linkedin });
+  }
+  return list;
+});
+
 
 const fetchSettings = async () => {
   try {
     const response = await publicApi.settings();
-    const settings = response.data.data;
-    if (settings) {
-      if (settings.social_instagram) socialInstagram.value = settings.social_instagram;
-      if (settings.social_facebook) socialFacebook.value = settings.social_facebook;
-      if (settings.social_twitter) socialTwitter.value = settings.social_twitter;
-      if (settings.social_whatsapp) socialWhatsapp.value = settings.social_whatsapp;
-      if (settings.social_tiktok) socialTiktok.value = settings.social_tiktok;
+    const settings = response.data?.data || {};
+
+    applyBrandSettings({
+      ...settings,
+      brand_tagline: settings.brand_tagline || settings.site_description || settings.meta_description || settings.about_teaser_text,
+    });
+    if (settings.address || settings.contact_address) {
+      shopAddress.value = settings.address || settings.contact_address;
     }
+    if (settings.phone || settings.contact_phone) {
+      shopPhone.value = settings.phone || settings.contact_phone;
+    }
+    if (settings.email || settings.contact_email) {
+      shopEmail.value = settings.email || settings.contact_email;
+    }
+
+    const platforms = ['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
+    platforms.forEach((p) => {
+      const val = settings[`social_${p}`] || settings[p] || settings.social?.[p] || '';
+      socialSettings.value[p] = val ? String(val).trim() : '';
+
+      const footerKey = `social_show_footer_${p}`;
+      socialSettings.value[`show_footer_${p}`] = parseBool(
+        settings[footerKey] ?? settings.social?.[footerKey],
+        true
+      );
+    });
   } catch (error) {
     console.error('Failed to load settings in footer:', error);
   }
@@ -170,3 +279,333 @@ onMounted(() => {
   fetchSettings();
 });
 </script>
+
+<style scoped>
+.public-header {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 0.5rem 1rem;
+}
+
+.public-nav-shell {
+  position: relative;
+  display: grid;
+  width: min(100%, 56rem);
+  min-height: 48px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.35rem 0.5rem 0.35rem 0.85rem;
+  background: rgba(13, 13, 13, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #FAFAF8;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.public-nav-shell--scrolled {
+  border-color: rgba(255, 153, 0, 0.3);
+  background: rgba(13, 13, 13, 0.95);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(255, 153, 0, 0.1);
+}
+
+:global([data-theme="light"]) .public-nav-shell {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  color: #111827;
+}
+
+:global([data-theme="light"]) .public-nav-shell--scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(255, 153, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.public-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: #FAFAF8;
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  text-decoration: none;
+}
+
+.public-brand__name {
+  color: #FAFAF8;
+}
+
+.public-brand__accent {
+  color: #FF9900;
+}
+
+:global([data-theme="light"]) .public-brand__name {
+  color: #111827;
+}
+
+.public-brand__mark {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.public-nav-links,
+.public-nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.public-theme-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(250, 250, 248, 0.75);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+:global([data-theme="light"]) .public-theme-toggle {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.03);
+  color: #4B5563;
+}
+
+.public-theme-toggle:hover {
+  border-color: rgba(255, 153, 0, 0.4);
+  color: #FFB84D;
+  background: rgba(255, 153, 0, 0.08);
+}
+
+.public-nav-links {
+  justify-content: center;
+  gap: clamp(0.8rem, 2.1vw, 1.5rem);
+}
+
+.public-nav-link,
+.public-login {
+  position: relative;
+  color: rgba(250, 250, 248, 0.78);
+  font-size: 0.8rem;
+  font-weight: 550;
+  text-decoration: none;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+:global([data-theme="light"]) .public-nav-link,
+:global([data-theme="light"]) .public-login {
+  color: #4B5563;
+}
+
+.public-nav-link:hover,
+.public-login:hover {
+  color: #FFB84D;
+}
+
+.public-nav-link--active {
+  color: #FF9900 !important;
+  font-weight: 650;
+}
+
+.public-nav-link--active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, #FF9900, #FFB84D);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(255, 153, 0, 0.6);
+}
+
+.public-nav-actions {
+  justify-content: flex-end;
+  gap: 0.9rem;
+}
+
+.public-signup,
+.public-mobile-signup {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #FF9900;
+  border-radius: 9px;
+  padding: 0.38rem 0.95rem;
+  background: linear-gradient(135deg, #FFB84D, #FF9900, #CC7A00);
+  color: #0D0D0D;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(255, 153, 0, 0.28);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.public-signup:hover,
+.public-mobile-signup:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 18px rgba(255, 153, 0, 0.45);
+}
+
+.public-signup:active,
+.public-mobile-signup:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.public-menu-toggle,
+.public-mobile-menu {
+  display: none;
+}
+
+:global(#features),
+:global(#services) {
+  scroll-margin-top: 5rem;
+}
+
+@media (max-width: 680px) {
+  .public-header {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .public-nav-shell {
+    min-height: 46px;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+    padding: 0.3rem 0.4rem 0.3rem 0.6rem;
+  }
+
+  .public-brand {
+    font-size: 0.9rem;
+  }
+
+  .public-nav-links,
+  .public-nav-actions {
+    display: none;
+  }
+
+  .public-mobile-theme {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .public-menu-toggle {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #FAFAF8;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  :global([data-theme="light"]) .public-menu-toggle {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+  }
+
+  .public-menu-toggle:hover {
+    border-color: rgba(255, 153, 0, 0.4);
+    color: #FF9900;
+  }
+
+  .public-menu-toggle svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .public-mobile-menu {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: 1px solid rgba(255, 153, 0, 0.25);
+    border-radius: 14px;
+    padding: 0.65rem;
+    background: rgba(13, 13, 13, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 153, 0, 0.12);
+  }
+
+  :global([data-theme="light"]) .public-mobile-menu {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(255, 153, 0, 0.25);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+  }
+
+  .public-mobile-link {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    color: rgba(250, 250, 248, 0.8);
+    font-size: 0.925rem;
+    font-weight: 550;
+    text-decoration: none;
+    transition: all 150ms ease;
+  }
+
+  :global([data-theme="light"]) .public-mobile-link {
+    color: #374151;
+  }
+
+  .public-mobile-link:hover {
+    background: rgba(255, 153, 0, 0.1);
+    color: #FFB84D;
+  }
+
+  .public-mobile-link.public-nav-link--active {
+    background: rgba(255, 153, 0, 0.15);
+    color: #FF9900;
+    font-weight: 650;
+    border-left: 2px solid #FF9900;
+  }
+
+  .public-mobile-signup {
+    min-height: 42px;
+    margin-top: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-nav-shell,
+  .public-nav-link,
+  .public-login,
+  .public-signup,
+  .public-mobile-signup {
+    transition: none;
+  }
+}
+</style>

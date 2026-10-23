@@ -94,38 +94,192 @@
         </div>
       </div>
 
-      <!-- Social Links -->
       <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
         <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
-          <h2 class="font-display text-xl text-theme-text">Social Media Links</h2>
-          <p class="mt-1 text-xs text-ivory/40">Links to your social media profiles.</p>
+          <h2 class="font-display text-xl text-theme-text">Contact Form Placeholders</h2>
+          <p class="mt-1 text-xs text-ivory/40">Edit the example text shown inside the public contact form fields.</p>
         </div>
+        <div class="grid gap-6 p-8 md:grid-cols-2">
+          <label class="block">
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Name</span>
+            <input v-model="content.contact_form_name_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Email</span>
+            <input v-model="content.contact_form_email_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Phone</span>
+            <input v-model="content.contact_form_phone_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Message</span>
+            <input v-model="content.contact_form_message_placeholder" type="text" maxlength="500" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Social Media Links & Visibility Control -->
+      <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
+        <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-display text-xl text-theme-text flex items-center gap-2.5">
+              <ShareIcon class="w-5 h-5 text-admin" /> Social Media Links & Visibility
+            </h2>
+            <p class="mt-1 text-xs text-ivory/50">
+              Control your social profiles and choose where each icon appears: Website Footer, Contact Page, or both.
+            </p>
+          </div>
+          <span class="text-[11px] px-3.5 py-1.5 rounded-full bg-admin/10 border border-admin/30 text-admin font-semibold tracking-wide self-start sm:self-auto">
+            {{ activeSocialCount }} Active Profile{{ activeSocialCount === 1 ? '' : 's' }}
+          </span>
+        </div>
+
         <div class="p-8 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Instagram</label>
-              <input v-model="content.social_instagram" type="url" placeholder="https://instagram.com/candycutz" 
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+            <div
+              v-for="platform in platformsList"
+              :key="platform.id"
+              class="rounded-xl border border-white/10 bg-white/[0.03] p-5 hover:border-admin/30 transition-all space-y-4"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm"
+                    :class="content[platform.linkKey] ? platform.activeBg : 'bg-white/5 text-ivory/40'"
+                  >
+                    <SocialIcon :name="platform.id" class="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-theme-text">{{ platform.name }}</h3>
+                    <p class="text-[11px] text-ivory/40">{{ platform.hint }}</p>
+                  </div>
+                </div>
+
+                <!-- Status Badge -->
+                <span
+                  class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border transition-colors"
+                  :class="getPlatformStatusBadge(platform)"
+                >
+                  {{ getPlatformStatusText(platform) }}
+                </span>
+              </div>
+
+              <!-- URL / Link Input -->
+              <div>
+                <label class="block text-[10px] uppercase tracking-wider text-ivory/50 font-bold mb-1.5">Profile Link / Phone</label>
+                <div class="relative">
+                  <input
+                    v-model="content[platform.linkKey]"
+                    :type="platform.inputType || 'url'"
+                    :placeholder="platform.placeholder"
+                    class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-xs text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-1 focus:ring-admin/30 focus:outline-none transition-all font-mono"
+                  />
+                  <button
+                    v-if="content[platform.linkKey]"
+                    @click="content[platform.linkKey] = ''"
+                    type="button"
+                    title="Clear link"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-ivory/40 hover:text-rose-400 text-xs transition-colors p-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <!-- Appearance Checkboxes -->
+              <div class="pt-3 border-t border-white/5 flex flex-wrap items-center gap-3 text-xs">
+                <span class="text-ivory/40 font-medium text-[11px]">Display On:</span>
+
+                <!-- Footer Checkbox -->
+                <label
+                  class="flex items-center gap-2 cursor-pointer select-none rounded-lg px-2.5 py-1.5 transition-all text-xs"
+                  :class="isOptionChecked(platform.footerKey) && content[platform.linkKey] ? 'bg-admin/15 text-admin border border-admin/30 shadow-sm' : 'bg-white/5 text-ivory/60 hover:text-white border border-transparent'"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="isOptionChecked(platform.footerKey)"
+                    @change="toggleOption(platform.footerKey, $event)"
+                    class="rounded border-white/20 text-admin focus:ring-0 bg-black/40 w-3.5 h-3.5"
+                  />
+                  <span class="font-semibold text-[11px]">Website Footer</span>
+                </label>
+
+                <!-- Contact Page Checkbox -->
+                <label
+                  class="flex items-center gap-2 cursor-pointer select-none rounded-lg px-2.5 py-1.5 transition-all text-xs"
+                  :class="isOptionChecked(platform.contactKey) && content[platform.linkKey] ? 'bg-admin/15 text-admin border border-admin/30 shadow-sm' : 'bg-white/5 text-ivory/60 hover:text-white border border-transparent'"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="isOptionChecked(platform.contactKey)"
+                    @change="toggleOption(platform.contactKey, $event)"
+                    class="rounded border-white/20 text-admin focus:ring-0 bg-black/40 w-3.5 h-3.5"
+                  />
+                  <span class="font-semibold text-[11px]">Contact Page</span>
+                </label>
+              </div>
             </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Facebook</label>
-              <input v-model="content.social_facebook" type="url" placeholder="https://facebook.com/candycutz" 
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
+          </div>
+
+          <!-- Live Mockup Previews -->
+          <div class="rounded-2xl border border-white/10 bg-black/40 p-6 space-y-6 mt-8">
+            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-admin flex items-center gap-2">
+                <EyeIcon class="w-4 h-4" /> Live Appearance Previews
+              </h3>
+              <span class="text-[11px] text-ivory/40">Visual feedback as you edit links</span>
             </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Twitter / X</label>
-              <input v-model="content.social_twitter" type="url" placeholder="https://x.com/candycutz" 
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
+
+            <!-- Preview 1: Footer Social Bar -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-[11px] text-ivory/60">
+                <span class="font-semibold">1. Footer Social Bar Preview</span>
+                <span class="font-mono text-[10px] text-admin">{{ activeFooterPreviewCount }} icon{{ activeFooterPreviewCount === 1 ? '' : 's' }} showing</span>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-[#070708] p-5 text-center shadow-inner">
+                <div class="relative flex items-center">
+                  <div class="flex-grow border-t border-white/10"></div>
+                  <div v-if="activeFooterPreviewCount > 0" class="flex items-center gap-4 px-4 text-zinc-400">
+                    <span
+                      v-for="p in activeFooterPreviewList"
+                      :key="p.id"
+                      class="text-zinc-400 hover:text-gold transition-colors"
+                      :title="p.name + ': ' + content[p.linkKey]"
+                    >
+                      <SocialIcon :name="p.id" class="h-4 w-4" />
+                    </span>
+                  </div>
+                  <div v-else class="px-4 text-[11px] text-zinc-600 italic">
+                    (No social icons enabled for footer)
+                  </div>
+                  <div class="flex-grow border-t border-white/10"></div>
+                </div>
+              </div>
             </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">WhatsApp</label>
-              <input v-model="content.social_whatsapp" type="text" placeholder="+234 800 000 0000" 
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
-            </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">TikTok</label>
-              <input v-model="content.social_tiktok" type="url" placeholder="https://tiktok.com/@candycutz" 
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
+
+            <!-- Preview 2: Contact Page Connect With Us -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-[11px] text-ivory/60">
+                <span class="font-semibold">2. Contact Page "Connect With Us" Preview</span>
+                <span class="font-mono text-[10px] text-admin">{{ activeContactPreviewCount }} icon{{ activeContactPreviewCount === 1 ? '' : 's' }} showing</span>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-black/60 p-5 shadow-inner">
+                <h4 class="text-gold font-semibold uppercase tracking-widest text-xs mb-3">Connect With Us</h4>
+                <div v-if="activeContactPreviewCount > 0" class="flex flex-wrap gap-3">
+                  <div
+                    v-for="p in activeContactPreviewList"
+                    :key="p.id"
+                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-ivory/80 shadow-md"
+                    :title="p.name + ': ' + content[p.linkKey]"
+                  >
+                    <SocialIcon :name="p.id" class="w-5 h-5" />
+                  </div>
+                </div>
+                <div v-else class="text-xs text-ivory/40 italic">
+                  (No social icons enabled for Contact page)
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -177,42 +331,198 @@
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
 import { adminApi } from '@/shared/api/old_adminApi';
-import { EnvelopeIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { EnvelopeIcon, CheckIcon, ShareIcon, EyeIcon } from '@heroicons/vue/24/outline';
+import SocialIcon from '@/components/SocialIcon.vue';
 
 const toast = useToast();
 const saving = ref(false);
 
+const platformsList = [
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    hint: 'Direct instant chats with clients',
+    linkKey: 'social_whatsapp',
+    footerKey: 'social_show_footer_whatsapp',
+    contactKey: 'social_show_contact_whatsapp',
+    placeholder: '+234 810 000 0000 or https://wa.me/234...',
+    inputType: 'text',
+    activeBg: 'bg-emerald-500/20 text-emerald-400',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    hint: 'Cut portfolio, stories & styling reels',
+    linkKey: 'social_instagram',
+    footerKey: 'social_show_footer_instagram',
+    contactKey: 'social_show_contact_instagram',
+    placeholder: 'https://instagram.com/candycutz',
+    inputType: 'url',
+    activeBg: 'bg-pink-500/20 text-pink-400',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    hint: 'Community page, reviews & updates',
+    linkKey: 'social_facebook',
+    footerKey: 'social_show_footer_facebook',
+    contactKey: 'social_show_contact_facebook',
+    placeholder: 'https://facebook.com/candycutz',
+    inputType: 'url',
+    activeBg: 'bg-blue-500/20 text-blue-400',
+  },
+  {
+    id: 'twitter',
+    name: 'X (formerly Twitter)',
+    hint: 'Announcements, trends & news',
+    linkKey: 'social_twitter',
+    footerKey: 'social_show_footer_twitter',
+    contactKey: 'social_show_contact_twitter',
+    placeholder: 'https://x.com/candycutz',
+    inputType: 'url',
+    activeBg: 'bg-white/20 text-white',
+  },
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    hint: 'Viral transformations & barber clips',
+    linkKey: 'social_tiktok',
+    footerKey: 'social_show_footer_tiktok',
+    contactKey: 'social_show_contact_tiktok',
+    placeholder: 'https://tiktok.com/@candycutz',
+    inputType: 'url',
+    activeBg: 'bg-rose-500/20 text-rose-400',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    hint: 'Full haircuts, shop tours & podcasts',
+    linkKey: 'social_youtube',
+    footerKey: 'social_show_footer_youtube',
+    contactKey: 'social_show_contact_youtube',
+    placeholder: 'https://youtube.com/@candycutz',
+    inputType: 'url',
+    activeBg: 'bg-red-500/20 text-red-400',
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    hint: 'Corporate partnerships & career opportunities',
+    linkKey: 'social_linkedin',
+    footerKey: 'social_show_footer_linkedin',
+    contactKey: 'social_show_contact_linkedin',
+    placeholder: 'https://linkedin.com/company/candycutz',
+    inputType: 'url',
+    activeBg: 'bg-sky-500/20 text-sky-400',
+  },
+];
+
 const content = ref({
   contact_title: 'Talk to CandyCutz',
   contact_subtitle: 'Use the form to ask a question, request availability, or start a booking conversation.',
+  contact_form_name_placeholder: 'John Doe',
+  contact_form_email_placeholder: 'john@example.com',
+  contact_form_phone_placeholder: '+234...',
+  contact_form_message_placeholder: 'How can we help?',
   contact_phone: '+234 800 000 0000',
   contact_email: 'info@candycutz.com',
   contact_receiver_email: '',
   contact_address: '123 Grooming Street\nLagos, Nigeria',
   contact_hours: 'Mon - Sat: 9:00 AM - 8:00 PM\nSun: Closed',
+  // Social profile links
+  social_whatsapp: '',
   social_instagram: '',
   social_facebook: '',
   social_twitter: '',
-  social_whatsapp: '',
   social_tiktok: '',
+  social_youtube: '',
+  social_linkedin: '',
+  // Footer visibility toggles
+  social_show_footer_whatsapp: 'true',
+  social_show_footer_instagram: 'true',
+  social_show_footer_facebook: 'true',
+  social_show_footer_twitter: 'true',
+  social_show_footer_tiktok: 'true',
+  social_show_footer_youtube: 'true',
+  social_show_footer_linkedin: 'true',
+  // Contact page visibility toggles
+  social_show_contact_whatsapp: 'true',
+  social_show_contact_instagram: 'true',
+  social_show_contact_facebook: 'true',
+  social_show_contact_twitter: 'true',
+  social_show_contact_tiktok: 'true',
+  social_show_contact_youtube: 'true',
+  social_show_contact_linkedin: 'true',
+  // Google Maps
   contact_map_iframe: '',
-  contact_map_link: ''
+  contact_map_link: '',
 });
+
+const isOptionChecked = (key) => {
+  const val = content.value[key];
+  if (val === undefined || val === null || val === '') return true;
+  return val === true || val === 'true' || val === 1 || val === '1';
+};
+
+const toggleOption = (key, event) => {
+  content.value[key] = event.target.checked ? 'true' : 'false';
+};
+
+const getPlatformStatusText = (platform) => {
+  const link = (content.value[platform.linkKey] || '').trim();
+  if (!link) return 'Not Set';
+  const showFooter = isOptionChecked(platform.footerKey);
+  const showContact = isOptionChecked(platform.contactKey);
+  if (showFooter && showContact) return 'Footer & Contact';
+  if (showFooter) return 'Footer Only';
+  if (showContact) return 'Contact Only';
+  return 'Hidden';
+};
+
+const getPlatformStatusBadge = (platform) => {
+  const link = (content.value[platform.linkKey] || '').trim();
+  if (!link) return 'border-white/10 text-ivory/40 bg-white/5';
+  const showFooter = isOptionChecked(platform.footerKey);
+  const showContact = isOptionChecked(platform.contactKey);
+  if (showFooter || showContact) return 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10';
+  return 'border-amber-500/30 text-amber-400 bg-amber-500/10';
+};
+
+const activeSocialCount = computed(() => {
+  return platformsList.filter((p) => {
+    const link = (content.value[p.linkKey] || '').trim();
+    const active = isOptionChecked(p.footerKey) || isOptionChecked(p.contactKey);
+    return Boolean(link && active);
+  }).length;
+});
+
+const activeFooterPreviewList = computed(() => {
+  return platformsList.filter((p) => {
+    const link = (content.value[p.linkKey] || '').trim();
+    return Boolean(link && isOptionChecked(p.footerKey));
+  });
+});
+const activeFooterPreviewCount = computed(() => activeFooterPreviewList.value.length);
+
+const activeContactPreviewList = computed(() => {
+  return platformsList.filter((p) => {
+    const link = (content.value[p.linkKey] || '').trim();
+    return Boolean(link && isOptionChecked(p.contactKey));
+  });
+});
+const activeContactPreviewCount = computed(() => activeContactPreviewList.value.length);
 
 const extractedMapSrc = computed(() => {
   const raw = (content.value.contact_map_iframe || '').trim();
   if (!raw) return '';
   
-  // 1. Already a direct embed URL
   if (raw.startsWith('https://www.google.com/maps/embed')) {
     return raw;
   }
   
-  // 2. Extract src from iframe HTML tag (handles both " and ' quotes)
   const match = raw.match(/src\s*=\s*["']([^"']+)["']/i);
   if (match) {
     const extracted = match[1].replace(/&amp;/g, '&');
-    // Ensure the extracted src is actually an embed URL to prevent X-Frame-Options errors
     if (extracted.startsWith('https://www.google.com/maps/embed')) {
       return extracted;
     }
@@ -224,11 +534,28 @@ const extractedMapSrc = computed(() => {
 const fetchContent = async () => {
   try {
     const response = await adminApi.settings();
-    const data = response.data.data;
+    const data = response.data?.data || {};
     if (data) {
       const keys = Object.keys(content.value);
-      keys.forEach(key => {
-        if (data[key]) content.value[key] = data[key];
+      keys.forEach((key) => {
+        if (data[key] !== undefined && data[key] !== null) {
+          content.value[key] = String(data[key]);
+        }
+      });
+      // Fallback to legacy keys (e.g. instagram -> social_instagram)
+      const legacyMap = {
+        social_instagram: 'instagram',
+        social_facebook: 'facebook',
+        social_twitter: 'twitter',
+        social_whatsapp: 'whatsapp',
+        social_tiktok: 'tiktok',
+        social_youtube: 'youtube',
+        social_linkedin: 'linkedin',
+      };
+      Object.entries(legacyMap).forEach(([newKey, oldKey]) => {
+        if (!content.value[newKey] && (data[oldKey] || data.social?.[oldKey])) {
+          content.value[newKey] = String(data[oldKey] || data.social?.[oldKey]);
+        }
       });
     }
   } catch (error) {
@@ -241,12 +568,18 @@ const saveContent = async () => {
   try {
     const formData = new FormData();
     Object.entries(content.value).forEach(([key, value]) => {
-      formData.append(`settings[${key}]`, value);
+      formData.append(`settings[${key}]`, value ?? '');
     });
+    // Also save legacy keys for interoperability
+    formData.append('settings[instagram]', content.value.social_instagram ?? '');
+    formData.append('settings[facebook]', content.value.social_facebook ?? '');
+    formData.append('settings[whatsapp]', content.value.social_whatsapp ?? '');
+    formData.append('settings[twitter]', content.value.social_twitter ?? '');
+
     await adminApi.updateSettings(formData);
-    toast.success('Contact page content saved!');
+    toast.success('Social links and contact content updated successfully!');
   } catch (error) {
-    toast.error('Failed to save changes.');
+    toast.error('Failed to save changes. Please try again.');
   } finally {
     saving.value = false;
   }

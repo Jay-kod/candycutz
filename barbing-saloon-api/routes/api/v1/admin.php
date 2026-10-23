@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AnimationApiController;
 use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
 use App\Http\Controllers\Api\V1\FeatureFlagApiController;
+use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\GateApiController;
 use App\Http\Controllers\Api\V1\SuperAdminApiController;
@@ -22,12 +24,17 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
+    Route::get('/admin/animations', [AnimationApiController::class, 'index']);
+    Route::post('/admin/animations', [AnimationApiController::class, 'update']);
+    Route::post('/admin/animations/reset', [AnimationApiController::class, 'reset']);
     Route::post('/admin/test-email', [AdminApiController::class, 'testEmail']);
     Route::get('/admin/logs', [AdminApiController::class, 'logs']);
     Route::get('/admin/verifications/stats', [AdminApiController::class, 'verificationStats']);
     Route::get('/admin/verifications', [AdminApiController::class, 'verifications']);
     Route::patch('/admin/verifications/{id}/verify', [AdminApiController::class, 'verifyAppointment']);
     Route::get('/admin/reports', [AdminApiController::class, 'reports']);
+    Route::get('/admin/feedback', [FeedbackSubmissionApiController::class, 'index']);
+    Route::patch('/admin/feedback/{submission}', [FeedbackSubmissionApiController::class, 'update'])->whereNumber('submission');
     Route::get('/admin/analytics', [AdminApiController::class, 'analytics']);
     Route::get('/admin/customers', [AdminApiController::class, 'customers']);
     Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile']);

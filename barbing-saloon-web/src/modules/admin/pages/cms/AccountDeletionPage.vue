@@ -46,6 +46,26 @@
               class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-y"></textarea>
           </div>
         </div>
+        <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
+          <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
+            <h2 class="font-display text-xl text-theme-text">Request Form Placeholders</h2>
+            <p class="mt-1 text-xs text-ivory/40">Edit the example text shown inside the public deletion request form.</p>
+          </div>
+          <div class="grid gap-6 p-8">
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Registered email</span>
+              <input v-model="content.account_deletion_email_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Username or full name</span>
+              <input v-model="content.account_deletion_identifier_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Reason</span>
+              <input v-model="content.account_deletion_reason_placeholder" type="text" maxlength="500" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
+            </label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -62,7 +82,10 @@ const saving = ref(false);
 
 const content = ref({
   account_deletion_title: 'Delete Your CandyCutz Account',
-  account_deletion_body: 'If you wish to permanently delete your CandyCutz account and all associated personal data, bookings history, and saved preferences, you may submit a deletion request. This action is irreversible.'
+  account_deletion_body: 'If you wish to permanently delete your CandyCutz account and all associated personal data, bookings history, and saved preferences, you may submit a deletion request. This action is irreversible.',
+  account_deletion_email_placeholder: 'you@example.com',
+  account_deletion_identifier_placeholder: '@username or Full Name',
+  account_deletion_reason_placeholder: 'Help us understand how we can improve...',
 });
 
 const fetchContent = async () => {
@@ -72,6 +95,13 @@ const fetchContent = async () => {
     if (data) {
       if (data.account_deletion_title) content.value.account_deletion_title = data.account_deletion_title;
       if (data.account_deletion_body) content.value.account_deletion_body = data.account_deletion_body;
+      for (const key of [
+        'account_deletion_email_placeholder',
+        'account_deletion_identifier_placeholder',
+        'account_deletion_reason_placeholder',
+      ]) {
+        if (data[key]) content.value[key] = data[key];
+      }
     }
   } catch (error) {
     console.error('Failed to load account deletion content:', error);
@@ -84,6 +114,9 @@ const saveContent = async () => {
     const formData = new FormData();
     formData.append('settings[account_deletion_title]', content.value.account_deletion_title);
     formData.append('settings[account_deletion_body]', content.value.account_deletion_body);
+    formData.append('settings[account_deletion_email_placeholder]', content.value.account_deletion_email_placeholder);
+    formData.append('settings[account_deletion_identifier_placeholder]', content.value.account_deletion_identifier_placeholder);
+    formData.append('settings[account_deletion_reason_placeholder]', content.value.account_deletion_reason_placeholder);
     await adminApi.updateSettings(formData);
     toast.success('Account deletion page content saved!');
   } catch (error) {

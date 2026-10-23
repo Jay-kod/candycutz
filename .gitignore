@@ -56,3 +56,9 @@ web-build/
 Thumbs.db
 .idea/
 .vscode/
+.agents/
+*/.agents/
+skills-lock.json
+*/skills-lock.json
+components.json
+*/components.json

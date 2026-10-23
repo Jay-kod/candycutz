@@ -41,12 +41,14 @@ return [
         'api/v1/available-slots',
         'api/v1/service-zones',
         'api/v1/settings',
+        'api/v1/animations',
         'api/v1/contact',
         'api/v1/feature-flags',
         'api/v1/app/crashes',
 
         // Public Namespaced Aliases (/api/v1/public/*)
         'api/v1/public/settings',
+        'api/v1/public/animations',
         'api/v1/public/services',
         'api/v1/public/service-categories',
         'api/v1/public/services/{idOrSlug}',

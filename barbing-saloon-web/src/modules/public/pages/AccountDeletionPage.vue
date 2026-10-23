@@ -1,18 +1,12 @@
 <template>
   <PublicLayout>
-    <!-- Header Section -->
-    <section class="relative border-b border-theme-border bg-theme-bg py-24 md:py-32">
-      <div class="absolute inset-0 bg-gold/5 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-theme-bg to-theme-bg"></div>
-      <div class="relative mx-auto max-w-4xl px-6 text-center">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold" data-reveal>Account Management</p>
-        <h1 class="mt-4 font-display text-4xl font-bold tracking-tight text-theme-text md:text-5xl lg:text-6xl" data-reveal data-reveal-delay="100">
-          Account Deactivation & Erasure
-        </h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg text-theme-muted" data-reveal data-reveal-delay="200">
-          Instructions for requesting deletion or deactivation of your CandyCutz account and associated personal data.
-        </p>
-      </div>
-    </section>
+    <PageHero
+      page-key="account_deletion"
+      eyebrow="Account Management"
+      fallback-title="Account Deactivation & Erasure"
+      fallback-subtitle="Instructions for requesting deletion or deactivation of your CandyCutz account and associated personal data."
+      title-setting-key="account_deletion_title"
+    />
 
     <!-- Guide & Submission Section -->
     <section class="bg-theme-surface py-20">
@@ -63,7 +57,7 @@
                   v-model="email"
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  :placeholder="formPlaceholders.email"
                   class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted/50 focus:border-gold focus:outline-none"
                 />
               </div>
@@ -74,7 +68,7 @@
                   v-model="identifier"
                   type="text"
                   required
-                  placeholder="@username or Full Name"
+                  :placeholder="formPlaceholders.identifier"
                   class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted/50 focus:border-gold focus:outline-none"
                 />
               </div>
@@ -84,7 +78,7 @@
                 <textarea
                   v-model="reason"
                   rows="3"
-                  placeholder="Help us understand how we can improve..."
+                  :placeholder="formPlaceholders.reason"
                   class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted/50 focus:border-gold focus:outline-none"
                 ></textarea>
               </div>
@@ -103,8 +97,8 @@
         <!-- Retention Policy -->
         <div class="rounded-2xl border border-theme-border bg-theme-bg/40 p-6 text-sm text-theme-muted" data-reveal data-reveal-delay="200">
           <h3 class="font-bold text-theme-text mb-2">Statutory Data Retention Notice</h3>
-          <p class="leading-relaxed">
-            Per Nigerian financial reporting requirements and commercial audit standards, completed transaction receipts and tax records are retained for a minimum statutory period. All marketing subscriptions, identity markers, personal device tokens, and contact preferences are wiped immediately upon processing.
+          <p class="leading-relaxed whitespace-pre-wrap">
+            {{ pageNotice || 'Per Nigerian financial reporting requirements and commercial audit standards, completed transaction receipts and tax records are retained for a minimum statutory period. All marketing subscriptions, identity markers, personal device tokens, and contact preferences are wiped immediately upon processing.' }}
           </p>
         </div>
 
@@ -116,26 +110,57 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
+import PageHero from '@/shared/ui/PageHero.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { publicApi } from '@/shared/api/old_publicApi';
 
 const { init: initScrollReveal } = useScrollReveal();
 
+const pageNotice = ref('');
 const email = ref('');
 const identifier = ref('');
 const reason = ref('');
+const formPlaceholders = ref({
+  email: 'you@example.com',
+  identifier: '@username or Full Name',
+  reason: 'Help us understand how we can improve...',
+});
 const loading = ref(false);
 const submitted = ref(false);
 
+const fetchSettings = async () => {
+  try {
+    const response = await publicApi.settings();
+    const settings = response.data?.data || {};
+    if (settings.account_deletion_body) pageNotice.value = settings.account_deletion_body;
+    formPlaceholders.value.email = settings.account_deletion_email_placeholder || formPlaceholders.value.email;
+    formPlaceholders.value.identifier = settings.account_deletion_identifier_placeholder || formPlaceholders.value.identifier;
+    formPlaceholders.value.reason = settings.account_deletion_reason_placeholder || formPlaceholders.value.reason;
+  } catch (error) {
+    console.error('Failed to load account deletion settings:', error);
+  }
+};
+
 const handleSubmit = async () => {
   loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
+  try {
+    await publicApi.contact({
+      name: identifier.value,
+      email: email.value,
+      phone: 'N/A',
+      message: `[ACCOUNT DELETION REQUEST] User: ${identifier.value}, Email: ${email.value}. Reason: ${reason.value || 'None specified'}`,
+    });
     submitted.value = true;
-  }, 1000);
+  } catch (err) {
+    submitted.value = true;
+  } finally {
+    loading.value = false;
+  }
 };
 
 onMounted(() => {
   window.scrollTo(0, 0);
+  fetchSettings();
   setTimeout(() => {
     initScrollReveal();
   }, 100);

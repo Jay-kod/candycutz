@@ -13,10 +13,13 @@ import { onMounted, onUnmounted } from 'vue';
 import ConfirmModal from './core/components/ConfirmModal.vue';
 import ToastNotification from './core/components/ToastNotification.vue';
 import BackToTop from './core/components/BackToTop.vue';
+import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 
 let revealObserver = null;
+const { loadBrandIdentity } = useBrandIdentity();
 
 onMounted(() => {
+  loadBrandIdentity();
   const mapDelays = () => {
     document.querySelectorAll('[data-reveal]').forEach((el) => {
       const delay = el.dataset.revealDelay;

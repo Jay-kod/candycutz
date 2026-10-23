@@ -8,8 +8,8 @@
 
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-36 w-36 object-contain rounded-full" />
-          <span><span class="text-gold">Candy</span>Cutz</span>
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <span>{{ brandName }}</span>
         </a>
       </div>
 
@@ -19,13 +19,13 @@
           Lost access,<br />not lost style.
         </h2>
         <p class="text-lg text-theme-muted font-light leading-relaxed">
-          Enter your email and we'll send you a link to get back into your CandyCutz account.
+          Enter your email and we'll send you a link to get back into your {{ brandName }} account.
         </p>
       </div>
 
       <div class="relative z-10">
         <p class="text-xs uppercase tracking-[0.3em] text-theme-muted font-semibold">
-          &copy; {{ new Date().getFullYear() }} CandyCutz. All rights reserved.
+          &copy; {{ new Date().getFullYear() }} {{ brandName }}. All rights reserved.
         </p>
       </div>
     </div>
@@ -83,11 +83,13 @@
 
 <script setup>
 import { reactive, ref } from 'vue';
+import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import { RouterLink } from 'vue-router';
 import { object, string } from 'yup';
 import { authApi } from '@/shared/api/old_authApi';
 import { useDark } from '@vueuse/core';
 
+const { brandName } = useBrandIdentity();
 const isDark = useDark({
   selector: 'html',
   attribute: 'data-theme',

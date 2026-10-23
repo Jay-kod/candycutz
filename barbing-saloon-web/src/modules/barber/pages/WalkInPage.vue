@@ -258,17 +258,15 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import { barberApi } from '@/shared/api/old_barberApi';
 import { useToast } from '../../../core/composables/useToast';
 import { 
-  UserPlusIcon, CheckCircleIcon, UserIcon, PhoneIcon, EnvelopeIcon,
+  UserPlusIcon, UserIcon, PhoneIcon, EnvelopeIcon,
   ScissorsIcon, SparklesIcon, CalendarIcon, BanknotesIcon,
   TicketIcon, ChevronDownIcon, CheckBadgeIcon, ClockIcon
 } from '@heroicons/vue/24/outline';
 
-const router = useRouter();
 const toast = useToast();
 
 const walkInSubmitting = ref(false);

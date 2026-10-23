@@ -15,8 +15,8 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-36 w-36 object-contain rounded-full" />
-          <span><span class="text-admin">Candy</span>Cutz</span>
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <span class="text-admin">{{ brandName }}</span>
         </a>
       </div>
       
@@ -26,13 +26,13 @@
           Precision in every cut.<br />Excellence in every detail.
         </h2>
         <p class="text-lg text-theme-muted font-light leading-relaxed">
-          Sign in to access the CandyCutz Admin Portal. Manage barbers, appointments, and overall shop operations.
+          Sign in to access the {{ brandName }} Admin Portal. Manage barbers, appointments, and overall shop operations.
         </p>
       </div>
       
       <div class="relative z-10">
         <p class="text-xs uppercase tracking-[0.3em] text-theme-muted font-semibold">
-          &copy; {{ new Date().getFullYear() }} CandyCutz. All rights reserved.
+          &copy; {{ new Date().getFullYear() }} {{ brandName }}. All rights reserved.
         </p>
       </div>
     </div>
@@ -43,8 +43,8 @@
       <!-- Mobile Logo -->
       <div class="absolute top-8 left-8 lg:hidden">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col gap-1 w-fit">
-          <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-8 w-8 object-contain rounded-full" />
-          <span><span class="text-admin">Candy</span>Cutz</span>
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full" />
+          <span class="text-admin">{{ brandName }}</span>
         </a>
       </div>
 
@@ -198,11 +198,13 @@
 
 <script setup>
 import { reactive, ref } from 'vue';
+import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
 import { useDark } from '@vueuse/core';
 
+const { brandName } = useBrandIdentity();
 const isDark = useDark({
   selector: 'html',
   attribute: 'data-theme',

@@ -1,6 +1,16 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\Gallery\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Domain/Content/Services/ContentService.php
+
+		-
+			message: "#^Return type of call to method Illuminate\\\\Support\\\\Collection\\<int,array\\<string, mixed\\>\\>\\:\\:all\\(\\) contains unresolvable type\\.$#"
+			count: 1
+			path: app/Domain/Content/Services/ContentService.php
+
+		-
 			message: "#^Property App\\\\Models\\\\User\\:\\:\\$role \\(App\\\\Domain\\\\Shared\\\\Enums\\\\UserRole\\) does not accept string\\.$#"
 			count: 1
 			path: app/Domain/Identity/Actions/CreateBarber.php
@@ -149,36 +159,6 @@ parameters:
 			message: "#^Method App\\\\Http\\\\Resources\\\\BlogPostResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Http/Resources/BlogPostResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$barber\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$category\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$image_path\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$is_featured\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:\\$title\\.$#"
-			count: 1
-			path: app/Http/Resources/GalleryResource.php
 
 		-
 			message: "#^Method App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"

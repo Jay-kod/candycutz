@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AccountApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\PaymentApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
@@ -26,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // -------------------------------------------------------------------------
     Route::get('/account/dashboard', [AccountApiController::class, 'dashboard']);
     Route::get('/customer/dashboard', [AccountApiController::class, 'dashboard']);
+
+    Route::middleware('check.role:customer')->post('/customer/feedback', [FeedbackSubmissionApiController::class, 'store']);
 
     Route::get('/account/profile', [AccountApiController::class, 'profile']);
     Route::post('/account/profile', [AccountApiController::class, 'updateProfile']);

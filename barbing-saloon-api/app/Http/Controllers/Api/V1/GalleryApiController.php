@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Enums\GalleryCategory;
 use App\Domain\Shared\Services\CatalogueCache;
 use App\Http\Resources\GalleryResource;
 use App\Http\Responses\ApiResponse;
@@ -113,7 +114,7 @@ class GalleryApiController
             if (! in_array($category, $validCategories, true)) {
                 $category = 'haircut';
             }
-            $item->category = $category;
+            $item->category = GalleryCategory::tryFrom($category) ?? GalleryCategory::haircut;
         }
 
         if (isset($validated['title'])) {

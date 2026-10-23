@@ -5,7 +5,7 @@ const PUBLIC_API_PATTERNS = [
   /\/api\/(v1\/)?(services|barbers|categories|gallery|testimonials|blog|settings|working-hours)/i,
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 

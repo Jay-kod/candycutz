@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi'
 import { useToast } from '@/core/composables/useToast'
@@ -36,13 +36,10 @@ import {
   BoltIcon,
   SignalIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
-  EyeIcon,
   SwatchIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
-const router = useRouter()
 const toast = useToast()
 
 // ── Master Catalog of All 24 Mobile App Pages ──
@@ -446,7 +443,6 @@ const currentPage = computed(() => {
 
 // ── Mock Phone Device State ──
 const previewTheme = ref('dark') // 'dark' | 'light'
-const simulatedRole = ref('customer') // 'customer' | 'barber'
 const copiedLink = ref(false)
 const testingApi = ref(false)
 const testApiSuccess = ref(false)

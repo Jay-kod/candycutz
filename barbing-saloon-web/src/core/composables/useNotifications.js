@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import api from '@/shared/api/client'
 
 // Global shared state so all components see the same unread count

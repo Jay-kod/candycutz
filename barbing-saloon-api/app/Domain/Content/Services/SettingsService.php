@@ -16,6 +16,7 @@ class SettingsService
         'general',
         'hero',
         'about',
+        'features',
         'contact',
         'booking',
         'social',
@@ -23,6 +24,8 @@ class SettingsService
         'theme',
         'mobile',
         'legal',
+        'content',
+        'animation',
     ];
 
     /**
@@ -44,7 +47,13 @@ class SettingsService
             ->map(fn ($item) => $item->value)
             ->all();
 
-        return array_merge($flat, $grouped);
+        $merged = array_merge($flat, $grouped);
+
+        /** @var AnimationSettingsService $animationService */
+        $animationService = app(AnimationSettingsService::class);
+        $merged['animation_resolved'] = $animationService->getResolvedSettings();
+
+        return $merged;
     }
 
     /**
@@ -66,6 +75,12 @@ class SettingsService
             ->map(fn ($item) => $item->value)
             ->all();
 
-        return array_merge($flat, $grouped);
+        $merged = array_merge($flat, $grouped);
+
+        /** @var AnimationSettingsService $animationService */
+        $animationService = app(AnimationSettingsService::class);
+        $merged['animation_resolved'] = $animationService->getResolvedSettings();
+
+        return $merged;
     }
 }

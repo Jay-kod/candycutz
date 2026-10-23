@@ -1,9 +1,14 @@
 <template>
   <CustomerLayout>
     <section class="mx-auto max-w-7xl px-4 md:px-6 py-20 text-theme-text">
-      <div data-reveal>
+      <div data-reveal class="mb-10">
         <p class="text-sm uppercase tracking-[0.3em] text-gold-light">Gallery</p>
-        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">Recent work <span class="text-2xl sm:text-3xl md:text-4xl text-gold/50">({{ gallery.length }})</span></h1>
+        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">
+          {{ pageTitle }} <span class="text-2xl sm:text-3xl md:text-4xl text-gold/50">({{ gallery.length }})</span>
+        </h1>
+        <p v-if="pageSubtitle" class="mt-4 max-w-2xl text-base text-theme-muted leading-relaxed whitespace-pre-wrap">
+          {{ pageSubtitle }}
+        </p>
       </div>
 
       <!-- Gallery Skeleton -->
@@ -85,6 +90,8 @@ import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
+const pageTitle = ref('Our Gallery');
+const pageSubtitle = ref('Browse our portfolio of premium cuts, styles, and grooming transformations.');
 const gallery = ref([]);
 const isLoading = ref(true);
 
@@ -122,8 +129,18 @@ function prevImage() {
 
 onMounted(async () => {
   try {
-    const response = await publicApi.gallery();
-    gallery.value = response.data.data;
+    const [settingsRes, galleryRes] = await Promise.all([
+      publicApi.settings().catch(() => ({ data: { data: {} } })),
+      publicApi.gallery().catch(() => ({ data: { data: [] } }))
+    ]);
+
+    const settings = settingsRes.data?.data;
+    if (settings) {
+      if (settings.gallery_title) pageTitle.value = settings.gallery_title;
+      if (settings.gallery_subtitle) pageSubtitle.value = settings.gallery_subtitle;
+    }
+
+    gallery.value = galleryRes.data?.data || [];
     isLoading.value = false;
     setTimeout(() => {
       initScrollReveal();

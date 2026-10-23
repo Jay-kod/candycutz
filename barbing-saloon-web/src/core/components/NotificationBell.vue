@@ -10,30 +10,14 @@ const route = useRoute()
 const {
   notifications,
   unreadCount,
-  isLoading,
   fetchNotifications,
   markAsRead,
   markAllRead,
-  requestBrowserPermission,
   startPolling,
   stopPolling,
 } = useNotifications()
 
 const isOpen = ref(false)
-const hasNotificationSupport = typeof window !== 'undefined' && 'Notification' in window
-const permissionState = ref(hasNotificationSupport ? Notification.permission : 'denied')
-
-const toggleOpen = () => {
-  isOpen.value = !isOpen.value
-  if (isOpen.value) {
-    fetchNotifications()
-  }
-}
-
-const enableDesktopNotifications = async () => {
-  const granted = await requestBrowserPermission()
-  permissionState.value = granted ? 'granted' : 'denied'
-}
 
 // Close when clicking outside
 const closeOnClickOutside = (e) => {

@@ -96,6 +96,15 @@ class SuperAdminApiController
             ];
         }
 
+        if ($request->hasFile('about_shop_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('about_shop_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'about_shop_image',
+                'value' => '/storage/'.$path,
+                'group' => 'about',
+            ];
+        }
+
         if ($request->hasFile('splash_image')) {
             $path = (new SecureImageUpload)->execute($request->file('splash_image'), 'uploads/settings');
             $settings[] = [
@@ -120,6 +129,24 @@ class SuperAdminApiController
                 'key' => 'login_background_image',
                 'value' => '/storage/'.$path,
                 'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('logo')) {
+            $path = (new SecureImageUpload)->execute($request->file('logo'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'logo',
+                'value' => '/storage/'.$path,
+                'group' => 'general',
+            ];
+        }
+
+        if ($request->hasFile('favicon')) {
+            $path = (new SecureImageUpload)->execute($request->file('favicon'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'favicon',
+                'value' => '/storage/'.$path,
+                'group' => 'general',
             ];
         }
 

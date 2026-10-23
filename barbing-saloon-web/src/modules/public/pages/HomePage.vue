@@ -1,46 +1,34 @@
 <template>
   <PublicLayout>
-    <section class="relative px-4 md:px-6 min-h-[100dvh] flex flex-col text-theme-text pt-24 pb-0 overflow-hidden">
-      <!-- Hero Background Image -->
-      <div v-if="heroImage" class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40" :style="{ backgroundImage: `url(${heroImage})` }"></div>
-      <!-- Dark overlay for text readability -->
-      <div class="absolute inset-0 z-10 bg-gradient-to-b from-obsidian/80 via-obsidian/50 to-obsidian pointer-events-none"></div>
-      <!-- Premium Background Gradient -->
-      <div class="absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.05),transparent_50%)] pointer-events-none"></div>
-      
-      <!-- Main Hero Content -->
-      <div class="relative z-20 w-full mx-auto max-w-5xl text-center flex-1 flex flex-col justify-center pb-20">
-        <div data-reveal>
-          <p class="inline-block text-sm md:text-base uppercase tracking-[0.4em] text-gold-light font-medium mr-[-0.4em]">Welcome to CandyCutz</p>
-          <h1 class="mt-6 font-display text-5xl sm:text-6xl leading-tight text-gold md:text-7xl lg:text-8xl">{{ heroTitle }}</h1>
-          <p class="mt-8 text-lg md:text-xl text-theme-muted font-light leading-relaxed mx-auto max-w-2xl">{{ heroSubtitle }}</p>
-          <div class="mt-12 flex flex-wrap justify-center gap-4">
-            <RouterLink to="/customer/login" class="rounded-full bg-gold px-10 py-4 font-semibold text-obsidian shadow-lg shadow-gold/20 transition hover:bg-gold-light hover:scale-105">{{ heroBtn1Text }}</RouterLink>
-            <RouterLink to="/about" class="rounded-full border border-gold px-10 py-4 font-semibold text-gold transition hover:bg-gold/10">{{ heroBtn2Text }}</RouterLink>
-          </div>
-        </div>
-      </div>
+    <section class="min-h-screen min-h-[100dvh] min-h-[100svh]">
+      <BarberCta
+        :title="ctaTitle"
+        :subtitle="ctaSubtitle"
+        :primary-text="ctaPrimaryText"
+        :secondary-text="heroBtn2Text"
+        :background-image="heroImage"
+        :image-opacity="heroImageOpacity"
+        :overlay-opacity="heroOverlayOpacity"
+      />
     </section>
 
+    <!-- Features Block (@efferd/features-1) -->
+    <div id="features">
+      <FeaturesSection
+        :badge="featuresBadge"
+        :title="featuresTitle"
+        :subtitle="featuresSubtitle"
+        :features="featuresItems"
+      />
+    </div>
+
     <!-- Statistics Section -->
-    <section class="bg-obsidian border-y border-white/5 py-16 relative z-20 shadow-2xl">
-      <div class="mx-auto max-w-7xl px-4 md:px-6">
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 text-center" data-reveal>
-          <div class="flex flex-col items-center justify-center text-center rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl hover:-translate-y-2 hover:border-gold/50 hover:bg-white/10 transition-all duration-300">
-            <p class="font-display text-5xl text-gold md:text-6xl drop-shadow-md">{{ statsYears }}</p>
-            <p class="mt-4 text-xs md:text-sm uppercase tracking-widest text-ivory/60 font-bold">Years Experience</p>
-          </div>
-          <div class="flex flex-col items-center justify-center text-center rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl hover:-translate-y-2 hover:border-gold/50 hover:bg-white/10 transition-all duration-300">
-            <p class="font-display text-5xl text-gold md:text-6xl drop-shadow-md">{{ statsServices }}</p>
-            <p class="mt-4 text-xs md:text-sm uppercase tracking-widest text-ivory/60 font-bold">Premium Services</p>
-          </div>
-          <div class="flex flex-col items-center justify-center text-center rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl hover:-translate-y-2 hover:border-gold/50 hover:bg-white/10 transition-all duration-300">
-            <p class="font-display text-5xl text-gold md:text-6xl drop-shadow-md">{{ statsClients }}</p>
-            <p class="mt-4 text-xs md:text-sm uppercase tracking-widest text-ivory/60 font-bold">Happy Clients</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <StatisticsSection
+      :years="statsYears"
+      :services="statsServices"
+      :clients="statsClients"
+      :barbers="statsBarbers"
+    />
 
     <!-- About Us Teaser -->
     <section class="bg-theme-surface text-theme-text py-16 md:py-24">
@@ -68,22 +56,18 @@
       </div>
     </section>
 
-    <!-- Services Teaser -->
-    <section class="mx-auto max-w-7xl px-4 md:px-6 py-16 md:py-24 text-center">
-      <div data-reveal class="max-w-3xl mx-auto">
-        <p class="text-sm uppercase tracking-[0.3em] text-gold-light font-medium">{{ portalTitle }}</p>
-        <h2 class="mt-4 font-display text-4xl text-gold md:text-5xl">{{ portalSubtitle }}</h2>
-        <p class="mt-6 text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">
-          {{ portalText }}
-        </p>
-        <div class="mt-10">
-          <RouterLink to="/customer/login" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-gold to-gold-dark px-10 py-5 font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all hover:scale-105">
-            Log in to Customer Portal
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-          </RouterLink>
-        </div>
-      </div>
-    </section>
+    <!-- Customer Portal Teaser Section (Orbit Constellation Design) -->
+    <div id="services">
+    <PortalCtaSection
+      :eyebrow="portalTitle"
+      :title="portalSubtitle"
+      :description="portalText"
+      primary-text="Log in to Customer Portal"
+      primary-link="/customer/login"
+      secondary-text="Create Account"
+      secondary-link="/customer/register"
+    />
+    </div>
 
   </PublicLayout>
 </template>
@@ -95,14 +79,28 @@ import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { getStorageUrl } from '@/core/utils/url';
+import BarberCta from '@/shared/ui/BarberCta.vue';
+import FeaturesSection from '@/components/FeaturesSection.vue';
+import PortalCtaSection from '@/components/PortalCtaSection.vue';
+import StatisticsSection from '@/components/StatisticsSection.vue';
 
 const { init: initScrollReveal } = useScrollReveal();
+
+const featuresBadge = ref('');
+const featuresTitle = ref('');
+const featuresSubtitle = ref('');
+const featuresItems = ref([]);
 
 const heroTitle = ref('Premium grooming with a sharper standard.');
 const heroSubtitle = ref('Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.');
 const heroBtn1Text = ref('Book a Service');
 const heroBtn2Text = ref('About Us');
 const heroImage = ref(null);
+const heroImageOpacity = ref(null);
+const heroOverlayOpacity = ref(null);
+const ctaTitle = ref('Precision Cuts.\nMade for You.');
+const ctaSubtitle = ref('Expert barbers. Fresh fades. A better kind of barbershop experience.');
+const ctaPrimaryText = ref('Book your cut');
 
 const statsYears = ref('10+');
 const statsBarbers = ref('5+');
@@ -129,20 +127,46 @@ const fetchSettings = async () => {
       if (settings.hero_btn1_text) heroBtn1Text.value = settings.hero_btn1_text;
       if (settings.hero_btn2_text) heroBtn2Text.value = settings.hero_btn2_text;
       if (settings.hero_image) heroImage.value = getStorageUrl(settings.hero_image);
+      if (settings.hero_image_opacity !== undefined && settings.hero_image_opacity !== null) {
+        heroImageOpacity.value = settings.hero_image_opacity;
+      } else if (settings.hero_opacity !== undefined && settings.hero_opacity !== null) {
+        heroImageOpacity.value = settings.hero_opacity;
+      }
+      if (settings.page_hero_home_overlay_opacity !== undefined && settings.page_hero_home_overlay_opacity !== null) {
+        heroOverlayOpacity.value = settings.page_hero_home_overlay_opacity;
+      }
+      ctaTitle.value = settings.cta_title || settings.hero_title || ctaTitle.value;
+      ctaSubtitle.value = settings.cta_subtitle || settings.hero_subtitle || ctaSubtitle.value;
+      ctaPrimaryText.value = settings.cta_primary_text || settings.hero_btn1_text || ctaPrimaryText.value;
       
-      if (settings.stats_years) statsYears.value = settings.stats_years;
-      if (settings.stats_barbers) statsBarbers.value = settings.stats_barbers;
-      if (settings.stats_services) statsServices.value = settings.stats_services;
-      if (settings.stats_clients) statsClients.value = settings.stats_clients;
+      statsYears.value = settings.stats_years || settings.stats_years_experience || statsYears.value;
+      statsBarbers.value = settings.stats_barbers || settings.stats_experienced_barbers || statsBarbers.value;
+      statsServices.value = settings.stats_services || statsServices.value;
+      statsClients.value = settings.stats_clients || settings.stats_happy_clients || statsClients.value;
       
-      if (settings.about_teaser_title) aboutTitle.value = settings.about_teaser_title;
-      if (settings.about_teaser_subtitle) aboutSubtitle.value = settings.about_teaser_subtitle;
-      if (settings.about_teaser_text) aboutText.value = settings.about_teaser_text;
-      if (settings.about_teaser_image) aboutImage.value = getStorageUrl(settings.about_teaser_image);
+      aboutTitle.value = settings.about_teaser_title || settings.about_shop_title || aboutTitle.value;
+      aboutSubtitle.value = settings.about_teaser_subtitle || settings.about_shop_subtitle || aboutSubtitle.value;
+      aboutText.value = settings.about_teaser_text || settings.about_shop_text_1 || aboutText.value;
+      if (settings.about_teaser_image || settings.about_shop_image) {
+        aboutImage.value = getStorageUrl(settings.about_teaser_image || settings.about_shop_image);
+      }
       
       if (settings.portal_teaser_title) portalTitle.value = settings.portal_teaser_title;
       if (settings.portal_teaser_subtitle) portalSubtitle.value = settings.portal_teaser_subtitle;
       if (settings.portal_teaser_text) portalText.value = settings.portal_teaser_text;
+
+      if (settings.features_badge) featuresBadge.value = settings.features_badge;
+      if (settings.features_title) featuresTitle.value = settings.features_title;
+      if (settings.features_subtitle) featuresSubtitle.value = settings.features_subtitle;
+      if (settings.features_items) {
+        try {
+          featuresItems.value = typeof settings.features_items === 'string'
+            ? JSON.parse(settings.features_items)
+            : settings.features_items;
+        } catch {
+          featuresItems.value = [];
+        }
+      }
     }
   } catch (error) {
     console.error('Failed to load public settings:', error);

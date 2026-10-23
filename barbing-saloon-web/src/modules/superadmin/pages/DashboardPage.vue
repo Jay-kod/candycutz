@@ -165,7 +165,6 @@ import {
   UserGroupIcon,
   ShieldCheckIcon,
   ScissorsIcon,
-  UserPlusIcon,
   ClockIcon,
   ArrowPathIcon,
   ChevronRightIcon,

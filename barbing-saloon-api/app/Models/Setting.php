@@ -28,8 +28,20 @@ class Setting extends Model
 
     public static function resolveGroupForKey(string $key): string
     {
-        if (str_starts_with($key, 'hero_')) {
+        if (str_starts_with($key, 'page_hero_')) {
             return 'hero';
+        }
+
+        if (str_starts_with($key, 'hero_') || str_starts_with($key, 'cta_')) {
+            return 'hero';
+        }
+
+        if (str_starts_with($key, 'about_')) {
+            return 'about';
+        }
+
+        if (str_starts_with($key, 'features_')) {
+            return 'features';
         }
 
         if (str_starts_with($key, 'contact_') || in_array($key, ['phone', 'email', 'address', 'city', 'state', 'latitude', 'longitude', 'map_link'], true)) {
@@ -60,8 +72,23 @@ class Setting extends Model
             return 'mobile';
         }
 
-        if (str_starts_with($key, 'terms_') || str_starts_with($key, 'privacy_')) {
+        if (
+            str_starts_with($key, 'terms_')
+            || str_starts_with($key, 'privacy_')
+            || str_starts_with($key, 'account_deletion_')
+            || str_starts_with($key, 'legal_')
+            || str_starts_with($key, 'security_')
+            || str_starts_with($key, 'cookie_')
+        ) {
             return 'legal';
+        }
+
+        if (str_starts_with($key, 'services_') || str_starts_with($key, 'gallery_')) {
+            return 'content';
+        }
+
+        if (str_starts_with($key, 'animation_')) {
+            return 'animation';
         }
 
         return 'general';

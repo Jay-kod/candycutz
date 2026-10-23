@@ -10,9 +10,7 @@ import {
   ExclamationTriangleIcon,
   BellAlertIcon,
   BugAntIcon,
-  ServerStackIcon,
   ArrowUpCircleIcon,
-  TrashIcon,
   CheckCircleIcon,
   MagnifyingGlassIcon,
   ChevronLeftIcon,
@@ -21,7 +19,6 @@ import {
   XMarkIcon,
   WrenchScrewdriverIcon,
   SignalIcon,
-  UserGroupIcon,
   ComputerDesktopIcon,
   ExclamationCircleIcon,
   PlusIcon

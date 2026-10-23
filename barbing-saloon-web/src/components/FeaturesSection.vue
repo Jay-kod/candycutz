@@ -1,0 +1,161 @@
+<template>
+  <section class="relative py-16 md:py-24 overflow-hidden bg-obsidian/40 border-y border-white/5">
+    <!-- Ambient Glow -->
+    <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.06),transparent_70%)]"></div>
+
+    <div class="relative z-10 mx-auto max-w-7xl px-4 md:px-6">
+      <!-- Section Header -->
+      <div v-if="displayTitle || displaySubtitle" class="text-center max-w-3xl mx-auto mb-12 md:mb-16" data-reveal>
+        <span
+          v-if="displayBadge"
+          class="inline-block px-3 py-1 mb-3 text-[11px] font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full"
+        >
+          {{ displayBadge }}
+        </span>
+        <h2 v-if="displayTitle" class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm">
+          {{ displayTitle }}
+        </h2>
+        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed">
+          {{ displaySubtitle }}
+        </p>
+      </div>
+
+      <!-- Features Block Grid (efferd/features-1) -->
+      <div class="mx-auto max-w-5xl" data-reveal>
+        <div class="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-4 sm:gap-5">
+          <div
+            v-for="(feature, index) in featureList"
+            :key="feature.title || index"
+            class="group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-5 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-6"
+          >
+            <!-- Feature Icon -->
+            <div class="relative flex items-center justify-center size-12 rounded-xl bg-gold/10 border border-gold/20 text-gold transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
+              <component :is="resolveIcon(feature.icon)" class="size-6 transition-transform group-hover:rotate-6" />
+            </div>
+
+            <!-- Title -->
+            <h3 class="font-heading mt-4 font-semibold text-sm md:text-base text-theme-text group-hover:text-gold transition-colors">
+              {{ feature.title }}
+            </h3>
+
+            <!-- Description -->
+            <p class="mt-2 text-xs text-theme-muted leading-relaxed max-w-[200px]">
+              {{ feature.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import {
+  Zap,
+  ShieldCheck,
+  Activity,
+  Globe,
+  Scissors,
+  Sparkles,
+  Clock,
+  Award,
+  Star,
+  Crown,
+  Heart,
+  Flame,
+  Layers,
+  Calendar,
+  Smartphone,
+  CheckCircle,
+} from 'lucide-vue-next';
+
+const iconMap = {
+  zap: Zap,
+  shield: ShieldCheck,
+  'shield-check': ShieldCheck,
+  activity: Activity,
+  globe: Globe,
+  scissors: Scissors,
+  sparkles: Sparkles,
+  clock: Clock,
+  award: Award,
+  star: Star,
+  crown: Crown,
+  heart: Heart,
+  flame: Flame,
+  layers: Layers,
+  calendar: Calendar,
+  smartphone: Smartphone,
+  check: CheckCircle,
+};
+
+const defaultFeatures = [
+  {
+    title: 'Precision Craft',
+    icon: 'scissors',
+    description: 'Master barbers dedicated to flawless fades, lines, and custom contours.',
+  },
+  {
+    title: 'Luxury Lounge',
+    icon: 'crown',
+    description: 'Exclusive ambiance with bespoke amenities and complimentary refreshments.',
+  },
+  {
+    title: 'Instant Booking',
+    icon: 'zap',
+    description: 'Real-time schedule availability and effortless queue coordination.',
+  },
+  {
+    title: 'Sanitized & Safe',
+    icon: 'shield-check',
+    description: 'Hospital-grade tool sterilization and highest hygienic standards.',
+  },
+];
+
+const props = defineProps({
+  badge: {
+    type: String,
+    default: '',
+  },
+  title: {
+    type: String,
+    default: '',
+  },
+  subtitle: {
+    type: String,
+    default: '',
+  },
+  features: {
+    type: [Array, String],
+    default: () => [],
+  },
+});
+
+const displayBadge = computed(() => props.badge || 'WHY CHOOSE CANDYCUTZ');
+const displayTitle = computed(() => props.title || 'Engineered for Perfection');
+const displaySubtitle = computed(
+  () => props.subtitle || 'Every detail of the CandyCutz experience is calibrated to deliver the pinnacle of men’s grooming.'
+);
+
+const featureList = computed(() => {
+  let list = props.features;
+  if (typeof list === 'string') {
+    try {
+      list = JSON.parse(list);
+    } catch {
+      list = [];
+    }
+  }
+  if (!Array.isArray(list) || list.length === 0) {
+    return defaultFeatures;
+  }
+  return list;
+});
+
+const resolveIcon = (iconName) => {
+  if (!iconName) return Sparkles;
+  const key = String(iconName).toLowerCase().trim();
+  return iconMap[key] || Sparkles;
+};
+</script>

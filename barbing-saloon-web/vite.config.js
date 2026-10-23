@@ -30,30 +30,21 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-  plugins: [
-    vue(),
-  ],
-  resolve: {
-    alias: {
-      '@': '/src',
-    },
-  },
-  build: {
-    // ── Chunk splitting for better caching ──
-    // ── Minification ──
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,  // Remove console.log in production
-        drop_debugger: true,
+    plugins: [
+      vue(),
+    ],
+    resolve: {
+      alias: {
+        '@': '/src',
       },
     },
-    // ── CSS optimization ──
-    cssMinify: true,
-    // ── Target modern browsers for smaller output ──
-    target: 'es2020',
-    // ── Increase chunk warning limit ──
-    chunkSizeWarningLimit: 600,
-  },
-};
+    esbuild: {
+      drop: ['console', 'debugger'],
+    },
+    build: {
+      cssMinify: true,
+      target: 'es2020',
+      chunkSizeWarningLimit: 600,
+    },
+  };
 });

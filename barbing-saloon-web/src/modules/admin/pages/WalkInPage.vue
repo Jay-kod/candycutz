@@ -272,17 +272,15 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useToast } from '../../../core/composables/useToast';
 import { 
-  UserPlusIcon, CheckCircleIcon, UserIcon, PhoneIcon, EnvelopeIcon,
+  UserPlusIcon, UserIcon, PhoneIcon, EnvelopeIcon,
   ScissorsIcon, UserCircleIcon, SparklesIcon, CalendarIcon, BanknotesIcon,
   TicketIcon, ChevronDownIcon, CheckBadgeIcon, ClockIcon
 } from '@heroicons/vue/24/outline';
 
-const router = useRouter();
 const toast = useToast();
 
 const walkInSubmitting = ref(false);

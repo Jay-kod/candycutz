@@ -33,7 +33,7 @@
           <div class="relative flex items-center justify-center shrink-0">
             <div :class="['h-11 w-11 rounded-2xl p-[1px] bg-gradient-to-br flex items-center justify-center group-hover:scale-105 transition-transform duration-300', portalConfig.rimGradient]">
               <div class="h-full w-full rounded-[15px] bg-[#14151b] flex items-center justify-center overflow-hidden">
-                <img src="/images/logo-icon.png" alt="CandyCutz Logo" class="h-6 w-6 object-contain" />
+                <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-6 w-6 object-contain" />
               </div>
             </div>
           </div>
@@ -46,7 +46,7 @@
             ]"
           >
             <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-white']">
-              Candy<span :class="themeClasses.text || 'text-amber-400'">Cutz</span>
+              {{ brandName }}
             </div>
             <div :class="['inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border', portalConfig.badgeClass]">
               <span :class="['h-1.5 w-1.5 rounded-full', portalConfig.dotClass]"></span>
@@ -68,14 +68,14 @@
       <!-- Navigation Links Container (Scrollable) -->
       <div
         ref="navContainer"
-        class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-3 px-3 custom-scrollbar space-y-4 overscroll-contain"
+        class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 px-2.5 custom-scrollbar space-y-2 overscroll-contain"
       >
-        <div v-for="(group, gIdx) in groupedNavItems" :key="gIdx" class="space-y-1">
+        <div v-for="(group, gIdx) in groupedNavItems" :key="gIdx" class="space-y-0.5">
           <!-- Section Label -->
-          <div v-if="group.label" class="px-3 pt-2 pb-1.5 flex items-center justify-between">
+          <div v-if="group.label" class="px-2.5 pt-1.5 pb-0.5 flex items-center justify-between">
             <p
               :class="[
-                'text-[10px] uppercase tracking-[0.2em] font-bold transition-all duration-300',
+                'text-[9.5px] uppercase tracking-[0.2em] font-bold transition-all duration-300',
                 themeClasses.textLight70 || 'text-amber-400/80',
                 isSidebarCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-80'
               ]"
@@ -84,20 +84,20 @@
             </p>
             <div
               v-if="!isSidebarCollapsed"
-              :class="['h-px flex-1 ml-3', portalConfig.sectionLine || 'bg-gradient-to-r from-white/[0.08] to-transparent']"
+              :class="['h-px flex-1 ml-2.5', portalConfig.sectionLine || 'bg-gradient-to-r from-white/[0.08] to-transparent']"
             ></div>
           </div>
 
           <!-- Nav Items -->
-          <nav class="space-y-1">
+          <nav class="space-y-0.5">
             <RouterLink
               v-for="item in group.items"
               :key="item.name"
               :to="item.to"
               :id="(isActiveRoute(item.to)) ? 'active-nav-item' : undefined"
               :class="[
-                'group relative flex items-center rounded-xl transition-all duration-200',
-                isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2',
+                'group relative flex items-center rounded-lg transition-all duration-200',
+                isSidebarCollapsed ? 'justify-center p-1.5' : 'gap-2.5 px-2.5 py-1',
                 isActiveRoute(item.to)
                   ? [
                       portalConfig.activeGradient,
@@ -112,13 +112,13 @@
               <!-- Active Indicator Bar (Left Edge) -->
               <div
                 v-if="isActiveRoute(item.to)"
-                :class="['absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full', portalConfig.activeIndicator]"
+                :class="['absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-1 rounded-r-full', portalConfig.activeIndicator]"
               ></div>
 
               <!-- Icon Container -->
               <div
                 :class="[
-                  'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                  'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-200',
                   isActiveRoute(item.to)
                     ? [portalConfig.iconActive, 'border']
                     : (portalConfig.iconInactive || ['bg-transparent text-white/40 group-hover:bg-white/[0.05]', portalConfig.iconHover])
@@ -126,14 +126,14 @@
               >
                 <component
                   :is="item.icon"
-                  class="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
+                  class="h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-110"
                 />
               </div>
 
               <!-- Item Label -->
               <span
                 :class="[
-                  'text-[13px] tracking-wide whitespace-nowrap transition-all duration-200',
+                  'text-[12.5px] leading-tight tracking-wide whitespace-nowrap transition-all duration-200',
                   isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto',
                   isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-white'] : ['font-medium', portalConfig.navLabelHover || 'group-hover:text-white']
                 ]"
@@ -144,7 +144,7 @@
               <!-- Badge (if applicable) -->
               <span
                 v-if="item.badge && !isSidebarCollapsed"
-                :class="['ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full border', portalConfig.badgeClass]"
+                :class="['ml-auto text-[8.5px] font-bold px-1.5 py-0.5 rounded-full border', portalConfig.badgeClass]"
               >
                 {{ item.badge }}
               </span>
@@ -152,7 +152,7 @@
               <!-- Subtle Chevron for Active Item -->
               <ChevronRightIcon
                 v-if="isActiveRoute(item.to) && !isSidebarCollapsed"
-                :class="['ml-auto h-3.5 w-3.5 shrink-0', portalConfig.chevronColor]"
+                :class="['ml-auto h-3 w-3 shrink-0', portalConfig.chevronColor]"
               />
             </RouterLink>
           </nav>
@@ -160,35 +160,35 @@
       </div>
 
       <!-- Profile Card & Sign Out Footer (Pinned) -->
-      <div :class="['relative z-10 shrink-0 mt-auto border-t p-3', portalConfig.profileBorder || 'border-white/[0.07]']">
+      <div :class="['relative z-10 shrink-0 mt-auto border-t p-2.5', portalConfig.profileBorder || 'border-white/[0.07]']">
         <!-- Expanded Profile Card -->
         <div
           v-if="!isSidebarCollapsed"
-          :class="['rounded-2xl border p-2.5 transition-all duration-200', portalConfig.profileCard || 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]']"
+          :class="['rounded-xl border p-2 transition-all duration-200', portalConfig.profileCard || 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]']"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2.5">
             <!-- User Avatar with Status Indicator -->
             <RouterLink
               v-if="profileRoute"
               :to="profileRoute"
-              :class="['relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden border group', portalConfig.avatarRing]"
+              :class="['relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden border group', portalConfig.avatarRing]"
               title="View Profile"
             >
               <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
               <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
                 {{ userInitials }}
               </div>
-              <span :class="['absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
+              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
             </RouterLink>
             <div
               v-else
-              :class="['relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden border', portalConfig.avatarRing]"
+              :class="['relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden border', portalConfig.avatarRing]"
             >
               <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
               <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
                 {{ userInitials }}
               </div>
-              <span :class="['absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
+              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
             </div>
 
             <!-- User Name and Role/Email -->
@@ -196,14 +196,14 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['block truncate text-[13px] font-semibold transition-colors', portalConfig.profileName || 'text-white', portalConfig.hoverText]"
+                :class="['block truncate text-xs font-semibold transition-colors', portalConfig.profileName || 'text-white', portalConfig.hoverText]"
               >
                 {{ userName }}
               </RouterLink>
-              <span v-else :class="['block truncate text-[13px] font-semibold', portalConfig.profileName || 'text-white']">
+              <span v-else :class="['block truncate text-xs font-semibold', portalConfig.profileName || 'text-white']">
                 {{ userName }}
               </span>
-              <p :class="['truncate text-[11px]', portalConfig.profileEmail || 'text-white/40']">
+              <p :class="['truncate text-[10px]', portalConfig.profileEmail || 'text-white/40']">
                 {{ userEmail || (portalName + ' Staff') }}
               </p>
             </div>
@@ -213,17 +213,17 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['flex h-7 w-7 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-white/40 hover:bg-white/10', portalConfig.hoverText]"
+                :class="['flex h-6 w-6 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-white/40 hover:bg-white/10', portalConfig.hoverText]"
                 title="Settings"
               >
-                <Cog6ToothIcon class="h-4 w-4" />
+                <Cog6ToothIcon class="h-3.5 w-3.5" />
               </RouterLink>
               <button
                 @click="$emit('logout')"
-                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-7 w-7 text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
+                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-6 w-6 text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
                 title="Sign Out"
               >
-                <ArrowRightOnRectangleIcon class="h-4 w-4" />
+                <ArrowRightOnRectangleIcon class="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
@@ -266,6 +266,9 @@ import {
   ChevronRightIcon,
   Cog6ToothIcon,
 } from '@heroicons/vue/24/outline';
+import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
+
+const { brandName } = useBrandIdentity();
 
 const props = defineProps({
   portalName: { type: String, default: 'Portal' },
@@ -322,7 +325,7 @@ const portalConfig = computed(() => {
         profileName: 'text-white',
         profileEmail: 'text-white/40',
         profileActionBtn: 'text-white/40 hover:bg-white/10 hover:text-white',
-        logoutBtn: 'h-7 w-7 text-red-400/60 hover:bg-red-500/10 hover:text-red-400',
+        logoutBtn: 'h-6 w-6 text-red-400/60 hover:bg-red-500/10 hover:text-red-400',
         closeBtn: 'text-white/50 hover:text-white hover:bg-white/5',
       };
     } else {
@@ -353,7 +356,7 @@ const portalConfig = computed(() => {
         profileName: 'text-slate-900',
         profileEmail: 'text-slate-500',
         profileActionBtn: 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
-        logoutBtn: 'h-7 w-7 text-red-500/70 hover:bg-red-50 hover:text-red-600',
+        logoutBtn: 'h-6 w-6 text-red-500/70 hover:bg-red-50 hover:text-red-600',
         closeBtn: 'text-slate-500 hover:text-slate-800 hover:bg-slate-100',
       };
     }

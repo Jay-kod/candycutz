@@ -119,7 +119,7 @@ const groupedNavItems = computed(() => {
 
   const customerSections = {
     'Menu': ['Dashboard', 'Browse Services', 'My Bookings', 'My Codes'],
-    'Discover': ['Wishlist', 'Reviews', 'Gallery', 'Blog'],
+    'Discover': ['Wishlist', 'Reviews', 'Feedback & Suggestions', 'Gallery', 'Blog'],
     'Activity': ['Notifications', 'Notification Settings', 'Analytics', 'Reports'],
   };
 
@@ -134,6 +134,7 @@ const groupedNavItems = computed(() => {
     'The Website': [
       'Website Overview',
       'Home Page',
+      'Homepage CTA',
       'About Us Page',
       'Services Page',
       'Gallery Page',
@@ -169,7 +170,7 @@ const groupedNavItems = computed(() => {
       'Privacy Policy',
       'Terms of Service'
     ],
-    'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Blog'],
+    'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Feedback Inbox', 'Blog'],
     'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
   };
 

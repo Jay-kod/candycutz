@@ -14,6 +14,7 @@ export const customerApi = {
   updateProfile: (data) => client.post('/customer/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   reviews: () => client.get('/customer/reviews'),
   createReview: (data) => client.post('/customer/testimonials', data),
+  submitFeedback: (data) => client.post('/customer/feedback', data),
   getWishlist: () => client.get('/customer/wishlist'),
   addToWishlist: (data) => client.post('/customer/wishlist', data),
   removeFromWishlist: (id) => client.delete(`/customer/wishlist/${id}`),

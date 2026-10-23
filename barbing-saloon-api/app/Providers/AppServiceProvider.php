@@ -32,6 +32,7 @@ use App\Models\BlogPost;
 use App\Models\Gallery;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use App\Models\Setting;
 use App\Models\Testimonial;
 use App\Models\User;
 use App\Policies\AppointmentPolicy;
@@ -40,6 +41,7 @@ use App\Policies\BlogPostPolicy;
 use App\Policies\GalleryPolicy;
 use App\Policies\ServiceCategoryPolicy;
 use App\Policies\ServicePolicy;
+use App\Policies\SettingPolicy;
 use App\Policies\TestimonialPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -102,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('manage-users', static fn (User $user): bool => ($user->role?->value ?? $user->role) === 'super_admin');
         Gate::define('manage-barber-accounts', static fn (User $user): bool => in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'], true));
+        Gate::define('manage-settings', static fn (User $user): bool => in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'], true));
 
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(Barber::class, BarberPolicy::class);
@@ -109,9 +112,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Gallery::class, GalleryPolicy::class);
         Gate::policy(Service::class, ServicePolicy::class);
         Gate::policy(ServiceCategory::class, ServiceCategoryPolicy::class);
+        Gate::policy(Setting::class, SettingPolicy::class);
         Gate::policy(Testimonial::class, TestimonialPolicy::class);
 
-        if (app()->environment('production')) {
+        if (app()->environment('production') && str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
 

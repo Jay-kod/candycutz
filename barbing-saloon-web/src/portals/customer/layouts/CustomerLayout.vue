@@ -22,7 +22,8 @@ import {
   BookOpenIcon,
   BellAlertIcon,
   ChartBarIcon,
-  QrCodeIcon
+  QrCodeIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -31,6 +32,7 @@ const navItems = [
   { name: 'My Bookings', to: '/customer/dashboard/bookings', icon: CalendarDaysIcon },
   { name: 'My Codes', to: '/customer/dashboard/my-codes', icon: QrCodeIcon },
   { name: 'Reviews', to: '/customer/dashboard/reviews', icon: StarIcon },
+  { name: 'Feedback & Suggestions', to: '/customer/dashboard/feedback', icon: ChatBubbleLeftRightIcon },
   { name: 'Wishlist', to: '/customer/dashboard/wishlist', icon: HeartIcon },
   { name: 'Gallery', to: '/customer/dashboard/gallery', icon: PhotoIcon },
   { name: 'Blog', to: '/customer/dashboard/blog', icon: BookOpenIcon },

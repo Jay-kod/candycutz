@@ -594,7 +594,7 @@ async function saveAll() {
     }
 
     // 2. Append general system configuration values
-    for (const [groupName, groupValues] of Object.entries(systemSettingsGroups.value)) {
+    for (const [, groupValues] of Object.entries(systemSettingsGroups.value)) {
       for (const [key, value] of Object.entries(groupValues)) {
         formData.append(`settings[${key}]`, value ?? '');
       }

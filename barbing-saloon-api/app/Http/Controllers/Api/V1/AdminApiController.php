@@ -65,10 +65,29 @@ class AdminApiController
             ];
         }
 
+        if ($request->hasFile('page_hero_image')) {
+            $page = $request->validated('page_hero_page');
+            $path = (new SecureImageUpload)->execute($request->file('page_hero_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => $page === 'home' ? 'hero_image' : "page_hero_{$page}_image",
+                'value' => '/storage/'.$path,
+                'group' => 'hero',
+            ];
+        }
+
         if ($request->hasFile('about_teaser_image')) {
             $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
             $settings[] = [
                 'key' => 'about_teaser_image',
+                'value' => '/storage/'.$path,
+                'group' => 'about',
+            ];
+        }
+
+        if ($request->hasFile('about_shop_image')) {
+            $path = (new SecureImageUpload)->execute($request->file('about_shop_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'about_shop_image',
                 'value' => '/storage/'.$path,
                 'group' => 'about',
             ];
@@ -98,6 +117,24 @@ class AdminApiController
                 'key' => 'login_background_image',
                 'value' => '/storage/'.$path,
                 'group' => 'mobile',
+            ];
+        }
+
+        if ($request->hasFile('logo')) {
+            $path = (new SecureImageUpload)->execute($request->file('logo'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'logo',
+                'value' => '/storage/'.$path,
+                'group' => 'general',
+            ];
+        }
+
+        if ($request->hasFile('favicon')) {
+            $path = (new SecureImageUpload)->execute($request->file('favicon'), 'uploads/settings');
+            $settings[] = [
+                'key' => 'favicon',
+                'value' => '/storage/'.$path,
+                'group' => 'general',
             ];
         }
 

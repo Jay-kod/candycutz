@@ -4,6 +4,7 @@ export default [
   { path: '/customer/dashboard/my-codes', name: 'customer-my-codes', component: () => import('../../modules/customer/pages/MyCodesPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/profile', name: 'customer-profile', component: () => import('../../modules/customer/pages/ProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/reviews', name: 'customer-reviews', component: () => import('../../modules/customer/pages/ReviewsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/feedback', name: 'customer-feedback', component: () => import('../../modules/customer/pages/FeedbackPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/services', name: 'customer-services', component: () => import('../../modules/customer/pages/BrowseServicesPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/services/:id', name: 'customer-service-details', component: () => import('../../modules/customer/pages/ServiceDetailsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/book/:serviceId', name: 'customer-book-service', component: () => import('../../modules/customer/pages/BookServicePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },

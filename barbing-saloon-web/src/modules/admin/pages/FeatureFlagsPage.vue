@@ -10,7 +10,6 @@ import {
   PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
-  CheckCircleIcon,
   DevicePhoneMobileIcon,
   GlobeAltIcon,
   ExclamationTriangleIcon

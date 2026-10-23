@@ -51,7 +51,9 @@ export const useAuthStore = defineStore('auth', {
             email: user.email,
           };
           localStorage.setItem('candycutz_cached_user', JSON.stringify(minimal));
-        } catch (e) {}
+        } catch {
+          // Ignore localStorage errors (e.g. storage quota exceeded or disabled in private mode)
+        }
       }
     },
 

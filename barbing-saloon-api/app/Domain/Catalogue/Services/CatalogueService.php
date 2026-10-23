@@ -156,13 +156,27 @@ class CatalogueService
      */
     protected function serviceData(Service $service): array
     {
+        $imageUrl = null;
+        if ($service->image) {
+            if (str_starts_with($service->image, 'http')) {
+                $imageUrl = $service->image;
+            } else {
+                $normalized = ltrim($service->image, '/');
+                if (str_starts_with($normalized, 'storage/')) {
+                    $normalized = substr($normalized, strlen('storage/'));
+                }
+                $imageUrl = url('storage/'.$normalized);
+            }
+        }
+
         return [
             'id' => $service->id,
             'name' => $service->name,
             'description' => $service->description,
             'price' => $service->price,
             'duration_minutes' => $service->duration_minutes,
-            'image' => $service->image,
+            'image' => $imageUrl ?? $service->image,
+            'image_url' => $imageUrl,
             'is_available' => (bool) $service->is_active,
             'category' => $service->category ? [
                 'id' => $service->category->id,

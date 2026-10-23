@@ -1,11 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi'
 import { useToast } from '@/core/composables/useToast'
 import {
   CircleStackIcon,
-  CloudArrowDownIcon,
   CloudArrowUpIcon,
   ArrowPathIcon,
   TrashIcon,

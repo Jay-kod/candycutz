@@ -14,6 +14,7 @@ export default [
 	{ path: '/admin/services/:id/edit', name: 'admin-service-edit', component: () => import('@/features/services/pages/ServiceFormPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/gallery', name: 'admin-gallery', component: () => import('../../features/gallery/pages/AdminGalleryPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/testimonials', name: 'admin-testimonials', component: () => import('../../modules/admin/pages/TestimonialsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/feedback', name: 'admin-feedback', component: () => import('../../modules/admin/pages/FeedbackInboxPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/blog', name: 'admin-blog', component: () => import('../../modules/admin/pages/BlogPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/blog/new', name: 'admin-blog-new', component: () => import('../../modules/admin/pages/BlogEditorPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/blog/:id/edit', name: 'admin-blog-edit', component: () => import('../../modules/admin/pages/BlogEditorPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
@@ -22,6 +23,7 @@ export default [
 	{ path: '/admin/api', name: 'admin-api', component: () => import('../../modules/admin/pages/ApiReferencePage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('@/features/analytics/pages/AdminAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/settings', name: 'admin-settings', component: () => import('../../modules/superadmin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/brand-identity', name: 'admin-brand-identity', component: () => import('../../modules/admin/pages/cms/BrandIdentityPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/reports', name: 'admin-reports', component: () => import('@/features/analytics/pages/AdminReportsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{
 		path: '/admin/websites',
@@ -31,12 +33,42 @@ export default [
 		children: [
 			{ path: '', redirect: '/admin/websites/home' },
 			{ path: 'home', name: 'admin-cms-home', component: () => import('../../features/cms/pages/HomePage.vue') },
+			{ path: 'features', name: 'admin-cms-features', component: () => import('../../modules/admin/pages/cms/FeaturesPage.vue') },
+			{ path: 'cta', name: 'admin-cms-cta', component: () => import('../../features/cms/pages/CtaPage.vue') },
+			{ path: 'heroes', name: 'admin-cms-page-heroes', component: () => import('../../modules/admin/pages/cms/PageHeroesPage.vue') },
 			{ path: 'about', name: 'admin-cms-about', component: () => import('../../modules/admin/pages/cms/AboutPage.vue') },
 			{ path: 'services', name: 'admin-cms-services', component: () => import('../../modules/admin/pages/cms/ServicesPage.vue') },
 			{ path: 'gallery', name: 'admin-cms-gallery', component: () => import('../../modules/admin/pages/cms/GalleryPage.vue') },
 			{ path: 'contact', name: 'admin-cms-contact', component: () => import('../../modules/admin/pages/cms/ContactPage.vue') },
 			{ path: 'privacy', name: 'admin-cms-privacy', component: () => import('../../modules/admin/pages/cms/PrivacyPage.vue') },
 			{ path: 'terms', name: 'admin-cms-terms', component: () => import('../../modules/admin/pages/cms/TermsPage.vue') },
+			{
+				path: 'legal',
+				name: 'admin-cms-legal',
+				component: () => import('../../modules/admin/pages/cms/LegalPageEditor.vue'),
+				props: {
+					settingPrefix: 'legal_stuff',
+					pageTitle: 'Legal Stuff',
+					description: 'Edit the overview and links shown on the public Legal Stuff page.',
+					defaultSections: [
+						{ heading: 'Legal information', body: 'Review the CandyCutz terms, privacy information, security information, and cookie preferences using the links on this page.' },
+					],
+				},
+			},
+			{
+				path: 'security',
+				name: 'admin-cms-security',
+				component: () => import('../../modules/admin/pages/cms/LegalPageEditor.vue'),
+				props: {
+					settingPrefix: 'security',
+					pageTitle: 'Security',
+					description: 'Edit the public security information page. Publish only details that have been verified by your team.',
+					defaultSections: [
+						{ heading: 'Security information', body: 'Security information is being prepared. For questions or to report a security concern, please contact CandyCutz.' },
+					],
+				},
+			},
+			{ path: 'cookies', name: 'admin-cms-cookies', component: () => import('../../modules/admin/pages/cms/CookiePreferencesEditor.vue') },
 			{ path: 'account-deletion', name: 'admin-cms-account-deletion', component: () => import('../../modules/admin/pages/cms/AccountDeletionPage.vue') },
 		]
 	},

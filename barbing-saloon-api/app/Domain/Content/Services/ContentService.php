@@ -20,23 +20,44 @@ class ContentService
     {
         $key = $category ? "cat:{$category}" : 'all';
 
-        return CatalogueCache::remember('gallery', $key, function () use ($category) {
-            return Gallery::query()
+        return CatalogueCache::remember('gallery', $key, function () use ($category): array {
+            /** @var array<int, array<string, mixed>> $items */
+            $items = Gallery::query()
                 ->with('barber.user')
                 ->when($category, fn ($query) => $query->where('category', $category))
                 ->orderBy('display_order')
                 ->get()
-                ->map(fn (Gallery $gallery) => [
-                    'id' => $gallery->id,
-                    'title' => $gallery->title,
-                    'description' => $gallery->description,
-                    'image_path' => $gallery->image_path,
-                    'category' => $gallery->category?->value ?? $gallery->category,
-                    'is_featured' => $gallery->is_featured,
-                    'display_order' => $gallery->display_order,
-                    'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
-                ])
+                ->map(function (Gallery $gallery): array {
+                    $imageUrl = null;
+                    if ($gallery->image_path) {
+                        if (str_starts_with($gallery->image_path, 'http')) {
+                            $imageUrl = $gallery->image_path;
+                        } else {
+                            $normalized = ltrim($gallery->image_path, '/');
+                            if (str_starts_with($normalized, 'storage/')) {
+                                $normalized = substr($normalized, strlen('storage/'));
+                            }
+                            $imageUrl = url('storage/'.$normalized);
+                        }
+                    }
+
+                    return [
+                        'id' => $gallery->id,
+                        'title' => $gallery->title,
+                        'description' => $gallery->description,
+                        'image_path' => $gallery->image_path,
+                        'image_url' => $imageUrl,
+                        'category' => $gallery->category?->value ?? $gallery->category,
+                        'barber_id' => $gallery->barber_id,
+                        'barber_name' => $gallery->barber?->user?->name ?? $gallery->barber?->name ?? null,
+                        'is_featured' => $gallery->is_featured,
+                        'display_order' => $gallery->display_order,
+                        'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
+                    ];
+                })
                 ->all();
+
+            return $items;
         });
     }
 

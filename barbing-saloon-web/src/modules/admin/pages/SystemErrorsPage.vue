@@ -1,30 +1,23 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi'
 import { useToast } from '@/core/composables/useToast'
 import {
   BugAntIcon,
   ExclamationCircleIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ArrowPathIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   EyeIcon,
   XMarkIcon,
   FingerPrintIcon,
-  ClockIcon,
-  TagIcon,
   DocumentMagnifyingGlassIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   InformationCircleIcon,
-  ShieldExclamationIcon,
   LightBulbIcon,
   CodeBracketIcon,
-  ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline'
 
 const toast = useToast()

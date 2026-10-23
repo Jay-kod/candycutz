@@ -1,18 +1,17 @@
 <template>
   <PublicLayout>
-    <!-- Header Section -->
-    <section class="relative border-b border-theme-border bg-theme-bg py-24 md:py-32">
-      <div class="absolute inset-0 bg-gold/5 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-theme-bg to-theme-bg"></div>
-      <div class="relative mx-auto max-w-4xl px-6 text-center">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold" data-reveal>Legal</p>
-        <h1 class="mt-4 font-display text-5xl font-bold tracking-tight text-theme-text md:text-6xl lg:text-7xl" data-reveal data-reveal-delay="100">{{ pageTitle }}</h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg text-theme-muted" data-reveal data-reveal-delay="200">Last updated: {{ new Date().toLocaleDateString() }}</p>
-      </div>
-    </section>
+    <PageHero
+      page-key="terms"
+      eyebrow="Legal"
+      fallback-title="Terms of Service"
+      fallback-subtitle="The terms that apply when you use CandyCutz services."
+      title-setting-key="terms_title"
+    />
 
     <!-- Content Section -->
     <section class="bg-theme-surface py-20">
       <div class="mx-auto max-w-3xl px-6 text-theme-text leading-relaxed prose prose-invert prose-gold">
+        <p class="mb-10 text-sm text-theme-muted">Last updated: {{ currentDate }}</p>
         <div v-for="(section, index) in pageSections" :key="index" data-reveal :data-reveal-delay="100 + (index * 50)">
           <h2 class="font-display text-3xl text-gold mb-6">{{ section.heading }}</h2>
           <p class="mb-8 whitespace-pre-wrap">{{ section.body }}</p>
@@ -25,12 +24,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
+import PageHero from '@/shared/ui/PageHero.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { publicApi } from '@/shared/api/old_publicApi';
 
 const { init: initScrollReveal } = useScrollReveal();
 
-const pageTitle = ref('Terms of Service');
+const currentDate = new Date().toLocaleDateString();
 const pageSections = ref([
   {
     heading: '1. Agreement to Terms',
@@ -59,10 +59,11 @@ const fetchSettings = async () => {
     const response = await publicApi.settings();
     const settings = response.data.data;
     if (settings) {
-      if (settings.terms_title) pageTitle.value = settings.terms_title;
       if (settings.terms_sections) {
         try {
-          const parsed = JSON.parse(settings.terms_sections);
+          const parsed = typeof settings.terms_sections === 'string'
+            ? JSON.parse(settings.terms_sections)
+            : settings.terms_sections;
           if (Array.isArray(parsed) && parsed.length > 0) pageSections.value = parsed;
         } catch (e) { /* fallback to defaults */ }
       }

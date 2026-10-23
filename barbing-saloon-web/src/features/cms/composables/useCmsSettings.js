@@ -13,6 +13,7 @@ export function useCmsSettings() {
     hero_subtitle: 'Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.',
     hero_btn1_text: 'Book a Service',
     hero_btn2_text: 'About Us',
+    hero_image_opacity: 22,
     stats_years: '10+',
     stats_barbers: '5+',
     stats_services: '20+',
@@ -58,8 +59,17 @@ export function useCmsSettings() {
       const data = response.data.data;
       if (data) {
         Object.keys(settings.value).forEach(key => {
-          if (data[key]) settings.value[key] = data[key];
+          if (data[key] !== undefined && data[key] !== null) {
+            settings.value[key] = key === 'hero_image_opacity'
+              ? Number(data[key])
+              : data[key];
+          }
         });
+        if (data.hero_image_opacity !== undefined && data.hero_image_opacity !== null) {
+          settings.value.hero_image_opacity = Number(data.hero_image_opacity);
+        } else if (data.hero_opacity !== undefined && data.hero_opacity !== null) {
+          settings.value.hero_image_opacity = Number(data.hero_opacity);
+        }
         currentHeroImage.value = data.hero_image || null;
         currentAboutImage.value = data.about_teaser_image || null;
       }
@@ -98,6 +108,7 @@ export function useCmsSettings() {
       Object.keys(settings.value).forEach(key => {
         formData.append(`settings[${key}]`, settings.value[key]);
       });
+      formData.append('settings[hero_opacity]', settings.value.hero_image_opacity);
       
       if (heroImageFile.value) {
         formData.append('hero_image', heroImageFile.value);

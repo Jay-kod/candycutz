@@ -44,6 +44,7 @@ class ServiceResource extends JsonResource
             'category' => $this->category?->name ?? 'General Grooming',
             'category_id' => $this->category_id,
             'category_name' => $this->category?->name ?? 'General Grooming',
+            'image' => $imageUrl,
             'image_url' => $imageUrl,
             'is_active' => (bool) $this->is_active,
             'approval_status' => $this->approval_status ?? 'approved',

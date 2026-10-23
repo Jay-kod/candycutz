@@ -437,23 +437,6 @@ const dividerClass = computed(() =>
   isDark.value ? 'border-red-500/10' : 'border-emerald-500/10'
 );
 
-const activateBtnClass = computed(() =>
-  isDark.value
-    ? 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-500 shadow-md shadow-emerald-950/40'
-    : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm'
-);
-
-const deactivateBtnClass = computed(() =>
-  isDark.value
-    ? 'bg-red-500/15 text-red-400 border-red-500/30 hover:bg-red-500/25'
-    : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-);
-
-const resetBtnClass = computed(() =>
-  isDark.value
-    ? 'bg-amber-500/15 text-amber-400 border-amber-500/30 hover:bg-amber-500/25'
-    : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-);
 
 const getRoleBadgeClass = (role) => {
   const dark = isDark.value;
