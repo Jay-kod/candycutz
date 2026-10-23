@@ -44,6 +44,10 @@ it('groups shop identity settings as public general settings and validates their
     foreach ([$adminRules, $superAdminRules] as $rules) {
         expect($rules['settings.brand_name'])->toContain('max:120');
         expect($rules['settings.site_name'])->toContain('max:120');
+        expect($rules['settings.brand_name_part_one'])->toContain('max:60');
+        expect($rules['settings.brand_name_part_two'])->toContain('max:60');
+        expect($rules['settings.brand_name_separator'])->toContain('in:none,space');
+        expect($rules['settings.brand_gold_part'])->toContain('in:first,second');
         expect($rules['settings.brand_tagline'])->toContain('max:300');
     }
 });

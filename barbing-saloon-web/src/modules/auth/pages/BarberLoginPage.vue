@@ -16,7 +16,7 @@
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
           <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
-          <span>{{ brandName }}</span>
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
       
@@ -32,7 +32,7 @@
       
       <div class="relative z-10">
         <p class="text-xs uppercase tracking-[0.3em] text-theme-muted font-semibold">
-          &copy; {{ new Date().getFullYear() }} {{ brandName }}. All rights reserved.
+          &copy; {{ new Date().getFullYear() }} <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />. All rights reserved.
         </p>
       </div>
     </div>
@@ -44,7 +44,7 @@
       <div class="absolute top-8 left-8 lg:hidden">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col gap-1 w-fit">
           <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full" />
-          <span>{{ brandName }}</span>
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
 
@@ -183,13 +183,14 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
 import SocialAuthButtons from '../components/SocialAuthButtons.vue';
 import { useDark } from '@vueuse/core';
 
-const { brandName } = useBrandIdentity();
+const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
 const isDark = useDark({
   selector: 'html',
   attribute: 'data-theme',

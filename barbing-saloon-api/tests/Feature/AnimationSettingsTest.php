@@ -264,6 +264,10 @@ it('persists shop branding in general settings and exposes it publicly', functio
         'settings' => [
             'brand_name' => 'Sharp & Proper',
             'site_name' => 'Sharp & Proper',
+            'brand_name_part_one' => 'Sharp',
+            'brand_name_part_two' => 'Proper',
+            'brand_name_separator' => 'space',
+            'brand_gold_part' => 'first',
             'brand_tagline' => 'A better standard in grooming.',
             'site_description' => 'A better standard in grooming.',
         ],
@@ -277,6 +281,10 @@ it('persists shop branding in general settings and exposes it publicly', functio
         ->assertStatus(200)
         ->assertJsonPath('data.brand_name', 'Sharp & Proper')
         ->assertJsonPath('data.site_name', 'Sharp & Proper')
+        ->assertJsonPath('data.brand_name_part_one', 'Sharp')
+        ->assertJsonPath('data.brand_name_part_two', 'Proper')
+        ->assertJsonPath('data.brand_name_separator', 'space')
+        ->assertJsonPath('data.brand_gold_part', 'first')
         ->assertJsonPath('data.brand_tagline', 'A better standard in grooming.')
         ->assertJsonPath('data.site_description', 'A better standard in grooming.');
 });

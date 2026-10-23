@@ -5,7 +5,7 @@
         <div>
           <p class="text-xs font-bold uppercase tracking-[0.25em] text-admin/80">Business Identity</p>
           <h1 class="mt-2 font-display text-3xl text-theme-text sm:text-4xl">Shop Name & Branding</h1>
-          <p class="mt-2 max-w-2xl text-sm text-ivory/60">Set the shop name and short description used across the website and dashboards.</p>
+          <p class="mt-2 max-w-2xl text-sm text-ivory/60">Set the shop name, wordmark colors, and short description used across the website and dashboards.</p>
         </div>
         <button
           type="button"
@@ -25,19 +25,32 @@
 
       <section v-else class="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
         <div class="space-y-6 rounded-2xl border border-admin/10 bg-black/30 p-5 shadow-xl sm:p-7">
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">First name part</span>
+              <input v-model="form.first" type="text" maxlength="60" required autocomplete="off" class="editor-input" placeholder="Candy" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Second name part</span>
+              <input v-model="form.second" type="text" maxlength="60" required autocomplete="off" class="editor-input" placeholder="Cutz" />
+            </label>
+          </div>
           <label class="block">
-            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Shop name</span>
-            <input
-              v-model="form.name"
-              type="text"
-              maxlength="120"
-              required
-              autocomplete="organization"
-              class="editor-input"
-              placeholder="Enter your shop name"
-            />
-            <span class="mt-2 block text-xs text-ivory/45">Used in the public navbar and footer, dashboard sidebar, sign-in pages, and browser tab.</span>
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Space between parts</span>
+            <select v-model="form.separator" class="editor-input">
+              <option value="none">No space (CandyCutz)</option>
+              <option value="space">Add a space (Candy Cutz)</option>
+            </select>
           </label>
+
+          <label class="block">
+            <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Gold wordmark part</span>
+            <select v-model="form.goldPart" class="editor-input">
+              <option value="second">First part white, second part gold</option>
+              <option value="first">First part gold, second part white</option>
+            </select>
+          </label>
+          <p class="-mt-4 text-xs text-ivory/45">The other part is displayed in white.</p>
 
           <label class="block">
             <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Short description</span>
@@ -56,10 +69,10 @@
           <p class="text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live preview</p>
           <div class="mt-5 rounded-2xl border border-white/10 bg-obsidian p-6">
             <p class="text-xs font-semibold uppercase tracking-widest text-ivory/40">Website navigation</p>
-            <p class="mt-3 break-words font-display text-2xl font-bold text-theme-text">{{ form.name.trim() || 'Your shop name' }}</p>
+            <p class="mt-3 break-words font-display text-2xl font-bold"><BrandWordmark :first="form.first.trim() || 'First'" :second="form.second.trim() || 'Second'" :gold-first="form.goldPart === 'first'" :space-between="form.separator === 'space'" /></p>
             <div class="my-6 border-t border-white/10"></div>
             <p class="text-xs font-semibold uppercase tracking-widest text-ivory/40">Website footer</p>
-            <p class="mt-3 break-words font-display text-xl font-bold text-theme-text">{{ form.name.trim() || 'Your shop name' }}</p>
+            <p class="mt-3 break-words font-display text-xl font-bold"><BrandWordmark :first="form.first.trim() || 'First'" :second="form.second.trim() || 'Second'" :gold-first="form.goldPart === 'first'" :space-between="form.separator === 'space'" /></p>
             <p class="mt-2 text-sm leading-6 text-ivory/60">{{ form.tagline.trim() || 'Your shop description will appear here.' }}</p>
           </div>
           <p class="mt-4 text-xs leading-5 text-ivory/45">Your uploaded logo/icon is kept as-is; this page changes the displayed shop name and description.</p>
@@ -90,13 +103,14 @@ import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import { useToast } from '@/core/composables/useToast';
-import { applyBrandSettings } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
+import { applyBrandSettings, splitBrandName } from '@/shared/composables/useBrandIdentity';
 
 const route = useRoute();
 const toast = useToast();
 const loading = ref(true);
 const saving = ref(false);
-const form = reactive({ name: 'CandyCutz', tagline: '' });
+const form = reactive({ first: 'Candy', second: 'Cutz', separator: 'none', goldPart: 'second', tagline: '' });
 const isAdmin = computed(() => route.path.startsWith('/admin'));
 const layout = computed(() => (isAdmin.value ? AdminLayout : SuperAdminLayout));
 const api = computed(() => (isAdmin.value ? adminApi : superadminApi));
@@ -106,7 +120,12 @@ const load = async () => {
   try {
     const response = await api.value.settings();
     const settings = response.data?.data || {};
-    form.name = settings.brand_name || settings.site_name || 'CandyCutz';
+    const name = settings.brand_name || settings.site_name || 'CandyCutz';
+    const [first, second, separator] = splitBrandName(name);
+    form.first = settings.brand_name_part_one ?? first;
+    form.second = settings.brand_name_part_two ?? second;
+    form.separator = settings.brand_name_separator ?? separator;
+    form.goldPart = settings.brand_gold_part === 'first' ? 'first' : 'second';
     form.tagline = settings.brand_tagline || settings.site_description || '';
     applyBrandSettings(settings);
   } catch (error) {
@@ -118,22 +137,32 @@ const load = async () => {
 };
 
 const save = async () => {
-  const name = form.name.trim();
-  if (!name) {
-    toast.error('Enter a shop name before saving.');
+  const first = form.first.trim();
+  const second = form.second.trim();
+  if (!first || !second) {
+    toast.error('Enter both parts of the shop name before saving.');
     return;
   }
+  const name = `${first}${form.separator === 'space' ? ' ' : ''}${second}`;
 
   saving.value = true;
   try {
     const formData = new FormData();
     formData.append('settings[brand_name]', name);
     formData.append('settings[site_name]', name);
+    formData.append('settings[brand_name_part_one]', first);
+    formData.append('settings[brand_name_part_two]', second);
+    formData.append('settings[brand_name_separator]', form.separator);
+    formData.append('settings[brand_gold_part]', form.goldPart);
     formData.append('settings[brand_tagline]', form.tagline.trim());
     formData.append('settings[site_description]', form.tagline.trim());
     await api.value.updateSettings(formData);
     applyBrandSettings({
       brand_name: name,
+      brand_name_part_one: first,
+      brand_name_part_two: second,
+      brand_name_separator: form.separator,
+      brand_gold_part: form.goldPart,
       brand_tagline: form.tagline.trim(),
     });
     toast.success('Shop name and branding saved.');

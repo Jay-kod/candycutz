@@ -46,7 +46,7 @@
             ]"
           >
             <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-white']">
-              {{ brandName }}
+              <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </div>
             <div :class="['inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border', portalConfig.badgeClass]">
               <span :class="['h-1.5 w-1.5 rounded-full', portalConfig.dotClass]"></span>
@@ -267,8 +267,9 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/vue/24/outline';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 
-const { brandName } = useBrandIdentity();
+const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
 
 const props = defineProps({
   portalName: { type: String, default: 'Portal' },

@@ -4,7 +4,7 @@
       <div class="public-nav-shell" :class="{ 'public-nav-shell--scrolled': y > 20 || route.path !== '/' }">
         <RouterLink to="/" class="public-brand" :aria-label="`${brandName} home`">
           <img src="/images/logo-icon.png" alt="" class="public-brand__mark" />
-          <span class="public-brand__name">{{ brandName }}</span>
+          <BrandWordmark class="public-brand__name" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </RouterLink>
 
         <nav class="public-nav-links" aria-label="Main navigation">
@@ -67,7 +67,7 @@
           <div class="md:col-span-2 lg:col-span-1 space-y-4">
             <RouterLink to="/" class="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
               <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
-              <span class="tracking-tight">{{ brandName }}</span>
+              <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </RouterLink>
             <p class="text-xs sm:text-[13px] text-zinc-400 leading-relaxed max-w-sm">
               {{ brandTagline }}
@@ -152,7 +152,7 @@
 
         <!-- Copyright Line -->
         <p class="mt-4 text-center text-xs text-zinc-500">
-          Copyright &copy; {{ new Date().getFullYear() }} {{ brandName }}, Inc.
+          Copyright &copy; {{ new Date().getFullYear() }} <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />, Inc.
         </p>
       </div>
     </footer>
@@ -168,6 +168,7 @@ import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
 import SocialIcon from '@/components/SocialIcon.vue';
 import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 
 const route = useRoute();
 const { y } = useWindowScroll();
@@ -177,7 +178,7 @@ watch(() => route.fullPath, () => {
   mobileMenuOpen.value = false;
 });
 
-const { brandName, brandTagline } = useBrandIdentity();
+const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
 const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
 const shopPhone = ref('+234 812 345 6789');
 const shopEmail = ref('info@candycutz.com');
@@ -342,15 +343,7 @@ onMounted(() => {
 }
 
 .public-brand__name {
-  color: #FAFAF8;
-}
-
-.public-brand__accent {
-  color: #FF9900;
-}
-
-:global([data-theme="light"]) .public-brand__name {
-  color: #111827;
+  color: inherit;
 }
 
 .public-brand__mark {
