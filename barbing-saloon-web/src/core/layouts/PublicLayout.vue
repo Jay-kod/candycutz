@@ -84,15 +84,6 @@
               </div>
             </div>
 
-            <div class="pt-1">
-              <RouterLink
-                to="/customer/login"
-                class="inline-flex items-center gap-2 rounded-lg bg-gold/10 border border-gold/30 px-3.5 py-1.5 text-xs font-semibold text-gold transition-all duration-300 hover:bg-gold/20 hover:border-gold hover:shadow-[0_0_16px_rgba(255,153,0,0.2)]"
-              >
-                <span>Book Appointment</span>
-                <span class="text-xs font-bold">→</span>
-              </RouterLink>
-            </div>
           </div>
 
           <!-- Section 2: Explore -->
