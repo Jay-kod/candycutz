@@ -487,6 +487,7 @@ onMounted(() => {
   }
 
   .public-nav-shell {
+    margin: 0.75rem auto 0;
     min-height: 46px;
     grid-template-columns: 1fr auto;
     gap: 0.4rem;
