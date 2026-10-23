@@ -62,7 +62,7 @@
     <footer class="border-t border-white/10 bg-[#070708] pt-16 pb-12 text-zinc-400">
       <div class="mx-auto max-w-7xl px-4 md:px-6">
         <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.9fr)] gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
           <!-- Section 1: Brand & Shop Identity -->
           <div class="md:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
             <RouterLink to="/" class="inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
@@ -83,11 +83,10 @@
                 <span>Mon – Sat: 8:00 AM – 9:00 PM • Sun: 12:00 PM – 8:00 PM</span>
               </div>
             </div>
-
           </div>
 
           <!-- Section 2: Explore -->
-          <div class="md:col-span-1 md:pl-6 lg:pl-10">
+          <div class="md:col-span-1 md:pl-6 lg:pl-8">
             <h3 class="text-sm font-semibold tracking-tight text-white mb-3">Explore</h3>
             <ul class="flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
               <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
