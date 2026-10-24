@@ -40,7 +40,7 @@
             <p class="text-xs text-ivory/40 flex items-center gap-1.5"><PencilSquareIcon class="h-3.5 w-3.5"/> Edit your availability below</p>
           </div>
           
-          <div class="p-6">
+          <div class="p-3.5 xs:p-5 sm:p-6">
             <div v-if="loading" class="py-12 flex justify-center">
               <div class="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent shadow-[0_0_15px_rgba(212,175,55,0.5)]"></div>
             </div>
@@ -49,7 +49,7 @@
               <div
                 v-for="hour in workingHours"
                 :key="hour.day_of_week"
-                class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-5 transition-all duration-300"
+                class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-3.5 xs:p-4 sm:p-5 transition-all duration-300"
                 :class="hour.is_closed 
                   ? 'border-red-500/15 bg-gradient-to-r from-red-500/[0.04] to-transparent' 
                   : 'border-gold/10 bg-gradient-to-r from-gold/[0.03] to-transparent hover:border-gold/25 hover:shadow-[0_0_30px_rgba(212,175,55,0.04)]'"
@@ -81,35 +81,35 @@
                 </div>
                 
                 <!-- Time Selection -->
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap xs:flex-nowrap items-center gap-2 xs:gap-3 w-full sm:w-auto">
                     <template v-if="!hour.is_closed">
                       <!-- Open Time -->
-                      <div class="relative flex items-center">
+                      <div class="relative flex items-center flex-1 xs:flex-initial">
                         <div class="absolute left-3 pointer-events-none">
                           <div class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
                         </div>
                         <input 
                           type="time" 
                           v-model="hour.open_time" 
-                          class="w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
+                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
                         />
                       </div>
 
-                      <div class="flex items-center gap-1.5 px-1">
-                        <div class="h-px w-4 bg-gold/30"></div>
+                      <div class="flex items-center gap-1.5 px-1 shrink-0">
+                        <div class="h-px w-3 xs:w-4 bg-gold/30"></div>
                         <span class="text-[10px] uppercase tracking-widest text-gold/40 font-bold">to</span>
-                        <div class="h-px w-4 bg-gold/30"></div>
+                        <div class="h-px w-3 xs:w-4 bg-gold/30"></div>
                       </div>
 
                       <!-- Close Time -->
-                      <div class="relative flex items-center">
+                      <div class="relative flex items-center flex-1 xs:flex-initial">
                         <div class="absolute left-3 pointer-events-none">
                           <div class="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"></div>
                         </div>
                         <input 
                           type="time" 
                           v-model="hour.close_time" 
-                          class="w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
+                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
                         />
                       </div>
                     </template>

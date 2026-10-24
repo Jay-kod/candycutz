@@ -83,7 +83,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 7.5rem 1.25rem 3.5rem;
+  padding: 6rem 1.25rem 1.5rem;
   background:
     radial-gradient(ellipse at 50% 45%, rgba(255, 153, 0, 0.1), transparent 58%),
     #090909;
@@ -148,8 +148,8 @@ onMounted(async () => {
 
 @media (max-width: 640px) {
   .page-hero {
-    padding-top: 6.5rem;
-    padding-bottom: 2.5rem;
+    padding-top: 5rem;
+    padding-bottom: 1rem;
   }
 }
 </style>
