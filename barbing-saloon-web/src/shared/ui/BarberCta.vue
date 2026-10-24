@@ -10,8 +10,9 @@
     <div v-if="!compact" class="barber-cta__dot-field" aria-hidden="true"></div>
 
     <div class="barber-cta__content">
-      <h1 class="barber-cta__title" :style="{ color: resolvedTitleColor }">
-        {{ title.replace(/\s*\n\s*/g, ' ').trim() }}
+      <h1 class="barber-cta__title">
+        <span :class="firstTitlePartClass">{{ titleParts[0] }}</span>
+        <span :class="secondTitlePartClass">{{ titleParts[1] }}</span>
       </h1>
 
       <p class="barber-cta__subtitle text-center">{{ subtitle }}</p>
@@ -37,6 +38,9 @@ import { ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   title: { type: String, default: 'Precision Cuts.\nMade for You.' },
+  titlePartOne: { type: String, default: '' },
+  titlePartTwo: { type: String, default: '' },
+  titleColorOrder: { type: String, default: 'first-white' },
   subtitle: { type: String, default: 'Expert barbers. Fresh fades. A better kind of barbershop experience.' },
   caption: { type: String, default: '' },
   titleColor: { type: String, default: '#ffb84d' },
@@ -49,8 +53,26 @@ const props = defineProps({
   compact: { type: Boolean, default: false }
 });
 
-const resolvedTitleColor = computed(() => (
-  /^#[\da-f]{6}$/i.test(props.titleColor) ? props.titleColor : '#ffb84d'
+const titleParts = computed(() => {
+  const first = props.titlePartOne.trim();
+  const second = props.titlePartTwo.trim();
+  if (first || second) return [first, second].filter(Boolean);
+
+  const normalizedTitle = props.title.replace(/\s*\n\s*/g, ' ').trim();
+  const sentenceBreak = normalizedTitle.match(/^(.+?[.!?])\s+(.+)$/);
+  if (sentenceBreak) return [sentenceBreak[1], sentenceBreak[2]];
+
+  const words = normalizedTitle.split(/\s+/);
+  if (words.length < 2) return [normalizedTitle];
+  const midpoint = Math.ceil(words.length / 2);
+  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')];
+});
+
+const firstTitlePartClass = computed(() => (
+  props.titleColorOrder === 'first-gold' ? 'barber-cta__title-gold' : 'barber-cta__title-white'
+));
+const secondTitlePartClass = computed(() => (
+  props.titleColorOrder === 'first-gold' ? 'barber-cta__title-white' : 'barber-cta__title-gold'
 ));
 
 const resolvedPhotoOpacity = computed(() => {
@@ -158,11 +180,23 @@ const resolvedOverlayOpacity = computed(() => {
 
 .barber-cta__title {
   margin: 0;
-  font-size: clamp(2.5rem, 6vw, 4.15rem);
+  font-size: clamp(1.25rem, 6vw, 4.15rem);
   font-weight: 700;
   letter-spacing: -0.055em;
   line-height: 1.06;
-  text-wrap: balance;
+  white-space: nowrap;
+}
+
+.barber-cta__title span {
+  display: inline;
+}
+
+.barber-cta__title-white {
+  color: #fafafa;
+}
+
+.barber-cta__title-gold {
+  color: #ffb84d;
 }
 
 .barber-cta__subtitle {
@@ -254,7 +288,7 @@ const resolvedOverlayOpacity = computed(() => {
   }
 
   .barber-cta__title {
-    font-size: clamp(2.35rem, 10.5vw, 3.5rem);
+    font-size: clamp(1.25rem, 6vw, 3.5rem);
   }
 
   .barber-cta__subtitle {
