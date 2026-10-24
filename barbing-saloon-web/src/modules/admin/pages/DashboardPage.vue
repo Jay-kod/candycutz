@@ -6,8 +6,12 @@
 
       <!-- Fully Populated Dashboard with CandyCutz System Colors & Real Backend Data -->
       <template v-else>
-        <!-- Top Bar: Greeting + Quick Action -->
-        <DashboardPrecisionHeader />
+        <!-- Top Bar: Greeting + Health & DB Status + Refresh + Quick Action -->
+        <DashboardPrecisionHeader 
+          :system-health="dashboard.system_health"
+          :is-refreshing="isRefreshing"
+          @refresh="loadDashboardData(true)"
+        />
 
         <!-- Row 1: 4 Metric Cards with Mini Equalizer Sparklines -->
         <DashboardPrecisionKpis 
@@ -20,6 +24,8 @@
         <!-- Row 2: 8-col Segmented Equalizer Chart + 4-col Monthly Segmented Chart -->
         <DashboardPrecisionRevenueCharts 
           :revenue-trend="dashboard.revenue_trend" 
+          :thirty-day-trend="dashboard.thirty_day_trend"
+          :monthly-revenue-trend="dashboard.monthly_revenue_trend"
           :booking-trend="dashboard.booking_trend"
           :stats="dashboard.stats"
           :revenue="dashboard.revenue"
@@ -37,6 +43,7 @@
           :top-services="dashboard.top_services" 
           :top-barbers="dashboard.top_barbers" 
           :recent-appointments="dashboard.recent_appointments"
+          :hourly-distribution="dashboard.hourly_distribution"
         />
       </template>
     </section>
@@ -53,5 +60,5 @@ import DashboardPrecisionFunnelAndStatus from '@/features/dashboard/components/D
 import DashboardPrecisionBottomCards from '@/features/dashboard/components/DashboardPrecisionBottomCards.vue';
 import DashboardPrecisionSkeleton from '@/features/dashboard/components/DashboardPrecisionSkeleton.vue';
 
-const { dashboard, loading } = useAdminDashboard();
+const { dashboard, loading, isRefreshing, loadDashboardData } = useAdminDashboard();
 </script>
