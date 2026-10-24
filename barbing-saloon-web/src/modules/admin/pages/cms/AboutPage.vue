@@ -36,7 +36,7 @@
 
       <!-- Editor Forms Container -->
       <div v-else class="space-y-6">
-        <section class="overflow-hidden rounded-2xl border border-admin/10 bg-black/30 shadow-xl">
+        <section v-show="activeTab === 'all' || activeTab === 'shop'" class="overflow-hidden rounded-2xl border border-admin/10 bg-black/30 shadow-xl">
           <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-6 py-5 sm:px-8">
             <h2 class="font-display text-xl text-theme-text">About Hero Cover</h2>
             <p class="mt-1 text-xs text-ivory/45">Upload a cover image and adjust the dark overlay behind the About page title.</p>
