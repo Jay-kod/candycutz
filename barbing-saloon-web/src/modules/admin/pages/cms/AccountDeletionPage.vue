@@ -1,132 +1,148 @@
 <template>
-  <div class="space-y-8 animate-fade-in pb-12">
-    <!-- Header Banner -->
-    <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 lg:p-12 shadow-2xl">
-      <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/10 blur-3xl"></div>
-      <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl"></div>
-      
-      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div>
-          <p class="text-xs uppercase tracking-[0.3em] text-admin/80 font-bold flex items-center gap-2">
-            <TrashIcon class="w-4 h-4" /> Compliance & Account Control
-          </p>
-          <h1 class="mt-2 font-display text-4xl lg:text-5xl text-theme-text drop-shadow-lg">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Account Deletion</span>
-          </h1>
-          <p class="mt-3 text-sm lg:text-base text-ivory/60 max-w-xl">Configure instructions and policies for Google Play / App Store account deletion requirements.</p>
+  <div class="space-y-6 animate-fade-in pb-16">
+    <!-- Header: Ambient luxury hero, live clock & primary actions -->
+    <AccountDeletionHeader 
+      :saving="saving" 
+      :loading="loading" 
+      :is-dirty="isDirty" 
+      @save="submit" 
+      @refresh="fetchContent" 
+    />
+
+    <!-- Skeleton Preloader (Zero Layout Shift) -->
+    <AccountDeletionSkeleton v-if="loading" />
+
+    <!-- Loaded Content Workspace -->
+    <div v-else class="space-y-6 animate-slide-up">
+      <!-- High-Density KPI / Section Stat Cards -->
+      <AccountDeletionStats 
+        :content="content"
+        :retention-notice-word-count="retentionNoticeWordCount"
+        :is-compliant-with-app-store="isCompliantWithAppStore"
+      />
+
+      <!-- Section Navigation Tabs & Interactive Preview Switcher -->
+      <AccountDeletionNavTabs v-model:active-tab="activeTab" />
+
+      <!-- Interactive Public Simulation Mode -->
+      <div v-if="activeTab === 'preview'" class="transition-all duration-300">
+        <AccountDeletionLivePreview 
+          :content="content"
+          :preview-hero-image="previewHeroImage"
+          :hero-opacity="heroOpacity"
+          @exit="activeTab = 'all'"
+        />
+      </div>
+
+      <!-- Editor Forms Container -->
+      <div v-else class="space-y-6">
+        <!-- 1. Headline & Hero Cover Form -->
+        <div v-show="activeTab === 'all' || activeTab === 'hero'">
+          <AccountDeletionHeroForm 
+            ref="heroFormRef"
+            :content="content"
+            v-model:hero-opacity="heroOpacity"
+            :preview-hero-image="previewHeroImage"
+            @image-selected="selectHeroImage"
+            @clear-image="handleClearImage"
+          />
         </div>
-        <button 
-          @click="saveContent" 
-          :disabled="saving" 
-          class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light px-6 py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_4px_25px_rgba(255,103,0,0.4)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-obsidian border-t-transparent"></span>
-          <CheckIcon v-else class="h-5 w-5" />
-          {{ saving ? 'Saving...' : 'Save Changes' }}
-        </button>
+
+        <!-- 2. Statutory Retention & Legal Notice Form -->
+        <div v-show="activeTab === 'all' || activeTab === 'retention'">
+          <AccountDeletionRetentionForm :content="content" />
+        </div>
+
+        <!-- 3. Form Field Placeholders Form -->
+        <div v-show="activeTab === 'all' || activeTab === 'placeholders'">
+          <AccountDeletionPlaceholdersForm :content="content" />
+        </div>
+
+        <!-- Bottom Action Bar -->
+        <div class="rounded-2xl border border-white/[0.08] bg-[#12161C] p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-2.5 text-xs text-white/50">
+            <span class="h-2 w-2 rounded-full" :class="isDirty ? 'bg-amber-400' : 'bg-emerald-400'"></span>
+            <span>{{ isDirty ? 'Unsaved modifications pending' : 'All account deletion settings in sync with production' }}</span>
+            <span v-if="lastSaved" class="text-white/30">• Last synced {{ lastSaved }}</span>
+          </div>
+
+          <button 
+            @click="submit" 
+            :disabled="saving" 
+            class="flex items-center justify-center min-h-[42px] w-full sm:w-auto gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light px-6 py-2.5 text-xs font-bold text-obsidian shadow-[0_4px_15px_rgba(255,103,0,0.25)] hover:shadow-[0_6px_20px_rgba(255,103,0,0.4)] active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-obsidian border-t-transparent"></span>
+            <CheckIcon v-else class="h-4 w-4" />
+            <span>{{ saving ? 'Saving Changes...' : 'Save All Changes' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Content Editor -->
-    <div class="space-y-6">
-      <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
-        <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
-          <h2 class="font-display text-xl text-theme-text">Page Header</h2>
-          <p class="mt-1 text-xs text-ivory/40">Title and description displayed on the public account deletion request page.</p>
-        </div>
-        <div class="p-8 space-y-6">
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Title</label>
-            <input v-model="content.account_deletion_title" type="text" placeholder="Delete Your CandyCutz Account" 
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Instructions & Notice</label>
-            <textarea v-model="content.account_deletion_body" rows="6" placeholder="Instructions explaining how accounts are deleted and what data is removed..."
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-y"></textarea>
-          </div>
-        </div>
-        <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
-          <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
-            <h2 class="font-display text-xl text-theme-text">Request Form Placeholders</h2>
-            <p class="mt-1 text-xs text-ivory/40">Edit the example text shown inside the public deletion request form.</p>
-          </div>
-          <div class="grid gap-6 p-8">
-            <label class="block">
-              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Registered email</span>
-              <input v-model="content.account_deletion_email_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
-            </label>
-            <label class="block">
-              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Username or full name</span>
-              <input v-model="content.account_deletion_identifier_placeholder" type="text" maxlength="180" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
-            </label>
-            <label class="block">
-              <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Reason</span>
-              <input v-model="content.account_deletion_reason_placeholder" type="text" maxlength="500" class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:outline-none" />
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Floating Sticky Bar on Unsaved Changes -->
+    <AccountDeletionStickyBar :is-dirty="isDirty" :saving="saving" @save="submit" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useToast } from '../../../../core/composables/useToast';
-import { adminApi } from '@/shared/api/old_adminApi';
-import { TrashIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { CheckIcon } from '@heroicons/vue/24/outline';
+import { useAccountDeletionCms } from './composables/useAccountDeletionCms';
+import AccountDeletionHeader from './components/account-deletion/AccountDeletionHeader.vue';
+import AccountDeletionStats from './components/account-deletion/AccountDeletionStats.vue';
+import AccountDeletionSkeleton from './components/account-deletion/AccountDeletionSkeleton.vue';
+import AccountDeletionNavTabs from './components/account-deletion/AccountDeletionNavTabs.vue';
+import AccountDeletionHeroForm from './components/account-deletion/AccountDeletionHeroForm.vue';
+import AccountDeletionRetentionForm from './components/account-deletion/AccountDeletionRetentionForm.vue';
+import AccountDeletionPlaceholdersForm from './components/account-deletion/AccountDeletionPlaceholdersForm.vue';
+import AccountDeletionLivePreview from './components/account-deletion/AccountDeletionLivePreview.vue';
+import AccountDeletionStickyBar from './components/account-deletion/AccountDeletionStickyBar.vue';
 
-const toast = useToast();
-const saving = ref(false);
+const {
+  content,
+  saving,
+  loading,
+  lastSaved,
+  isDirty,
+  activeTab,
+  heroOpacity,
+  previewHeroImage,
+  retentionNoticeWordCount,
+  isCompliantWithAppStore,
+  selectHeroImage,
+  clearHeroImage,
+  fetchContent,
+  saveContent
+} = useAccountDeletionCms();
 
-const content = ref({
-  account_deletion_title: 'Delete Your CandyCutz Account',
-  account_deletion_body: 'If you wish to permanently delete your CandyCutz account and all associated personal data, bookings history, and saved preferences, you may submit a deletion request. This action is irreversible.',
-  account_deletion_email_placeholder: 'you@example.com',
-  account_deletion_identifier_placeholder: '@username or Full Name',
-  account_deletion_reason_placeholder: 'Help us understand how we can improve...',
-});
+const heroFormRef = ref(null);
 
-const fetchContent = async () => {
-  try {
-    const response = await adminApi.settings();
-    const data = response.data?.data;
-    if (data) {
-      if (data.account_deletion_title) content.value.account_deletion_title = data.account_deletion_title;
-      if (data.account_deletion_body) content.value.account_deletion_body = data.account_deletion_body;
-      for (const key of [
-        'account_deletion_email_placeholder',
-        'account_deletion_identifier_placeholder',
-        'account_deletion_reason_placeholder',
-      ]) {
-        if (data[key]) content.value[key] = data[key];
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load account deletion content:', error);
-  }
+const handleClearImage = () => {
+  clearHeroImage(heroFormRef.value?.imageInput);
 };
 
-const saveContent = async () => {
-  saving.value = true;
-  try {
-    const formData = new FormData();
-    formData.append('settings[account_deletion_title]', content.value.account_deletion_title);
-    formData.append('settings[account_deletion_body]', content.value.account_deletion_body);
-    formData.append('settings[account_deletion_email_placeholder]', content.value.account_deletion_email_placeholder);
-    formData.append('settings[account_deletion_identifier_placeholder]', content.value.account_deletion_identifier_placeholder);
-    formData.append('settings[account_deletion_reason_placeholder]', content.value.account_deletion_reason_placeholder);
-    await adminApi.updateSettings(formData);
-    toast.success('Account deletion page content saved!');
-  } catch (error) {
-    toast.error('Failed to save changes.');
-  } finally {
-    saving.value = false;
-  }
+const submit = () => {
+  saveContent(heroFormRef.value?.imageInput);
 };
 
 onMounted(() => {
   fetchContent();
 });
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

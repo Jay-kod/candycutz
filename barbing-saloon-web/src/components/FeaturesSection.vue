@@ -28,7 +28,7 @@
             </div>
 
             <!-- Title -->
-            <h3 class="font-heading mt-4 font-semibold text-sm md:text-base text-theme-text group-hover:text-gold transition-colors">
+            <h3 class="font-heading mt-4 font-semibold text-sm md:text-base text-neutral-900 dark:text-theme-text group-hover:text-gold transition-colors">
               {{ feature.title }}
             </h3>
 
