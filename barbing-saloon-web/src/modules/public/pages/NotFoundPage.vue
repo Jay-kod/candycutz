@@ -3,8 +3,8 @@
     <section class="relative flex min-h-[80vh] w-full max-w-4xl flex-col items-center justify-center overflow-hidden px-4 xs:px-6 py-12 sm:py-20 text-center">
       <!-- Decorative background elements -->
       <div class="pointer-events-none absolute inset-0 overflow-hidden max-w-full">
-        <div class="absolute -left-10 -top-10 h-72 w-72 rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
-        <div class="absolute -bottom-10 right-0 h-72 w-72 rounded-full bg-gold/5 blur-3xl animate-pulse-slow" style="animation-delay: 1.5s"></div>
+        <div class="absolute -left-10 -top-10 h-64 w-64 rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
+        <div class="absolute -bottom-10 right-4 h-64 w-64 rounded-full bg-gold/5 blur-3xl animate-pulse-slow" style="animation-delay: 1.5s"></div>
       </div>
 
       <!-- Animated Scissors SVG -->
