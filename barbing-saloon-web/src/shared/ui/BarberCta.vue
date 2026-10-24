@@ -10,7 +10,7 @@
     <div v-if="!compact" class="barber-cta__dot-field" aria-hidden="true"></div>
 
     <div class="barber-cta__content">
-      <h1 class="barber-cta__title">
+      <h1 class="barber-cta__title whitespace-nowrap">
         <span :class="firstTitlePartClass">{{ titleParts[0] }}</span>
         <span v-if="titleParts[1]" :class="secondTitlePartClass"> {{ titleParts[1] }}</span>
       </h1>

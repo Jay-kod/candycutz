@@ -30,7 +30,7 @@ describe('BarberCta', () => {
     expect(wrapper.find('.barber-cta__subtitle').text()).toBe('Pick a barber and book your style.');
     expect(wrapper.find('.barber-cta__caption').text()).toBe('Premium grooming, made simple.');
     expect(wrapper.find('.barber-cta__actions').element.previousElementSibling).toBe(wrapper.find('.barber-cta__caption').element);
-    expect(wrapper.find('h1').element.style.whiteSpace).toBe('nowrap');
+    expect(wrapper.find('h1').classes()).toContain('whitespace-nowrap');
   });
 
   it('supports the reverse white and gold headline order', () => {
