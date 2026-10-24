@@ -30,9 +30,9 @@
       </div>
     </div>
 
-    <!-- Row 2: 2 Revenue Chart Skeletons (8 cols + 4 cols) -->
+    <!-- Row 2: 2 Revenue Chart Skeletons with Wide & Closely Spaced Bars -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-      <!-- Left 8-col Skeleton -->
+      <!-- Left 8-col Skeleton: 28 Wide & Closely Spaced Columns -->
       <div class="lg:col-span-8 rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 space-y-6">
         <div class="flex flex-col sm:flex-row justify-between gap-4 pb-4 border-b border-white/[0.04]">
           <div class="space-y-2">
@@ -46,23 +46,23 @@
           <div class="h-7 w-36 rounded-lg bg-white/[0.04] animate-pulse"></div>
         </div>
 
-        <!-- 24-Column Equalizer Skeleton with Orange Tint -->
-        <div class="h-56 flex items-end justify-between gap-1 sm:gap-2 px-2 pb-5">
+        <!-- 28 Wide & Closely Spaced Columns Skeleton -->
+        <div class="h-56 flex items-end justify-between gap-[2px] sm:gap-[3px] md:gap-1 px-1 pb-5 w-full">
           <div
-            v-for="c in 26"
+            v-for="c in 28"
             :key="'sk-col-' + c"
             class="flex-1 flex flex-col-reverse gap-[2px] items-center"
           >
             <span
-              v-for="b in ((c % 7) + 8)"
+              v-for="b in ((c % 7) + 10)"
               :key="'sk-b-' + b"
-              class="w-full max-w-[8px] h-[5px] rounded-[1px] bg-admin/20 animate-pulse"
+              class="w-full max-w-[20px] sm:max-w-[22px] h-[5px] sm:h-[6px] rounded-[1px] bg-admin/20 animate-pulse"
             ></span>
           </div>
         </div>
       </div>
 
-      <!-- Right 4-col Skeleton -->
+      <!-- Right 4-col Skeleton: Wide Monthly Bars -->
       <div class="lg:col-span-4 rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 space-y-6">
         <div class="flex justify-between items-start pb-4 border-b border-white/[0.04]">
           <div class="space-y-2">
@@ -72,17 +72,17 @@
           <div class="h-4 w-12 rounded bg-emerald-500/20 animate-pulse"></div>
         </div>
 
-        <!-- Monthly Bars Skeleton -->
-        <div class="h-56 flex items-end justify-between gap-3 px-3 pb-5">
+        <!-- Wide Monthly Bars Skeleton -->
+        <div class="h-56 flex items-end justify-between gap-3 sm:gap-4 md:gap-5 px-3 pb-5">
           <div
-            v-for="m in 5"
+            v-for="m in 6"
             :key="'sk-mbar-' + m"
             class="flex-1 flex flex-col-reverse gap-[2px] items-center"
           >
             <span
-              v-for="seg in ((m % 4) * 3 + 8)"
+              v-for="seg in ((m % 4) * 3 + 10)"
               :key="'sk-mseg-' + seg"
-              class="w-full max-w-[12px] h-[5px] rounded-[1px] bg-admin/25 animate-pulse"
+              class="w-full max-w-[24px] sm:max-w-[28px] h-[5px] sm:h-[6px] rounded-[1px] bg-admin/25 animate-pulse"
             ></span>
           </div>
         </div>
