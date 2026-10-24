@@ -25,7 +25,14 @@ trait HasSecureUploads
         $folder = trim($folder, '/');
         $fileName = Str::uuid().'-'.time().'.webp';
 
-        return $file->storePubliclyAs($folder, $fileName, 'public');
+        $stored = $file->storePubliclyAs($folder, $fileName, 'public');
+        $publicStoragePath = public_path('storage/'.$stored);
+        if (! file_exists($publicStoragePath)) {
+            @mkdir(dirname($publicStoragePath), 0755, true);
+            @copy($file->getRealPath(), $publicStoragePath);
+        }
+
+        return $stored;
     }
 
     public function deleteFile(string $path): void
