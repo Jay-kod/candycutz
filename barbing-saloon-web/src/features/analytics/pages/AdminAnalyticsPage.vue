@@ -2,10 +2,10 @@
   <AdminLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-xl border border-theme-border bg-theme-surface p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="relative overflow-hidden rounded-xl border border-theme-border bg-theme-surface p-4 xs:p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <p class="text-xs uppercase tracking-[0.3em] text-admin/70 font-bold">Admin Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
+          <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text">
             Platform <span class="text-admin">Analytics</span>
           </h1>
           <p class="mt-2 text-sm text-theme-muted max-w-xl">
@@ -14,11 +14,11 @@
         </div>
 
         <!-- Time Range Selector -->
-        <div class="flex items-center gap-2 bg-theme-bg p-1 rounded-lg border border-theme-border w-max">
+        <div class="flex flex-wrap items-center gap-1.5 xs:gap-2 bg-theme-bg p-1 rounded-lg border border-theme-border max-w-full">
           <button v-for="r in ranges" :key="r.value"
                   @click="setRange(r.value)"
                   :class="[
-                    'px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300',
+                    'px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-md text-xs xs:text-sm font-semibold transition-all duration-300 min-h-[38px] flex items-center justify-center',
                     range === r.value 
                       ? 'bg-gold text-obsidian' 
                       : 'text-theme-muted hover:text-theme-text hover:bg-white/5'

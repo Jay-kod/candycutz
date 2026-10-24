@@ -2,12 +2,12 @@
   <BarberLayout>
     <section class="space-y-6 animate-fade-in min-h-full pb-6">
       <!-- Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8 shadow-2xl">
+      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-4 xs:p-6 sm:p-8 shadow-2xl">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Schedule</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text drop-shadow-lg">
+            <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text drop-shadow-lg">
               Working Hours & <span class="text-gold">Bookings</span>
             </h1>
           </div>
