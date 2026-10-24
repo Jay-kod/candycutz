@@ -1,0 +1,1 @@
+import{E as e,L as t,c as n,m as r}from"./runtime-core.esm-bundler-CvTHluui.js";import{t as i}from"./AdminLayout-DhUk39cF.js";import{t as a}from"./NotificationsView-CaCKQ0jy.js";var o={__name:`NotificationsPage`,setup(o){return(o,s)=>(e(),n(i,null,{default:t(()=>[r(a)]),_:1}))}};export{o as default};
