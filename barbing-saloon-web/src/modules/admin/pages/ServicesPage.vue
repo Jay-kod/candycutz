@@ -2,7 +2,7 @@
   <AdminLayout>
     <section class="space-y-6 animate-fade-in pb-10">
       <!-- Premium Header Banner -->
-      <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#111111]/90 p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 backdrop-blur-3xl">
+      <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#111111]/90 p-4 xs:p-6 sm:p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 backdrop-blur-3xl">
         <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-admin/10 blur-[100px]"></div>
         <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/8 blur-[80px]"></div>
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,103,0,0.05),transparent_60%)]"></div>
@@ -14,7 +14,7 @@
             </span>
             <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold">Catalog</p>
           </div>
-          <h1 class="font-display text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
+          <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
             Service <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-amber-400">Menu</span>
             <span v-if="!loading" class="ml-3 inline-flex items-center justify-center h-9 px-3.5 rounded-full bg-white/5 border border-white/10 text-lg text-white/60 font-normal align-middle">{{ services.length }}</span>
           </h1>

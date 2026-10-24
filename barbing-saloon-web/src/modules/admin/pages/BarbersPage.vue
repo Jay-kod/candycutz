@@ -14,7 +14,7 @@
             </span>
             <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold">Staff Management</p>
           </div>
-          <h1 class="font-display text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
+          <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
             Barber <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-amber-400">Team</span>
           </h1>
           <p class="mt-3 text-sm text-white/40 max-w-lg leading-relaxed">
@@ -88,7 +88,7 @@
                   </div>
                   
                   <!-- Quick Actions Menu -->
-                  <div class="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <router-link :to="`/admin/barbers/${barber.id}/edit`" class="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors" title="Edit Barber">
                       <PencilSquareIcon class="h-4 w-4" />
                     </router-link>
