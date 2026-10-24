@@ -60,3 +60,4 @@ describe('PrivacyStats.vue', () => {
     expect(text).toContain('Add Account Erasure');
   });
 });
+
