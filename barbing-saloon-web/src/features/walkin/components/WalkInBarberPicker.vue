@@ -105,3 +105,4 @@ const selectBarber = (id) => {
   emit('update:modelValue', id);
 };
 </script>
+

@@ -83,7 +83,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 6rem 1.25rem 1.5rem;
+  padding: 5.5rem 1.25rem 1rem;
   background:
     radial-gradient(ellipse at 50% 45%, rgba(255, 153, 0, 0.1), transparent 58%),
     #090909;

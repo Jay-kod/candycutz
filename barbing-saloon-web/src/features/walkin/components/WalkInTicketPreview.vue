@@ -147,3 +147,4 @@ const paymentMethodLabel = computed(() => {
   return map[props.form.payment_method] || 'Cash';
 });
 </script>
+
