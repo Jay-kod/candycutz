@@ -28,12 +28,19 @@
       Approved customer testimonials will appear here.
     </p>
 
-    <div v-else class="relative w-full overflow-x-auto border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
-      <div class="flex w-max items-stretch">
+    <div v-else class="testimonials-marquee relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
+      <div
+        v-for="(loop, loopIndex) in 2"
+        :key="loopIndex"
+        class="testimonials-track flex shrink-0 items-stretch"
+        :class="direction === 'right' ? 'testimonials-track-right' : 'testimonials-track-left'"
+        :style="{ '--testimonials-marquee-duration': `${speed}s` }"
+        :aria-hidden="loopIndex === 1 ? 'true' : undefined"
+      >
         <article
           v-for="(testimonial, idx) in visibleTestimonials"
-          :key="testimonial.id || idx"
-          class="group/card flex w-[320px] sm:w-[380px] md:w-[420px] shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 sm:p-7 md:p-8 transition-colors duration-200 hover:bg-white/[0.035]"
+          :key="`${loopIndex}-${testimonial.id || idx}`"
+          class="group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 transition-colors duration-200 hover:bg-white/[0.035] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
         >
           <!-- Card Header: Quote Icon + Source Pill -->
           <div class="flex items-center justify-between gap-4">
@@ -97,6 +104,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  speed: {
+    type: Number,
+    default: 45,
+  },
+  direction: {
+    type: String,
+    default: 'left',
+    validator: (value) => ['left', 'right'].includes(value),
+  },
   badge: {
     type: String,
     default: 'Client stories',
@@ -143,4 +159,39 @@ const getSource = (item) => {
 </script>
 
 <style scoped>
+.testimonials-marquee {
+  display: flex;
+}
+
+.testimonials-track {
+  min-width: 100%;
+  will-change: transform;
+  animation-duration: var(--testimonials-marquee-duration, 45s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.testimonials-track-left {
+  animation-name: testimonials-scroll-left;
+}
+
+.testimonials-track-right {
+  animation-name: testimonials-scroll-right;
+}
+
+@keyframes testimonials-scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes testimonials-scroll-right {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none;
+  }
+}
 </style>
