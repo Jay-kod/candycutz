@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen w-full overflow-x-hidden bg-[var(--color-bg)] text-[var(--color-text)] font-sans">
+  <div class="min-h-[100dvh] w-full bg-[var(--color-bg)] text-[var(--color-text)] font-sans">
     <div class="scroll-progress" aria-hidden="true"></div>
     <router-view />
     <ConfirmModal />

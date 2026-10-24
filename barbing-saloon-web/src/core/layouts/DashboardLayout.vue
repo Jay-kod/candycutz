@@ -41,7 +41,7 @@
       <main 
         id="main-scroll-container" 
         tabindex="0"
-        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 lg:p-10 custom-scrollbar overscroll-contain focus:outline-none"
+        class="flex-1 min-h-0 overflow-y-auto p-3 xs:p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain focus:outline-none"
         :class="mainBgClass"
       >
         <div class="mx-auto max-w-7xl min-h-full pb-24">
