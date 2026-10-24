@@ -15,7 +15,7 @@
         <h2 v-if="displayTitle" class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm">
           {{ displayTitle }}
         </h2>
-        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed">
+        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
           {{ displaySubtitle }}
         </p>
       </div>
@@ -39,7 +39,7 @@
             </h3>
 
             <!-- Description -->
-            <p class="mt-2 text-xs text-theme-muted leading-relaxed max-w-[200px]">
+            <p class="mt-2 text-xs text-theme-muted leading-relaxed max-w-[200px] text-center mx-auto">
               {{ feature.description }}
             </p>
           </div>

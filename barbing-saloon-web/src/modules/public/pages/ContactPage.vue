@@ -58,10 +58,10 @@
             ></div>
 
             <!-- Top Header (Exact Typography Hierarchy from Reference) -->
-            <h3 class="font-display text-xl sm:text-2xl text-ivory font-semibold tracking-tight">
+            <h3 class="font-display text-xl sm:text-2xl text-ivory font-semibold tracking-tight text-center">
               Works where you work
             </h3>
-            <p class="mt-1.5 text-xs sm:text-[12.5px] text-theme-muted font-light max-w-xs sm:max-w-sm mx-auto leading-relaxed">
+            <p class="mt-1.5 text-xs sm:text-[12.5px] text-theme-muted font-light max-w-xs sm:max-w-sm mx-auto leading-relaxed text-center">
               Connect with our master barbers, view signature drops, or locate our studio across your favourite platforms.
             </p>
 
