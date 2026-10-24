@@ -31,10 +31,13 @@
           <!-- Mobile Cards -->
           <AppointmentsMobileCards
             :appointments="filteredAppointments"
+            :search="search"
+            :currentFilter="currentFilter"
             @details="openDetails"
             @approve="approve"
             @cancel="cancel"
             @view-receipt="viewReceipt"
+            @reset-filters="resetFilters"
           />
 
           <!-- Desktop Table -->
