@@ -139,7 +139,9 @@ class TestimonialApiController
         $result = $action->execute($testimonial, $validated['is_featured']);
         CatalogueCache::bust('testimonials');
 
-        $message = $result->is_approved ? 'Testimonial approved and displayed on the homepage' : 'Testimonial unapproved and hidden from the homepage';
+        $message = $result->is_featured
+            ? 'Testimonial is visible on the website'
+            : 'Testimonial is hidden from the website';
 
         return ApiResponse::success(new TestimonialResource($result), $message);
     }

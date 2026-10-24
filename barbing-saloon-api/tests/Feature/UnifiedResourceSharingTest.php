@@ -159,6 +159,24 @@ it('keeps unapproved testimonials hidden from the public feed for signed-in admi
     expect($adminIds)->toContain($approved->id)
         ->toContain($approvedHidden->id)
         ->toContain($pending->id);
+
+    $unapproveResponse = $this->patchJson("/api/v1/admin/testimonials/{$approvedHidden->id}/approve", [
+        'is_approved' => false,
+    ]);
+    $unapproveResponse->assertOk();
+    expect($approvedHidden->fresh()->is_featured)->toBeFalse();
+
+    $approveResponse = $this->patchJson("/api/v1/admin/testimonials/{$approvedHidden->id}/approve", [
+        'is_approved' => true,
+    ]);
+    $approveResponse->assertOk();
+    expect($approvedHidden->fresh()->is_approved)->toBeTrue()
+        ->and($approvedHidden->fresh()->is_featured)->toBeFalse();
+
+    $pendingFeatureResponse = $this->patchJson("/api/v1/admin/testimonials/{$pending->id}/feature", [
+        'is_featured' => true,
+    ]);
+    $pendingFeatureResponse->assertUnprocessable();
 });
 
 it('allows admins to feature and unfeature testimonials through the approval flow', function () {
