@@ -24,7 +24,7 @@ describe('BarberCta', () => {
       caption: 'Premium grooming, made simple.',
     });
 
-    expect(wrapper.find('h1').text()).toBe('Fresh Cut.Zero Stress.');
+    expect(wrapper.find('h1').text().replace(/\u00a0/g, ' ')).toBe('Fresh Cut. Zero Stress.');
     expect(wrapper.find('.barber-cta__title-white').text()).toBe('Fresh Cut.');
     expect(wrapper.find('.barber-cta__title-gold').text()).toBe('Zero Stress.');
     expect(wrapper.find('.barber-cta__subtitle').text()).toBe('Pick a barber and book your style.');

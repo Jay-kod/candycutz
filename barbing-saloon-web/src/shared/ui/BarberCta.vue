@@ -12,7 +12,7 @@
     <div class="barber-cta__content">
       <h1 class="barber-cta__title whitespace-nowrap">
         <span :class="firstTitlePartClass">{{ titleParts[0] }}</span>
-        <span v-if="titleParts[1]" :class="secondTitlePartClass"> {{ titleParts[1] }}</span>
+        <span v-if="titleParts[1]" :class="secondTitlePartClass">&nbsp;{{ titleParts[1] }}</span>
       </h1>
 
       <p class="barber-cta__subtitle text-center">{{ subtitle }}</p>
