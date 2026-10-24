@@ -114,3 +114,4 @@ const shopImageSrc = computed(() => {
   return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80';
 });
 </script>
+

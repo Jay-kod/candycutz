@@ -52,3 +52,4 @@ describe('AboutStats.vue', () => {
     expect(text).toContain('Meet the team');
   });
 });
+

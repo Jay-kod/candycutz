@@ -120,3 +120,4 @@ const totalChars = computed(() => {
   return (p1 + p2).length;
 });
 </script>
+
