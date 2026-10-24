@@ -180,6 +180,8 @@ import { ref, computed } from 'vue';
 const props = defineProps({
   revenueTrend: { type: Array, default: () => [] },
   bookingTrend: { type: Array, default: () => [] },
+  thirtyDayTrend: { type: Array, default: () => [] },
+  monthlyRevenueTrend: { type: Array, default: () => [] },
   stats: { type: Object, default: () => ({}) },
   revenue: { type: Object, default: () => ({}) }
 });
@@ -202,7 +204,7 @@ const formatCompact = (val) => {
 const periodRevenueTotal = computed(() => {
   const r = props.revenue || {};
   const s = props.stats || {};
-  return Number(r.total_revenue || s.month_revenue || s.week_revenue || s.today_revenue || 90000000);
+  return Number(r.total_revenue || s.month_revenue || s.week_revenue || s.today_revenue || 0);
 });
 
 const currentMonthName = computed(() => {
@@ -213,48 +215,51 @@ const currentMonthName = computed(() => {
 const yAxisLabels = computed(() => {
   const total = periodRevenueTotal.value;
   if (total >= 10000000) {
-    return ['0', '5M', '10M', '15M', '20M'];
+    return ['0', '25M', '50M', '75M', '100M'];
   }
   return ['0', '5k', '10k', '15k', '20k'];
 });
 
-// 28 Columns for 30-Day Window: Wide and tightly packed just like original reference image
+// Dynamic Columns mapped directly from real API 30-day timeline
 const thirtyDayColumns = computed(() => {
+  const trend = props.thirtyDayTrend || [];
+  if (trend.length) {
+    const maxRev = Math.max(...trend.map(d => Number(d.revenue || 0)), 1);
+    const maxCount = Math.max(...trend.map(d => Number(d.count || 0)), 1);
+    return trend.map(d => {
+      const rev = Number(d.revenue || 0);
+      const cnt = Number(d.count || 0);
+      const orangeBricks = rev > 0 ? Math.max(Math.round((rev / maxRev) * 16), 2) : 0;
+      const slateBricks = cnt > 0 ? Math.max(Math.round((cnt / maxCount) * 6), 1) : 0;
+      const totalBricks = Math.max(orangeBricks + slateBricks, 1);
+      return {
+        whiteBricks: orangeBricks,
+        totalBricks,
+        dateLabel: d.date_label || d.date,
+        revenue: rev,
+        bookings: cnt
+      };
+    });
+  }
+
+  // Fallback to 7-day trend mapped onto 28-day range if 30-day not yet populated
   const revTrend = props.revenueTrend || [];
   const bookTrend = props.bookingTrend || [];
-  const totalRev = periodRevenueTotal.value;
-  const avgDailyRev = totalRev > 0 ? Math.round(totalRev / 30) : 50000;
-
-  // Base patterns for realistic 28 columns (matching the equalizer structure in the reference image)
-  const pattern = [
-    { w: 8, t: 14 }, { w: 12, t: 17 }, { w: 9, t: 13 }, { w: 7, t: 11 }, { w: 13, t: 19 },
-    { w: 10, t: 15 }, { w: 8, t: 12 }, { w: 14, t: 20 }, { w: 11, t: 17 }, { w: 9, t: 14 },
-    { w: 7, t: 11 }, { w: 12, t: 18 }, { w: 15, t: 22 }, { w: 10, t: 16 }, { w: 8, t: 13 },
-    { w: 13, t: 19 }, { w: 11, t: 17 }, { w: 14, t: 21 }, { w: 12, t: 18 }, { w: 9, t: 15 },
-    { w: 11, t: 17 }, { w: 10, t: 16 }, { w: 13, t: 19 }, { w: 12, t: 18 }, { w: 15, t: 21 },
-    { w: 11, t: 16 }, { w: 10, t: 15 }, { w: 12, t: 18 }
-  ];
-
   const now = new Date();
-  return pattern.map((p, idx) => {
-    // Days leading up to today
+  return Array.from({ length: 28 }, (_, idx) => {
     const dayOffset = 27 - idx;
     const dateObj = new Date(now.getTime() - dayOffset * 24 * 60 * 60 * 1000);
     const dateLabel = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    // Check if within latest 7 days for backend data injection
     const revItem = revTrend[idx - 21];
     const bookItem = bookTrend[idx - 21];
-
-    const dayRevenue = revItem && revItem.revenue > 0 ? revItem.revenue : Math.round(avgDailyRev * (p.w / 12));
-    const dayBookings = bookItem && bookItem.count > 0 ? bookItem.count : Math.max(Math.round(p.t / 4), 1);
-
+    const rev = Number(revItem?.revenue || 0);
+    const cnt = Number(bookItem?.count || 0);
     return {
-      whiteBricks: p.w,
-      totalBricks: p.t,
+      whiteBricks: rev > 0 ? 8 : 0,
+      totalBricks: rev > 0 ? 14 : (cnt > 0 ? 4 : 1),
       dateLabel,
-      revenue: dayRevenue,
-      bookings: dayBookings
+      revenue: rev,
+      bookings: cnt
     };
   });
 });
@@ -286,22 +291,35 @@ const spacedDateLabels = computed(() => {
   return indices.map(i => cols[i]?.dateLabel || '');
 });
 
-// Right Card: 6 Monthly Bars (Wide Bars)
+// Right Card: Real Monthly Performance Bars
 const monthlyBars = computed(() => {
-  const total = periodRevenueTotal.value;
-  const currentVal = total > 0 ? total : 87600000;
-
+  const mTrend = props.monthlyRevenueTrend || [];
+  if (mTrend.length) {
+    const maxVal = Math.max(...mTrend.map(m => Number(m.revenue || 0)), 1);
+    return mTrend.map(m => {
+      const rev = Number(m.revenue || 0);
+      const segs = rev > 0 ? Math.max(Math.round((rev / maxVal) * 18), 2) : 1;
+      return {
+        month: m.month,
+        val: rev,
+        highlight: Boolean(m.is_current),
+        segments: segs
+      };
+    });
+  }
+  const currentVal = periodRevenueTotal.value;
   return [
-    { month: 'Jan', segments: 18, highlight: true, val: currentVal },
-    { month: 'Mar', segments: 14, highlight: false, val: Math.round(currentVal * 0.72) },
-    { month: 'May', segments: 16, highlight: false, val: Math.round(currentVal * 0.81) },
-    { month: 'Jul', segments: 12, highlight: false, val: Math.round(currentVal * 0.62) },
-    { month: 'Sep', segments: 15, highlight: false, val: Math.round(currentVal * 0.78) },
-    { month: 'Nov', segments: 13, highlight: false, val: Math.round(currentVal * 0.68) }
+    { month: 'May', segments: 1, highlight: false, val: 0 },
+    { month: 'Jun', segments: 1, highlight: false, val: 0 },
+    { month: 'Jul', segments: 1, highlight: false, val: 0 },
+    { month: 'Aug', segments: 1, highlight: false, val: 0 },
+    { month: 'Sep', segments: 1, highlight: false, val: 0 },
+    { month: currentMonthName.value, segments: currentVal > 0 ? 18 : 1, highlight: true, val: currentVal }
   ];
 });
 
 const topPeriodVal = computed(() => {
-  return periodRevenueTotal.value;
+  const current = monthlyBars.value.find(m => m.highlight);
+  return current ? current.val : periodRevenueTotal.value;
 });
 </script>
