@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-8 animate-fade-in pb-12">
     <!-- Header Banner -->
-    <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 lg:p-12 shadow-2xl">
+    <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-4 xs:p-6 sm:p-8 lg:p-12 shadow-2xl">
       <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/10 blur-3xl"></div>
       <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl"></div>
       
@@ -10,7 +10,7 @@
           <p class="text-xs uppercase tracking-[0.3em] text-admin/80 font-bold flex items-center gap-2">
             <Cog8ToothIcon class="w-4 h-4" /> Home Page Content
           </p>
-          <h1 class="mt-2 font-display text-4xl lg:text-5xl text-theme-text drop-shadow-lg">
+          <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-theme-text drop-shadow-lg">
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Hero Section</span>
           </h1>
           <p class="mt-3 text-sm lg:text-base text-ivory/60 max-w-xl">Configure the main text and background image for your public landing page.</p>
