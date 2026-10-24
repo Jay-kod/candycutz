@@ -236,16 +236,14 @@ export default function BookingsScreen() {
         title="Cancel appointment?"
         message={pendingCancellation ? `Booking ${pendingCancellation.booking_reference} will be cancelled and removed from your upcoming schedule.` : ''}
         confirmLabel="Cancel Booking"
-        destructive
+        resolutionType="cancelled"
+        resolutionTitle="Booking Cancelled"
+        resolutionMessage="Your appointment has been cancelled and removed from your schedule."
         onCancel={() => setPendingCancellation(null)}
+        onComplete={() => setPendingCancellation(null)}
         onConfirm={async () => {
           if (!pendingCancellation) return;
-          try {
-            await cancelMutation.mutateAsync(pendingCancellation.id);
-            setPendingCancellation(null);
-          } catch {
-            // Keep the dialog open so the customer can review or retry.
-          }
+          await cancelMutation.mutateAsync(pendingCancellation.id);
         }}
       />
     </SafeAreaView>
