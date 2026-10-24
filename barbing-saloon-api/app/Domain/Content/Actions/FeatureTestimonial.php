@@ -8,7 +8,10 @@ class FeatureTestimonial
 {
     public function execute(Testimonial $testimonial, bool $isFeatured): Testimonial
     {
-        $testimonial->update(['is_featured' => $isFeatured]);
+        $testimonial->update([
+            'is_approved' => $isFeatured,
+            'is_featured' => $isFeatured,
+        ]);
 
         return $testimonial->refresh()->load(['barber.user', 'customer']);
     }

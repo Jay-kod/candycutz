@@ -128,14 +128,10 @@ class TestimonialApiController
             'is_featured' => 'required|boolean',
         ]);
 
-        if ($validated['is_featured'] && ! $testimonial->is_approved) {
-            return ApiResponse::error('Only approved testimonials can be displayed on the homepage.', status: 422);
-        }
-
         $result = $action->execute($testimonial, $validated['is_featured']);
         CatalogueCache::bust('testimonials');
 
-        $message = $result->is_featured ? 'Testimonial selected for the homepage' : 'Testimonial hidden from the homepage';
+        $message = $result->is_approved ? 'Testimonial approved and displayed on the homepage' : 'Testimonial unapproved and hidden from the homepage';
 
         return ApiResponse::success(new TestimonialResource($result), $message);
     }

@@ -13,7 +13,7 @@
               Review <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Moderation</span>
               <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ filteredTestimonials.length }}</span>
             </h1>
-            <p class="mt-2 text-sm text-ivory/60">Approve or unapprove each review, then choose which approved testimonials appear on the homepage.</p>
+            <p class="mt-2 text-sm text-ivory/60">Approved testimonials appear on the website. Unapprove a testimonial to hide it.</p>
           </div>
 
           <!-- Filters Bar -->
@@ -40,13 +40,6 @@
                 :class="activeStatusFilter === 'approved' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
               >
                 Approved
-              </button>
-              <button
-                @click="activeStatusFilter = 'featured'"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                :class="activeStatusFilter === 'featured' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
-              >
-                On Homepage
               </button>
             </div>
 
@@ -131,14 +124,7 @@
               <div class="flex items-center gap-2 mb-2">
                 <div class="h-2 w-2 rounded-full" :class="item.is_approved ? 'bg-emerald-500' : 'bg-admin animate-pulse'"></div>
                 <span class="text-xs font-bold uppercase tracking-wider" :class="item.is_approved ? 'text-emerald-400' : 'text-admin'">
-                  {{ item.is_approved ? 'Approved' : 'Pending' }}
-                </span>
-              </div>
-
-              <div class="flex items-center gap-2 mb-2">
-                <div class="h-2 w-2 rounded-full" :class="item.is_featured ? 'bg-gold' : 'bg-white/30'"></div>
-                <span class="text-xs font-bold uppercase tracking-wider" :class="item.is_featured ? 'text-gold' : 'text-ivory/50'">
-                  {{ item.is_featured ? 'On homepage' : 'Hidden from homepage' }}
+                  {{ item.is_approved ? 'Approved · visible on website' : 'Pending · hidden from website' }}
                 </span>
               </div>
 
@@ -151,16 +137,6 @@
                 {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_approved ? 'Unapprove' : 'Approve' }}
               </button>
 
-              <button
-                :disabled="moderatingIds.has(item.id) || !item.is_approved"
-                @click="toggleFeatured(item)"
-                class="flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                :class="item.is_featured ? 'border-gold/30 bg-gold/10 text-gold hover:bg-gold hover:text-obsidian' : 'border-white/15 bg-white/5 text-ivory/80 hover:border-gold/30 hover:text-gold'"
-                :title="item.is_approved ? '' : 'Approve this testimonial before displaying it on the homepage'"
-              >
-                {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_featured ? 'Hide from homepage' : 'Show on homepage' }}
-              </button>
-              
               <button 
                 @click="deleteReview(item.id)" 
                 class="flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
@@ -216,8 +192,6 @@ const filteredTestimonials = computed(() => {
     list = list.filter(t => !t.is_approved);
   } else if (activeStatusFilter.value === 'approved') {
     list = list.filter(t => t.is_approved);
-  } else if (activeStatusFilter.value === 'featured') {
-    list = list.filter(t => t.is_approved && t.is_featured);
   }
 
   if (activeServiceFilter.value !== 'all') {
@@ -268,28 +242,11 @@ const toggleApproval = async (item) => {
   try {
     const response = await adminApi.approveTestimonial(item.id, isApproved);
     item.is_approved = response.data?.data?.is_approved ?? isApproved;
-    item.is_featured = response.data?.data?.is_featured ?? (isApproved && item.is_featured);
-    toast.success(isApproved ? 'Testimonial approved' : 'Testimonial unapproved and hidden from the homepage');
+    item.is_featured = response.data?.data?.is_featured ?? isApproved;
+    toast.success(isApproved ? 'Testimonial approved and displayed on the website' : 'Testimonial unapproved and hidden from the website');
   } catch (error) {
     console.error('Failed to update testimonial approval', error);
     toast.error(isApproved ? 'Failed to approve testimonial' : 'Failed to unapprove testimonial');
-  } finally {
-    const nextIds = new Set(moderatingIds.value);
-    nextIds.delete(item.id);
-    moderatingIds.value = nextIds;
-  }
-};
-
-const toggleFeatured = async (item) => {
-  const isFeatured = !item.is_featured;
-  moderatingIds.value = new Set(moderatingIds.value).add(item.id);
-  try {
-    const response = await adminApi.featureTestimonial(item.id, isFeatured);
-    item.is_featured = response.data?.data?.is_featured ?? isFeatured;
-    toast.success(isFeatured ? 'Testimonial selected for the homepage' : 'Testimonial hidden from the homepage');
-  } catch (error) {
-    console.error('Failed to update homepage visibility', error);
-    toast.error('Failed to update homepage visibility');
   } finally {
     const nextIds = new Set(moderatingIds.value);
     nextIds.delete(item.id);

@@ -253,7 +253,7 @@ const fetchSettings = async () => {
 
 const fetchTestimonials = async () => {
   try {
-    const response = await publicApi.testimonials({ featured: true });
+    const response = await publicApi.testimonials();
     const items = response.data?.data;
     if (!Array.isArray(items)) {
       throw new TypeError('The testimonials response did not contain a list.');

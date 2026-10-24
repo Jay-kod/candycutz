@@ -20,6 +20,7 @@ import { FONTS, RADIUS, SPACING } from '../../constants/theme';
 import { useAppTheme } from '../../hooks/useAppTheme';
 
 export type ConfirmDialogVariant = 'danger' | 'warning' | 'info' | 'primary';
+export type ConfirmResolutionType = 'deleted' | 'saved' | 'cancelled' | 'confirmed' | 'custom';
 
 export interface ConfirmDialogProps {
   visible: boolean;
@@ -29,8 +30,13 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   destructive?: boolean;
   variant?: ConfirmDialogVariant;
+  resolutionType?: ConfirmResolutionType;
+  resolutionTitle?: string;
+  resolutionMessage?: string;
+  autoDismissDelay?: number;
   onCancel: () => void;
   onConfirm: () => void | Promise<void>;
+  onComplete?: () => void;
 }
 
 export function ConfirmDialog({
@@ -41,24 +47,106 @@ export function ConfirmDialog({
   cancelLabel = 'Cancel',
   destructive = false,
   variant,
+  resolutionType,
+  resolutionTitle,
+  resolutionMessage,
+  autoDismissDelay = 1300,
   onCancel,
   onConfirm,
+  onComplete,
 }: ConfirmDialogProps) {
   const { colors, isDark } = useAppTheme();
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [step, setStep] = React.useState<'prompt' | 'executing' | 'resolved'>('prompt');
+  const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Determine active visual variant
   const effectiveVariant: ConfirmDialogVariant =
     variant || (destructive ? 'danger' : 'primary');
 
+  // Determine effective resolution type
+  const effectiveResolution: ConfirmResolutionType =
+    resolutionType ||
+    (effectiveVariant === 'danger' || destructive ? 'deleted' : 'saved');
+
   // Animation values
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const cardScaleAnim = useRef(new Animated.Value(0.9)).current;
   const cardOpacityAnim = useRef(new Animated.Value(0)).current;
+  const resolveIconScaleAnim = useRef(new Animated.Value(0)).current;
+  const resolvePulseAnim = useRef(new Animated.Value(0.85)).current;
+
+  // Cached state for smooth rendering during resolution transition
+  const cachedState = useRef({
+    title,
+    message,
+    effectiveVariant,
+    effectiveResolution,
+    resolutionTitle,
+    resolutionMessage,
+  });
+
+  if (visible && step === 'prompt') {
+    cachedState.current = {
+      title,
+      message,
+      effectiveVariant,
+      effectiveResolution,
+      resolutionTitle,
+      resolutionMessage,
+    };
+  }
+
+  const dismissWithAnimation = React.useCallback(() => {
+    Animated.parallel([
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardScaleAnim, {
+        toValue: 0.95,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardOpacityAnim, {
+        toValue: 0,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setStep('prompt');
+      setIsProcessing(false);
+      onCancel();
+      onComplete?.();
+    });
+  }, [backdropAnim, cardScaleAnim, cardOpacityAnim, onCancel, onComplete]);
 
   useEffect(() => {
-    if (!visible) setIsProcessing(false);
-    if (visible) {
+    if (!visible) {
+      if (step === 'prompt') {
+        setIsProcessing(false);
+        Animated.parallel([
+          Animated.timing(backdropAnim, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardScaleAnim, {
+            toValue: 0.95,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardOpacityAnim, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
+    } else {
+      setStep('prompt');
+      setIsProcessing(false);
       Animated.parallel([
         Animated.timing(backdropAnim, {
           toValue: 1,
@@ -77,40 +165,52 @@ export function ConfirmDialog({
           useNativeDriver: true,
         }),
       ]).start();
-    } else {
+    }
+
+    return () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+    };
+  }, [visible, backdropAnim, cardScaleAnim, cardOpacityAnim, step]);
+
+  const handleConfirm = async () => {
+    if (isProcessing || step !== 'prompt') return;
+    setIsProcessing(true);
+    setStep('executing');
+    try {
+      await onConfirm();
+      // Transition to resolution feedback card!
+      setStep('resolved');
+      resolveIconScaleAnim.setValue(0);
+      resolvePulseAnim.setValue(0.85);
+
       Animated.parallel([
-        Animated.timing(backdropAnim, {
-          toValue: 0,
-          duration: 150,
+        Animated.spring(resolveIconScaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(cardScaleAnim, {
-          toValue: 0.95,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacityAnim, {
-          toValue: 0,
-          duration: 150,
+        Animated.timing(resolvePulseAnim, {
+          toValue: 1,
+          duration: 350,
           useNativeDriver: true,
         }),
       ]).start();
-    }
-  }, [visible, backdropAnim, cardScaleAnim, cardOpacityAnim]);
 
-  const handleConfirm = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-    try {
-      await onConfirm();
-    } finally {
+      dismissTimerRef.current = setTimeout(() => {
+        dismissWithAnimation();
+      }, autoDismissDelay);
+    } catch {
+      setStep('prompt');
       setIsProcessing(false);
     }
   };
 
-  // Icon and Accent Color Resolution
+  // Icon and Accent Color Resolution for Confirmation Prompt
   const getVariantStyles = () => {
-    switch (effectiveVariant) {
+    switch (cachedState.current.effectiveVariant) {
       case 'danger':
         return {
           icon: <AlertTriangle size={28} color="#EF4444" strokeWidth={2.2} />,
@@ -159,14 +259,70 @@ export function ConfirmDialog({
     }
   };
 
+  // Resolution Content and Styles for State 3 (Post-Action Animation)
+  const getResolutionContent = () => {
+    const customTitle = cachedState.current.resolutionTitle;
+    const customMsg = cachedState.current.resolutionMessage;
+
+    switch (cachedState.current.effectiveResolution) {
+      case 'deleted':
+        return {
+          title: customTitle || 'Deleted Successfully',
+          message: customMsg || 'The item has been permanently removed.',
+          icon: <Trash2 size={32} color="#EF4444" strokeWidth={2.2} />,
+          haloBg: 'rgba(239, 68, 68, 0.16)',
+          ringBorder: 'rgba(239, 68, 68, 0.35)',
+          topRimColor: 'rgba(239, 68, 68, 0.6)',
+          accentColor: '#EF4444',
+          badgeText: 'DELETED',
+        };
+      case 'cancelled':
+        return {
+          title: customTitle || 'Appointment Cancelled',
+          message: customMsg || 'The appointment has been cancelled and slot released.',
+          icon: <Trash2 size={32} color="#EF4444" strokeWidth={2.2} />,
+          haloBg: 'rgba(239, 68, 68, 0.16)',
+          ringBorder: 'rgba(239, 68, 68, 0.35)',
+          topRimColor: 'rgba(239, 68, 68, 0.6)',
+          accentColor: '#EF4444',
+          badgeText: 'CANCELLED',
+        };
+      case 'confirmed':
+        return {
+          title: customTitle || 'Appointment Confirmed',
+          message: customMsg || 'The booking is confirmed. Notifications have been dispatched.',
+          icon: <CheckCircle2 size={32} color={colors.primary} strokeWidth={2.4} />,
+          haloBg: isDark ? 'rgba(212, 175, 55, 0.18)' : 'rgba(197, 155, 39, 0.18)',
+          ringBorder: isDark ? 'rgba(229, 186, 115, 0.45)' : 'rgba(197, 155, 39, 0.4)',
+          topRimColor: isDark ? 'rgba(229, 186, 115, 0.7)' : 'rgba(197, 155, 39, 0.6)',
+          accentColor: colors.primary,
+          badgeText: 'CONFIRMED',
+        };
+      case 'saved':
+      default:
+        return {
+          title: customTitle || 'Saved Successfully',
+          message: customMsg || 'Your changes have been applied and saved.',
+          icon: <CheckCircle2 size={32} color="#22C55E" strokeWidth={2.4} />,
+          haloBg: 'rgba(34, 197, 94, 0.16)',
+          ringBorder: 'rgba(34, 197, 94, 0.35)',
+          topRimColor: 'rgba(34, 197, 94, 0.6)',
+          accentColor: '#22C55E',
+          badgeText: 'SAVED',
+        };
+    }
+  };
+
   const currentTheme = getVariantStyles();
+  const resContent = getResolutionContent();
+  const isResolved = step === 'resolved';
 
   return (
     <Modal
-      visible={visible}
+      visible={visible || isResolved}
       transparent
       animationType="none"
-      onRequestClose={onCancel}
+      onRequestClose={isResolved ? dismissWithAnimation : onCancel}
       statusBarTranslucent
     >
       <View style={styles.overlayContainer}>
@@ -180,7 +336,10 @@ export function ConfirmDialog({
             },
           ]}
         >
-          <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={isResolved ? dismissWithAnimation : onCancel}
+          />
         </Animated.View>
 
         {/* Animated Card Modal */}
@@ -189,7 +348,7 @@ export function ConfirmDialog({
             styles.card,
             {
               backgroundColor: colors.surfaceElevated,
-              borderColor: colors.border,
+              borderColor: isResolved ? resContent.ringBorder : colors.border,
               opacity: cardOpacityAnim,
               transform: [{ scale: cardScaleAnim }],
             },
@@ -199,82 +358,141 @@ export function ConfirmDialog({
           <View
             style={[
               styles.topRimLight,
-              { backgroundColor: currentTheme.topRimColor },
+              { backgroundColor: isResolved ? resContent.topRimColor : currentTheme.topRimColor },
             ]}
           />
 
-          {/* Hero Floating Icon Badge with ambient glow ring */}
-          <View
-            style={[
-              styles.iconHalo,
-              {
-                backgroundColor: currentTheme.haloBg,
-                borderColor: currentTheme.ringBorder,
-              },
-            ]}
-          >
-            <View style={styles.iconInnerDisc}>{currentTheme.icon}</View>
-          </View>
-
-          {/* Title & Message */}
-          <View style={styles.textBlock}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
-            <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actionsRow}>
-            {/* Cancel Button */}
-            <Pressable
-              onPress={onCancel}
-              disabled={isProcessing}
-              style={({ pressed }) => [
-                styles.cancelButton,
-                {
-                  backgroundColor: isDark
-                    ? 'rgba(255, 255, 255, 0.05)'
-                    : 'rgba(0, 0, 0, 0.04)',
-                  borderColor: colors.border,
-                },
-                pressed && (isDark ? styles.cancelButtonPressedDark : styles.cancelButtonPressedLight),
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={cancelLabel}
-            >
-              <Text style={[styles.cancelText, { color: colors.textSecondary }]}>{cancelLabel}</Text>
-            </Pressable>
-
-            {/* Confirm Button */}
-            <Pressable
-              onPress={handleConfirm}
-              disabled={isProcessing}
-              style={({ pressed }) => [
-                styles.confirmButton,
-                {
-                  backgroundColor: pressed
-                    ? currentTheme.confirmBtnPressedBg
-                    : currentTheme.confirmBtnBg,
-                  shadowColor: currentTheme.glowShadow,
-                },
-                pressed && styles.confirmButtonPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={confirmLabel}
-            >
-              {isProcessing ? (
-                <ActivityIndicator size="small" color={currentTheme.confirmText} />
-              ) : (
-                <Text
+          {isResolved ? (
+            /* =================== STATE 3: RESOLVED FEEDBACK CARD =================== */
+            <View style={styles.resolvedContainer}>
+              <Animated.View
                 style={[
-                  styles.confirmText,
-                  { color: currentTheme.confirmText },
+                  styles.iconHalo,
+                  {
+                    backgroundColor: resContent.haloBg,
+                    borderColor: resContent.ringBorder,
+                    transform: [{ scale: resolveIconScaleAnim }],
+                  },
                 ]}
-                >
-                  {confirmLabel}
+              >
+                <View style={styles.iconInnerDisc}>{resContent.icon}</View>
+              </Animated.View>
+
+              <View style={styles.textBlock}>
+                <Text style={[styles.title, { color: colors.textPrimary }]}>
+                  {resContent.title}
                 </Text>
-              )}
-            </Pressable>
-          </View>
+                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                  {resContent.message}
+                </Text>
+              </View>
+
+              {/* Status Pill Badge */}
+              <View
+                style={[
+                  styles.resolutionBadge,
+                  {
+                    backgroundColor: resContent.haloBg,
+                    borderColor: resContent.ringBorder,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.resolutionBadgeText,
+                    { color: resContent.accentColor },
+                  ]}
+                >
+                  {resContent.badgeText}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            /* =================== STATE 1 & 2: PROMPT & EXECUTING =================== */
+            <>
+              {/* Hero Floating Icon Badge with ambient glow ring */}
+              <View
+                style={[
+                  styles.iconHalo,
+                  {
+                    backgroundColor: currentTheme.haloBg,
+                    borderColor: currentTheme.ringBorder,
+                  },
+                ]}
+              >
+                <View style={styles.iconInnerDisc}>{currentTheme.icon}</View>
+              </View>
+
+              {/* Title & Message */}
+              <View style={styles.textBlock}>
+                <Text style={[styles.title, { color: colors.textPrimary }]}>
+                  {cachedState.current.title}
+                </Text>
+                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                  {cachedState.current.message}
+                </Text>
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.actionsRow}>
+                {/* Cancel Button */}
+                <Pressable
+                  onPress={onCancel}
+                  disabled={isProcessing}
+                  style={({ pressed }) => [
+                    styles.cancelButton,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(255, 255, 255, 0.05)'
+                        : 'rgba(0, 0, 0, 0.04)',
+                      borderColor: colors.border,
+                    },
+                    pressed &&
+                      (isDark
+                        ? styles.cancelButtonPressedDark
+                        : styles.cancelButtonPressedLight),
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={cancelLabel}
+                >
+                  <Text style={[styles.cancelText, { color: colors.textSecondary }]}>
+                    {cancelLabel}
+                  </Text>
+                </Pressable>
+
+                {/* Confirm Button */}
+                <Pressable
+                  onPress={handleConfirm}
+                  disabled={isProcessing}
+                  style={({ pressed }) => [
+                    styles.confirmButton,
+                    {
+                      backgroundColor: pressed
+                        ? currentTheme.confirmBtnPressedBg
+                        : currentTheme.confirmBtnBg,
+                      shadowColor: currentTheme.glowShadow,
+                    },
+                    pressed && styles.confirmButtonPressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={confirmLabel}
+                >
+                  {isProcessing ? (
+                    <ActivityIndicator size="small" color={currentTheme.confirmText} />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.confirmText,
+                        { color: currentTheme.confirmText },
+                      ]}
+                    >
+                      {confirmLabel}
+                    </Text>
+                  )}
+                </Pressable>
+              </View>
+            </>
+          )}
         </Animated.View>
       </View>
     </Modal>
@@ -310,6 +528,25 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 16,
     overflow: 'hidden',
+  },
+  resolvedContainer: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  resolutionBadge: {
+    paddingVertical: 7,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resolutionBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.6,
   },
   topRimLight: {
     position: 'absolute',
