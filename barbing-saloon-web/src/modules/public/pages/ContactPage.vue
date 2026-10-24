@@ -423,18 +423,18 @@ const fetchSettings = async () => {
     const response = await publicApi.settings();
     const settings = response.data?.data || {};
     if (settings) {
-      if (settings.contact_address) contactAddress.value = settings.contact_address;
+      if (settings.contact_address || settings.address) contactAddress.value = settings.contact_address || settings.address;
       if (settings.contact_form_name_placeholder) formPlaceholders.name = settings.contact_form_name_placeholder;
       if (settings.contact_form_email_placeholder) formPlaceholders.email = settings.contact_form_email_placeholder;
       if (settings.contact_form_phone_placeholder) formPlaceholders.phone = settings.contact_form_phone_placeholder;
       if (settings.contact_form_message_placeholder) formPlaceholders.message = settings.contact_form_message_placeholder;
-      if (settings.contact_hours !== undefined && settings.contact_hours !== null) {
+      if (settings.contact_hours !== undefined && settings.contact_hours !== null && settings.contact_hours !== '') {
         contactHours.value = settings.contact_hours;
       }
-      if (settings.contact_phone) contactPhone.value = settings.contact_phone;
-      if (settings.contact_email) contactEmail.value = settings.contact_email;
-      if (settings.contact_map_iframe) contactMapIframe.value = settings.contact_map_iframe;
-      if (settings.contact_map_link) contactMapLink.value = settings.contact_map_link;
+      if (settings.contact_phone || settings.phone || settings.phone_number) contactPhone.value = settings.contact_phone || settings.phone || settings.phone_number;
+      if (settings.contact_email || settings.email) contactEmail.value = settings.contact_email || settings.email;
+      if (settings.contact_map_iframe || settings.map_iframe) contactMapIframe.value = settings.contact_map_iframe || settings.map_iframe;
+      if (settings.contact_map_link || settings.map_link) contactMapLink.value = settings.contact_map_link || settings.map_link;
 
       const platforms = ['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
       platforms.forEach((p) => {
