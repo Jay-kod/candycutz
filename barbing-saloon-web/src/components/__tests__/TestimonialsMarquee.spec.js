@@ -49,3 +49,4 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.find('[aria-hidden="true"]').exists()).toBe(true);
   });
 });
+
