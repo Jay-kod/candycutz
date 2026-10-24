@@ -1,5 +1,5 @@
 <template>
-  <section class="relative py-16 md:py-24 overflow-hidden bg-obsidian/40 border-y border-white/5">
+  <section class="features-section relative py-16 md:py-24 overflow-hidden bg-obsidian/40 border-y border-white/5 transition-colors duration-300">
     <!-- Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.06),transparent_70%)]"></div>
 
@@ -20,7 +20,7 @@
           <div
             v-for="(feature, index) in featureList"
             :key="feature.title || index"
-            class="group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-7"
+            class="feature-card group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-7"
           >
             <!-- Feature Icon -->
             <div class="relative flex items-center justify-center size-12 rounded-xl bg-gold/10 border border-gold/20 text-gold transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
@@ -153,3 +153,26 @@ const resolveIcon = (iconName) => {
   return iconMap[key] || Sparkles;
 };
 </script>
+
+<style scoped>
+:global([data-theme="light"]) .features-section {
+  background-color: var(--color-surface, #FFFFFF);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .features-section h2 {
+  color: #CC7A00;
+}
+
+:global([data-theme="light"]) .feature-card {
+  background-color: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .feature-card:hover {
+  background-color: #FFFFFF;
+  border-color: rgba(255, 153, 0, 0.5);
+  box-shadow: 0 12px 30px rgba(255, 153, 0, 0.12);
+}
+</style>
