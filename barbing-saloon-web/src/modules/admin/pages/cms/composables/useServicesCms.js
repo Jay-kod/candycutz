@@ -1,6 +1,7 @@
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
+import { getStorageUrl } from '@/core/utils/url';
 
 export function useServicesCms() {
   const toast = useToast();
@@ -17,10 +18,32 @@ export function useServicesCms() {
 
   const catalogServices = ref([]);
   const catalogLoading = ref(false);
+  const currentHeroImage = ref('');
+  const heroImageFile = ref(null);
+  const heroImageInput = ref(null);
+  const heroOpacity = ref(76);
+  const removeHeroImage = ref(false);
+  const heroPreviewUrl = ref('');
+
+  const clearHeroPreviewUrl = () => {
+    if (heroPreviewUrl.value) URL.revokeObjectURL(heroPreviewUrl.value);
+    heroPreviewUrl.value = '';
+  };
+
+  const previewHeroImage = computed(() => {
+    if (heroPreviewUrl.value) return heroPreviewUrl.value;
+    if (removeHeroImage.value || !currentHeroImage.value) return '';
+    return getStorageUrl(currentHeroImage.value);
+  });
 
   const isDirty = computed(() => {
+    if (heroImageFile.value || removeHeroImage.value) return true;
     if (!initialSnapshot.value) return false;
-    return initialSnapshot.value !== JSON.stringify(content.value);
+    return initialSnapshot.value !== JSON.stringify({
+      content: content.value,
+      heroImage: currentHeroImage.value,
+      heroOpacity: heroOpacity.value,
+    });
   });
 
   const categories = computed(() => {
@@ -40,7 +63,13 @@ export function useServicesCms() {
       if (data) {
         if (data.services_title) content.value.services_title = data.services_title;
         if (data.services_subtitle) content.value.services_subtitle = data.services_subtitle;
-        initialSnapshot.value = JSON.stringify(content.value);
+        currentHeroImage.value = data.page_hero_services_image || '';
+        heroOpacity.value = Number(data.page_hero_services_overlay_opacity ?? 76);
+        initialSnapshot.value = JSON.stringify({
+          content: content.value,
+          heroImage: currentHeroImage.value,
+          heroOpacity: heroOpacity.value,
+        });
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
@@ -48,6 +77,21 @@ export function useServicesCms() {
     } finally {
       loading.value = false;
     }
+  };
+
+  const handleHeroImageUpload = (file) => {
+    if (!file) return;
+    heroImageFile.value = file;
+    removeHeroImage.value = false;
+    clearHeroPreviewUrl();
+    heroPreviewUrl.value = URL.createObjectURL(file);
+  };
+
+  const clearHeroImage = () => {
+    heroImageFile.value = null;
+    if (heroImageInput.value) heroImageInput.value.value = '';
+    removeHeroImage.value = true;
+    clearHeroPreviewUrl();
   };
 
   const fetchCatalog = async () => {
@@ -77,11 +121,28 @@ export function useServicesCms() {
       const formData = new FormData();
       formData.append('settings[services_title]', content.value.services_title);
       formData.append('settings[services_subtitle]', content.value.services_subtitle);
+      formData.append('settings[page_hero_services_overlay_opacity]', String(heroOpacity.value));
+      formData.append('page_hero_page', 'services');
+      if (heroImageFile.value) {
+        formData.append('page_hero_image', heroImageFile.value);
+      } else if (removeHeroImage.value) {
+        formData.append('settings[page_hero_services_image]', '');
+      }
 
-      await api.post('/v1/admin/settings', formData);
+      const response = await api.post('/v1/admin/settings', formData);
       toast.success('Services page content saved successfully!');
       
-      initialSnapshot.value = JSON.stringify(content.value);
+      const data = response.data?.data;
+      if (data) currentHeroImage.value = data.page_hero_services_image || '';
+      heroImageFile.value = null;
+      removeHeroImage.value = false;
+      if (heroImageInput.value) heroImageInput.value.value = '';
+      clearHeroPreviewUrl();
+      initialSnapshot.value = JSON.stringify({
+        content: content.value,
+        heroImage: currentHeroImage.value,
+        heroOpacity: heroOpacity.value,
+      });
       lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
       console.error('Error saving services content:', error);
@@ -90,6 +151,8 @@ export function useServicesCms() {
       saving.value = false;
     }
   };
+
+  onBeforeUnmount(clearHeroPreviewUrl);
 
   return {
     content,
@@ -100,9 +163,15 @@ export function useServicesCms() {
     activeTab,
     catalogServices,
     catalogLoading,
+    currentHeroImage,
+    heroImageInput,
+    heroOpacity,
+    previewHeroImage,
     categories,
     fetchContent,
     fetchCatalog,
+    handleHeroImageUpload,
+    clearHeroImage,
     saveContent
   };
 }

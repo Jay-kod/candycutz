@@ -34,6 +34,63 @@
 
       <!-- Editor Forms Container -->
       <div v-else class="space-y-6">
+        <section v-show="activeTab === 'all' || activeTab === 'copy'" class="overflow-hidden rounded-2xl border border-admin/10 bg-black/30 shadow-xl">
+          <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-6 py-5 sm:px-8">
+            <h2 class="font-display text-xl text-theme-text">Services Hero Cover</h2>
+            <p class="mt-1 text-xs text-ivory/45">Upload a cover image and adjust the dark overlay behind the Services page title.</p>
+          </div>
+          <div class="grid gap-8 p-6 sm:p-8 xl:grid-cols-2">
+            <div class="space-y-6">
+              <div>
+                <label for="services-hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
+                <input
+                  id="services-hero-image"
+                  ref="heroImageInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-theme-text file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
+                  @change="handleHeroImageUpload($event.target.files?.[0])"
+                />
+                <p class="mt-2 text-xs text-ivory/45">JPG, PNG, or WEBP, up to 5 MB. Save All Changes to publish the cover image.</p>
+              </div>
+              <div>
+                <div class="mb-2 flex items-center justify-between gap-4">
+                  <label for="services-hero-opacity" class="block text-xs font-bold uppercase tracking-widest text-ivory/50">Image overlay opacity</label>
+                  <span class="text-sm font-semibold text-admin-light">{{ heroOpacity }}%</span>
+                </div>
+                <input
+                  id="services-hero-opacity"
+                  v-model.number="heroOpacity"
+                  type="range"
+                  min="0"
+                  max="100"
+                  class="w-full accent-admin"
+                />
+                <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
+              </div>
+              <button
+                v-if="currentHeroImage || previewHeroImage"
+                type="button"
+                class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
+                @click="clearHeroImage"
+              >
+                Remove hero cover image
+              </button>
+            </div>
+            <div class="min-w-0">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live hero preview</p>
+              <PageHero
+                page-key="services"
+                :fallback-title="content.services_title || 'Our Premium Services'"
+                :fallback-subtitle="content.services_subtitle"
+                :background-image="previewHeroImage"
+                :overlay-opacity="heroOpacity"
+                :load-settings="false"
+              />
+            </div>
+          </div>
+        </section>
+
         <!-- 1. Page Header Copy & Headline Form -->
         <div v-show="activeTab === 'all' || activeTab === 'copy'">
           <ServicesCopyForm :content="content" />
@@ -76,6 +133,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { CheckIcon } from '@heroicons/vue/24/outline';
+import PageHero from '@/shared/ui/PageHero.vue';
 import { useServicesCms } from './composables/useServicesCms';
 import ServicesHeader from './components/services/ServicesHeader.vue';
 import ServicesStats from './components/services/ServicesStats.vue';
@@ -95,8 +153,14 @@ const {
   activeTab,
   catalogServices,
   categories,
+  currentHeroImage,
+  heroImageInput,
+  heroOpacity,
+  previewHeroImage,
   fetchContent,
   fetchCatalog,
+  handleHeroImageUpload,
+  clearHeroImage,
   saveContent
 } = useServicesCms();
 

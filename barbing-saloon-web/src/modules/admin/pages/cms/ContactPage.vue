@@ -46,6 +46,56 @@
             <textarea v-model="content.contact_subtitle" rows="2" placeholder="Use the form to ask a question..."
               class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-none"></textarea>
           </div>
+          <div class="grid gap-8 border-t border-white/5 pt-6 xl:grid-cols-2">
+            <div class="space-y-6">
+              <div>
+                <label for="contact-hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
+                <input
+                  id="contact-hero-image"
+                  ref="heroImageInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-theme-text file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
+                  @change="handleHeroImageUpload($event.target.files?.[0])"
+                />
+                <p class="mt-2 text-xs text-ivory/45">JPG, PNG, or WEBP, up to 5 MB. Save Changes to publish the cover image.</p>
+              </div>
+              <div>
+                <div class="mb-2 flex items-center justify-between gap-4">
+                  <label for="contact-hero-opacity" class="block text-xs font-bold uppercase tracking-widest text-ivory/50">Image overlay opacity</label>
+                  <span class="text-sm font-semibold text-admin-light">{{ heroOpacity }}%</span>
+                </div>
+                <input
+                  id="contact-hero-opacity"
+                  v-model.number="heroOpacity"
+                  type="range"
+                  min="0"
+                  max="100"
+                  class="w-full accent-admin"
+                />
+                <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
+              </div>
+              <button
+                v-if="currentHeroImage || previewHeroImage"
+                type="button"
+                class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
+                @click="clearHeroImage"
+              >
+                Remove hero cover image
+              </button>
+            </div>
+            <div class="min-w-0">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live hero preview</p>
+              <PageHero
+                page-key="contact"
+                :fallback-title="content.contact_title || 'Contact Us'"
+                :fallback-subtitle="content.contact_subtitle"
+                :background-image="previewHeroImage"
+                :overlay-opacity="heroOpacity"
+                :load-settings="false"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -328,14 +378,48 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
 import { adminApi } from '@/shared/api/old_adminApi';
+import PageHero from '@/shared/ui/PageHero.vue';
+import { getStorageUrl } from '@/core/utils/url';
 import { EnvelopeIcon, CheckIcon, ShareIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import SocialIcon from '@/components/SocialIcon.vue';
 
 const toast = useToast();
 const saving = ref(false);
+const currentHeroImage = ref('');
+const selectedHeroImage = ref(null);
+const heroImageInput = ref(null);
+const heroOpacity = ref(76);
+const removeHeroImage = ref(false);
+const heroPreviewUrl = ref('');
+
+const previewHeroImage = computed(() => {
+  if (heroPreviewUrl.value) return heroPreviewUrl.value;
+  if (removeHeroImage.value || !currentHeroImage.value) return '';
+  return getStorageUrl(currentHeroImage.value);
+});
+
+const clearHeroPreviewUrl = () => {
+  if (heroPreviewUrl.value) URL.revokeObjectURL(heroPreviewUrl.value);
+  heroPreviewUrl.value = '';
+};
+
+const handleHeroImageUpload = (file) => {
+  if (!file) return;
+  selectedHeroImage.value = file;
+  removeHeroImage.value = false;
+  clearHeroPreviewUrl();
+  heroPreviewUrl.value = URL.createObjectURL(file);
+};
+
+const clearHeroImage = () => {
+  selectedHeroImage.value = null;
+  if (heroImageInput.value) heroImageInput.value.value = '';
+  removeHeroImage.value = true;
+  clearHeroPreviewUrl();
+};
 
 const platformsList = [
   {
@@ -557,6 +641,8 @@ const fetchContent = async () => {
           content.value[newKey] = String(data[oldKey] || data.social?.[oldKey]);
         }
       });
+      currentHeroImage.value = data.page_hero_contact_image || '';
+      heroOpacity.value = Number(data.page_hero_contact_overlay_opacity ?? 76);
     }
   } catch (error) {
     console.error('Failed to load contact content:', error);
@@ -575,8 +661,21 @@ const saveContent = async () => {
     formData.append('settings[facebook]', content.value.social_facebook ?? '');
     formData.append('settings[whatsapp]', content.value.social_whatsapp ?? '');
     formData.append('settings[twitter]', content.value.social_twitter ?? '');
+    formData.append('settings[page_hero_contact_overlay_opacity]', String(heroOpacity.value));
+    formData.append('page_hero_page', 'contact');
+    if (selectedHeroImage.value) {
+      formData.append('page_hero_image', selectedHeroImage.value);
+    } else if (removeHeroImage.value) {
+      formData.append('settings[page_hero_contact_image]', '');
+    }
 
-    await adminApi.updateSettings(formData);
+    const response = await adminApi.updateSettings(formData);
+    const data = response.data?.data;
+    if (data) currentHeroImage.value = data.page_hero_contact_image || '';
+    selectedHeroImage.value = null;
+    removeHeroImage.value = false;
+    if (heroImageInput.value) heroImageInput.value.value = '';
+    clearHeroPreviewUrl();
     toast.success('Social links and contact content updated successfully!');
   } catch (error) {
     toast.error('Failed to save changes. Please try again.');
@@ -588,4 +687,6 @@ const saveContent = async () => {
 onMounted(() => {
   fetchContent();
 });
+
+onBeforeUnmount(clearHeroPreviewUrl);
 </script>
