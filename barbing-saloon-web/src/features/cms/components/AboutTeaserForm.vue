@@ -1,58 +1,111 @@
 <template>
-  <div class="border-t border-white/5 px-8 py-8 space-y-6">
-    <div>
-      <h3 class="font-display text-xl text-theme-text">About Us Teaser</h3>
-      <p class="text-sm text-ivory/50">The introductory philosophy section on the home page.</p>
-    </div>
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="space-y-6">
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Section Title</label>
-          <input v-model="settings.about_teaser_title" type="text" placeholder="Our Philosophy" class="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-3 text-theme-text placeholder-ivory/20 focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin/50 transition-all" />
+  <div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C] p-6 lg:p-8 shadow-xl">
+    <!-- Section Header -->
+    <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/[0.06]">
+      <div class="flex items-center gap-3.5">
+        <div class="h-10 w-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+          <BookmarkSquareIcon class="h-5 w-5" />
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Subtitle / Heading</label>
-          <input v-model="settings.about_teaser_subtitle" type="text" placeholder="A Sharper Standard" class="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-3 text-theme-text placeholder-ivory/20 focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin/50 transition-all" />
+          <h2 class="font-display text-xl text-white tracking-tight">About Us Philosophy Teaser</h2>
+          <p class="text-xs text-white/50 mt-0.5">The introductory storytelling block showcasing the barbershop's standard of excellence.</p>
         </div>
       </div>
-      <div>
-        <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Description Text</label>
-        <textarea v-model="settings.about_teaser_text" rows="5" placeholder="Welcome to CandyCutz..." class="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-3 text-theme-text placeholder-ivory/20 focus:border-admin focus:outline-none focus:ring-1 focus:ring-admin/50 transition-all resize-none"></textarea>
-      </div>
+      <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] text-white/40">
+        Section 03
+      </span>
     </div>
-    
-    <div class="mt-6">
-      <label class="flex items-center gap-2 text-sm font-bold text-ivory/80 mb-3 uppercase tracking-wider">
-        <PhotoIcon class="h-4 w-4 text-admin/80" />
-        Side Image
-      </label>
-      
-      <div class="relative w-full max-w-md aspect-[4/3] rounded-2xl border-2 border-dashed border-white/10 bg-black/20 hover:border-admin/40 hover:bg-admin/5 transition-all duration-300 group overflow-hidden flex flex-col items-center justify-center cursor-pointer"
-           @click="$refs.aboutFileInput.click()">
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Left: Copywriting Inputs -->
+      <div class="space-y-5">
+        <div class="space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-white/70">
+            Eyebrow / Small Title
+          </label>
+          <input 
+            v-model="settings.about_teaser_title" 
+            type="text" 
+            placeholder="e.g. Our Philosophy" 
+            class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-xs font-semibold text-white placeholder-white/20 focus:border-amber-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-amber-500/15 transition-all outline-none" 
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-white/70">
+            Main Heading / Subtitle
+          </label>
+          <input 
+            v-model="settings.about_teaser_subtitle" 
+            type="text" 
+            placeholder="e.g. A Sharper Standard" 
+            class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-base font-display text-white placeholder-white/20 focus:border-amber-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-amber-500/15 transition-all outline-none" 
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-white/70">
+            Philosophy Story / Body Copy
+          </label>
+          <textarea 
+            v-model="settings.about_teaser_text" 
+            rows="6" 
+            placeholder="Welcome to CandyCutz, where precision meets style..." 
+            class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-xs sm:text-sm text-white/80 placeholder-white/20 focus:border-amber-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-amber-500/15 transition-all outline-none resize-none leading-relaxed"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Right: Side Image Showcase Dropzone -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/70">
+            <PhotoIcon class="h-3.5 w-3.5 text-amber-400" />
+            Philosophy Feature Image
+          </label>
+          <span class="text-xs text-white/40 font-mono">
+            Aspect: 4:3 Studio Shot
+          </span>
+        </div>
         
-        <!-- Current/Preview Image -->
-        <img v-if="!aboutImageLoadError" 
-             :src="previewAboutUrl || (currentAboutImage ? getStorageUrl(currentAboutImage) : 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')" 
-             @error="$emit('update:aboutImageLoadError', true)"
-             @load="$emit('update:aboutImageLoadError', false)"
-             class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-40 transition-all duration-500" />
-             
-        <!-- Upload Overlay -->
-        <div class="relative z-10 flex flex-col items-center justify-center p-6 text-center" :class="(!aboutImageLoadError) ? 'opacity-0 group-hover:opacity-100 transition-opacity duration-300' : ''">
-          <div class="w-16 h-16 rounded-full bg-admin/10 border border-admin/20 flex items-center justify-center mb-4 text-admin group-hover:scale-110 transition-transform">
-            <CloudArrowUpIcon class="w-8 h-8" />
+        <div 
+          class="relative w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-white/[0.12] bg-black/40 hover:border-amber-500/50 hover:bg-black/60 transition-all duration-300 group overflow-hidden flex flex-col items-center justify-center cursor-pointer shadow-inner"
+          @click="$refs.aboutFileInput.click()"
+        >
+          <!-- Current/Preview Image -->
+          <img 
+            v-if="!aboutImageLoadError" 
+            :src="previewAboutUrl || (currentAboutImage ? getStorageUrl(currentAboutImage) : 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')" 
+            @error="$emit('update:aboutImageLoadError', true)"
+            @load="$emit('update:aboutImageLoadError', false)"
+            alt="About teaser preview"
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-500" 
+          />
+               
+          <!-- Upload Overlay -->
+          <div 
+            class="relative z-10 flex flex-col items-center justify-center p-6 text-center" 
+            :class="(!aboutImageLoadError) ? 'opacity-0 group-hover:opacity-100 transition-opacity duration-300' : ''"
+          >
+            <div class="w-14 h-14 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-3 text-amber-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+              <CloudArrowUpIcon class="w-7 h-7" />
+            </div>
+            <p class="text-white font-display text-base mb-1">{{ ((previewAboutUrl || currentAboutImage) && !aboutImageLoadError) ? 'Replace Feature Image' : 'Upload Feature Image' }}</p>
+            <p class="text-xs text-white/40">Drag & drop or click to browse</p>
+            <p class="text-[10px] text-white/30 uppercase tracking-widest mt-3 border border-white/[0.08] bg-[#0B0F13]/80 px-2.5 py-0.5 rounded-full font-mono">Max 2MB • JPG / PNG</p>
           </div>
-          <p class="text-theme-text font-display text-lg mb-1">{{ ((previewAboutUrl || currentAboutImage) && !aboutImageLoadError) ? 'Change Image' : 'Upload Image' }}</p>
-          <p class="text-[10px] text-ivory/30 uppercase tracking-widest mt-2 border border-white/5 bg-black/40 px-3 py-1 rounded-full">Max 2MB • JPG/PNG</p>
+          
+          <input 
+            ref="aboutFileInput"
+            type="file" 
+            class="hidden"
+            @change="onChange" 
+            accept="image/jpeg,image/png,image/webp" 
+          />
         </div>
-        
-        <input 
-          ref="aboutFileInput"
-          type="file" 
-          class="hidden"
-          @change="onChange" 
-          accept="image/jpeg,image/png,image/webp" 
-        />
+        <p class="text-xs text-white/40 leading-relaxed pt-1">
+          Displays beside your philosophy statement. A clean shot of the salon interior or team in action is strongly recommended.
+        </p>
       </div>
     </div>
   </div>
@@ -60,14 +113,33 @@
 
 <script setup>
 import { ref } from 'vue';
-import { PhotoIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline';
+import { 
+  BookmarkSquareIcon, 
+  PhotoIcon, 
+  CloudArrowUpIcon 
+} from '@heroicons/vue/24/outline';
 
 defineProps({
-  settings: Object,
-  previewAboutUrl: String,
-  currentAboutImage: String,
-  aboutImageLoadError: Boolean,
-  getStorageUrl: Function
+  settings: {
+    type: Object,
+    required: true
+  },
+  previewAboutUrl: {
+    type: String,
+    default: null
+  },
+  currentAboutImage: {
+    type: String,
+    default: null
+  },
+  aboutImageLoadError: {
+    type: Boolean,
+    default: false
+  },
+  getStorageUrl: {
+    type: Function,
+    required: true
+  }
 });
 
 const emit = defineEmits(['image-upload', 'update:aboutImageLoadError']);
