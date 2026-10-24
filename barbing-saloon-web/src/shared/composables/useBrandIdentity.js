@@ -27,8 +27,8 @@ export const splitBrandName = (name) => {
 };
 
 export const applyBrandSettings = (settings = {}) => {
-  const name = settings.brand_name || settings.site_name;
-  const taglineKey = ['brand_tagline', 'site_description', 'meta_description']
+  const name = settings.brand_name || settings.site_name || settings.saloon_name;
+  const taglineKey = ['brand_tagline', 'tagline', 'site_description', 'meta_description']
     .find((key) => Object.prototype.hasOwnProperty.call(settings, key) && typeof settings[key] === 'string');
 
   if (typeof name === 'string' && name.trim()) {
