@@ -44,4 +44,23 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.text()).not.toContain('Pending Client');
     expect(wrapper.findAll('article')).toHaveLength(1);
   });
+
+  it('applies flow direction and animation speed styles to marquee track', () => {
+    const testimonials = [
+      { id: 'shown', client_name: 'Approved Client', review: 'Great cut.', is_approved: true, is_featured: true },
+    ];
+
+    const wrapper = mount(TestimonialsMarquee, {
+      props: {
+        testimonials,
+        speed: 30,
+        direction: 'right',
+      },
+    });
+
+    const track = wrapper.find('.marquee-track');
+    expect(track.exists()).toBe(true);
+    expect(track.classes()).toContain('marquee-track-right');
+    expect(track.attributes('style')).toContain('animation-duration: 30s');
+  });
 });
