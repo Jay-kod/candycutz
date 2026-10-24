@@ -1,5 +1,5 @@
 <template>
-  <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#111111]/90 p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 backdrop-blur-3xl">
+  <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#111111]/90 p-4 xs:p-6 sm:p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 backdrop-blur-3xl">
     <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-admin/10 blur-[100px]"></div>
     <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-purple-500/10 blur-[80px]"></div>
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,103,0,0.05),transparent_60%)]"></div>
@@ -11,7 +11,7 @@
         </span>
         <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold truncate">Booking Management</p>
       </div>
-      <h1 class="font-display text-3xl lg:text-4xl text-white drop-shadow-md leading-tight whitespace-nowrap">
+      <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl text-white drop-shadow-md leading-tight">
         Saloon <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-amber-400">Appointments</span>
       </h1>
       <p class="mt-3 text-sm text-white/40 max-w-md leading-relaxed hidden sm:block">
