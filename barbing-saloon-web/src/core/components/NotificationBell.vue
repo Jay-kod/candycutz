@@ -37,6 +37,10 @@ onUnmounted(() => {
   document.removeEventListener('click', closeOnClickOutside)
 })
 
+const toggleOpen = () => {
+  isOpen.value = !isOpen.value
+}
+
 const viewAll = () => {
   isOpen.value = false
   const path = route.path
@@ -52,14 +56,18 @@ const viewAll = () => {
 
 <template>
   <div class="relative notification-bell">
-    <button @click="toggleOpen" class="relative p-2 text-ivory/70 hover:text-gold transition-colors focus:outline-none">
+    <button 
+      @click="toggleOpen" 
+      class="relative min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-ivory/70 hover:text-gold transition-colors focus:outline-none"
+      aria-label="View notifications"
+    >
       <BellIcon class="h-6 w-6" />
-      <span v-if="unreadCount > 0" class="absolute top-1 right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-obsidian">
+      <span v-if="unreadCount > 0" class="absolute top-1.5 right-1.5 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-obsidian">
         {{ unreadCount > 9 ? '9+' : unreadCount }}
       </span>
     </button>
     
-    <div v-if="isOpen" class="absolute right-0 mt-2 w-80 bg-obsidian border border-theme-border rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 overflow-hidden transform transition-all">
+    <div v-if="isOpen" class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-80 bg-obsidian border border-theme-border rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 overflow-hidden transform transition-all">
       <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/5">
         <h3 class="font-bold text-ivory">Notifications</h3>
         <button v-if="unreadCount > 0" @click.stop="markAllRead" class="text-xs text-gold hover:text-gold/80 transition-colors">Mark all read</button>
