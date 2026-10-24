@@ -90,7 +90,7 @@ export function useServiceForm() {
             price: service.price || '',
             duration_minutes: service.duration_minutes || 30,
             category_id: service.category_id || null,
-            is_available: service.is_available !== undefined ? Boolean(Number(service.is_available)) : true
+            is_available: service.is_active !== undefined ? Boolean(service.is_active) : true
           };
           
           if (service.image || service.image_url) images.value.url1 = service.image_url || service.image;
@@ -102,7 +102,6 @@ export function useServiceForm() {
         }
       }
     } catch (error) {
-      console.error('Failed to load service form data', error);
       toast.error(error.response?.data?.message || error.message || 'Failed to load service data');
     } finally {
       loadingData.value = false;
