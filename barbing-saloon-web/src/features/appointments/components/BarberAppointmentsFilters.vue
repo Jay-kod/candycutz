@@ -4,7 +4,7 @@
       v-for="tab in tabs" 
       :key="tab.value"
       @click="$emit('update:currentFilter', tab.value)"
-      class="relative px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden"
+      class="relative px-4 xs:px-5 py-2.5 min-h-[44px] inline-flex items-center rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden"
       :class="currentFilter === tab.value ? 'text-obsidian bg-gold shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-ivory/50 hover:text-ivory bg-theme-surface/60 border border-theme-border hover:bg-theme-surface'"
     >
       <span class="relative z-10 flex items-center gap-2">
