@@ -63,6 +63,7 @@ describe('AppointmentsStats', () => {
     const text = wrapper.text();
     expect(text).toContain("Today's Schedule");
     expect(text).toContain('Queue is up to date');
-    expect(text).toContain('0 all time');
+    expect(text).toContain('Total Roster');
+    expect(text).toContain('0all time');
   });
 });

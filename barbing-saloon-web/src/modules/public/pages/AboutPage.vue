@@ -60,11 +60,11 @@
               </div>
               
               <!-- Barber Details -->
-              <div class="p-8 md:p-12 md:w-1/2 flex flex-col justify-center">
+              <div class="p-5 sm:p-8 md:p-12 md:w-1/2 flex flex-col justify-center">
                 <span class="text-xs uppercase tracking-[0.2em] font-semibold text-gold mb-2">Master Barber</span>
-                <h3 class="font-display text-4xl text-theme-text">{{ barbers[0].name }}</h3>
+                <h3 class="font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text">{{ barbers[0].name }}</h3>
                 
-                <div class="mt-4 flex items-center gap-4 text-sm font-medium">
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium">
                   <div class="flex items-center gap-1 text-gold">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
                     <span>{{ barbers[0].rating || '5.0' }}</span>
@@ -78,14 +78,14 @@
                   </span>
                 </div>
                 
-                <p class="mt-6 text-base leading-relaxed text-theme-muted line-clamp-4">{{ barbers[0].bio }}</p>
+                <p class="mt-6 text-sm sm:text-base leading-relaxed text-theme-muted line-clamp-4">{{ barbers[0].bio }}</p>
                 
                 <div class="mt-6 flex flex-wrap gap-2">
                   <span v-for="spec in (barbers[0].specialties || []).slice(0, 4)" :key="spec" class="rounded-full border border-theme-border bg-theme-bg px-3 py-1 text-xs font-medium text-theme-text">{{ spec }}</span>
                 </div>
                 
-                <div class="mt-10">
-                  <RouterLink :to="`/customer/dashboard/barber/${barbers[0].id}`" class="inline-flex items-center gap-2 rounded-xl bg-gold px-8 py-4 text-sm font-bold text-obsidian shadow-lg hover:bg-gold-light transition-all duration-300 hover:scale-[1.02]">
+                <div class="mt-8 sm:mt-10">
+                  <RouterLink :to="`/customer/dashboard/barber/${barbers[0].id}`" class="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] gap-2 rounded-xl bg-gold px-8 py-4 text-sm font-bold text-obsidian shadow-lg hover:bg-gold-light transition-all duration-300 hover:scale-[1.02]">
                     View Full Profile & Book
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                   </RouterLink>

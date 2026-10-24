@@ -185,7 +185,7 @@
       <!-- Next Button -->
       <button
         @click.stop="nextImage"
-        class="absolute right-4 sm:right-8 z-20 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute right-2 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
         :class="{ 'opacity-30 cursor-not-allowed': currentIdx === filteredGallery.length - 1 }"
         :disabled="currentIdx === filteredGallery.length - 1"
         aria-label="Next image"
