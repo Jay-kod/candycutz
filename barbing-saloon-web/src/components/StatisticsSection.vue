@@ -1,6 +1,6 @@
 <template>
   <section
-    class="relative py-4 sm:py-5 lg:py-6 overflow-hidden bg-obsidian border-y border-white/5 z-20 shadow-2xl"
+    class="relative py-16 md:py-24 overflow-hidden bg-obsidian border-y border-white/5 z-20 shadow-2xl"
     aria-label="CandyCutz Achievements and Key Statistics"
     ref="sectionRef"
   >
@@ -10,7 +10,7 @@
       aria-hidden="true"
     ></div>
     <div
-      class="pointer-events-none absolute -bottom-32 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-gold/5 blur-[100px] rounded-full"
+      class="pointer-events-none absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gold/5 blur-[120px] rounded-full"
       aria-hidden="true"
     ></div>
 
@@ -20,27 +20,30 @@
       aria-hidden="true"
     ></div>
 
-    <div class="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-      <!-- Section Header -->
-      <div class="!text-center max-w-xl mx-auto mb-3.5 sm:mb-4" data-reveal>
-        <h2 class="font-display text-base sm:text-lg md:text-xl text-ivory tracking-tight drop-shadow-sm !text-center">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Standardized Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16" data-reveal>
+        <span class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
+          Proven Numbers
+        </span>
+        <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm text-center">
           Proven Craftsmanship by the Numbers
         </h2>
-        <p class="mt-0.5 text-[10px] sm:text-[10.5px] text-theme-muted font-light max-w-md mx-auto !text-center">
+        <p class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
           Every cut is a statement of precision, passion, and personal style.
         </p>
       </div>
 
       <!-- Statistics Grid -->
       <div
-        class="grid gap-2.5 sm:gap-3 items-stretch"
-        :class="statItems.length >= 4 ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'"
+        class="grid gap-5 sm:gap-6 items-stretch"
+        :class="statItems.length >= 4 ? 'grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'"
         data-reveal
       >
         <div
           v-for="(stat, index) in statItems"
           :key="stat.id"
-          class="group relative flex flex-col items-center gap-1.5 rounded-xl py-2.5 px-3 sm:py-3 sm:px-3.5 lg:py-3.5 lg:px-4 !text-center transition-all duration-300 hover:-translate-y-0.5 cursor-default overflow-hidden border border-white/10 hover:border-gold/50 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
+          class="group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-white/10 hover:border-gold/50 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
           :style="{ '--reveal-delay': `${index * 0.15}s` }"
         >
           <!-- Corner Decor Crosshairs -->
@@ -62,50 +65,50 @@
           <!-- Card Header: Glowing Icon Vessel & Rating -->
           <div class="flex flex-col items-center">
             <div
-              class="relative flex items-center justify-center size-7 sm:size-8 rounded-lg bg-gradient-to-b from-gold/20 via-gold/10 to-transparent border border-gold/30 text-gold shadow-[0_0_15px_rgba(255,153,0,0.15)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(255,153,0,0.3)] group-hover:border-gold/60"
+              class="relative flex items-center justify-center size-12 sm:size-14 rounded-xl bg-gradient-to-b from-gold/20 via-gold/10 to-transparent border border-gold/30 text-gold shadow-[0_0_15px_rgba(255,153,0,0.15)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(255,153,0,0.3)] group-hover:border-gold/60"
             >
               <component
                 :is="stat.icon"
-                class="size-3.5 sm:size-4 transition-transform duration-300 group-hover:rotate-6"
+                class="size-6 sm:size-7 transition-transform duration-300 group-hover:rotate-6"
               />
             </div>
 
             <!-- 5-Star Rating Indicator for Clients -->
             <div
               v-if="stat.ratingStars"
-              class="flex items-center gap-0.5 mt-0.5"
+              class="flex items-center gap-1 mt-2"
               aria-label="5 Star Rated"
             >
               <Star
                 v-for="s in 5"
                 :key="s"
-                class="size-1.5 sm:size-2 fill-gold text-gold transition-transform duration-300 group-hover:scale-110"
+                class="size-2.5 sm:size-3 fill-gold text-gold transition-transform duration-300 group-hover:scale-110"
               />
             </div>
-            <div v-else class="h-1.5 sm:h-2 mt-0.5"></div>
+            <div v-else class="h-2.5 sm:h-3 mt-2"></div>
           </div>
 
           <!-- Card Body: Numeric Counter & Primary Label -->
-          <div class="!text-center">
+          <div class="text-center w-full">
             <div
               class="inline-flex items-baseline justify-center"
               :aria-label="stat.ariaLabel"
             >
               <span
-                class="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#FFF5DC] via-[#FFB84D] to-[#D97706] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
+                class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#FFF5DC] via-[#FFB84D] to-[#D97706] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).num }}
               </span>
               <span
                 v-if="splitValue(displayValues[stat.id] || stat.value).suffix"
-                class="font-display text-sm sm:text-base lg:text-lg font-bold tracking-tight bg-gradient-to-b from-[#FFB84D] to-[#D97706] bg-clip-text text-transparent ml-0.5 drop-shadow-sm select-none"
+                class="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-b from-[#FFB84D] to-[#D97706] bg-clip-text text-transparent ml-1 drop-shadow-sm select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).suffix }}
               </span>
             </div>
 
             <h3
-              class="mt-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-ivory/90 group-hover:text-gold transition-colors duration-300 !text-center"
+              class="mt-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-ivory/90 group-hover:text-gold transition-colors duration-300 text-center"
             >
               {{ stat.label }}
             </h3>
@@ -116,21 +119,21 @@
 
       <!-- Bottom Reassurance Strip -->
       <div
-        class="mt-3 sm:mt-4 pt-2.5 border-t border-white/5 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-[8.5px] sm:text-[9px] text-ivory/50 uppercase tracking-[0.1em]"
+        class="mt-12 sm:mt-16 pt-6 border-t border-white/5 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-ivory/60 uppercase tracking-wider"
         data-reveal
       >
-        <span class="flex items-center gap-1.5">
-          <Award class="size-3.5 text-gold shrink-0" />
+        <span class="flex items-center gap-2">
+          <Award class="size-4 text-gold shrink-0" />
           Master Barbers Certified
         </span>
         <span class="hidden sm:inline text-gold/30 select-none">◆</span>
-        <span class="flex items-center gap-1.5">
-          <Sparkles class="size-3.5 text-gold shrink-0" />
+        <span class="flex items-center gap-2">
+          <Sparkles class="size-4 text-gold shrink-0" />
           Luxury Grooming Lounge
         </span>
         <span class="hidden sm:inline text-gold/30 select-none">◆</span>
-        <span class="flex items-center gap-1.5">
-          <Clock class="size-3.5 text-gold shrink-0" />
+        <span class="flex items-center gap-2">
+          <Clock class="size-4 text-gold shrink-0" />
           Walk-Ins & Online Bookings
         </span>
       </div>
