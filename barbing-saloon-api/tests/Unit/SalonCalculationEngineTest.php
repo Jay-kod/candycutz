@@ -70,6 +70,8 @@ class SalonCalculationEngineTest extends TestCase
         Appointment::create([
             'booking_reference' => 'CC-TEST-1',
             'customer_id' => $customer->id,
+            'client_name' => $customer->name,
+            'client_phone' => '08012345678',
             'barber_id' => $barber->id,
             'service_id' => $service1->id,
             'appointment_date' => '2026-10-24',
@@ -83,6 +85,8 @@ class SalonCalculationEngineTest extends TestCase
         Appointment::create([
             'booking_reference' => 'CC-TEST-2',
             'customer_id' => $customer->id,
+            'client_name' => $customer->name,
+            'client_phone' => '08012345678',
             'barber_id' => $barber->id,
             'service_id' => $service2->id,
             'appointment_date' => '2026-10-24',
@@ -142,6 +146,8 @@ class SalonCalculationEngineTest extends TestCase
         Appointment::create([
             'booking_reference' => 'CC-CORRUPT-1',
             'customer_id' => $customer->id,
+            'client_name' => $customer->name,
+            'client_phone' => '08012345678',
             'barber_id' => $barber->id,
             'service_id' => $service->id,
             'appointment_date' => '2026-10-24',
