@@ -497,14 +497,14 @@ onMounted(() => {
   scroll-margin-top: 5rem;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .public-header {
     padding: 0.55rem 0.65rem;
   }
 
   .public-nav-shell {
     margin: 0.75rem auto 0;
-    min-height: 46px;
+    min-height: 48px;
     grid-template-columns: 1fr auto;
     gap: 0.4rem;
     padding: 0.3rem 0.4rem 0.3rem 0.6rem;
@@ -521,6 +521,9 @@ onMounted(() => {
 
   .public-mobile-theme {
     width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
     border: 0;
     background: transparent;
     text-align: left;
@@ -529,8 +532,10 @@ onMounted(() => {
 
   .public-menu-toggle {
     display: inline-flex;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -552,8 +557,8 @@ onMounted(() => {
   }
 
   .public-menu-toggle svg {
-    width: 21px;
-    height: 21px;
+    width: 22px;
+    height: 22px;
   }
 
   .public-mobile-menu {
@@ -580,7 +585,7 @@ onMounted(() => {
   }
 
   .public-mobile-link {
-    min-height: 42px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     border-radius: 8px;
@@ -609,7 +614,7 @@ onMounted(() => {
   }
 
   .public-mobile-signup {
-    min-height: 42px;
+    min-height: 44px;
     margin-top: 0.35rem;
   }
 }
