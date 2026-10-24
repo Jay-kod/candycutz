@@ -10,9 +10,9 @@
       <div class="flex items-center justify-between pb-4 border-b border-white/[0.04]">
         <div class="flex items-center gap-2 text-xs font-medium text-ivory/70">
           <SparklesIcon class="h-3.5 w-3.5 text-admin" />
-          <span>Top Services</span>
+          <span>Top Salon Services</span>
         </div>
-        <span class="text-[10px] text-ivory/40 font-mono">Real-time counts</span>
+        <span class="text-[10px] text-ivory/40 font-mono">By appointments</span>
       </div>
 
       <div class="py-3 space-y-3.5 flex-1 flex flex-col justify-center">
@@ -26,12 +26,12 @@
           </span>
           <span class="flex-1 mx-2 border-b border-dashed border-white/15"></span>
           <span class="text-white font-mono font-semibold tabular-nums shrink-0">
-            {{ service.bookings || service.count || 0 }} booked
+            {{ service.bookings || service.count || 0 }} cuts
           </span>
         </div>
 
         <div v-if="!displayedServices.length" class="text-xs text-ivory/40 text-center py-6 font-mono">
-          No appointment bookings recorded yet
+          No service bookings recorded yet
         </div>
       </div>
     </div>
@@ -46,9 +46,9 @@
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.04] text-left">
         <div class="flex items-center gap-2 text-xs font-medium text-ivory/70">
           <UserGroupIcon class="h-3.5 w-3.5 text-admin" />
-          <span>Barber Team</span>
+          <span>Barbers & Stylists</span>
         </div>
-        <span class="text-[10px] text-ivory/40 font-mono">{{ barberCount }} on duty</span>
+        <span class="text-[10px] text-ivory/40 font-mono">{{ barberCount }} active staff</span>
       </div>
 
       <div class="py-4 flex flex-col items-center justify-center flex-1">
