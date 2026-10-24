@@ -48,6 +48,26 @@ export function formatCurrency(kobo, options = {}) {
 }
 
 /**
+ * Format a service price stored in naira (major currency units).
+ * @param {number|string} amount - Service price in naira
+ * @returns {string} Formatted price (e.g., "₦1,500.00")
+ */
+export function formatNairaAmount(amount) {
+  const value = Number(amount);
+
+  if (!Number.isFinite(value)) {
+    return '₦0.00';
+  }
+
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+/**
  * Format kobo to naira without currency symbol
  * @param {number} kobo - Amount in kobo
  * @returns {string} Formatted number string (e.g., "5,000.00")

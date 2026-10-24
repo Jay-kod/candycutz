@@ -113,7 +113,7 @@
             <div>
               <span class="block text-[10px] uppercase tracking-widest text-theme-muted font-semibold">Pricing</span>
               <span class="font-display text-2xl font-bold text-gold">
-                {{ formatCurrency(service.price) }}
+                {{ formatNairaAmount(service.price) }}
               </span>
             </div>
             <RouterLink
@@ -155,7 +155,7 @@ import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import PageHero from '@/shared/ui/PageHero.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
-import { formatCurrency } from '../../../core/utils';
+import { formatNairaAmount } from '../../../core/utils';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const { init: initScrollReveal } = useScrollReveal();
