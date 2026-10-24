@@ -60,6 +60,8 @@
     <TestimonialsMarquee
       :testimonials="testimonials"
       :loading="testimonialsLoading"
+      :speed="testimonialsFlowSpeed"
+      :direction="testimonialsFlowDirection"
     />
 
     <!-- Customer Portal Teaser Section (Orbit Constellation Design) -->
@@ -120,6 +122,8 @@ const aboutText = ref("Welcome to CandyCutz, where precision meets style. We've 
 const aboutImage = ref(null);
 const testimonials = ref([]);
 const testimonialsLoading = ref(true);
+const testimonialsFlowSpeed = ref(45);
+const testimonialsFlowDirection = ref('left');
 
 const portalTitle = ref('The CandyCutz Portal');
 const portalSubtitle = ref('Unlock the Full Experience');
@@ -173,6 +177,19 @@ const fetchSettings = async () => {
             : settings.features_items;
         } catch {
           featuresItems.value = [];
+        }
+      }
+
+      if (settings.testimonials_flow_speed) {
+        const parsedSpeed = Number(settings.testimonials_flow_speed);
+        if (Number.isFinite(parsedSpeed) && parsedSpeed >= 10 && parsedSpeed <= 120) {
+          testimonialsFlowSpeed.value = parsedSpeed;
+        }
+      }
+      if (settings.testimonials_flow_direction) {
+        const dir = String(settings.testimonials_flow_direction).toLowerCase();
+        if (dir === 'left' || dir === 'right') {
+          testimonialsFlowDirection.value = dir;
         }
       }
     }

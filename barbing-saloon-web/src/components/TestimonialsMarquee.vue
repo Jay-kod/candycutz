@@ -24,12 +24,11 @@
     <p v-if="loading" class="mx-auto max-w-7xl px-4 text-center text-sm text-theme-muted">
       Loading approved testimonials...
     </p>
-    <p v-else-if="!trackItems.length" class="mx-auto max-w-7xl px-4 text-center text-sm text-theme-muted">
+    <p v-else-if="!visibleTestimonials.length" class="mx-auto max-w-7xl px-4 text-center text-sm text-theme-muted">
       Approved customer testimonials will appear here.
     </p>
 
-    <!-- Infinite Testimonials Line (Marquee) -->
-    <div v-else class="relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
+    <div v-else class="relative w-full overflow-x-auto border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
       <!-- Gradient Edge Fade Masks -->
       <div
         class="pointer-events-none absolute left-0 top-0 bottom-0 z-20 w-16 sm:w-28 md:w-36 bg-gradient-to-r from-obsidian via-obsidian/80 to-transparent"
@@ -41,16 +40,10 @@
       ></div>
 
       <!-- Marquee Moving Track -->
-      <div class="marquee-container flex select-none overflow-hidden group">
-        <!-- First Loop -->
-        <div
-          class="marquee-track flex shrink-0 items-stretch"
-          :class="isRightFlow ? 'marquee-track-right' : 'marquee-track-left'"
-          :style="{ animationDuration: `${flowDuration}s` }"
-        >
+      <div class="flex w-max items-stretch">
           <article
-            v-for="(testimonial, idx) in trackItems"
-            :key="`track1-${testimonial.id || idx}`"
+            v-for="(testimonial, idx) in visibleTestimonials"
+            :key="testimonial.id || idx"
             class="group/card flex w-[320px] sm:w-[380px] md:w-[420px] shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 sm:p-7 md:p-8 transition-colors duration-200 hover:bg-white/[0.035]"
           >
             <!-- Card Header: Quote Icon + Source Pill -->
@@ -97,65 +90,6 @@
               </div>
             </div>
           </article>
-        </div>
-
-        <!-- Second Duplicate Loop (Ensures Continuous Infinite Ribbon) -->
-        <div
-          class="marquee-track flex shrink-0 items-stretch"
-          :class="isRightFlow ? 'marquee-track-right' : 'marquee-track-left'"
-          :style="{ animationDuration: `${flowDuration}s` }"
-          aria-hidden="true"
-        >
-          <article
-            v-for="(testimonial, idx) in trackItems"
-            :key="`track2-${testimonial.id || idx}`"
-            class="group/card flex w-[320px] sm:w-[380px] md:w-[420px] shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 sm:p-7 md:p-8 transition-colors duration-200 hover:bg-white/[0.035]"
-          >
-            <!-- Card Header: Quote Icon + Source Pill -->
-            <div class="flex items-center justify-between gap-4">
-              <div class="text-zinc-500 transition-colors group-hover/card:text-gold/80">
-                <svg class="size-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-              <span class="inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
-                {{ getSource(testimonial) }}
-              </span>
-            </div>
-
-            <!-- Review Text -->
-            <p class="my-6 text-sm sm:text-base leading-relaxed text-zinc-100 font-normal">
-              {{ testimonial.review || testimonial.comment }}
-            </p>
-
-            <!-- Bottom: Author Avatar, Name & Role -->
-            <div class="flex items-center gap-3 pt-2 border-t border-white/5">
-              <img
-                v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
-                :src="getStorageUrl(testimonial.client_avatar)"
-                :alt="`${testimonial.client_name} avatar`"
-                class="size-10 sm:size-11 rounded-full object-cover border border-zinc-700/60 shrink-0"
-                loading="lazy"
-                @error="markAvatarFailed(testimonial.id)"
-              />
-              <div
-                v-else
-                class="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-xs sm:text-sm font-bold text-gold"
-                aria-hidden="true"
-              >
-                {{ getInitials(testimonial.client_name) }}
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-sm sm:text-base font-semibold text-white tracking-tight">
-                  {{ testimonial.client_name || 'CandyCutz client' }}
-                </p>
-                <p class="truncate text-xs text-zinc-400 mt-0.5">
-                  {{ getSubtitle(testimonial) }}
-                </p>
-              </div>
-            </div>
-          </article>
-        </div>
       </div>
     </div>
   </section>
@@ -186,37 +120,14 @@ const props = defineProps({
     type: String,
     default: 'A look at the kind of premium experience customers can expect.',
   },
-  speed: {
-    type: [Number, String],
-    default: 45,
-  },
-  direction: {
-    type: String,
-    default: 'left',
-  },
 });
 
 const failedAvatars = ref(new Set());
 
-const flowDuration = computed(() => {
-  const parsed = Number(props.speed);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 45;
-});
-
-const isRightFlow = computed(() => {
-  return String(props.direction || '').toLowerCase() === 'right';
-});
-
-const trackItems = computed(() => {
-  const source = Array.isArray(props.testimonials) ? props.testimonials : [];
-
-  // Duplicate items if needed so each track is sufficiently long for wide screens
-  let items = [...source];
-  while (items.length < 6 && items.length > 0) {
-    items = items.concat(source);
-  }
-  return items;
-});
+const visibleTestimonials = computed(() => (
+  (Array.isArray(props.testimonials) ? props.testimonials : [])
+    .filter((item) => item.is_approved === true && item.is_featured === true && (item.review || item.comment))
+));
 
 const markAvatarFailed = (id) => {
   failedAvatars.value = new Set([...failedAvatars.value, id]);
@@ -243,64 +154,4 @@ const getSource = (item) => {
 </script>
 
 <style scoped>
-.marquee-container {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 60px,
-    black calc(100% - 60px),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 60px,
-    black calc(100% - 60px),
-    transparent 100%
-  );
-}
-
-.marquee-track {
-  display: flex;
-  flex-shrink: 0;
-  will-change: transform;
-  transition: none !important;
-}
-
-.marquee-track-left {
-  animation: marquee-scroll-left 45s linear infinite;
-}
-
-.marquee-track-right {
-  animation: marquee-scroll-right 45s linear infinite;
-}
-
-.marquee-container:hover .marquee-track,
-.marquee-container:active .marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes marquee-scroll-left {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes marquee-scroll-right {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(0%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation-play-state: paused;
-  }
-}
 </style>

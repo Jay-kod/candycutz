@@ -15,38 +15,33 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.text()).toContain('What our clients say');
   });
 
-  it('renders default testimonials when no testimonials are passed', () => {
+  it('renders an empty state when there are no approved visible testimonials', () => {
     const wrapper = mount(TestimonialsMarquee, {
       props: {
         testimonials: [],
       },
     });
 
-    expect(wrapper.text()).toContain('Guillermo Rauch');
-    expect(wrapper.text()).toContain('x.com');
-    expect(wrapper.findAll('.marquee-track').length).toBe(2);
+    expect(wrapper.text()).toContain('Approved customer testimonials will appear here.');
+    expect(wrapper.findAll('article')).toHaveLength(0);
   });
 
-  it('renders custom testimonials in infinite tracks', () => {
-    const customTestimonials = [
-      {
-        id: 'test-1',
-        client_name: 'John Doe',
-        role: 'Verified Customer',
-        source: 'x.com',
-        review: 'Incredible skin fade and sharp beard line!',
-      },
+  it('renders each approved and visible testimonial once', () => {
+    const testimonials = [
+      { id: 'shown', client_name: 'Approved Client', review: 'Great cut.', is_approved: true, is_featured: true },
+      { id: 'hidden', client_name: 'Hidden Client', review: 'Hidden cut.', is_approved: true, is_featured: false },
+      { id: 'pending', client_name: 'Pending Client', review: 'Pending cut.', is_approved: false, is_featured: true },
     ];
 
     const wrapper = mount(TestimonialsMarquee, {
       props: {
-        testimonials: customTestimonials,
+        testimonials,
       },
     });
 
-    expect(wrapper.text()).toContain('John Doe');
-    expect(wrapper.text()).toContain('Incredible skin fade and sharp beard line!');
-    expect(wrapper.find('[aria-hidden="true"]').exists()).toBe(true);
+    expect(wrapper.text()).toContain('Approved Client');
+    expect(wrapper.text()).not.toContain('Hidden Client');
+    expect(wrapper.text()).not.toContain('Pending Client');
+    expect(wrapper.findAll('article')).toHaveLength(1);
   });
 });
-

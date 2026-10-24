@@ -15,7 +15,7 @@ describe('useConfirm Composable with 2-Stage Morphing Resolution', () => {
   });
 
   it('handles custom resolution configuration and options object', () => {
-    const { isOpen, resolutionType, resolutionTitle, autoDismissDelay, confirm } = useConfirm();
+    const { isOpen, resolutionType, resolutionTitle, resolutionBadgeText, autoDismissDelay, confirm } = useConfirm();
 
     confirm({
       title: 'Accept Booking',
@@ -23,12 +23,14 @@ describe('useConfirm Composable with 2-Stage Morphing Resolution', () => {
       variant: 'primary',
       resolutionType: 'confirmed',
       resolutionTitle: 'Booking Accepted!',
+      resolutionBadgeText: 'ACCEPTED',
       autoDismissDelay: 1000,
     });
 
     expect(isOpen.value).toBe(true);
     expect(resolutionType.value).toBe('confirmed');
     expect(resolutionTitle.value).toBe('Booking Accepted!');
+    expect(resolutionBadgeText.value).toBe('ACCEPTED');
     expect(autoDismissDelay.value).toBe(1000);
   });
 
