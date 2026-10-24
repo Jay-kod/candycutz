@@ -104,23 +104,8 @@ import { usePaymentSettings } from '@/features/appointments/composables/usePayme
 
 const toast = useToast();
 
-const {
-  appointments,
-  loading,
-  isRefreshing,
-  loadAppointments,
-  approve,
-  forceApprove,
-  cancel
-} = useAppointments();
-
-const {
-  showSettingsModal,
-  savingSettings,
-  settingsForm,
-  loadSettings,
-  saveSettings
-} = usePaymentSettings();
+const { appointments, loading, isRefreshing, loadAppointments, approve, forceApprove, cancel } = useAppointments();
+const { showSettingsModal, savingSettings, settingsForm, loadSettings, saveSettings } = usePaymentSettings();
 
 const search = ref('');
 const currentFilter = ref('all');
@@ -130,9 +115,7 @@ const sortOrder = ref('newest_created');
 const selectedBooking = ref(null);
 const detailsModal = ref(null);
 
-function openDetails(appt) {
-  detailsModal.value = appt;
-}
+function openDetails(appt) { detailsModal.value = appt; }
 
 const tabs = computed(() => {
   const list = appointments.value || [];

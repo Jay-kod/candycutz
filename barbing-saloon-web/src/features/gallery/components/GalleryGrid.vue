@@ -27,9 +27,9 @@
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </div>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <div class="flex items-end justify-between">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90 sm:opacity-0 transition-opacity duration-300 sm:group-hover:opacity-100"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 translate-y-0 opacity-100 sm:translate-y-4 sm:opacity-0 transition-all duration-300 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+          <div class="flex items-end justify-between gap-2">
             <div>
               <p class="font-display text-lg text-theme-text">{{ item.title }}</p>
               <div class="flex items-center gap-2">
@@ -39,19 +39,21 @@
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 shrink-0">
               <button
                 @click="$emit('edit', item)"
-                class="rounded-lg bg-black/40 p-2 text-ivory/70 transition-colors backdrop-blur-sm"
+                class="rounded-lg bg-black/50 p-2.5 min-h-[38px] min-w-[38px] flex items-center justify-center text-ivory/80 transition-colors backdrop-blur-sm"
                 :class="colorTheme === 'gold' ? 'hover:text-gold hover:bg-gold/10' : 'hover:text-admin-light hover:bg-admin/10'"
                 title="Edit"
+                aria-label="Edit"
               >
                 <PencilSquareIcon class="h-4 w-4" />
               </button>
               <button
                 @click="$emit('delete', item.id)"
-                class="rounded-lg bg-red-500/20 p-2 text-red-400 hover:bg-red-500/40 transition-colors backdrop-blur-sm"
+                class="rounded-lg bg-red-500/20 p-2.5 min-h-[38px] min-w-[38px] flex items-center justify-center text-red-400 hover:bg-red-500/40 transition-colors backdrop-blur-sm"
                 title="Delete"
+                aria-label="Delete"
               >
                 <TrashIcon class="h-4 w-4" />
               </button>

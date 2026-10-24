@@ -2,13 +2,13 @@
   <AdminLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 shadow-2xl">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/5 blur-3xl"></div>
-        <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl"></div>
+      <div class="relative overflow-hidden rounded-2xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-4 xs:p-6 sm:p-8 shadow-2xl">
+        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/5 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl pointer-events-none"></div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-admin/70 font-bold">Portfolio</p>
-            <h1 class="mt-2 font-display text-4xl text-theme-text drop-shadow-lg flex items-center gap-3">
+            <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text drop-shadow-lg flex items-center gap-3">
               Global <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Gallery</span> 
               <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ gallery.length }}</span>
             </h1>
@@ -18,7 +18,7 @@
           </div>
           <button
             @click="openUploadForm"
-            class="flex items-center gap-2 shrink-0 rounded-xl bg-gradient-to-r from-admin to-admin-light px-5 py-3 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(255,103,0,0.25)] transition-all hover:shadow-[0_0_30px_rgba(255,103,0,0.4)] hover:scale-[1.02]"
+            class="flex items-center justify-center gap-2 shrink-0 rounded-xl bg-gradient-to-r from-admin to-admin-light px-5 py-3 min-h-[44px] w-full sm:w-auto text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(255,103,0,0.25)] transition-all hover:shadow-[0_0_30px_rgba(255,103,0,0.4)] hover:scale-[1.02]"
           >
             <PlusIcon class="h-5 w-5" />
             Upload Image
