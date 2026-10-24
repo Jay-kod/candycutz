@@ -58,7 +58,7 @@ export function ConfirmDialog({
   const { colors, isDark } = useAppTheme();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [step, setStep] = React.useState<'prompt' | 'executing' | 'resolved'>('prompt');
-  const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Determine active visual variant
   const effectiveVariant: ConfirmDialogVariant =

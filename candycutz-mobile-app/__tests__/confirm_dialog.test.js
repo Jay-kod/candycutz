@@ -19,4 +19,17 @@ test('ConfirmDialog Redesign Verification Suite', async (t) => {
     assert.ok(content.includes('backdropAnim'), 'Must use animated backdrop');
     assert.ok(content.includes('cardScaleAnim'), 'Must use spring card animation');
   });
+
+  await t.test('ConfirmDialog implements 2-stage animated resolution feedback', () => {
+    const dialogPath = path.resolve(__dirname, '../src/components/common/ConfirmDialog.tsx');
+    const content = fs.readFileSync(dialogPath, 'utf8');
+
+    assert.ok(content.includes('ConfirmResolutionType'), 'Must export ConfirmResolutionType');
+    assert.ok(content.includes('autoDismissDelay'), 'Must support autoDismissDelay');
+    assert.ok(content.includes('resolvedContainer'), 'Must render resolvedContainer');
+    assert.ok(content.includes('Trash2'), 'Must use Trash2 icon for deletion resolution');
+    assert.ok(content.includes('CheckCircle2'), 'Must use CheckCircle2 icon for saved/confirmed resolution');
+    assert.ok(content.includes('resolveIconScaleAnim'), 'Must animate resolution icon scale pop');
+  });
 });
+
