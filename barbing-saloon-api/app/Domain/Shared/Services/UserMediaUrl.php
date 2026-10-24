@@ -25,20 +25,18 @@ class UserMediaUrl
         }
 
         $prefix = $user ? "user-media/{$user->id}/" : '';
-        if ($prefix === '' || ! str_starts_with($normalizedPath, $prefix)) {
-            return null;
+        if ($prefix !== '' && str_starts_with($normalizedPath, $prefix)) {
+            $relativePath = substr($normalizedPath, strlen($prefix));
+            $parts = explode('/', $relativePath, 2);
+            if (count($parts) === 2 && in_array($parts[0], ['avatar', 'cover'], true)) {
+                return URL::temporarySignedRoute(
+                    'user-media.show',
+                    now()->addMinutes(30),
+                    ['user' => $user->id, 'type' => $parts[0], 'filename' => basename($parts[1])]
+                );
+            }
         }
 
-        $relativePath = substr($normalizedPath, strlen($prefix));
-        $parts = explode('/', $relativePath, 2);
-        if (count($parts) !== 2 || ! in_array($parts[0], ['avatar', 'cover'], true)) {
-            return null;
-        }
-
-        return URL::temporarySignedRoute(
-            'user-media.show',
-            now()->addMinutes(30),
-            ['user' => $user->id, 'type' => $parts[0], 'filename' => basename($parts[1])]
-        );
+        return url('storage/'.$normalizedPath);
     }
 }
