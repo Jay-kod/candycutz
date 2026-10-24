@@ -14,17 +14,17 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(periodRevenueTotal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Total Sales in last {{ timeframeLabel }}</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Total Salon Revenue ({{ timeframeLabel }})</p>
 
           <!-- Legend with System Brand Colors -->
           <div class="flex items-center gap-4 mt-2.5 text-xs text-ivory/60">
             <span class="flex items-center gap-1.5">
               <span class="h-2 w-2 rounded-full bg-admin"></span>
-              <span>Revenue (₦)</span>
+              <span>Revenue Volume (₦)</span>
             </span>
             <span class="flex items-center gap-1.5">
               <span class="h-2 w-2 rounded-full bg-[#353945]"></span>
-              <span>Bookings</span>
+              <span>Appointments Volume</span>
             </span>
           </div>
         </div>
@@ -48,9 +48,9 @@
             </button>
           </div>
 
-          <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
-            <span>↑</span>
-            <span>1.5% vs last 30 days</span>
+          <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1 font-mono">
+            <span>●</span>
+            <span>Live Salon Stream</span>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@
             <span>{{ yAxisLabels[3] }}</span>
             <span>{{ yAxisLabels[2] }}</span>
             <span>{{ yAxisLabels[1] }}</span>
-            <span>0k</span>
+            <span>{{ yAxisLabels[0] }}</span>
           </div>
 
           <!-- Stacked Segmented Equalizer Columns -->
@@ -127,12 +127,12 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(topPeriodVal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Monthly Performance in {{ currentMonthName }}</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Monthly Revenue ({{ currentMonthName }})</p>
         </div>
 
-        <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
-          <span>↑</span>
-          <span>5.2%</span>
+        <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1 font-mono">
+          <span>●</span>
+          <span>Verified Ledger</span>
         </div>
       </div>
 
