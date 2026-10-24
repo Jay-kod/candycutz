@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen flex bg-theme-bg overflow-hidden relative text-theme-text">
+  <div class="min-h-[100dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text overflow-y-auto">
     
     <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
     <div class="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
@@ -38,12 +38,12 @@
     </div>
 
     <!-- Right Section: Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border overflow-y-auto">
+    <div class="w-full lg:w-1/2 flex min-h-[100dvh] flex-col items-center justify-center p-4 xs:p-6 sm:p-10 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border py-10 lg:py-16">
       
       <!-- Mobile Logo -->
-      <div class="absolute top-8 left-8 lg:hidden">
-        <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full" />
+      <div class="mb-6 lg:hidden flex justify-center w-full">
+        <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
