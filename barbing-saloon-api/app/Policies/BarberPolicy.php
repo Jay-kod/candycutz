@@ -43,6 +43,6 @@ class BarberPolicy
 
     public function delete(User $user, Barber $barber): bool
     {
-        return false;
+        return in_array($user->role?->value ?? $user->role, ['admin', 'super_admin']);
     }
 }
