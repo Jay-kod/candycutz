@@ -87,6 +87,16 @@ class SuperAdminApiController
             ];
         }
 
+        if ($request->hasFile('page_hero_image')) {
+            $page = $request->validated('page_hero_page');
+            $path = (new SecureImageUpload)->execute($request->file('page_hero_image'), 'uploads/settings');
+            $settings[] = [
+                'key' => $page === 'home' ? 'hero_image' : "page_hero_{$page}_image",
+                'value' => '/storage/'.$path,
+                'group' => 'hero',
+            ];
+        }
+
         if ($request->hasFile('about_teaser_image')) {
             $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
             $settings[] = [

@@ -75,8 +75,8 @@ class ContentService
                 ->get()
                 ->map(fn (Testimonial $testimonial) => [
                     'id' => $testimonial->id,
-                    'client_name' => $testimonial->customer?->name ?? 'Anonymous',
-                    'client_avatar' => app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer?->avatar),
+                    'client_name' => $testimonial->customer?->name ?? $testimonial->client_name ?? 'Anonymous',
+                    'client_avatar' => ($testimonial->client_avatar ? (str_starts_with($testimonial->client_avatar, 'http') ? $testimonial->client_avatar : url('storage/'.ltrim(str_replace('storage/', '', $testimonial->client_avatar), '/'))) : null) ?? app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer?->avatar),
                     'rating' => $testimonial->rating,
                     'review' => $testimonial->review,
                     'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,
