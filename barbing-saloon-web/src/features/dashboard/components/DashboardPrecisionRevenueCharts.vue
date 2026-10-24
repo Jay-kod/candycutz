@@ -215,9 +215,9 @@ const currentMonthName = computed(() => {
 const yAxisLabels = computed(() => {
   const total = periodRevenueTotal.value;
   if (total >= 10000000) {
-    return ['0', '25M', '50M', '75M', '100M'];
+    return ['₦0', '₦25M', '₦50M', '₦75M', '₦100M'];
   }
-  return ['0', '5k', '10k', '15k', '20k'];
+  return ['₦0', '₦5K', '₦10K', '₦15K', '₦20K'];
 });
 
 // Dynamic Columns mapped directly from real API 30-day timeline

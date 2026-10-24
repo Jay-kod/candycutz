@@ -118,6 +118,8 @@ const cards = computed(() => {
     return { height, highlight: val > 0 };
   });
 
+  const completedAppts = Number(s.completed_appointments ?? s.completed ?? 0);
+
   return [
     {
       label: 'Total Revenue',
@@ -125,34 +127,34 @@ const cards = computed(() => {
       icon: BanknotesIcon,
       iconColor: 'text-emerald-400',
       trendPositive: todayRev > 0,
-      trendText: todayRev > 0 ? `₦${formatCurrency(todayRev)} today` : 'Current revenue',
+      trendText: todayRev > 0 ? `₦${formatCurrency(todayRev)} today` : 'Verified ledger',
       equalizer: revEqualizer.length ? revEqualizer : defaultEqualizer
     },
     {
-      label: 'Total Bookings',
+      label: 'Total Appointments',
       value: formatNumber(totalAppts),
       icon: CalendarDaysIcon,
       iconColor: 'text-admin',
       trendPositive: totalAppts >= yesterdayAppts,
-      trendText: yesterdayAppts > 0 ? `${yesterdayAppts} yesterday` : `${pendingAppts} pending`,
+      trendText: pendingAppts > 0 ? `${pendingAppts} awaiting service` : `${yesterdayAppts} yesterday`,
       equalizer: bookEqualizer.length ? bookEqualizer : defaultEqualizer
     },
     {
-      label: 'Average Ticket Value',
+      label: 'Average Service Value',
       value: `₦${formatCurrency(avgTicket)}`,
       icon: CreditCardIcon,
       iconColor: 'text-amber-400',
       trendPositive: avgTicket > 0,
-      trendText: 'Per appointment',
+      trendText: 'Per salon visit',
       equalizer: revEqualizer.length ? revEqualizer : defaultEqualizer
     },
     {
-      label: 'Completion Rate',
+      label: 'Service Fulfillment',
       value: `${completionRate}%`,
       icon: CheckBadgeIcon,
       iconColor: 'text-admin',
       trendPositive: completionRate >= 80,
-      trendText: `${pendingAppts} awaiting service`,
+      trendText: completedAppts > 0 ? `${completedAppts} cuts completed` : `${pendingAppts} in queue`,
       equalizer: bookEqualizer.length ? bookEqualizer : defaultEqualizer
     }
   ];
