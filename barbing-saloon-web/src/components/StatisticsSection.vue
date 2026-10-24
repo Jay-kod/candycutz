@@ -10,7 +10,7 @@
       aria-hidden="true"
     ></div>
     <div
-      class="pointer-events-none absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gold/5 blur-[120px] rounded-full"
+      class="pointer-events-none absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] max-w-full h-[300px] bg-gold/5 blur-[120px] rounded-full"
       aria-hidden="true"
     ></div>
 
