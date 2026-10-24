@@ -138,7 +138,7 @@
               </button>
 
               <button
-                :disabled="moderatingIds.has(item.id) || (!item.is_approved && !item.is_featured)"
+                :disabled="moderatingIds.has(item.id) || !item.is_approved"
                 @click="toggleWebsiteVisibility(item)"
                 class="flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40"
                 :class="item.is_featured
@@ -148,7 +148,7 @@
               >
                 <EyeSlashIcon v-if="item.is_featured" class="h-4 w-4" />
                 <EyeIcon v-else class="h-4 w-4" />
-                {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_featured ? 'Hide from website' : 'View on website' }}
+                {{ moderatingIds.has(item.id) ? 'Saving...' : !item.is_approved ? 'Approve to display' : item.is_featured ? 'Hide from website' : 'View on website' }}
               </button>
 
               <button 
