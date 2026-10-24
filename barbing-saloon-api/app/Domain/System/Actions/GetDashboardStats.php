@@ -81,6 +81,84 @@ class GetDashboardStats
             ];
         }
 
+        // Live Database Connection & System Health Status
+        $dbStatus = 'disconnected';
+        $dbLatencyMs = 0;
+        try {
+            $start = microtime(true);
+            DB::connection()->getPdo();
+            $dbLatencyMs = max((int) round((microtime(true) - $start) * 1000), 1);
+            $dbStatus = 'connected';
+        } catch (Throwable) {
+            $dbStatus = 'disconnected';
+        }
+
+        $systemHealth = [
+            'status' => $dbStatus === 'connected' ? 'operational' : 'degraded',
+            'database' => [
+                'status' => $dbStatus,
+                'connection' => config('database.default', 'mysql'),
+                'latency_ms' => $dbLatencyMs,
+            ],
+            'timestamp' => now()->toIso8601String(),
+        ];
+
+        // 30-Day Rolling Real Daily Revenue & Bookings Trend
+        $thirtyDaysAgo = today()->subDays(29)->toDateString();
+        $rawThirtyDayData = Appointment::query()
+            ->selectRaw("DATE(appointment_date) as day_date, SUM(CASE WHEN status IN ('confirmed', 'completed') THEN total_price ELSE 0 END) as total_rev, COUNT(*) as total_count")
+            ->where('appointment_date', '>=', $thirtyDaysAgo)
+            ->groupBy('day_date')
+            ->get()
+            ->keyBy('day_date');
+
+        $thirtyDayTrend = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $dateObj = today()->subDays($i);
+            $dStr = $dateObj->toDateString();
+            $matched = $rawThirtyDayData->get($dStr);
+
+            $thirtyDayTrend[] = [
+                'date' => $dStr,
+                'day' => $dateObj->format('D'),
+                'date_label' => $dateObj->format('M j'),
+                'revenue' => (float) ($matched ? $matched->total_rev : 0),
+                'count' => (int) ($matched ? $matched->total_count : 0),
+            ];
+        }
+
+        // 6-Month Rolling Real Monthly Revenue & Bookings Trend
+        $sixMonthsAgo = today()->subMonths(5)->startOfMonth()->toDateString();
+        $rawMonthlyData = Appointment::query()
+            ->selectRaw("DATE_FORMAT(appointment_date, '%Y-%m') as ym, SUM(CASE WHEN status IN ('confirmed', 'completed') THEN total_price ELSE 0 END) as total_rev, COUNT(*) as total_count")
+            ->where('appointment_date', '>=', $sixMonthsAgo)
+            ->groupBy('ym')
+            ->get()
+            ->keyBy('ym');
+
+        $monthlyRevenueTrend = [];
+        for ($m = 5; $m >= 0; $m--) {
+            $mObj = today()->subMonths($m);
+            $ym = $mObj->format('Y-m');
+            $matchedMonth = $rawMonthlyData->get($ym);
+
+            $monthlyRevenueTrend[] = [
+                'ym' => $ym,
+                'month' => $mObj->format('M'),
+                'revenue' => (float) ($matchedMonth ? $matchedMonth->total_rev : 0),
+                'count' => (int) ($matchedMonth ? $matchedMonth->total_count : 0),
+                'is_current' => $m === 0,
+            ];
+        }
+
+        // Real Hourly Booking Distribution (for Hourly Heatmap Matrix)
+        $hourlyDistribution = Appointment::query()
+            ->selectRaw("HOUR(appointment_time) as hr, COUNT(*) as count")
+            ->whereNotNull('appointment_time')
+            ->groupBy('hr')
+            ->pluck('count', 'hr')
+            ->all();
+
         // Status breakdown
         $statusBreakdown = [
             'completed' => Appointment::query()->where('status', AppointmentStatus::completed->value)->count(),
