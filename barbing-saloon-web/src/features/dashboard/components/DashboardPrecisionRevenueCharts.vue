@@ -14,7 +14,7 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(periodRevenueTotal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Total Sales in last 30 days</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Total Sales in last {{ timeframeLabel }}</p>
 
           <!-- Legend with System Brand Colors -->
           <div class="flex items-center gap-4 mt-2.5 text-xs text-ivory/60">
@@ -79,14 +79,14 @@
             </div>
 
             <!-- 28 Columns: Wider and Closer to Each Other -->
-            <div class="flex-1 flex items-end justify-between gap-[2px] sm:gap-[3px] md:gap-1 z-10 pb-5 w-full">
+            <div class="flex-1 flex items-end justify-between gap-[2px] sm:gap-[3px] z-10 pb-5 w-full">
               <div
-                v-for="(col, cIdx) in thirtyDayColumns"
+                v-for="(col, cIdx) in activeColumns"
                 :key="'eq-col-' + cIdx"
-                class="group/bar flex flex-col-reverse justify-start items-center flex-1 h-full relative cursor-pointer min-w-[6px]"
+                class="group/bar flex flex-col-reverse justify-start items-center flex-1 h-full relative cursor-pointer"
               >
-                <!-- Segmented Bricks Stack: Wide and closely packed -->
-                <div class="flex flex-col-reverse gap-[2px] w-full max-w-[20px] sm:max-w-[22px]">
+                <!-- Segmented Bricks Stack: Wide and closely packed across each column -->
+                <div class="flex flex-col-reverse gap-[2px] w-full">
                   <span
                     v-for="b in col.totalBricks"
                     :key="'brick-' + b"
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Wide Dashed Segmented Bar -->
-            <div class="flex flex-col-reverse gap-[2px] w-5 sm:w-6 md:w-7">
+            <div class="flex flex-col-reverse gap-[2px] w-7 sm:w-8 md:w-9">
               <span
                 v-for="seg in m.segments"
                 :key="'mseg-' + seg"

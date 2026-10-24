@@ -19,6 +19,10 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'settings' => ['nullable', 'array'],
             'settings.*' => ['nullable'],
+            'settings.cta_title' => ['sometimes', 'string', 'max:140'],
+            'settings.cta_title_color' => ['sometimes', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'settings.cta_subtitle' => ['sometimes', 'string', 'max:240'],
+            'settings.cta_caption' => ['sometimes', 'nullable', 'string', 'max:240'],
             'settings.testimonials_flow_speed' => ['sometimes', 'nullable'],
             'settings.testimonials_flow_direction' => ['sometimes', 'nullable', 'in:left,right'],
             'settings.brand_name' => ['sometimes', 'string', 'max:120'],
