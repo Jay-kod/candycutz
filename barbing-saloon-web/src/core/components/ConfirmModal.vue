@@ -335,9 +335,15 @@ const resTheme = computed(() => {
 const handleKeyDown = (e) => {
   if (!isOpen.value) return;
   if (e.key === 'Escape') {
-    cancel();
+    if (isResolved.value) {
+      closeImmediately();
+    } else {
+      cancel();
+    }
   } else if (e.key === 'Enter') {
-    if (!isResolved.value) {
+    if (isResolved.value) {
+      closeImmediately();
+    } else {
       agree();
     }
   }
