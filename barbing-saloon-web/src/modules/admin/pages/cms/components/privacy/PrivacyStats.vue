@@ -122,3 +122,4 @@ const props = defineProps({
 
 const sectionsCount = computed(() => props.sections?.length || 0);
 </script>
+

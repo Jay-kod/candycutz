@@ -29,3 +29,4 @@ export const DEFAULT_PRIVACY_SECTIONS = [
     body: 'In accordance with Apple Guideline 5.1.1(v) and Google Play user data policies, users have full autonomy to deactivate their accounts and request data deletion:\n\n• In-App Deactivation: You may initiate immediate account deactivation within the CandyCutz mobile app under Profile > Security > Deactivate Account.\n• Web Deletion Request: You can submit an account erasure request at https://candycutz.com/account-deletion or by emailing privacy@candycutz.com.\n• Data Retention Policy: Upon deactivation, your profile is immediately deactivated and active authentication tokens are revoked. Historical financial transaction logs are retained strictly in accordance with statutory accounting and tax regulations before being permanently purged.'
   }
 ];
+
