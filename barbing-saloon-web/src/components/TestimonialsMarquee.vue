@@ -9,13 +9,15 @@
       aria-hidden="true"
     ></div>
 
-    <div class="relative z-10 mx-auto max-w-7xl px-4 md:px-6 mb-10 md:mb-14">
-      <header class="max-w-2xl" data-reveal>
-        <p class="text-xs font-bold uppercase tracking-[0.25em] text-gold">{{ badge }}</p>
-        <h2 id="home-testimonials-title" class="mt-3 font-display text-3xl font-bold tracking-tight text-ivory sm:text-4xl md:text-5xl">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
+      <header class="max-w-3xl" data-reveal>
+        <span v-if="badge" class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
+          {{ badge }}
+        </span>
+        <h2 id="home-testimonials-title" class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gold">
           {{ title }}
         </h2>
-        <p class="mt-3 text-sm leading-relaxed text-theme-muted sm:text-base">
+        <p class="mt-4 text-sm sm:text-base leading-relaxed text-theme-muted max-w-2xl">
           {{ subtitle }}
         </p>
       </header>

@@ -1,18 +1,16 @@
 <template>
   <PublicLayout>
-    <section class="min-h-screen min-h-[100dvh] min-h-[100svh]">
-      <BarberCta
-        :title="ctaTitle"
-        :subtitle="ctaSubtitle"
-        :caption="ctaCaption"
-        :title-color="ctaTitleColor"
-        :primary-text="ctaPrimaryText"
-        :secondary-text="heroBtn2Text"
-        :background-image="heroImage"
-        :image-opacity="heroImageOpacity"
-        :overlay-opacity="heroOverlayOpacity"
-      />
-    </section>
+    <BarberCta
+      :title="ctaTitle"
+      :subtitle="ctaSubtitle"
+      :caption="ctaCaption"
+      :title-color="ctaTitleColor"
+      :primary-text="ctaPrimaryText"
+      :secondary-text="heroBtn2Text"
+      :background-image="heroImage"
+      :image-opacity="heroImageOpacity"
+      :overlay-opacity="heroOverlayOpacity"
+    />
 
     <!-- Features Block (@efferd/features-1) -->
     <div id="features">
@@ -33,13 +31,17 @@
     />
 
     <!-- About Us Teaser -->
-    <section class="bg-theme-surface text-theme-text py-16 md:py-24">
-      <div class="mx-auto max-w-7xl px-4 md:px-6">
+    <section class="bg-theme-surface text-theme-text py-16 md:py-24 border-y border-white/5 overflow-hidden">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <p class="text-sm uppercase tracking-[0.3em] text-gold-light">{{ aboutTitle }}</p>
-            <h2 class="mt-3 font-display text-4xl text-gold md:text-5xl">{{ aboutSubtitle }}</h2>
-            <p class="mt-6 text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">
+            <span class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
+              {{ aboutTitle || 'Our Story' }}
+            </span>
+            <h2 class="mt-2 font-display text-3xl sm:text-4xl lg:text-5xl text-gold">
+              {{ aboutSubtitle }}
+            </h2>
+            <p class="mt-5 text-base sm:text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">
               {{ aboutText }}
             </p>
             <div class="mt-8">
@@ -51,7 +53,7 @@
               </RouterLink>
             </div>
           </div>
-          <div class="relative overflow-hidden rounded-3xl aspect-[4/3] border border-theme-border shadow-lg">
+          <div class="relative overflow-hidden rounded-3xl aspect-[4/3] border border-theme-border shadow-2xl">
             <img :src="aboutImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
           </div>
         </div>

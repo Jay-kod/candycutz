@@ -3,12 +3,12 @@
     <!-- Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.06),transparent_70%)]"></div>
 
-    <div class="relative z-10 mx-auto max-w-7xl px-4 md:px-6">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div v-if="displayTitle || displaySubtitle" class="text-center max-w-3xl mx-auto mb-12 md:mb-16" data-reveal>
         <span
           v-if="displayBadge"
-          class="inline-block px-3 py-1 mb-3 text-[11px] font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full"
+          class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full"
         >
           {{ displayBadge }}
         </span>
@@ -21,12 +21,12 @@
       </div>
 
       <!-- Features Block Grid (efferd/features-1) -->
-      <div class="mx-auto max-w-5xl" data-reveal>
-        <div class="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-4 sm:gap-5">
+      <div class="w-full" data-reveal>
+        <div class="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 lg:grid-cols-4 sm:gap-6">
           <div
             v-for="(feature, index) in featureList"
             :key="feature.title || index"
-            class="group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-5 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-6"
+            class="group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-7"
           >
             <!-- Feature Icon -->
             <div class="relative flex items-center justify-center size-12 rounded-xl bg-gold/10 border border-gold/20 text-gold transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
