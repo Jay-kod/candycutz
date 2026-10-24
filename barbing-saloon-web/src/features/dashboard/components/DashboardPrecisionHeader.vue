@@ -59,20 +59,20 @@
         type="button"
         @click="triggerRefresh"
         :disabled="isRefreshing"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-[#0B0F13] hover:border-admin/40 hover:bg-[#141820] text-xs font-semibold text-ivory/80 hover:text-white px-3 py-1.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+        class="inline-flex items-center min-h-[40px] xs:min-h-[44px] gap-1.5 rounded-lg border border-white/[0.08] bg-[#0B0F13] hover:border-admin/40 hover:bg-[#141820] text-xs font-semibold text-ivory/80 hover:text-white px-3 py-2 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
         title="Sync live dashboard and health status"
       >
         <ArrowPathIcon 
           class="h-3.5 w-3.5 text-admin transition-transform" 
           :class="{ 'animate-spin': isRefreshing }"
         />
-        <span class="hidden sm:inline">Sync</span>
+        <span class="inline">Sync</span>
       </button>
 
       <!-- New Walk-In CTA -->
       <RouterLink
         to="/admin/walk-in"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-admin/40 bg-admin/15 hover:bg-admin hover:text-white text-xs font-semibold text-admin px-3.5 py-1.5 transition-all active:scale-95 shadow-sm group"
+        class="inline-flex items-center min-h-[40px] xs:min-h-[44px] gap-1.5 rounded-lg border border-admin/40 bg-admin/15 hover:bg-admin hover:text-white text-xs font-semibold text-admin px-3.5 py-2 transition-all active:scale-95 shadow-sm group"
       >
         <PlusIcon class="h-3.5 w-3.5 text-admin group-hover:text-white transition-colors" />
         <span>New Walk-In</span>
