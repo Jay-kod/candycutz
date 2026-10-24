@@ -20,11 +20,11 @@
           <div class="flex items-center gap-4 mt-2.5 text-xs text-ivory/60">
             <span class="flex items-center gap-1.5">
               <span class="h-2 w-2 rounded-full bg-admin"></span>
-              <span>New user</span>
+              <span>Revenue (₦)</span>
             </span>
             <span class="flex items-center gap-1.5">
               <span class="h-2 w-2 rounded-full bg-[#353945]"></span>
-              <span>Existing user</span>
+              <span>Bookings</span>
             </span>
           </div>
         </div>
@@ -127,7 +127,7 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(topPeriodVal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Revenue from campaigns in {{ currentMonthName }}</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Monthly Performance in {{ currentMonthName }}</p>
         </div>
 
         <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
