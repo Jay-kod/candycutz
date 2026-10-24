@@ -35,66 +35,74 @@
           <h2 class="font-display text-xl text-theme-text">Page Header</h2>
           <p class="mt-1 text-xs text-ivory/40">The title, subtitle, cover image, and image overlay shown at the top of the Gallery page.</p>
         </div>
-        <div class="p-8 space-y-6">
+        <div class="space-y-6 p-8">
           <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Title</label>
-            <input v-model="content.gallery_title" type="text" placeholder="Our Gallery" 
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Subtitle</label>
-            <textarea v-model="content.gallery_subtitle" rows="3" placeholder="Browse our portfolio of premium cuts and styles..."
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-none"></textarea>
-          </div>
-        </div>
-        <div class="grid gap-8 xl:grid-cols-2">
-          <div class="space-y-6">
-            <div>
-              <label for="gallery-hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
-              <input
-                id="gallery-hero-image"
-                ref="imageInput"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-theme-text file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
-                @change="selectImage"
-              />
-              <p class="mt-2 text-xs text-ivory/45">Upload a JPG, PNG, or WEBP image up to 5 MB. The saved image appears behind the Gallery hero.</p>
-            </div>
-            <div>
-              <div class="mb-2 flex items-center justify-between gap-4">
-                <label for="gallery-hero-opacity" class="block text-xs font-bold uppercase tracking-widest text-ivory/50">Image overlay opacity</label>
-                <span class="text-sm font-semibold text-admin-light">{{ heroOpacity }}%</span>
-              </div>
-              <input
-                id="gallery-hero-opacity"
-                v-model.number="heroOpacity"
-                type="range"
-                min="0"
-                max="100"
-                class="w-full accent-admin"
-              />
-              <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
-            </div>
-            <button
-              v-if="heroImage || selectedFile"
-              type="button"
-              class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
-              @click="clearImage"
-            >
-              Remove hero cover image
-            </button>
-          </div>
-          <div class="min-w-0">
-            <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live hero preview</p>
-            <PageHero
-              page-key="gallery"
-              :fallback-title="content.gallery_title || 'Our Gallery'"
-              :fallback-subtitle="content.gallery_subtitle"
-              :background-image="previewImage"
-              :overlay-opacity="heroOpacity"
-              :load-settings="false"
+            <label class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Page Title</label>
+            <input
+              v-model="content.gallery_title"
+              type="text"
+              placeholder="Our Gallery"
+              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 transition-all focus:border-admin/50 focus:outline-none focus:ring-2 focus:ring-admin/20"
             />
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Page Subtitle</label>
+            <textarea
+              v-model="content.gallery_subtitle"
+              rows="3"
+              placeholder="Browse our portfolio of premium cuts and styles..."
+              class="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 transition-all focus:border-admin/50 focus:outline-none focus:ring-2 focus:ring-admin/20"
+            ></textarea>
+          </div>
+          <div class="grid gap-8 xl:grid-cols-2">
+            <div class="space-y-6">
+              <div>
+                <label for="gallery-hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
+                <input
+                  id="gallery-hero-image"
+                  ref="imageInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-theme-text file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
+                  @change="selectImage"
+                />
+                <p class="mt-2 text-xs text-ivory/45">Upload a JPG, PNG, or WEBP image up to 5 MB. The saved image appears behind the Gallery hero.</p>
+              </div>
+              <div>
+                <div class="mb-2 flex items-center justify-between gap-4">
+                  <label for="gallery-hero-opacity" class="block text-xs font-bold uppercase tracking-widest text-ivory/50">Image overlay opacity</label>
+                  <span class="text-sm font-semibold text-admin-light">{{ heroOpacity }}%</span>
+                </div>
+                <input
+                  id="gallery-hero-opacity"
+                  v-model.number="heroOpacity"
+                  type="range"
+                  min="0"
+                  max="100"
+                  class="w-full accent-admin"
+                />
+                <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
+              </div>
+              <button
+                v-if="heroImage || selectedFile"
+                type="button"
+                class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
+                @click="clearImage"
+              >
+                Remove hero cover image
+              </button>
+            </div>
+            <div class="min-w-0">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live hero preview</p>
+              <PageHero
+                page-key="gallery"
+                :fallback-title="content.gallery_title || 'Our Gallery'"
+                :fallback-subtitle="content.gallery_subtitle"
+                :background-image="previewImage"
+                :overlay-opacity="heroOpacity"
+                :load-settings="false"
+              />
+            </div>
           </div>
         </div>
       </div>
