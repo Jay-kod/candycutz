@@ -33,7 +33,7 @@
             </h3>
 
             <!-- Description -->
-            <p class="mt-2 text-xs text-theme-muted leading-relaxed max-w-[200px] text-center mx-auto">
+            <p class="mt-2 text-xs text-neutral-600 dark:text-theme-muted leading-relaxed max-w-[200px] text-center mx-auto">
               {{ feature.description }}
             </p>
           </div>
