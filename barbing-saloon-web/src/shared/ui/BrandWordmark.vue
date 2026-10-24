@@ -22,7 +22,12 @@ defineProps({
 }
 
 .brand-wordmark__white {
-  color: #fff;
+  color: var(--brand-wordmark-white, #fff);
+  transition: color 200ms ease;
+}
+
+:global([data-theme="light"]) .brand-wordmark__white {
+  color: var(--brand-wordmark-white, #111827);
 }
 
 .brand-wordmark__gold {
