@@ -183,7 +183,7 @@ const fetchSettings = async () => {
 
 const fetchTestimonials = async () => {
   try {
-    const response = await publicApi.testimonials({ featured: true });
+    const response = await publicApi.testimonials();
     const items = response.data?.data;
     if (!Array.isArray(items)) {
       throw new TypeError('The testimonials response did not contain a list.');
@@ -195,8 +195,6 @@ const fetchTestimonials = async () => {
         ...item,
         client_name: item.client_name || item.customer_name || 'CandyCutz client',
         client_avatar: item.client_avatar || item.avatar_url || null,
-        source: item.source || 'x.com',
-        role: item.service?.name ? `Client • ${item.service.name}` : (item.role || 'Verified Client'),
       }));
   } catch (error) {
     console.error('Failed to load homepage testimonials:', error);

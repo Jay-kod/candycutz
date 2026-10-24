@@ -21,8 +21,15 @@
       </header>
     </div>
 
+    <p v-if="loading" class="mx-auto max-w-7xl px-4 text-center text-sm text-theme-muted">
+      Loading approved testimonials...
+    </p>
+    <p v-else-if="!trackItems.length" class="mx-auto max-w-7xl px-4 text-center text-sm text-theme-muted">
+      Approved customer testimonials will appear here.
+    </p>
+
     <!-- Infinite Testimonials Line (Marquee) -->
-    <div class="relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
+    <div v-else class="relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
       <!-- Gradient Edge Fade Masks -->
       <div
         class="pointer-events-none absolute left-0 top-0 bottom-0 z-20 w-16 sm:w-28 md:w-36 bg-gradient-to-r from-obsidian via-obsidian/80 to-transparent"
@@ -50,7 +57,7 @@
                 </svg>
               </div>
               <span class="inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
-                {{ testimonial.source || 'x.com' }}
+                {{ getSource(testimonial) }}
               </span>
             </div>
 
@@ -103,7 +110,7 @@
                 </svg>
               </div>
               <span class="inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
-                {{ testimonial.source || 'x.com' }}
+                {{ getSource(testimonial) }}
               </span>
             </div>
 
@@ -174,61 +181,8 @@ const props = defineProps({
 
 const failedAvatars = ref(new Set());
 
-const defaultTestimonials = [
-  {
-    id: 'sample-1',
-    client_name: 'Guillermo Rauch',
-    role: 'CEO, Vercel',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    review: 'CandyCutz is why I still have sharp hair. No more pulling it out over bad fades or uneven contours. The craft is in safe hands.',
-  },
-  {
-    id: 'sample-2',
-    client_name: 'Ibrahim Suleiman',
-    role: 'Verified Client • Fade & Beard',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    review: 'The fade was clean, precise, and exactly the style I asked for. The shop atmosphere is top-tier and the barbers take real pride in their work.',
-  },
-  {
-    id: 'sample-3',
-    client_name: 'Elon Musk',
-    role: 'CEO, X.com',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    review: 'I tried to book a fresh cut elsewhere, but nobody matches CandyCutz precision. Fast scheduling, zero waiting around, razor-sharp styling.',
-  },
-  {
-    id: 'sample-4',
-    client_name: 'David Adeleke',
-    role: 'VIP Member • Full Grooming',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
-    review: 'A welcoming lounge, professional service, and a crisp lineup. The team takes time to understand what you want and nails it every visit.',
-  },
-  {
-    id: 'sample-5',
-    client_name: 'Tim Cook',
-    role: 'CEO, Apple',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    review: 'Clean lines, immaculate craft, and consistent excellence from start to finish. It is the gold standard of modern grooming.',
-  },
-  {
-    id: 'sample-6',
-    client_name: 'Chinedu Okafor',
-    role: 'Verified Client • Sharp Lineup',
-    source: 'x.com',
-    client_avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    review: 'Booking on the web app was seamless, the chair was ready on arrival, and the fade was a masterclass. Definitely my regular spot now.',
-  },
-];
-
 const trackItems = computed(() => {
-  const source = props.testimonials && props.testimonials.length > 0
-    ? props.testimonials
-    : defaultTestimonials;
+  const source = Array.isArray(props.testimonials) ? props.testimonials : [];
 
   // Duplicate items if needed so each track is sufficiently long for wide screens
   let items = [...source];
@@ -248,12 +202,15 @@ const getInitials = (name) => {
 };
 
 const getSubtitle = (item) => {
-  if (item.role) return item.role;
+  if (item.client_name?.startsWith('Sample Customer ')) return 'Demo sample — not a customer review';
   if (item.service?.name) return `Client • ${item.service.name}`;
   if (item.subtitle) return item.subtitle;
-  if (item.client_name?.startsWith('Sample Customer ')) return 'CandyCutz Regular Client';
-  return 'Verified Client';
+  return 'Customer testimonial';
 };
+
+const getSource = (item) => (
+  item.client_name?.startsWith('Sample Customer ') ? 'Demo sample' : 'Customer review'
+);
 </script>
 
 <style scoped>
