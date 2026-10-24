@@ -29,3 +29,4 @@ export const DEFAULT_TERMS_SECTIONS = [
     body: "If you have any questions or disputes regarding these Terms, please contact our legal and customer operations desk:\n\n• By email: legal@candycutz.com\n• By visiting the contact desk on our website or mobile app."
   }
 ];
+

@@ -62,3 +62,4 @@ describe('TermsStats.vue', () => {
     expect(text).toContain('Add Booking Clauses');
   });
 });
+
