@@ -22,11 +22,20 @@ class TestimonialApiController
 
     public function index(Request $request): JsonResponse
     {
+        return $this->testimonialList($request, false);
+    }
+
+    public function adminIndex(Request $request): JsonResponse
+    {
+        return $this->testimonialList($request, true);
+    }
+
+    private function testimonialList(Request $request, bool $includeUnapproved): JsonResponse
+    {
         $query = Testimonial::query()
             ->with(['customer', 'service', 'barber.user']);
 
-        $user = $request->user('sanctum');
-        if (! $user || ! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+        if (! $includeUnapproved) {
             $query->where('is_approved', true);
         }
 

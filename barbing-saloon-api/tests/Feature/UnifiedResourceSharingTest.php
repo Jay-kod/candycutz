@@ -122,6 +122,35 @@ it('supports service-tagged testimonials and filters by service', function () {
     expect($firstItem['service']['name'])->toBe($service->name);
 });
 
+it('keeps unapproved testimonials hidden from the public feed for signed-in admins', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $customer = User::factory()->create(['role' => 'customer']);
+    $approved = Testimonial::factory()->create([
+        'customer_id' => $customer->id,
+        'service_id' => null,
+        'barber_id' => null,
+        'is_approved' => true,
+    ]);
+    $pending = Testimonial::factory()->create([
+        'customer_id' => $customer->id,
+        'service_id' => null,
+        'barber_id' => null,
+        'is_approved' => false,
+    ]);
+
+    $publicList = $this->actingAs($admin)->getJson('/api/v1/testimonials');
+    $publicList->assertOk();
+    $publicIds = collect($publicList->json('data'))->pluck('id');
+    expect($publicIds)->toContain($approved->id)
+        ->not->toContain($pending->id);
+
+    $adminList = $this->getJson('/api/v1/admin/testimonials');
+    $adminList->assertOk();
+    $adminIds = collect($adminList->json('data'))->pluck('id');
+    expect($adminIds)->toContain($approved->id)
+        ->toContain($pending->id);
+});
+
 it('allows admins to feature and unfeature testimonials through the approval flow', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $customer = User::factory()->create(['role' => 'customer']);

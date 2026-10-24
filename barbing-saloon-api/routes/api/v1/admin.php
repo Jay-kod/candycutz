@@ -73,7 +73,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::delete('/admin/gallery/{id}', [GalleryApiController::class, 'destroy'])->whereNumber('id');
 
     // Admin Testimonials Management
-    Route::get('/admin/testimonials', [TestimonialApiController::class, 'index']);
+    Route::get('/admin/testimonials', [TestimonialApiController::class, 'adminIndex']);
     Route::match(['post', 'put'], '/admin/testimonials/{id}', [TestimonialApiController::class, 'update'])->whereNumber('id');
     Route::patch('/admin/testimonials/{id}/approve', [TestimonialApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/admin/testimonials/{id}/feature', [TestimonialApiController::class, 'feature'])->whereNumber('id');
