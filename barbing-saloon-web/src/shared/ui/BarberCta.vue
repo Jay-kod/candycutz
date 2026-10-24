@@ -107,7 +107,7 @@ const resolvedOverlayOpacity = computed(() => {
 
 .barber-cta__shade {
   z-index: -1;
-  background: rgba(9, 9, 9, 1);
+  background: linear-gradient(180deg, rgba(9, 9, 9, 0.4), rgba(9, 9, 9, 0.55));
   opacity: 0.78;
 }
 
