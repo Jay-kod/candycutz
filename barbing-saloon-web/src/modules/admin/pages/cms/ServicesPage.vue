@@ -69,7 +69,7 @@
                 <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
               </div>
               <button
-                v-if="currentHeroImage || previewHeroImage"
+                v-if="previewHeroImage"
                 type="button"
                 class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
                 @click="clearHeroImage"
