@@ -259,11 +259,30 @@ const thirtyDayColumns = computed(() => {
   });
 });
 
-// Spaced date labels along the 28 columns (every ~4th column)
+// Timeframe label
+const timeframeLabel = computed(() => {
+  if (activeTimeframe.value === '14D') return '14 days';
+  if (activeTimeframe.value === '3M') return '3 months';
+  if (activeTimeframe.value === '6M') return '6 months';
+  return '30 days';
+});
+
+// Dynamic columns based on active timeframe
+const activeColumns = computed(() => {
+  if (activeTimeframe.value === '14D') {
+    return thirtyDayColumns.value.slice(-14);
+  }
+  return thirtyDayColumns.value;
+});
+
+// Spaced date labels along the active columns
 const spacedDateLabels = computed(() => {
-  const cols = thirtyDayColumns.value;
+  const cols = activeColumns.value;
   if (!cols.length) return [];
-  const indices = [0, 4, 8, 12, 16, 20, 24, 27];
+  if (cols.length <= 14) {
+    return [0, 4, 9, cols.length - 1].map(i => cols[i]?.dateLabel || '');
+  }
+  const indices = [0, 4, 8, 12, 16, 20, 24, cols.length - 1];
   return indices.map(i => cols[i]?.dateLabel || '');
 });
 
