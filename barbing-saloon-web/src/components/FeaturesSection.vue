@@ -9,7 +9,7 @@
         <h2 v-if="displayTitle" class="font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold drop-shadow-sm">
           {{ displayTitle }}
         </h2>
-        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
+        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-neutral-600 dark:text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
           {{ displaySubtitle }}
         </p>
       </div>
