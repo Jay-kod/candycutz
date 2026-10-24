@@ -262,3 +262,4 @@ const getCellColor = (day, hour) => {
   return 'bg-[#16181F]';
 };
 </script>
+

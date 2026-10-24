@@ -236,3 +236,4 @@ const monthlyBars = [
   { month: 'Nov', segments: 13, highlight: false, val: 59.1 }
 ];
 </script>
+
