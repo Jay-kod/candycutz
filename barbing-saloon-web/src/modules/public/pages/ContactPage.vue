@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <form data-reveal data-reveal-delay="200" class="rounded-3xl border border-theme-border bg-theme-surface p-8 shadow-2xl backdrop-blur-md" @submit.prevent="submit">
+      <form data-reveal data-reveal-delay="200" class="rounded-3xl border border-theme-border bg-theme-surface p-4 xs:p-6 sm:p-8 shadow-2xl backdrop-blur-md" @submit.prevent="submit">
         <div class="grid gap-6 md:grid-cols-2">
           <label class="grid gap-2">
             <span class="text-sm font-medium text-theme-text">Name</span>

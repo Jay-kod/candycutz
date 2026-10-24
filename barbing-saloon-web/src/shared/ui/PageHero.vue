@@ -83,7 +83,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 5.5rem 1.25rem 1rem;
+  padding: 5rem 1.25rem 1rem;
   background:
     radial-gradient(ellipse at 50% 45%, rgba(255, 153, 0, 0.1), transparent 58%),
     #090909;
@@ -125,7 +125,7 @@ onMounted(async () => {
 }
 
 .page-hero__title {
-  margin: 0.85rem auto 0;
+  margin: 0.65rem auto 0;
   color: #f5f5f5;
   font-family: var(--font-display, inherit);
   font-size: clamp(2.25rem, 6vw, 4.75rem);
@@ -138,7 +138,7 @@ onMounted(async () => {
 
 .page-hero__subtitle {
   max-width: 44rem;
-  margin: 1.25rem auto 0;
+  margin: 0.8rem auto 0;
   color: rgba(245, 245, 245, 0.76);
   font-size: clamp(0.95rem, 1.5vw, 1.15rem);
   line-height: 1.7;

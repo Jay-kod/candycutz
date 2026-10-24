@@ -1,6 +1,6 @@
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center bg-theme-bg text-theme-text">
-    <section class="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
+  <div class="flex min-h-[100dvh] w-full overflow-hidden flex-col items-center justify-center bg-theme-bg text-theme-text">
+    <section class="relative flex min-h-[80vh] w-full max-w-4xl flex-col items-center justify-center overflow-hidden px-4 xs:px-6 py-12 sm:py-20 text-center">
       <!-- Decorative background elements -->
       <div class="pointer-events-none absolute inset-0 overflow-hidden">
         <div class="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
