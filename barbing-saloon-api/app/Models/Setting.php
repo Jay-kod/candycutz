@@ -83,7 +83,7 @@ class Setting extends Model
             return 'legal';
         }
 
-        if (str_starts_with($key, 'services_') || str_starts_with($key, 'gallery_')) {
+        if (str_starts_with($key, 'services_') || str_starts_with($key, 'gallery_') || str_starts_with($key, 'testimonials_')) {
             return 'content';
         }
 
