@@ -2,10 +2,10 @@
   <AdminLayout>
     <section class="space-y-6 animate-fade-in pb-10">
       <!-- Premium Header Banner -->
-      <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#1a0f00] p-8 lg:p-10 shadow-2xl">
-        <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-admin/10 blur-[100px]"></div>
-        <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-[80px]"></div>
-        <div class="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(255,103,0,0.06),transparent_60%)]"></div>
+      <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#1a0f00] p-4 xs:p-6 sm:p-8 lg:p-10 shadow-2xl">
+        <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-admin/10 blur-[100px] pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(255,103,0,0.06),transparent_60%)] pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
@@ -15,7 +15,7 @@
               </span>
               <p class="text-[10px] uppercase tracking-[0.3em] text-admin/80 font-bold">Verification Center</p>
             </div>
-            <h1 class="font-display text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
+            <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-white drop-shadow-md leading-tight">
               Code <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-amber-400">Verification</span>
             </h1>
             <p class="mt-3 text-sm text-white/40 max-w-lg leading-relaxed">
@@ -33,11 +33,11 @@
                 @keydown.enter="quickVerify"
                 type="text"
                 placeholder="Paste code to quick-verify..."
-                class="flex-1 bg-transparent text-sm text-white py-3.5 px-3 outline-none placeholder:text-white/25"
+                class="flex-1 bg-transparent text-base sm:text-sm text-white py-3.5 px-3 outline-none placeholder:text-white/25"
               />
               <button 
                 @click="quickVerify"
-                class="px-4 py-2 mr-1.5 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/30 transition-colors border border-emerald-500/20"
+                class="px-4 py-2 mr-1.5 min-h-[38px] bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/30 transition-colors border border-emerald-500/20 flex items-center justify-center"
               >
                 Verify
               </button>

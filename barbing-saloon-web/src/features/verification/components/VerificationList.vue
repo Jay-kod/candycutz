@@ -23,7 +23,7 @@
         <div 
           v-for="(item, idx) in verifications" 
           :key="item.id" 
-          class="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1.5fr_1.2fr_auto] items-center gap-4 md:gap-6 px-6 md:px-8 py-5 transition-all duration-300 hover:bg-white/[0.025] group"
+          class="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1.5fr_1.2fr_auto] items-start md:items-center gap-4 md:gap-6 px-4 xs:px-6 md:px-8 py-5 transition-all duration-300 hover:bg-white/[0.025] group"
           :class="{ 'animate-row-in': true }"
           :style="{ animationDelay: idx * 30 + 'ms' }"
         >
@@ -59,7 +59,7 @@
 
           <!-- Code -->
           <div>
-            <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border font-mono text-sm tracking-wider font-bold transition-all duration-300"
+            <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border font-mono text-sm tracking-wider font-bold transition-all duration-300 max-w-full"
                  :class="getCodeStyle(item.status, item.appointment_date)">
               <CheckBadgeIcon v-if="item.status === 'completed'" class="h-4 w-4 flex-shrink-0" />
               <ExclamationTriangleIcon v-else-if="item.status === 'cancelled'" class="h-4 w-4 flex-shrink-0" />
@@ -70,10 +70,10 @@
           </div>
 
           <!-- Action -->
-          <div class="flex justify-end">
+          <div class="flex justify-start md:justify-end">
             <button v-if="item.status === 'confirmed' && !isExpired(item.appointment_date)" 
                     @click="$emit('verify', item)"
-                    class="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all duration-200 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:scale-105 active:scale-95">
+                    class="flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all duration-200 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:scale-105 active:scale-95">
               <ShieldCheckIcon class="h-3.5 w-3.5" />
               Verify
             </button>
