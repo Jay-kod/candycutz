@@ -55,7 +55,16 @@
       </div>
 
       <div class="grid gap-5">
+        <div v-if="isLoading" class="rounded-2xl border border-white/10 bg-theme-surface/30 px-6 py-12 text-center text-sm text-ivory/60">
+          Loading testimonials...
+        </div>
+
+        <div v-else-if="loadError" class="rounded-2xl border border-red-500/20 bg-red-500/5 px-6 py-8 text-center text-sm text-red-300">
+          Unable to load testimonials. Please refresh the page and try again.
+        </div>
+
         <article 
+          v-else
           v-for="item in filteredTestimonials" 
           :key="item.id" 
           class="group relative overflow-hidden rounded-2xl border bg-black/20 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-black/40"
@@ -108,11 +117,12 @@
 
               <button 
                 v-if="!item.is_approved" 
+                :disabled="approvingIds.has(item.id)"
                 @click="toggleApproval(item)" 
-                class="flex items-center justify-center gap-2 rounded-xl bg-admin/10 border border-admin/30 text-admin-light px-4 py-2 text-sm font-medium hover:bg-admin hover:text-obsidian hover:border-admin transition-all"
+                class="flex items-center justify-center gap-2 rounded-xl bg-admin/10 border border-admin/30 text-admin-light px-4 py-2 text-sm font-medium hover:bg-admin hover:text-obsidian hover:border-admin transition-all disabled:cursor-wait disabled:opacity-60"
               >
                 <CheckCircleIcon class="h-4 w-4" />
-                Approve
+                {{ approvingIds.has(item.id) ? 'Approving...' : 'Approve' }}
               </button>
               
               <button 
@@ -126,10 +136,14 @@
           </div>
         </article>
 
-        <div v-if="testimonials.length === 0" class="col-span-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-3xl bg-theme-surface/30">
+        <div v-if="!isLoading && !loadError && testimonials.length === 0" class="col-span-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-3xl bg-theme-surface/30">
           <ChatBubbleBottomCenterTextIcon class="h-12 w-12 text-ivory/20 mb-4" />
           <p class="text-ivory/60 font-medium">No testimonials found.</p>
           <p class="text-sm text-ivory/40 mt-1">When clients leave reviews, they will appear here for moderation.</p>
+        </div>
+
+        <div v-else-if="!isLoading && !loadError && filteredTestimonials.length === 0" class="rounded-2xl border border-dashed border-white/10 bg-theme-surface/30 px-6 py-10 text-center text-sm text-ivory/50">
+          No testimonials match the selected filters.
         </div>
       </div>
     </section>
@@ -152,6 +166,9 @@ const testimonials = ref([]);
 const services = ref([]);
 const activeStatusFilter = ref('all');
 const activeServiceFilter = ref('all');
+const isLoading = ref(true);
+const loadError = ref(false);
+const approvingIds = ref(new Set());
 
 const pendingCount = computed(() => {
   return testimonials.value.filter(t => !t.is_approved).length;
@@ -182,16 +199,33 @@ const loadServices = async () => {
 };
 
 const loadTestimonials = async () => {
+  isLoading.value = true;
+  loadError.value = false;
   try {
     const response = await adminApi.testimonials();
-    testimonials.value = response.data?.data || response.data || [];
+    const payload = response.data?.data;
+    const items = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : null;
+
+    if (!items) {
+      throw new TypeError('The testimonials response did not contain a list.');
+    }
+
+    testimonials.value = items;
   } catch (error) {
     console.error("Failed to load testimonials", error);
+    loadError.value = true;
     toast.error('Failed to load testimonials');
+  } finally {
+    isLoading.value = false;
   }
 };
 
 const toggleApproval = async (item) => {
+  approvingIds.value = new Set(approvingIds.value).add(item.id);
   try {
     await adminApi.approveTestimonial(item.id);
     item.is_approved = true; 
@@ -199,6 +233,10 @@ const toggleApproval = async (item) => {
   } catch (error) {
     console.error("Failed to update approval", error);
     toast.error('Failed to approve testimonial');
+  } finally {
+    const nextIds = new Set(approvingIds.value);
+    nextIds.delete(item.id);
+    approvingIds.value = nextIds;
   }
 };
 
