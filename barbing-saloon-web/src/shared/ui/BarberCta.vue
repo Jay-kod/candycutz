@@ -158,7 +158,7 @@ const resolvedOverlayOpacity = computed(() => {
 .barber-cta__title {
   margin: 0;
   font-size: clamp(2.5rem, 6vw, 4.15rem);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.055em;
   line-height: 1.06;
   text-wrap: balance;

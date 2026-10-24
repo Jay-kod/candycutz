@@ -47,7 +47,7 @@
         </div>
 
         <!-- 28 Wide & Closely Spaced Columns Skeleton -->
-        <div class="h-56 flex items-end justify-between gap-[2px] sm:gap-[3px] md:gap-1 px-1 pb-5 w-full">
+        <div class="h-56 flex items-end justify-between gap-[2px] sm:gap-[3px] px-1 pb-5 w-full">
           <div
             v-for="c in 28"
             :key="'sk-col-' + c"
@@ -56,7 +56,7 @@
             <span
               v-for="b in ((c % 7) + 10)"
               :key="'sk-b-' + b"
-              class="w-full max-w-[20px] sm:max-w-[22px] h-[5px] sm:h-[6px] rounded-[1px] bg-admin/20 animate-pulse"
+              class="w-full h-[5px] sm:h-[6px] rounded-[1px] bg-admin/20 animate-pulse"
             ></span>
           </div>
         </div>
@@ -82,7 +82,7 @@
             <span
               v-for="seg in ((m % 4) * 3 + 10)"
               :key="'sk-mseg-' + seg"
-              class="w-full max-w-[24px] sm:max-w-[28px] h-[5px] sm:h-[6px] rounded-[1px] bg-admin/25 animate-pulse"
+              class="w-7 sm:w-8 md:w-9 h-[5px] sm:h-[6px] rounded-[1px] bg-admin/25 animate-pulse"
             ></span>
           </div>
         </div>
