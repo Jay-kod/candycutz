@@ -51,3 +51,15 @@ it('groups shop identity settings as public general settings and validates their
         expect($rules['settings.brand_tagline'])->toContain('max:300');
     }
 });
+
+it('groups testimonials flow settings with content group and validates rules', function () {
+    expect(Setting::resolveGroupForKey('testimonials_flow_speed'))->toBe('content');
+    expect(Setting::resolveGroupForKey('testimonials_flow_direction'))->toBe('content');
+
+    $adminRules = (new UpdateSettingsRequest)->rules();
+    $superAdminRules = (new \App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest)->rules();
+
+    foreach ([$adminRules, $superAdminRules] as $rules) {
+        expect($rules['settings.testimonials_flow_direction'])->toContain('in:left,right');
+    }
+});

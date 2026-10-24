@@ -19,6 +19,8 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'settings' => ['nullable', 'array'],
             'settings.*' => ['nullable'],
+            'settings.testimonials_flow_speed' => ['sometimes', 'nullable'],
+            'settings.testimonials_flow_direction' => ['sometimes', 'nullable', 'in:left,right'],
             'settings.brand_name' => ['sometimes', 'string', 'max:120'],
             'settings.site_name' => ['sometimes', 'string', 'max:120'],
             'settings.brand_name_part_one' => ['sometimes', 'string', 'max:60'],
