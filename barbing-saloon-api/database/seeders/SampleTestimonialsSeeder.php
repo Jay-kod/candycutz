@@ -27,20 +27,25 @@ class SampleTestimonialsSeeder extends Seeder
 
         foreach ($reviews as $index => $review) {
             $number = $index + 1;
+            $testimonial = Testimonial::firstOrNew([
+                'client_name' => sprintf('Sample Customer %02d', $number),
+            ]);
 
-            Testimonial::updateOrCreate(
-                ['client_name' => sprintf('Sample Customer %02d', $number)],
-                [
+            $testimonial->client_avatar = 'testimonials/candycutz-sample-avatar.png';
+
+            if (! $testimonial->exists) {
+                $testimonial->fill([
                     'customer_id' => null,
-                    'client_avatar' => 'testimonials/candycutz-sample-avatar.png',
                     'rating' => 5,
                     'review' => $review,
                     'service_id' => null,
                     'barber_id' => null,
                     'is_approved' => true,
-                    'is_featured' => false,
-                ]
-            );
+                    'is_featured' => true,
+                ]);
+            }
+
+            $testimonial->save();
         }
 
         CatalogueCache::bust('testimonials');

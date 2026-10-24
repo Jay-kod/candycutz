@@ -13,7 +13,7 @@
               Review <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Moderation</span>
               <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ filteredTestimonials.length }}</span>
             </h1>
-            <p class="mt-2 text-sm text-ivory/60">Manage and approve client feedback before it goes live on the public site.</p>
+            <p class="mt-2 text-sm text-ivory/60">Approve or unapprove each review, then choose which approved testimonials appear on the homepage.</p>
           </div>
 
           <!-- Filters Bar -->
@@ -40,6 +40,13 @@
                 :class="activeStatusFilter === 'approved' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
               >
                 Approved
+              </button>
+              <button
+                @click="activeStatusFilter = 'featured'"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                :class="activeStatusFilter === 'featured' ? 'bg-admin text-obsidian shadow' : 'text-white/60 hover:text-white'"
+              >
+                On Homepage
               </button>
             </div>
 
@@ -128,14 +135,30 @@
                 </span>
               </div>
 
-              <button 
-                v-if="!item.is_approved" 
-                :disabled="approvingIds.has(item.id)"
-                @click="toggleApproval(item)" 
+              <div class="flex items-center gap-2 mb-2">
+                <div class="h-2 w-2 rounded-full" :class="item.is_featured ? 'bg-gold' : 'bg-white/30'"></div>
+                <span class="text-xs font-bold uppercase tracking-wider" :class="item.is_featured ? 'text-gold' : 'text-ivory/50'">
+                  {{ item.is_featured ? 'On homepage' : 'Hidden from homepage' }}
+                </span>
+              </div>
+
+              <button
+                :disabled="moderatingIds.has(item.id)"
+                @click="toggleApproval(item)"
                 class="flex items-center justify-center gap-2 rounded-xl bg-admin/10 border border-admin/30 text-admin-light px-4 py-2 text-sm font-medium hover:bg-admin hover:text-obsidian hover:border-admin transition-all disabled:cursor-wait disabled:opacity-60"
               >
                 <CheckCircleIcon class="h-4 w-4" />
-                {{ approvingIds.has(item.id) ? 'Approving...' : 'Approve' }}
+                {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_approved ? 'Unapprove' : 'Approve' }}
+              </button>
+
+              <button
+                :disabled="moderatingIds.has(item.id) || !item.is_approved"
+                @click="toggleFeatured(item)"
+                class="flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                :class="item.is_featured ? 'border-gold/30 bg-gold/10 text-gold hover:bg-gold hover:text-obsidian' : 'border-white/15 bg-white/5 text-ivory/80 hover:border-gold/30 hover:text-gold'"
+                :title="item.is_approved ? '' : 'Approve this testimonial before displaying it on the homepage'"
+              >
+                {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_featured ? 'Hide from homepage' : 'Show on homepage' }}
               </button>
               
               <button 
@@ -181,7 +204,7 @@ const activeStatusFilter = ref('all');
 const activeServiceFilter = ref('all');
 const isLoading = ref(true);
 const loadError = ref(false);
-const approvingIds = ref(new Set());
+const moderatingIds = ref(new Set());
 
 const pendingCount = computed(() => {
   return testimonials.value.filter(t => !t.is_approved).length;
@@ -193,6 +216,8 @@ const filteredTestimonials = computed(() => {
     list = list.filter(t => !t.is_approved);
   } else if (activeStatusFilter.value === 'approved') {
     list = list.filter(t => t.is_approved);
+  } else if (activeStatusFilter.value === 'featured') {
+    list = list.filter(t => t.is_approved && t.is_featured);
   }
 
   if (activeServiceFilter.value !== 'all') {
@@ -238,18 +263,37 @@ const loadTestimonials = async () => {
 };
 
 const toggleApproval = async (item) => {
-  approvingIds.value = new Set(approvingIds.value).add(item.id);
+  const isApproved = !item.is_approved;
+  moderatingIds.value = new Set(moderatingIds.value).add(item.id);
   try {
-    await adminApi.approveTestimonial(item.id);
-    item.is_approved = true; 
-    toast.success('Testimonial approved successfully');
+    const response = await adminApi.approveTestimonial(item.id, isApproved);
+    item.is_approved = response.data?.data?.is_approved ?? isApproved;
+    item.is_featured = response.data?.data?.is_featured ?? (isApproved && item.is_featured);
+    toast.success(isApproved ? 'Testimonial approved' : 'Testimonial unapproved and hidden from the homepage');
   } catch (error) {
-    console.error("Failed to update approval", error);
-    toast.error('Failed to approve testimonial');
+    console.error('Failed to update testimonial approval', error);
+    toast.error(isApproved ? 'Failed to approve testimonial' : 'Failed to unapprove testimonial');
   } finally {
-    const nextIds = new Set(approvingIds.value);
+    const nextIds = new Set(moderatingIds.value);
     nextIds.delete(item.id);
-    approvingIds.value = nextIds;
+    moderatingIds.value = nextIds;
+  }
+};
+
+const toggleFeatured = async (item) => {
+  const isFeatured = !item.is_featured;
+  moderatingIds.value = new Set(moderatingIds.value).add(item.id);
+  try {
+    const response = await adminApi.featureTestimonial(item.id, isFeatured);
+    item.is_featured = response.data?.data?.is_featured ?? isFeatured;
+    toast.success(isFeatured ? 'Testimonial selected for the homepage' : 'Testimonial hidden from the homepage');
+  } catch (error) {
+    console.error('Failed to update homepage visibility', error);
+    toast.error('Failed to update homepage visibility');
+  } finally {
+    const nextIds = new Set(moderatingIds.value);
+    nextIds.delete(item.id);
+    moderatingIds.value = nextIds;
   }
 };
 
