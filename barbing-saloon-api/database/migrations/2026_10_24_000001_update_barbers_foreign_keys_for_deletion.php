@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $isSqlite = DB::getDriverName() === 'sqlite';
+
         // 1. appointments: make barber_id nullable and set null on delete so historical records are kept
-        Schema::table('appointments', function (Blueprint $table) {
-            $table->dropForeign('appointments_barber_id_foreign');
+        Schema::table('appointments', function (Blueprint $table) use ($isSqlite) {
+            if ($isSqlite) {
+                $table->dropForeign(['barber_id']);
+            } else {
+                $table->dropForeign('appointments_barber_id_foreign');
+            }
             $table->unsignedBigInteger('barber_id')->nullable()->change();
             $table->foreign('barber_id')
                 ->references('id')
@@ -22,8 +28,12 @@ return new class extends Migration
         });
 
         // 2. gallery: set null on delete so gallery images remain part of the shop portfolio
-        Schema::table('gallery', function (Blueprint $table) {
-            $table->dropForeign('gallery_barber_id_foreign');
+        Schema::table('gallery', function (Blueprint $table) use ($isSqlite) {
+            if ($isSqlite) {
+                $table->dropForeign(['barber_id']);
+            } else {
+                $table->dropForeign('gallery_barber_id_foreign');
+            }
             $table->foreign('barber_id')
                 ->references('id')
                 ->on('barbers')
@@ -31,8 +41,12 @@ return new class extends Migration
         });
 
         // 3. testimonials: set null on delete so customer reviews remain with the shop
-        Schema::table('testimonials', function (Blueprint $table) {
-            $table->dropForeign('testimonials_barber_id_foreign');
+        Schema::table('testimonials', function (Blueprint $table) use ($isSqlite) {
+            if ($isSqlite) {
+                $table->dropForeign(['barber_id']);
+            } else {
+                $table->dropForeign('testimonials_barber_id_foreign');
+            }
             $table->foreign('barber_id')
                 ->references('id')
                 ->on('barbers')
@@ -40,8 +54,12 @@ return new class extends Migration
         });
 
         // 4. working_hours: cascade on delete when a barber is removed
-        Schema::table('working_hours', function (Blueprint $table) {
-            $table->dropForeign('working_hours_barber_id_foreign');
+        Schema::table('working_hours', function (Blueprint $table) use ($isSqlite) {
+            if ($isSqlite) {
+                $table->dropForeign(['barber_id']);
+            } else {
+                $table->dropForeign('working_hours_barber_id_foreign');
+            }
             $table->foreign('barber_id')
                 ->references('id')
                 ->on('barbers')
