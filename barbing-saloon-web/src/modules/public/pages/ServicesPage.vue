@@ -69,7 +69,7 @@
             v-if="service.image || service.image_url"
             :src="getImageUrl(service.image || service.image_url)"
             :alt="service.name"
-            class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            class="absolute inset-0 -z-20 h-full w-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105"
           />
           <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-gradient-to-br from-[#59300c] via-[#241407] to-[#0c0906]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-28 h-28 text-gold/20">
@@ -80,7 +80,7 @@
           <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#140b05]/70 via-transparent via-35% to-[#100a05]/80"></div>
           <div class="absolute inset-3 -z-10 rounded-[1.35rem] border border-gold/20"></div>
 
-          <div class="flex h-full flex-col justify-between p-5 sm:p-6">
+          <div class="flex h-full flex-col justify-between px-5 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-gold/70">CandyCutz Service</p>
