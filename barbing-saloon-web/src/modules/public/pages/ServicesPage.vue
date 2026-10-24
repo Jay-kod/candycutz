@@ -41,7 +41,7 @@
         <div
           v-for="n in 6"
           :key="n"
-          class="aspect-[0.68] min-h-[460px] rounded-3xl border border-theme-border bg-theme-surface p-5 space-y-4 animate-pulse"
+          class="aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full rounded-3xl border border-theme-border bg-theme-surface p-5 space-y-4 animate-pulse"
         >
           <div class="h-8 w-2/3 rounded-lg bg-theme-border/50"></div>
           <div class="h-4 w-1/3 rounded bg-theme-border/30"></div>
@@ -63,7 +63,7 @@
           v-for="service in filteredServices"
           :key="service.id"
           data-reveal
-          class="group relative isolate aspect-[0.68] min-h-[460px] overflow-hidden rounded-[1.75rem] border border-gold/25 bg-[#241407] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-2xl hover:shadow-gold/10"
+          class="group relative isolate aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full overflow-hidden rounded-[1.75rem] border border-gold/25 bg-[#241407] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-2xl hover:shadow-gold/10"
         >
           <img
             v-if="service.image || service.image_url"
