@@ -1,6 +1,6 @@
 <template>
   <section
-    class="relative overflow-hidden border-y border-white/5 bg-obsidian py-16 text-theme-text md:py-24"
+    class="testimonials-section relative overflow-hidden border-y border-white/5 bg-obsidian py-16 text-theme-text md:py-24 transition-colors duration-300"
     aria-labelledby="home-testimonials-title"
   >
     <!-- Ambient Glow -->
@@ -42,7 +42,7 @@
         <article
           v-for="(testimonial, idx) in visibleTestimonials"
           :key="`${loopIndex}-${testimonial.id || idx}`"
-          class="group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 transition-colors duration-200 hover:bg-white/[0.035] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
+          class="testimonial-card group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 transition-colors duration-200 hover:bg-white/[0.035] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
         >
           <!-- Card Header: Quote Icon + Source Pill -->
           <div class="flex items-center justify-between gap-4">
@@ -51,18 +51,18 @@
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
             </div>
-            <span class="inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
+            <span class="testimonial-source inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
               {{ getSource(testimonial) }}
             </span>
           </div>
 
           <!-- Review Text -->
-          <p class="my-6 text-sm sm:text-base leading-relaxed text-zinc-100 font-normal">
+          <p class="testimonial-text my-6 text-sm sm:text-base leading-relaxed text-zinc-100 font-normal">
             "{{ testimonial.review || testimonial.comment }}"
           </p>
 
           <!-- Bottom: Author Avatar, Name & Role -->
-          <div class="flex items-center gap-3 pt-2 border-t border-white/5">
+          <div class="testimonial-author-wrapper flex items-center gap-3 pt-2 border-t border-white/5">
             <img
               v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
               :src="getStorageUrl(testimonial.client_avatar)"
@@ -79,10 +79,10 @@
               {{ getInitials(testimonial.client_name) }}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm sm:text-base font-semibold text-white tracking-tight">
+              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-white tracking-tight">
                 {{ testimonial.client_name || 'CandyCutz client' }}
               </p>
-              <p class="truncate text-xs text-zinc-400 mt-0.5">
+              <p class="testimonial-role truncate text-xs text-zinc-400 mt-0.5">
                 {{ getSubtitle(testimonial) }}
               </p>
             </div>
@@ -195,5 +195,51 @@ const getSource = (item) => {
   .testimonials-track {
     animation: none;
   }
+}
+
+:global([data-theme="light"]) .testimonials-section {
+  background: var(--color-bg, #FAF9F6);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .testimonials-section h2 {
+  color: #CC7A00;
+}
+
+:global([data-theme="light"]) .testimonials-marquee {
+  background-color: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .testimonial-card {
+  background-color: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .testimonial-card:hover {
+  background-color: #FFFDF8;
+}
+
+:global([data-theme="light"]) .testimonial-source {
+  border-color: rgba(204, 122, 0, 0.25);
+  background-color: #FFF7ED;
+  color: #9A3412;
+}
+
+:global([data-theme="light"]) .testimonial-text {
+  color: #1F2937;
+}
+
+:global([data-theme="light"]) .testimonial-author {
+  color: #111827;
+}
+
+:global([data-theme="light"]) .testimonial-role {
+  color: #6B7280;
+}
+
+:global([data-theme="light"]) .testimonial-author-wrapper {
+  border-color: rgba(0, 0, 0, 0.06);
 }
 </style>
