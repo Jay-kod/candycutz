@@ -14,12 +14,12 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             {{ funnelCompletionRate }}%
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Booking completion efficiency · {{ completedCount }} of {{ totalAppts }} appointments fulfilled</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Salon Service Efficiency · {{ completedCount }} of {{ totalAppts }} appointments fulfilled</p>
         </div>
 
         <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
-          <span>↑</span>
-          <span>Salon Flow</span>
+          <span>●</span>
+          <span>Client Service Flow</span>
         </div>
       </div>
 
@@ -121,12 +121,12 @@
           <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             {{ totalAppts }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Total salon bookings breakdown by status</p>
+          <p class="text-xs text-ivory/50 mt-0.5">Salon Appointments by Service Status</p>
         </div>
 
         <div class="text-[11px] font-medium text-admin flex items-center gap-1">
           <span>●</span>
-          <span>Live Breakdown</span>
+          <span>Live Status Mix</span>
         </div>
       </div>
 
