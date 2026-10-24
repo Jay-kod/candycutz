@@ -20,7 +20,7 @@
           <div
             v-for="(feature, index) in featureList"
             :key="feature.title || index"
-            class="feature-card group relative flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-center shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.045] sm:p-7"
+            class="feature-card group relative flex flex-col items-center justify-center rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-white/[0.025] p-6 text-center shadow-md dark:shadow-lg shadow-black/5 dark:shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/60 dark:hover:border-gold/40 hover:shadow-xl sm:p-7"
           >
             <!-- Feature Icon -->
             <div class="relative flex items-center justify-center size-12 rounded-xl bg-gold/10 border border-gold/20 text-gold transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
