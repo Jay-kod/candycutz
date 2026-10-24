@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl as resolveStorageUrl } from '@/core/utils/url';
@@ -23,6 +23,17 @@ export function useAboutCms() {
   const currentShopImage = ref(null);
   const shopImageFile = ref(null);
   const shopImageLoadError = ref(false);
+  const currentHeroImage = ref('');
+  const heroImageFile = ref(null);
+  const heroImageInput = ref(null);
+  const heroOpacity = ref(76);
+  const removeHeroImage = ref(false);
+  const heroPreviewUrl = ref('');
+
+  const clearHeroPreviewUrl = () => {
+    if (heroPreviewUrl.value) URL.revokeObjectURL(heroPreviewUrl.value);
+    heroPreviewUrl.value = '';
+  };
 
   const previewShopUrl = computed(() => {
     if (shopImageFile.value) {
@@ -32,9 +43,18 @@ export function useAboutCms() {
   });
 
   const isDirty = computed(() => {
-    if (shopImageFile.value) return true;
+    if (shopImageFile.value || heroImageFile.value || removeHeroImage.value) return true;
     if (!initialSnapshot.value) return false;
-    return initialSnapshot.value !== JSON.stringify(content.value);
+    return initialSnapshot.value !== JSON.stringify({
+      content: content.value,
+      heroImage: currentHeroImage.value,
+      heroOpacity: heroOpacity.value,
+    });
+  });
+  const previewHeroImage = computed(() => {
+    if (heroPreviewUrl.value) return heroPreviewUrl.value;
+    if (removeHeroImage.value || !currentHeroImage.value) return '';
+    return getStorageUrl(currentHeroImage.value);
   });
 
   const getStorageUrl = (path) => {
@@ -53,7 +73,13 @@ export function useAboutCms() {
           }
         });
         currentShopImage.value = data.about_shop_image || null;
-        initialSnapshot.value = JSON.stringify(content.value);
+        currentHeroImage.value = data.page_hero_about_image || '';
+        heroOpacity.value = Number(data.page_hero_about_overlay_opacity ?? 76);
+        initialSnapshot.value = JSON.stringify({
+          content: content.value,
+          heroImage: currentHeroImage.value,
+          heroOpacity: heroOpacity.value,
+        });
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
@@ -75,6 +101,24 @@ export function useAboutCms() {
     return false;
   };
 
+  const handleHeroImageUpload = (file) => {
+    if (file) {
+      heroImageFile.value = file;
+      removeHeroImage.value = false;
+      clearHeroPreviewUrl();
+      heroPreviewUrl.value = URL.createObjectURL(file);
+      return true;
+    }
+    return false;
+  };
+
+  const clearHeroImage = () => {
+    heroImageFile.value = null;
+    if (heroImageInput.value) heroImageInput.value.value = '';
+    removeHeroImage.value = true;
+    clearHeroPreviewUrl();
+  };
+
   const saveContent = async (fileInputRef) => {
     if (!content.value.about_shop_title || !content.value.about_shop_subtitle) {
       toast.error('Please enter the shop section title and subtitle.');
@@ -91,6 +135,13 @@ export function useAboutCms() {
       if (shopImageFile.value) {
         formData.append('about_shop_image', shopImageFile.value);
       }
+      formData.append('settings[page_hero_about_overlay_opacity]', String(heroOpacity.value));
+      formData.append('page_hero_page', 'about');
+      if (heroImageFile.value) {
+        formData.append('page_hero_image', heroImageFile.value);
+      } else if (removeHeroImage.value) {
+        formData.append('settings[page_hero_about_image]', '');
+      }
       
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('About page content saved successfully!');
@@ -99,10 +150,19 @@ export function useAboutCms() {
       if (updatedData) {
         currentShopImage.value = updatedData.about_shop_image || currentShopImage.value;
         shopImageFile.value = null;
+        currentHeroImage.value = updatedData.page_hero_about_image || '';
+        heroImageFile.value = null;
+        removeHeroImage.value = false;
+        if (heroImageInput.value) heroImageInput.value.value = '';
+        clearHeroPreviewUrl();
         if (fileInputRef && fileInputRef.value) {
           fileInputRef.value.value = '';
         }
-        initialSnapshot.value = JSON.stringify(content.value);
+        initialSnapshot.value = JSON.stringify({
+          content: content.value,
+          heroImage: currentHeroImage.value,
+          heroOpacity: heroOpacity.value,
+        });
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
@@ -113,6 +173,8 @@ export function useAboutCms() {
     }
   };
 
+  onBeforeUnmount(clearHeroPreviewUrl);
+
   return {
     content,
     saving,
@@ -121,13 +183,18 @@ export function useAboutCms() {
     isDirty,
     activeTab,
     currentShopImage,
+    currentHeroImage,
+    heroImageInput,
+    heroOpacity,
+    previewHeroImage,
     shopImageFile,
     shopImageLoadError,
     previewShopUrl,
     getStorageUrl,
     fetchContent,
     handleShopImageUpload,
+    handleHeroImageUpload,
+    clearHeroImage,
     saveContent
   };
 }
-
