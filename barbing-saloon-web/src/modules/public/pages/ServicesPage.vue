@@ -101,14 +101,14 @@
               </div>
             </div>
 
-            <div class="rounded-2xl border border-gold/20 bg-[#160e08]/60 p-4 shadow-2xl backdrop-blur-sm sm:p-5">
+            <div class="rounded-2xl border border-gold/20 bg-[#160e08]/60 p-3 shadow-2xl backdrop-blur-sm sm:p-4">
               <h2 class="font-display text-2xl font-bold leading-tight text-white group-hover:text-gold transition-colors">
                 {{ service.name }}
               </h2>
-              <p class="mt-2 text-xs leading-relaxed text-white/70 line-clamp-2">
+              <p class="mt-1 text-xs leading-relaxed text-white/70 line-clamp-2">
                 {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
               </p>
-              <div class="mt-4 flex items-end justify-between gap-3 border-t border-gold/20 pt-3">
+              <div class="mt-3 flex items-end justify-between gap-3 border-t border-gold/20 pt-2">
                 <div>
                   <span class="block text-[9px] font-bold uppercase tracking-[0.2em] text-gold/60">Price</span>
                   <span class="font-display text-2xl font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>

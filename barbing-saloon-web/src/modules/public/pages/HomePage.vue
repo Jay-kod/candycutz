@@ -33,7 +33,7 @@
     />
 
     <!-- About Us Teaser -->
-    <section class="bg-theme-surface text-theme-text py-16 md:py-24 border-y border-white/5 overflow-hidden">
+    <section class="about-teaser-section bg-theme-surface text-theme-text py-16 md:py-24 border-y border-white/5 transition-colors duration-300 overflow-hidden">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
@@ -262,3 +262,25 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', refreshTestimonialsWhenVisible);
 });
 </script>
+
+<style scoped>
+:global([data-theme="light"]) .about-teaser-section {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .about-teaser-section h2 {
+  color: #CC7A00;
+}
+
+:global([data-theme="light"]) .about-teaser-section .border-gold\/30 {
+  border-color: rgba(204, 122, 0, 0.4);
+  color: #B45309;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+:global([data-theme="light"]) .about-teaser-section .border-gold\/30:hover {
+  border-color: #FF9900;
+  color: #9A3412;
+  background-color: #FFF7ED;
+}
+</style>
