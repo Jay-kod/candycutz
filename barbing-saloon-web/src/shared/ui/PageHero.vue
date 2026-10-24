@@ -78,8 +78,8 @@ onMounted(async () => {
   position: relative;
   isolation: isolate;
   display: flex;
-  min-height: 50vh;
-  min-height: 50svh;
+  min-height: 35vh;
+  min-height: 35svh;
   align-items: center;
   justify-content: center;
   overflow: hidden;
