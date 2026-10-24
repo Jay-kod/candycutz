@@ -4,7 +4,7 @@
       <div>
         <p class="text-xs font-bold uppercase tracking-[0.25em] text-admin/80">Website CMS</p>
         <h1 class="mt-2 font-display text-3xl text-theme-text sm:text-4xl">Page Heroes</h1>
-        <p class="mt-2 max-w-2xl text-sm text-ivory/60">Set the 50vh hero title, subtitle, background image, and overlay opacity for each public content page.</p>
+        <p class="mt-2 max-w-2xl text-sm text-ivory/60">Set the 40vh hero title, subtitle, cover image, and overlay opacity for each public content page.</p>
       </div>
       <button
         type="button"
@@ -28,7 +28,7 @@
         <select id="hero-page" v-model="selectedPage" class="editor-input" @change="loadSelectedPage">
           <option v-for="page in pages" :key="page.key" :value="page.key">{{ page.label }}</option>
         </select>
-        <p class="mt-2 text-xs text-ivory/45">The homepage uses its existing CTA title, subtitle, and background image settings.</p>
+        <p class="mt-2 text-xs text-ivory/45">Choose a page, add or replace its cover image, then save to publish it to that page’s hero. The homepage cover is managed here too.</p>
       </section>
 
       <section class="grid gap-6 xl:grid-cols-2">
@@ -42,15 +42,16 @@
             <textarea id="hero-subtitle" v-model.trim="form.subtitle" rows="4" maxlength="1000" class="editor-input resize-y"></textarea>
           </div>
           <div>
-            <label for="hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Background image</label>
+            <label for="hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
             <input
+              ref="imageInput"
               id="hero-image"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               class="editor-input file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
               @change="selectImage"
             />
-            <p class="mt-2 text-xs text-ivory/45">JPG, PNG, or WEBP, up to 5 MB. Uploaded images are processed by the server.</p>
+            <p class="mt-2 text-xs text-ivory/45">Add a JPG, PNG, or WEBP image up to 5 MB. The saved cover appears behind this page’s hero title.</p>
           </div>
           <div>
             <div class="mb-2 flex items-center justify-between gap-4">
@@ -66,7 +67,7 @@
               class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
               @click="clearImage"
             >
-              Remove background image
+              Remove cover image
             </button>
             <button type="button" class="min-h-10 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-ivory/70 transition hover:border-white/30" @click="resetText">
               Reset title and subtitle
@@ -75,7 +76,7 @@
         </div>
 
         <div class="min-w-0">
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">50vh preview</p>
+          <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">40vh preview</p>
           <PageHero
             :key="selectedPage"
             :page-key="selectedPage"
@@ -132,6 +133,7 @@ const loading = ref(true);
 const saving = ref(false);
 const selectedPage = ref('home');
 const selectedFile = ref(null);
+const imageInput = ref(null);
 const localPreviewUrl = ref('');
 const removeImage = ref(false);
 const form = reactive({ title: '', subtitle: '', image: '', opacity: 22 });
@@ -156,6 +158,7 @@ const loadSelectedPage = () => {
   form.image = settings.value[imageKey.value] || '';
   form.opacity = Number(settings.value[opacityKey.value] ?? 76);
   selectedFile.value = null;
+  if (imageInput.value) imageInput.value.value = '';
   removeImage.value = false;
   clearPreviewUrl();
 };
@@ -175,6 +178,7 @@ const selectImage = (event) => {
 
 const clearImage = () => {
   selectedFile.value = null;
+  if (imageInput.value) imageInput.value.value = '';
   removeImage.value = true;
   clearPreviewUrl();
 };
