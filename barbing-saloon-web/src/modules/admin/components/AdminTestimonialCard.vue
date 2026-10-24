@@ -112,3 +112,4 @@ defineProps({
 
 defineEmits(['toggle-approval', 'toggle-visibility', 'delete']);
 </script>
+

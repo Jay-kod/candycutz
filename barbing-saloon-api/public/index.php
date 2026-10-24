@@ -33,6 +33,9 @@ if (strpos($requestUri, '/api') !== 0 && strpos($requestUri, '/up') !== 0 && str
     if (file_exists(__DIR__.$requestUri) && is_file(__DIR__.$requestUri)) {
         return false; // serve requested file as-is
     } elseif (file_exists(__DIR__.'/index.html')) {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         readfile(__DIR__.'/index.html');
         exit;
     }
