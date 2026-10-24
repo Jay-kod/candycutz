@@ -7,12 +7,12 @@
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        @keydown.esc="isResolved ? closeImmediately() : cancel()"
+        @keydown.esc="isProcessing ? null : (isResolved ? closeImmediately() : cancel())"
       >
         <!-- Backdrop with obsidian blur -->
         <div
           class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
-          @click="isResolved ? closeImmediately() : cancel()"
+          @click="isProcessing ? null : (isResolved ? closeImmediately() : cancel())"
         ></div>
 
         <!-- Modal Panel -->
@@ -243,6 +243,7 @@ const {
   resolutionType,
   resolutionTitle,
   resolutionMessage,
+  resolutionBadgeText,
   agree,
   cancel,
   closeImmediately,
@@ -294,7 +295,7 @@ const resTheme = computed(() => {
         haloBg: 'bg-red-500/15 shadow-[0_0_30px_rgba(239,68,68,0.25)]',
         ringBorder: 'border-red-500/40',
         badgeBg: 'bg-red-500/15 border-red-500/30 text-red-400',
-        badgeText: 'DELETED',
+        badgeText: resolutionBadgeText.value || 'DELETED',
         title: resolutionTitle.value || 'Deleted Successfully',
         message: resolutionMessage.value || 'The item has been permanently removed.',
       };
@@ -304,7 +305,7 @@ const resTheme = computed(() => {
         haloBg: 'bg-red-500/15 shadow-[0_0_30px_rgba(239,68,68,0.25)]',
         ringBorder: 'border-red-500/40',
         badgeBg: 'bg-red-500/15 border-red-500/30 text-red-400',
-        badgeText: 'CANCELLED',
+        badgeText: resolutionBadgeText.value || 'CANCELLED',
         title: resolutionTitle.value || 'Appointment Cancelled',
         message: resolutionMessage.value || 'The slot has been freed and schedule updated.',
       };
@@ -314,7 +315,7 @@ const resTheme = computed(() => {
         haloBg: 'bg-[#E5BA73]/15 shadow-[0_0_30px_rgba(212,175,55,0.25)]',
         ringBorder: 'border-[#E5BA73]/40',
         badgeBg: 'bg-[#E5BA73]/15 border-[#E5BA73]/30 text-[#E5BA73]',
-        badgeText: 'CONFIRMED',
+        badgeText: resolutionBadgeText.value || 'CONFIRMED',
         title: resolutionTitle.value || 'Appointment Confirmed',
         message: resolutionMessage.value || 'Notifications dispatched and client scheduled.',
       };
@@ -325,7 +326,7 @@ const resTheme = computed(() => {
         haloBg: 'bg-emerald-500/15 shadow-[0_0_30px_rgba(34,197,94,0.25)]',
         ringBorder: 'border-emerald-500/40',
         badgeBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
-        badgeText: 'SAVED',
+        badgeText: resolutionBadgeText.value || 'SAVED',
         title: resolutionTitle.value || 'Saved Successfully',
         message: resolutionMessage.value || 'Your changes have been saved.',
       };
@@ -333,7 +334,7 @@ const resTheme = computed(() => {
 });
 
 const handleKeyDown = (e) => {
-  if (!isOpen.value) return;
+  if (!isOpen.value || isProcessing.value) return;
   if (e.key === 'Escape') {
     if (isResolved.value) {
       closeImmediately();
