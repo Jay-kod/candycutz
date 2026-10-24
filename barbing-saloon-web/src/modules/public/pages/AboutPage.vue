@@ -95,7 +95,7 @@
           </div>
 
           <!-- Multiple Barbers Responsive Grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <article v-for="barber in barbers" :key="barber.id" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface flex flex-col shadow-xl hover:shadow-2xl hover:shadow-gold/10 transition-all duration-500 hover:-translate-y-1.5">
               <!-- Barber Image -->
               <div class="relative overflow-hidden bg-theme-bg aspect-[4/5] w-full">
@@ -116,7 +116,7 @@
               </div>
               
               <!-- Barber Details -->
-              <div class="p-6 sm:p-8 flex flex-1 flex-col justify-between">
+              <div class="p-4 xs:p-6 sm:p-8 flex flex-1 flex-col justify-between">
                 <div>
                   <span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-gold mb-1.5 block">Master Barber</span>
                   <h3 class="font-display text-2xl font-bold text-theme-text group-hover:text-gold transition-colors">{{ barber.name }}</h3>
@@ -138,7 +138,7 @@
                 </div>
                 
                 <div class="mt-6 pt-5 border-t border-theme-border/50">
-                  <RouterLink :to="`/customer/dashboard/barber/${barber.id}`" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gold/10 border border-gold/30 px-4 py-3 text-sm font-bold text-gold transition-all duration-300 hover:bg-gold hover:text-obsidian hover:shadow-lg">
+                  <RouterLink :to="`/customer/dashboard/barber/${barber.id}`" class="w-full inline-flex items-center justify-center min-h-[44px] gap-2 rounded-xl bg-gold/10 border border-gold/30 px-4 py-3 text-sm font-bold text-gold transition-all duration-300 hover:bg-gold hover:text-obsidian hover:shadow-lg">
                     View Full Profile & Book
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                   </RouterLink>
