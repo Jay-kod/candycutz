@@ -37,10 +37,7 @@
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <span class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
-              {{ aboutTitle || 'Our Story' }}
-            </span>
-            <h2 class="mt-2 font-display text-3xl sm:text-4xl lg:text-5xl text-gold">
+            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold">
               {{ aboutSubtitle }}
             </h2>
             <p class="mt-5 text-base sm:text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">

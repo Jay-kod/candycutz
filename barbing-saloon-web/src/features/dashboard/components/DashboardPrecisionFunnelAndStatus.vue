@@ -99,9 +99,9 @@
 
         <!-- Stage Bottom Labels -->
         <div class="flex justify-between text-[11px] text-ivory/60 px-2 sm:px-4 font-medium pt-2">
-          <span>Inquiries</span>
-          <span>Service Choice</span>
-          <span>Confirmed Slot</span>
+          <span>Total Clients</span>
+          <span>Bookings</span>
+          <span>Confirmed</span>
           <span>Fulfilled</span>
         </div>
       </div>
@@ -233,21 +233,21 @@ const funnelCompletionRate = computed(() => {
 });
 
 const funnelStages = computed(() => {
-  const tot = Math.max(totalAppts.value, 1);
+  const tot = totalAppts.value;
+  const customers = Number(props.stats?.total_customers || 0);
   const comp = completedCount.value;
   const conf = Number(props.statusBreakdown?.confirmed || 0);
-  const pend = Number(props.statusBreakdown?.pending || 0);
 
-  const s1Count = Math.max(tot * 4, 24);
-  const s2Count = Math.max(tot * 2, 12);
-  const s3Count = comp + conf + pend;
+  const s1Count = Math.max(customers, tot, 1);
+  const s2Count = tot;
+  const s3Count = conf + comp;
   const s4Count = comp;
 
   return [
     { count: s1Count, pct: 100 },
-    { count: s2Count, pct: Math.round((s2Count / s1Count) * 100) },
-    { count: s3Count, pct: Math.round((s3Count / s1Count) * 100) },
-    { count: s4Count, pct: Math.max(Math.round((s4Count / s1Count) * 100), s4Count > 0 ? 5 : 0) }
+    { count: s2Count, pct: Math.min(Math.round((s2Count / s1Count) * 100), 100) },
+    { count: s3Count, pct: Math.min(Math.round((s3Count / s1Count) * 100), 100) },
+    { count: s4Count, pct: Math.min(Math.round((s4Count / s1Count) * 100), 100) }
   ];
 });
 

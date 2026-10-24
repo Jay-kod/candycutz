@@ -23,9 +23,6 @@
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Standardized Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16" data-reveal>
-        <span class="inline-block px-3.5 py-1 mb-3.5 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
-          Proven Numbers
-        </span>
         <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm text-center">
           Proven Craftsmanship by the Numbers
         </h2>
