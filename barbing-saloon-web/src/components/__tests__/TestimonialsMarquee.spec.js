@@ -26,7 +26,7 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.findAll('article')).toHaveLength(0);
   });
 
-  it('renders each approved and visible testimonial once', () => {
+  it('scrolls only approved and visible testimonials in an accessible seamless loop', () => {
     const testimonials = [
       { id: 'shown', client_name: 'Approved Client', review: 'Great cut.', is_approved: true, is_featured: true },
       { id: 'hidden', client_name: 'Hidden Client', review: 'Hidden cut.', is_approved: true, is_featured: false },
@@ -42,10 +42,12 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.text()).toContain('Approved Client');
     expect(wrapper.text()).not.toContain('Hidden Client');
     expect(wrapper.text()).not.toContain('Pending Client');
-    expect(wrapper.findAll('article')).toHaveLength(1);
+    expect(wrapper.findAll('.testimonials-track')).toHaveLength(2);
+    expect(wrapper.find('.testimonials-track:not([aria-hidden="true"])').findAll('article')).toHaveLength(1);
+    expect(wrapper.find('.testimonials-track[aria-hidden="true"]').findAll('article')).toHaveLength(1);
   });
 
-  it('renders a single selected testimonial once', () => {
+  it('uses the selected direction and speed for automatic scrolling', () => {
     const testimonials = [
       { id: 'shown', client_name: 'Approved Client', review: 'Great cut.', is_approved: true, is_featured: true },
     ];
@@ -53,10 +55,14 @@ describe('TestimonialsMarquee', () => {
     const wrapper = mount(TestimonialsMarquee, {
       props: {
         testimonials,
+        direction: 'right',
+        speed: 30,
       },
     });
 
-    expect(wrapper.findAll('article')).toHaveLength(1);
-    expect(wrapper.text().match(/Approved Client/g)).toHaveLength(1);
+    expect(wrapper.findAll('.testimonials-track-right')).toHaveLength(2);
+    expect(wrapper.find('.testimonials-track').attributes('style')).toContain('--testimonials-marquee-duration: 30s');
+    expect(wrapper.find('.testimonials-track[aria-hidden="true"]').attributes('aria-hidden')).toBe('true');
+    expect(wrapper.text().match(/Approved Client/g)).toHaveLength(2);
   });
 });
