@@ -81,6 +81,12 @@
                 <div>
                   <div class="flex items-center gap-2 flex-wrap">
                     <h2 class="font-display text-xl text-theme-text group-hover:text-admin-light transition-colors">{{ item.client_name || item.customer_name }}</h2>
+                    <span
+                      v-if="item.client_name?.startsWith('Sample Customer ') || item.customer_name?.startsWith('Sample Customer ')"
+                      class="rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-300"
+                    >
+                      Demo sample
+                    </span>
                     <span v-if="item.service?.name || item.service_name" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-admin/20 border border-admin/30 text-admin-light text-xs font-semibold">
                       ✂️ {{ item.service?.name || item.service_name }}
                     </span>

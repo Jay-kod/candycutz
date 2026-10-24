@@ -72,7 +72,7 @@
             What our clients say
           </h2>
           <p class="mt-3 text-sm leading-relaxed text-theme-muted sm:text-base">
-            Real feedback from customers who have experienced the CandyCutz difference.
+            A look at the kind of premium experience customers can expect.
           </p>
         </header>
 
@@ -103,7 +103,7 @@
               <img
                 v-if="testimonial.client_avatar && !failedTestimonialAvatars.has(testimonial.id)"
                 :src="getStorageUrl(testimonial.client_avatar)"
-                :alt="`${testimonial.client_name} profile`"
+                :alt="`${testimonial.client_name} avatar`"
                 class="size-10 rounded-full border border-gold/30 object-cover"
                 loading="lazy"
                 @error="markTestimonialAvatarFailed(testimonial.id)"
@@ -117,7 +117,9 @@
               </div>
               <div class="min-w-0">
                 <p class="truncate text-sm font-semibold text-ivory">{{ testimonial.client_name || 'CandyCutz client' }}</p>
-                <p class="mt-0.5 text-xs text-theme-muted">CandyCutz client</p>
+                <p class="mt-0.5 text-xs text-theme-muted">
+                  {{ isSampleTestimonial(testimonial) ? 'Demonstration sample — not a customer review' : 'CandyCutz client' }}
+                </p>
               </div>
             </div>
           </article>
@@ -256,7 +258,14 @@ const fetchTestimonials = async () => {
     if (!Array.isArray(items)) {
       throw new TypeError('The testimonials response did not contain a list.');
     }
-    testimonials.value = items.filter((item) => item.review).slice(0, 3);
+    testimonials.value = items
+      .filter((item) => item.review)
+      .slice(0, 10)
+      .map((item) => ({
+        ...item,
+        client_name: item.client_name || item.customer_name || 'CandyCutz client',
+        client_avatar: item.client_avatar || item.avatar_url || null,
+      }));
   } catch (error) {
     console.error('Failed to load homepage testimonials:', error);
   } finally {
@@ -272,6 +281,8 @@ const getTestimonialInitials = (name) => {
   const words = (name || 'Client').trim().split(/\s+/).filter(Boolean);
   return words.slice(0, 2).map((word) => word[0].toUpperCase()).join('');
 };
+
+const isSampleTestimonial = (testimonial) => testimonial.client_name?.startsWith('Sample Customer ');
 
 onMounted(() => {
   fetchSettings();
