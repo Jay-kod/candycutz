@@ -6,16 +6,31 @@ const title = ref('');
 const confirmButtonText = ref('Confirm');
 const cancelButtonText = ref('Cancel');
 const variant = ref('danger'); // 'danger' | 'warning' | 'info' | 'primary'
+const isResolved = ref(false);
+const isProcessing = ref(false);
+const resolutionType = ref('deleted'); // 'deleted' | 'saved' | 'cancelled' | 'confirmed'
+const resolutionTitle = ref('');
+const resolutionMessage = ref('');
+const autoDismissDelay = ref(1300);
 const resolvePromise = ref(null);
+const actionCallback = ref(null);
 
 export function useConfirm() {
   const confirm = (optionsOrTitle, messageText) => {
+    isResolved.value = false;
+    isProcessing.value = false;
+    actionCallback.value = null;
+
     if (typeof optionsOrTitle === 'string') {
       title.value = optionsOrTitle;
       message.value = messageText || 'Are you sure you want to proceed?';
       confirmButtonText.value = 'Confirm';
       cancelButtonText.value = 'Cancel';
       variant.value = 'danger';
+      resolutionType.value = 'deleted';
+      resolutionTitle.value = '';
+      resolutionMessage.value = '';
+      autoDismissDelay.value = 1300;
     } else {
       const options = optionsOrTitle || {};
       title.value = options.title || 'Confirm Action';
@@ -23,6 +38,15 @@ export function useConfirm() {
       confirmButtonText.value = options.confirmText || options.confirmButtonText || 'Confirm';
       cancelButtonText.value = options.cancelText || options.cancelButtonText || 'Cancel';
       variant.value = options.variant || options.type || (options.destructive ? 'danger' : 'primary');
+      resolutionType.value =
+        options.resolutionType ||
+        (variant.value === 'danger' || options.destructive ? 'deleted' : 'saved');
+      resolutionTitle.value = options.resolutionTitle || '';
+      resolutionMessage.value = options.resolutionMessage || '';
+      autoDismissDelay.value = options.autoDismissDelay || 1300;
+      if (typeof options.onConfirm === 'function') {
+        actionCallback.value = options.onConfirm;
+      }
     }
     isOpen.value = true;
 
@@ -31,13 +55,33 @@ export function useConfirm() {
     });
   };
 
-  const agree = () => {
-    isOpen.value = false;
-    if (resolvePromise.value) resolvePromise.value(true);
+  const agree = async () => {
+    if (isProcessing.value) return;
+    isProcessing.value = true;
+
+    try {
+      if (actionCallback.value) {
+        await actionCallback.value();
+      }
+      // Enter resolved animation state
+      isResolved.value = true;
+      setTimeout(() => {
+        isOpen.value = false;
+        isResolved.value = false;
+        isProcessing.value = false;
+        if (resolvePromise.value) resolvePromise.value(true);
+      }, autoDismissDelay.value);
+    } catch (err) {
+      isProcessing.value = false;
+      isResolved.value = false;
+      throw err;
+    }
   };
 
   const cancel = () => {
     isOpen.value = false;
+    isResolved.value = false;
+    isProcessing.value = false;
     if (resolvePromise.value) resolvePromise.value(false);
   };
 
@@ -48,6 +92,12 @@ export function useConfirm() {
     confirmButtonText,
     cancelButtonText,
     variant,
+    isResolved,
+    isProcessing,
+    resolutionType,
+    resolutionTitle,
+    resolutionMessage,
+    autoDismissDelay,
     confirm,
     agree,
     cancel,
