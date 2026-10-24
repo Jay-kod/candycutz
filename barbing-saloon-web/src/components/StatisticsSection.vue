@@ -1,6 +1,6 @@
 <template>
   <section
-    class="relative py-16 md:py-24 overflow-hidden bg-obsidian border-y border-white/5 z-20 shadow-2xl"
+    class="statistics-section relative py-16 md:py-24 overflow-hidden bg-obsidian border-y border-white/5 z-20 shadow-2xl transition-colors duration-300"
     aria-label="CandyCutz Achievements and Key Statistics"
     ref="sectionRef"
   >
@@ -40,7 +40,7 @@
         <div
           v-for="(stat, index) in statItems"
           :key="stat.id"
-          class="group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-white/10 hover:border-gold/50 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
+          class="stat-card group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-white/10 hover:border-gold/50 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
           :style="{ '--reveal-delay': `${index * 0.15}s` }"
         >
           <!-- Corner Decor Crosshairs -->
@@ -92,20 +92,20 @@
               :aria-label="stat.ariaLabel"
             >
               <span
-                class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#FFF5DC] via-[#FFB84D] to-[#D97706] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
+                class="stat-number font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#FFF5DC] via-[#FFB84D] to-[#D97706] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).num }}
               </span>
               <span
                 v-if="splitValue(displayValues[stat.id] || stat.value).suffix"
-                class="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-b from-[#FFB84D] to-[#D97706] bg-clip-text text-transparent ml-1 drop-shadow-sm select-none"
+                class="stat-suffix font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-b from-[#FFB84D] to-[#D97706] bg-clip-text text-transparent ml-1 drop-shadow-sm select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).suffix }}
               </span>
             </div>
 
             <h3
-              class="mt-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-ivory/90 group-hover:text-gold transition-colors duration-300 text-center"
+              class="stat-label mt-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-ivory/90 group-hover:text-gold transition-colors duration-300 text-center"
             >
               {{ stat.label }}
             </h3>
@@ -116,7 +116,7 @@
 
       <!-- Bottom Reassurance Strip -->
       <div
-        class="mt-12 sm:mt-16 pt-6 border-t border-white/5 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-ivory/60 uppercase tracking-wider"
+        class="stat-reassurance mt-12 sm:mt-16 pt-6 border-t border-white/5 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-ivory/60 uppercase tracking-wider"
         data-reveal
       >
         <span class="flex items-center gap-2">
@@ -345,3 +345,45 @@ onUnmounted(() => {
   observer?.disconnect();
 });
 </script>
+
+<style scoped>
+:global([data-theme="light"]) .statistics-section {
+  background: linear-gradient(180deg, #F8F7F4 0%, #F1EFEA 100%);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+:global([data-theme="light"]) .statistics-section h2 {
+  color: #CC7A00;
+}
+
+:global([data-theme="light"]) .stat-card {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .stat-card:hover {
+  background: #FFFFFF;
+  border-color: rgba(255, 153, 0, 0.5);
+  box-shadow: 0 12px 30px rgba(255, 153, 0, 0.14);
+}
+
+:global([data-theme="light"]) .stat-number {
+  background-image: linear-gradient(to bottom, #CC7A00, #B45309, #92400E);
+  filter: drop-shadow(0 1px 2px rgba(204, 122, 0, 0.2));
+}
+
+:global([data-theme="light"]) .stat-suffix {
+  background-image: linear-gradient(to bottom, #CC7A00, #92400E);
+}
+
+:global([data-theme="light"]) .stat-label {
+  color: #1F2937;
+}
+
+:global([data-theme="light"]) .stat-reassurance {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4B5563;
+}
+</style>
