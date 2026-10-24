@@ -74,3 +74,4 @@ describe('BarbersStats', () => {
     expect(text).toContain('★ 5.0');
   });
 });
+
