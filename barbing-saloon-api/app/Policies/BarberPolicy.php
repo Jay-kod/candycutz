@@ -31,7 +31,7 @@ class BarberPolicy
 
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role?->value ?? $user->role, ['admin', 'super_admin']);
     }
 
     public function update(User $user, Barber $barber): bool
