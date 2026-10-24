@@ -2,9 +2,11 @@
   <PublicLayout>
     <BarberCta
       :title="ctaTitle"
+      :title-part-one="ctaTitlePartOne"
+      :title-part-two="ctaTitlePartTwo"
+      :title-color-order="ctaTitleColorOrder"
       :subtitle="ctaSubtitle"
       :caption="ctaCaption"
-      :title-color="ctaTitleColor"
       :primary-text="ctaPrimaryText"
       :secondary-text="heroBtn2Text"
       :background-image="heroImage"
@@ -112,9 +114,11 @@ const heroImage = ref(null);
 const heroImageOpacity = ref(null);
 const heroOverlayOpacity = ref(null);
 const ctaTitle = ref('Fresh Cut. Zero Stress.');
+const ctaTitlePartOne = ref('Fresh Cut.');
+const ctaTitlePartTwo = ref('Zero Stress.');
+const ctaTitleColorOrder = ref('first-white');
 const ctaSubtitle = ref('Pick your barber, choose your style, lock your time.');
 const ctaCaption = ref('Expert barbers. Fresh fades. A better kind of barbershop experience.');
-const ctaTitleColor = ref('#ffb84d');
 const ctaPrimaryText = ref('Book your cut');
 
 const statsYears = ref('10+');
@@ -154,9 +158,12 @@ const fetchSettings = async () => {
         heroOverlayOpacity.value = settings.page_hero_home_overlay_opacity;
       }
       ctaTitle.value = settings.cta_title || settings.hero_title || ctaTitle.value;
+      const titleParts = splitHeadline(ctaTitle.value);
+      ctaTitlePartOne.value = settings.cta_title_part_one ?? titleParts[0];
+      ctaTitlePartTwo.value = settings.cta_title_part_two ?? titleParts[1];
+      ctaTitleColorOrder.value = settings.cta_title_color_order === 'first-gold' ? 'first-gold' : 'first-white';
       ctaSubtitle.value = settings.cta_subtitle || settings.hero_subtitle || ctaSubtitle.value;
       ctaCaption.value = settings.cta_caption ?? ctaCaption.value;
-      ctaTitleColor.value = settings.cta_title_color || ctaTitleColor.value;
       ctaPrimaryText.value = settings.cta_primary_text || settings.hero_btn1_text || ctaPrimaryText.value;
       
       statsYears.value = settings.stats_years || settings.stats_years_experience || statsYears.value;
@@ -226,6 +233,17 @@ const fetchTestimonials = async () => {
   } finally {
     testimonialsLoading.value = false;
   }
+};
+
+const splitHeadline = (title) => {
+  const normalizedTitle = String(title || '').replace(/\s*\n\s*/g, ' ').trim();
+  const sentenceBreak = normalizedTitle.match(/^(.+?[.!?])\s+(.+)$/);
+  if (sentenceBreak) return [sentenceBreak[1], sentenceBreak[2]];
+
+  const words = normalizedTitle.split(/\s+/);
+  if (words.length < 2) return [normalizedTitle, ''];
+  const midpoint = Math.ceil(words.length / 2);
+  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')];
 };
 
 const refreshTestimonialsWhenVisible = () => {

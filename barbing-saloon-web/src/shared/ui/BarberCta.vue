@@ -43,7 +43,6 @@ const props = defineProps({
   titleColorOrder: { type: String, default: 'first-white' },
   subtitle: { type: String, default: 'Expert barbers. Fresh fades. A better kind of barbershop experience.' },
   caption: { type: String, default: '' },
-  titleColor: { type: String, default: '#ffb84d' },
   primaryText: { type: String, default: 'Book your cut' },
   secondaryText: { type: String, default: 'Contact the shop' },
   secondaryLink: { type: String, default: '/contact' },

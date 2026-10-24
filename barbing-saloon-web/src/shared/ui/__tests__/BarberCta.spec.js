@@ -17,22 +17,38 @@ describe('BarberCta', () => {
 
   it('renders a single colored headline followed by two supporting lines', () => {
     const wrapper = mountCta({
-      title: 'Fresh Cut.\nZero Stress.',
-      titleColor: '#ff9900',
+      titlePartOne: 'Fresh Cut.',
+      titlePartTwo: 'Zero Stress.',
+      titleColorOrder: 'first-white',
       subtitle: 'Pick a barber and book your style.',
       caption: 'Premium grooming, made simple.',
     });
 
-    expect(wrapper.find('h1').text()).toBe('Fresh Cut. Zero Stress.');
-    expect(wrapper.find('h1').attributes('style')).toContain('color: rgb(255, 153, 0)');
+    expect(wrapper.find('h1').text()).toBe('Fresh Cut.Zero Stress.');
+    expect(wrapper.find('.barber-cta__title-white').text()).toBe('Fresh Cut.');
+    expect(wrapper.find('.barber-cta__title-gold').text()).toBe('Zero Stress.');
     expect(wrapper.find('.barber-cta__subtitle').text()).toBe('Pick a barber and book your style.');
     expect(wrapper.find('.barber-cta__caption').text()).toBe('Premium grooming, made simple.');
     expect(wrapper.find('.barber-cta__actions').element.previousElementSibling).toBe(wrapper.find('.barber-cta__caption').element);
+    expect(wrapper.find('h1').element.style.whiteSpace).toBe('nowrap');
   });
 
-  it('uses the default accent when the provided headline color is invalid', () => {
-    const wrapper = mountCta({ titleColor: 'red; background: url(javascript:alert(1))' });
+  it('supports the reverse white and gold headline order', () => {
+    const wrapper = mountCta({
+      titlePartOne: 'Fresh Cut.',
+      titlePartTwo: 'Zero Stress.',
+      titleColorOrder: 'first-gold',
+    });
 
-    expect(wrapper.find('h1').attributes('style')).toContain('color: rgb(255, 184, 77)');
+    const titleParts = wrapper.find('h1').element.children;
+    expect(titleParts[0].classList.contains('barber-cta__title-gold')).toBe(true);
+    expect(titleParts[1].classList.contains('barber-cta__title-white')).toBe(true);
+  });
+
+  it('splits a legacy headline into two colored phrases', () => {
+    const wrapper = mountCta({ title: 'Fresh Cut. Zero Stress.' });
+
+    expect(wrapper.find('.barber-cta__title-white').text()).toBe('Fresh Cut.');
+    expect(wrapper.find('.barber-cta__title-gold').text()).toBe('Zero Stress.');
   });
 });

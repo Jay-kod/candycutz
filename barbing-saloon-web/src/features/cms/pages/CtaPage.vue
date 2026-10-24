@@ -32,30 +32,38 @@
       <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <form class="space-y-5 rounded-xl border border-white/10 bg-black/20 p-5 sm:p-7" @submit.prevent="save">
           <div>
-            <label for="cta-title" class="mb-2 block text-sm font-semibold text-theme-text">Headline</label>
+            <label for="cta-title-part-one" class="mb-2 block text-sm font-semibold text-theme-text">Headline phrase one</label>
             <input
-              id="cta-title"
-              v-model.trim="settings.cta_title"
-              maxlength="140"
+              id="cta-title-part-one"
+              v-model.trim="settings.cta_title_part_one"
+              maxlength="60"
               required
               type="text"
               class="cta-input"
-              placeholder="Fresh Cut. Zero Stress."
+              placeholder="Fresh Cut."
             />
-            <p class="mt-2 text-xs text-ivory/50">Keep the main headline to one sentence.</p>
           </div>
 
           <div>
-            <label for="cta-title-color" class="mb-2 block text-sm font-semibold text-theme-text">Headline color</label>
-            <div class="flex items-center gap-3">
-              <input
-                id="cta-title-color"
-                v-model="settings.cta_title_color"
-                type="color"
-                class="h-11 w-16 cursor-pointer rounded-lg border border-white/10 bg-black/30 p-1"
-              />
-              <span class="text-sm text-ivory/70">{{ settings.cta_title_color }}</span>
-            </div>
+            <label for="cta-title-part-two" class="mb-2 block text-sm font-semibold text-theme-text">Headline phrase two</label>
+            <input
+              id="cta-title-part-two"
+              v-model.trim="settings.cta_title_part_two"
+              maxlength="60"
+              required
+              type="text"
+              class="cta-input"
+              placeholder="Zero Stress."
+            />
+          </div>
+
+          <div>
+            <label for="cta-title-color-order" class="mb-2 block text-sm font-semibold text-theme-text">Headline color order</label>
+            <select id="cta-title-color-order" v-model="settings.cta_title_color_order" class="cta-input">
+              <option value="first-white">Phrase one white, phrase two gold</option>
+              <option value="first-gold">Phrase one gold, phrase two white</option>
+            </select>
+            <p class="mt-2 text-xs text-ivory/50">The full headline stays on one line; the second phrase uses the opposite color.</p>
           </div>
 
           <div>
@@ -105,9 +113,11 @@
           <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live preview</p>
           <BarberCta
             :title="settings.cta_title"
+            :title-part-one="settings.cta_title_part_one"
+            :title-part-two="settings.cta_title_part_two"
+            :title-color-order="settings.cta_title_color_order"
             :subtitle="settings.cta_subtitle"
             :caption="settings.cta_caption"
-            :title-color="settings.cta_title_color"
             :primary-text="settings.cta_primary_text"
             :background-image="settings.hero_image ? getStorageUrl(settings.hero_image) : ''"
             :image-opacity="settings.hero_image_opacity"
@@ -150,7 +160,9 @@ const loading = ref(true);
 const saving = ref(false);
 const settings = reactive({
   cta_title: 'Fresh Cut. Zero Stress.',
-  cta_title_color: '#ffb84d',
+  cta_title_part_one: 'Fresh Cut.',
+  cta_title_part_two: 'Zero Stress.',
+  cta_title_color_order: 'first-white',
   cta_subtitle: 'Pick your barber, choose your style, lock your time.',
   cta_caption: 'Expert barbers. Fresh fades. A better kind of barbershop experience.',
   cta_primary_text: 'Book your cut',
@@ -164,10 +176,13 @@ const loadSettings = async () => {
     const response = await api.get('/v1/admin/settings');
     const data = response.data.data || {};
     settings.cta_title = data.cta_title || data.hero_title || settings.cta_title;
+    const titleParts = splitHeadline(settings.cta_title);
+    settings.cta_title_part_one = data.cta_title_part_one ?? titleParts[0];
+    settings.cta_title_part_two = data.cta_title_part_two ?? titleParts[1];
+    settings.cta_title_color_order = data.cta_title_color_order === 'first-gold'
+      ? 'first-gold'
+      : 'first-white';
     settings.cta_subtitle = data.cta_subtitle || data.hero_subtitle || settings.cta_subtitle;
-    settings.cta_title_color = /^#[\da-f]{6}$/i.test(data.cta_title_color || '')
-      ? data.cta_title_color
-      : settings.cta_title_color;
     settings.cta_caption = data.cta_caption ?? settings.cta_caption;
     settings.cta_primary_text = data.cta_primary_text || data.hero_btn1_text || settings.cta_primary_text;
     settings.hero_image = data.hero_image || null;
@@ -182,16 +197,18 @@ const loadSettings = async () => {
 
 const save = async () => {
   if (
-    !settings.cta_title.trim() ||
+    !settings.cta_title_part_one.trim() ||
+    !settings.cta_title_part_two.trim() ||
     !settings.cta_subtitle.trim() ||
     !settings.cta_primary_text.trim()
   ) {
-    toast.error('Headline, description, and booking button label are required');
+    toast.error('Both headline phrases, the supporting line, and booking button label are required');
     return;
   }
 
   saving.value = true;
   try {
+    settings.cta_title = `${settings.cta_title_part_one.trim()} ${settings.cta_title_part_two.trim()}`;
     const formData = new FormData();
     Object.entries(settings).forEach(([key, value]) => {
       formData.append(`settings[${key}]`, value);
@@ -207,6 +224,17 @@ const save = async () => {
 };
 
 onMounted(loadSettings);
+
+const splitHeadline = (title) => {
+  const normalizedTitle = String(title || '').replace(/\s*\n\s*/g, ' ').trim();
+  const sentenceBreak = normalizedTitle.match(/^(.+?[.!?])\s+(.+)$/);
+  if (sentenceBreak) return [sentenceBreak[1], sentenceBreak[2]];
+
+  const words = normalizedTitle.split(/\s+/);
+  if (words.length < 2) return [normalizedTitle, ''];
+  const midpoint = Math.ceil(words.length / 2);
+  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')];
+};
 </script>
 
 <style scoped>
