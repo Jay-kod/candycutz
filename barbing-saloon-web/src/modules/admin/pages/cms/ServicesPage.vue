@@ -153,7 +153,6 @@ const {
   activeTab,
   catalogServices,
   categories,
-  currentHeroImage,
   heroImageInput,
   heroOpacity,
   previewHeroImage,

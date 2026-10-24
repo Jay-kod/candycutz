@@ -53,3 +53,4 @@ defineEmits(['save']);
   animation: bounceSubtle 3s ease-in-out infinite;
 }
 </style>
+

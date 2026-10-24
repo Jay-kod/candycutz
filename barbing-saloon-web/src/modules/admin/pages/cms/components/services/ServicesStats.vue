@@ -120,3 +120,4 @@ const categorySnippet = computed(() => {
   return 'Haircuts · Beard Styling';
 });
 </script>
+

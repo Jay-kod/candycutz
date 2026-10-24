@@ -57,3 +57,4 @@ describe('ServicesStats.vue', () => {
     expect(text).toContain('Haircuts · Beard Styling');
   });
 });
+
