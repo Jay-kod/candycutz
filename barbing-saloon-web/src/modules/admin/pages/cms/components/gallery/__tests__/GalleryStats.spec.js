@@ -64,3 +64,4 @@ describe('GalleryStats.vue', () => {
     expect(text).toContain('Haircuts · Transformations');
   });
 });
+

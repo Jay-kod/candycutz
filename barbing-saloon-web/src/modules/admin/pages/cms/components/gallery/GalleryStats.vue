@@ -126,3 +126,4 @@ const categorySnippet = computed(() => {
   return 'Haircuts · Transformations';
 });
 </script>
+
