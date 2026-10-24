@@ -135,3 +135,4 @@ const channelSummary = computed(() => {
 const hasValidMap = computed(() => Boolean(props.extractedMapSrc));
 const hasMapLink = computed(() => Boolean(props.content?.contact_map_link?.trim()));
 </script>
+

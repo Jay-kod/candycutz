@@ -82,3 +82,4 @@ const tabs = computed(() => [
   scrollbar-width: none;
 }
 </style>
+

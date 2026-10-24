@@ -118,3 +118,4 @@ export const PLATFORMS_LIST = [
     activeBg: 'bg-sky-500/20 text-sky-400',
   },
 ];
+

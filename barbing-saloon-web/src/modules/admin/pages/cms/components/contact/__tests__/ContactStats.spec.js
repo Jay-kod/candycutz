@@ -54,3 +54,4 @@ describe('ContactStats.vue', () => {
     expect(text).toContain('Pending Embed');
   });
 });
+
