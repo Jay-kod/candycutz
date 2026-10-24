@@ -33,7 +33,7 @@
       <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
         <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
           <h2 class="font-display text-xl text-theme-text">Page Header</h2>
-          <p class="mt-1 text-xs text-ivory/40">The title and subtitle shown at the top of the Gallery page.</p>
+          <p class="mt-1 text-xs text-ivory/40">The title, subtitle, cover image, and image overlay shown at the top of the Gallery page.</p>
         </div>
         <div class="p-8 space-y-6">
           <div>
@@ -45,6 +45,56 @@
             <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Subtitle</label>
             <textarea v-model="content.gallery_subtitle" rows="3" placeholder="Browse our portfolio of premium cuts and styles..."
               class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-none"></textarea>
+          </div>
+        </div>
+        <div class="grid gap-8 xl:grid-cols-2">
+          <div class="space-y-6">
+            <div>
+              <label for="gallery-hero-image" class="mb-2 block text-xs font-bold uppercase tracking-widest text-ivory/50">Hero cover image</label>
+              <input
+                id="gallery-hero-image"
+                ref="imageInput"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-theme-text file:mr-4 file:rounded-lg file:border-0 file:bg-admin/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-light"
+                @change="selectImage"
+              />
+              <p class="mt-2 text-xs text-ivory/45">Upload a JPG, PNG, or WEBP image up to 5 MB. The saved image appears behind the Gallery hero.</p>
+            </div>
+            <div>
+              <div class="mb-2 flex items-center justify-between gap-4">
+                <label for="gallery-hero-opacity" class="block text-xs font-bold uppercase tracking-widest text-ivory/50">Image overlay opacity</label>
+                <span class="text-sm font-semibold text-admin-light">{{ heroOpacity }}%</span>
+              </div>
+              <input
+                id="gallery-hero-opacity"
+                v-model.number="heroOpacity"
+                type="range"
+                min="0"
+                max="100"
+                class="w-full accent-admin"
+              />
+              <p class="mt-2 text-xs text-ivory/45">Higher opacity darkens the cover image behind the title.</p>
+            </div>
+            <button
+              v-if="heroImage || selectedFile"
+              type="button"
+              class="min-h-10 rounded-xl border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/10"
+              @click="clearImage"
+            >
+              Remove hero cover image
+            </button>
+          </div>
+          <div class="min-w-0">
+            <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live hero preview</p>
+            <PageHero
+              page-key="gallery"
+              :fallback-title="content.gallery_title || 'Our Gallery'"
+              :fallback-subtitle="content.gallery_subtitle"
+              :background-image="previewImage"
+              :overlay-opacity="heroOpacity"
+              :load-settings="false"
+            />
           </div>
         </div>
       </div>
@@ -59,13 +109,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useToast } from '../../../../core/composables/useToast';
 import { adminApi } from '@/shared/api/old_adminApi';
+import PageHero from '@/shared/ui/PageHero.vue';
+import { getStorageUrl } from '@/core/utils/url';
 import { PhotoIcon, CheckIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const saving = ref(false);
+const selectedFile = ref(null);
+const imageInput = ref(null);
+const localPreviewUrl = ref('');
+const removeImage = ref(false);
+const heroImage = ref('');
+const heroOpacity = ref(76);
+const previewImage = computed(() => {
+  if (localPreviewUrl.value) return localPreviewUrl.value;
+  if (removeImage.value || !heroImage.value) return '';
+  return getStorageUrl(heroImage.value);
+});
 
 const content = ref({
   gallery_title: 'Our Gallery',
@@ -79,10 +142,32 @@ const fetchContent = async () => {
     if (data) {
       if (data.gallery_title) content.value.gallery_title = data.gallery_title;
       if (data.gallery_subtitle) content.value.gallery_subtitle = data.gallery_subtitle;
+      heroImage.value = data.page_hero_gallery_image || '';
+      heroOpacity.value = Number(data.page_hero_gallery_overlay_opacity ?? 76);
     }
   } catch (error) {
     console.error('Failed to load gallery content:', error);
+    toast.error('Failed to load Gallery page settings.');
   }
+};
+
+const clearPreviewUrl = () => {
+  if (localPreviewUrl.value) URL.revokeObjectURL(localPreviewUrl.value);
+  localPreviewUrl.value = '';
+};
+
+const selectImage = (event) => {
+  selectedFile.value = event.target.files?.[0] || null;
+  removeImage.value = false;
+  clearPreviewUrl();
+  if (selectedFile.value) localPreviewUrl.value = URL.createObjectURL(selectedFile.value);
+};
+
+const clearImage = () => {
+  selectedFile.value = null;
+  if (imageInput.value) imageInput.value.value = '';
+  removeImage.value = true;
+  clearPreviewUrl();
 };
 
 const saveContent = async () => {
@@ -91,16 +176,27 @@ const saveContent = async () => {
     const formData = new FormData();
     formData.append('settings[gallery_title]', content.value.gallery_title);
     formData.append('settings[gallery_subtitle]', content.value.gallery_subtitle);
-    await adminApi.updateSettings(formData);
+    formData.append('settings[page_hero_gallery_overlay_opacity]', String(heroOpacity.value));
+    formData.append('page_hero_page', 'gallery');
+    if (selectedFile.value) formData.append('page_hero_image', selectedFile.value);
+    else if (removeImage.value) formData.append('settings[page_hero_gallery_image]', '');
+
+    const response = await adminApi.updateSettings(formData);
+    const data = response.data?.data;
+    if (data) heroImage.value = data.page_hero_gallery_image || '';
+    selectedFile.value = null;
+    if (imageInput.value) imageInput.value.value = '';
+    removeImage.value = false;
+    clearPreviewUrl();
     toast.success('Gallery page content saved!');
   } catch (error) {
-    toast.error('Failed to save changes.');
+    console.error('Failed to save gallery content:', error);
+    toast.error('Failed to save Gallery page settings.');
   } finally {
     saving.value = false;
   }
 };
 
-onMounted(() => {
-  fetchContent();
-});
+onMounted(fetchContent);
+onBeforeUnmount(clearPreviewUrl);
 </script>
