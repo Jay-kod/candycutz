@@ -37,7 +37,7 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         <div
           v-for="n in 6"
           :key="n"
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Services Grid -->
-      <div v-else-if="filteredServices.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div v-else-if="filteredServices.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         <article
           v-for="service in filteredServices"
           :key="service.id"
