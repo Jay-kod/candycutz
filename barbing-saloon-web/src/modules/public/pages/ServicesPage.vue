@@ -77,7 +77,7 @@
             </svg>
           </div>
 
-          <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#140b05]/85 via-transparent via-35% to-[#100a05]/95"></div>
+          <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#140b05]/70 via-transparent via-35% to-[#100a05]/80"></div>
           <div class="absolute inset-3 -z-10 rounded-[1.35rem] border border-gold/20"></div>
 
           <div class="flex h-full flex-col justify-between p-5 sm:p-6">
@@ -101,7 +101,7 @@
               </div>
             </div>
 
-            <div class="rounded-2xl border border-gold/20 bg-[#160e08]/75 p-4 shadow-2xl backdrop-blur-sm sm:p-5">
+            <div class="rounded-2xl border border-gold/20 bg-[#160e08]/60 p-4 shadow-2xl backdrop-blur-sm sm:p-5">
               <h2 class="font-display text-2xl font-bold leading-tight text-white group-hover:text-gold transition-colors">
                 {{ service.name }}
               </h2>
