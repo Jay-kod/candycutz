@@ -130,6 +130,14 @@ it('keeps unapproved testimonials hidden from the public feed for signed-in admi
         'service_id' => null,
         'barber_id' => null,
         'is_approved' => true,
+        'is_featured' => true,
+    ]);
+    $approvedHidden = Testimonial::factory()->create([
+        'customer_id' => $customer->id,
+        'service_id' => null,
+        'barber_id' => null,
+        'is_approved' => true,
+        'is_featured' => false,
     ]);
     $pending = Testimonial::factory()->create([
         'customer_id' => $customer->id,
@@ -142,12 +150,14 @@ it('keeps unapproved testimonials hidden from the public feed for signed-in admi
     $publicList->assertOk();
     $publicIds = collect($publicList->json('data'))->pluck('id');
     expect($publicIds)->toContain($approved->id)
+        ->not->toContain($approvedHidden->id)
         ->not->toContain($pending->id);
 
     $adminList = $this->getJson('/api/v1/admin/testimonials');
     $adminList->assertOk();
     $adminIds = collect($adminList->json('data'))->pluck('id');
     expect($adminIds)->toContain($approved->id)
+        ->toContain($approvedHidden->id)
         ->toContain($pending->id);
 });
 
@@ -171,6 +181,7 @@ it('allows admins to feature and unfeature testimonials through the approval flo
     $featureResponse->assertOk();
     expect($featureResponse->json('data.is_featured'))->toBeTrue();
     expect($testimonial->fresh()->is_featured)->toBeTrue();
+    expect($testimonial->fresh()->is_approved)->toBeTrue();
 
     $featuredList = $this->getJson('/api/v1/testimonials?featured=true');
     $featuredList->assertOk();

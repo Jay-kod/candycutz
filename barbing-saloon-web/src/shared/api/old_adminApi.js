@@ -18,6 +18,7 @@ export const adminApi = {
   deleteGalleryImage: (id) => client.delete(`/admin/gallery/${id}`),
   testimonials: (params = {}) => client.get('/admin/testimonials', { params }),
   approveTestimonial: (id, isApproved) => client.patch(`/admin/testimonials/${id}/approve`, { is_approved: isApproved }),
+  featureTestimonial: (id, isFeatured) => client.patch(`/admin/testimonials/${id}/feature`, { is_featured: isFeatured }),
   deleteTestimonial: (id) => client.delete(`/admin/testimonials/${id}`),
   blogPosts: () => client.get('/admin/blog'),
   createBlogPost: (data) => client.post('/admin/blog', data),

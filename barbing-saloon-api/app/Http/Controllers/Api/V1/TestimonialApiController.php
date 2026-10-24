@@ -32,11 +32,10 @@ class TestimonialApiController
 
     private function testimonialList(Request $request, bool $includeUnapproved): JsonResponse
     {
-        $query = Testimonial::query()
-            ->with(['customer', 'service', 'barber.user']);
+        $query = Testimonial::query()->with(['customer', 'service', 'barber.user']);
 
         if (! $includeUnapproved) {
-            $query->where('is_approved', true);
+            $query->where('is_approved', true)->where('is_featured', true);
         }
 
         if ($request->has('service_id') && is_numeric($request->service_id)) {

@@ -10,7 +10,6 @@ class ApproveTestimonial
     {
         $testimonial->update([
             'is_approved' => $isApproved,
-            'is_featured' => $isApproved,
         ]);
 
         return $testimonial->refresh()->load(['barber.user', 'customer']);

@@ -13,7 +13,7 @@
               Review <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Moderation</span>
               <span class="flex items-center justify-center h-8 px-3 rounded-full bg-admin/20 border border-admin/30 text-lg text-admin-light">{{ filteredTestimonials.length }}</span>
             </h1>
-            <p class="mt-2 text-sm text-ivory/60">Approved testimonials appear on the website. Unapprove a testimonial to hide it.</p>
+            <p class="mt-2 text-sm text-ivory/60">Approve reviews and separately choose which approved testimonials appear on the website.</p>
           </div>
 
           <!-- Filters Bar -->
@@ -124,7 +124,7 @@
               <div class="flex items-center gap-2 mb-2">
                 <div class="h-2 w-2 rounded-full" :class="item.is_approved ? 'bg-emerald-500' : 'bg-admin animate-pulse'"></div>
                 <span class="text-xs font-bold uppercase tracking-wider" :class="item.is_approved ? 'text-emerald-400' : 'text-admin'">
-                  {{ item.is_approved ? 'Approved · visible on website' : 'Pending · hidden from website' }}
+                  {{ item.is_approved ? (item.is_featured ? 'Approved · visible on website' : 'Approved · hidden from website') : 'Pending · hidden from website' }}
                 </span>
               </div>
 
@@ -135,6 +135,20 @@
               >
                 <CheckCircleIcon class="h-4 w-4" />
                 {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_approved ? 'Unapprove' : 'Approve' }}
+              </button>
+
+              <button
+                :disabled="moderatingIds.has(item.id) || (!item.is_approved && !item.is_featured)"
+                @click="toggleWebsiteVisibility(item)"
+                class="flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40"
+                :class="item.is_featured
+                  ? 'border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400 hover:text-obsidian'
+                  : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500 hover:text-obsidian'"
+                :title="item.is_approved ? '' : 'Approve this testimonial before displaying it'"
+              >
+                <EyeSlashIcon v-if="item.is_featured" class="h-4 w-4" />
+                <EyeIcon v-else class="h-4 w-4" />
+                {{ moderatingIds.has(item.id) ? 'Saving...' : item.is_featured ? 'Hide from website' : 'View on website' }}
               </button>
 
               <button 
@@ -169,7 +183,7 @@ import client from '@/shared/api/client';
 import { adminApi } from '@/shared/api/old_adminApi';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { useToast } from '../../../core/composables/useToast';
-import { ChatBubbleBottomCenterTextIcon, CheckCircleIcon, TrashIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { ChatBubbleBottomCenterTextIcon, CheckCircleIcon, TrashIcon, ClockIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 const { confirm } = useConfirm();
 const toast = useToast();
@@ -242,11 +256,33 @@ const toggleApproval = async (item) => {
   try {
     const response = await adminApi.approveTestimonial(item.id, isApproved);
     item.is_approved = response.data?.data?.is_approved ?? isApproved;
-    item.is_featured = response.data?.data?.is_featured ?? isApproved;
-    toast.success(isApproved ? 'Testimonial approved and displayed on the website' : 'Testimonial unapproved and hidden from the website');
+    item.is_approved = response.data?.data?.is_approved ?? isApproved;
+    toast.success(isApproved ? 'Testimonial approved' : 'Testimonial unapproved and hidden from the website');
   } catch (error) {
     console.error('Failed to update testimonial approval', error);
     toast.error(isApproved ? 'Failed to approve testimonial' : 'Failed to unapprove testimonial');
+  } finally {
+    const nextIds = new Set(moderatingIds.value);
+    nextIds.delete(item.id);
+    moderatingIds.value = nextIds;
+  }
+};
+
+const toggleWebsiteVisibility = async (item) => {
+  if (!item.is_approved) {
+    toast.error('Approve this testimonial before displaying it');
+    return;
+  }
+
+  const isFeatured = !item.is_featured;
+  moderatingIds.value = new Set(moderatingIds.value).add(item.id);
+  try {
+    const response = await adminApi.featureTestimonial(item.id, isFeatured);
+    item.is_featured = response.data?.data?.is_featured ?? isFeatured;
+    toast.success(isFeatured ? 'Testimonial is now visible on the website' : 'Testimonial hidden from the website');
+  } catch (error) {
+    console.error('Failed to update testimonial website visibility', error);
+    toast.error(isFeatured ? 'Failed to display testimonial on the website' : 'Failed to hide testimonial from the website');
   } finally {
     const nextIds = new Set(moderatingIds.value);
     nextIds.delete(item.id);
