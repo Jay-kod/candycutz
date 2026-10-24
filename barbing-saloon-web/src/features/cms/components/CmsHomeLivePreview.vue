@@ -174,3 +174,4 @@ const computedOpacity = computed(() => {
   return clamped > 1 ? clamped / 100 : clamped;
 });
 </script>
+

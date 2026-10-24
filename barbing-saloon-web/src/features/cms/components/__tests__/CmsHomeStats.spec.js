@@ -53,3 +53,4 @@ describe('CmsHomeStats.vue', () => {
     expect(text).toContain('Customer Portal');
   });
 });
+

@@ -135,3 +135,4 @@ const metricsSummary = computed(() => {
   return `${years} yrs • ${barbers} barbers • ${clients} clients`;
 });
 </script>
+
