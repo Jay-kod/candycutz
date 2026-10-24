@@ -3,37 +3,38 @@
     <Transition name="modal">
       <div v-if="show" class="fixed inset-0 z-[100] flex flex-col bg-obsidian/95 backdrop-blur-md">
         <!-- Preview Header -->
-        <div class="flex items-center justify-between border-b border-white/10 bg-black/40 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-white/10 bg-black/40 px-4 xs:px-6 py-3 xs:py-4 gap-2">
           <div>
-            <h2 class="text-xl font-bold text-theme-text">Report Preview</h2>
-            <p class="text-sm text-ivory/60">CandyCutz {{ activeRangeLabel }} Analytics</p>
+            <h2 class="text-base xs:text-xl font-bold text-theme-text">Report Preview</h2>
+            <p class="text-xs xs:text-sm text-ivory/60 truncate max-w-[180px] xs:max-w-xs">CandyCutz {{ activeRangeLabel }} Analytics</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 xs:gap-3 shrink-0">
             <button 
               @click="$emit('close')"
-              class="rounded-full p-2 text-ivory/60 transition-colors hover:bg-white/5 hover:text-white"
+              class="h-11 w-11 flex items-center justify-center rounded-full text-ivory/60 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label="Close Preview"
             >
               <XMarkIcon class="h-6 w-6" />
             </button>
             <button 
               @click="downloadPdf"
               :disabled="isGeneratingPdf"
-              class="flex items-center gap-2 rounded-xl bg-admin px-6 py-2.5 font-bold text-obsidian shadow-[0_0_15px_rgba(255,103,0,0.3)] transition-all hover:bg-admin-light hover:shadow-[0_0_25px_rgba(255,103,0,0.5)] disabled:opacity-50"
+              class="flex items-center gap-1.5 xs:gap-2 rounded-xl bg-admin px-3.5 xs:px-6 py-2.5 min-h-[44px] text-xs xs:text-sm font-bold text-obsidian shadow-[0_0_15px_rgba(255,103,0,0.3)] transition-all hover:bg-admin-light hover:shadow-[0_0_25px_rgba(255,103,0,0.5)] disabled:opacity-50"
             >
               <template v-if="isGeneratingPdf">
-                <div class="h-5 w-5 animate-spin rounded-full border-2 border-obsidian/30 border-t-obsidian"></div>
+                <div class="h-4 w-4 xs:h-5 xs:w-5 animate-spin rounded-full border-2 border-obsidian/30 border-t-obsidian"></div>
                 Generating...
               </template>
               <template v-else>
-                <ArrowDownTrayIcon class="h-5 w-5" />
-                Download PDF
+                <ArrowDownTrayIcon class="h-4 w-4 xs:h-5 xs:w-5" />
+                <span class="hidden xs:inline">Download</span> PDF
               </template>
             </button>
           </div>
         </div>
 
         <!-- Preview Scroll Area -->
-        <div class="flex-1 overflow-y-auto p-8">
+        <div class="flex-1 overflow-y-auto overflow-x-auto p-2 xs:p-4 sm:p-8">
           <div class="mx-auto max-w-[794px] bg-white shadow-2xl">
             <!-- Actual PDF content to be captured -->
             <div ref="reportRef" class="report-document bg-white text-gray-900">
