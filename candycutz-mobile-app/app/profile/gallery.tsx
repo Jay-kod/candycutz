@@ -353,39 +353,23 @@ export default function GalleryScreen() {
         </View>
       </Modal>
 
-      <ActionDialog
+      <ConfirmDialog
         visible={Boolean(itemToDelete)}
         title="Delete Photo"
         message={`Are you sure you want to remove "${itemToDelete?.title || 'this cut'}" from your portfolio?`}
+        confirmLabel="Delete"
+        destructive
         variant="danger"
-        dismissLabel="Cancel"
-        onDismiss={() => setItemToDelete(null)}
-        actions={[
-          {
-            label: 'Delete',
-            destructive: true,
-            onPress: async () => {
-              if (!itemToDelete) return;
-              try {
-                await galleryApi.delete(itemToDelete.id);
-                setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-                useToastStore.getState().show({
-                  variant: 'success',
-                  title: 'Photo Deleted',
-                  message: 'Cut photo removed from portfolio.',
-                });
-              } catch {
-                useToastStore.getState().show({
-                  variant: 'error',
-                  title: 'Error',
-                  message: 'Failed to delete gallery item.',
-                });
-              } finally {
-                setItemToDelete(null);
-              }
-            },
-          },
-        ]}
+        resolutionType="deleted"
+        resolutionTitle="Photo Deleted"
+        resolutionMessage="Cut photo removed from your portfolio."
+        onCancel={() => setItemToDelete(null)}
+        onComplete={() => setItemToDelete(null)}
+        onConfirm={async () => {
+          if (!itemToDelete) return;
+          await galleryApi.delete(itemToDelete.id);
+          setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+        }}
       />
     </SafeAreaView>
   );
