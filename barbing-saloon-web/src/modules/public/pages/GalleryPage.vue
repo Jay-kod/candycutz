@@ -70,8 +70,8 @@
           </div>
 
           <!-- Hover Details Overlay -->
-          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-white translate-y-6 transition-transform duration-500 group-hover:translate-y-0">
-            <div class="flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-6 text-white translate-y-0 sm:translate-y-6 transition-transform duration-500 sm:group-hover:translate-y-0">
+            <div class="flex items-center justify-between opacity-100 sm:opacity-0 transition-opacity duration-500 sm:group-hover:opacity-100 delay-100">
               <span class="text-[10px] uppercase tracking-[0.25em] text-gold font-bold">
                 {{ formatCategory(item.category) }}
               </span>
@@ -83,17 +83,17 @@
               </span>
             </div>
 
-            <h2 class="mt-2 font-display text-2xl font-bold drop-shadow-md">
+            <h2 class="mt-2 font-display text-xl sm:text-2xl font-bold drop-shadow-md">
               {{ item.title }}
             </h2>
 
-            <p v-if="item.description" class="mt-2 text-sm text-white/80 line-clamp-2 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">
+            <p v-if="item.description" class="mt-2 text-xs sm:text-sm text-white/80 line-clamp-2 opacity-100 sm:opacity-0 transition-opacity duration-500 sm:group-hover:opacity-100 delay-150">
               {{ item.description }}
             </p>
 
             <!-- Expand Icon Button -->
             <button
-              class="absolute right-6 bottom-6 flex h-10 w-10 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-gold-light"
+              class="absolute right-4 bottom-4 xs:right-6 xs:bottom-6 flex h-11 w-11 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg opacity-100 sm:opacity-0 transform translate-y-0 sm:translate-y-4 transition-all duration-500 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-gold-light"
               aria-label="View larger"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -134,7 +134,7 @@
       <!-- Close Button -->
       <button
         @click="closeLightbox"
-        class="absolute top-6 right-6 z-20 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
         aria-label="Close lightbox"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -145,7 +145,7 @@
       <!-- Previous Button -->
       <button
         @click.stop="prevImage"
-        class="absolute left-4 sm:left-8 z-20 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute left-2 sm:left-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
         :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }"
         :disabled="currentIdx === 0"
         aria-label="Previous image"
