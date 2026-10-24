@@ -204,11 +204,11 @@ const cards = [
   position: relative;
   isolation: isolate;
   display: flex;
-  min-height: 420px;
+  min-height: 480px;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 3rem 1.5rem;
+  padding: clamp(4.5rem, 8vw, 6.5rem) 1.5rem;
   background-color: #070708;
   color: #fafafa;
 }
