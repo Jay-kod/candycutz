@@ -20,7 +20,7 @@
         </span>
       </h1>
 
-      <p class="barber-cta__subtitle">{{ subtitle }}</p>
+      <p class="barber-cta__subtitle text-center">{{ subtitle }}</p>
       <div class="barber-cta__actions">
         <RouterLink :to="secondaryLink" class="barber-cta__button barber-cta__button--secondary">
           <PhoneIcon class="h-4 w-4" aria-hidden="true" />
