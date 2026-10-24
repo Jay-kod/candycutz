@@ -28,27 +28,11 @@
       Approved customer testimonials will appear here.
     </p>
 
-    <div v-else class="marquee-wrapper relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
-      <!-- Gradient Edge Fade Masks -->
-      <div
-        class="pointer-events-none absolute left-0 top-0 bottom-0 z-20 w-16 sm:w-28 md:w-36 bg-gradient-to-r from-obsidian via-obsidian/80 to-transparent"
-        aria-hidden="true"
-      ></div>
-      <div
-        class="pointer-events-none absolute right-0 top-0 bottom-0 z-20 w-16 sm:w-28 md:w-36 bg-gradient-to-l from-obsidian via-obsidian/80 to-transparent"
-        aria-hidden="true"
-      ></div>
-
-      <!-- Marquee Moving Track (Pause on Hover) -->
-      <div
-        class="marquee-track flex w-max items-stretch group"
-        :class="direction === 'right' ? 'marquee-track-right' : 'marquee-track-left'"
-        :style="{ animationDuration: `${speed}s` }"
-      >
-        <!-- Primary Track (Semantic Articles) -->
+    <div v-else class="relative w-full overflow-x-auto border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
+      <div class="flex w-max items-stretch">
         <article
           v-for="(testimonial, idx) in visibleTestimonials"
-          :key="`primary-${testimonial.id || idx}`"
+          :key="testimonial.id || idx"
           class="group/card flex w-[320px] sm:w-[380px] md:w-[420px] shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 sm:p-7 md:p-8 transition-colors duration-200 hover:bg-white/[0.035]"
         >
           <!-- Card Header: Quote Icon + Source Pill -->
@@ -95,58 +79,6 @@
             </div>
           </div>
         </article>
-
-        <!-- Duplicate Track for Seamless Infinite Drift (Aria-hidden for accessibility) -->
-        <div
-          v-for="(testimonial, idx) in visibleTestimonials"
-          :key="`duplicate-${testimonial.id || idx}`"
-          aria-hidden="true"
-          class="group/card flex w-[320px] sm:w-[380px] md:w-[420px] shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 sm:p-7 md:p-8 transition-colors duration-200 hover:bg-white/[0.035]"
-        >
-          <!-- Card Header: Quote Icon + Source Pill -->
-          <div class="flex items-center justify-between gap-4">
-            <div class="text-zinc-500 transition-colors group-hover/card:text-gold/80">
-              <svg class="size-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-              </svg>
-            </div>
-            <span class="inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
-              {{ getSource(testimonial) }}
-            </span>
-          </div>
-
-          <!-- Review Text -->
-          <p class="my-6 text-sm sm:text-base leading-relaxed text-zinc-100 font-normal">
-            "{{ testimonial.review || testimonial.comment }}"
-          </p>
-
-          <!-- Bottom: Author Avatar, Name & Role -->
-          <div class="flex items-center gap-3 pt-2 border-t border-white/5">
-            <img
-              v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
-              :src="getStorageUrl(testimonial.client_avatar)"
-              :alt="`${testimonial.client_name} avatar`"
-              class="size-10 sm:size-11 rounded-full object-cover border border-zinc-700/60 shrink-0"
-              loading="lazy"
-              @error="markAvatarFailed(testimonial.id)"
-            />
-            <div
-              v-else
-              class="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-xs sm:text-sm font-bold text-gold"
-              aria-hidden="true"
-            >
-              {{ getInitials(testimonial.client_name) }}
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-sm sm:text-base font-semibold text-white tracking-tight">
-                {{ testimonial.client_name || 'CandyCutz client' }}
-              </p>
-              <p class="truncate text-xs text-zinc-400 mt-0.5">
-                {{ getSubtitle(testimonial) }}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -176,15 +108,6 @@ const props = defineProps({
   subtitle: {
     type: String,
     default: 'A look at the kind of premium experience customers can expect.',
-  },
-  speed: {
-    type: Number,
-    default: 45,
-  },
-  direction: {
-    type: String,
-    default: 'left',
-    validator: (v) => ['left', 'right'].includes(v),
   },
 });
 
@@ -220,44 +143,4 @@ const getSource = (item) => {
 </script>
 
 <style scoped>
-.marquee-wrapper {
-  mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  will-change: transform;
-}
-
-.marquee-track-left {
-  animation: marquee-scroll-left 45s linear infinite;
-}
-
-.marquee-track-right {
-  animation: marquee-scroll-right 45s linear infinite;
-}
-
-.marquee-wrapper:hover .marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes marquee-scroll-left {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes marquee-scroll-right {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0%);
-  }
-}
 </style>
