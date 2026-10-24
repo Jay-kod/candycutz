@@ -2,9 +2,9 @@
   <div class="flex min-h-[100dvh] w-full overflow-hidden flex-col items-center justify-center bg-theme-bg text-theme-text">
     <section class="relative flex min-h-[80vh] w-full max-w-4xl flex-col items-center justify-center overflow-hidden px-4 xs:px-6 py-12 sm:py-20 text-center">
       <!-- Decorative background elements -->
-      <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
-        <div class="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-gold/5 blur-3xl animate-pulse-slow" style="animation-delay: 1.5s"></div>
+      <div class="pointer-events-none absolute inset-0 overflow-hidden max-w-full">
+        <div class="absolute -left-10 -top-10 h-72 w-72 rounded-full bg-gold/5 blur-3xl animate-pulse-slow"></div>
+        <div class="absolute -bottom-10 right-0 h-72 w-72 rounded-full bg-gold/5 blur-3xl animate-pulse-slow" style="animation-delay: 1.5s"></div>
       </div>
 
       <!-- Animated Scissors SVG -->
@@ -35,7 +35,7 @@
 
       <!-- Error Code -->
       <h1
-        class="font-display text-[8rem] font-extrabold leading-none tracking-tight text-gold/20 md:text-[12rem]"
+        class="font-display text-[5rem] xs:text-[7rem] sm:text-[9rem] md:text-[12rem] font-extrabold leading-none tracking-tight text-gold/20 select-none"
         data-reveal
       >
         404
