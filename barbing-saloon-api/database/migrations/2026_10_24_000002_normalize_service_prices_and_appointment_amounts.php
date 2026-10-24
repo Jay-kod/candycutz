@@ -67,3 +67,4 @@ return new class extends Migration
         // Safe no-op for data normalization
     }
 };
+
