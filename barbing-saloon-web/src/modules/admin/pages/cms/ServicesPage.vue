@@ -1,106 +1,128 @@
 <template>
-  <div class="space-y-8 animate-fade-in pb-12">
-    <!-- Header Banner -->
-    <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 lg:p-12 shadow-2xl">
-      <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/10 blur-3xl"></div>
-      <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl"></div>
-      
-      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div>
-          <p class="text-xs uppercase tracking-[0.3em] text-admin/80 font-bold flex items-center gap-2">
-            <SparklesIcon class="w-4 h-4" /> Services Page Content
-          </p>
-          <h1 class="mt-2 font-display text-4xl lg:text-5xl text-theme-text drop-shadow-lg">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Services</span>
-          </h1>
-          <p class="mt-3 text-sm lg:text-base text-ivory/60 max-w-xl">Manage the header content and layout of your public Services page.</p>
+  <div class="space-y-6 animate-fade-in pb-16">
+    <!-- Header: Ambient luxury hero, live clock & primary actions -->
+    <ServicesHeader 
+      :saving="saving" 
+      :loading="loading" 
+      :is-dirty="isDirty" 
+      @save="saveContent" 
+      @refresh="reloadAll" 
+    />
+
+    <!-- Skeleton Preloader (Zero Layout Shift) -->
+    <ServicesSkeleton v-if="loading" />
+
+    <!-- Loaded Content Workspace -->
+    <div v-else class="space-y-6 animate-slide-up">
+      <!-- High-Density KPI / Section Stat Cards -->
+      <ServicesStats 
+        :content="content"
+        :services="catalogServices"
+        :categories="categories"
+      />
+
+      <!-- Section Navigation Tabs & Interactive Preview Switcher -->
+      <ServicesNavTabs v-model:active-tab="activeTab" />
+
+      <!-- Interactive Public Simulation Mode -->
+      <div v-if="activeTab === 'preview'" class="transition-all duration-300">
+        <ServicesLivePreview 
+          :content="content"
+          @exit="activeTab = 'all'"
+        />
+      </div>
+
+      <!-- Editor Forms Container -->
+      <div v-else class="space-y-6">
+        <!-- 1. Page Header Copy & Headline Form -->
+        <div v-show="activeTab === 'all' || activeTab === 'copy'">
+          <ServicesCopyForm :content="content" />
         </div>
-        <button 
-          @click="saveContent" 
-          :disabled="saving" 
-          class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light px-6 py-3 text-sm font-bold text-obsidian transition-all hover:shadow-[0_4px_25px_rgba(255,103,0,0.4)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-obsidian border-t-transparent"></span>
-          <CheckIcon v-else class="h-5 w-5" />
-          {{ saving ? 'Saving...' : 'Save Changes' }}
-        </button>
+
+        <!-- 2. Catalog Integration Bridge -->
+        <div v-show="activeTab === 'all' || activeTab === 'catalog'">
+          <ServicesCatalogInfo 
+            :services="catalogServices"
+            :categories="categories"
+          />
+        </div>
+
+        <!-- Bottom Action Bar -->
+        <div class="rounded-2xl border border-white/[0.08] bg-[#12161C] p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div class="flex items-center gap-2.5 text-xs text-white/50">
+            <span class="h-2 w-2 rounded-full" :class="isDirty ? 'bg-amber-400' : 'bg-emerald-400'"></span>
+            <span>{{ isDirty ? 'Unsaved modifications pending' : 'All services content in sync with production' }}</span>
+            <span v-if="lastSaved" class="text-white/30">• Last synced {{ lastSaved }}</span>
+          </div>
+
+          <button 
+            @click="saveContent" 
+            :disabled="saving" 
+            class="flex items-center justify-center min-h-[42px] w-full sm:w-auto gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light px-6 py-2.5 text-xs font-bold text-obsidian shadow-[0_4px_15px_rgba(255,103,0,0.25)] hover:shadow-[0_6px_20px_rgba(255,103,0,0.4)] active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-obsidian border-t-transparent"></span>
+            <CheckIcon v-else class="h-4 w-4" />
+            <span>{{ saving ? 'Saving Changes...' : 'Save All Changes' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Content Editor -->
-    <div class="space-y-6">
-      <!-- Page Header -->
-      <div class="rounded-2xl border border-admin/10 bg-black/30 backdrop-blur-md overflow-hidden shadow-xl">
-        <div class="border-b border-white/5 bg-gradient-to-r from-admin/10 to-transparent px-8 py-6">
-          <h2 class="font-display text-xl text-theme-text">Page Header</h2>
-          <p class="mt-1 text-xs text-ivory/40">The title and subtitle shown at the top of the Services page.</p>
-        </div>
-        <div class="p-8 space-y-6">
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Title</label>
-            <input v-model="content.services_title" type="text" placeholder="Our Premium Services" 
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-ivory/50 font-bold mb-2">Page Subtitle</label>
-            <textarea v-model="content.services_subtitle" rows="3" placeholder="Explore our full range of grooming services..."
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-theme-text placeholder-ivory/30 focus:border-admin/50 focus:ring-2 focus:ring-admin/20 focus:outline-none transition-all resize-none"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Info Banner -->
-      <div class="rounded-2xl border border-white/5 bg-black/20 p-8 flex items-center gap-4">
-        <InformationCircleIcon class="w-6 h-6 text-admin/60 shrink-0" />
-        <p class="text-sm text-ivory/50">Individual services, their pricing, and images are managed from the <RouterLink to="/admin/services" class="text-admin hover:text-admin-light underline transition-colors">Services Management</RouterLink> page.</p>
-      </div>
-    </div>
+    <!-- Floating Sticky Bar on Unsaved Changes -->
+    <ServicesStickyBar :is-dirty="isDirty" :saving="saving" @save="saveContent" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useToast } from '../../../../core/composables/useToast';
-import { adminApi } from '@/shared/api/old_adminApi';
-import { SparklesIcon, CheckIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import { onMounted } from 'vue';
+import { CheckIcon } from '@heroicons/vue/24/outline';
+import { useServicesCms } from './composables/useServicesCms';
+import ServicesHeader from './components/services/ServicesHeader.vue';
+import ServicesStats from './components/services/ServicesStats.vue';
+import ServicesSkeleton from './components/services/ServicesSkeleton.vue';
+import ServicesNavTabs from './components/services/ServicesNavTabs.vue';
+import ServicesCopyForm from './components/services/ServicesCopyForm.vue';
+import ServicesCatalogInfo from './components/services/ServicesCatalogInfo.vue';
+import ServicesLivePreview from './components/services/ServicesLivePreview.vue';
+import ServicesStickyBar from './components/services/ServicesStickyBar.vue';
 
-const toast = useToast();
-const saving = ref(false);
+const {
+  content,
+  saving,
+  loading,
+  lastSaved,
+  isDirty,
+  activeTab,
+  catalogServices,
+  categories,
+  fetchContent,
+  fetchCatalog,
+  saveContent
+} = useServicesCms();
 
-const content = ref({
-  services_title: 'Our Premium Services',
-  services_subtitle: 'Explore our full range of grooming services designed to keep you looking sharp and feeling confident.'
-});
-
-const fetchContent = async () => {
-  try {
-    const response = await adminApi.settings();
-    const data = response.data.data;
-    if (data) {
-      if (data.services_title) content.value.services_title = data.services_title;
-      if (data.services_subtitle) content.value.services_subtitle = data.services_subtitle;
-    }
-  } catch (error) {
-    console.error('Failed to load services content:', error);
-  }
-};
-
-const saveContent = async () => {
-  saving.value = true;
-  try {
-    const formData = new FormData();
-    formData.append('settings[services_title]', content.value.services_title);
-    formData.append('settings[services_subtitle]', content.value.services_subtitle);
-    await adminApi.updateSettings(formData);
-    toast.success('Services page content saved!');
-  } catch (error) {
-    toast.error('Failed to save changes.');
-  } finally {
-    saving.value = false;
-  }
+const reloadAll = () => {
+  fetchContent();
+  fetchCatalog();
 };
 
 onMounted(() => {
-  fetchContent();
+  reloadAll();
 });
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
