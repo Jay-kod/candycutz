@@ -1,9 +1,9 @@
 <template>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4">
     <article
       v-for="(card, idx) in cards"
       :key="card.label || idx"
-      class="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 transition-all duration-300 hover:border-admin/40 hover:bg-[#0E141A]"
+      class="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-3.5 xs:p-4 sm:p-5 transition-all duration-300 hover:border-admin/40 hover:bg-[#0E141A]"
     >
       <!-- Technical Corner Ticks with CandyCutz Orange Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -21,7 +21,7 @@
 
         <!-- Middle: Dynamic Main Value -->
         <div>
-          <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-xl xs:text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
             {{ card.value }}
           </div>
         </div>
