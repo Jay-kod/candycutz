@@ -33,6 +33,7 @@ export interface ConfirmDialogProps {
   resolutionType?: ConfirmResolutionType;
   resolutionTitle?: string;
   resolutionMessage?: string;
+  resolutionBadgeText?: string;
   autoDismissDelay?: number;
   onCancel: () => void;
   onConfirm: () => void | Promise<void>;
@@ -50,6 +51,7 @@ export function ConfirmDialog({
   resolutionType,
   resolutionTitle,
   resolutionMessage,
+  resolutionBadgeText,
   autoDismissDelay = 1300,
   onCancel,
   onConfirm,
@@ -84,6 +86,7 @@ export function ConfirmDialog({
     effectiveResolution,
     resolutionTitle,
     resolutionMessage,
+    resolutionBadgeText,
   });
 
   if (visible && step === 'prompt') {
@@ -94,10 +97,15 @@ export function ConfirmDialog({
       effectiveResolution,
       resolutionTitle,
       resolutionMessage,
+      resolutionBadgeText,
     };
   }
 
   const dismissWithAnimation = React.useCallback(() => {
+    if (dismissTimerRef.current) {
+      clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+    }
     Animated.parallel([
       Animated.timing(backdropAnim, {
         toValue: 0,
@@ -117,8 +125,11 @@ export function ConfirmDialog({
     ]).start(() => {
       setStep('prompt');
       setIsProcessing(false);
-      onCancel();
-      onComplete?.();
+      if (onComplete) {
+        onComplete();
+      } else {
+        onCancel();
+      }
     });
   }, [backdropAnim, cardScaleAnim, cardOpacityAnim, onCancel, onComplete]);
 

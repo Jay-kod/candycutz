@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { galleryApi } from '../../src/api/client';
 import { GalleryItem } from '../../src/api/types';
+import { Card } from '../../src/components/common/Card';
 import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 import { useAppTheme } from '../../src/hooks/useAppTheme';
