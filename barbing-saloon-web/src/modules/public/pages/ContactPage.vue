@@ -66,8 +66,8 @@
             </p>
 
             <!-- 9-Disc Honeycomb Constellation (Exact Reference Spacing: D=70px, ΔX=132px, Air Gap=62px) -->
-            <div class="relative mt-8 sm:mt-10 mb-4 flex items-center justify-center overflow-hidden w-full max-w-full">
-              <div class="relative mx-auto h-[130px] min-[400px]:h-[150px] sm:h-[160px] w-full max-w-[280px] xs:max-w-[340px] sm:max-w-[470px] flex items-center justify-center overflow-hidden">
+            <div class="relative mt-8 sm:mt-10 mb-4 flex items-center justify-center overflow-hidden sm:overflow-visible w-full max-w-full">
+              <div class="relative mx-auto h-[130px] min-[400px]:h-[150px] sm:h-[160px] w-full max-w-[280px] xs:max-w-[340px] sm:max-w-[470px] flex items-center justify-center overflow-hidden sm:overflow-visible">
                 <div class="relative h-[160px] w-[470px] shrink-0 scale-[0.6] xs:scale-[0.72] sm:scale-100 origin-center transition-transform">
                   <template v-for="disc in allConstellationDiscs" :key="disc.id">
                   <!-- Empty / Future Addition Slot Disc -->
