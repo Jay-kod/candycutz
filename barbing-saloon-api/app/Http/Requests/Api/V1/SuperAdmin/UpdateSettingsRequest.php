@@ -28,6 +28,8 @@ class UpdateSettingsRequest extends FormRequest
             'settings.brand_tagline' => ['sometimes', 'nullable', 'string', 'max:300'],
             'settings.site_description' => ['sometimes', 'nullable', 'string', 'max:300'],
             'hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'page_hero_page' => ['nullable', 'required_with:page_hero_image', 'in:home,about,services,gallery,contact,privacy,terms,legal,security,cookies,account_deletion'],
+            'page_hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
             'about_teaser_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
             'about_shop_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
             'splash_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
