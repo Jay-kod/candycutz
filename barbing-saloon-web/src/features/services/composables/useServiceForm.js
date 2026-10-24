@@ -74,22 +74,14 @@ export function useServiceForm() {
   async function loadData() {
     loadingData.value = true;
     try {
-      try {
-        const catRes = await client.get('/service-categories');
-        serviceCategories.value = catRes.data?.data || catRes.data || [];
-      } catch (e) {
-        try {
-          const catRes = await client.get(`/v1/${portal.value}/service-categories`);
-          serviceCategories.value = catRes.data?.data || [];
-        } catch (err) {
-          serviceCategories.value = [];
-        }
-      }
+      const [categoryResponse, serviceResponse] = await Promise.all([
+        client.get('/service-categories'),
+        isEditing.value ? client.get(`/services/${serviceId.value}`) : Promise.resolve(null),
+      ]);
+      serviceCategories.value = categoryResponse.data?.data || categoryResponse.data || [];
 
       if (isEditing.value) {
-        const res = await client.get(`/v1/${portal.value}/services`);
-        const allServices = res.data?.data || res.data || [];
-        const service = allServices.find(s => String(s.id) === String(serviceId.value));
+        const service = serviceResponse?.data?.data;
 
         if (service) {
           form.value = {
@@ -110,7 +102,8 @@ export function useServiceForm() {
         }
       }
     } catch (error) {
-      toast.error('Failed to load data');
+      console.error('Failed to load service form data', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to load service data');
     } finally {
       loadingData.value = false;
     }
