@@ -3,7 +3,7 @@
     <header class="public-header">
       <div class="public-nav-shell" :class="{ 'public-nav-shell--scrolled': y > 20 || route.path !== '/' }">
         <RouterLink to="/" class="public-brand" :aria-label="`${brandName} home`">
-          <img src="/images/logo-icon.png" alt="" class="public-brand__mark" />
+          <img :src="logoUrl" alt="" class="public-brand__mark" />
           <BrandWordmark class="public-brand__name" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </RouterLink>
 
