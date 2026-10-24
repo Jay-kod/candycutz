@@ -12,6 +12,8 @@ use App\Models\Gallery;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class GetDashboardStats
 {
