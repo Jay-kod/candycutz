@@ -83,17 +83,17 @@
           <div class="flex h-full flex-col justify-between px-5 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-gold/70">CandyCutz Service</p>
-                <span class="mt-2 inline-flex rounded-full border border-gold/40 bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold backdrop-blur">
+                <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-gold/70">CandyCutz Service</p>
+                <span class="mt-2 inline-flex rounded-full border border-gold/40 bg-black/45 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-gold backdrop-blur">
                   {{ service.category?.name || service.category || 'Barbering' }}
                 </span>
               </div>
               <div class="flex flex-col items-end gap-2">
-                <span v-if="service.is_home_service_eligible" class="rounded-full border border-emerald-300/40 bg-emerald-950/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-200 backdrop-blur">
+                <span v-if="service.is_home_service_eligible" class="rounded-full border border-emerald-300/40 bg-emerald-950/60 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-200 backdrop-blur">
                   Home service
                 </span>
-                <span class="flex items-center gap-1.5 rounded-full border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5 text-gold">
+                <span class="flex items-center gap-1 rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3 text-gold">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {{ service.duration_minutes || 30 }} min
@@ -102,7 +102,7 @@
             </div>
 
             <div class="rounded-2xl border border-gold/20 bg-[#160e08]/60 p-3 shadow-2xl backdrop-blur-sm sm:p-4">
-              <h2 class="font-display text-2xl font-bold leading-tight text-white group-hover:text-gold transition-colors">
+              <h2 class="font-display text-xl font-bold leading-tight text-white group-hover:text-gold transition-colors">
                 {{ service.name }}
               </h2>
               <p class="mt-1 text-xs leading-relaxed text-white/70 line-clamp-2">
@@ -110,15 +110,15 @@
               </p>
               <div class="mt-3 flex items-end justify-between gap-3 border-t border-gold/20 pt-2">
                 <div>
-                  <span class="block text-[9px] font-bold uppercase tracking-[0.2em] text-gold/60">Price</span>
-                  <span class="font-display text-2xl font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>
+                  <span class="block text-[8px] font-bold uppercase tracking-[0.18em] text-gold/60">Price</span>
+                  <span class="font-display text-xl font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>
                 </div>
                 <RouterLink
                   :to="`/customer/dashboard/book/${service.id}`"
-                  class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 min-h-[44px] text-xs font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-gold/30"
+                  class="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-gold to-gold-light px-3 py-2 text-[11px] font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-gold/30"
                 >
                   Book Cut
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>
                 </RouterLink>
