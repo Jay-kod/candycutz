@@ -10,17 +10,12 @@
     <div v-if="!compact" class="barber-cta__dot-field" aria-hidden="true"></div>
 
     <div class="barber-cta__content">
-      <h1 class="barber-cta__title">
-        <span
-          v-for="(line, index) in titleLines"
-          :key="`${line}-${index}`"
-          :class="{ 'barber-cta__title-outline': index === titleLines.length - 1 && titleLines.length > 1 }"
-        >
-          {{ line }}
-        </span>
+      <h1 class="barber-cta__title" :style="{ color: resolvedTitleColor }">
+        {{ title.replace(/\s*\n\s*/g, ' ').trim() }}
       </h1>
 
       <p class="barber-cta__subtitle text-center">{{ subtitle }}</p>
+      <p v-if="caption" class="barber-cta__caption">{{ caption }}</p>
       <div class="barber-cta__actions">
         <RouterLink :to="secondaryLink" class="barber-cta__button barber-cta__button--secondary">
           <PhoneIcon class="h-4 w-4" aria-hidden="true" />
@@ -43,6 +38,8 @@ import { ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline';
 const props = defineProps({
   title: { type: String, default: 'Precision Cuts.\nMade for You.' },
   subtitle: { type: String, default: 'Expert barbers. Fresh fades. A better kind of barbershop experience.' },
+  caption: { type: String, default: '' },
+  titleColor: { type: String, default: '#ffb84d' },
   primaryText: { type: String, default: 'Book your cut' },
   secondaryText: { type: String, default: 'Contact the shop' },
   secondaryLink: { type: String, default: '/contact' },
@@ -52,7 +49,9 @@ const props = defineProps({
   compact: { type: Boolean, default: false }
 });
 
-const titleLines = computed(() => props.title.split('\n').map(line => line.trim()).filter(Boolean));
+const resolvedTitleColor = computed(() => (
+  /^#[\da-f]{6}$/i.test(props.titleColor) ? props.titleColor : '#ffb84d'
+));
 
 const resolvedPhotoOpacity = computed(() => {
   if (props.imageOpacity === null || props.imageOpacity === undefined || props.imageOpacity === '') {
@@ -157,8 +156,7 @@ const resolvedOverlayOpacity = computed(() => {
 }
 
 .barber-cta__title {
-  margin: 1.35rem 0 0;
-  color: #fafafa;
+  margin: 0;
   font-size: clamp(2.5rem, 6vw, 4.15rem);
   font-weight: 650;
   letter-spacing: -0.055em;
@@ -166,23 +164,23 @@ const resolvedOverlayOpacity = computed(() => {
   text-wrap: balance;
 }
 
-.barber-cta__title span {
-  display: block;
-}
-
-.barber-cta__title-outline {
-  color: transparent;
-  -webkit-text-stroke: 1px #ffb84d;
-  text-stroke: 1px #ffb84d;
-}
-
 .barber-cta__subtitle {
-  max-width: 34rem;
-  margin: 1.35rem auto 0;
-  color: #a5a5a5;
-  font-size: clamp(0.95rem, 2vw, 1.075rem);
+  max-width: 38rem;
+  margin: 1rem auto 0;
+  color: #e5e5e5;
+  font-size: clamp(0.9rem, 1.7vw, 1rem);
   letter-spacing: 0.025em;
-  line-height: 1.7;
+  line-height: 1.6;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.barber-cta__caption {
+  max-width: 34rem;
+  margin: 0.5rem auto 0;
+  color: #a5a5a5;
+  font-size: clamp(0.75rem, 1.4vw, 0.875rem);
+  line-height: 1.6;
   text-align: center;
   text-wrap: balance;
 }
@@ -255,13 +253,12 @@ const resolvedOverlayOpacity = computed(() => {
   }
 
   .barber-cta__title {
-    margin-top: 1.3rem;
     font-size: clamp(2.35rem, 10.5vw, 3.5rem);
   }
 
   .barber-cta__subtitle {
     max-width: 25rem;
-    margin-top: 1.1rem;
+    margin-top: 0.85rem;
     font-size: 0.95rem;
   }
 
