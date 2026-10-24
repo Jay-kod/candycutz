@@ -24,12 +24,6 @@
 
     <!-- Centered Content -->
     <div class="portal-cta__content !text-center" data-reveal>
-      <div v-if="eyebrow" class="mb-3.5">
-        <span class="inline-block px-3.5 py-1 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
-          {{ eyebrow }}
-        </span>
-      </div>
-
       <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm !text-center">
         {{ title }}
       </h2>
