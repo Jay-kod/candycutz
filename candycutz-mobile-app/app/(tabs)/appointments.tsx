@@ -341,15 +341,18 @@ export default function BarberAppointmentsScreen() {
         confirmLabel="Decline Booking"
         destructive
         variant="danger"
+        resolutionType="cancelled"
+        resolutionTitle="Booking Declined"
+        resolutionMessage="The slot has been released and customer notified."
         onCancel={() => setConfirmAction(null)}
-        onConfirm={() => {
+        onComplete={() => setConfirmAction(null)}
+        onConfirm={async () => {
           if (confirmAction) {
-            transitionMutation.mutate({
+            await transitionMutation.mutateAsync({
               id: confirmAction.appointment.id,
               status: 'cancelled',
             });
           }
-          setConfirmAction(null);
         }}
       />
     </SafeAreaView>

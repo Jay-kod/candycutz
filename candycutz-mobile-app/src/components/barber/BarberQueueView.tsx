@@ -906,15 +906,42 @@ export function BarberQueueView() {
             ? 'danger'
             : 'primary'
         }
+        resolutionType={
+          pendingApproval?.status === 'cancelled' || pendingApproval?.status === 'no_show'
+            ? 'cancelled'
+            : 'confirmed'
+        }
+        resolutionTitle={
+          pendingApproval?.status === 'no_show'
+            ? 'Marked as No-Show'
+            : pendingApproval?.status === 'completed'
+            ? 'Service Completed!'
+            : pendingApproval?.status === 'confirmed'
+            ? 'Booking Accepted!'
+            : pendingApproval?.status === 'cancelled'
+            ? 'Booking Declined'
+            : 'Service Started!'
+        }
+        resolutionMessage={
+          pendingApproval?.status === 'no_show'
+            ? 'The slot has been freed and schedule updated.'
+            : pendingApproval?.status === 'completed'
+            ? 'Chair status has returned to ready.'
+            : pendingApproval?.status === 'confirmed'
+            ? 'The client has been notified to prepare.'
+            : pendingApproval?.status === 'cancelled'
+            ? 'The booking request has been declined.'
+            : 'The timer has started for this haircut.'
+        }
         onCancel={() => setPendingApproval(null)}
-        onConfirm={() => {
+        onComplete={() => setPendingApproval(null)}
+        onConfirm={async () => {
           if (pendingApproval) {
-            transitionMutation.mutate({
+            await transitionMutation.mutateAsync({
               id: pendingApproval.appointment.id,
               status: pendingApproval.status,
             });
           }
-          setPendingApproval(null);
         }}
       />
     </SafeAreaView>
