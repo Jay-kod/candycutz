@@ -104,26 +104,40 @@ class TestimonialApiController
         return ApiResponse::success(new TestimonialResource($testimonial->refresh()), 'Testimonial updated');
     }
 
-    public function approve(int $id, ApproveTestimonial $action): JsonResponse
+    public function approve(Request $request, int $id, ApproveTestimonial $action): JsonResponse
     {
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
+        $validated = $request->validate([
+            'is_approved' => 'required|boolean',
+        ]);
 
-        $result = $action->execute($testimonial);
+        $result = $action->execute($testimonial, $validated['is_approved']);
         CatalogueCache::bust('testimonials');
 
-        return ApiResponse::success(new TestimonialResource($result), 'Testimonial approved');
+        $message = $result->is_approved ? 'Testimonial approved' : 'Testimonial unapproved';
+
+        return ApiResponse::success(new TestimonialResource($result), $message);
     }
 
-    public function feature(int $id, FeatureTestimonial $action): JsonResponse
+    public function feature(Request $request, int $id, FeatureTestimonial $action): JsonResponse
     {
         $testimonial = Testimonial::findOrFail($id);
         $this->authorize('update', $testimonial);
+        $validated = $request->validate([
+            'is_featured' => 'required|boolean',
+        ]);
 
-        $result = $action->execute($testimonial);
+        if ($validated['is_featured'] && ! $testimonial->is_approved) {
+            return ApiResponse::error('Only approved testimonials can be displayed on the homepage.', status: 422);
+        }
+
+        $result = $action->execute($testimonial, $validated['is_featured']);
         CatalogueCache::bust('testimonials');
 
-        return ApiResponse::success(new TestimonialResource($result), 'Testimonial feature toggled');
+        $message = $result->is_featured ? 'Testimonial selected for the homepage' : 'Testimonial hidden from the homepage';
+
+        return ApiResponse::success(new TestimonialResource($result), $message);
     }
 
     public function destroy(int $id, DeleteTestimonial $action): JsonResponse
