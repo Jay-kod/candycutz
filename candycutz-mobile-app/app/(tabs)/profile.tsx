@@ -456,7 +456,13 @@ export default function ProfileScreen() {
         message="You will need to sign in again to access your bookings and profile."
         confirmLabel="Log out"
         destructive
+        variant="danger"
+        resolutionType="custom"
+        resolutionTitle="Logged Out"
+        resolutionMessage="You have been safely signed out of CandyCutz."
+        resolutionBadgeText="LOGGED OUT"
         onCancel={() => setLogoutDialogVisible(false)}
+        onComplete={() => setLogoutDialogVisible(false)}
         onConfirm={confirmLogout}
       />
 

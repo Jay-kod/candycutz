@@ -11,9 +11,11 @@ const isProcessing = ref(false);
 const resolutionType = ref('deleted'); // 'deleted' | 'saved' | 'cancelled' | 'confirmed'
 const resolutionTitle = ref('');
 const resolutionMessage = ref('');
+const resolutionBadgeText = ref('');
 const autoDismissDelay = ref(1300);
 const resolvePromise = ref(null);
 const actionCallback = ref(null);
+let dismissTimer = null;
 
 export function useConfirm() {
   const confirm = (optionsOrTitle, messageText) => {
@@ -30,6 +32,7 @@ export function useConfirm() {
       resolutionType.value = 'deleted';
       resolutionTitle.value = '';
       resolutionMessage.value = '';
+      resolutionBadgeText.value = '';
       autoDismissDelay.value = 1300;
     } else {
       const options = optionsOrTitle || {};
@@ -43,6 +46,7 @@ export function useConfirm() {
         (variant.value === 'danger' || options.destructive ? 'deleted' : 'saved');
       resolutionTitle.value = options.resolutionTitle || '';
       resolutionMessage.value = options.resolutionMessage || '';
+      resolutionBadgeText.value = options.resolutionBadgeText || '';
       autoDismissDelay.value = options.autoDismissDelay || 1300;
       if (typeof options.onConfirm === 'function') {
         actionCallback.value = options.onConfirm;
@@ -125,6 +129,7 @@ export function useConfirm() {
     resolutionType,
     resolutionTitle,
     resolutionMessage,
+    resolutionBadgeText,
     autoDismissDelay,
     confirm,
     agree,
