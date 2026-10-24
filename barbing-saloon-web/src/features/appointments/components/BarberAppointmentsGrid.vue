@@ -107,22 +107,23 @@
           <button
             v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'"
             @click="$emit('viewReceipt', appointment)"
-            class="flex-1 inline-flex justify-center items-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
+            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
           >
             Receipt
           </button>
           <button
             v-else
             @click="$emit('approve', appointment.id)"
-            class="flex-1 inline-flex justify-center items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
           >
             <CheckIcon class="h-4 w-4" />
             Approve
           </button>
           <button
             @click="$emit('cancel', appointment.id)"
-            class="inline-flex justify-center items-center px-4 rounded-xl border border-red-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
+            class="inline-flex justify-center items-center min-h-[44px] min-w-[44px] px-4 rounded-xl border border-red-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
             title="Cancel Appointment"
+            aria-label="Cancel Appointment"
           >
             <XMarkIcon class="h-4 w-4" />
           </button>
@@ -131,22 +132,23 @@
         <template v-else-if="appointment.status === 'confirmed'">
           <button
             @click="$emit('promptComplete', appointment.id)"
-            class="flex-1 inline-flex justify-center items-center gap-1.5 rounded-xl bg-gold py-2.5 text-xs font-bold uppercase tracking-widest text-obsidian hover:bg-gold-light hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all shadow-sm"
+            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-gold py-2.5 text-xs font-bold uppercase tracking-widest text-obsidian hover:bg-gold-light hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all shadow-sm"
           >
             <CheckIcon class="h-4 w-4" />
             Complete
           </button>
           <button
             @click="$emit('markNoShow', appointment.id)"
-            class="inline-flex justify-center items-center px-4 rounded-xl border border-amber-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-amber-500 hover:bg-amber-500/10 hover:border-amber-500/50 transition-all"
+            class="inline-flex justify-center items-center min-h-[44px] px-3 xs:px-4 rounded-xl border border-amber-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-amber-500 hover:bg-amber-500/10 hover:border-amber-500/50 transition-all"
             title="Mark as No Show"
           >
             No Show
           </button>
           <button
             @click="$emit('cancel', appointment.id)"
-            class="inline-flex justify-center items-center px-4 rounded-xl border border-red-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
+            class="inline-flex justify-center items-center min-h-[44px] min-w-[44px] px-4 rounded-xl border border-red-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
             title="Cancel Appointment"
+            aria-label="Cancel Appointment"
           >
             <XMarkIcon class="h-4 w-4" />
           </button>
