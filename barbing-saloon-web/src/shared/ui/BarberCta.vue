@@ -82,7 +82,7 @@ const resolvedOverlayOpacity = computed(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 8.5rem 1.25rem 5rem;
+  padding: clamp(6.5rem, 14vh, 9.5rem) 1.25rem clamp(4rem, 8vh, 6rem);
   background:
     radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.075), transparent 58%),
     #090909;
@@ -120,7 +120,8 @@ const resolvedOverlayOpacity = computed(() => {
 }
 
 .barber-cta__content {
-  width: min(100%, 700px);
+  width: min(100%, 820px);
+  padding: 0 1rem;
   margin: 0 auto;
   text-align: center;
 }

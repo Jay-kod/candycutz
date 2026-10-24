@@ -24,15 +24,17 @@
 
     <!-- Centered Content -->
     <div class="portal-cta__content !text-center" data-reveal>
-      <p v-if="eyebrow" class="portal-cta__eyebrow !text-center">
-        {{ eyebrow }}
-      </p>
+      <div v-if="eyebrow" class="mb-3.5">
+        <span class="inline-block px-3.5 py-1 text-xs font-semibold tracking-widest uppercase text-gold bg-gold/10 border border-gold/20 rounded-full">
+          {{ eyebrow }}
+        </span>
+      </div>
 
-      <h2 class="portal-cta__title !text-center">
+      <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm !text-center">
         {{ title }}
       </h2>
 
-      <p class="portal-cta__description !text-center">
+      <p class="portal-cta__description !text-center text-sm sm:text-base text-theme-muted font-light leading-relaxed max-w-2xl mx-auto mt-4">
         {{ description }}
       </p>
 
