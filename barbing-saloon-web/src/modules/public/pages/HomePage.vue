@@ -58,7 +58,6 @@
 
     <!-- Customer Testimonials -->
     <section
-      v-if="testimonials.length"
       class="relative overflow-hidden border-y border-white/5 bg-obsidian py-16 text-theme-text md:py-20"
       aria-labelledby="home-testimonials-title"
     >
@@ -77,7 +76,7 @@
           </p>
         </header>
 
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div v-if="testimonials.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <article
             v-for="testimonial in testimonials"
             :key="testimonial.id"
@@ -123,6 +122,9 @@
             </div>
           </article>
         </div>
+        <p v-else-if="!testimonialsLoading" class="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-theme-muted">
+          Customer testimonials will appear here once reviews are approved.
+        </p>
       </div>
     </section>
 
@@ -183,6 +185,7 @@ const aboutSubtitle = ref('A Sharper Standard');
 const aboutText = ref("Welcome to CandyCutz, where precision meets style. We've been providing premium grooming services to those who appreciate a quality cut. Our shop combines traditional barbering techniques with modern trends in a relaxing, luxurious environment.");
 const aboutImage = ref(null);
 const testimonials = ref([]);
+const testimonialsLoading = ref(true);
 const failedTestimonialAvatars = ref(new Set());
 
 const portalTitle = ref('The CandyCutz Portal');
@@ -256,6 +259,8 @@ const fetchTestimonials = async () => {
     testimonials.value = items.filter((item) => item.review).slice(0, 3);
   } catch (error) {
     console.error('Failed to load homepage testimonials:', error);
+  } finally {
+    testimonialsLoading.value = false;
   }
 };
 
