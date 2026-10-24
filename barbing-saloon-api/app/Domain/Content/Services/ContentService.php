@@ -159,7 +159,7 @@ class ContentService
             'slug' => $post->slug,
             'excerpt' => $post->excerpt,
             'content' => $post->body,
-            'featured_image' => $post->featured_image,
+            'featured_image' => $post->featured_image ? (str_starts_with($post->featured_image, 'http') ? $post->featured_image : url('storage/'.ltrim(str_replace('storage/', '', $post->featured_image), '/'))) : null,
             'status' => $post->status,
             'is_published' => $post->status === 'published',
             'created_at' => $post->created_at,
