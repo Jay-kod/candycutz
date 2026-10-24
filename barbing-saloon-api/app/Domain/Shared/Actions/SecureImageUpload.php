@@ -32,6 +32,12 @@ class SecureImageUpload
                 $path = trim($directory, '/').'/'.$filename;
                 Storage::disk($disk)->put($path, (string) $encoded);
 
+                $publicStoragePath = public_path('storage/'.$path);
+                if (! file_exists($publicStoragePath)) {
+                    @mkdir(dirname($publicStoragePath), 0755, true);
+                    @file_put_contents($publicStoragePath, (string) $encoded);
+                }
+
                 return $path;
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
@@ -44,6 +50,12 @@ class SecureImageUpload
         $filename = Str::random(40).'.'.$extension;
         $path = trim($directory, '/').'/'.$filename;
         Storage::disk($disk)->putFileAs(trim($directory, '/'), $file, $filename);
+
+        $publicStoragePath = public_path('storage/'.$path);
+        if (! file_exists($publicStoragePath)) {
+            @mkdir(dirname($publicStoragePath), 0755, true);
+            @copy($file->getRealPath(), $publicStoragePath);
+        }
 
         return $path;
     }
