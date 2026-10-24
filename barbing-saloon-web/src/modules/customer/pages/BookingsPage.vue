@@ -8,13 +8,13 @@
         <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/80 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-obsidian/90 via-obsidian/60 to-transparent"></div>
         
-        <div class="absolute inset-0 flex items-center p-8 md:p-12">
+        <div class="absolute inset-0 flex items-center p-4 xs:p-6 sm:p-8 md:p-12">
           <div class="max-w-2xl">
             <p class="text-xs uppercase tracking-[0.4em] text-gold-light mb-4 font-bold">Your Appointments</p>
-            <h1 class="font-display text-5xl md:text-6xl font-bold text-white drop-shadow-lg">
+            <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
               Manage your <span class="text-gold italic">Bookings</span>
             </h1>
-            <p class="mt-4 text-lg text-white/70 max-w-xl font-light hidden sm:block">
+            <p class="mt-4 text-sm sm:text-lg text-white/70 max-w-xl font-light hidden xs:block">
               View your upcoming appointments, upload payment receipts, and check your grooming history.
             </p>
           </div>
@@ -23,10 +23,10 @@
 
       <!-- Main Layout -->
       <div class="space-y-8 max-w-5xl mx-auto">
-        <div class="rounded-3xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+        <div class="rounded-3xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl p-4 xs:p-6 md:p-8 shadow-2xl">
           <div class="flex items-center justify-between mb-8">
-            <h2 class="font-display text-2xl md:text-3xl text-theme-text">Booking <span class="text-gold">History</span></h2>
-            <button class="flex items-center gap-2 rounded-xl bg-theme-bg px-4 py-2 text-xs font-bold text-theme-muted hover:bg-gold/10 hover:text-gold hover:border-gold/30 transition-all border border-theme-border shadow-sm group" @click="loadBookings" title="Refresh Data">
+            <h2 class="font-display text-xl xs:text-2xl md:text-3xl text-theme-text">Booking <span class="text-gold">History</span></h2>
+            <button class="flex items-center justify-center min-h-[44px] gap-2 rounded-xl bg-theme-bg px-4 py-2 text-xs font-bold text-theme-muted hover:bg-gold/10 hover:text-gold hover:border-gold/30 transition-all border border-theme-border shadow-sm group" @click="loadBookings" title="Refresh Data">
               <ArrowPathIcon class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': loadingBookings }" />
               <span class="hidden sm:inline">Refresh</span>
             </button>
@@ -34,10 +34,10 @@
 
           <!-- Filters -->
           <div class="mb-6 flex flex-wrap gap-2 md:gap-3">
-            <button @click="currentFilter = 'all'" :class="currentFilter === 'all' ? 'bg-gold text-obsidian font-bold border-gold' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm transition-all border border-theme-border shadow-sm">Recent / All</button>
-            <button @click="currentFilter = 'pending'" :class="currentFilter === 'pending' ? 'bg-amber-500 text-obsidian font-bold border-amber-500' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm transition-all border border-theme-border shadow-sm">Pending</button>
-            <button @click="currentFilter = 'confirmed'" :class="currentFilter === 'confirmed' ? 'bg-emerald-400 text-obsidian font-bold border-emerald-400' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm transition-all border border-theme-border shadow-sm">Approved</button>
-            <button @click="currentFilter = 'cancelled'" :class="currentFilter === 'cancelled' ? 'bg-red-500 text-white font-bold border-red-500' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm transition-all border border-theme-border shadow-sm">Cancelled</button>
+            <button @click="currentFilter = 'all'" :class="currentFilter === 'all' ? 'bg-gold text-obsidian font-bold border-gold' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-theme-border shadow-sm">Recent / All</button>
+            <button @click="currentFilter = 'pending'" :class="currentFilter === 'pending' ? 'bg-amber-500 text-obsidian font-bold border-amber-500' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-theme-border shadow-sm">Pending</button>
+            <button @click="currentFilter = 'confirmed'" :class="currentFilter === 'confirmed' ? 'bg-emerald-400 text-obsidian font-bold border-emerald-400' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-theme-border shadow-sm">Approved</button>
+            <button @click="currentFilter = 'cancelled'" :class="currentFilter === 'cancelled' ? 'bg-red-500 text-white font-bold border-red-500' : 'bg-theme-bg text-theme-muted hover:bg-theme-surface'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-theme-border shadow-sm">Cancelled</button>
           </div>
           
           <div v-if="loadingBookings" class="py-20 flex justify-center">
