@@ -374,9 +374,14 @@ onMounted(() => {
 }
 
 .public-theme-toggle {
+  min-height: 38px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 0.3rem 0.6rem;
+  padding: 0.35rem 0.65rem;
   background: rgba(255, 255, 255, 0.04);
   color: rgba(250, 250, 248, 0.75);
   font-size: 0.72rem;
@@ -401,17 +406,20 @@ onMounted(() => {
 
 .public-nav-links {
   justify-content: center;
-  gap: clamp(0.8rem, 2.1vw, 1.5rem);
+  gap: clamp(0.6rem, 1.8vw, 1.5rem);
 }
 
 .public-nav-link,
 .public-login {
   position: relative;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
   color: rgba(250, 250, 248, 0.78);
-  font-size: 0.8rem;
+  font-size: 0.825rem;
   font-weight: 550;
   text-decoration: none;
-  padding: 0.35rem 0.45rem;
+  padding: 0.4rem 0.55rem;
   border-radius: 6px;
   transition: color 150ms ease, background-color 150ms ease;
 }
