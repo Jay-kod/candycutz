@@ -149,6 +149,8 @@
       </div>
     </footer>
   </div>
+</template>
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
@@ -282,7 +284,12 @@ const fetchSettings = async () => {
 };
 
 onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
   fetchSettings();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
 });
 </script>
 
