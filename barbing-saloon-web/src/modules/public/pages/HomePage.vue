@@ -56,79 +56,11 @@
       </div>
     </section>
 
-    <!-- Customer Testimonials -->
-    <section
-      class="relative overflow-hidden border-y border-white/5 bg-obsidian py-16 text-theme-text md:py-20"
-      aria-labelledby="home-testimonials-title"
-    >
-      <div
-        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(255,153,0,0.08),transparent_70%)]"
-        aria-hidden="true"
-      ></div>
-      <div class="relative mx-auto max-w-7xl px-4 md:px-6">
-        <header class="mb-8 max-w-2xl" data-reveal>
-          <p class="text-xs font-bold uppercase tracking-[0.25em] text-gold">Client stories</p>
-          <h2 id="home-testimonials-title" class="mt-3 font-display text-3xl font-bold tracking-tight text-ivory sm:text-4xl">
-            What our clients say
-          </h2>
-          <p class="mt-3 text-sm leading-relaxed text-theme-muted sm:text-base">
-            A look at the kind of premium experience customers can expect.
-          </p>
-        </header>
-
-        <div v-if="testimonials.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <article
-            v-for="testimonial in testimonials"
-            :key="testimonial.id"
-            class="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 shadow-lg transition duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-[0_18px_36px_-16px_rgba(255,153,0,0.2)] sm:p-6"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1" :aria-label="`${testimonial.rating} out of 5 stars`">
-                <Star
-                  v-for="star in 5"
-                  :key="star"
-                  class="size-4"
-                  :class="star <= Number(testimonial.rating) ? 'fill-gold text-gold' : 'text-white/20'"
-                  aria-hidden="true"
-                />
-              </div>
-              <Quote class="size-5 text-gold/60 transition-colors group-hover:text-gold" aria-hidden="true" />
-            </div>
-
-            <p class="mt-5 flex-1 whitespace-pre-line text-sm leading-7 text-ivory/85">
-              “{{ testimonial.review }}”
-            </p>
-
-            <div class="mt-6 flex items-center gap-3 border-t border-white/10 pt-4">
-              <img
-                v-if="testimonial.client_avatar && !failedTestimonialAvatars.has(testimonial.id)"
-                :src="getStorageUrl(testimonial.client_avatar)"
-                :alt="`${testimonial.client_name} avatar`"
-                class="size-10 rounded-full border border-gold/30 object-cover"
-                loading="lazy"
-                @error="markTestimonialAvatarFailed(testimonial.id)"
-              />
-              <div
-                v-else
-                class="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-sm font-bold text-gold"
-                aria-hidden="true"
-              >
-                {{ getTestimonialInitials(testimonial.client_name) }}
-              </div>
-              <div class="min-w-0">
-                <p class="truncate text-sm font-semibold text-ivory">{{ testimonial.client_name || 'CandyCutz client' }}</p>
-                <p class="mt-0.5 text-xs text-theme-muted">
-                  {{ isSampleTestimonial(testimonial) ? 'Demonstration sample — not a customer review' : 'CandyCutz client' }}
-                </p>
-              </div>
-            </div>
-          </article>
-        </div>
-        <p v-else-if="!testimonialsLoading" class="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-theme-muted">
-          Customer testimonials will appear here once reviews are approved.
-        </p>
-      </div>
-    </section>
+    <!-- Customer Testimonials (Horizontal Infinite Marquee) -->
+    <TestimonialsMarquee
+      :testimonials="testimonials"
+      :loading="testimonialsLoading"
+    />
 
     <!-- Customer Portal Teaser Section (Orbit Constellation Design) -->
     <div id="services">
@@ -149,7 +81,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Quote, Star } from 'lucide-vue-next';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { publicApi } from '@/shared/api/old_publicApi';
@@ -158,6 +89,7 @@ import BarberCta from '@/shared/ui/BarberCta.vue';
 import FeaturesSection from '@/components/FeaturesSection.vue';
 import PortalCtaSection from '@/components/PortalCtaSection.vue';
 import StatisticsSection from '@/components/StatisticsSection.vue';
+import TestimonialsMarquee from '@/components/TestimonialsMarquee.vue';
 
 const { init: initScrollReveal } = useScrollReveal();
 
@@ -188,12 +120,10 @@ const aboutText = ref("Welcome to CandyCutz, where precision meets style. We've 
 const aboutImage = ref(null);
 const testimonials = ref([]);
 const testimonialsLoading = ref(true);
-const failedTestimonialAvatars = ref(new Set());
 
 const portalTitle = ref('The CandyCutz Portal');
 const portalSubtitle = ref('Unlock the Full Experience');
 const portalText = ref('Create an account to browse our extensive list of services, check barber availability in real-time, view our exclusive gallery, and manage your appointments seamlessly from your own personalized dashboard.');
-
 
 const fetchSettings = async () => {
   try {
@@ -253,18 +183,20 @@ const fetchSettings = async () => {
 
 const fetchTestimonials = async () => {
   try {
-    const response = await publicApi.testimonials();
+    const response = await publicApi.testimonials({ featured: true });
     const items = response.data?.data;
     if (!Array.isArray(items)) {
       throw new TypeError('The testimonials response did not contain a list.');
     }
     testimonials.value = items
-      .filter((item) => item.review)
-      .slice(0, 10)
+      .filter((item) => item.review || item.comment)
+      .slice(0, 12)
       .map((item) => ({
         ...item,
         client_name: item.client_name || item.customer_name || 'CandyCutz client',
         client_avatar: item.client_avatar || item.avatar_url || null,
+        source: item.source || 'x.com',
+        role: item.service?.name ? `Client • ${item.service.name}` : (item.role || 'Verified Client'),
       }));
   } catch (error) {
     console.error('Failed to load homepage testimonials:', error);
@@ -272,17 +204,6 @@ const fetchTestimonials = async () => {
     testimonialsLoading.value = false;
   }
 };
-
-const markTestimonialAvatarFailed = (id) => {
-  failedTestimonialAvatars.value = new Set([...failedTestimonialAvatars.value, id]);
-};
-
-const getTestimonialInitials = (name) => {
-  const words = (name || 'Client').trim().split(/\s+/).filter(Boolean);
-  return words.slice(0, 2).map((word) => word[0].toUpperCase()).join('');
-};
-
-const isSampleTestimonial = (testimonial) => testimonial.client_name?.startsWith('Sample Customer ');
 
 onMounted(() => {
   fetchSettings();
