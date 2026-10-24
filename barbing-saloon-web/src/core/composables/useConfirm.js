@@ -48,11 +48,30 @@ export function useConfirm() {
         actionCallback.value = options.onConfirm;
       }
     }
+    if (dismissTimer) {
+      clearTimeout(dismissTimer);
+      dismissTimer = null;
+    }
     isOpen.value = true;
 
     return new Promise((resolve) => {
       resolvePromise.value = resolve;
     });
+  };
+
+  const closeImmediately = () => {
+    if (dismissTimer) {
+      clearTimeout(dismissTimer);
+      dismissTimer = null;
+    }
+    isOpen.value = false;
+    isResolved.value = false;
+    isProcessing.value = false;
+    if (resolvePromise.value) {
+      const resolver = resolvePromise.value;
+      resolvePromise.value = null;
+      resolver(true);
+    }
   };
 
   const agree = async () => {
@@ -65,13 +84,14 @@ export function useConfirm() {
       }
       // Enter resolved animation state
       isResolved.value = true;
-      setTimeout(() => {
-        isOpen.value = false;
-        isResolved.value = false;
-        isProcessing.value = false;
-        if (resolvePromise.value) resolvePromise.value(true);
+      dismissTimer = setTimeout(() => {
+        closeImmediately();
       }, autoDismissDelay.value);
     } catch (err) {
+      if (dismissTimer) {
+        clearTimeout(dismissTimer);
+        dismissTimer = null;
+      }
       isProcessing.value = false;
       isResolved.value = false;
       throw err;
@@ -79,10 +99,18 @@ export function useConfirm() {
   };
 
   const cancel = () => {
+    if (dismissTimer) {
+      clearTimeout(dismissTimer);
+      dismissTimer = null;
+    }
     isOpen.value = false;
     isResolved.value = false;
     isProcessing.value = false;
-    if (resolvePromise.value) resolvePromise.value(false);
+    if (resolvePromise.value) {
+      const resolver = resolvePromise.value;
+      resolvePromise.value = null;
+      resolver(false);
+    }
   };
 
   return {
@@ -101,5 +129,6 @@ export function useConfirm() {
     confirm,
     agree,
     cancel,
+    closeImmediately,
   };
 }
