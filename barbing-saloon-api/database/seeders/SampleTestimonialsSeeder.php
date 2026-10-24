@@ -28,11 +28,11 @@ class SampleTestimonialsSeeder extends Seeder
         foreach ($reviews as $index => $review) {
             $number = $index + 1;
 
-            Testimonial::firstOrCreate(
+            Testimonial::updateOrCreate(
                 ['client_name' => sprintf('Sample Customer %02d', $number)],
                 [
                     'customer_id' => null,
-                    'client_avatar' => 'settings/logo.png',
+                    'client_avatar' => 'testimonials/candycutz-sample-avatar.png',
                     'rating' => 5,
                     'review' => $review,
                     'service_id' => null,

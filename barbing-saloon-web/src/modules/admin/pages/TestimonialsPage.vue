@@ -75,7 +75,14 @@
           <div class="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div class="flex-1">
               <div class="flex items-center gap-4 mb-3">
-                <div class="h-12 w-12 rounded-full bg-admin/20 border border-admin/30 flex items-center justify-center text-admin font-display text-xl shrink-0">
+                <img
+                  v-if="item.avatar_url"
+                  :src="item.avatar_url"
+                  :alt="`${item.client_name || item.customer_name || 'Customer'} profile`"
+                  class="h-12 w-12 shrink-0 rounded-full border border-admin/30 object-cover"
+                  loading="lazy"
+                />
+                <div v-else class="h-12 w-12 rounded-full bg-admin/20 border border-admin/30 flex items-center justify-center text-admin font-display text-xl shrink-0">
                   {{ (item.client_name || item.customer_name || 'C').charAt(0).toUpperCase() }}
                 </div>
                 <div>
