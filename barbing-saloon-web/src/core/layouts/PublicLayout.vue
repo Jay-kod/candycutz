@@ -149,10 +149,8 @@
       </div>
     </footer>
   </div>
-</template>
-
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useWindowScroll } from '@vueuse/core';
 import { publicApi } from '@/shared/api/old_publicApi';
@@ -170,6 +168,12 @@ const mobileMenuOpen = ref(false);
 watch(() => route.fullPath, () => {
   mobileMenuOpen.value = false;
 });
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' && mobileMenuOpen.value) {
+    mobileMenuOpen.value = false;
+  }
+};
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
 const logoUrl = ref('/images/logo-icon.png');
