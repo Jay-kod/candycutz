@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
@@ -220,11 +220,22 @@ const fetchTestimonials = async () => {
   }
 };
 
+const refreshTestimonialsWhenVisible = () => {
+  if (document.visibilityState === 'visible') {
+    fetchTestimonials();
+  }
+};
+
 onMounted(() => {
   fetchSettings();
   fetchTestimonials();
+  document.addEventListener('visibilitychange', refreshTestimonialsWhenVisible);
   setTimeout(() => {
     initScrollReveal();
   }, 100);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', refreshTestimonialsWhenVisible);
 });
 </script>
