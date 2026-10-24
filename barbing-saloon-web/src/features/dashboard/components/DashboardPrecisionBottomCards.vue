@@ -93,9 +93,9 @@
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.04]">
         <div class="flex items-center gap-2 text-xs font-medium text-ivory/70">
           <ClockIcon class="h-3.5 w-3.5 text-admin" />
-          <span>Booking Density</span>
+          <span>Appointment Density</span>
         </div>
-        <span class="text-[10px] text-ivory/40 font-mono">By hour</span>
+        <span class="text-[10px] text-ivory/40 font-mono">Hourly traffic</span>
       </div>
 
       <div class="pt-2 flex items-baseline justify-between">
@@ -167,7 +167,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.04]">
         <div class="flex items-center gap-2 text-xs font-medium text-ivory/70">
           <BoltIcon class="h-3.5 w-3.5 text-admin" />
-          <span>Quick actions</span>
+          <span>Salon Operations</span>
         </div>
       </div>
 
