@@ -10,7 +10,6 @@
     ></div>
     <div class="page-hero__overlay" :style="{ opacity: overlayOpacity / 100 }" aria-hidden="true"></div>
     <div class="page-hero__content text-center">
-      <p v-if="eyebrow" class="page-hero__eyebrow text-center">{{ eyebrow }}</p>
       <h1 class="page-hero__title text-center">{{ title }}</h1>
       <p v-if="subtitle" class="page-hero__subtitle text-center">{{ subtitle }}</p>
     </div>
@@ -114,18 +113,8 @@ onMounted(async () => {
   text-align: center;
 }
 
-.page-hero__eyebrow {
-  margin: 0 auto;
-  color: #ffb84d;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  text-align: center;
-}
-
 .page-hero__title {
-  margin: 0.65rem auto 0;
+  margin: 0 auto;
   color: #f5f5f5;
   font-family: var(--font-display, inherit);
   font-size: clamp(2.25rem, 6vw, 4.75rem);
