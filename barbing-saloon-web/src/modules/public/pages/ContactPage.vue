@@ -9,7 +9,7 @@
       subtitle-setting-key="contact_subtitle"
     />
     <section class="mx-auto grid max-w-7xl gap-10 px-4 md:px-6 pt-16 pb-20 text-theme-text lg:grid-cols-[0.9fr_1.1fr]">
-      <div data-reveal>
+      <div data-reveal class="min-w-0 w-full max-w-full">
         <div class="grid gap-6 sm:grid-cols-2">
           <!-- Location Card -->
           <div v-if="contactAddress" class="group rounded-2xl border border-theme-border bg-theme-surface p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 hover:bg-white/5">

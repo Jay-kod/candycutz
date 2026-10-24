@@ -115,7 +115,7 @@
                 </div>
                 <RouterLink
                   :to="`/customer/dashboard/book/${service.id}`"
-                  class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 text-xs font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-gold/30"
+                  class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 min-h-[44px] text-xs font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-gold/30"
                 >
                   Book Cut
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">

@@ -397,6 +397,10 @@ const cards = [
     padding: 2.25rem 1.25rem;
   }
 
+  .portal-cta__constellation {
+    display: none;
+  }
+
   .portal-cta__card {
     width: 48px;
     height: 48px;
