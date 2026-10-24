@@ -189,6 +189,7 @@ class SalonCalculationEngineTest extends TestCase
             'customer_id' => $customer->id,
             'client_name' => $customer->name,
             'client_phone' => '08012345678',
+            'client_email' => $customer->email,
             'barber_id' => $barber->id,
             'service_id' => $service->id,
             'appointment_date' => '2026-10-24',
