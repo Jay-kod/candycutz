@@ -247,8 +247,8 @@ const peakHoursText = computed(() => {
 
 const quickActions = [
   { title: 'Walk-In Booking', desc: 'Register a walk-in client.', icon: UserPlusIcon, to: '/admin/walk-in' },
-  { title: 'Appointments', desc: 'Manage schedule & slots.', icon: CalendarDaysIcon, to: '/admin/appointments' },
-  { title: 'Reports & Revenue', desc: 'Audit statements & ledger.', icon: DocumentChartBarIcon, to: '/admin/reports' },
+  { title: 'Salon Schedule', desc: 'Manage chairs & slots.', icon: CalendarDaysIcon, to: '/admin/appointments' },
+  { title: 'Revenue & Reports', desc: 'Audit statements & ledger.', icon: DocumentChartBarIcon, to: '/admin/reports' },
   { title: 'Salon Settings', desc: 'Pricing, hours & CMS.', icon: Cog6ToothIcon, to: '/admin/settings' }
 ];
 
