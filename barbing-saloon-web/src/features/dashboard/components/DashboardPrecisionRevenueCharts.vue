@@ -211,13 +211,17 @@ const currentMonthName = computed(() => {
   return new Date().toLocaleDateString('en-US', { month: 'short' });
 });
 
-// Y-Axis scale labels
+// Y-Axis scale labels - dynamically computed from real salon revenue
 const yAxisLabels = computed(() => {
-  const total = periodRevenueTotal.value;
-  if (total >= 10000000) {
-    return ['₦0', '₦25M', '₦50M', '₦75M', '₦100M'];
-  }
-  return ['₦0', '₦5K', '₦10K', '₦15K', '₦20K'];
+  const total = Math.max(periodRevenueTotal.value, 4000);
+  const step = total / 4;
+  return [
+    '₦0',
+    `₦${formatCompact(Math.round(step))}`,
+    `₦${formatCompact(Math.round(step * 2))}`,
+    `₦${formatCompact(Math.round(step * 3))}`,
+    `₦${formatCompact(Math.round(total))}`
+  ];
 });
 
 // Dynamic Columns mapped directly from real API 30-day timeline
