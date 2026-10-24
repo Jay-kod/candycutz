@@ -63,6 +63,17 @@ const isDark = useDark({
   attribute: 'data-theme',
   valueDark: 'dark',
   valueLight: 'light',
+  onChanged(dark) {
+    if (typeof document !== 'undefined') {
+      const el = document.documentElement;
+      el.setAttribute('data-theme', dark ? 'dark' : 'light');
+      if (dark) {
+        el.classList.add('dark');
+      } else {
+        el.classList.remove('dark');
+      }
+    }
+  },
 });
 
 const toggleDark = useToggle(isDark);
