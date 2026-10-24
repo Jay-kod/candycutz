@@ -7,12 +7,12 @@
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        @keydown.esc="cancel"
+        @keydown.esc="isResolved ? closeImmediately() : cancel()"
       >
         <!-- Backdrop with obsidian blur -->
         <div
           class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
-          @click="cancel"
+          @click="isResolved ? closeImmediately() : cancel()"
         ></div>
 
         <!-- Modal Panel -->
@@ -245,6 +245,7 @@ const {
   resolutionMessage,
   agree,
   cancel,
+  closeImmediately,
 } = useConfirm();
 
 const theme = computed(() => {
