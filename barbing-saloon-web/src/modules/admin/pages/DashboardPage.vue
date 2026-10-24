@@ -4,7 +4,7 @@
       <!-- High-Fidelity Skeletal Preload Matching Exact Dashboard Layout -->
       <DashboardPrecisionSkeleton v-if="loading" />
 
-      <!-- Fully Populated Dashboard Matching Precision Layout -->
+      <!-- Fully Populated Dashboard with CandyCutz System Colors & Real Backend Data -->
       <template v-else>
         <!-- Top Bar: Greeting + Quick Action -->
         <DashboardPrecisionHeader />
@@ -13,22 +13,30 @@
         <DashboardPrecisionKpis 
           :stats="dashboard.stats" 
           :revenue="dashboard.revenue" 
+          :revenue-trend="dashboard.revenue_trend"
+          :booking-trend="dashboard.booking_trend"
         />
 
         <!-- Row 2: 8-col Segmented Equalizer Chart + 4-col Monthly Segmented Chart -->
         <DashboardPrecisionRevenueCharts 
           :revenue-trend="dashboard.revenue_trend" 
+          :booking-trend="dashboard.booking_trend"
+          :stats="dashboard.stats"
+          :revenue="dashboard.revenue"
         />
 
-        <!-- Row 3: Funnel Sankey Conversion Flow + Radial-Lined Sunburst & Breakdown Table -->
+        <!-- Row 3: Funnel Sankey Conversion Flow + Radial-Lined Sunburst & Real Status Breakdown -->
         <DashboardPrecisionFunnelAndStatus 
+          :stats="dashboard.stats"
           :status-breakdown="dashboard.status_breakdown" 
         />
 
-        <!-- Row 4: 4 Cards (Traffic Sources + Team + Hourly Heatmap Matrix + Quick Actions) -->
+        <!-- Row 4: 4 Cards (Top Services + Team + Hourly Heatmap Matrix + Quick Actions) -->
         <DashboardPrecisionBottomCards 
+          :stats="dashboard.stats"
           :top-services="dashboard.top_services" 
           :top-barbers="dashboard.top_barbers" 
+          :recent-appointments="dashboard.recent_appointments"
         />
       </template>
     </section>
