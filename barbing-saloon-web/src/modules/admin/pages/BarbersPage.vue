@@ -209,7 +209,11 @@ async function deleteBarber(barber) {
     toast.success('Barber removed successfully');
     await loadBarbers();
   } catch (error) {
-    toast.error(error.response?.data?.error || 'Failed to delete barber');
+    const errorMsg = error.response?.data?.errors?.barber?.[0]
+      || (typeof error.response?.data?.error === 'string' ? error.response?.data?.error : null)
+      || error.response?.data?.message
+      || 'Failed to delete barber';
+    toast.error(errorMsg);
   }
 }
 
