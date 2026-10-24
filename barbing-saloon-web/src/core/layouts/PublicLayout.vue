@@ -66,7 +66,7 @@
           <!-- Section 1: Brand & Shop Identity -->
           <div class="md:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
             <RouterLink to="/" class="inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-white font-display group">
-              <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
+              <img :src="logoUrl" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
               <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </RouterLink>
             <p class="max-w-sm text-xs leading-relaxed text-zinc-400 sm:text-[13px]">
@@ -161,6 +161,7 @@ import SocialIcon from '@/components/SocialIcon.vue';
 import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
+import { getStorageUrl } from '@/core/utils/url';
 
 const route = useRoute();
 const { y } = useWindowScroll();
@@ -171,6 +172,7 @@ watch(() => route.fullPath, () => {
 });
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
+const logoUrl = ref('/images/logo-icon.png');
 const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
 const shopPhone = ref('+234 812 345 6789');
 const shopEmail = ref('info@candycutz.com');
@@ -243,6 +245,9 @@ const fetchSettings = async () => {
       ...settings,
       brand_tagline: settings.brand_tagline || settings.site_description || settings.meta_description || settings.about_teaser_text,
     });
+    if (settings.logo) {
+      logoUrl.value = getStorageUrl(settings.logo, '/images/logo-icon.png');
+    }
     if (settings.address || settings.contact_address) {
       shopAddress.value = settings.address || settings.contact_address;
     }
