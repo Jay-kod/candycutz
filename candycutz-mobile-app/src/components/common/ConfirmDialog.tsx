@@ -274,6 +274,7 @@ export function ConfirmDialog({
   const getResolutionContent = () => {
     const customTitle = cachedState.current.resolutionTitle;
     const customMsg = cachedState.current.resolutionMessage;
+    const customBadge = cachedState.current.resolutionBadgeText;
 
     switch (cachedState.current.effectiveResolution) {
       case 'deleted':
@@ -285,7 +286,7 @@ export function ConfirmDialog({
           ringBorder: 'rgba(239, 68, 68, 0.35)',
           topRimColor: 'rgba(239, 68, 68, 0.6)',
           accentColor: '#EF4444',
-          badgeText: 'DELETED',
+          badgeText: customBadge || 'DELETED',
         };
       case 'cancelled':
         return {
@@ -296,7 +297,7 @@ export function ConfirmDialog({
           ringBorder: 'rgba(239, 68, 68, 0.35)',
           topRimColor: 'rgba(239, 68, 68, 0.6)',
           accentColor: '#EF4444',
-          badgeText: 'CANCELLED',
+          badgeText: customBadge || 'CANCELLED',
         };
       case 'confirmed':
         return {
@@ -307,7 +308,18 @@ export function ConfirmDialog({
           ringBorder: isDark ? 'rgba(229, 186, 115, 0.45)' : 'rgba(197, 155, 39, 0.4)',
           topRimColor: isDark ? 'rgba(229, 186, 115, 0.7)' : 'rgba(197, 155, 39, 0.6)',
           accentColor: colors.primary,
-          badgeText: 'CONFIRMED',
+          badgeText: customBadge || 'CONFIRMED',
+        };
+      case 'custom':
+        return {
+          title: customTitle || 'Completed Successfully',
+          message: customMsg || 'The action was performed successfully.',
+          icon: <CheckCircle2 size={32} color={colors.primary} strokeWidth={2.4} />,
+          haloBg: isDark ? 'rgba(212, 175, 55, 0.18)' : 'rgba(197, 155, 39, 0.18)',
+          ringBorder: isDark ? 'rgba(229, 186, 115, 0.45)' : 'rgba(197, 155, 39, 0.4)',
+          topRimColor: isDark ? 'rgba(229, 186, 115, 0.7)' : 'rgba(197, 155, 39, 0.6)',
+          accentColor: colors.primary,
+          badgeText: customBadge || 'COMPLETED',
         };
       case 'saved':
       default:
@@ -319,7 +331,7 @@ export function ConfirmDialog({
           ringBorder: 'rgba(34, 197, 94, 0.35)',
           topRimColor: 'rgba(34, 197, 94, 0.6)',
           accentColor: '#22C55E',
-          badgeText: 'SAVED',
+          badgeText: customBadge || 'SAVED',
         };
     }
   };
@@ -333,7 +345,7 @@ export function ConfirmDialog({
       visible={visible || isResolved}
       transparent
       animationType="none"
-      onRequestClose={isResolved ? dismissWithAnimation : onCancel}
+      onRequestClose={step === 'executing' ? () => {} : (isResolved ? dismissWithAnimation : onCancel)}
       statusBarTranslucent
     >
       <View style={styles.overlayContainer}>
@@ -349,7 +361,7 @@ export function ConfirmDialog({
         >
           <Pressable
             style={StyleSheet.absoluteFill}
-            onPress={isResolved ? dismissWithAnimation : onCancel}
+            onPress={step === 'executing' ? undefined : (isResolved ? dismissWithAnimation : onCancel)}
           />
         </Animated.View>
 

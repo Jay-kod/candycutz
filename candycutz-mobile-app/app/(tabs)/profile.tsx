@@ -55,7 +55,6 @@ export default function ProfileScreen() {
   };
 
   const confirmLogout = async () => {
-    setLogoutDialogVisible(false);
     await logout();
   };
 
