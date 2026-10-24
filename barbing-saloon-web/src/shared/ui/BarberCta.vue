@@ -268,6 +268,71 @@ const resolvedOverlayOpacity = computed(() => {
   background: rgba(38, 29, 16, 0.88);
 }
 
+/* Light mode overrides for Hero */
+:global([data-theme="light"]) .barber-cta {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.1), transparent 58%),
+    #FAF9F6;
+  color: #111827;
+}
+
+:global([data-theme="light"]) .barber-cta__shade {
+  background: linear-gradient(180deg, rgba(250, 249, 246, 0.72), rgba(250, 249, 246, 0.92));
+  opacity: 0.88;
+}
+
+:global([data-theme="light"]) .barber-cta__photo {
+  opacity: 0.15;
+  filter: contrast(1.05) brightness(1.05);
+}
+
+:global([data-theme="light"]) .barber-cta__dot-field {
+  background-image: radial-gradient(rgba(204, 122, 0, 0.16) 0.8px, transparent 0.8px);
+  opacity: 0.35;
+}
+
+:global([data-theme="light"]) .barber-cta__announcement {
+  border-color: rgba(255, 153, 0, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1F2937;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+:global([data-theme="light"]) .barber-cta__announcement:hover {
+  border-color: rgba(255, 153, 0, 0.6);
+  background: #FFF7ED;
+}
+
+:global([data-theme="light"]) .barber-cta__title-white {
+  color: #111827;
+}
+
+:global([data-theme="light"]) .barber-cta__title-gold {
+  color: #CC7A00;
+}
+
+:global([data-theme="light"]) .barber-cta__subtitle {
+  color: #4B5563;
+}
+
+:global([data-theme="light"]) .barber-cta__caption {
+  color: #6B7280;
+}
+
+:global([data-theme="light"]) .barber-cta__button--secondary {
+  border-color: rgba(204, 122, 0, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  color: #B45309;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .barber-cta__button--secondary:hover {
+  border-color: #FF9900;
+  background: #FFF7ED;
+  color: #9A3412;
+  box-shadow: 0 4px 14px rgba(255, 153, 0, 0.15);
+}
+
 .barber-cta--preview {
   min-height: 430px;
   border-radius: 12px;

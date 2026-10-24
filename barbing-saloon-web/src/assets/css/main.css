@@ -6,14 +6,16 @@
 @custom-variant dark (&:is(.dark *));
 @config "../../../tailwind.config.js";
 
-:root {
-  --color-bg: #FFFFFF;
-  --color-surface: #F9FAFB;
+:root,
+[data-theme="light"] {
+  --color-bg: #FAF9F6;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F4F1EA;
   --color-text: #111827;
   --color-text-muted: #6B7280;
   --color-accent: #FF9900;
-  --color-accent-hover: #FFB84D;
-  --color-border: #E5E7EB;
+  --color-accent-hover: #E08500;
+  --color-border: #E8E5DF;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -51,6 +53,7 @@
 [data-theme="dark"] {
   --color-bg: #050505;
   --color-surface: #121212;
+  --color-surface-subtle: #1A1A1A;
   --color-text: #F9FAFB;
   --color-text-muted: #9CA3AF;
   --color-accent: #FF9900;
