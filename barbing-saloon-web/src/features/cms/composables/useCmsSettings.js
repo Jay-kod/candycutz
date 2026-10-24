@@ -7,6 +7,9 @@ export function useCmsSettings() {
   const toast = useToast();
   const saving = ref(false);
   const loading = ref(false);
+  const lastSaved = ref(null);
+  const initialSnapshot = ref(null);
+  const activeTab = ref('all');
 
   const settings = ref({
     hero_title: 'Premium grooming with a sharper standard.',
@@ -48,6 +51,12 @@ export function useCmsSettings() {
     return null;
   });
 
+  const isDirty = computed(() => {
+    if (heroImageFile.value || aboutImageFile.value) return true;
+    if (!initialSnapshot.value) return false;
+    return initialSnapshot.value !== JSON.stringify(settings.value);
+  });
+
   const getStorageUrl = (path) => {
     return resolveStorageUrl(path);
   };
@@ -72,6 +81,8 @@ export function useCmsSettings() {
         }
         currentHeroImage.value = data.hero_image || null;
         currentAboutImage.value = data.about_teaser_image || null;
+        initialSnapshot.value = JSON.stringify(settings.value);
+        lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -130,6 +141,9 @@ export function useCmsSettings() {
         currentAboutImage.value = updatedData.about_teaser_image || currentAboutImage.value;
         aboutImageFile.value = null;
         if (aboutFileInputRef) aboutFileInputRef.value = '';
+
+        initialSnapshot.value = JSON.stringify(settings.value);
+        lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -143,6 +157,9 @@ export function useCmsSettings() {
     settings,
     saving,
     loading,
+    lastSaved,
+    isDirty,
+    activeTab,
     currentHeroImage,
     heroImageFile,
     imageLoadError,
