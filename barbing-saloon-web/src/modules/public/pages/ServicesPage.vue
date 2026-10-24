@@ -41,15 +41,18 @@
         <div
           v-for="n in 6"
           :key="n"
-          class="rounded-3xl border border-theme-border bg-theme-surface p-6 space-y-4 animate-pulse"
+          class="aspect-[0.68] min-h-[460px] rounded-3xl border border-theme-border bg-theme-surface p-5 space-y-4 animate-pulse"
         >
-          <div class="aspect-[16/9] w-full rounded-2xl bg-theme-border/40"></div>
-          <div class="h-6 w-2/3 rounded-lg bg-theme-border/50"></div>
-          <div class="h-4 w-full rounded bg-theme-border/30"></div>
-          <div class="h-4 w-4/5 rounded bg-theme-border/30"></div>
-          <div class="pt-4 flex justify-between items-center border-t border-theme-border/50">
-            <div class="h-6 w-20 rounded bg-theme-border/50"></div>
-            <div class="h-10 w-28 rounded-xl bg-theme-border/60"></div>
+          <div class="h-8 w-2/3 rounded-lg bg-theme-border/50"></div>
+          <div class="h-4 w-1/3 rounded bg-theme-border/30"></div>
+          <div class="mt-auto space-y-3 pt-56">
+            <div class="h-7 w-3/4 rounded-lg bg-theme-border/50"></div>
+            <div class="h-4 w-full rounded bg-theme-border/30"></div>
+            <div class="h-4 w-4/5 rounded bg-theme-border/30"></div>
+            <div class="pt-4 flex justify-between items-center border-t border-theme-border/50">
+              <div class="h-6 w-20 rounded bg-theme-border/50"></div>
+              <div class="h-10 w-28 rounded-xl bg-theme-border/60"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -60,71 +63,67 @@
           v-for="service in filteredServices"
           :key="service.id"
           data-reveal
-          class="group rounded-3xl border border-theme-border bg-theme-surface overflow-hidden flex flex-col justify-between shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/5"
+          class="group relative isolate aspect-[0.68] min-h-[460px] overflow-hidden rounded-[1.75rem] border border-gold/25 bg-[#241407] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-2xl hover:shadow-gold/10"
         >
-          <div>
-            <!-- Service Header / Image Banner -->
-            <div class="relative aspect-[4/3] w-full overflow-hidden bg-theme-bg">
-              <img
-                v-if="service.image || service.image_url"
-                :src="getImageUrl(service.image || service.image_url)"
-                :alt="service.name"
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-theme-surface to-theme-bg">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" class="w-16 h-16 text-gold/30">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887m8.416-2.224l-1.536.887M9.384 14.863l-1.536.887m8.416 2.224l-1.536-.887M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
-                </svg>
-              </div>
-
-              <!-- Badges Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80"></div>
-              
-              <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                <span class="rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold border border-gold/30">
-                  {{ service.category?.name || service.category || 'Barbering' }}
-                </span>
-                <span v-if="service.is_home_service_eligible" class="rounded-full bg-emerald-500/20 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
-                  Home Service
-                </span>
-              </div>
-
-              <div class="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white/90 border border-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-gold">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ service.duration_minutes || 30 }} mins
-              </div>
-            </div>
-
-            <!-- Service Info -->
-            <div class="p-5 sm:p-6">
-              <h2 class="font-display text-xl font-bold text-theme-text group-hover:text-gold transition-colors">
-                {{ service.name }}
-              </h2>
-              <p class="mt-2 text-xs text-theme-muted leading-snug line-clamp-2">
-                {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
-              </p>
-            </div>
+          <img
+            v-if="service.image || service.image_url"
+            :src="getImageUrl(service.image || service.image_url)"
+            :alt="service.name"
+            class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-gradient-to-br from-[#59300c] via-[#241407] to-[#0c0906]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-28 h-28 text-gold/20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887m8.416-2.224l-1.536.887M9.384 14.863l-1.536.887m8.416 2.224l-1.536-.887M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+            </svg>
           </div>
 
-          <!-- Pricing & Book CTA -->
-          <div class="px-5 pb-5 sm:px-6 sm:pb-6 pt-3 border-t border-theme-border/50 flex items-center justify-between gap-3">
-            <div>
-              <span class="block text-[10px] uppercase tracking-widest text-theme-muted font-semibold">Pricing</span>
-              <span class="font-display text-xl font-bold text-gold">
-                {{ formatNairaAmount(service.price) }}
-              </span>
+          <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#140b05]/85 via-transparent via-35% to-[#100a05]/95"></div>
+          <div class="absolute inset-3 -z-10 rounded-[1.35rem] border border-gold/20"></div>
+
+          <div class="flex h-full flex-col justify-between p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-gold/70">CandyCutz Service</p>
+                <span class="mt-2 inline-flex rounded-full border border-gold/40 bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold backdrop-blur">
+                  {{ service.category?.name || service.category || 'Barbering' }}
+                </span>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span v-if="service.is_home_service_eligible" class="rounded-full border border-emerald-300/40 bg-emerald-950/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-200 backdrop-blur">
+                  Home service
+                </span>
+                <span class="flex items-center gap-1.5 rounded-full border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5 text-gold">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ service.duration_minutes || 30 }} min
+                </span>
+              </div>
             </div>
-            <RouterLink
-              :to="`/customer/dashboard/book/${service.id}`"
-              class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 text-xs sm:text-sm font-bold text-obsidian shadow-lg hover:shadow-gold/30 hover:scale-[1.03] transition-all duration-200"
-            >
-              Book Cut
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </RouterLink>
+
+            <div class="rounded-2xl border border-gold/20 bg-[#160e08]/75 p-4 shadow-2xl backdrop-blur-sm sm:p-5">
+              <h2 class="font-display text-2xl font-bold leading-tight text-white group-hover:text-gold transition-colors">
+                {{ service.name }}
+              </h2>
+              <p class="mt-2 text-xs leading-relaxed text-white/70 line-clamp-2">
+                {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
+              </p>
+              <div class="mt-4 flex items-end justify-between gap-3 border-t border-gold/20 pt-3">
+                <div>
+                  <span class="block text-[9px] font-bold uppercase tracking-[0.2em] text-gold/60">Price</span>
+                  <span class="font-display text-2xl font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>
+                </div>
+                <RouterLink
+                  :to="`/customer/dashboard/book/${service.id}`"
+                  class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 text-xs font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-gold/30"
+                >
+                  Book Cut
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </RouterLink>
+              </div>
+            </div>
           </div>
         </article>
       </div>

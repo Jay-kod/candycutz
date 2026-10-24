@@ -40,6 +40,7 @@ class SalonCalculationEngineTest extends TestCase
         $service1 = Service::create([
             'name' => 'Premium Fade',
             'slug' => 'premium-fade',
+            'description' => 'Detailed skin fade',
             'price' => 2000,
             'duration_minutes' => 45,
             'category_id' => $category->id,
@@ -49,6 +50,7 @@ class SalonCalculationEngineTest extends TestCase
         $service2 = Service::create([
             'name' => 'Dye Complete',
             'slug' => 'dye-complete',
+            'description' => 'Complete hair color',
             'price' => 8000,
             'duration_minutes' => 60,
             'category_id' => $category->id,
@@ -125,6 +127,7 @@ class SalonCalculationEngineTest extends TestCase
         $service = Service::create([
             'name' => 'Standard Cut',
             'slug' => 'standard-cut',
+            'description' => 'Standard haircut',
             'price' => 2500,
             'duration_minutes' => 30,
             'category_id' => $category->id,
@@ -161,6 +164,7 @@ class SalonCalculationEngineTest extends TestCase
         $service = Service::create([
             'name' => 'Gold Combo',
             'slug' => 'gold-combo',
+            'description' => 'Luxury grooming combo',
             'price' => 6500,
             'duration_minutes' => 75,
             'category_id' => $category->id,
