@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { XMarkIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline'
 import ReportsPDFPage1 from './pdf/ReportsPDFPage1.vue'
 import ReportsPDFPage2 from './pdf/ReportsPDFPage2.vue'
@@ -83,7 +83,21 @@ const props = defineProps({
   selectedRange: { type: String, required: true }
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' && props.show) {
+    emit('close')
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+})
 
 const isGeneratingPdf = ref(false)
 const reportRef = ref(null)
