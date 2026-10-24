@@ -85,7 +85,7 @@ const cards = computed(() => {
   const pendingAppts = Number(s.pending_appointments || 0);
 
   // 3. Average ticket from backend
-  const avgTicket = totalAppts > 0 ? Math.round(totalRev / totalAppts) : 0;
+  const avgTicket = Number(s.average_ticket ?? (totalAppts > 0 ? Math.round(totalRev / totalAppts) : 0));
 
   // 4. Completion rate from backend
   const completionRate = s.completion_rate !== undefined ? Number(s.completion_rate) : (totalAppts > 0 ? 100 : 0);

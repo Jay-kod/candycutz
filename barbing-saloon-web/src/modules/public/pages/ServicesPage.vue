@@ -64,7 +64,7 @@
         >
           <div>
             <!-- Service Header / Image Banner -->
-            <div class="relative aspect-[16/10] w-full overflow-hidden bg-theme-bg">
+            <div class="relative aspect-[4/3] w-full overflow-hidden bg-theme-bg">
               <img
                 v-if="service.image || service.image_url"
                 :src="getImageUrl(service.image || service.image_url)"
@@ -98,27 +98,27 @@
             </div>
 
             <!-- Service Info -->
-            <div class="p-6 sm:p-7">
-              <h2 class="font-display text-2xl font-bold text-theme-text group-hover:text-gold transition-colors">
+            <div class="p-5 sm:p-6">
+              <h2 class="font-display text-xl font-bold text-theme-text group-hover:text-gold transition-colors">
                 {{ service.name }}
               </h2>
-              <p class="mt-3 text-sm text-theme-muted leading-relaxed line-clamp-3">
+              <p class="mt-2 text-xs text-theme-muted leading-snug line-clamp-2">
                 {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
               </p>
             </div>
           </div>
 
           <!-- Pricing & Book CTA -->
-          <div class="px-6 pb-6 sm:px-7 sm:pb-7 pt-4 border-t border-theme-border/50 flex items-center justify-between gap-4">
+          <div class="px-5 pb-5 sm:px-6 sm:pb-6 pt-3 border-t border-theme-border/50 flex items-center justify-between gap-3">
             <div>
               <span class="block text-[10px] uppercase tracking-widest text-theme-muted font-semibold">Pricing</span>
-              <span class="font-display text-2xl font-bold text-gold">
+              <span class="font-display text-xl font-bold text-gold">
                 {{ formatNairaAmount(service.price) }}
               </span>
             </div>
             <RouterLink
               :to="`/customer/dashboard/book/${service.id}`"
-              class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-5 py-3 text-xs sm:text-sm font-bold text-obsidian shadow-lg hover:shadow-gold/30 hover:scale-[1.03] transition-all duration-200"
+              class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-gold-light px-4 py-2.5 text-xs sm:text-sm font-bold text-obsidian shadow-lg hover:shadow-gold/30 hover:scale-[1.03] transition-all duration-200"
             >
               Book Cut
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
