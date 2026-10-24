@@ -43,7 +43,11 @@
       <!-- Marquee Moving Track -->
       <div class="marquee-container flex select-none overflow-hidden group">
         <!-- First Loop -->
-        <div class="marquee-track flex shrink-0 items-stretch">
+        <div
+          class="marquee-track flex shrink-0 items-stretch"
+          :class="isRightFlow ? 'marquee-track-right' : 'marquee-track-left'"
+          :style="{ animationDuration: `${flowDuration}s` }"
+        >
           <article
             v-for="(testimonial, idx) in trackItems"
             :key="`track1-${testimonial.id || idx}`"
@@ -96,7 +100,12 @@
         </div>
 
         <!-- Second Duplicate Loop (Ensures Continuous Infinite Ribbon) -->
-        <div class="marquee-track flex shrink-0 items-stretch" aria-hidden="true">
+        <div
+          class="marquee-track flex shrink-0 items-stretch"
+          :class="isRightFlow ? 'marquee-track-right' : 'marquee-track-left'"
+          :style="{ animationDuration: `${flowDuration}s` }"
+          aria-hidden="true"
+        >
           <article
             v-for="(testimonial, idx) in trackItems"
             :key="`track2-${testimonial.id || idx}`"
@@ -177,16 +186,33 @@ const props = defineProps({
     type: String,
     default: 'A look at the kind of premium experience customers can expect.',
   },
+  speed: {
+    type: [Number, String],
+    default: 45,
+  },
+  direction: {
+    type: String,
+    default: 'left',
+  },
 });
 
 const failedAvatars = ref(new Set());
+
+const flowDuration = computed(() => {
+  const parsed = Number(props.speed);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 45;
+});
+
+const isRightFlow = computed(() => {
+  return String(props.direction || '').toLowerCase() === 'right';
+});
 
 const trackItems = computed(() => {
   const source = Array.isArray(props.testimonials) ? props.testimonials : [];
 
   // Duplicate items if needed so each track is sufficiently long for wide screens
   let items = [...source];
-  while (items.length < 6) {
+  while (items.length < 6 && items.length > 0) {
     items = items.concat(source);
   }
   return items;
@@ -204,13 +230,16 @@ const getInitials = (name) => {
 const getSubtitle = (item) => {
   if (item.client_name?.startsWith('Sample Customer ')) return 'Demo sample — not a customer review';
   if (item.service?.name) return `Client • ${item.service.name}`;
+  if (item.role) return item.role;
   if (item.subtitle) return item.subtitle;
   return 'Customer testimonial';
 };
 
-const getSource = (item) => (
-  item.client_name?.startsWith('Sample Customer ') ? 'Demo sample' : 'Customer review'
-);
+const getSource = (item) => {
+  if (item.source) return item.source;
+  if (item.client_name?.startsWith('Sample Customer ')) return 'Demo sample';
+  return 'x.com';
+};
 </script>
 
 <style scoped>
@@ -234,9 +263,16 @@ const getSource = (item) => (
 .marquee-track {
   display: flex;
   flex-shrink: 0;
-  animation: marquee-scroll 45s linear infinite;
   will-change: transform;
   transition: none !important;
+}
+
+.marquee-track-left {
+  animation: marquee-scroll-left 45s linear infinite;
+}
+
+.marquee-track-right {
+  animation: marquee-scroll-right 45s linear infinite;
 }
 
 .marquee-container:hover .marquee-track,
@@ -244,12 +280,21 @@ const getSource = (item) => (
   animation-play-state: paused;
 }
 
-@keyframes marquee-scroll {
+@keyframes marquee-scroll-left {
   0% {
     transform: translateX(0%);
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
   }
 }
 
