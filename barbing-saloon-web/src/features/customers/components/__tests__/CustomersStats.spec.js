@@ -68,3 +68,4 @@ describe('CustomersStats', () => {
     expect(text).toContain('0appointments');
   });
 });
+
