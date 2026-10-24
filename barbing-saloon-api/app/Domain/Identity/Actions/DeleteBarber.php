@@ -2,13 +2,11 @@
 
 namespace App\Domain\Identity\Actions;
 
-use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Barber;
 use App\Models\Gallery;
 use App\Models\Service;
 use App\Models\Testimonial;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class DeleteBarber
 {
@@ -17,18 +15,8 @@ class DeleteBarber
         DB::transaction(function () use ($id) {
             $barber = Barber::with('user')->findOrFail($id);
 
-            // Prevent deletion if the barber has active appointments
-            $activeAppointmentsCount = $barber->appointments()
-                ->whereIn('status', AppointmentStatus::activeStatuses())
-                ->count();
-
-            if ($activeAppointmentsCount > 0) {
-                throw ValidationException::withMessages([
-                    'barber' => ["Cannot delete barber with {$activeAppointmentsCount} active upcoming appointment(s). Please reassign or cancel them first."],
-                ]);
-            }
-
-            // 1. Disassociate past/completed/cancelled appointments to preserve financial & audit history
+            // 1. Disassociate all appointments (historical & upcoming) so they become unassigned
+            // and financial / transaction records are preserved.
             $barber->appointments()->update(['barber_id' => null]);
 
             // 2. Disassociate gallery images (keep photos in shop portfolio)
