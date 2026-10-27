@@ -29,7 +29,7 @@
       <div class="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-white/50">
         <span class="font-mono text-white/80 font-medium">{{ currentTime }}</span>
         <span class="text-white/20">•</span>
-        <span class="truncate">Dynamically toggle capabilities and percentage rollouts across Web and Mobile Apps.</span>
+        <span class="truncate">Dynamically toggle web capabilities and percentage rollouts.</span>
       </div>
     </div>
 
@@ -134,4 +134,3 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 </script>
-
