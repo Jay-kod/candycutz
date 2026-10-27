@@ -106,3 +106,4 @@ defineProps({
 
 defineEmits(['edit', 'togglePublish', 'delete', 'reset', 'newPost']);
 </script>
+
