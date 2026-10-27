@@ -1,5 +1,5 @@
 <template>
-  <section class="page-hero">
+  <section class="page-hero" :class="{ 'page-hero--has-image': Boolean(backgroundImage) }">
     <div
       v-if="backgroundImage"
       class="page-hero__image"
@@ -8,7 +8,7 @@
       }"
       aria-hidden="true"
     ></div>
-    <div class="page-hero__overlay" :style="{ opacity: overlayOpacity / 100 }" aria-hidden="true"></div>
+    <div v-if="backgroundImage" class="page-hero__overlay" :style="{ opacity: overlayOpacity / 100 }" aria-hidden="true"></div>
     <div class="page-hero__content text-center">
       <h1 class="page-hero__title text-center">{{ title }}</h1>
       <p v-if="subtitle" class="page-hero__subtitle text-center">{{ subtitle }}</p>
@@ -84,9 +84,14 @@ onMounted(async () => {
   overflow: hidden;
   padding: 5rem 1.25rem 1rem;
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(255, 153, 0, 0.1), transparent 58%),
-    #090909;
+    radial-gradient(ellipse at 50% 45%, rgba(255, 153, 0, 0.08), transparent 58%),
+    var(--color-bg-primary);
   text-align: center;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.page-hero--has-image {
+  background: #090909;
 }
 
 .page-hero__image,
@@ -115,7 +120,7 @@ onMounted(async () => {
 
 .page-hero__title {
   margin: 0 auto;
-  color: #f5f5f5;
+  color: var(--color-text-primary);
   font-family: var(--font-display, inherit);
   font-size: clamp(2.25rem, 6vw, 4.75rem);
   font-weight: 700;
@@ -125,14 +130,22 @@ onMounted(async () => {
   text-align: center;
 }
 
+.page-hero--has-image .page-hero__title {
+  color: #f5f5f5;
+}
+
 .page-hero__subtitle {
   max-width: 44rem;
   margin: 0.8rem auto 0;
-  color: rgba(245, 245, 245, 0.76);
+  color: var(--color-text-secondary);
   font-size: clamp(0.95rem, 1.5vw, 1.15rem);
   line-height: 1.7;
   text-wrap: balance;
   text-align: center;
+}
+
+.page-hero--has-image .page-hero__subtitle {
+  color: rgba(245, 245, 245, 0.76);
 }
 
 @media (max-width: 640px) {
