@@ -62,3 +62,4 @@ describe('HealthKPICards.vue', () => {
     expect(wrapper.text()).not.toContain('Database Core')
   })
 })
+
