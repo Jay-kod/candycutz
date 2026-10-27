@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-[100dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text overflow-y-auto">
+  <div class="login-page flex flex-col lg:flex-row bg-theme-bg relative text-theme-text">
     
     <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
-    <div class="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
+    <div class="login-brand-panel hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
       <!-- Background Effects -->
       <div class="absolute inset-0 bg-theme-bg z-0"></div>
       <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent z-0"></div>
@@ -38,24 +38,24 @@
     </div>
 
     <!-- Right Section: Login Form -->
-    <div class="w-full lg:w-1/2 flex min-h-[100dvh] flex-col items-center justify-center p-4 xs:p-6 sm:p-10 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border py-10 lg:py-16">
+    <div class="login-panel w-full lg:w-1/2 flex flex-col items-center justify-center px-4 py-4 xs:px-6 sm:px-10 sm:py-6 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border">
       
       <!-- Mobile Logo -->
-      <div class="mb-6 lg:hidden flex justify-center w-full">
+      <div class="login-mobile-logo mb-4 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
           <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
 
-      <div class="w-full max-w-sm">
-        <div class="mb-8">
+      <div class="login-card w-full max-w-sm">
+        <div class="login-intro mb-4 sm:mb-6">
           <div class="text-center">
-            <h1 class="font-display font-bold text-3xl sm:text-4xl text-gold mb-4">Customer Portal</h1>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-gold mb-2">Customer Portal</h1>
           </div>
-          <p class="text-theme-muted text-xs sm:text-sm mb-4">Please enter your credentials to access your dashboard.</p>
+          <p class="text-theme-muted text-xs sm:text-sm mb-3">Please enter your credentials to access your dashboard.</p>
           
-          <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
+          <div class="login-demo-credentials bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-theme-text font-semibold flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
@@ -72,12 +72,12 @@
             <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> customer123</p>
           </div>
 
-          <div class="mb-6">
+          <div class="login-social mb-4">
             <SocialAuthButtons />
           </div>
         </div>
 
-        <form class="space-y-4" @submit.prevent="submitForm">
+        <form class="login-form space-y-3" @submit.prevent="submitForm">
           <!-- General Error -->
           <div v-if="generalError" class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-400 font-medium flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -144,7 +144,7 @@
             </RouterLink>
           </div>
           
-          <div class="space-y-3 mt-6">
+          <div class="login-actions space-y-3 mt-4">
             <!-- Submit Button -->
             <button 
               :disabled="loading" 
@@ -159,10 +159,11 @@
             </button>
 
             <button 
+              class="login-demo-button w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-2.5 text-sm font-bold text-theme-text transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-70 flex items-center justify-center gap-2"
               type="button"
               @click="demoCustomerLogin"
               :disabled="loading" 
-              class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-2.5 text-sm font-bold text-theme-text transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-70 flex items-center justify-center gap-2">
+              >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
               Use Customer Demo
             </button>
@@ -170,7 +171,7 @@
         </form>
 
         <!-- Register Link -->
-        <div class="mt-10 text-center text-sm text-theme-muted">
+        <div class="login-register-link mt-5 text-center text-sm text-theme-muted">
           Don't have an account yet? 
           <RouterLink to="/customer/register" class="font-bold text-gold hover:text-gold-dark transition-colors ml-1">
             Create an account
@@ -178,7 +179,7 @@
         </div>
 
         <!-- Staff Portals -->
-        <div class="mt-8 border-t border-theme-border pt-6 flex flex-col md:flex-row justify-center gap-4 text-xs text-theme-muted">
+        <div class="login-staff-links mt-4 border-t border-theme-border pt-3 flex flex-col md:flex-row justify-center gap-4 text-xs text-theme-muted">
           <RouterLink to="/barber/login" class="hover:text-gold transition-colors">Barber Portal</RouterLink>
           <span class="hidden md:inline text-theme-border">•</span>
           <RouterLink to="/admin/login" class="hover:text-gold transition-colors">Admin Portal</RouterLink>
@@ -267,3 +268,147 @@ async function submitForm() {
   }
 }
 </script>
+
+<style scoped>
+.login-page {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.login-panel {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (max-height: 760px) {
+  .login-panel {
+    padding: 0.75rem 1rem;
+  }
+
+  .login-mobile-logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .login-mobile-logo img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .login-card {
+    max-width: 24rem;
+  }
+
+  .login-intro {
+    margin-bottom: 0.75rem;
+  }
+
+  .login-intro h1 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .login-intro p {
+    margin-bottom: 0;
+  }
+
+  .login-demo-credentials,
+  .login-social,
+  .login-demo-button,
+  .login-staff-links {
+    display: none;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .login-form > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .login-form label {
+    margin-bottom: 0.125rem;
+  }
+
+  .login-form input:not([type="checkbox"]) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .login-actions {
+    margin-top: 0.25rem;
+  }
+
+  .login-actions > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem;
+  }
+
+  .login-register-link {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .login-mobile-logo {
+    display: none;
+  }
+
+  .login-intro h1 {
+    font-size: 1.25rem;
+  }
+
+  .login-form {
+    gap: 0.375rem;
+  }
+
+  .login-form input:not([type="checkbox"]) {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  .login-actions button {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .login-register-link {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 700px) and (max-height: 500px) {
+  .login-panel {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+
+  .login-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    column-gap: 2rem;
+    max-width: 50rem;
+  }
+
+  .login-intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .login-form {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .login-register-link {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+</style>
