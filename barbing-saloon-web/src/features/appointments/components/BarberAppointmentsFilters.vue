@@ -5,11 +5,11 @@
       :key="tab.value"
       @click="$emit('update:currentFilter', tab.value)"
       class="relative px-4 xs:px-5 py-2.5 min-h-[44px] inline-flex items-center rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden"
-      :class="currentFilter === tab.value ? 'text-obsidian bg-gold shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-ivory/50 hover:text-ivory bg-theme-surface/60 border border-theme-border hover:bg-theme-surface'"
+      :class="currentFilter === tab.value ? 'text-obsidian bg-gold shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-theme-text-muted hover:text-theme-text bg-theme-surface/60 border border-theme-border hover:bg-theme-surface'"
     >
       <span class="relative z-10 flex items-center gap-2">
         {{ tab.label }}
-        <span class="flex items-center justify-center h-5 px-1.5 rounded-md text-[10px] tabular-nums" :class="currentFilter === tab.value ? 'bg-black/20 text-obsidian' : 'bg-black/40 text-ivory/50'">
+        <span class="flex items-center justify-center h-5 px-1.5 rounded-md text-[10px] tabular-nums" :class="currentFilter === tab.value ? 'bg-black/20 text-obsidian' : 'bg-theme-surface-subtle text-theme-text-muted'">
           {{ tab.count }}
         </span>
       </span>
