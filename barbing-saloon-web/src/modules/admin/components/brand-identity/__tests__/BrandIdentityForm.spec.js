@@ -49,3 +49,4 @@ describe('BrandIdentityForm.vue', () => {
     expect(form.goldPart).toBe('first');
   });
 });
+

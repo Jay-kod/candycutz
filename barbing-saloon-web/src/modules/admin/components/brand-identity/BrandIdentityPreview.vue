@@ -144,3 +144,4 @@ const displayFullName = computed(() => {
   return `${displayFirst.value}${sep}${displaySecond.value}`;
 });
 </script>
+
