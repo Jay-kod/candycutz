@@ -85,3 +85,4 @@ const wordCount = computed(() => {
   return (props.content?.account_deletion_body || '').trim().split(/\s+/).filter(Boolean).length;
 });
 </script>
+

@@ -46,3 +46,4 @@ describe('AccountDeletionStats.vue', () => {
     expect(text).toContain('Add Erasure Terms');
   });
 });
+

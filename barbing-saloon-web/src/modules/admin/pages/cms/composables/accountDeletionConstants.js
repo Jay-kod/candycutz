@@ -6,3 +6,4 @@ export const DEFAULT_ACCOUNT_DELETION_CONTENT = {
   account_deletion_identifier_placeholder: '@username or Full Name',
   account_deletion_reason_placeholder: 'Help us understand how we can improve...',
 };
+
