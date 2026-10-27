@@ -1,6 +1,6 @@
 <template>
   <section
-    class="statistics-section relative py-16 md:py-24 overflow-hidden bg-obsidian border-y border-white/5 z-20 shadow-2xl transition-colors duration-300"
+    class="statistics-section relative py-16 md:py-24 overflow-hidden bg-[#FAF9F6] dark:bg-obsidian border-y border-neutral-200/80 dark:border-white/5 z-20 shadow-2xl transition-colors duration-300"
     aria-label="CandyCutz Achievements and Key Statistics"
     ref="sectionRef"
   >
@@ -23,10 +23,10 @@
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Standardized Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16" data-reveal>
-        <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm text-center">
+        <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold drop-shadow-sm text-center">
           Proven Craftsmanship by the Numbers
         </h2>
-        <p class="mt-4 text-sm sm:text-base text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
+        <p class="mt-4 text-sm sm:text-base text-neutral-600 dark:text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
           Every cut is a statement of precision, passion, and personal style.
         </p>
       </div>
@@ -40,7 +40,7 @@
         <div
           v-for="(stat, index) in statItems"
           :key="stat.id"
-          class="stat-card group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-white/10 hover:border-gold/50 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
+          class="stat-card group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-neutral-200/90 dark:border-white/10 hover:border-gold/50 bg-white dark:bg-gradient-to-b dark:from-white/[0.05] dark:via-white/[0.02] dark:to-transparent backdrop-blur-xl shadow-md dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),_0_12px_24px_-10px_rgba(0,0,0,0.6)] hover:shadow-xl dark:hover:shadow-[0_18px_36px_-10px_rgba(255,153,0,0.2),_inset_0_0_18px_rgba(255,153,0,0.04)]"
           :style="{ '--reveal-delay': `${index * 0.15}s` }"
         >
           <!-- Corner Decor Crosshairs -->
