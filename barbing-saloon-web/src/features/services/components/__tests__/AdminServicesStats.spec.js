@@ -47,3 +47,4 @@ describe('Admin ServicesStats.vue', () => {
     expect(wrapper.text()).toContain('₦0');
   });
 });
+

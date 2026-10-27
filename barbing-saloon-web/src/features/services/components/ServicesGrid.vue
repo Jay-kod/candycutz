@@ -118,3 +118,4 @@ const emptyDescription = computed(() => {
   return 'Your salon catalog is currently empty. Create your first service offering to start receiving customer bookings.';
 });
 </script>
+

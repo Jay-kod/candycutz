@@ -7,7 +7,8 @@
 @config "../../../tailwind.config.js";
 
 :root,
-[data-theme="light"] {
+[data-theme="light"],
+.light {
   --color-bg: #FAF9F6;
   --color-surface: #FFFFFF;
   --color-surface-subtle: #F4F1EA;
@@ -50,7 +51,8 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
   --color-bg: #050505;
   --color-surface: #121212;
   --color-surface-subtle: #1A1A1A;

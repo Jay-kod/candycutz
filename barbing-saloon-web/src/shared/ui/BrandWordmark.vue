@@ -26,7 +26,8 @@ defineProps({
   transition: color 200ms ease;
 }
 
-:global([data-theme="light"]) .brand-wordmark__white {
+:global([data-theme="light"]) .brand-wordmark__white,
+:global(html:not(.dark)) .brand-wordmark__white {
   color: var(--brand-wordmark-white, #111827);
 }
 
