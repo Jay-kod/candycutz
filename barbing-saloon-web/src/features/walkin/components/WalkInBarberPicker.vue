@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.08] bg-[#0B0F13]/90 p-6 sm:p-7 relative overflow-hidden group hover:border-admin/40 transition-all">
+  <div class="rounded-2xl border border-theme-border bg-theme-surface p-6 sm:p-7 relative overflow-hidden group hover:border-admin/40 transition-all">
     <!-- Technical Corner Ticks -->
     <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
     <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -7,18 +7,18 @@
     <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
     <!-- Section Title -->
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.04]">
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-theme-border">
       <div class="flex items-center gap-3.5">
         <div class="h-10 w-10 rounded-xl bg-admin/10 border border-admin/20 flex items-center justify-center text-admin">
           <UserGroupIcon class="h-5 w-5" />
         </div>
         <div>
-          <h2 class="text-base font-bold text-white tracking-wide">Assign Stylist Chair</h2>
-          <p class="text-xs text-ivory/50">Allocate barber for execution</p>
+          <h2 class="text-base font-bold text-theme-text tracking-wide">Assign Stylist Chair</h2>
+          <p class="text-xs text-theme-text-muted">Allocate barber for execution</p>
         </div>
       </div>
 
-      <span class="text-[10px] font-mono text-ivory/40 uppercase tracking-widest">
+      <span class="text-[10px] font-mono text-theme-text-muted uppercase tracking-widest">
         {{ barbers.length }} Stylists On Roster
       </span>
     </div>
@@ -31,18 +31,18 @@
         class="group/barber cursor-pointer p-4 rounded-xl border transition-all relative flex items-center gap-3.5"
         :class="!modelValue 
           ? 'border-admin bg-admin/10 ring-1 ring-admin/40 shadow-lg shadow-admin/10' 
-          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'"
+          : 'border-theme-border bg-theme-bg hover:border-theme-border hover:bg-theme-surface-hover'"
       >
-        <div class="h-11 w-11 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-sm font-bold text-white shrink-0">
+        <div class="h-11 w-11 rounded-full bg-theme-surface border border-theme-border flex items-center justify-center text-sm font-bold text-theme-text shrink-0">
           ✨
         </div>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5">
-            <h3 class="text-xs font-bold text-white group-hover/barber:text-admin-light transition-colors truncate">
+            <h3 class="text-xs font-bold text-theme-text group-hover/barber:text-admin-light transition-colors truncate">
               First Available Chair
             </h3>
           </div>
-          <p class="text-[10px] text-ivory/40 font-mono mt-0.5">Auto-assign first free stylist</p>
+          <p class="text-[10px] text-theme-text-muted font-mono mt-0.5">Auto-assign first free stylist</p>
         </div>
       </div>
 
@@ -54,7 +54,7 @@
         class="group/barber cursor-pointer p-4 rounded-xl border transition-all relative flex items-center gap-3.5"
         :class="modelValue === b.id 
           ? 'border-admin bg-admin/10 ring-1 ring-admin/40 shadow-lg shadow-admin/10' 
-          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'"
+          : 'border-theme-border bg-theme-bg hover:border-theme-border hover:bg-theme-surface-hover'"
       >
         <!-- Selected Check Badge -->
         <span 
@@ -65,13 +65,13 @@
         </span>
 
         <!-- Avatar Initials -->
-        <div class="h-11 w-11 rounded-full bg-gradient-to-br from-admin/40 to-admin/10 border border-admin/30 flex items-center justify-center text-xs font-bold text-white shrink-0">
+        <div class="h-11 w-11 rounded-full bg-gradient-to-br from-admin/40 to-admin/10 border border-admin/30 flex items-center justify-center text-xs font-bold text-admin shrink-0">
           {{ getInitials(b.name) }}
         </div>
 
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5">
-            <h3 class="text-xs font-bold text-white group-hover/barber:text-admin-light transition-colors truncate">
+            <h3 class="text-xs font-bold text-theme-text group-hover/barber:text-admin-light transition-colors truncate">
               {{ b.name }}
             </h3>
             <span class="text-[10px] text-amber-400 font-mono shrink-0">★ {{ b.rating || '5.0' }}</span>
@@ -105,4 +105,3 @@ const selectBarber = (id) => {
   emit('update:modelValue', id);
 };
 </script>
-
