@@ -1,15 +1,15 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all">
+  <div class="rounded-2xl border border-theme-border bg-theme-surface p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all">
     <!-- Technical Corner Ticks -->
     <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
     <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
     <span class="absolute bottom-1.5 left-1.5 w-1.5 h-1.5 border-b border-l border-admin/30 group-hover:border-admin transition-colors"></span>
     <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
-    <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-white/[0.04]">
+    <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-theme-border">
       <div class="flex items-center gap-2">
         <ClockIcon class="h-4 w-4 text-admin" />
-        <h3 class="text-xs font-bold text-white uppercase tracking-wider">Today's Walk-In Ledger</h3>
+        <h3 class="text-xs font-bold text-theme-text uppercase tracking-wider">Today's Walk-In Ledger</h3>
       </div>
       <RouterLink 
         to="/admin/appointments" 
@@ -19,7 +19,7 @@
       </RouterLink>
     </div>
 
-    <div v-if="walkIns.length === 0" class="text-xs text-ivory/40 text-center py-6 font-mono bg-white/[0.02] rounded-xl border border-white/[0.04]">
+    <div v-if="walkIns.length === 0" class="text-xs text-theme-text-muted text-center py-6 font-mono bg-theme-bg rounded-xl border border-theme-border">
       No walk-ins registered yet today.
     </div>
 
@@ -27,24 +27,24 @@
       <div
         v-for="item in walkIns"
         :key="item.id"
-        class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors"
+        class="flex items-center justify-between p-3 rounded-xl bg-theme-bg border border-theme-border hover:bg-theme-surface-hover transition-colors"
       >
         <div class="flex items-center gap-3 min-w-0">
           <div class="h-8 w-8 rounded-full bg-admin/15 border border-admin/30 flex items-center justify-center text-xs font-bold text-admin shrink-0">
             {{ getInitials(item.client_name || item.customer?.name) }}
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-bold text-white truncate">
+            <p class="text-xs font-bold text-theme-text truncate">
               {{ item.client_name || item.customer?.name || 'Walk-In Guest' }}
             </p>
-            <p class="text-[10px] text-ivory/40 truncate">
+            <p class="text-[10px] text-theme-text-muted truncate">
               {{ item.service?.name || 'Grooming' }} • {{ formatTime(item.appointment_time) }}
             </p>
           </div>
         </div>
 
         <div class="text-right shrink-0 ml-3">
-          <p class="text-xs font-bold text-white font-mono">
+          <p class="text-xs font-bold text-theme-text font-mono">
             ₦{{ Number(item.total_price || item.service?.price || 0).toLocaleString() }}
           </p>
           <span 
@@ -90,4 +90,3 @@ const getStatusClass = (status) => {
   }
 };
 </script>
-
