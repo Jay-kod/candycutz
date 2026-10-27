@@ -60,3 +60,4 @@ describe('PageHeroesForm.vue', () => {
     expect(wrapper.emitted('reset-text')).toBeTruthy();
   });
 });
+
