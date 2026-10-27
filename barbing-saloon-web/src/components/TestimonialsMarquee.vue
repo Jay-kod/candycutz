@@ -30,7 +30,7 @@
       Approved customer testimonials will appear here.
     </p>
 
-    <div v-else class="testimonials-marquee relative w-full overflow-hidden border-y border-white/10 bg-[#0C0C0E]/95 py-0 shadow-2xl">
+    <div v-else class="testimonials-marquee relative w-full overflow-hidden border-y border-neutral-200/80 dark:border-white/10 bg-white dark:bg-[#0C0C0E]/95 py-0 shadow-lg dark:shadow-2xl">
       <div
         v-for="(loop, loopIndex) in 2"
         :key="loopIndex"
@@ -42,47 +42,47 @@
         <article
           v-for="(testimonial, idx) in visibleTestimonials"
           :key="`${loopIndex}-${testimonial.id || idx}`"
-          class="testimonial-card group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-white/10 bg-[#0C0C0E] p-6 transition-colors duration-200 hover:bg-white/[0.035] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
+          class="testimonial-card group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-neutral-200/80 dark:border-white/10 bg-white dark:bg-[#0C0C0E] p-6 transition-colors duration-200 hover:bg-amber-50/40 dark:hover:bg-white/[0.035] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
         >
           <!-- Card Header: Quote Icon + Source Pill -->
           <div class="flex items-center justify-between gap-4">
-            <div class="text-zinc-500 transition-colors group-hover/card:text-gold/80">
+            <div class="text-zinc-400 dark:text-zinc-500 transition-colors group-hover/card:text-amber-600 dark:group-hover/card:text-gold/80">
               <svg class="size-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
             </div>
-            <span class="testimonial-source inline-flex items-center rounded-full border border-zinc-700/60 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300">
+            <span class="testimonial-source inline-flex items-center rounded-full border border-amber-600/30 dark:border-zinc-700/60 bg-amber-50 dark:bg-zinc-800/50 px-3 py-1 text-xs font-medium text-amber-800 dark:text-zinc-300">
               {{ getSource(testimonial) }}
             </span>
           </div>
 
           <!-- Review Text -->
-          <p class="testimonial-text my-6 text-sm sm:text-base leading-relaxed text-zinc-100 font-normal">
+          <p class="testimonial-text my-6 text-sm sm:text-base leading-relaxed text-neutral-800 dark:text-zinc-100 font-normal">
             "{{ testimonial.review || testimonial.comment }}"
           </p>
 
           <!-- Bottom: Author Avatar, Name & Role -->
-          <div class="testimonial-author-wrapper flex items-center gap-3 pt-2 border-t border-white/5">
+          <div class="testimonial-author-wrapper flex items-center gap-3 pt-2 border-t border-neutral-200/80 dark:border-white/5">
             <img
               v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
               :src="getStorageUrl(testimonial.client_avatar)"
               :alt="`${testimonial.client_name} avatar`"
-              class="size-10 sm:size-11 rounded-full object-cover border border-zinc-700/60 shrink-0"
+              class="size-10 sm:size-11 rounded-full object-cover border border-neutral-300 dark:border-zinc-700/60 shrink-0"
               loading="lazy"
               @error="markAvatarFailed(testimonial.id)"
             />
             <div
               v-else
-              class="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-xs sm:text-sm font-bold text-gold"
+              class="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-amber-600/40 dark:border-gold/30 bg-amber-50 dark:bg-gold/10 text-xs sm:text-sm font-bold text-amber-700 dark:text-gold"
               aria-hidden="true"
             >
               {{ getInitials(testimonial.client_name) }}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-white tracking-tight">
+              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-neutral-900 dark:text-white tracking-tight">
                 {{ testimonial.client_name || 'CandyCutz client' }}
               </p>
-              <p class="testimonial-role truncate text-xs text-zinc-400 mt-0.5">
+              <p class="testimonial-role truncate text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">
                 {{ getSubtitle(testimonial) }}
               </p>
             </div>

@@ -18,17 +18,17 @@
           animationDelay: `${-(index % 5) * 1.1}s`
         }"
       >
-        <component :is="card.icon" class="h-6 w-6 sm:h-7 sm:w-7 text-gold-light" aria-hidden="true" />
+        <component :is="card.icon" class="h-6 w-6 sm:h-7 sm:w-7 text-amber-700 dark:text-gold-light" aria-hidden="true" />
       </div>
     </div>
 
     <!-- Centered Content -->
     <div class="portal-cta__content !text-center" data-reveal>
-      <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-gold drop-shadow-sm !text-center">
+      <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold drop-shadow-sm !text-center">
         {{ title }}
       </h2>
 
-      <p class="portal-cta__description !text-center text-sm sm:text-base text-theme-muted font-light leading-relaxed max-w-2xl mx-auto mt-4">
+      <p class="portal-cta__description !text-center text-sm sm:text-base text-neutral-600 dark:text-theme-muted font-light leading-relaxed max-w-2xl mx-auto mt-4">
         {{ description }}
       </p>
 
