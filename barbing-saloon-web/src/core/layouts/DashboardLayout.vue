@@ -287,10 +287,10 @@ const themeClasses = computed(() => {
       borderHover: 'hover:border-gold/30',
       hoverTextLight: 'group-hover:text-gold-light',
       hoverText: 'hover:text-gold',
-      bodyBg: 'bg-charcoal',
-      surfaceBg: 'bg-obsidian',
-      headerBg: 'bg-charcoal/90',
-      mainBg: 'bg-obsidian/90'
+      bodyBg: 'bg-[var(--color-bg-primary)]',
+      surfaceBg: 'bg-[var(--color-bg-secondary)]',
+      headerBg: 'bg-[var(--color-bg-secondary)]/90',
+      mainBg: 'bg-[var(--color-bg-primary)]'
     };
   }
 
@@ -335,10 +335,10 @@ const themeClasses = computed(() => {
       borderHover: 'hover:border-blue-500/30',
       hoverTextLight: 'group-hover:text-blue-400',
       hoverText: 'hover:text-blue-500',
-      bodyBg: 'bg-charcoal',
-      surfaceBg: 'bg-obsidian',
-      headerBg: 'bg-charcoal/90',
-      mainBg: 'bg-obsidian/90'
+      bodyBg: 'bg-[var(--color-bg-primary)]',
+      surfaceBg: 'bg-[var(--color-bg-secondary)]',
+      headerBg: 'bg-[var(--color-bg-secondary)]/90',
+      mainBg: 'bg-[var(--color-bg-primary)]'
     };
   }
 
@@ -358,10 +358,10 @@ const themeClasses = computed(() => {
     borderHover: 'hover:border-gold/30',
     hoverTextLight: 'group-hover:text-gold-light',
     hoverText: 'hover:text-gold',
-    bodyBg: 'bg-charcoal',
-    surfaceBg: 'bg-obsidian',
-    headerBg: 'bg-charcoal/90',
-    mainBg: 'bg-obsidian/90'
+    bodyBg: 'bg-[var(--color-bg-primary)]',
+    surfaceBg: 'bg-[var(--color-bg-secondary)]',
+    headerBg: 'bg-[var(--color-bg-secondary)]/90',
+    mainBg: 'bg-[var(--color-bg-primary)]'
   };
 });
 
@@ -431,22 +431,23 @@ const handleLogout = async () => {
 <style scoped>
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 103, 0, 0.45) rgba(0, 0, 0, 0.4);
+  scrollbar-color: var(--color-accent) var(--color-border-subtle);
 }
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-border-subtle);
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 103, 0, 0.4);
+  background-color: var(--color-accent);
+  opacity: 0.5;
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 103, 0, 0.75);
+  background-color: var(--color-accent-hover);
 }
 </style>
