@@ -7,13 +7,13 @@
     leave-from-class="opacity-100 translate-y-0 max-h-[500px]"
     leave-to-class="opacity-0 -translate-y-3 max-h-0"
   >
-    <div v-if="showFilters" class="overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-xl shadow-lg">
+    <div v-if="showFilters" class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-xl shadow-lg">
       <div class="p-6 space-y-5">
         <!-- Time Filter -->
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <ClockIcon class="h-4 w-4 text-gold/60" />
-            <span class="text-xs font-bold uppercase tracking-[0.2em] text-gold/70">When</span>
+            <ClockIcon class="h-4 w-4 text-[var(--color-accent)]/60" />
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-accent)]">When</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
@@ -22,8 +22,8 @@
               @click="$emit('update:activeTimeFilter', f.value)"
               class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all duration-200"
               :class="activeTimeFilter === f.value 
-                ? 'bg-gold/20 border-gold/40 text-gold shadow-[0_0_10px_rgba(212,175,55,0.15)]' 
-                : 'bg-theme-bg/50 border-theme-border/50 text-theme-muted hover:text-theme-text hover:border-theme-border'"
+                ? 'bg-[var(--color-accent)]/20 border-[var(--color-accent)]/40 text-[var(--color-accent)] shadow-[0_0_10px_rgba(212,175,55,0.15)]' 
+                : 'bg-[var(--color-bg-tertiary)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)]'"
             >
               {{ f.label }}
             </button>
@@ -33,8 +33,8 @@
         <!-- Type Filter -->
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <TagIcon class="h-4 w-4 text-gold/60" />
-            <span class="text-xs font-bold uppercase tracking-[0.2em] text-gold/70">Type</span>
+            <TagIcon class="h-4 w-4 text-[var(--color-accent)]/60" />
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-accent)]">Type</span>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
@@ -42,9 +42,9 @@
               :key="f.value"
               @click="$emit('update:activeTypeFilter', f.value)"
               class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all duration-200"
-              :class="activeTypeFilter === f.value 
-                ? (f.bg || 'bg-gold/20 border-gold/40') + ' ' + (f.color || 'text-gold') + ' shadow-sm' 
-                : 'bg-theme-bg/50 border-theme-border/50 text-theme-muted hover:text-theme-text hover:border-theme-border'"
+              :class="activeTimeFilter === f.value 
+                ? (f.bg || 'bg-[var(--color-accent)]/20 border-[var(--color-accent)]/40') + ' ' + (f.color || 'text-[var(--color-accent)]') + ' shadow-sm' 
+                : 'bg-[var(--color-bg-tertiary)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)]'"
             >
               {{ f.label }}
             </button>
@@ -52,12 +52,12 @@
         </div>
 
         <!-- Active Filters Summary & Clear -->
-        <div v-if="hasActiveFilters" class="flex items-center justify-between pt-3 border-t border-theme-border/30">
-          <p class="text-xs text-theme-muted">
-            Showing <span class="text-gold font-bold">{{ filteredCount }}</span> of 
-            <span class="text-theme-muted font-bold">{{ totalCount }}</span> notifications
+        <div v-if="hasActiveFilters" class="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
+          <p class="text-xs text-[var(--color-text-secondary)]">
+            Showing <span class="text-[var(--color-accent)] font-bold">{{ filteredCount }}</span> of 
+            <span class="text-[var(--color-text-secondary)] font-bold">{{ totalCount }}</span> notifications
           </p>
-          <button @click="$emit('clearFilters')" class="flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
+          <button @click="$emit('clearFilters')" class="flex items-center gap-1.5 text-xs font-bold text-[var(--color-danger)] hover:opacity-80 transition-opacity">
             <XMarkIcon class="h-4 w-4" />
             Clear Filters
           </button>
