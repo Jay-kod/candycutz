@@ -1,5 +1,5 @@
 <template>
-  <section class="features-section relative py-16 md:py-24 overflow-hidden bg-white dark:bg-obsidian/40 border-y border-neutral-200/80 dark:border-white/5 transition-colors duration-300">
+  <section class="features-section relative py-16 md:py-24 overflow-hidden bg-[var(--color-bg-primary)] border-y border-[var(--color-border-subtle)] transition-colors duration-300">
     <!-- Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.06),transparent_70%)]"></div>
 
