@@ -2,7 +2,7 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-[#1A1A00] p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-card to-theme-surface p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
         <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
         
@@ -11,7 +11,7 @@
           <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text drop-shadow-lg">
             Performance <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">Analytics</span>
           </h1>
-          <p class="mt-2 text-sm text-ivory/60 max-w-xl">
+          <p class="mt-2 text-sm text-theme-text-muted max-w-xl">
             Track your revenue, client retention, and service popularity over time.
           </p>
         </div>
@@ -24,7 +24,7 @@
                     'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300',
                     range === r.value 
                       ? 'bg-gold text-obsidian shadow-md' 
-                      : 'text-theme-muted hover:text-theme-text hover:bg-white/5'
+                      : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
                   ]">
             {{ r.label }}
           </button>
@@ -32,7 +32,7 @@
       </div>
 
       <div v-if="loading" class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <div v-for="i in 4" :key="i" class="h-32 rounded-2xl bg-white/5 animate-pulse border border-white/5"></div>
+        <div v-for="i in 4" :key="i" class="h-32 rounded-2xl bg-theme-surface/50 animate-pulse border border-theme-border"></div>
       </div>
       
       <div v-else-if="error" class="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center text-red-400">
@@ -99,7 +99,7 @@
               <div v-for="legend in legendItems" :key="legend.label" class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-2">
                   <div class="w-3 h-3 rounded-full" :class="legend.bgClass"></div>
-                  <span class="text-ivory/70 capitalize">{{ legend.label.replace('_', ' ') }}</span>
+                  <span class="text-theme-text-muted capitalize">{{ legend.label.replace('_', ' ') }}</span>
                 </div>
                 <span class="font-bold text-theme-text">{{ legend.count }}</span>
               </div>
@@ -113,7 +113,7 @@
             <h2 class="font-display text-2xl text-theme-text mb-6">Top <span class="text-gold">Services</span></h2>
             <div class="overflow-hidden rounded-xl border border-theme-border bg-theme-bg/50">
               <table class="w-full text-left text-sm">
-                <thead class="bg-white/5 text-ivory/60 border-b border-theme-border text-xs uppercase tracking-wider">
+                <thead class="bg-theme-surface text-theme-text-muted border-b border-theme-border text-xs uppercase tracking-wider">
                   <tr>
                     <th class="p-4 font-semibold">Service</th>
                     <th class="p-4 font-semibold text-center">Bookings</th>
@@ -121,18 +121,18 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-theme-border">
-                  <tr v-for="service in analytics.top_services" :key="service.name" class="hover:bg-white/5 transition-colors">
+                  <tr v-for="service in analytics.top_services" :key="service.name" class="hover:bg-theme-surface/50 transition-colors">
                     <td class="p-4 font-medium text-theme-text flex items-center gap-3">
                       <div class="h-8 w-8 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20 text-gold">
                         <SparklesIcon class="h-4 w-4" />
                       </div>
                       {{ service.name }}
                     </td>
-                    <td class="p-4 text-center text-ivory/80">{{ service.count }}</td>
+                    <td class="p-4 text-center text-theme-text">{{ service.count }}</td>
                     <td class="p-4 text-right text-emerald-400 font-semibold">₦{{ Number(service.revenue).toLocaleString() }}</td>
                   </tr>
                   <tr v-if="!analytics.top_services?.length">
-                    <td colspan="3" class="p-8 text-center text-ivory/40 text-sm">No service data available.</td>
+                    <td colspan="3" class="p-8 text-center text-theme-text-muted text-sm">No service data available.</td>
                   </tr>
                 </tbody>
               </table>

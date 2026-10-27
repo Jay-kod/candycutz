@@ -1,5 +1,5 @@
 <template>
-  <header class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 sm:p-7 backdrop-blur-xl shadow-2xl">
+  <header class="relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/90 p-5 sm:p-7 backdrop-blur-xl shadow-2xl">
     <!-- Ambient Glow Accent -->
     <div class="pointer-events-none absolute -top-24 right-1/4 h-56 w-96 rounded-full bg-gradient-to-r from-[#FF6700]/15 via-amber-500/10 to-transparent blur-3xl"></div>
 
@@ -11,20 +11,20 @@
             <span class="h-1.5 w-1.5 rounded-full bg-[#FF6700]"></span>
             Executive Dossier
           </span>
-          <span class="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-medium text-white/50">
-            <ClockIcon class="h-3 w-3 text-white/40" />
+          <span class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-surface px-2.5 py-0.5 text-[11px] font-medium text-theme-text-muted">
+            <ClockIcon class="h-3 w-3 text-theme-text-muted" />
             {{ currentTime }}
           </span>
-          <span v-if="lastRefreshed" class="text-[11px] text-white/40">
+          <span v-if="lastRefreshed" class="text-[11px] text-theme-text-muted">
             Updated {{ lastRefreshed }}
           </span>
         </div>
 
         <div>
-          <h1 class="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <h1 class="font-display text-2xl font-bold tracking-tight text-theme-text sm:text-3xl">
             Operational <span class="bg-gradient-to-r from-[#FF6700] via-amber-400 to-amber-200 bg-clip-text text-transparent">Reports</span>
           </h1>
-          <p class="mt-1 text-xs sm:text-sm text-white/50 max-w-xl">
+          <p class="mt-1 text-xs sm:text-sm text-theme-text-muted max-w-xl">
             Official financial ledger, barber throughput, and client retention summaries ready for export.
           </p>
         </div>
@@ -33,7 +33,7 @@
       <!-- Controls & Actions -->
       <div class="flex flex-wrap items-center gap-3">
         <!-- Range Selector Pills -->
-        <div class="flex items-center rounded-xl border border-white/[0.08] bg-[#0B0F13]/80 p-1 backdrop-blur-md">
+        <div class="flex items-center rounded-xl border border-theme-border bg-theme-bg/80 p-1 backdrop-blur-md">
           <button
             v-for="option in rangeOptions"
             :key="option.value"
@@ -43,7 +43,7 @@
               'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200',
               selectedRange === option.value
                 ? 'bg-gradient-to-r from-[#FF6700] to-amber-500 text-white shadow-lg shadow-[#FF6700]/25'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+                : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
             ]"
           >
             {{ option.label }}
@@ -53,7 +53,7 @@
         <!-- Direct Link to Live Analytics Dashboard -->
         <router-link
           to="/admin/analytics"
-          class="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white/80 transition-all hover:border-sky-500/40 hover:bg-sky-500/10 hover:text-sky-400"
+          class="inline-flex items-center gap-2 rounded-xl border border-theme-border bg-theme-surface px-3.5 py-2 text-xs font-semibold text-theme-text transition-all hover:border-sky-500/40 hover:bg-sky-500/10 hover:text-sky-400"
         >
           <ChartBarSquareIcon class="h-4 w-4" />
           <span>Live Analytics</span>
