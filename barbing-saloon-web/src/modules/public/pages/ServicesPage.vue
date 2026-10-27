@@ -108,17 +108,17 @@
               <p class="mt-1 text-xs leading-relaxed text-white/70 line-clamp-2">
                 {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
               </p>
-              <div class="mt-3 flex items-end justify-between gap-3 border-t border-gold/20 pt-2">
+              <div class="mt-3 flex items-end justify-between gap-2.5 border-t border-gold/20 pt-2">
                 <div>
-                  <span class="block text-[8px] font-bold uppercase tracking-[0.18em] text-gold/60">Price</span>
-                  <span class="font-display text-xl font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>
+                  <span class="block text-[7px] font-bold uppercase tracking-[0.16em] text-gold/60">Price</span>
+                  <span class="font-display text-lg font-bold text-gold">{{ formatNairaAmount(service.price) }}</span>
                 </div>
                 <RouterLink
                   :to="`/customer/dashboard/book/${service.id}`"
-                  class="inline-flex min-h-[34px] shrink-0 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-gold to-gold-light px-2.5 py-1.5 text-[10px] font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-gold/30"
+                  class="inline-flex min-h-[30px] shrink-0 items-center justify-center gap-1 rounded-md bg-gradient-to-r from-gold to-gold-light px-2 py-1.5 text-[9px] font-bold text-obsidian shadow-lg transition-all duration-200 hover:scale-[1.01] hover:shadow-gold/30"
                 >
                   Book Cut
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-2.5 w-2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>
                 </RouterLink>
