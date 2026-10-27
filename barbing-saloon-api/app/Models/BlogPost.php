@@ -33,6 +33,9 @@ class BlogPost extends Model
 
     protected $casts = ['status' => BlogStatus::class, 'published_at' => 'datetime'];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $chair_status
  * @property-read User $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkingHour> $workingHours
- *
  * @property string $status
  * @property string|null $bank_name
  * @property string|null $account_name

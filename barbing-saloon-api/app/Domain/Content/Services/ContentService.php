@@ -49,7 +49,7 @@ class ContentService
                         'image_url' => $imageUrl,
                         'category' => $gallery->category?->value ?? $gallery->category,
                         'barber_id' => $gallery->barber_id,
-                        'barber_name' => $gallery->barber?->user?->name ?? $gallery->barber?->name ?? null,
+                        'barber_name' => $gallery->barber?->user?->name,
                         'is_featured' => $gallery->is_featured,
                         'display_order' => $gallery->display_order,
                         'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
@@ -73,7 +73,7 @@ class ContentService
                 ->orderByDesc('rating')
                 ->latest()
                 ->get()
-                ->map(fn (Testimonial $testimonial) => [
+                ->map(fn (Testimonial $testimonial): array => [
                     'id' => $testimonial->id,
                     'client_name' => $testimonial->customer?->name ?? $testimonial->client_name ?? 'Anonymous',
                     'client_avatar' => ($testimonial->client_avatar ? (str_starts_with($testimonial->client_avatar, 'http') ? $testimonial->client_avatar : url('storage/'.ltrim(str_replace('storage/', '', $testimonial->client_avatar), '/'))) : null) ?? app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer?->avatar),
@@ -97,7 +97,7 @@ class ContentService
                 ->where('status', 'published')
                 ->latest()
                 ->get()
-                ->map(fn (BlogPost $post) => $this->blogData($post))
+                ->map(fn (BlogPost $post): array => $this->blogData($post))
                 ->all();
         });
     }
@@ -132,7 +132,7 @@ class ContentService
      * @param  Barber  $barber
      * @return array<string, mixed>
      */
-    protected function barberData($barber): array
+    protected function barberData(Barber $barber): array
     {
         $avatar = app(UserMediaUrl::class)->for($barber->user, $barber->user?->avatar);
 

@@ -12,6 +12,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $username
+ * @property string|null $phone
+ * @property string|null $avatar
+ * @property string|null $cover_image
+ * @property string|null $status
+ * @property UserRole $role
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Barber|null $barber
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
@@ -63,6 +77,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'notification_preferences' => 'array',
     ];
 
+    /**
+     * @return HasOne<Barber, $this>
+     */
     public function barber(): HasOne
     {
         return $this->hasOne(Barber::class);

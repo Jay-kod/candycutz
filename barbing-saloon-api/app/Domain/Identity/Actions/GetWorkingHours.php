@@ -13,7 +13,7 @@ class GetWorkingHours
     {
         $barbers = Barber::with(['user', 'workingHours' => fn ($q) => $q->orderBy('day_of_week')])->get();
 
-        return $barbers->map(function ($b) {
+        return $barbers->map(function (Barber $b): array {
             return [
                 'barber_id' => $b->id,
                 'barber_name' => $b->user?->name ?? 'Barber #'.$b->id,

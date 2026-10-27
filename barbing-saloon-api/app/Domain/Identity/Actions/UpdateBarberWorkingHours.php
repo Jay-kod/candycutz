@@ -29,7 +29,7 @@ class UpdateBarberWorkingHours
             );
         }
 
-        return $barber->workingHours->map(fn ($h) => [
+        return $barber->workingHours->map(fn (WorkingHour $h): array => [
             'id' => $h->id,
             'day_of_week' => $h->day_of_week,
             'open_time' => substr($h->open_time, 0, 5),
