@@ -3,47 +3,47 @@
     <div class="animate-fade-in pb-20 max-w-4xl mx-auto">
       
       <!-- Header -->
-      <section class="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8 mb-12 shadow-2xl">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
+      <section class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 mb-12 shadow-2xl">
+        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
         <div class="relative z-10">
-          <button @click="goBack" class="mb-6 flex items-center gap-2 text-sm text-ivory/50 hover:text-gold transition-colors">
+          <button @click="goBack" class="mb-6 flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
             <ArrowLeftIcon class="h-4 w-4" /> Back to Services
           </button>
-          <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Book Appointment</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-            Secure your <span class="text-gold">Seat</span>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)]/80 font-medium">Book Appointment</p>
+          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-[var(--color-text-primary)]">
+            Secure your <span class="text-[var(--color-accent)]">Seat</span>
           </h1>
         </div>
       </section>
 
       <!-- Loading State -->
       <div v-if="loadingService" class="flex justify-center py-20">
-        <div class="h-10 w-10 animate-spin rounded-full border-4 border-gold border-t-transparent shadow-[0_0_15px_rgba(212,175,55,0.5)]"></div>
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-accent)] border-t-transparent shadow-[0_0_15px_rgba(255,153,0,0.5)]"></div>
       </div>
 
-      <div v-else-if="!service" class="text-center py-20 bg-theme-surface/60 rounded-3xl border border-theme-border">
-        <p class="text-ivory/50">Service not found.</p>
-        <button @click="router.push('/customer/dashboard/services')" class="mt-4 text-gold hover:underline">Go back to services</button>
+      <div v-else-if="!service" class="text-center py-20 bg-[var(--color-bg-secondary)] rounded-3xl border border-[var(--color-border)]">
+        <p class="text-[var(--color-text-muted)]">Service not found.</p>
+        <button @click="router.push('/customer/dashboard/services')" class="mt-4 text-[var(--color-accent)] hover:underline">Go back to services</button>
       </div>
 
       <div v-else class="space-y-8">
         
         <!-- Selected Service & Barber Summary -->
-        <div class="bg-theme-surface/80 backdrop-blur-xl border border-gold/20 rounded-2xl p-6 shadow-xl">
+        <div class="bg-[var(--color-bg-secondary)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
           <div class="flex flex-col sm:flex-row items-center gap-6">
-            <div class="h-24 w-24 rounded-xl overflow-hidden shrink-0 border border-gold/30">
+            <div class="h-24 w-24 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]">
               <img v-if="service.image" :src="service.image" :alt="service.name" class="h-full w-full object-cover" />
-              <div v-else class="h-full w-full bg-theme-bg flex items-center justify-center">
-                <ScissorsIcon class="w-8 h-8 text-gold/50" />
+              <div v-else class="h-full w-full bg-[var(--color-bg-tertiary)] flex items-center justify-center">
+                <ScissorsIcon class="w-8 h-8 text-[var(--color-accent)]/60" />
               </div>
             </div>
             <div class="flex-1 text-center sm:text-left">
-              <span class="text-[10px] uppercase tracking-widest text-gold/70">{{ service.category?.name || 'Service' }}</span>
-              <h2 class="font-display text-2xl font-bold text-theme-text mt-1">{{ service.name }}</h2>
-              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-ivory/60">
-                <span class="flex items-center gap-1.5"><ClockIcon class="w-4 h-4 text-gold/50" /> {{ service.duration_minutes }} mins</span>
-                <span class="hidden sm:inline text-theme-border">•</span>
-                <span class="flex items-center gap-1.5 font-bold text-theme-text"><CurrencyDollarIcon class="w-4 h-4 text-gold/50" /> {{ formatNairaAmount(service.price) }}</span>
+              <span class="text-[10px] uppercase tracking-widest text-[var(--color-accent)]/80">{{ service.category?.name || 'Service' }}</span>
+              <h2 class="font-display text-2xl font-bold text-[var(--color-text-primary)] mt-1">{{ service.name }}</h2>
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-[var(--color-text-secondary)]">
+                <span class="flex items-center gap-1.5"><ClockIcon class="w-4 h-4 text-[var(--color-accent)]/60" /> {{ service.duration_minutes }} mins</span>
+                <span class="hidden sm:inline text-[var(--color-border)]">•</span>
+                <span class="flex items-center gap-1.5 font-bold text-[var(--color-text-primary)]"><CurrencyDollarIcon class="w-4 h-4 text-[var(--color-accent)]/60" /> {{ formatNairaAmount(service.price) }}</span>
               </div>
             </div>
           </div>
@@ -58,8 +58,8 @@
         </div>
 
         <!-- Booking Form: Date & Time only -->
-        <form @submit.prevent="submit" class="bg-theme-surface/60 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+        <form @submit.prevent="submit" class="bg-[var(--color-bg-secondary)] backdrop-blur-xl border border-[var(--color-border)] rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
           <!-- Step 1: Date & Time -->
           <BookingTimeSlotPicker
@@ -107,10 +107,10 @@ import BookingBarberSelect from '../components/booking/BookingBarberSelect.vue'
 import BookingTimeSlotPicker from '../components/booking/BookingTimeSlotPicker.vue'
 import BookingSummaryStep from '../components/booking/BookingSummaryStep.vue'
 import { 
-  ArrowLeftIcon,
+  ArrowLeftIcon, 
   ScissorsIcon, 
   ClockIcon, 
-  CurrencyDollarIcon
+  CurrencyDollarIcon 
 } from '@heroicons/vue/24/outline'
 import { getStorageUrl as getFullImageUrl } from '@/core/utils/url'
 
