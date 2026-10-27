@@ -13,9 +13,9 @@
         'fixed inset-y-0 left-0 z-50 flex flex-col h-full h-[100dvh] max-h-screen transition-all duration-300 ease-in-out',
         'lg:static lg:h-full lg:max-h-full lg:translate-x-0',
         'sidebar-panel backdrop-blur-xl',
-        themeClasses.surfaceBg || 'bg-[#090a0d]/95',
+        themeClasses.surfaceBg || 'bg-[var(--color-bg-secondary)]/95',
         'border-r',
-        portalConfig.sidebarBorder || 'border-white/[0.07]',
+        portalConfig.sidebarBorder || 'border-[var(--color-border)]',
         isMobileSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/80' : '-translate-x-full',
         isSidebarCollapsed ? 'lg:w-[88px]' : 'w-72'
       ]"
@@ -27,12 +27,12 @@
       </div>
 
       <!-- Sidebar Header / Brand Emblem -->
-      <div :class="['relative z-10 flex h-20 shrink-0 items-center justify-between px-5 border-b', portalConfig.headerBorder || 'border-white/[0.06]']">
+      <div :class="['relative z-10 flex h-20 shrink-0 items-center justify-between px-5 border-b', portalConfig.headerBorder || 'border-[var(--color-border-subtle)]']">
         <RouterLink :to="homeRoute" class="flex items-center gap-3 group min-w-0">
           <!-- Logo Emblem with Luxury Rim -->
           <div class="relative flex items-center justify-center shrink-0">
             <div :class="['h-11 w-11 rounded-2xl p-[1px] bg-gradient-to-br flex items-center justify-center group-hover:scale-105 transition-transform duration-300', portalConfig.rimGradient]">
-              <div class="h-full w-full rounded-[15px] bg-[#14151b] flex items-center justify-center overflow-hidden">
+              <div class="h-full w-full rounded-[15px] bg-[var(--color-bg-secondary)] flex items-center justify-center overflow-hidden">
                 <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-6 w-6 object-contain" />
               </div>
             </div>
@@ -45,7 +45,7 @@
               isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100'
             ]"
           >
-            <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-white']">
+            <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-[var(--color-text-primary)]']">
               <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </div>
             <div :class="['inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border', portalConfig.badgeClass]">
@@ -58,7 +58,7 @@
         <!-- Mobile Close Button -->
         <button
           @click="$emit('closeMobile')"
-          :class="['lg:hidden p-2 transition-colors rounded-xl', portalConfig.closeBtn || 'text-white/50 hover:text-white hover:bg-white/5']"
+          :class="['lg:hidden p-2 transition-colors rounded-xl', portalConfig.closeBtn || 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]']"
           aria-label="Close sidebar"
         >
           <XMarkIcon class="h-5 w-5" />
@@ -84,7 +84,7 @@
             </p>
             <div
               v-if="!isSidebarCollapsed"
-              :class="['h-px flex-1 ml-2.5', portalConfig.sectionLine || 'bg-gradient-to-r from-white/[0.08] to-transparent']"
+              :class="['h-px flex-1 ml-2.5', portalConfig.sectionLine || 'bg-gradient-to-r from-[var(--color-border)] to-transparent']"
             ></div>
           </div>
 
@@ -105,7 +105,7 @@
                       portalConfig.activeBorder,
                       'shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]'
                     ]
-                  : (portalConfig.navInactive || 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06]')
+                  : (portalConfig.navInactive || 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] border border-transparent hover:border-[var(--color-border-subtle)]')
               ]"
               :title="isSidebarCollapsed ? item.name : ''"
             >
@@ -121,7 +121,7 @@
                   'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-200',
                   isActiveRoute(item.to)
                     ? [portalConfig.iconActive, 'border']
-                    : (portalConfig.iconInactive || ['bg-transparent text-white/40 group-hover:bg-white/[0.05]', portalConfig.iconHover])
+                    : (portalConfig.iconInactive || ['bg-transparent text-[var(--color-text-muted)] group-hover:bg-[var(--color-bg-tertiary)]', portalConfig.iconHover])
                 ]"
               >
                 <component
@@ -135,7 +135,7 @@
                 :class="[
                   'text-[12.5px] leading-tight tracking-wide whitespace-nowrap transition-all duration-200',
                   isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto',
-                  isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-white'] : ['font-medium', portalConfig.navLabelHover || 'group-hover:text-white']
+                  isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-[var(--color-text-primary)]'] : ['font-medium', portalConfig.navLabelHover || 'group-hover:text-[var(--color-text-primary)]']
                 ]"
               >
                 {{ item.name }}
@@ -160,11 +160,11 @@
       </div>
 
       <!-- Profile Card & Sign Out Footer (Pinned) -->
-      <div :class="['relative z-10 shrink-0 mt-auto border-t p-2.5', portalConfig.profileBorder || 'border-white/[0.07]']">
+      <div :class="['relative z-10 shrink-0 mt-auto border-t p-2.5', portalConfig.profileBorder || 'border-[var(--color-border)]']">
         <!-- Expanded Profile Card -->
         <div
           v-if="!isSidebarCollapsed"
-          :class="['rounded-xl border p-2 transition-all duration-200', portalConfig.profileCard || 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]']"
+          :class="['rounded-xl border p-2 transition-all duration-200', portalConfig.profileCard || 'border-[var(--color-border)] bg-[var(--color-bg-tertiary)] hover:border-[var(--color-accent)]/30']"
         >
           <div class="flex items-center gap-2.5">
             <!-- User Avatar with Status Indicator -->
@@ -178,7 +178,7 @@
               <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
                 {{ userInitials }}
               </div>
-              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
+              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
             </RouterLink>
             <div
               v-else
@@ -188,7 +188,7 @@
               <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
                 {{ userInitials }}
               </div>
-              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
+              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
             </div>
 
             <!-- User Name and Role/Email -->
@@ -196,14 +196,14 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['block truncate text-xs font-semibold transition-colors', portalConfig.profileName || 'text-white', portalConfig.hoverText]"
+                :class="['block truncate text-xs font-semibold transition-colors', portalConfig.profileName || 'text-[var(--color-text-primary)]', portalConfig.hoverText]"
               >
                 {{ userName }}
               </RouterLink>
-              <span v-else :class="['block truncate text-xs font-semibold', portalConfig.profileName || 'text-white']">
+              <span v-else :class="['block truncate text-xs font-semibold', portalConfig.profileName || 'text-[var(--color-text-primary)]']">
                 {{ userName }}
               </span>
-              <p :class="['truncate text-[10px]', portalConfig.profileEmail || 'text-white/40']">
+              <p :class="['truncate text-[10px]', portalConfig.profileEmail || 'text-[var(--color-text-secondary)]']">
                 {{ userEmail || (portalName + ' Staff') }}
               </p>
             </div>
@@ -213,14 +213,14 @@
               <RouterLink
                 v-if="profileRoute"
                 :to="profileRoute"
-                :class="['flex h-6 w-6 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-white/40 hover:bg-white/10', portalConfig.hoverText]"
+                :class="['flex h-6 w-6 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]', portalConfig.hoverText]"
                 title="Settings"
               >
                 <Cog6ToothIcon class="h-3.5 w-3.5" />
               </RouterLink>
               <button
                 @click="$emit('logout')"
-                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-6 w-6 text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
+                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-6 w-6 text-[var(--color-danger)]/70 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]']"
                 title="Sign Out"
               >
                 <ArrowRightOnRectangleIcon class="h-3.5 w-3.5" />
@@ -241,12 +241,12 @@
             <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
               {{ userInitials }}
             </div>
-            <span :class="['absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#090a0d]', portalConfig.dotClass]"></span>
+            <span :class="['absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
           </RouterLink>
 
           <button
             @click="$emit('logout')"
-            :class="['flex h-9 w-9 items-center justify-center rounded-xl transition-colors', portalConfig.logoutBtn || 'text-red-400/60 hover:bg-red-500/10 hover:text-red-400']"
+            :class="['flex h-9 w-9 items-center justify-center rounded-xl transition-colors', portalConfig.logoutBtn || 'text-[var(--color-danger)]/70 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]']"
             title="Sign Out"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4" />
@@ -421,7 +421,7 @@ defineExpose({ navContainer });
 <style scoped>
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 153, 0, 0.4) rgba(0, 0, 0, 0.2);
+  scrollbar-color: var(--color-accent) transparent;
   -webkit-overflow-scrolling: touch;
 }
 .custom-scrollbar::-webkit-scrollbar {
@@ -431,10 +431,11 @@ defineExpose({ navContainer });
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 153, 0, 0.3);
+  background-color: var(--color-accent);
+  opacity: 0.3;
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 153, 0, 0.6);
+  background-color: var(--color-accent-hover);
 }
 </style>
