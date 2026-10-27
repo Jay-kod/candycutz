@@ -45,3 +45,4 @@ describe('BackupSummaryCards.vue', () => {
     expect(wrapper.text()).not.toContain('Total Snapshots')
   })
 })
+
