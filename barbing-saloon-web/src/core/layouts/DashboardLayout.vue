@@ -109,7 +109,7 @@ const mainBgClass = computed(() => {
 });
 
 const isActiveRoute = (to) => {
-  if (to === props.homeRoute || to === '/admin/mobile-app' || to === '/admin/websites') return route.path === to;
+  if (to === props.homeRoute || to === '/admin/websites') return route.path === to;
   return route.path === to || route.path.startsWith(to + '/');
 };
 
@@ -142,33 +142,6 @@ const groupedNavItems = computed(() => {
       'Privacy Policy Page',
       'Terms of Service Page',
       'Account Deletion Page'
-    ],
-    'The App': [
-      'App Control Center',
-      'Onboarding',
-      'Home / Discover',
-      'Services Catalog',
-      'Book Appointment',
-      'Booking Confirmation',
-      'Walk-In Queue',
-      'My Bookings',
-      'Barber Appointments',
-      'Barber Schedule',
-      'Customer Profile',
-      'Edit Profile',
-      'Barber Profile',
-      'Wishlist',
-      'Reviews & Ratings',
-      'Hairstyle Gallery',
-      'Grooming Blog',
-      'Push Notifications',
-      'App Settings & Theme',
-      'Personal Analytics',
-      'Sign In',
-      'Sign Up',
-      'Forgot Password',
-      'Privacy Policy',
-      'Terms of Service'
     ],
     'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Feedback Inbox', 'Blog'],
     'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
