@@ -57,7 +57,7 @@ it('stores customer avatars privately and serves them only through a signed URL'
     expect($signedUrl)->toContain('signature=');
     $this->get($signedUrl)->assertOk();
     $this->get($signedUrl.'&signature=invalid')->assertForbidden();
-    $this->get('/storage/'.$storedPath)->assertNotFound();
+    $this->get('/storage/'.$storedPath)->assertForbidden();
 
     $testimonial = Testimonial::factory()->create([
         'customer_id' => $user->id,

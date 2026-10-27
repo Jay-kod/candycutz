@@ -32,7 +32,7 @@
           <div class="min-w-0 flex-1">
             <h3 class="font-display text-lg sm:text-xl text-theme-text truncate" :title="appointment.customer_name">{{ appointment.customer_name || 'Unknown Client' }}</h3>
             <p class="text-xs sm:text-sm font-medium truncate mb-1.5" :class="serviceTextClasses(appointment.status)" :title="appointment.service_name">{{ appointment.service_name || 'General Service' }}</p>
-            <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-ivory/50">
+            <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-theme-text-muted">
               <span v-if="appointment.customer_phone" class="flex items-center gap-1 truncate"><PhoneIcon class="h-3 w-3 shrink-0" /> {{ appointment.customer_phone }}</span>
               <span v-else-if="appointment.customer_email" class="flex items-center gap-1 truncate"><EnvelopeIcon class="h-3 w-3 shrink-0" /> {{ appointment.customer_email }}</span>
               <span v-else>No contact info</span>
@@ -64,18 +64,18 @@
         </span>
 
         <!-- Payment Method -->
-        <span v-if="appointment.payment_method" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-white/10 bg-white/[0.04] text-ivory/60">
+        <span v-if="appointment.payment_method" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-theme-border bg-theme-surface-subtle text-theme-text-muted">
           <BanknotesIcon class="h-3 w-3" />
           {{ appointment.payment_method === 'pos' ? 'POS' : appointment.payment_method }}
         </span>
 
         <!-- Payment Status -->
-        <span v-if="appointment.payment_status" class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-white/5 bg-black/40 text-ivory/60">
+        <span v-if="appointment.payment_status" class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-theme-border bg-theme-surface-subtle text-theme-text-muted">
           <span class="w-1.5 h-1.5 rounded-full" :class="appointment.payment_status === 'successful' ? 'bg-emerald-400' : appointment.payment_status === 'awaiting_verification' ? 'bg-amber-400' : 'bg-red-400'"></span>
           {{ appointment.payment_status.replace('_', ' ') }}
         </span>
-        <span v-else class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-white/5 bg-black/20 text-ivory/30">
-          <span class="w-1.5 h-1.5 rounded-full bg-ivory/20"></span>
+        <span v-else class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-theme-border bg-theme-surface-subtle text-theme-text-muted">
+          <span class="w-1.5 h-1.5 rounded-full bg-theme-text-muted/40"></span>
           Unpaid
         </span>
       </div>
@@ -86,13 +86,13 @@
         :class="detailsCardClasses(appointment.status)"
       >
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3 text-sm text-ivory/70">
+          <div class="flex items-center gap-3 text-sm text-theme-text-muted">
             <div class="p-2 rounded-xl bg-theme-surface border border-theme-border shadow-sm" :class="iconClasses(appointment.status)">
               <CalendarIcon class="h-4 w-4" />
             </div>
             <span class="font-medium tracking-wide text-xs sm:text-sm">{{ new Date(appointment.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</span>
           </div>
-          <div class="flex items-center gap-3 text-sm text-ivory/70">
+          <div class="flex items-center gap-3 text-sm text-theme-text-muted">
             <div class="p-2 rounded-xl bg-theme-surface border border-theme-border shadow-sm" :class="iconClasses(appointment.status)">
               <ClockIcon class="h-4 w-4" />
             </div>
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="mt-auto pt-5 border-t border-white/5 flex flex-wrap gap-2">
+      <div class="mt-auto pt-5 border-t border-theme-border flex flex-wrap gap-2">
         <template v-if="appointment.status === 'pending'">
           <button
             v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'"
@@ -158,11 +158,11 @@
 
     <!-- Empty State -->
     <div v-if="appointments.length === 0" class="col-span-full py-24 text-center rounded-3xl border border-dashed border-theme-border bg-theme-surface/30">
-      <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.05] shadow-inner mb-6">
+      <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-theme-surface-subtle border border-theme-border shadow-inner mb-6">
         <ClipboardDocumentCheckIcon class="h-10 w-10 text-gold/30" />
       </div>
       <h3 class="font-display text-2xl text-theme-text mb-2">No Appointments</h3>
-      <p class="text-sm text-ivory/40">You don't have any appointments matching this criteria.</p>
+      <p class="text-sm text-theme-text-muted">You don't have any appointments matching this criteria.</p>
     </div>
   </div>
 </template>
@@ -202,7 +202,7 @@ const statusColors = {
     avatar: 'bg-gradient-to-br from-amber-500/25 to-amber-600/10 text-amber-400 border-amber-500/25',
     serviceText: 'text-amber-400/80',
     badge: 'bg-amber-400/15 text-amber-400 border-amber-400/25 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
-    detailsCard: 'bg-amber-950/20 border-amber-500/10',
+    detailsCard: 'bg-amber-500/10 border-amber-500/15',
     icon: 'text-amber-400/70',
     timeText: 'text-amber-400',
   },
@@ -213,7 +213,7 @@ const statusColors = {
     avatar: 'bg-gradient-to-br from-blue-500/25 to-blue-600/10 text-blue-400 border-blue-500/25',
     serviceText: 'text-blue-400/80',
     badge: 'bg-blue-400/15 text-blue-400 border-blue-400/25 shadow-[0_0_10px_rgba(59,130,246,0.1)]',
-    detailsCard: 'bg-blue-950/20 border-blue-500/10',
+    detailsCard: 'bg-blue-500/10 border-blue-500/15',
     icon: 'text-blue-400/70',
     timeText: 'text-blue-400',
   },
@@ -224,7 +224,7 @@ const statusColors = {
     avatar: 'bg-gradient-to-br from-emerald-500/25 to-emerald-600/10 text-emerald-400 border-emerald-500/25',
     serviceText: 'text-emerald-400/80',
     badge: 'bg-emerald-400/15 text-emerald-400 border-emerald-400/25 shadow-[0_0_10px_rgba(16,185,129,0.1)]',
-    detailsCard: 'bg-emerald-950/20 border-emerald-500/10',
+    detailsCard: 'bg-emerald-500/10 border-emerald-500/15',
     icon: 'text-emerald-400/70',
     timeText: 'text-emerald-400',
   },
@@ -235,7 +235,7 @@ const statusColors = {
     avatar: 'bg-gradient-to-br from-red-500/25 to-red-600/10 text-red-400 border-red-500/25',
     serviceText: 'text-red-400/80',
     badge: 'bg-red-400/15 text-red-400 border-red-400/25 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
-    detailsCard: 'bg-red-950/20 border-red-500/10',
+    detailsCard: 'bg-red-500/10 border-red-500/15',
     icon: 'text-red-400/70',
     timeText: 'text-red-400',
   },
@@ -246,7 +246,7 @@ const statusColors = {
     avatar: 'bg-gradient-to-br from-gray-500/20 to-gray-600/10 text-gray-400 border-gray-500/20',
     serviceText: 'text-gray-400/70',
     badge: 'bg-gray-400/15 text-gray-400 border-gray-400/25',
-    detailsCard: 'bg-gray-950/20 border-gray-500/10',
+    detailsCard: 'bg-gray-500/10 border-gray-500/15',
     icon: 'text-gray-400/70',
     timeText: 'text-gray-400',
   },

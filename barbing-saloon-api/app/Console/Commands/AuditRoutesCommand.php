@@ -36,6 +36,7 @@ class AuditRoutesCommand extends Command
             $middlewareStr = implode(', ', $middleware);
 
             $isWhitelisted = $this->isWhitelisted($uri, $whitelist);
+            $isSignedStorageRoute = $this->isSignedStorageRoute($route);
 
             $hasAuth = false;
             $roles = [];
@@ -53,12 +54,16 @@ class AuditRoutesCommand extends Command
                 $status = '<info>PUBLIC (WHITELISTED)</info>';
             } elseif ($hasAuth) {
                 $status = '<comment>PROTECTED (SANCTUM)</comment>';
+            } elseif ($isSignedStorageRoute) {
+                $status = '<comment>PROTECTED (SIGNED URL)</comment>';
             } else {
                 $status = '<error>UNPROTECTED VIOLATION</error>';
                 $violations++;
             }
 
-            $roleStr = ! empty($roles) ? implode(', ', $roles) : ($hasAuth ? 'authenticated' : 'public');
+            $roleStr = ! empty($roles)
+                ? implode(', ', $roles)
+                : ($hasAuth ? 'authenticated' : ($isSignedStorageRoute ? 'signed URL' : 'public'));
 
             $rows[] = [
                 $methods,
@@ -107,6 +112,32 @@ class AuditRoutesCommand extends Command
                 if (preg_match($regex, $uri)) {
                     return true;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    private function isSignedStorageRoute(\Illuminate\Routing\Route $route): bool
+    {
+        $name = $route->getName();
+        $disks = config('filesystems.disks', []);
+
+        foreach ($disks as $disk => $diskConfig) {
+            if (($diskConfig['driver'] ?? null) !== 'local' || ! ($diskConfig['serve'] ?? false)) {
+                continue;
+            }
+
+            if ($name === "storage.{$disk}.upload" && in_array('PUT', $route->methods(), true)) {
+                return true;
+            }
+
+            if (
+                $name === "storage.{$disk}"
+                && in_array('GET', $route->methods(), true)
+                && ($diskConfig['visibility'] ?? 'private') !== 'public'
+            ) {
+                return true;
             }
         }
 
