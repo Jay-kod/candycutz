@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domain\System\Services;
 
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class SalonCalculationEngine
@@ -17,7 +16,7 @@ class SalonCalculationEngine
      * - Protects against legacy 10,000x multiplier by dividing if >= 100,000
      * - Seamlessly falls back to canonical service price (services.price) if null or 0
      */
-    public const PRICE_EXPR = "COALESCE(CASE WHEN a.total_price > 0 AND a.total_price <= 100000 THEN a.total_price WHEN a.total_price > 100000 THEN ROUND(a.total_price / 10000) ELSE NULL END, s.price, 0)";
+    public const PRICE_EXPR = 'COALESCE(CASE WHEN a.total_price > 0 AND a.total_price <= 100000 THEN a.total_price WHEN a.total_price > 100000 THEN ROUND(a.total_price / 10000) ELSE NULL END, s.price, 0)';
 
     /**
      * Compute comprehensive salon revenue & appointment KPIs in a single optimized query.
@@ -307,7 +306,7 @@ class SalonCalculationEngine
     public function computeHourlyDistribution(): array
     {
         return DB::table('appointments')
-            ->selectRaw("HOUR(appointment_time) as hr, COUNT(*) as count")
+            ->selectRaw('HOUR(appointment_time) as hr, COUNT(*) as count')
             ->whereNotNull('appointment_time')
             ->groupBy('hr')
             ->pluck('count', 'hr')
