@@ -2,7 +2,7 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in pb-10">
       <!-- Header -->
-      <div class="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-8 lg:p-10 shadow-2xl">
+      <div class="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-8 lg:p-10 shadow-2xl">
         <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-gold/5 blur-[100px]"></div>
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.06),transparent_70%)]"></div>
         <div class="relative z-10">
@@ -10,7 +10,7 @@
           <h1 class="mt-2 font-display text-4xl lg:text-5xl text-theme-text drop-shadow-lg leading-tight">
             My <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-amber-400">Profile</span>
           </h1>
-          <p class="mt-3 max-w-xl text-sm text-ivory/50 leading-relaxed">
+          <p class="mt-3 max-w-xl text-sm text-theme-text-muted leading-relaxed">
             Update your personal details, specialties, and let your clients know exactly what you bring to the chair.
           </p>
         </div>
@@ -19,26 +19,26 @@
       <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         <!-- Profile Form -->
         <form
-          class="rounded-3xl border border-white/[0.06] bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-xl"
+          class="rounded-3xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-xl"
           @submit.prevent="submit"
         >
-          <div class="flex items-center gap-3 border-b border-white/[0.04] px-8 py-6 bg-black/20">
+          <div class="flex items-center gap-3 border-b border-theme-border px-8 py-6 bg-theme-surface-subtle/40">
             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 border border-gold/20 shadow-inner">
               <UserIcon class="h-5 w-5 text-gold" />
             </div>
             <div>
               <h2 class="font-display text-xl text-theme-text">Personal Details</h2>
-              <p class="text-[10px] uppercase tracking-widest text-ivory/40 font-bold mt-0.5">Your public persona</p>
+              <p class="text-[10px] uppercase tracking-widest text-theme-text-muted font-bold mt-0.5">Your public persona</p>
             </div>
           </div>
 
           <div class="p-8 space-y-6">
             <!-- Profile Picture Placeholder -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-4 border-b border-white/5">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-4 border-b border-theme-border">
               <div class="relative group cursor-pointer">
-                <div class="h-28 w-28 rounded-full border-2 border-gold/30 bg-[#1a1a1a] overflow-hidden shadow-[0_0_20px_rgba(212,175,55,0.15)] flex items-center justify-center transition-all duration-300 group-hover:border-gold">
+                <div class="h-28 w-28 rounded-full border-2 border-gold/30 bg-theme-surface overflow-hidden shadow-[0_0_20px_rgba(212,175,55,0.15)] flex items-center justify-center transition-all duration-300 group-hover:border-gold">
                   <img v-if="form.profile_image" :src="form.profile_image" class="h-full w-full object-cover" />
-                  <UserIcon v-else class="h-12 w-12 text-ivory/20" />
+                  <UserIcon v-else class="h-12 w-12 text-theme-text-muted" />
                   <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
                     <CameraIcon class="h-6 w-6 text-white" />
                   </div>
@@ -47,8 +47,8 @@
               </div>
               <div>
                 <h3 class="text-sm font-bold text-theme-text">Profile Picture</h3>
-                <p class="text-xs text-ivory/40 mt-1 max-w-sm">Upload a professional headshot or avatar. PNG, JPG or WebP up to 5MB.</p>
-                <button type="button" @click="$refs.fileInput.click()" class="mt-3 px-4 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-theme-text transition-colors">
+                <p class="text-xs text-theme-text-muted mt-1 max-w-sm">Upload a professional headshot or avatar. PNG, JPG or WebP up to 5MB.</p>
+                <button type="button" @click="$refs.fileInput.click()" class="mt-3 px-4 py-1.5 rounded-lg bg-theme-surface-subtle hover:bg-theme-surface border border-theme-border text-xs font-bold text-theme-text transition-colors">
                   Change Image
                 </button>
               </div>
@@ -56,58 +56,58 @@
 
             <div class="grid sm:grid-cols-3 gap-6">
               <label class="block">
-                <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Full Name</span>
+                <span class="text-[11px] uppercase tracking-widest text-theme-text-muted font-bold ml-1 mb-2 block">Full Name</span>
                 <input
                   v-model="form.name"
-                  class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
+                  class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30"
                   placeholder="e.g. Obo Shadow"
                   required
                 />
               </label>
               <label class="block">
-                <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Email Address</span>
+                <span class="text-[11px] uppercase tracking-widest text-theme-text-muted font-bold ml-1 mb-2 block">Email Address</span>
                 <input
                   v-model="form.email"
                   type="email"
-                  class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
+                  class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30"
                   placeholder="e.g. barber@candycutz.com"
                   required
                 />
               </label>
               <label class="block">
-                <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Phone Number</span>
+                <span class="text-[11px] uppercase tracking-widest text-theme-text-muted font-bold ml-1 mb-2 block">Phone Number</span>
                 <input
                   v-model="form.phone"
-                  class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
+                  class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30"
                   placeholder="e.g. +234 800 000 0000"
                 />
               </label>
             </div>
             
             <label class="block">
-              <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Bio</span>
+              <span class="text-[11px] uppercase tracking-widest text-theme-text-muted font-bold ml-1 mb-2 block">Bio</span>
               <textarea
                 v-model="form.bio"
                 rows="4"
-                class="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30 resize-none"
+                class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30 resize-none"
                 placeholder="Tell clients about your experience, style, and what makes your cuts unique..."
               ></textarea>
             </label>
             <label class="block">
-              <span class="text-[11px] uppercase tracking-widest text-ivory/50 font-bold ml-1 mb-2 block">Instagram Profile URL</span>
+              <span class="text-[11px] uppercase tracking-widest text-theme-text-muted font-bold ml-1 mb-2 block">Instagram Profile URL</span>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span class="text-ivory/30 text-sm">@</span>
+                  <span class="text-theme-text-muted text-sm">@</span>
                 </div>
                 <input
                   v-model="form.instagram_url"
-                  class="w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-4 py-3.5 text-sm text-theme-text placeholder:text-ivory/20 outline-none transition-all focus:border-gold/50 focus:bg-black/40 focus:ring-1 focus:ring-gold/30"
+                  class="w-full rounded-xl border border-theme-border bg-theme-bg pl-9 pr-4 py-3.5 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30"
                   placeholder="instagram_handle"
                 />
               </div>
             </label>
 
-            <div class="pt-6 border-t border-white/5 flex items-center gap-4">
+            <div class="pt-6 border-t border-theme-border flex items-center gap-4">
               <button
                 type="submit"
                 :disabled="saving"
@@ -147,7 +147,7 @@ const authStore = useAuthStore()
 
 const form = reactive({ 
   name: '', 
-  email: '',
+  email: '', 
   phone: '', 
   bio: '', 
   instagram_url: '', 
