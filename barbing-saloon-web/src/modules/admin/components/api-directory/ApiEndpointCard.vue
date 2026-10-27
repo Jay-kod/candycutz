@@ -86,3 +86,4 @@ const methodBadgeClass = computed(() => {
   return map[props.endpoint.method] || 'border-white/10 bg-white/5 text-white/60';
 });
 </script>
+

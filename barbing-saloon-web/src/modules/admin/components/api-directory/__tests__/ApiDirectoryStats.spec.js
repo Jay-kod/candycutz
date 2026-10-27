@@ -44,3 +44,4 @@ describe('ApiDirectoryStats.vue', () => {
     expect(wrapper.text()).toContain('Checking');
   });
 });
+

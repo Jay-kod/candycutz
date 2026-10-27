@@ -40,3 +40,4 @@ defineProps({
 
 defineEmits(['copy']);
 </script>
+
