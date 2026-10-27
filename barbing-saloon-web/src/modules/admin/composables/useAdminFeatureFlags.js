@@ -16,7 +16,6 @@ export function useAdminFeatureFlags() {
   // Filters & Search
   const search = ref('');
   const statusFilter = ref('all'); // 'all', 'active', 'inactive'
-  const platformFilter = ref('all'); // 'all', 'web', 'app', 'both'
   const sortOrder = ref('newest'); // 'newest', 'oldest', 'name-asc', 'rollout-desc'
 
   // Modal State
@@ -26,55 +25,40 @@ export function useAdminFeatureFlags() {
     key: '',
     name: '',
     description: '',
-    enabled_for: ['web', 'app'],
+    enabled_for: ['web'],
     rollout_percentage: 100,
     is_active: true,
   });
 
   // KPI Metrics Computed
   const stats = computed(() => {
-    const list = flags.value;
+    const list = flags.value.filter(
+      flag => !Array.isArray(flag.enabled_for) || flag.enabled_for.includes('web')
+    );
     const totalCount = list.length;
     const activeCount = list.filter(f => f.is_active).length;
     const inactiveCount = list.filter(f => !f.is_active).length;
-    const webCount = list.filter(f => Array.isArray(f.enabled_for) && f.enabled_for.includes('web')).length;
-    const appCount = list.filter(f => Array.isArray(f.enabled_for) && f.enabled_for.includes('app')).length;
-    const crossPlatformCount = list.filter(
-      f => Array.isArray(f.enabled_for) && f.enabled_for.includes('web') && f.enabled_for.includes('app')
-    ).length;
     const activeRate = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
 
     return {
       totalCount,
       activeCount,
       inactiveCount,
-      webCount,
-      appCount,
-      crossPlatformCount,
       activeRate,
     };
   });
 
   // Filtered and Sorted Flags
   const filteredFlags = computed(() => {
-    let list = [...flags.value];
+    let list = flags.value.filter(
+      flag => !Array.isArray(flag.enabled_for) || flag.enabled_for.includes('web')
+    );
 
     // Status Filter
     if (statusFilter.value === 'active') {
       list = list.filter(f => f.is_active);
     } else if (statusFilter.value === 'inactive') {
       list = list.filter(f => !f.is_active);
-    }
-
-    // Platform Filter
-    if (platformFilter.value === 'web') {
-      list = list.filter(f => Array.isArray(f.enabled_for) && f.enabled_for.includes('web'));
-    } else if (platformFilter.value === 'app') {
-      list = list.filter(f => Array.isArray(f.enabled_for) && f.enabled_for.includes('app'));
-    } else if (platformFilter.value === 'both') {
-      list = list.filter(
-        f => Array.isArray(f.enabled_for) && f.enabled_for.includes('web') && f.enabled_for.includes('app')
-      );
     }
 
     // Search Query
@@ -135,7 +119,7 @@ export function useAdminFeatureFlags() {
       key: '',
       name: '',
       description: '',
-      enabled_for: ['web', 'app'],
+      enabled_for: ['web'],
       rollout_percentage: 100,
       is_active: true,
     };
@@ -148,7 +132,7 @@ export function useAdminFeatureFlags() {
       key: flag.key,
       name: flag.name,
       description: flag.description || '',
-      enabled_for: Array.isArray(flag.enabled_for) ? [...flag.enabled_for] : ['web', 'app'],
+      enabled_for: Array.isArray(flag.enabled_for) ? [...flag.enabled_for] : ['web'],
       rollout_percentage: flag.rollout_percentage ?? 100,
       is_active: flag.is_active ?? true,
     };
@@ -160,23 +144,9 @@ export function useAdminFeatureFlags() {
     editingFlag.value = null;
   };
 
-  const togglePlatform = (platform) => {
-    const list = form.value.enabled_for;
-    const idx = list.indexOf(platform);
-    if (idx > -1) {
-      if (list.length > 1) {
-        list.splice(idx, 1);
-      } else {
-        toast.info('At least one platform must remain selected');
-      }
-    } else {
-      list.push(platform);
-    }
-  };
-
   const saveFlag = async () => {
-    if (!form.value.key || !form.value.name || !form.value.enabled_for.length) {
-      toast.error('Key, name, and at least one platform are required');
+    if (!form.value.key || !form.value.name) {
+      toast.error('Key and name are required');
       return;
     }
 
@@ -252,7 +222,6 @@ export function useAdminFeatureFlags() {
   const resetFilters = () => {
     search.value = '';
     statusFilter.value = 'all';
-    platformFilter.value = 'all';
     sortOrder.value = 'newest';
   };
 
@@ -264,7 +233,6 @@ export function useAdminFeatureFlags() {
     togglingId,
     search,
     statusFilter,
-    platformFilter,
     sortOrder,
     modalOpen,
     editingFlag,
@@ -275,11 +243,9 @@ export function useAdminFeatureFlags() {
     openCreateModal,
     openEditModal,
     closeModal,
-    togglePlatform,
     saveFlag,
     toggleFlag,
     deleteFlag,
     resetFilters,
   };
 }
-

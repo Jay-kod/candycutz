@@ -39,7 +39,7 @@
 
     <!-- Empty State: Filter Empty -->
     <div 
-      v-else-if="statusFilter !== 'all' || platformFilter !== 'all'"
+      v-else-if="statusFilter !== 'all'"
       class="flex flex-col items-center justify-center py-20 px-4 text-center rounded-3xl border border-dashed border-white/10 bg-[#12161C]/50 backdrop-blur-sm"
     >
       <div class="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
@@ -47,7 +47,7 @@
       </div>
       <h3 class="font-display text-xl text-white font-semibold mb-2">No Flags Match Filter</h3>
       <p class="text-sm text-white/50 max-w-md mb-6">
-        There are currently no feature flags matching the selected platform or status criteria.
+        There are currently no feature flags matching the selected status.
       </p>
       <button
         @click="$emit('reset')"
@@ -102,10 +102,6 @@ defineProps({
     type: String,
     default: 'all'
   },
-  platformFilter: {
-    type: String,
-    default: 'all'
-  },
   togglingId: {
     type: [Number, String],
     default: null
@@ -114,4 +110,3 @@ defineProps({
 
 defineEmits(['toggle', 'edit', 'delete', 'reset', 'create']);
 </script>
-

@@ -1,5 +1,5 @@
 <template>
-  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Feature Flag Metrics">
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-label="Feature Flag Metrics">
     <!-- Card 1: Total Runtime Flags -->
     <div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C] p-5 shadow-lg group hover:border-admin/40 transition-all duration-300">
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-admin/5 blur-2xl group-hover:bg-admin/10 transition-all"></div>
@@ -93,24 +93,6 @@
       </div>
     </div>
 
-    <!-- Card 4: Platform Reach -->
-    <div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C] p-5 shadow-lg group hover:border-violet-500/40 transition-all duration-300">
-      <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-500/5 blur-2xl group-hover:bg-violet-500/10 transition-all"></div>
-      <div class="flex items-center justify-between relative z-10">
-        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Cross-Platform</span>
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15 text-violet-400 border border-violet-500/30">
-          <DevicePhoneMobileIcon class="h-4 w-4" />
-        </span>
-      </div>
-      <div class="mt-3 flex items-baseline gap-2 relative z-10">
-        <span class="font-display text-3xl font-bold text-white tracking-tight">{{ stats.crossPlatformCount }}</span>
-        <span class="text-xs text-violet-400/80 font-medium">web & app</span>
-      </div>
-      <div class="mt-3 flex items-center justify-between text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
-        <span>Coverage breakdown</span>
-        <span class="font-mono text-white/80 font-medium">{{ stats.webCount }} web • {{ stats.appCount }} app</span>
-      </div>
-    </div>
   </section>
 </template>
 
@@ -118,8 +100,7 @@
 import { 
   FlagIcon, 
   CheckCircleIcon, 
-  PauseCircleIcon, 
-  DevicePhoneMobileIcon 
+  PauseCircleIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -130,12 +111,8 @@ defineProps({
       totalCount: 0,
       activeCount: 0,
       inactiveCount: 0,
-      webCount: 0,
-      appCount: 0,
-      crossPlatformCount: 0,
       activeRate: 0,
     })
   }
 });
 </script>
-

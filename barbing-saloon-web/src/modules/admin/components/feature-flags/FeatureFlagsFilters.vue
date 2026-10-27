@@ -56,24 +56,8 @@
       </button>
     </div>
 
-    <!-- Right: Platform Filter & Sort Selectors -->
+    <!-- Right: Sort Selector -->
     <div class="flex flex-wrap items-center gap-3">
-      <!-- Platform Selector -->
-      <div class="flex items-center gap-2">
-        <label for="platform-select" class="text-xs text-white/40 hidden sm:inline">Platform:</label>
-        <select
-          id="platform-select"
-          :value="platformFilter"
-          @change="$emit('update:platformFilter', $event.target.value)"
-          class="bg-white/[0.04] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3 py-2 outline-none focus:border-admin/50 transition-colors cursor-pointer"
-        >
-          <option value="all" class="bg-[#12161C] text-white">All Platforms</option>
-          <option value="web" class="bg-[#12161C] text-white">Web Portal</option>
-          <option value="app" class="bg-[#12161C] text-white">Mobile App</option>
-          <option value="both" class="bg-[#12161C] text-white">Cross-Platform (Both)</option>
-        </select>
-      </div>
-
       <!-- Sort Order Selector -->
       <div class="flex items-center gap-2">
         <label for="sort-select" class="text-xs text-white/40 hidden sm:inline">Sort:</label>
@@ -112,10 +96,6 @@ defineProps({
     type: String,
     default: 'all'
   },
-  platformFilter: {
-    type: String,
-    default: 'all'
-  },
   sortOrder: {
     type: String,
     default: 'newest'
@@ -130,6 +110,5 @@ defineProps({
   }
 });
 
-defineEmits(['update:statusFilter', 'update:platformFilter', 'update:sortOrder', 'reset']);
+defineEmits(['update:statusFilter', 'update:sortOrder', 'reset']);
 </script>
-

@@ -42,21 +42,12 @@
           {{ flag.description || 'No detailed description provided for this runtime feature flag.' }}
         </p>
 
-        <!-- Platform & Rollout Badges -->
+        <!-- Web Portal & Rollout Badges -->
         <div class="flex flex-wrap items-center gap-4 text-xs">
-          <!-- Platforms -->
           <div class="flex items-center gap-1.5">
-            <span
-              v-for="platform in platformsList"
-              :key="platform"
-              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border"
-              :class="platform === 'app'
-                ? 'bg-violet-500/10 text-violet-300 border-violet-500/20'
-                : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'"
-            >
-              <DevicePhoneMobileIcon v-if="platform === 'app'" class="h-3 w-3" />
-              <GlobeAltIcon v-else class="h-3 w-3" />
-              <span>{{ platform === 'app' ? 'Mobile App' : 'Web Portal' }}</span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border bg-cyan-500/10 text-cyan-300 border-cyan-500/20">
+              <GlobeAltIcon class="h-3 w-3" />
+              <span>Web Portal</span>
             </span>
           </div>
 
@@ -125,7 +116,6 @@
 import { computed, ref } from 'vue';
 import { 
   GlobeAltIcon, 
-  DevicePhoneMobileIcon, 
   PencilSquareIcon, 
   TrashIcon, 
   DocumentDuplicateIcon, 
@@ -146,13 +136,6 @@ const props = defineProps({
 defineEmits(['toggle', 'edit', 'delete']);
 
 const copied = ref(false);
-
-const platformsList = computed(() => {
-  if (Array.isArray(props.flag.enabled_for)) {
-    return props.flag.enabled_for;
-  }
-  return ['web', 'app'];
-});
 
 const formattedDate = computed(() => {
   if (!props.flag.created_at) return 'Recently';
@@ -179,4 +162,3 @@ const copyKey = async () => {
   }
 };
 </script>
-

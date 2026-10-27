@@ -18,7 +18,7 @@
               {{ editingFlag ? 'Edit Feature Flag' : 'Configure New Feature Flag' }}
             </h3>
             <p class="text-xs text-white/50 mt-0.5">
-              {{ editingFlag ? 'Adjust runtime targeting and rollout percentages.' : 'Define unique key, supported clients, and rollout scope.' }}
+              {{ editingFlag ? 'Adjust the web rollout percentage and active state.' : 'Define a unique key and web rollout scope.' }}
             </p>
           </div>
           <button 
@@ -44,7 +44,7 @@
               placeholder="e.g. instant_booking_checkout"
               class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs font-mono placeholder:text-white/20 focus:outline-none focus:border-admin/50 focus:bg-white/[0.06] transition-all disabled:opacity-50" 
             />
-            <p class="text-[10px] text-white/30">Snake_case recommended. Used by web & mobile SDKs to evaluate feature status.</p>
+            <p class="text-[10px] text-white/30">Snake_case recommended. Used by the web portal to evaluate feature status.</p>
           </div>
 
           <!-- Display Name -->
@@ -72,40 +72,6 @@
               placeholder="Explain which user flows or components this flag controls..."
               class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs placeholder:text-white/20 focus:outline-none focus:border-admin/50 focus:bg-white/[0.06] resize-none transition-all"
             ></textarea>
-          </div>
-
-          <!-- Platform Targeting -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">
-              Target Platforms <span class="text-admin">*</span>
-            </label>
-            <div class="flex items-center gap-3">
-              <!-- Web Platform Chip -->
-              <button
-                type="button"
-                @click="$emit('togglePlatform', 'web')"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all"
-                :class="form.enabled_for.includes('web')
-                  ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                  : 'bg-white/[0.02] text-white/40 border-white/[0.06] hover:bg-white/[0.05]'"
-              >
-                <GlobeAltIcon class="h-4 w-4" />
-                <span>Web Portal</span>
-              </button>
-
-              <!-- App Platform Chip -->
-              <button
-                type="button"
-                @click="$emit('togglePlatform', 'app')"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all"
-                :class="form.enabled_for.includes('app')
-                  ? 'bg-violet-500/15 text-violet-300 border-violet-500/40 shadow-[0_0_15px_rgba(139,92,246,0.15)]'
-                  : 'bg-white/[0.02] text-white/40 border-white/[0.06] hover:bg-white/[0.05]'"
-              >
-                <DevicePhoneMobileIcon class="h-4 w-4" />
-                <span>Mobile App</span>
-              </button>
-            </div>
           </div>
 
           <!-- Rollout Percentage Slider -->
@@ -171,12 +137,7 @@
 </template>
 
 <script setup>
-import { 
-  XMarkIcon, 
-  ArrowPathIcon, 
-  GlobeAltIcon, 
-  DevicePhoneMobileIcon 
-} from '@heroicons/vue/24/outline';
+import { XMarkIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
 
 defineProps({
   modelValue: {
@@ -197,6 +158,5 @@ defineProps({
   }
 });
 
-defineEmits(['update:modelValue', 'togglePlatform', 'save']);
+defineEmits(['update:modelValue', 'save']);
 </script>
-

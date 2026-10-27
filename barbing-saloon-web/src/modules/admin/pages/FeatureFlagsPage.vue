@@ -21,7 +21,6 @@
         <!-- 4. Filter Toolbar -->
         <FeatureFlagsFilters
           v-model:status-filter="statusFilter"
-          v-model:platform-filter="platformFilter"
           v-model:sort-order="sortOrder"
           :stats="stats"
           :has-active-filters="hasActiveFilters"
@@ -33,7 +32,6 @@
           :flags="filteredFlags"
           :search-query="search"
           :status-filter="statusFilter"
-          :platform-filter="platformFilter"
           :toggling-id="togglingId"
           @toggle="toggleFlag"
           @edit="openEditModal"
@@ -49,7 +47,6 @@
         :editing-flag="editingFlag"
         :form="form"
         :saving="saving"
-        @toggle-platform="togglePlatform"
         @save="saveFlag"
       />
     </div>
@@ -74,7 +71,6 @@ const {
   togglingId,
   search,
   statusFilter,
-  platformFilter,
   sortOrder,
   modalOpen,
   editingFlag,
@@ -84,7 +80,6 @@ const {
   fetchFlags,
   openCreateModal,
   openEditModal,
-  togglePlatform,
   saveFlag,
   toggleFlag,
   deleteFlag,
@@ -95,7 +90,6 @@ const hasActiveFilters = computed(() => {
   return (
     search.value.trim().length > 0 ||
     statusFilter.value !== 'all' ||
-    platformFilter.value !== 'all' ||
     sortOrder.value !== 'newest'
   );
 });
