@@ -1,6 +1,6 @@
 # ==============================================================================
 # Candycutz — Turnkey Single-VPS Production Docker Compose Topology
-# Orchestrates Nginx, Laravel 11 (PHP-FPM 8.2), Queue Worker, Scheduler,
+# Orchestrates Nginx, Laravel 12 (PHP-FPM 8.5), Queue Worker, Scheduler,
 # MySQL 8.0, and Redis 7.2 over the internal bridge network candycutz-net.
 # ==============================================================================
 
@@ -33,7 +33,7 @@ services:
       - candycutz-net
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 2. Application Server: Laravel 11 (PHP-FPM 8.2 with OPcache)
+  # 2. Application Server: Laravel 12 (PHP-FPM 8.5 with OPcache)
   # ──────────────────────────────────────────────────────────────────────────
   app:
     build:

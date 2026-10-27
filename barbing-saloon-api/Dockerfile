@@ -6,8 +6,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignor
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
-# --- 2. Runtime (FrankenPHP: PHP 8.3 + Caddy) ---
-FROM dunglas/frankenphp:1-php8.3
+# --- 2. Runtime (FrankenPHP: PHP 8.5 + Caddy) ---
+FROM dunglas/frankenphp:1-php8.5
 RUN install-php-extensions pdo_mysql pdo_pgsql bcmath intl zip gd opcache pcntl
 WORKDIR /app
 COPY --from=vendor /app /app

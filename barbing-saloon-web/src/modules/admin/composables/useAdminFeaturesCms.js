@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, markRaw } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 import {
@@ -21,41 +21,41 @@ import {
 } from 'lucide-vue-next';
 
 export const availableIcons = [
-  { name: 'scissors', comp: Scissors, label: 'Scissors' },
-  { name: 'crown', comp: Crown, label: 'Crown' },
-  { name: 'zap', comp: Zap, label: 'Lightning' },
-  { name: 'shield-check', comp: ShieldCheck, label: 'Shield' },
-  { name: 'star', comp: Star, label: 'Star' },
-  { name: 'award', comp: Award, label: 'Award' },
-  { name: 'clock', comp: Clock, label: 'Clock' },
-  { name: 'sparkles', comp: Sparkles, label: 'Sparkles' },
-  { name: 'heart', comp: Heart, label: 'Heart' },
-  { name: 'flame', comp: Flame, label: 'Flame' },
-  { name: 'globe', comp: Globe, label: 'Globe' },
-  { name: 'activity', comp: Activity, label: 'Pulse' },
-  { name: 'layers', comp: Layers, label: 'Layers' },
-  { name: 'calendar', comp: Calendar, label: 'Calendar' },
-  { name: 'smartphone', comp: Smartphone, label: 'Mobile' },
+  { name: 'scissors', comp: markRaw(Scissors), label: 'Scissors' },
+  { name: 'crown', comp: markRaw(Crown), label: 'Crown' },
+  { name: 'zap', comp: markRaw(Zap), label: 'Lightning' },
+  { name: 'shield-check', comp: markRaw(ShieldCheck), label: 'Shield' },
+  { name: 'star', comp: markRaw(Star), label: 'Star' },
+  { name: 'award', comp: markRaw(Award), label: 'Award' },
+  { name: 'clock', comp: markRaw(Clock), label: 'Clock' },
+  { name: 'sparkles', comp: markRaw(Sparkles), label: 'Sparkles' },
+  { name: 'heart', comp: markRaw(Heart), label: 'Heart' },
+  { name: 'flame', comp: markRaw(Flame), label: 'Flame' },
+  { name: 'globe', comp: markRaw(Globe), label: 'Globe' },
+  { name: 'activity', comp: markRaw(Activity), label: 'Pulse' },
+  { name: 'layers', comp: markRaw(Layers), label: 'Layers' },
+  { name: 'calendar', comp: markRaw(Calendar), label: 'Calendar' },
+  { name: 'smartphone', comp: markRaw(Smartphone), label: 'Mobile' },
 ];
 
 export const iconMap = {
-  zap: Zap,
-  shield: ShieldCheck,
-  'shield-check': ShieldCheck,
-  activity: Activity,
-  globe: Globe,
-  scissors: Scissors,
-  sparkles: Sparkles,
-  clock: Clock,
-  award: Award,
-  star: Star,
-  crown: Crown,
-  heart: Heart,
-  flame: Flame,
-  layers: Layers,
-  calendar: Calendar,
-  smartphone: Smartphone,
-  check: CheckCircle,
+  zap: markRaw(Zap),
+  shield: markRaw(ShieldCheck),
+  'shield-check': markRaw(ShieldCheck),
+  activity: markRaw(Activity),
+  globe: markRaw(Globe),
+  scissors: markRaw(Scissors),
+  sparkles: markRaw(Sparkles),
+  clock: markRaw(Clock),
+  award: markRaw(Award),
+  star: markRaw(Star),
+  crown: markRaw(Crown),
+  heart: markRaw(Heart),
+  flame: markRaw(Flame),
+  layers: markRaw(Layers),
+  calendar: markRaw(Calendar),
+  smartphone: markRaw(Smartphone),
+  check: markRaw(CheckCircle),
 };
 
 export const defaultFeatures = [

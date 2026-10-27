@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { reactive, h } from 'vue';
+import { reactive, h, markRaw } from 'vue';
 import FeaturesItemsManager from '../FeaturesItemsManager.vue';
 
 describe('FeaturesItemsManager.vue', () => {
-  const dummyIcon = { render: () => h('svg') };
+  const dummyIcon = markRaw({ render: () => h('svg') });
   const availableIcons = [
     { name: 'scissors', comp: dummyIcon, label: 'Scissors' },
     { name: 'crown', comp: dummyIcon, label: 'Crown' },
@@ -29,9 +29,15 @@ describe('FeaturesItemsManager.vue', () => {
     const text = wrapper.text();
     expect(text).toContain('Feature Cards (2)');
     expect(text).toContain('Precision Craft');
-    expect(text).toContain('Flawless fades and lines.');
     expect(text).toContain('Luxury Lounge');
-    expect(text).toContain('Exclusive amenities.');
+
+    const inputs = wrapper.findAll('input[type="text"]');
+    expect(inputs[0].element.value).toBe('Precision Craft');
+    expect(inputs[1].element.value).toBe('Luxury Lounge');
+
+    const textareas = wrapper.findAll('textarea');
+    expect(textareas[0].element.value).toBe('Flawless fades and lines.');
+    expect(textareas[1].element.value).toBe('Exclusive amenities.');
   });
 
   it('emits add-feature and remove-feature events upon button clicks', async () => {
@@ -60,4 +66,3 @@ describe('FeaturesItemsManager.vue', () => {
     expect(wrapper.emitted('remove-feature')[0]).toEqual([0]);
   });
 });
-

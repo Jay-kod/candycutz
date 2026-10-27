@@ -1,5 +1,5 @@
-# Production PHP 8.2-FPM Alpine Container for Candycutz
-FROM php:8.2-fpm-alpine
+# Production PHP 8.5-FPM Alpine Container for Candycutz
+FROM php:8.5-fpm-alpine
 
 # Set working directory
 WORKDIR /var/www/html

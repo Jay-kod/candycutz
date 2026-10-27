@@ -8,7 +8,7 @@ The product supports both appointments at the CandyCutz shop and on-demand home-
 
 CandyCutz's active platform consists of the web client and one backend. The Expo project is kept separately under `MOBILE/` and can be developed and released independently:
 
-- **Laravel 11 API**: The source of truth for identity, permissions, services, availability, bookings, payments, notifications, and audit records.
+- **Laravel 12 API (PHP 8.5)**: The source of truth for identity, permissions, services, availability, bookings, payments, notifications, and audit records.
 - **Vue 3 web application**: The public website, customer portal, barber portal, admin dashboard, super-admin controls, and installable PWA experience.
 - **Standalone Expo mobile project**: A native React Native application with role-based navigation for customers and barbers. It is not part of the web/API release workflow.
 - **CMS and Theme Studio**: Operational content management and controlled branding changes with draft, preview, publish, and rollback workflows.
@@ -22,7 +22,7 @@ flowchart LR
     Web[Vue 3 Web / PWA]
     Mobile[Expo Mobile App\nCustomer + Barber modes]
     CMS[Admin CMS\nwithin Web client]
-    API[Laravel 11 API\n/api/v1]
+    API[Laravel 12 API\n/api/v1]
     Auth[Sanctum + permissions]
     Booking[Booking and availability engine]
     Payment[Stripe payment service]
@@ -130,7 +130,7 @@ Login issues client-scoped tokens; standard login must not delete all of a user'
 
 | Area | Technologies |
 | --- | --- |
-| Backend | PHP 8.2, Laravel 11, Laravel Sanctum, Spatie permissions |
+| Backend | PHP 8.5, Laravel 12, Laravel Sanctum |
 | Web | Vue 3.5, Vue Router, Pinia, Axios, Vite 8, Tailwind CSS, Vite PWA |
 | Mobile | Expo SDK 57, React Native 0.86, TypeScript, Expo Router |
 | Client state | TanStack Query for server state, Zustand for lightweight client state |
@@ -144,7 +144,7 @@ Login issues client-scoped tokens; standard login must not delete all of a user'
 
 ```text
 candycutz/
-├── barbing-saloon-api/       # Authoritative Laravel 11 backend
+├── barbing-saloon-api/       # Authoritative Laravel 12 backend
 │   ├── app/                  # Domain logic, services, requests, resources
 │   ├── routes/               # Web, legacy compatibility, and API routes
 │   ├── database/             # Migrations, factories, seeders
@@ -201,7 +201,7 @@ The existing web client compatibility routes remain supported while clients migr
 
 ### Requirements
 
-- PHP 8.2 with `pdo_mysql` enabled
+- PHP 8.5 with `pdo_mysql` enabled
 - Composer
 - Node.js 20 or newer and npm
 - MySQL 8.0 or compatible MariaDB

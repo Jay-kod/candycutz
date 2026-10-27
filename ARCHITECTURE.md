@@ -2,7 +2,7 @@
 
 **Status:** Target state. This document is authoritative. Where the codebase disagrees with this document, the codebase is wrong.
 **Supersedes:** `docs/architecture/ARCHITECTURE.md`, `docs/Architecture.md`, `docs/Architecture-Essentials.md`, `docs/architecture/ARCHITECTURE_ESSENTIALS.md`
-**Scope:** `barbing-saloon-api` (Laravel 11) and `barbing-saloon-web` (Vue 3). The separately maintained Expo project lives in `MOBILE/`.
+**Scope:** `barbing-saloon-api` (Laravel 12, PHP 8.5) and `barbing-saloon-web` (Vue 3). The separately maintained Expo project lives in `MOBILE/`.
 
 ---
 
@@ -31,7 +31,7 @@ The web platform has one API authority. The Expo project in `MOBILE/` is maintai
            └────────────┬────────────┴─────────────────────────┘
                         ▼
         ┌───────────────────────────────────────────┐
-        │  barbing-saloon-api — Laravel 11          │
+        │  barbing-saloon-api — Laravel 12 / PHP 8.5│
         │  SINGLE API SURFACE: /api/v1/*            │
         │                                           │
         │  HTTP layer → Application layer → Domain  │

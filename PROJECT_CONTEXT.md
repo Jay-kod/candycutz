@@ -58,7 +58,7 @@ Source: `barbing-saloon-api/app/Core/Enums/UserRole.php`, route files, controlle
 
 | Deployable | Technology | Directory |
 |-----------|------------|-----------|
-| `barbing-saloon-api` | Laravel 11, PHP 8.2, MySQL, Redis | `barbing-saloon-api/` |
+| `barbing-saloon-api` | Laravel 12, PHP 8.5, MySQL, Redis | `barbing-saloon-api/` |
 | `barbing-saloon-web` | Vue 3, Vite, Pinia, Tailwind CSS | `barbing-saloon-web/` |
 | Standalone mobile project | Expo, React Native, TypeScript, TanStack Query, Zustand | `MOBILE/` |
 

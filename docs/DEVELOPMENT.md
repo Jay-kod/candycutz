@@ -10,7 +10,7 @@ The active platform comprises the API and web projects. The Expo project is main
 
 ```
 candycutz/
-├── barbing-saloon-api/      # Canonical Laravel 11 Monolith API (/api/v1/*)
+├── barbing-saloon-api/      # Canonical Laravel 12 Monolith API (/api/v1/*)
 ├── barbing-saloon-web/      # Vue 3 + Vite Single Page Application
 ├── MOBILE/                  # Standalone Expo / React Native project
 └── docs/                    # Authoritative platform documentation & OpenAPI specs
@@ -22,7 +22,7 @@ candycutz/
 
 Ensure your workstation has the following runtimes installed:
 
-* **PHP:** >= 8.2 (with `pdo_mysql`, `pdo_sqlite`, `mbstring`, `xml`, `bcmath`, `intl`)
+* **PHP:** >= 8.5 (with `pdo_mysql`, `pdo_sqlite`, `mbstring`, `xml`, `bcmath`, `intl`)
 * **Composer:** >= 2.6
 * **Node.js:** >= 20.0.0 (LTS)
 * **npm:** >= 10.0.0
