@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { useDark, useToggle } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import NotificationBell from '@/core/components/NotificationBell.vue';
 import {
   SunIcon,
@@ -80,11 +80,5 @@ defineProps({
 
 defineEmits(['toggleMobile', 'toggleCollapse']);
 
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
-const toggleDark = useToggle(isDark);
+const { isDark, toggleTheme: toggleDark } = useTheme();
 </script>

@@ -8,13 +8,13 @@
     :class="[
       isDark
         ? 'bg-obsidian border border-gold/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,153,0,0.12)] hover:border-gold/60'
-        : 'bg-[#F4F0E8] border border-gold/35 shadow-[inset_0_2px_4px_rgba(204,122,0,0.06),_0_2px_5px_rgba(255,153,0,0.08)] hover:border-gold/60'
+        : 'bg-[var(--color-bg-secondary)] border border-gold/35 shadow-[inset_0_2px_4px_rgba(204,122,0,0.06),_0_2px_5px_rgba(255,153,0,0.08)] hover:border-gold/60'
     ]"
     @click="toggleTheme"
   >
     <!-- LIGHT label (visible on the left when in Light mode) -->
     <span
-      class="absolute left-3 text-[9px] font-extrabold tracking-[0.14em] text-neutral-900 transition-all duration-300 pointer-events-none select-none uppercase"
+      class="absolute left-3 text-[9px] font-extrabold tracking-[0.14em] text-[var(--color-text-primary)] transition-all duration-300 pointer-events-none select-none uppercase"
       :class="!isDark ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'"
     >
       LIGHT
@@ -55,34 +55,10 @@
 </template>
 
 <script setup>
-import { useDark, useToggle } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import { Sun, MoonStar } from 'lucide-vue-next';
 
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-  onChanged(dark) {
-    if (typeof document !== 'undefined') {
-      const el = document.documentElement;
-      el.setAttribute('data-theme', dark ? 'dark' : 'light');
-      if (dark) {
-        el.classList.add('dark');
-        el.classList.remove('light');
-      } else {
-        el.classList.remove('dark');
-        el.classList.add('light');
-      }
-    }
-  },
-});
-
-const toggleDark = useToggle(isDark);
-
-const toggleTheme = () => {
-  toggleDark();
-};
+const { isDark, toggleTheme } = useTheme();
 </script>
 
 <style scoped>
