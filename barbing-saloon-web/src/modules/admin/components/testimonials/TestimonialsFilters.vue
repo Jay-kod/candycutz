@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <!-- Left: Status Tabs -->
-    <div class="flex items-center gap-1.5 bg-[#12161C] p-1.5 rounded-2xl border border-white/[0.08] overflow-x-auto scrollbar-hide max-w-full">
+    <div class="flex items-center gap-1.5 bg-theme-surface p-1.5 rounded-2xl border border-theme-border overflow-x-auto scrollbar-hide max-w-full">
       <button
         @click="$emit('update:activeStatusFilter', 'all')"
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatusFilter === 'all'
           ? 'bg-admin text-obsidian shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         All ({{ totalItems }})
       </button>
@@ -28,7 +28,7 @@
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatusFilter === 'approved'
           ? 'bg-emerald-500 text-obsidian shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         Approved ({{ approvedCount }})
       </button>
@@ -37,8 +37,8 @@
         @click="$emit('update:activeStatusFilter', 'featured')"
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all flex items-center gap-1.5"
         :class="activeStatusFilter === 'featured'
-          ? 'bg-white/20 text-white shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          ? 'bg-theme-surface-subtle text-theme-text shadow-lg'
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         <SparklesIcon class="h-3.5 w-3.5 text-amber-400" />
         Featured Ribbon ({{ featuredCount }})
@@ -52,12 +52,12 @@
         <select
           :value="activeServiceFilter"
           @change="$emit('update:activeServiceFilter', $event.target.value)"
-          class="appearance-none bg-[#12161C] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs text-theme-text rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
         >
-          <option value="all" class="bg-[#12161C] text-white">All Services</option>
-          <option v-for="s in services" :key="s.id" :value="s.id" class="bg-[#12161C] text-white">{{ s.name }}</option>
+          <option value="all" class="bg-theme-surface text-theme-text">All Services</option>
+          <option v-for="s in services" :key="s.id" :value="s.id" class="bg-theme-surface text-theme-text">{{ s.name }}</option>
         </select>
-        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-theme-text-muted" />
       </div>
 
       <!-- Rating Filter -->
@@ -65,14 +65,14 @@
         <select
           :value="activeRatingFilter"
           @change="$emit('update:activeRatingFilter', $event.target.value)"
-          class="appearance-none bg-[#12161C] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs text-theme-text rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
         >
-          <option value="all" class="bg-[#12161C] text-white">All Ratings</option>
-          <option value="5" class="bg-[#12161C] text-white">★ 5 Stars Only</option>
-          <option value="4" class="bg-[#12161C] text-white">★ 4 Stars</option>
-          <option value="3" class="bg-[#12161C] text-white">★ 3 Stars & Under</option>
+          <option value="all" class="bg-theme-surface text-theme-text">All Ratings</option>
+          <option value="5" class="bg-theme-surface text-theme-text">★ 5 Stars Only</option>
+          <option value="4" class="bg-theme-surface text-theme-text">★ 4 Stars</option>
+          <option value="3" class="bg-theme-surface text-theme-text">★ 3 Stars & Under</option>
         </select>
-        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-theme-text-muted" />
       </div>
 
       <!-- Sort Selector -->
@@ -80,14 +80,14 @@
         <select
           :value="sortOrder"
           @change="$emit('update:sortOrder', $event.target.value)"
-          class="appearance-none bg-[#12161C] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs text-theme-text rounded-xl px-3 py-2 pr-7 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
         >
-          <option value="newest" class="bg-[#12161C] text-white">Newest First</option>
-          <option value="oldest" class="bg-[#12161C] text-white">Oldest First</option>
-          <option value="rating-desc" class="bg-[#12161C] text-white">Rating: Highest</option>
-          <option value="rating-asc" class="bg-[#12161C] text-white">Rating: Lowest</option>
+          <option value="newest" class="bg-theme-surface text-theme-text">Newest First</option>
+          <option value="oldest" class="bg-theme-surface text-theme-text">Oldest First</option>
+          <option value="rating-desc" class="bg-theme-surface text-theme-text">Rating: Highest</option>
+          <option value="rating-asc" class="bg-theme-surface text-theme-text">Rating: Lowest</option>
         </select>
-        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        <ChevronDownIcon class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-theme-text-muted" />
       </div>
     </div>
   </div>
@@ -147,4 +147,3 @@ defineEmits([
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
-
