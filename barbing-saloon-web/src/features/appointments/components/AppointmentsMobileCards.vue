@@ -4,7 +4,7 @@
       <article 
         v-for="appointment in appointments" 
         :key="appointment.id"
-        class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C] p-4 flex flex-col gap-3 shadow-lg transition-all duration-200 hover:border-admin/40"
+        class="relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface p-4 flex flex-col gap-3 shadow-lg transition-all duration-200 hover:border-admin/40"
       >
         <!-- Top: Avatar, Name, Ref & Status -->
         <div class="flex items-start justify-between gap-3">
@@ -19,10 +19,10 @@
               <span v-else>{{ initials(appointment.customer?.name || appointment.client_name) }}</span>
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-white truncate">{{ appointment.customer?.name || appointment.client_name }}</p>
-              <p class="text-[10px] font-mono text-white/40 flex items-center gap-1 mt-0.5">
+              <p class="text-sm font-bold text-theme-text truncate">{{ appointment.customer?.name || appointment.client_name }}</p>
+              <p class="text-[10px] font-mono text-theme-text-muted flex items-center gap-1 mt-0.5">
                 <span>{{ appointment.booking_reference || `CC-${String(appointment.id).padStart(4, '0')}` }}</span>
-                <span v-if="appointment.client_phone" class="text-white/20">•</span>
+                <span v-if="appointment.client_phone" class="text-theme-text-muted opacity-40">•</span>
                 <span v-if="appointment.client_phone">{{ appointment.client_phone }}</span>
               </p>
             </div>
@@ -38,17 +38,17 @@
         </div>
 
         <!-- Service, Chair, Time, Price -->
-        <div class="grid grid-cols-2 gap-3 py-2.5 border-y border-white/[0.05] text-xs">
+        <div class="grid grid-cols-2 gap-3 py-2.5 border-y border-theme-border text-xs">
           <div>
-            <span class="text-[9px] uppercase tracking-wider text-white/40 block mb-0.5">Service & Barber</span>
-            <p class="text-white/95 font-semibold truncate">{{ appointment.service?.name || 'General Booking' }}</p>
+            <span class="text-[9px] uppercase tracking-wider text-theme-text-muted block mb-0.5">Service & Barber</span>
+            <p class="text-theme-text font-semibold truncate">{{ appointment.service?.name || 'General Booking' }}</p>
             <p class="text-[11px] text-admin/80 truncate mt-0.5 flex items-center gap-1">
               <span>💈 {{ appointment.barber?.name || 'Any Barber' }}</span>
             </p>
           </div>
           <div>
-            <span class="text-[9px] uppercase tracking-wider text-white/40 block mb-0.5">Schedule</span>
-            <p class="text-white/95 font-semibold">{{ formatDate(appointment.appointment_date) }}</p>
+            <span class="text-[9px] uppercase tracking-wider text-theme-text-muted block mb-0.5">Schedule</span>
+            <p class="text-theme-text font-semibold">{{ formatDate(appointment.appointment_date) }}</p>
             <p class="text-amber-400 font-mono font-medium text-[11px] mt-0.5">{{ appointment.appointment_time }}</p>
           </div>
         </div>
@@ -68,7 +68,7 @@
             </span>
 
             <!-- Price -->
-            <span class="text-xs font-mono font-bold text-white/80">
+            <span class="text-xs font-mono font-bold text-theme-text">
               ₦{{ (appointment.total_price || appointment.grand_total || appointment.service?.price || 0).toLocaleString() }}
             </span>
           </div>
@@ -77,7 +77,7 @@
           <div class="flex items-center gap-1.5">
             <button 
               @click="$emit('details', appointment)" 
-              class="min-h-[38px] px-3 rounded-lg bg-white/[0.06] border border-white/10 text-xs font-semibold text-white hover:bg-white/[0.12] transition-colors"
+              class="min-h-[38px] px-3 rounded-lg bg-theme-bg border border-theme-border text-xs font-semibold text-theme-text hover:bg-theme-surface-hover transition-colors"
             >
               Details
             </button>
@@ -112,7 +112,7 @@
               <button 
                 v-if="appointment.receipt_image" 
                 @click="$emit('view-receipt', appointment)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-white/[0.06] border border-white/10 text-white/60 hover:text-white transition-colors" 
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-theme-bg border border-theme-border text-theme-text-muted hover:text-theme-text transition-colors" 
                 title="Receipt"
               >
                 <DocumentTextIcon class="h-4 w-4" />
@@ -131,12 +131,12 @@
     </div>
 
     <!-- Mobile Empty State -->
-    <div v-else class="flex flex-col items-center justify-center py-14 px-4 text-center rounded-2xl border border-white/[0.08] bg-[#12161C] shadow-lg">
-      <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/[0.08] mb-3.5">
-        <ClipboardDocumentCheckIcon class="h-7 w-7 text-white/30" />
+    <div v-else class="flex flex-col items-center justify-center py-14 px-4 text-center rounded-2xl border border-theme-border bg-theme-surface shadow-lg">
+      <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-theme-bg border border-theme-border mb-3.5">
+        <ClipboardDocumentCheckIcon class="h-7 w-7 text-theme-text-muted" />
       </div>
-      <h3 class="text-base font-bold text-white mb-1">No Appointments Found</h3>
-      <p class="text-xs text-white/40 max-w-xs mx-auto">
+      <h3 class="text-base font-bold text-theme-text mb-1">No Appointments Found</h3>
+      <p class="text-xs text-theme-text-muted max-w-xs mx-auto">
         {{ search ? `No results match your search "${search}".` : `There are no ${currentFilter !== 'all' ? currentFilter : ''} appointments matching the selected filters.` }}
       </p>
       <button 
@@ -193,7 +193,7 @@ function statusClass(status) {
     cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
     no_show: 'bg-purple-500/15 text-purple-400 border-purple-500/30'
   };
-  return map[status] || 'bg-white/5 text-white/50 border-white/10';
+  return map[status] || 'bg-theme-bg text-theme-text-muted border-theme-border';
 }
 
 function statusDot(status) {
@@ -204,6 +204,6 @@ function statusDot(status) {
     cancelled: 'bg-red-400',
     no_show: 'bg-purple-400'
   };
-  return map[status] || 'bg-white/30';
+  return map[status] || 'bg-theme-text-muted';
 }
 </script>
