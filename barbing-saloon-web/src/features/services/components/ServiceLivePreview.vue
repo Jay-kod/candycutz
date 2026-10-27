@@ -1,11 +1,11 @@
 <template>
   <div class="lg:sticky lg:top-8 space-y-6">
     <div class="flex items-center gap-2 px-2">
-      <EyeIcon class="h-4 w-4 text-white/30" />
-      <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-white/30">Live Service Preview</h3>
+      <EyeIcon class="h-4 w-4 text-theme-text-muted" />
+      <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-theme-text-muted">Live Service Preview</h3>
     </div>
 
-    <div class="group relative overflow-hidden rounded-[2.5rem] border border-white/[0.08] bg-gradient-to-br from-[#1a1a1a] to-[#111] shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <div class="group relative overflow-hidden rounded-[2.5rem] border border-theme-border bg-theme-surface shadow-2xl">
       <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
       <!-- Glow accent -->
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-admin to-amber-400 z-20"></div>
@@ -25,7 +25,7 @@
             :class="activePreviewIndex === idx ? 'w-4 bg-admin' : 'w-1.5 bg-white/40 hover:bg-white/70'"
           ></button>
         </div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-transparent opacity-80"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-theme-surface via-transparent to-transparent opacity-80"></div>
       </div>
 
       <div class="p-8 relative z-10 flex flex-col" :class="{'pt-4': hasAnyImage}">
@@ -38,12 +38,12 @@
         </div>
 
         <!-- Name -->
-        <h2 class="font-display text-3xl text-white leading-tight mb-3 drop-shadow-md">
+        <h2 class="font-display text-3xl text-theme-text leading-tight mb-3 drop-shadow-md">
           {{ form.name || 'Service Name' }}
         </h2>
 
         <!-- Description -->
-        <p class="text-sm text-white/50 leading-relaxed mb-6">
+        <p class="text-sm text-theme-text-muted leading-relaxed mb-6">
           {{ form.description || 'This service doesn\'t have a description yet.' }}
         </p>
 
@@ -60,12 +60,12 @@
         </div>
 
         <!-- Price & Duration -->
-        <div class="pt-6 flex items-center justify-between border-t border-white/[0.05]">
+        <div class="pt-6 flex items-center justify-between border-t border-theme-border">
           <div class="flex items-baseline gap-1 text-emerald-400 font-display drop-shadow-md">
             <span class="text-sm opacity-60">₦</span>
             <span class="text-3xl font-bold">{{ form.price ? Number(form.price).toLocaleString() : '0' }}</span>
           </div>
-          <div class="flex items-center gap-1.5 text-xs font-bold text-white/50 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/[0.05]">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-theme-text-muted bg-theme-surface-subtle px-3 py-2 rounded-xl border border-theme-border">
             <ClockIcon class="h-4 w-4 text-admin/60" />
             {{ form.duration_minutes || 0 }} mins
           </div>
