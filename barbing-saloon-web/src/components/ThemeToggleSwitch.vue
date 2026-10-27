@@ -69,8 +69,10 @@ const isDark = useDark({
       el.setAttribute('data-theme', dark ? 'dark' : 'light');
       if (dark) {
         el.classList.add('dark');
+        el.classList.remove('light');
       } else {
         el.classList.remove('dark');
+        el.classList.add('light');
       }
     }
   },
