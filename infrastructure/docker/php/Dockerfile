@@ -22,7 +22,7 @@ RUN apk add --no-cache \
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
+    && docker-php-ext-install -j2 \
         pdo_mysql \
         mbstring \
         bcmath \

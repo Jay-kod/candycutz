@@ -47,3 +47,4 @@ describe('CookieCategoriesList.vue', () => {
     expect(content.cookie_preferences_title).toBe('Custom Preferences Name');
   });
 });
+

@@ -132,3 +132,4 @@ const toggleCategory = (key) => {
   simulatedState[key] = !simulatedState[key];
 };
 </script>
+

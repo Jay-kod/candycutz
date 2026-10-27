@@ -130,3 +130,4 @@ defineProps({
 
 defineEmits(['save', 'refresh', 'reset-defaults', 'update:activeView']);
 </script>
+
