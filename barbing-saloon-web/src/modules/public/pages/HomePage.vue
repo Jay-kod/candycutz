@@ -33,18 +33,18 @@
     />
 
     <!-- About Us Teaser -->
-    <section class="about-teaser-section bg-theme-surface text-theme-text py-16 md:py-24 border-y border-white/5 transition-colors duration-300 overflow-hidden">
+    <section class="about-teaser-section bg-theme-surface text-theme-text py-16 md:py-24 border-y border-neutral-200/80 dark:border-white/5 transition-colors duration-300 overflow-hidden">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-gold">
+            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold">
               {{ aboutSubtitle }}
             </h2>
-            <p class="mt-5 text-base sm:text-lg text-theme-muted leading-relaxed whitespace-pre-wrap">
+            <p class="mt-5 text-base sm:text-lg text-neutral-600 dark:text-theme-muted leading-relaxed whitespace-pre-wrap">
               {{ aboutText }}
             </p>
             <div class="mt-8">
-              <RouterLink to="/about" class="inline-flex items-center gap-2 rounded-xl border border-gold/30 px-8 py-4 font-semibold text-gold transition-all hover:border-gold hover:bg-gold/10 hover:-translate-y-0.5">
+              <RouterLink to="/about" class="inline-flex items-center gap-2 rounded-xl border border-amber-600/40 dark:border-gold/30 px-8 py-4 font-semibold text-amber-700 dark:text-gold bg-white/80 dark:bg-transparent shadow-sm dark:shadow-none transition-all hover:border-gold hover:bg-amber-50 dark:hover:bg-gold/10 hover:-translate-y-0.5">
                 Learn More About Us
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>

@@ -92,20 +92,20 @@
               :aria-label="stat.ariaLabel"
             >
               <span
-                class="stat-number font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#FFF5DC] via-[#FFB84D] to-[#D97706] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
+                class="stat-number font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums bg-gradient-to-b from-[#B45309] via-[#D97706] to-[#CC7A00] dark:from-[#FFF5DC] dark:via-[#FFB84D] dark:to-[#D97706] bg-clip-text text-transparent drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(255,153,0,0.22)] select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).num }}
               </span>
               <span
                 v-if="splitValue(displayValues[stat.id] || stat.value).suffix"
-                class="stat-suffix font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-b from-[#FFB84D] to-[#D97706] bg-clip-text text-transparent ml-1 drop-shadow-sm select-none"
+                class="stat-suffix font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-b from-[#B45309] to-[#D97706] dark:from-[#FFB84D] dark:to-[#D97706] bg-clip-text text-transparent ml-1 drop-shadow-sm select-none"
               >
                 {{ splitValue(displayValues[stat.id] || stat.value).suffix }}
               </span>
             </div>
 
             <h3
-              class="stat-label mt-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-ivory/90 group-hover:text-gold transition-colors duration-300 text-center"
+              class="stat-label mt-2 text-xs sm:text-sm font-bold uppercase tracking-widest text-neutral-800 dark:text-ivory/90 group-hover:text-amber-600 dark:group-hover:text-gold transition-colors duration-300 text-center"
             >
               {{ stat.label }}
             </h3>
@@ -116,7 +116,7 @@
 
       <!-- Bottom Reassurance Strip -->
       <div
-        class="stat-reassurance mt-12 sm:mt-16 pt-6 border-t border-white/5 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-ivory/60 uppercase tracking-wider"
+        class="stat-reassurance mt-12 sm:mt-16 pt-6 border-t border-neutral-200/80 dark:border-white/5 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-neutral-600 dark:text-ivory/60 uppercase tracking-wider"
         data-reveal
       >
         <span class="flex items-center gap-2">
