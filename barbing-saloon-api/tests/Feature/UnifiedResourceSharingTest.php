@@ -111,7 +111,10 @@ it('supports service-tagged testimonials and filters by service', function () {
     expect($response->json('data.review'))->toBe('Best fade in town! Razor sharp lines.');
 
     // Approve testimonial so it is visible in public listing
-    Testimonial::find($testimonialId)->update(['is_approved' => true]);
+    Testimonial::find($testimonialId)->update([
+        'is_approved' => true,
+        'is_featured' => true,
+    ]);
 
     $listResponse = $this->getJson("/api/v1/testimonials?service_id={$service->id}");
     $listResponse->assertOk();
@@ -195,7 +198,9 @@ it('allows admins to feature and unfeature testimonials through the approval flo
         'is_featured' => false,
     ]);
 
-    $featureResponse = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature");
+    $featureResponse = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature", [
+        'is_featured' => true,
+    ]);
     $featureResponse->assertOk();
     expect($featureResponse->json('data.is_featured'))->toBeTrue();
     expect($testimonial->fresh()->is_featured)->toBeTrue();
@@ -206,7 +211,9 @@ it('allows admins to feature and unfeature testimonials through the approval flo
     $ids = collect($featuredList->json('data'))->pluck('id')->all();
     expect($ids)->toContain($testimonial->id);
 
-    $toggleBack = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature");
+    $toggleBack = $this->actingAs($admin)->patchJson("/api/v1/admin/testimonials/{$testimonial->id}/feature", [
+        'is_featured' => false,
+    ]);
     $toggleBack->assertOk();
     expect($toggleBack->json('data.is_featured'))->toBeFalse();
     expect($testimonial->fresh()->is_featured)->toBeFalse();

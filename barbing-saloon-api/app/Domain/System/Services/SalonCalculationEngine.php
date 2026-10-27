@@ -183,11 +183,14 @@ class SalonCalculationEngine
         $today = $referenceDate ? $referenceDate->copy()->startOfDay() : Carbon::today();
         $sixMonthsAgo = $today->copy()->subMonths(5)->startOfMonth()->toDateString();
         $expr = self::PRICE_EXPR;
+        $monthExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', a.appointment_date)"
+            : "DATE_FORMAT(a.appointment_date, '%Y-%m')";
 
         $rawMonths = DB::table('appointments as a')
             ->leftJoin('services as s', 'a.service_id', '=', 's.id')
             ->selectRaw("
-                DATE_FORMAT(a.appointment_date, '%Y-%m') as ym,
+                {$monthExpression} as ym,
                 SUM(CASE WHEN a.status IN ('completed', 'confirmed') THEN {$expr} ELSE 0 END) as total_rev,
                 COUNT(*) as total_count
             ")
