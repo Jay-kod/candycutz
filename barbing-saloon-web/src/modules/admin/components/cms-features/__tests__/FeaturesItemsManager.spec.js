@@ -60,3 +60,4 @@ describe('FeaturesItemsManager.vue', () => {
     expect(wrapper.emitted('remove-feature')[0]).toEqual([0]);
   });
 });
+
