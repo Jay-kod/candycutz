@@ -1,52 +1,113 @@
 <template>
-  <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100] p-4 xs:p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-    <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-admin/5 blur-3xl pointer-events-none"></div>
-    <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-admin/5 blur-3xl pointer-events-none"></div>
-    
-    <div class="relative z-10">
-      <p class="text-xs uppercase tracking-[0.3em] text-admin/70 font-bold">Reports</p>
-      <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text drop-shadow-lg">
-        Operational <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Analytics</span>
-      </h1>
-      <p class="mt-2 text-sm text-ivory/60">Comprehensive overview of revenue, performance, and trends.</p>
-    </div>
+  <header class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 sm:p-7 backdrop-blur-xl shadow-2xl">
+    <!-- Ambient Glow Accent -->
+    <div class="pointer-events-none absolute -top-24 right-1/4 h-56 w-96 rounded-full bg-gradient-to-r from-[#FF6700]/15 via-amber-500/10 to-transparent blur-3xl"></div>
 
-    <div class="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 xs:gap-2 bg-black/40 p-1.5 xs:p-2 rounded-xl border border-white/10 backdrop-blur-md max-w-full">
-        <button 
-          v-for="option in rangeOptions" 
-          :key="option.value"
-          @click="$emit('update:selectedRange', option.value)"
-          class="px-3 xs:px-4 py-2 min-h-[38px] rounded-lg text-xs xs:text-sm font-medium transition-all duration-300"
-          :class="selectedRange === option.value 
-            ? 'bg-admin text-obsidian shadow-[0_0_15px_rgba(255,103,0,0.3)]' 
-            : 'text-ivory/60 hover:text-admin hover:bg-white/5'"
-        >
-          {{ option.label }}
-        </button>
+    <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <!-- Title & Live Meta -->
+      <div class="space-y-2">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-[#FF6700]/30 bg-[#FF6700]/10 px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-[#FF6700]">
+            <span class="h-1.5 w-1.5 rounded-full bg-[#FF6700]"></span>
+            Executive Dossier
+          </span>
+          <span class="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-medium text-white/50">
+            <ClockIcon class="h-3 w-3 text-white/40" />
+            {{ currentTime }}
+          </span>
+          <span v-if="lastRefreshed" class="text-[11px] text-white/40">
+            Updated {{ lastRefreshed }}
+          </span>
+        </div>
+
+        <div>
+          <h1 class="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Operational <span class="bg-gradient-to-r from-[#FF6700] via-amber-400 to-amber-200 bg-clip-text text-transparent">Reports</span>
+          </h1>
+          <p class="mt-1 text-xs sm:text-sm text-white/50 max-w-xl">
+            Official financial ledger, barber throughput, and client retention summaries ready for export.
+          </p>
+        </div>
       </div>
 
-      <!-- Generate Report Button -->
-      <button 
-        @click="$emit('generate')"
-        :disabled="loading"
-        class="flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gradient-to-r from-admin to-amber-500 text-obsidian font-bold text-sm shadow-[0_0_20px_rgba(255,103,0,0.3)] hover:shadow-[0_0_30px_rgba(255,103,0,0.5)] transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <DocumentArrowDownIcon class="h-5 w-5" />
-        Generate Report
-      </button>
+      <!-- Controls & Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Range Selector Pills -->
+        <div class="flex items-center rounded-xl border border-white/[0.08] bg-[#0B0F13]/80 p-1 backdrop-blur-md">
+          <button
+            v-for="option in rangeOptions"
+            :key="option.value"
+            type="button"
+            @click="$emit('update:selectedRange', option.value)"
+            :class="[
+              'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+              selectedRange === option.value
+                ? 'bg-gradient-to-r from-[#FF6700] to-amber-500 text-white shadow-lg shadow-[#FF6700]/25'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+            ]"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+
+        <!-- Direct Link to Live Analytics Dashboard -->
+        <router-link
+          to="/admin/analytics"
+          class="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white/80 transition-all hover:border-sky-500/40 hover:bg-sky-500/10 hover:text-sky-400"
+        >
+          <ChartBarSquareIcon class="h-4 w-4" />
+          <span>Live Analytics</span>
+        </router-link>
+
+        <!-- Generate PDF Report Button -->
+        <button
+          type="button"
+          @click="$emit('generate')"
+          :disabled="loading"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF6700] to-amber-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#FF6700]/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#FF6700]/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <DocumentArrowDownIcon class="h-4 w-4" />
+          <span>Generate PDF</span>
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 </template>
 
 <script setup>
-import { DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { 
+  ClockIcon, 
+  DocumentArrowDownIcon, 
+  ChartBarSquareIcon 
+} from '@heroicons/vue/24/outline';
 
 defineProps({
   loading: { type: Boolean, default: false },
   selectedRange: { type: String, required: true },
-  rangeOptions: { type: Array, required: true }
+  rangeOptions: { type: Array, required: true },
+  lastRefreshed: { type: String, default: null }
 });
 
 defineEmits(['update:selectedRange', 'generate']);
+
+const currentTime = ref('');
+
+const updateClock = () => {
+  const now = new Date();
+  currentTime.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+let clockInterval = null;
+
+onMounted(() => {
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
+});
+
+onUnmounted(() => {
+  if (clockInterval) {
+    clearInterval(clockInterval);
+  }
+});
 </script>
