@@ -66,46 +66,73 @@ class Appointment extends Model
         'payment_due_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Branch, $this>
+     */
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * @return BelongsTo<ServiceZone, $this>
+     */
     public function serviceZone(): BelongsTo
     {
         return $this->belongsTo(ServiceZone::class);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function customerAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'customer_address_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
     }
 
+    /**
+     * @return BelongsTo<Barber, $this>
+     */
     public function barber(): BelongsTo
     {
         return $this->belongsTo(Barber::class);
     }
 
+    /**
+     * @return BelongsTo<Service, $this>
+     */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
+    /**
+     * @return HasMany<AppointmentItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(AppointmentItem::class);
     }
 
+    /**
+     * @return HasMany<AppointmentStatusHistory, $this>
+     */
     public function statusHistory(): HasMany
     {
         return $this->hasMany(AppointmentStatusHistory::class);
     }
 
+    /**
+     * @return HasOne<Payment, $this>
+     */
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
