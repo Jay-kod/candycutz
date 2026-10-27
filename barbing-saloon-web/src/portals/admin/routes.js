@@ -20,7 +20,7 @@ export default [
 	{ path: '/admin/integrations', name: 'admin-integrations', component: () => import('../../modules/admin/pages/IntegrationsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/api', name: 'admin-api', component: () => import('../../modules/admin/pages/ApiReferencePage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('@/features/analytics/pages/AdminAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
-	{ path: '/admin/settings', name: 'admin-settings', component: () => import('../../modules/superadmin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/settings', name: 'admin-settings', component: () => import('../../modules/admin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/brand-identity', name: 'admin-brand-identity', component: () => import('../../modules/admin/pages/cms/BrandIdentityPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/reports', name: 'admin-reports', component: () => import('@/features/analytics/pages/AdminReportsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{
