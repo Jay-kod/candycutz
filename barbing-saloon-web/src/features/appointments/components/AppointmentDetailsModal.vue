@@ -3,12 +3,12 @@
     <div v-if="booking" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-[#050505]/85 backdrop-blur-md" @click="$emit('close')"></div>
       
-      <div class="relative w-full max-w-lg rounded-3xl border border-white/[0.1] bg-[#12161C] shadow-[0_30px_100px_rgba(0,0,0,0.85)] overflow-hidden animate-slide-up p-6 sm:p-8 text-white z-10">
+      <div class="relative w-full max-w-lg rounded-3xl border border-theme-border bg-theme-surface shadow-2xl overflow-hidden animate-slide-up p-6 sm:p-8 text-theme-text z-10">
         <!-- Technical Ambient Accent -->
         <div class="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-admin/10 blur-3xl pointer-events-none"></div>
 
         <!-- Header -->
-        <div class="flex justify-between items-start mb-6 pb-4 border-b border-white/[0.08] relative z-10">
+        <div class="flex justify-between items-start mb-6 pb-4 border-b border-theme-border relative z-10">
           <div>
             <div class="flex items-center gap-2 mb-1">
               <span class="text-[10px] font-mono uppercase tracking-wider text-admin font-bold">
@@ -18,11 +18,11 @@
                 {{ booking.status }}
               </span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-display font-bold text-white">Booking Details</h3>
+            <h3 class="text-xl sm:text-2xl font-display font-bold text-theme-text">Booking Details</h3>
           </div>
           <button 
             @click="$emit('close')" 
-            class="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/5 text-white/50 hover:text-white"
+            class="p-2 bg-theme-bg hover:bg-theme-surface-hover rounded-full transition-colors border border-theme-border text-theme-text-muted hover:text-theme-text"
             title="Close"
           >
             <XMarkIcon class="h-5 w-5" />
@@ -30,15 +30,15 @@
         </div>
 
         <!-- Details Grid -->
-        <div class="space-y-2.5 bg-black/30 rounded-2xl border border-white/[0.06] p-4 text-xs">
+        <div class="space-y-2.5 bg-theme-bg rounded-2xl border border-theme-border p-4 text-xs">
           <!-- Client Details -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Client Name</span>
-            <span class="font-bold text-white text-sm">{{ booking.customer?.name || booking.client_name }}</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Client Name</span>
+            <span class="font-bold text-theme-text text-sm">{{ booking.customer?.name || booking.client_name }}</span>
           </div>
 
-          <div v-if="booking.client_phone || booking.customer?.phone" class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Phone Number</span>
+          <div v-if="booking.client_phone || booking.customer?.phone" class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Phone Number</span>
             <a 
               :href="`tel:${booking.client_phone || booking.customer?.phone}`" 
               class="font-mono text-admin hover:underline flex items-center gap-1"
@@ -49,37 +49,37 @@
           </div>
 
           <!-- Service Details -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Service</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Service</span>
             <div class="text-right">
-              <p class="font-bold text-white">{{ booking.service?.name || 'General Booking' }}</p>
-              <p v-if="booking.service?.duration_minutes" class="text-[10px] text-white/40">{{ booking.service.duration_minutes }} minutes</p>
+              <p class="font-bold text-theme-text">{{ booking.service?.name || 'General Booking' }}</p>
+              <p v-if="booking.service?.duration_minutes" class="text-[10px] text-theme-text-muted">{{ booking.service.duration_minutes }} minutes</p>
             </div>
           </div>
 
           <!-- Service Fee -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Amount Due</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Amount Due</span>
             <span class="font-bold text-emerald-400 font-mono text-sm">
               ₦{{ (booking.total_price || booking.grand_total || booking.service?.price || 0).toLocaleString() }}
             </span>
           </div>
 
           <!-- Stylist & Chair -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Stylist / Chair</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Stylist / Chair</span>
             <span class="font-medium text-admin">💈 {{ booking.barber?.name || 'First Available Stylist' }}</span>
           </div>
 
           <!-- Schedule -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Scheduled Time</span>
-            <span class="font-medium text-white/90">{{ formatDate(booking.appointment_date) }} at {{ booking.appointment_time }}</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Scheduled Time</span>
+            <span class="font-medium text-theme-text">{{ formatDate(booking.appointment_date) }} at {{ booking.appointment_time }}</span>
           </div>
 
           <!-- Intake Channel -->
-          <div class="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Channel</span>
+          <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Channel</span>
             <span v-if="booking.booking_type === 'walk_in' || booking.source === 'walk_in'" class="font-bold text-amber-400">Walk-In Intake</span>
             <span v-else-if="booking.source === 'app'" class="font-bold text-purple-400">Mobile App</span>
             <span v-else class="font-bold text-sky-400">Website Booking</span>
@@ -87,9 +87,9 @@
 
           <!-- Payment Details -->
           <div class="flex justify-between items-center py-1.5">
-            <span class="text-white/40 uppercase tracking-wider text-[10px] font-semibold">Payment Status</span>
+            <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Payment Status</span>
             <div class="flex items-center gap-2">
-              <span v-if="booking.payment_method" class="text-[10px] font-bold uppercase text-white/60">
+              <span v-if="booking.payment_method" class="text-[10px] font-bold uppercase text-theme-text-muted">
                 {{ booking.payment_method === 'pos' ? 'POS' : booking.payment_method }}
               </span>
               <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border" :class="paymentStatusClass(booking.payment_status)">
@@ -100,8 +100,8 @@
         </div>
 
         <!-- Notes if present -->
-        <div v-if="booking.notes" class="mt-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-white/60">
-          <p class="text-[10px] font-bold uppercase text-white/40 mb-1">Intake Notes:</p>
+        <div v-if="booking.notes" class="mt-3 p-3 rounded-xl bg-theme-bg border border-theme-border text-xs text-theme-text-muted">
+          <p class="text-[10px] font-bold uppercase text-theme-text-muted mb-1">Intake Notes:</p>
           <p>{{ booking.notes }}</p>
         </div>
 
@@ -133,7 +133,7 @@
           <template v-else-if="(booking.status === 'confirmed' || booking.status === 'completed') && booking.receipt_image">
             <button 
               @click="$emit('view-receipt', booking)" 
-              class="flex-1 rounded-xl bg-white/5 border border-white/10 py-3 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2"
+              class="flex-1 rounded-xl bg-theme-bg border border-theme-border py-3 text-xs font-bold uppercase tracking-wider text-theme-text hover:bg-theme-surface-hover transition-all flex items-center justify-center gap-2"
             >
               <DocumentTextIcon class="h-4 w-4" /> View Receipt
             </button>
@@ -149,7 +149,7 @@
           <button 
             v-else 
             @click="$emit('close')" 
-            class="flex-1 rounded-xl bg-white/5 border border-white/10 py-3 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/10 transition-all"
+            class="flex-1 rounded-xl bg-theme-bg border border-theme-border py-3 text-xs font-bold uppercase tracking-wider text-theme-text hover:bg-theme-surface-hover transition-all"
           >
             Close Details
           </button>
@@ -181,7 +181,7 @@ function statusClass(status) {
     cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
     no_show: 'bg-purple-500/15 text-purple-400 border-purple-500/30'
   };
-  return map[status] || 'bg-white/5 text-white/50 border-white/10';
+  return map[status] || 'bg-theme-bg text-theme-text-muted border-theme-border';
 }
 
 function paymentStatusClass(status) {
@@ -195,7 +195,7 @@ function paymentStatusClass(status) {
     rejected: 'text-red-400 border-red-500/30',
     failed: 'text-red-400 border-red-500/30'
   };
-  return map[status] || 'text-white/40 border-white/10';
+  return map[status] || 'text-theme-text-muted border-theme-border';
 }
 </script>
 
