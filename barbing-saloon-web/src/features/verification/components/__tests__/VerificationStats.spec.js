@@ -36,3 +36,4 @@ describe('VerificationStats.vue', () => {
     expect(text).toContain('Expired');
   });
 });
+
