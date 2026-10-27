@@ -1,40 +1,40 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.1] bg-[#0A0D12] overflow-hidden shadow-2xl relative">
+  <div class="rounded-2xl border border-theme-border bg-theme-surface overflow-hidden shadow-2xl relative">
     <!-- Top Brand Header Bar -->
     <div class="h-1.5 bg-gradient-to-r from-admin via-amber-400 to-amber-200"></div>
 
     <div class="p-6 sm:p-7 relative z-10">
       <!-- Ticket Header -->
-      <div class="text-center pb-5 border-b border-white/[0.06]">
+      <div class="text-center pb-5 border-b border-theme-border">
         <div class="w-12 h-12 mx-auto rounded-xl bg-admin/10 border border-admin/20 flex items-center justify-center text-admin mb-3 shadow-inner">
           <TicketIcon class="h-6 w-6" />
         </div>
         <p class="text-[9px] font-mono uppercase tracking-[0.25em] text-admin font-bold">CandyCutz Luxury Grooming</p>
-        <h3 class="text-lg font-display font-bold text-white tracking-wide mt-0.5">Walk-In Intake Slip</h3>
-        <p class="text-[10px] text-ivory/40 font-mono mt-0.5">{{ formattedDate }}</p>
+        <h3 class="text-lg font-display font-bold text-theme-text tracking-wide mt-0.5">Walk-In Intake Slip</h3>
+        <p class="text-[10px] text-theme-text-muted font-mono mt-0.5">{{ formattedDate }}</p>
       </div>
 
       <!-- Ticket Data Fields -->
       <div class="py-5 space-y-4">
         <!-- Client -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Client</span>
-          <span class="font-bold text-white truncate max-w-[170px]">
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Client</span>
+          <span class="font-bold text-theme-text truncate max-w-[170px]">
             {{ form.customer_name || 'Guest Client' }}
           </span>
         </div>
 
         <!-- Phone -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Phone</span>
-          <span class="font-mono text-white/90">
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Phone</span>
+          <span class="font-mono text-theme-text">
             {{ form.customer_phone || '---' }}
           </span>
         </div>
 
         <!-- Service -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Service</span>
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Service</span>
           <span class="font-bold text-admin-light truncate max-w-[170px]">
             {{ service?.name || 'Select a service' }}
           </span>
@@ -42,15 +42,15 @@
 
         <!-- Stylist -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Stylist</span>
-          <span class="font-bold text-white truncate max-w-[170px]">
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Stylist</span>
+          <span class="font-bold text-theme-text truncate max-w-[170px]">
             {{ barber?.name || 'First Free Chair' }}
           </span>
         </div>
 
         <!-- Schedule Window -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Window</span>
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Window</span>
           <span class="font-mono text-emerald-400">
             {{ form.appointment_time || 'Now' }} <span v-if="finishTime">→ {{ finishTime }}</span>
           </span>
@@ -58,8 +58,8 @@
 
         <!-- Payment Method -->
         <div class="flex items-center justify-between text-xs">
-          <span class="text-ivory/40 uppercase tracking-wider text-[10px] font-mono">Payment</span>
-          <span class="px-2 py-0.5 rounded bg-white/[0.06] text-white text-[10px] font-semibold uppercase tracking-wider">
+          <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Payment</span>
+          <span class="px-2 py-0.5 rounded bg-theme-bg border border-theme-border text-theme-text text-[10px] font-semibold uppercase tracking-wider">
             {{ paymentMethodLabel }}
           </span>
         </div>
@@ -67,10 +67,10 @@
         <!-- Price Banner -->
         <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-admin/15 to-transparent border border-admin/30 flex items-center justify-between">
           <div>
-            <p class="text-[9px] uppercase tracking-widest text-ivory/50 font-mono">Total Due</p>
+            <p class="text-[9px] uppercase tracking-widest text-theme-text-muted font-mono">Total Due</p>
             <p class="text-xs text-admin-light font-semibold">Standard salon fee</p>
           </div>
-          <div class="text-2xl font-bold font-mono text-white">
+          <div class="text-2xl font-bold font-mono text-theme-text">
             ₦{{ Number(service?.price || 0).toLocaleString() }}
           </div>
         </div>
@@ -92,14 +92,14 @@
         <button
           type="button"
           @click="$emit('reset')"
-          class="w-full py-2.5 text-center text-[11px] font-semibold text-ivory/40 hover:text-white transition-colors uppercase tracking-wider"
+          class="w-full py-2.5 text-center text-[11px] font-semibold text-theme-text-muted hover:text-theme-text transition-colors uppercase tracking-wider"
         >
           Clear Form
         </button>
       </div>
 
       <!-- Decorative Tear Line -->
-      <div class="mt-6 pt-4 border-t border-dashed border-white/10 flex items-center justify-between text-[9px] font-mono text-ivory/30">
+      <div class="mt-6 pt-4 border-t border-dashed border-theme-border flex items-center justify-between text-[9px] font-mono text-theme-text-muted">
         <span>CANDYCUTZ-DESK-SLIP</span>
         <span>AUTH: VALID</span>
       </div>
@@ -147,4 +147,3 @@ const paymentMethodLabel = computed(() => {
   return map[props.form.payment_method] || 'Cash';
 });
 </script>
-
