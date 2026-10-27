@@ -55,7 +55,7 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useDark } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
@@ -81,12 +81,7 @@ const isMobileSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const sidebarRef = ref(null);
 
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
+const { isDark } = useTheme();
 
 const layoutBgClass = computed(() => {
   if (props.theme === 'superadmin') {

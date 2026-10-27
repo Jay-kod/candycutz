@@ -259,7 +259,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useDark } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
@@ -288,12 +288,7 @@ const props = defineProps({
 
 defineEmits(['closeMobile', 'logout']);
 
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
+const { isDark } = useTheme();
 
 const portalConfig = computed(() => {
   const p = props.portalName?.toLowerCase() || '';
