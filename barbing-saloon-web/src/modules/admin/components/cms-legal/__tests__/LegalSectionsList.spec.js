@@ -50,3 +50,4 @@ describe('LegalSectionsList.vue', () => {
     expect(wrapper.emitted('remove-section')[0]).toEqual([0]);
   });
 });
+
