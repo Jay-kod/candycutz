@@ -1,41 +1,57 @@
 <template>
   <AdminLayout>
-    <section class="space-y-6 animate-fade-in pb-12">
-      <!-- Header Banner & Controls -->
+    <div class="space-y-6 pb-12 animate-fade-in">
+      <!-- Header Banner & Range Controls -->
       <ReportsHeader
         :loading="loading"
         :selectedRange="selectedRange"
         :rangeOptions="rangeOptions"
+        :lastRefreshed="lastRefreshed"
         @update:selectedRange="setRange"
         @generate="showReportPreview = true"
       />
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center py-20">
-        <div class="h-12 w-12 rounded-full border-4 border-admin/20 border-t-admin animate-spin"></div>
+      <!-- Content-Aware Loading Skeleton -->
+      <ReportsSkeleton v-if="loading" />
+
+      <!-- Error State -->
+      <div
+        v-else-if="error"
+        class="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-8 text-center"
+      >
+        <p class="font-display text-lg font-bold text-rose-400">Failed to Load Operational Report</p>
+        <p class="mt-1 text-xs text-rose-300/70">{{ error }}</p>
+        <button
+          type="button"
+          @click="fetchAnalytics"
+          class="mt-4 inline-flex items-center gap-2 rounded-xl bg-rose-500/20 px-4 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/30 transition-colors"
+        >
+          Retry Connection
+        </button>
       </div>
 
+      <!-- Main Operational Report Dossier -->
       <template v-else>
-        <!-- KPI Cards -->
+        <!-- 5 Executive KPI Cards -->
         <ReportsKPICards
           :businessStats="businessStats"
           :platformStats="platformStats"
         />
 
-        <!-- Top Barbers & Services -->
+        <!-- Top Barbers & Popular Services Split -->
         <ReportsTopPerformers
           :topBarbers="topBarbers"
           :topServices="topServices"
         />
 
-        <!-- Booking Status Breakdown -->
+        <!-- Booking Lifecycle Status Breakdown -->
         <ReportsStatusBreakdown
           :statusBreakdown="statusBreakdown"
         />
       </template>
-    </section>
+    </div>
 
-    <!-- PDF Preview Modal -->
+    <!-- Executive PDF Preview & Generation Modal -->
     <ReportsPDFPreview
       :show="showReportPreview"
       :businessStats="businessStats"
@@ -54,23 +70,26 @@
 import { ref, onMounted } from 'vue';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 
-// Subcomponents
-import ReportsHeader from '@/features/analytics/components/ReportsHeader.vue';
-import ReportsKPICards from '@/features/analytics/components/ReportsKPICards.vue';
-import ReportsTopPerformers from '@/features/analytics/components/ReportsTopPerformers.vue';
-import ReportsStatusBreakdown from '@/features/analytics/components/ReportsStatusBreakdown.vue';
-import ReportsPDFPreview from '@/features/analytics/components/ReportsPDFPreview.vue';
+// Decomposed Modular Subcomponents
+import ReportsHeader from '../components/ReportsHeader.vue';
+import ReportsKPICards from '../components/ReportsKPICards.vue';
+import ReportsTopPerformers from '../components/ReportsTopPerformers.vue';
+import ReportsStatusBreakdown from '../components/ReportsStatusBreakdown.vue';
+import ReportsSkeleton from '../components/ReportsSkeleton.vue';
+import ReportsPDFPreview from '../components/ReportsPDFPreview.vue';
 
-// Composable
-import { useAnalytics } from '@/features/analytics/composables/useAnalytics';
+// Canonical /api/v1/admin/reports Composable
+import { useAnalytics } from '../composables/useAnalytics';
 
 const showReportPreview = ref(false);
 
 const {
   loading,
+  error,
   selectedRange,
   rangeOptions,
   activeRangeLabel,
+  lastRefreshed,
   businessStats,
   platformStats,
   topBarbers,
@@ -87,10 +106,17 @@ onMounted(() => {
 
 <style scoped>
 .animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
