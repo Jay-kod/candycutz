@@ -64,3 +64,4 @@ describe('SettingsTabs.vue', () => {
     expect(wrapper.emitted('update:searchQuery')[0]).toEqual(['deposit'])
   })
 })
+

@@ -154,3 +154,4 @@ const displayedCategories = computed(() => {
     </div>
   </div>
 </template>
+

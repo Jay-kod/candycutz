@@ -101,3 +101,4 @@ const getCategoryIcon = (id) => {
     </div>
   </div>
 </template>
+
