@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 
@@ -12,19 +12,29 @@ export function useVerification() {
   const currentFilter = ref('all');
   const search = ref('');
   const quickCode = ref('');
+  const lastRefreshed = ref(null);
   
   let searchTimeout = null;
+
+  const updateTimestamp = () => {
+    const now = new Date();
+    lastRefreshed.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   async function loadData() {
     loading.value = true;
     try {
       const [statsRes, listRes] = await Promise.all([
         client.get('/admin/verifications/stats'),
-        client.get('/admin/verifications', { params: { filter: currentFilter.value, search: search.value } })
+        client.get('/admin/verifications', {
+          params: { filter: currentFilter.value, search: search.value }
+        })
       ]);
-      stats.value = statsRes.data.data;
-      verifications.value = listRes.data.data;
+      stats.value = statsRes.data?.data || statsRes.data || { total: 0, verified_today: 0, pending: 0, expired: 0 };
+      verifications.value = listRes.data?.data || listRes.data || [];
+      updateTimestamp();
     } catch (err) {
+      console.error('Failed to load verification data:', err);
       toast.error('Failed to load verification data');
     } finally {
       loading.value = false;
@@ -37,6 +47,7 @@ export function useVerification() {
   }
 
   function setFilter(filter) {
+    if (currentFilter.value === filter) return;
     currentFilter.value = filter;
     loadData();
   }
@@ -56,12 +67,18 @@ export function useVerification() {
       await loadData();
       return true;
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to verify appointment');
+      toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to verify appointment');
       return false;
     } finally {
       isVerifying.value = false;
     }
   }
+
+  onUnmounted(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+  });
 
   return {
     loading,
@@ -71,6 +88,7 @@ export function useVerification() {
     currentFilter,
     search,
     quickCode,
+    lastRefreshed,
     loadData,
     handleSearch,
     setFilter,
