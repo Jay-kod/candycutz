@@ -47,7 +47,7 @@
           <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
           <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
-          <div class="py-2 px-3 flex items-center justify-between border-y border-neutral-200/80 dark:border-white/10 my-1">
+          <div class="py-2 px-3 flex items-center justify-between border-y border-[var(--color-border-subtle)] my-1">
             <span class="text-xs font-bold uppercase tracking-wider text-theme-muted">Theme</span>
             <ThemeToggleSwitch />
           </div>
@@ -59,27 +59,27 @@
     <main class="flex-grow"><slot /></main>
 
     <!-- Redesigned Footer (Modern SaaS Structure with Real Website Content) -->
-    <footer class="public-footer border-t border-neutral-200/90 dark:border-white/10 bg-[#FAF9F6] dark:bg-[#070708] pt-16 pb-12 text-neutral-600 dark:text-zinc-400 transition-colors duration-300">
+    <footer class="public-footer border-t border-[var(--color-border)] bg-[var(--color-bg-primary)] pt-16 pb-12 text-[var(--color-text-secondary)] transition-colors duration-300">
       <div class="mx-auto max-w-7xl px-4 md:px-6">
         <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.9fr)] gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
           <!-- Section 1: Brand & Shop Identity -->
           <div class="md:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
-            <RouterLink to="/" class="public-footer__brand inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-neutral-900 dark:text-white font-display group">
+            <RouterLink to="/" class="public-footer__brand inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-[var(--color-text-primary)] font-display group">
               <img :src="logoUrl" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
               <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
             </RouterLink>
-            <p class="public-footer__text max-w-sm text-xs leading-relaxed text-neutral-600 dark:text-zinc-400 sm:text-[13px]">
+            <p class="public-footer__text max-w-sm text-xs leading-relaxed text-[var(--color-text-secondary)] sm:text-[13px]">
               {{ brandTagline }}
             </p>
 
-            <div class="public-footer__text space-y-3 pt-1 text-xs text-neutral-600 dark:text-zinc-400">
+            <div class="public-footer__text space-y-3 pt-1 text-xs text-[var(--color-text-secondary)]">
               <div v-if="shopAddress" class="flex items-start gap-2">
-                <MapPinIcon class="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                <MapPinIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0 mt-0.5" />
                 <span class="leading-snug">{{ shopAddress }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <ClockIcon class="h-4 w-4 text-gold shrink-0" />
+                <ClockIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0" />
                 <span class="whitespace-pre-line leading-snug">{{ contactHours }}</span>
               </div>
             </div>
@@ -87,61 +87,61 @@
 
           <!-- Section 2: Explore -->
           <div class="md:col-span-1 md:pl-6 lg:pl-8">
-            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-neutral-900 dark:text-white mb-3">Explore</h3>
+            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-[var(--color-text-primary)] mb-3">Explore</h3>
             <ul class="public-footer__links flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
-              <li><RouterLink to="/" class="hover:text-gold transition-colors">Home</RouterLink></li>
-              <li><RouterLink to="/services" class="hover:text-gold transition-colors">Services</RouterLink></li>
-              <li><RouterLink to="/gallery" class="hover:text-gold transition-colors">Gallery</RouterLink></li>
-              <li><RouterLink to="/about" class="hover:text-gold transition-colors">About Us</RouterLink></li>
-              <li><RouterLink to="/contact" class="hover:text-gold transition-colors">Contact Shop</RouterLink></li>
+              <li><RouterLink to="/" class="hover:text-[var(--color-accent)] transition-colors">Home</RouterLink></li>
+              <li><RouterLink to="/services" class="hover:text-[var(--color-accent)] transition-colors">Services</RouterLink></li>
+              <li><RouterLink to="/gallery" class="hover:text-[var(--color-accent)] transition-colors">Gallery</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">About Us</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Contact Shop</RouterLink></li>
             </ul>
           </div>
 
           <!-- Section 3: Legal & Policies -->
           <div class="md:col-span-1">
-            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-neutral-900 dark:text-white mb-3">Legal & Policies</h3>
+            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-[var(--color-text-primary)] mb-3">Legal & Policies</h3>
             <ul class="public-footer__links flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
-              <li><RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink></li>
-              <li><RouterLink to="/terms" class="hover:text-gold transition-colors">Terms of Service</RouterLink></li>
-              <li><RouterLink to="/account-deletion" class="hover:text-gold transition-colors">Account Deletion</RouterLink></li>
-              <li><RouterLink to="/about" class="hover:text-gold transition-colors">Hygiene Standards</RouterLink></li>
-              <li><RouterLink to="/contact" class="hover:text-gold transition-colors">Support Desk</RouterLink></li>
+              <li><RouterLink to="/privacy" class="hover:text-[var(--color-accent)] transition-colors">Privacy Policy</RouterLink></li>
+              <li><RouterLink to="/terms" class="hover:text-[var(--color-accent)] transition-colors">Terms of Service</RouterLink></li>
+              <li><RouterLink to="/account-deletion" class="hover:text-[var(--color-accent)] transition-colors">Account Deletion</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">Hygiene Standards</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Support Desk</RouterLink></li>
             </ul>
           </div>
         </div>
 
         <!-- Horizontal Divider with Centered Social Icons Embedded in the Line -->
         <div class="relative flex items-center my-10">
-          <div class="public-footer__divider flex-grow border-t border-neutral-200/80 dark:border-white/10"></div>
-          <div v-if="activeFooterSocials.length > 0" class="public-footer__socials flex items-center gap-4 px-4 sm:px-6 text-neutral-500 dark:text-zinc-400">
+          <div class="public-footer__divider flex-grow border-t border-[var(--color-border-subtle)]"></div>
+          <div v-if="activeFooterSocials.length > 0" class="public-footer__socials flex items-center gap-4 px-4 sm:px-6 text-[var(--color-text-muted)]">
             <a
               v-for="item in activeFooterSocials"
               :key="item.key"
               :href="item.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="hover:text-gold transition-colors duration-200"
+              class="hover:text-[var(--color-accent)] transition-colors duration-200"
               :aria-label="item.label"
             >
               <SocialIcon :name="item.key" class="h-4 w-4" />
             </a>
           </div>
-          <div class="public-footer__divider flex-grow border-t border-neutral-200/80 dark:border-white/10"></div>
+          <div class="public-footer__divider flex-grow border-t border-[var(--color-border-subtle)]"></div>
         </div>
 
         <!-- Centered Legal Links Separated by Pipes (Exact reference design) -->
-        <div class="public-footer__legal mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-neutral-500 dark:text-zinc-400">
-          <RouterLink to="/legal" class="hover:text-gold transition-colors">Legal Stuff</RouterLink>
-          <span class="public-footer__pipe text-neutral-300 dark:text-white/20 select-none">|</span>
-          <RouterLink to="/privacy" class="hover:text-gold transition-colors">Privacy Policy</RouterLink>
-          <span class="public-footer__pipe text-neutral-300 dark:text-white/20 select-none">|</span>
-          <RouterLink to="/security" class="hover:text-gold transition-colors">Security</RouterLink>
-          <span class="public-footer__pipe text-neutral-300 dark:text-white/20 select-none">|</span>
-          <RouterLink to="/cookies" class="hover:text-gold transition-colors">Manage Cookies</RouterLink>
+        <div class="public-footer__legal mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-[var(--color-text-muted)]">
+          <RouterLink to="/legal" class="hover:text-[var(--color-accent)] transition-colors">Legal Stuff</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/privacy" class="hover:text-[var(--color-accent)] transition-colors">Privacy Policy</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/security" class="hover:text-[var(--color-accent)] transition-colors">Security</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors">Manage Cookies</RouterLink>
         </div>
 
         <!-- Copyright Line -->
-        <p class="footer-copyright mt-4 text-center text-xs text-neutral-500 dark:text-zinc-500">
+        <p class="footer-copyright mt-4 text-center text-xs text-[var(--color-text-muted)]">
           Copyright &copy; {{ new Date().getFullYear() }}
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />,
           Inc.
