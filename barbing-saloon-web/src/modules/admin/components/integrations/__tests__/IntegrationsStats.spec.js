@@ -47,3 +47,4 @@ describe('IntegrationsStats.vue', () => {
     expect(wrapper.text()).toContain('Credentials required');
   });
 });
+

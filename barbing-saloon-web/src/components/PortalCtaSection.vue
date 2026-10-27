@@ -18,17 +18,17 @@
           animationDelay: `${-(index % 5) * 1.1}s`
         }"
       >
-        <component :is="card.icon" class="h-6 w-6 sm:h-7 sm:w-7 text-amber-700 dark:text-gold-light" aria-hidden="true" />
+        <component :is="card.icon" class="h-6 w-6 sm:h-7 sm:w-7 text-[var(--color-accent)]" aria-hidden="true" />
       </div>
     </div>
 
     <!-- Centered Content -->
     <div class="portal-cta__content !text-center" data-reveal>
-      <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold drop-shadow-sm !text-center">
+      <h2 class="portal-cta__title font-display text-3xl sm:text-4xl lg:text-5xl text-[var(--color-accent)] drop-shadow-sm !text-center">
         {{ title }}
       </h2>
 
-      <p class="portal-cta__description !text-center text-sm sm:text-base text-neutral-600 dark:text-theme-muted font-light leading-relaxed max-w-2xl mx-auto mt-4">
+      <p class="portal-cta__description !text-center text-sm sm:text-base text-[var(--color-text-secondary)] font-light leading-relaxed max-w-2xl mx-auto mt-4">
         {{ description }}
       </p>
 
@@ -203,8 +203,9 @@ const cards = [
   justify-content: center;
   overflow: hidden;
   padding: clamp(4.5rem, 8vw, 6.5rem) 1.5rem;
-  background-color: #070708;
-  color: #fafafa;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 /* Ambient Top-Center Spotlight Glow */
@@ -235,14 +236,13 @@ const cards = [
   align-items: center;
   justify-content: center;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(22, 22, 24, 0.78);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
   box-shadow:
-    0 12px 35px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 12px 35px var(--color-shadow);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--color-text-primary);
   pointer-events: auto;
   cursor: default;
   transform: translate(0, 0) rotate(var(--rotate-base, 0deg));
@@ -255,12 +255,11 @@ const cards = [
 
 .portal-cta__card:hover {
   transform: translate(0, -6px) rotate(var(--rotate-base, 0deg)) scale(1.1);
-  border-color: rgba(255, 153, 0, 0.5);
+  border-color: var(--color-accent);
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.85),
-    0 0 24px rgba(255, 153, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+    0 16px 40px var(--color-shadow),
+    0 0 24px rgba(255, 153, 0, 0.2);
+  color: var(--color-accent);
   z-index: 10;
 }
 
@@ -279,7 +278,7 @@ const cards = [
   width: 100%;
   text-align: center !important;
   margin-bottom: 1rem;
-  color: #ff9900;
+  color: var(--color-accent);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.25em;
@@ -296,7 +295,7 @@ const cards = [
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1.1;
-  color: #ffffff;
+  color: var(--color-text-primary);
   text-wrap: balance;
 }
 
@@ -306,7 +305,7 @@ const cards = [
   text-align: center !important;
   max-width: 34rem;
   margin: 0.9rem auto 0;
-  color: #a1a1aa;
+  color: var(--color-text-secondary);
   font-size: clamp(0.9rem, 1.5vw, 1rem);
   line-height: 1.5;
   text-wrap: balance;
@@ -346,30 +345,31 @@ const cards = [
 
 /* Primary button uses the CandyCutz gold accent. */
 .portal-cta__btn--primary {
-  background-color: #ff9900;
-  color: #0d0d0d;
-  border: 1px solid #ff9900;
-  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.16);
+  background-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.2);
 }
 
 .portal-cta__btn--primary:hover {
-  background-color: #ffb84d;
-  border-color: #ffb84d;
-  box-shadow: 0 6px 28px rgba(255, 153, 0, 0.28);
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  box-shadow: 0 6px 28px rgba(255, 153, 0, 0.35);
 }
 
 /* Secondary button keeps the dark surface with a gold hairline accent. */
 .portal-cta__btn--secondary {
-  background-color: rgba(24, 24, 27, 0.7);
-  color: #ffb84d;
-  border: 1px solid rgba(255, 153, 0, 0.3);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .portal-cta__btn--secondary:hover {
-  background-color: rgba(39, 29, 16, 0.88);
-  border-color: rgba(255, 153, 0, 0.55);
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
 }
 
 /* Keyframe Float Animation with Subtle Tilt Jitter */
@@ -445,67 +445,4 @@ const cards = [
   }
 }
 
-/* Light mode overrides for Portal CTA */
-:global([data-theme="light"]) .portal-cta,
-:global(html:not(.dark)) .portal-cta {
-  background:
-    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255, 153, 0, 0.08), transparent 70%),
-    linear-gradient(180deg, #F8F7F4 0%, #EFECE6 100%) !important;
-  color: #111827 !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-:global([data-theme="light"]) .portal-cta__spotlight,
-:global(html:not(.dark)) .portal-cta__spotlight {
-  background:
-    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255, 255, 255, 0.9), transparent 70%),
-    radial-gradient(ellipse 50% 30% at 50% 12%, rgba(255, 153, 0, 0.12), transparent 60%) !important;
-}
-
-:global([data-theme="light"]) .portal-cta__card,
-:global(html:not(.dark)) .portal-cta__card {
-  border-color: rgba(204, 122, 0, 0.25) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow:
-    0 10px 25px rgba(204, 122, 0, 0.08),
-    0 4px 10px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-  color: #B45309 !important;
-}
-
-:global([data-theme="light"]) .portal-cta__card:hover,
-:global(html:not(.dark)) .portal-cta__card:hover {
-  background: #FFFFFF !important;
-  border-color: rgba(255, 153, 0, 0.6) !important;
-  box-shadow:
-    0 14px 32px rgba(255, 153, 0, 0.2),
-    0 0 20px rgba(255, 153, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-  color: #9A3412 !important;
-}
-
-:global([data-theme="light"]) .portal-cta__title,
-:global(html:not(.dark)) .portal-cta__title {
-  color: #B45309 !important;
-}
-
-:global([data-theme="light"]) .portal-cta__description,
-:global(html:not(.dark)) .portal-cta__description {
-  color: #4B5563 !important;
-}
-
-:global([data-theme="light"]) .portal-cta__btn--secondary,
-:global(html:not(.dark)) .portal-cta__btn--secondary {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #B45309 !important;
-  border: 1px solid rgba(255, 153, 0, 0.45) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-}
-
-:global([data-theme="light"]) .portal-cta__btn--secondary:hover,
-:global(html:not(.dark)) .portal-cta__btn--secondary:hover {
-  background-color: #FFF7ED !important;
-  border-color: #FF9900 !important;
-  color: #9A3412 !important;
-}
 </style>

@@ -160,3 +160,4 @@ defineProps({
 
 defineEmits(['save', 'generateAndroid', 'copy']);
 </script>
+
