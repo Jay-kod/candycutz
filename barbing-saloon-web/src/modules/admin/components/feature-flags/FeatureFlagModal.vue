@@ -199,3 +199,4 @@ defineProps({
 
 defineEmits(['update:modelValue', 'togglePlatform', 'save']);
 </script>
+

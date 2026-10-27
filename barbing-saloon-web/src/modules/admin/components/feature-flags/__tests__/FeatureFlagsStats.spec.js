@@ -48,3 +48,4 @@ describe('FeatureFlagsStats.vue', () => {
     expect(wrapper.text()).toContain('0 web • 0 app');
   });
 });
+
