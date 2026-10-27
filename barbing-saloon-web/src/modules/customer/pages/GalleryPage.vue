@@ -1,35 +1,35 @@
 <template>
   <CustomerLayout>
-    <section class="mx-auto max-w-7xl px-4 md:px-6 py-20 text-theme-text">
+    <section class="mx-auto max-w-7xl px-4 md:px-6 py-20 text-[var(--color-text-primary)]">
       <div data-reveal class="mb-10">
-        <p class="text-sm uppercase tracking-[0.3em] text-gold-light">Gallery</p>
-        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-gold md:text-6xl">
-          {{ pageTitle }} <span class="text-2xl sm:text-3xl md:text-4xl text-gold/50">({{ gallery.length }})</span>
+        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">Gallery</p>
+        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-[var(--color-accent)] md:text-6xl">
+          {{ pageTitle }} <span class="text-2xl sm:text-3xl md:text-4xl text-[var(--color-accent)]/50">({{ gallery.length }})</span>
         </h1>
-        <p v-if="pageSubtitle" class="mt-4 max-w-2xl text-base text-theme-muted leading-relaxed whitespace-pre-wrap">
+        <p v-if="pageSubtitle" class="mt-4 max-w-2xl text-base text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
           {{ pageSubtitle }}
         </p>
       </div>
 
       <!-- Gallery Skeleton -->
       <div v-if="isLoading" class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-        <div v-for="n in 6" :key="'gal-skel-'+n" class="overflow-hidden rounded-3xl border border-theme-border bg-theme-surface mb-6 break-inside-avoid">
+        <div v-for="n in 6" :key="'gal-skel-'+n" class="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] mb-6 break-inside-avoid">
           <div class="skeleton-shimmer w-full" :style="{ aspectRatio: n % 2 === 0 ? '4/5' : '4/3' }"></div>
         </div>
       </div>
 
       <!-- Gallery Real -->
       <div v-else class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-        <article v-for="(item, index) in gallery" :key="item.id" @click="openLightbox(index)" :data-reveal-delay="index * 100" data-reveal class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface relative block mb-6 break-inside-avoid cursor-pointer shadow-md hover:shadow-2xl hover:shadow-gold/10 transition-shadow duration-500">
-          <div class="relative w-full overflow-hidden bg-theme-bg" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }">
+        <article v-for="(item, index) in gallery" :key="item.id" @click="openLightbox(index)" :data-reveal-delay="index * 100" data-reveal class="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] relative block mb-6 break-inside-avoid cursor-pointer shadow-md hover:shadow-2xl hover:shadow-[var(--color-accent)]/10 transition-shadow duration-500">
+          <div class="relative w-full overflow-hidden bg-[var(--color-bg-tertiary)]" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }">
              <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
              <!-- Smart Gradient Overlay -->
-             <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
+             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
           </div>
           <!-- Smart Hover Content -->
           <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-white translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
             <div class="flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">
-                <p class="text-[10px] uppercase tracking-[0.25em] text-gold-light font-semibold">{{ item.category }}</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)] font-semibold">{{ item.category }}</p>
                 <p class="text-[10px] uppercase font-bold tracking-widest text-white/60 bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
                     {{ item.barber_name || 'CandyCutz Admin' }}
@@ -38,7 +38,7 @@
             <h2 class="mt-2 font-display text-2xl font-semibold">{{ item.title }}</h2>
             <p class="mt-2 text-sm text-white/80 line-clamp-2 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">{{ item.description }}</p>
             <!-- Expand action button -->
-            <button class="absolute right-6 bottom-6 flex h-10 w-10 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-gold-light" aria-label="View larger">
+            <button class="absolute right-6 bottom-6 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110 hover:brightness-110" aria-label="View larger">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
             </button>
           </div>
@@ -47,36 +47,36 @@
     </section>
 
     <!-- Lightbox Overlay -->
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-theme-bg/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
+    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-bg-primary)]/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
       <!-- Close Button -->
-      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-theme-surface/10 p-2 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors">
+      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-2 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
 
       <!-- Previous Button -->
-      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
+      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-3 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
       </button>
 
       <!-- Main Image -->
       <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
         <img v-if="gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url" :src="getImageUrl(gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url)" :alt="gallery[currentIdx]?.title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
-        <div class="mt-6 text-center text-theme-text">
+        <div class="mt-6 text-center text-[var(--color-text-primary)]">
           <div class="flex items-center justify-center gap-3">
-              <p class="text-xs font-semibold uppercase tracking-widest text-gold-light">{{ gallery[currentIdx]?.category }}</p>
-              <span class="w-1.5 h-1.5 rounded-full bg-theme-border"></span>
-              <p class="text-xs font-bold uppercase tracking-widest text-theme-muted flex items-center gap-1.5">
+              <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">{{ gallery[currentIdx]?.category }}</p>
+              <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"></span>
+              <p class="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
                   By {{ gallery[currentIdx]?.barber_name || 'CandyCutz Admin' }}
               </p>
           </div>
           <h2 class="mt-3 font-display text-2xl md:text-3xl">{{ gallery[currentIdx]?.title }}</h2>
-          <p class="mt-3 text-theme-muted max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
+          <p class="mt-3 text-[var(--color-text-secondary)] max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
         </div>
       </div>
 
       <!-- Next Button -->
-      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-theme-surface/10 p-3 text-theme-text hover:bg-theme-surface/30 hover:text-gold transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === gallery.length - 1 }" :disabled="currentIdx === gallery.length - 1">
+      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-3 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === gallery.length - 1 }" :disabled="currentIdx === gallery.length - 1">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
       </button>
     </div>
