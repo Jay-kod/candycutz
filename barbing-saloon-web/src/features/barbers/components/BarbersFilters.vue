@@ -9,13 +9,13 @@
         class="relative px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden flex items-center gap-2"
         :class="currentFilter === tab.value 
           ? 'bg-admin text-obsidian shadow-[0_2px_10px_rgba(255,103,0,0.3)]' 
-          : 'bg-white/[0.03] border border-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.06]'"
+          : 'bg-theme-surface border border-theme-border text-theme-text-muted hover:text-theme-text hover:bg-theme-border/30'"
       >
         <span>{{ tab.label }}</span>
         <span 
           v-if="tab.count !== undefined" 
           class="flex items-center justify-center h-4 px-1.5 rounded-full text-[10px] tabular-nums font-mono font-bold" 
-          :class="currentFilter === tab.value ? 'bg-black/25 text-obsidian' : 'bg-white/10 text-white/60'"
+          :class="currentFilter === tab.value ? 'bg-black/25 text-obsidian' : 'bg-theme-border text-theme-text-muted'"
         >
           {{ tab.count }}
         </span>
@@ -29,14 +29,14 @@
         <select 
           :value="specialtyFilter"
           @change="$emit('update:specialtyFilter', $event.target.value)"
-          class="appearance-none bg-white/[0.03] border border-white/[0.08] text-xs font-semibold text-white/90 rounded-xl py-2 pl-3 pr-8 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] cursor-pointer"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs font-semibold text-theme-text rounded-xl py-2 pl-3 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer"
         >
-          <option value="all" class="bg-[#12161C] text-white">All Specialties</option>
-          <option v-for="spec in specialties" :key="spec" :value="spec" class="bg-[#12161C] text-white">
+          <option value="all" class="bg-theme-surface text-theme-text">All Specialties</option>
+          <option v-for="spec in specialties" :key="spec" :value="spec" class="bg-theme-surface text-theme-text">
             {{ spec }}
           </option>
         </select>
-        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-theme-text-muted">
           <ChevronDownIcon class="h-3.5 w-3.5" />
         </div>
       </div>
@@ -46,22 +46,22 @@
         <select 
           :value="sortOrder"
           @change="$emit('update:sortOrder', $event.target.value)"
-          class="appearance-none bg-white/[0.03] border border-white/[0.08] text-xs font-semibold text-white/90 rounded-xl py-2 pl-3 pr-8 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] cursor-pointer"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs font-semibold text-theme-text rounded-xl py-2 pl-3 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer"
         >
-          <option value="rating_desc" class="bg-[#12161C] text-white">Highest Rated</option>
-          <option value="experience_desc" class="bg-[#12161C] text-white">Most Experienced</option>
-          <option value="name_asc" class="bg-[#12161C] text-white">Name (A → Z)</option>
-          <option value="newest" class="bg-[#12161C] text-white">Newest Added</option>
+          <option value="rating_desc" class="bg-theme-surface text-theme-text">Highest Rated</option>
+          <option value="experience_desc" class="bg-theme-surface text-theme-text">Most Experienced</option>
+          <option value="name_asc" class="bg-theme-surface text-theme-text">Name (A → Z)</option>
+          <option value="newest" class="bg-theme-surface text-theme-text">Newest Added</option>
         </select>
-        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-theme-text-muted">
           <ChevronDownIcon class="h-3.5 w-3.5" />
         </div>
       </div>
 
       <!-- Total Count Chip -->
-      <div class="hidden sm:inline-flex items-center px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/40 font-mono">
+      <div class="hidden sm:inline-flex items-center px-3 py-1.5 rounded-xl bg-theme-surface border border-theme-border text-xs text-theme-text-muted font-mono">
         <span>Team: </span>
-        <span class="ml-1 text-white font-bold">{{ totalBarbers }}</span>
+        <span class="ml-1 text-theme-text font-bold">{{ totalBarbers }}</span>
       </div>
     </div>
   </div>
