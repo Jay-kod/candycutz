@@ -1,72 +1,140 @@
 <template>
   <AdminLayout>
-    <section class="animate-fade-in max-w-4xl mx-auto space-y-8">
-      <!-- Header -->
+    <section class="animate-fade-in max-w-4xl mx-auto space-y-8 pb-12">
+      <!-- Top Navigation Header -->
       <div class="flex items-center justify-between">
-        <button @click="router.push('/admin/blog')" class="flex items-center gap-2 text-ivory/50 hover:text-admin-light transition-colors text-sm font-medium">
+        <button 
+          @click="router.push('/admin/blog')" 
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+        >
           <ArrowLeftIcon class="h-4 w-4" />
-          Back to Blog
+          <span>Back to Articles</span>
         </button>
+
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border" :class="form.is_published ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30' : 'bg-amber-950/80 text-amber-400 border-amber-500/30'">
+          <span class="h-1.5 w-1.5 rounded-full" :class="form.is_published ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'"></span>
+          {{ form.is_published ? 'Will Publish Live' : 'Saving as Draft' }}
+        </span>
       </div>
 
-      <div class="rounded-3xl border border-admin/20 bg-theme-surface p-8 shadow-2xl">
-        <h1 class="font-display text-3xl text-theme-text mb-2">{{ isEditing ? 'Edit Post' : 'New Post' }}</h1>
-        <p class="text-sm text-ivory/50 mb-8">{{ isEditing ? 'Update your blog post details below.' : 'Create a new blog post for your audience.' }}</p>
+      <!-- Editor Card -->
+      <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#12161C] p-8 shadow-2xl backdrop-blur-2xl">
+        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-admin/10 blur-[90px] pointer-events-none"></div>
+
+        <div class="relative z-10 mb-8 border-b border-white/[0.06] pb-6">
+          <h1 class="font-display text-2xl sm:text-3xl text-white tracking-tight">
+            {{ isEditing ? 'Edit Article' : 'Compose New Article' }}
+          </h1>
+          <p class="mt-1 text-xs text-white/50">
+            {{ isEditing ? 'Refine your article content, update images, and manage publication status.' : 'Write engaging saloon announcements, hair styling guides and care tips.' }}
+          </p>
+        </div>
         
-        <form @submit.prevent="savePost" class="space-y-8">
-          
-          <!-- Image Upload Section -->
-          <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Featured Image</label>
-            <div class="relative w-full h-64 rounded-2xl border-2 border-dashed border-white/10 bg-black/30 overflow-hidden group hover:border-admin/50 transition-colors cursor-pointer flex items-center justify-center">
-              <input type="file" accept="image/*" @change="onFileSelected" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+        <form @submit.prevent="savePost" class="relative z-10 space-y-6">
+          <!-- Featured Cover Image Upload -->
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Featured Cover Image</label>
+            <div class="relative w-full h-64 rounded-2xl border-2 border-dashed border-white/10 bg-black/40 overflow-hidden group hover:border-admin/50 transition-colors cursor-pointer flex items-center justify-center">
+              <input 
+                type="file" 
+                accept="image/*" 
+                @change="onFileSelected" 
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+              />
               
               <template v-if="previewImage">
-                <img :src="previewImage" alt="Preview" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  <span class="bg-black/80 text-white px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-md flex items-center gap-2">
-                    <PhotoIcon class="h-5 w-5" /> Change Image
+                <img :src="previewImage" alt="Preview" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity" />
+                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <span class="bg-black/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md flex items-center gap-2 border border-white/10">
+                    <PhotoIcon class="h-4 w-4 text-admin" /> Change Cover Image
                   </span>
                 </div>
               </template>
               <template v-else>
-                <div class="text-center text-ivory/40 group-hover:text-admin-light/80 transition-colors pointer-events-none">
-                  <PhotoIcon class="h-12 w-12 mx-auto mb-3" />
-                  <p class="text-sm font-medium">Click to upload featured image</p>
+                <div class="text-center text-white/40 group-hover:text-admin transition-colors pointer-events-none px-4">
+                  <PhotoIcon class="h-10 w-10 mx-auto mb-2 opacity-60" />
+                  <p class="text-xs font-semibold">Click or drag image to upload cover</p>
+                  <p class="text-[10px] text-white/30 mt-1">Recommended: 1200x630px JPG, PNG, WebP (Max 2MB)</p>
                 </div>
               </template>
             </div>
           </div>
 
-          <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Title</label>
-            <input v-model="form.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-admin/50 focus:bg-black/50" placeholder="e.g. 5 Tips for the Perfect Fade" />
+          <!-- Title Input -->
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Article Title <span class="text-admin">*</span></label>
+            <input 
+              v-model="form.title" 
+              type="text" 
+              required 
+              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15" 
+              placeholder="e.g. Master the Perfect Beard Fade: Expert Barbering Guide" 
+            />
           </div>
 
-          <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Author / Source (Optional)</label>
-            <input v-model="form.author_display" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-admin/50 focus:bg-black/50" placeholder="Defaults to 'Admin' — or type a barber name, source, etc." />
+          <!-- Author Display -->
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Author / Source Display</label>
+            <input 
+              v-model="form.author_display" 
+              type="text" 
+              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15" 
+              placeholder="Defaults to 'CandyCutz Team' or enter specific barber / stylist name" 
+            />
           </div>
 
-          <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Excerpt</label>
-            <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-admin/50 focus:bg-black/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
+          <!-- Excerpt Summary -->
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Excerpt / Brief Summary</label>
+            <textarea 
+              v-model="form.excerpt" 
+              rows="2" 
+              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 resize-none" 
+              placeholder="Short summary displayed on public blog cards and social previews..."
+            ></textarea>
           </div>
 
-          <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Content</label>
-            <textarea v-model="form.content" rows="15" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-admin/50 focus:bg-black/50 resize-y font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
+          <!-- Article Content Body -->
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Article Content <span class="text-admin">*</span></label>
+            <textarea 
+              v-model="form.content" 
+              rows="14" 
+              required 
+              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm font-sans text-white/90 leading-relaxed placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 resize-y" 
+              placeholder="Write your article content here. Paragraphs and formatting are preserved..."
+            ></textarea>
           </div>
 
-          <div class="flex items-center gap-3 p-4 rounded-xl border border-white/5 bg-white/5">
-            <input v-model="form.is_published" type="checkbox" id="publish" class="h-5 w-5 rounded accent-admin cursor-pointer" />
-            <label for="publish" class="text-sm text-ivory/80 cursor-pointer font-medium select-none">Publish immediately</label>
+          <!-- Publication Checkbox -->
+          <div class="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] bg-white/[0.02]">
+            <input 
+              v-model="form.is_published" 
+              type="checkbox" 
+              id="publish" 
+              class="h-4 w-4 rounded accent-admin cursor-pointer" 
+            />
+            <label for="publish" class="text-xs text-white/80 cursor-pointer font-medium select-none">
+              Publish immediately (visible to all clients on public website)
+            </label>
           </div>
 
-          <div class="flex gap-4 pt-4 border-t border-white/10">
-            <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-admin to-admin-light py-4 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(255,103,0,0.3)] hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
+          <!-- Form Actions -->
+          <div class="flex items-center gap-4 pt-4 border-t border-white/[0.08]">
+            <button 
+              type="button" 
+              @click="router.push('/admin/blog')" 
+              class="px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              :disabled="saving" 
+              class="flex-1 rounded-xl bg-gradient-to-r from-admin to-admin-light py-3 text-xs font-bold text-obsidian shadow-[0_4px_20px_rgba(255,103,0,0.25)] hover:shadow-[0_6px_28px_rgba(255,103,0,0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
               <span v-if="saving" class="h-4 w-4 border-2 border-obsidian border-t-transparent rounded-full animate-spin"></span>
-              {{ saving ? 'Saving...' : (isEditing ? 'Update Post' : 'Create Post') }}
+              <span>{{ saving ? 'Saving Article...' : (isEditing ? 'Update Article' : 'Publish Article') }}</span>
             </button>
           </div>
         </form>
@@ -79,8 +147,8 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
-import { adminApi } from '@/shared/api/old_adminApi';
-import { useToast } from '../../../core/composables/useToast';
+import client from '@/shared/api/client';
+import { useToast } from '@/core/composables/useToast';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import { getStorageUrl } from '@/core/utils/url';
 
@@ -121,24 +189,29 @@ async function loadPost() {
   if (!isEditing.value) return;
   
   try {
-    const res = await adminApi.blogPosts();
-    const post = res.data.data.find(p => p.id == route.params.id);
+    const res = await client.get('/admin/blog');
+    const posts = Array.isArray(res.data?.data) 
+      ? res.data.data 
+      : (res.data?.data?.data || []);
+      
+    const post = posts.find(p => String(p.id) === String(route.params.id));
     if (post) {
-      form.title = post.title;
+      form.title = post.title || '';
       form.excerpt = post.excerpt || '';
-      form.content = post.content;
-      form.is_published = post.is_published == 1;
-      form.featured_image = post.featured_image || '';
-      form.author_display = post.author_display || '';
+      form.content = post.content || post.body || '';
+      form.is_published = post.is_published == 1 || post.status === 'published';
+      form.featured_image = post.featured_image || post.featured_image_url || '';
+      form.author_display = post.author_display || post.author?.name || '';
       if (form.featured_image) {
         previewImage.value = getImageUrl(form.featured_image);
       }
     } else {
-      toast.error('Post not found');
+      toast.error('Article not found');
       router.push('/admin/blog');
     }
   } catch (err) {
-    toast.error('Failed to load post');
+    console.error('[BlogEditor] Failed to load post:', err);
+    toast.error('Failed to load article');
   }
 }
 
@@ -148,27 +221,30 @@ async function savePost() {
     const formData = new FormData();
     formData.append('title', form.title);
     formData.append('content', form.content);
-    formData.append('excerpt', form.excerpt);
-    formData.append('is_published', form.is_published ? 1 : 0);
-    formData.append('author_display', form.author_display);
+    formData.append('excerpt', form.excerpt || '');
+    formData.append('is_published', form.is_published ? '1' : '0');
+    formData.append('status', form.is_published ? 'published' : 'draft');
+    formData.append('author_display', form.author_display || '');
     
     if (form.featured_image && !selectedFile.value) {
       formData.append('featured_image', form.featured_image);
     }
     if (selectedFile.value) {
+      formData.append('featured_image', selectedFile.value);
       formData.append('image', selectedFile.value);
     }
 
     if (isEditing.value) {
-      await adminApi.updateBlogPost(route.params.id, formData);
-      toast.success('Post updated');
+      await client.post(`/admin/blog/${route.params.id}`, formData);
+      toast.success('Article updated successfully');
     } else {
-      await adminApi.createBlogPost(formData);
-      toast.success('Post created');
+      await client.post('/admin/blog', formData);
+      toast.success('Article created successfully');
     }
     router.push('/admin/blog');
   } catch (err) {
-    const errorMsg = err.response?.data?.error || 'Failed to save post';
+    console.error('[BlogEditor] Failed to save post:', err);
+    const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to save article';
     toast.error(errorMsg);
   } finally {
     saving.value = false;
