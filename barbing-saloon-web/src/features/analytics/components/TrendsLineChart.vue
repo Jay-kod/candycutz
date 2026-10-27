@@ -31,10 +31,10 @@
       
       <!-- Interactive Data Points -->
       <div v-for="(p, idx) in graphPoints" :key="'point-'+idx" 
-           class="absolute w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full bg-charcoal border-2 border-gold shadow-[0_0_10px_rgba(212,175,55,0.6)] group/point cursor-pointer transition-all duration-300 hover:scale-[1.8] hover:bg-gold z-20"
+           class="absolute w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full bg-theme-surface border-2 border-gold shadow-[0_0_10px_rgba(212,175,55,0.6)] group/point cursor-pointer transition-all duration-300 hover:scale-[1.8] hover:bg-gold z-20"
            :style="{ left: `${p.x}%`, top: `${p.y}%` }">
         <!-- Tooltip -->
-        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/point:opacity-100 transition-all duration-200 bg-obsidian border border-gold/30 text-xs px-3 py-1.5 rounded-lg shadow-xl text-gold font-bold whitespace-nowrap z-30 pointer-events-none scale-50 group-hover/point:scale-100 origin-bottom">
+        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/point:opacity-100 transition-all duration-200 bg-theme-card border border-gold/30 text-xs px-3 py-1.5 rounded-lg shadow-xl text-gold font-bold whitespace-nowrap z-30 pointer-events-none scale-50 group-hover/point:scale-100 origin-bottom">
           <span v-if="tooltipPrefix">{{ tooltipPrefix }}</span>{{ Number(p.value).toLocaleString() }}<span v-if="tooltipSuffix"> {{ tooltipSuffix }}{{ p.value === 1 ? '' : 's' }}</span>
         </div>
       </div>
@@ -47,7 +47,7 @@
       </div>
     </div>
     
-    <div v-if="trends.length === 0" class="w-full h-full flex items-center justify-center text-ivory/30 text-sm absolute inset-0 z-0">
+    <div v-if="trends.length === 0" class="w-full h-full flex items-center justify-center text-theme-text-muted text-sm absolute inset-0 z-0">
       {{ emptyMessage }}
     </div>
   </div>

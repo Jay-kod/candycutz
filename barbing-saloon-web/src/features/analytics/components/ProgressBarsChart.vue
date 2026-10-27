@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <div v-for="item in normalizedItems" :key="item.label" class="group">
       <div class="flex justify-between text-sm mb-1">
-        <span class="text-ivory/80 font-medium">{{ item.label }}</span>
+        <span class="text-theme-text font-medium">{{ item.label }}</span>
         <span class="font-bold tabular-nums" :class="valueClass">{{ item.value }} {{ unit }}</span>
       </div>
       <div class="h-2 w-full bg-theme-bg rounded-full overflow-hidden border border-theme-border">
@@ -11,7 +11,7 @@
              :style="{ width: `${item.percentage}%` }"></div>
       </div>
     </div>
-    <div v-if="normalizedItems.length === 0" class="p-8 text-center text-ivory/40 text-sm">
+    <div v-if="normalizedItems.length === 0" class="p-8 text-center text-theme-text-muted text-sm">
       {{ emptyMessage }}
     </div>
   </div>

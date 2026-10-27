@@ -1,7 +1,7 @@
 <template>
   <div class="relative mb-6 mx-auto" :class="containerClass">
     <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
-      <circle cx="50" cy="50" r="40" fill="transparent" stroke="rgba(255,255,255,0.05)" :stroke-width="strokeWidth" />
+      <circle cx="50" cy="50" r="40" fill="transparent" stroke="var(--color-border)" :stroke-width="strokeWidth" />
       <circle v-for="(segment, idx) in donutSegments" :key="idx"
               cx="50" cy="50" r="40" fill="transparent"
               :stroke="segment.color"
@@ -14,7 +14,7 @@
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
       <span class="font-display text-theme-text" :class="valueClass">{{ total }}</span>
-      <span class="uppercase tracking-widest text-ivory/40" :class="labelClass">{{ label }}</span>
+      <span class="uppercase tracking-widest text-theme-text-muted" :class="labelClass">{{ label }}</span>
     </div>
   </div>
 </template>
