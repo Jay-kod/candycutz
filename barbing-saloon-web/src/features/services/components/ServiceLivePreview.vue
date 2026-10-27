@@ -11,7 +11,7 @@
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-admin to-amber-400 z-20"></div>
 
       <!-- Image Gallery Preview -->
-      <div v-if="hasAnyImage" class="relative w-full h-48 bg-black/40 overflow-hidden">
+      <div v-if="hasAnyImage" class="relative w-full h-48 bg-theme-surface-subtle overflow-hidden">
         <div class="absolute inset-0 flex transition-transform duration-500" :style="{ transform: `translateX(-${activePreviewIndex * 100}%)` }">
           <img v-for="(img, idx) in previewImages" :key="idx" :src="img" class="w-full h-full object-cover shrink-0" />
         </div>
@@ -22,7 +22,7 @@
             :key="idx" 
             @click="$emit('update:activePreviewIndex', idx)"
             class="h-1.5 rounded-full transition-all duration-300"
-            :class="activePreviewIndex === idx ? 'w-4 bg-admin' : 'w-1.5 bg-white/40 hover:bg-white/70'"
+            :class="activePreviewIndex === idx ? 'w-4 bg-admin' : 'w-1.5 bg-theme-border hover:bg-theme-text-muted'"
           ></button>
         </div>
         <div class="absolute inset-0 bg-gradient-to-t from-theme-surface via-transparent to-transparent opacity-80"></div>
@@ -52,8 +52,8 @@
           <span
             class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border"
             :class="form.is_available
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : 'bg-red-500/10 text-red-400 border-red-500/20'"
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'"
           >
             {{ form.is_available ? '● Available for Booking' : '● Currently Unavailable' }}
           </span>
@@ -61,7 +61,7 @@
 
         <!-- Price & Duration -->
         <div class="pt-6 flex items-center justify-between border-t border-theme-border">
-          <div class="flex items-baseline gap-1 text-emerald-400 font-display drop-shadow-md">
+          <div class="flex items-baseline gap-1 text-emerald-600 dark:text-emerald-400 font-display drop-shadow-md">
             <span class="text-sm opacity-60">₦</span>
             <span class="text-3xl font-bold">{{ form.price ? Number(form.price).toLocaleString() : '0' }}</span>
           </div>

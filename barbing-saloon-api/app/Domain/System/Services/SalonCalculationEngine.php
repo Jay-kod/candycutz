@@ -305,8 +305,12 @@ class SalonCalculationEngine
      */
     public function computeHourlyDistribution(): array
     {
+        $hourExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%H', appointment_time) AS INTEGER)"
+            : 'HOUR(appointment_time)';
+
         return DB::table('appointments')
-            ->selectRaw('HOUR(appointment_time) as hr, COUNT(*) as count')
+            ->selectRaw("{$hourExpression} as hr, COUNT(*) as count")
             ->whereNotNull('appointment_time')
             ->groupBy('hr')
             ->pluck('count', 'hr')
