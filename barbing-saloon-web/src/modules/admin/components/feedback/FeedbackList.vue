@@ -152,3 +152,4 @@ const emptyDescription = computed(() => {
   return 'Customer suggestions and maintenance reports will appear here in the private inbox after submission.';
 });
 </script>
+

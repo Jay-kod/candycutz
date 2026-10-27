@@ -44,3 +44,4 @@ describe('FeedbackStats.vue', () => {
     expect(wrapper.text()).toContain('Inbox up to date');
   });
 });
+
