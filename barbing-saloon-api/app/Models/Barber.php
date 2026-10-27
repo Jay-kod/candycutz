@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $bio
+ * @property array<int, string>|null $specialties
+ * @property int|null $experience_years
+ * @property float $rating
+ * @property bool $is_available
+ * @property string $chair_status
+ * @property-read User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkingHour> $workingHours
+ *
  * @property string $status
  * @property string|null $bank_name
  * @property string|null $account_name
@@ -70,6 +81,9 @@ class Barber extends Model
         return $this->hasMany(Testimonial::class);
     }
 
+    /**
+     * @return HasMany<WorkingHour, $this>
+     */
     public function workingHours(): HasMany
     {
         return $this->hasMany(WorkingHour::class);
