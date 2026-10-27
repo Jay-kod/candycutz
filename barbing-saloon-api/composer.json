@@ -4,7 +4,7 @@
   "description": "Barbing Saloon API",
   "require": {
     "php": "^8.2",
-    "laravel/framework": "^11.0",
+    "laravel/framework": "^12.68.0",
     "laravel/sanctum": "^4.0",
     "ezyang/htmlpurifier": "^4.18",
     "firebase/php-jwt": "^7.1",
