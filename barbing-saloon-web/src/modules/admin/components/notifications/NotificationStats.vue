@@ -59,7 +59,7 @@
       <div class="flex items-center justify-between">
         <span class="text-xs font-semibold uppercase tracking-wider text-white/50">System &amp; Security</span>
         <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 group-hover:scale-105 transition-transform">
-          <ShieldAlertIcon class="h-5 w-5" />
+          <ShieldExclamationIcon class="h-5 w-5" />
         </div>
       </div>
       <div class="mt-4">

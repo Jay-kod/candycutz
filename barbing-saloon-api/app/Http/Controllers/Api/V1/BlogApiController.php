@@ -23,7 +23,8 @@ class BlogApiController
 
     public function __construct(
         protected HtmlContentSanitizer $htmlContentSanitizer
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): JsonResponse
     {
