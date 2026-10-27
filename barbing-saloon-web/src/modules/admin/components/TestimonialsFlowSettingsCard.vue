@@ -1,7 +1,7 @@
 <template>
   <div class="relative overflow-hidden rounded-3xl border border-admin/20 bg-theme-surface/90 p-6 md:p-8 backdrop-blur-md shadow-xl transition-all duration-300">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-theme-border">
       <div>
         <div class="flex items-center gap-2">
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-admin/20 border border-admin/30 text-admin-light text-[11px] font-bold uppercase tracking-wider">
@@ -11,7 +11,7 @@
         <h2 class="mt-2 font-display text-2xl text-theme-text flex items-center gap-2">
           Marquee <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin to-admin-light">Speed & Direction</span>
         </h2>
-        <p class="text-xs sm:text-sm text-ivory/60 mt-1 max-w-xl">
+        <p class="text-xs sm:text-sm text-theme-text-muted mt-1 max-w-xl">
           Control how customer reviews drift across the homepage ribbon. Adjust the speed and direction, preview live, and save.
         </p>
       </div>
@@ -21,7 +21,7 @@
           type="button"
           @click="resetToDefaults"
           :disabled="isSaving"
-          class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-ivory/70 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+          class="rounded-xl border border-theme-border bg-theme-surface-subtle px-4 py-2 text-xs font-semibold text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all disabled:opacity-50"
         >
           Reset Defaults
         </button>
@@ -54,9 +54,9 @@
             class="flex flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-center transition-all duration-200"
             :class="flowDirection === 'left'
               ? 'border-admin bg-admin/15 text-admin-light shadow-md shadow-admin/10 ring-1 ring-admin/50'
-              : 'border-white/10 bg-black/30 text-ivory/60 hover:border-white/20 hover:text-ivory'"
+              : 'border-theme-border bg-theme-surface-subtle text-theme-text-muted hover:border-theme-border/80 hover:text-theme-text'"
           >
-            <div class="flex items-center justify-center size-9 rounded-xl bg-white/5 border border-white/10 text-lg">
+            <div class="flex items-center justify-center size-9 rounded-xl bg-theme-surface border border-theme-border text-lg">
               ←
             </div>
             <div>
@@ -71,9 +71,9 @@
             class="flex flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-center transition-all duration-200"
             :class="flowDirection === 'right'
               ? 'border-admin bg-admin/15 text-admin-light shadow-md shadow-admin/10 ring-1 ring-admin/50'
-              : 'border-white/10 bg-black/30 text-ivory/60 hover:border-white/20 hover:text-ivory'"
+              : 'border-theme-border bg-theme-surface-subtle text-theme-text-muted hover:border-theme-border/80 hover:text-theme-text'"
           >
-            <div class="flex items-center justify-center size-9 rounded-xl bg-white/5 border border-white/10 text-lg">
+            <div class="flex items-center justify-center size-9 rounded-xl bg-theme-surface border border-theme-border text-lg">
               →
             </div>
             <div>
@@ -103,9 +103,9 @@
             max="90"
             step="5"
             v-model.number="flowSpeed"
-            class="w-full accent-[#FF6700] h-2 bg-black/50 rounded-lg cursor-pointer"
+            class="w-full accent-[#FF6700] h-2 bg-theme-border rounded-lg cursor-pointer"
           />
-          <div class="flex justify-between text-[11px] text-ivory/40 mt-1 font-mono">
+          <div class="flex justify-between text-[11px] text-theme-text-muted/60 mt-1 font-mono">
             <span>Fast (15s)</span>
             <span>Balanced (45s)</span>
             <span>Gentle (90s)</span>
@@ -122,7 +122,7 @@
             class="rounded-lg border px-2.5 py-1 text-xs font-medium transition-all"
             :class="flowSpeed === preset.value
               ? 'border-admin bg-admin text-obsidian font-bold'
-              : 'border-white/10 bg-black/30 text-ivory/60 hover:border-white/20 hover:text-white'"
+              : 'border-theme-border bg-theme-surface-subtle text-theme-text-muted hover:border-theme-border/80 hover:text-theme-text'"
           >
             {{ preset.label }}
           </button>
@@ -131,14 +131,14 @@
     </div>
 
     <!-- 3. Live Interactive Mini-Preview Strip -->
-    <div class="mt-6 pt-5 border-t border-white/5">
+    <div class="mt-6 pt-5 border-t border-theme-border">
       <div class="flex items-center justify-between mb-2.5">
-        <span class="text-xs font-bold uppercase tracking-wider text-ivory/50 flex items-center gap-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-theme-text-muted flex items-center gap-2">
           <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
           Live Admin Preview (Hover to pause)
         </span>
-        <span class="text-[11px] text-ivory/40">
-          Direction: <strong class="text-white">{{ flowDirection === 'left' ? '← Left' : '→ Right' }}</strong> | Speed: <strong class="text-white">{{ flowSpeed }}s</strong>
+        <span class="text-[11px] text-theme-text-muted">
+          Direction: <strong class="text-theme-text">{{ flowDirection === 'left' ? '← Left' : '→ Right' }}</strong> | Speed: <strong class="text-theme-text">{{ flowSpeed }}s</strong>
         </span>
       </div>
 
@@ -252,4 +252,3 @@ onMounted(() => {
   loadSettings();
 });
 </script>
-
