@@ -3,7 +3,7 @@
     <article
       v-for="(card, idx) in cards"
       :key="card.label || idx"
-      class="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-3.5 xs:p-4 sm:p-5 transition-all duration-300 hover:border-admin/40 hover:bg-[#0E141A]"
+      class="group relative overflow-hidden rounded-xl border border-theme-border bg-theme-surface/90 p-3.5 xs:p-4 sm:p-5 transition-all duration-300 hover:border-admin/40 hover:bg-theme-card"
     >
       <!-- Technical Corner Ticks with CandyCutz Orange Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -14,14 +14,14 @@
       <!-- Card Content -->
       <div class="flex flex-col justify-between h-full gap-3">
         <!-- Top Row: Icon + Label -->
-        <div class="flex items-center gap-2 text-ivory/60 text-xs font-medium">
+        <div class="flex items-center gap-2 text-theme-text-muted text-xs font-medium">
           <component :is="card.icon" class="h-4 w-4" :class="card.iconColor" />
           <span class="tracking-wide">{{ card.label }}</span>
         </div>
 
         <!-- Middle: Dynamic Main Value -->
         <div>
-          <div class="text-xl xs:text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-xl xs:text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
             {{ card.value }}
           </div>
         </div>

@@ -2,20 +2,20 @@
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2">
     <!-- Left: Greeting & Description -->
     <div>
-      <h1 class="text-2xl sm:text-[26px] font-bold text-white tracking-tight flex items-center gap-2 font-sans">
+      <h1 class="text-2xl sm:text-[26px] font-bold text-theme-text tracking-tight flex items-center gap-2 font-sans">
         <span>Welcome back, {{ userName }}!</span>
         <span class="inline-block hover:rotate-12 transition-transform cursor-default select-none">👋</span>
       </h1>
-      <p class="text-xs text-ivory/50 mt-0.5">CandyCutz Salon Overview & Real-Time Operations</p>
+      <p class="text-xs text-theme-text-muted mt-0.5">CandyCutz Salon Overview & Real-Time Operations</p>
     </div>
 
     <!-- Right: Telemetry Strip (Clock + Health + DB + Refresh + Action) -->
     <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
       <!-- Live Clock Pill -->
-      <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B0F13] border border-white/[0.08] text-xs text-ivory/60 font-mono">
-        <ClockIcon class="h-3.5 w-3.5 text-ivory/40" />
-        <span class="text-white font-semibold tabular-nums">{{ currentTime }}</span>
-        <span class="text-ivory/30">|</span>
+      <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-theme-bg border border-theme-border text-xs text-theme-text-muted font-mono">
+        <ClockIcon class="h-3.5 w-3.5 text-theme-text-muted" />
+        <span class="text-theme-text font-semibold tabular-nums">{{ currentTime }}</span>
+        <span class="text-theme-text-muted/50">|</span>
         <span class="uppercase text-[11px]">{{ currentDate }}</span>
       </div>
 
@@ -43,7 +43,7 @@
       <div 
         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono font-medium backdrop-blur-sm transition-all"
         :class="isDbConnected 
-          ? 'bg-[#141820] border-admin/30 text-ivory/90' 
+          ? 'bg-theme-surface border-admin/30 text-theme-text' 
           : 'bg-rose-950/30 border-rose-500/30 text-rose-300'"
       >
         <CircleStackIcon 
@@ -51,7 +51,7 @@
           :class="isDbConnected ? 'text-admin' : 'text-rose-400'" 
         />
         <span>DB: <strong :class="isDbConnected ? 'text-admin font-bold' : 'text-rose-300'">{{ isDbConnected ? 'Connected' : 'Offline' }}</strong></span>
-        <span v-if="isDbConnected && dbLatency" class="text-[10px] text-ivory/40 tabular-nums">({{ dbLatency }}ms)</span>
+        <span v-if="isDbConnected && dbLatency" class="text-[10px] text-theme-text-muted tabular-nums">({{ dbLatency }}ms)</span>
       </div>
 
       <!-- Live Refresh Button -->
@@ -59,7 +59,7 @@
         type="button"
         @click="triggerRefresh"
         :disabled="isRefreshing"
-        class="inline-flex items-center min-h-[40px] xs:min-h-[44px] gap-1.5 rounded-lg border border-white/[0.08] bg-[#0B0F13] hover:border-admin/40 hover:bg-[#141820] text-xs font-semibold text-ivory/80 hover:text-white px-3 py-2 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+        class="inline-flex items-center min-h-[40px] xs:min-h-[44px] gap-1.5 rounded-lg border border-theme-border bg-theme-bg hover:border-admin/40 hover:bg-theme-surface text-xs font-semibold text-theme-text-muted hover:text-theme-text px-3 py-2 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
         title="Sync live dashboard and health status"
       >
         <ArrowPathIcon 
