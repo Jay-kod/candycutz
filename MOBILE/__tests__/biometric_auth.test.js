@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const projectRoot = path.resolve('c:/xampp/htdocs/1/candycutz/candycutz-mobile-app');
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 test('Biometric Authentication & Fingerprint Login Suite', async (t) => {
   await t.test('biometricService.ts exists and exports multi-role interface', () => {

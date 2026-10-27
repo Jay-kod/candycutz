@@ -6,13 +6,13 @@ Welcome to the CandyCutz development guide. This document provides setup instruc
 
 ## 1. Architectural Topology
 
-Per `ARCHITECTURE.md`, the platform comprises three discrete projects in a single repository:
+The active platform comprises the API and web projects. The Expo project is maintained separately under `MOBILE/`:
 
 ```
 candycutz/
 ├── barbing-saloon-api/      # Canonical Laravel 11 Monolith API (/api/v1/*)
 ├── barbing-saloon-web/      # Vue 3 + Vite Single Page Application
-├── candycutz-mobile-app/    # Expo / React Native Customer Mobile App
+├── MOBILE/                  # Standalone Expo / React Native project
 └── docs/                    # Authoritative platform documentation & OpenAPI specs
 ```
 
@@ -73,10 +73,10 @@ npm run dev
 ```
 The web app is served at `http://localhost:5173`.
 
-### 3.3 Mobile App (`candycutz-mobile-app`)
+### 3.3 Standalone Mobile Project (`MOBILE`)
 
 ```bash
-cd candycutz-mobile-app
+cd MOBILE
 
 # 1. Install Node dependencies
 npm install
@@ -124,7 +124,7 @@ npm run build
 ```
 
 ### 4.3 Mobile App Verification
-Run inside `candycutz-mobile-app/`:
+Run inside `MOBILE/`:
 
 ```bash
 # 1. TypeScript Static Type Check
@@ -153,7 +153,7 @@ php artisan openapi:generate
 To sync client types with the latest OpenAPI spec:
 
 ```bash
-cd candycutz-mobile-app
+cd MOBILE
 # Generates src/api/types.ts from docs/openapi.json
 npm run generate-types
 ```
