@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <!-- Left Card: Conversion Funnel (Sankey Flow) with System Colors -->
-    <div class="rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
+    <div class="rounded-xl border border-theme-border bg-theme-surface/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
       <!-- Technical Corner Ticks with CandyCutz Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
       <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -9,12 +9,12 @@
       <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
       <!-- Header with Real Conversion Rate -->
-      <div class="flex items-start justify-between pb-6 border-b border-white/[0.04]">
+      <div class="flex items-start justify-between pb-6 border-b border-theme-border">
         <div>
-          <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
             {{ funnelCompletionRate }}%
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Salon Service Efficiency · {{ completedCount }} of {{ totalAppts }} appointments fulfilled</p>
+          <p class="text-xs text-theme-text-muted mt-0.5">Salon Service Efficiency · {{ completedCount }} of {{ totalAppts }} appointments fulfilled</p>
         </div>
 
         <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
@@ -56,41 +56,41 @@
             />
 
             <!-- Vertical Stage Dividers with Glass Fill -->
-            <line x1="70" y1="5" x2="70" y2="115" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2 2" />
-            <line x1="175" y1="26" x2="175" y2="94" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2 2" />
-            <line x1="285" y1="46" x2="285" y2="74" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2 2" />
+            <line x1="70" y1="5" x2="70" y2="115" stroke="var(--color-border)" stroke-dasharray="2 2" />
+            <line x1="175" y1="26" x2="175" y2="94" stroke="var(--color-border)" stroke-dasharray="2 2" />
+            <line x1="285" y1="46" x2="285" y2="74" stroke="var(--color-border)" stroke-dasharray="2 2" />
           </svg>
 
           <!-- 4 Overlay Nodes with Values & Percentage Pills -->
           <div class="absolute inset-0 flex justify-between items-center px-4 sm:px-6 pointer-events-none">
             <!-- Stage 1 -->
             <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-white mb-2 tabular-nums">{{ funnelStages[0].count }}</span>
-              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
+              <span class="text-xs font-bold text-theme-text mb-2 tabular-nums">{{ funnelStages[0].count }}</span>
+              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-theme-text shadow">
                 100%
               </div>
             </div>
 
             <!-- Stage 2 -->
             <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-white mb-2 tabular-nums">{{ funnelStages[1].count }}</span>
-              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
+              <span class="text-xs font-bold text-theme-text mb-2 tabular-nums">{{ funnelStages[1].count }}</span>
+              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-theme-text shadow">
                 {{ funnelStages[1].pct }}%
               </div>
             </div>
 
             <!-- Stage 3 -->
             <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-white mb-2 tabular-nums">{{ funnelStages[2].count }}</span>
-              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
+              <span class="text-xs font-bold text-theme-text mb-2 tabular-nums">{{ funnelStages[2].count }}</span>
+              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-theme-text shadow">
                 {{ funnelStages[2].pct }}%
               </div>
             </div>
 
             <!-- Stage 4 -->
             <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-white mb-2 tabular-nums">{{ funnelStages[3].count }}</span>
-              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
+              <span class="text-xs font-bold text-theme-text mb-2 tabular-nums">{{ funnelStages[3].count }}</span>
+              <div class="rounded-full bg-admin/20 backdrop-blur-md border border-admin/40 px-2.5 py-0.5 text-[10px] font-bold text-theme-text shadow">
                 {{ funnelStages[3].pct }}%
               </div>
             </div>
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Stage Bottom Labels -->
-        <div class="flex justify-between text-[11px] text-ivory/60 px-2 sm:px-4 font-medium pt-2">
+        <div class="flex justify-between text-[11px] text-theme-text-muted px-2 sm:px-4 font-medium pt-2">
           <span>Total Clients</span>
           <span>Bookings</span>
           <span>Confirmed</span>
@@ -108,7 +108,7 @@
     </div>
 
     <!-- Right Card: Radial-Lined Sunburst & Real Status Breakdown -->
-    <div class="rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
+    <div class="rounded-xl border border-theme-border bg-theme-surface/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
       <!-- Technical Corner Ticks with CandyCutz Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
       <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -116,12 +116,12 @@
       <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
       <!-- Header with Real Total Orders -->
-      <div class="flex items-start justify-between pb-6 border-b border-white/[0.04]">
+      <div class="flex items-start justify-between pb-6 border-b border-theme-border">
         <div>
-          <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
             {{ totalAppts }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Salon Appointments by Service Status</p>
+          <p class="text-xs text-theme-text-muted mt-0.5">Salon Appointments by Service Status</p>
         </div>
 
         <div class="text-[11px] font-medium text-admin flex items-center gap-1">
@@ -136,11 +136,11 @@
         <div class="relative w-36 h-36 shrink-0 flex items-center justify-center">
           <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
             <!-- Ray Lines Circle Texture -->
-            <circle cx="50" cy="50" r="44" fill="#141820" stroke="rgba(255,103,0,0.15)" stroke-width="1" />
+            <circle cx="50" cy="50" r="44" fill="var(--color-bg)" stroke="rgba(255,103,0,0.15)" stroke-width="1" />
             
             <!-- Radiating Texture Lines (48 rays) -->
             <line
-              vfor="i in 48"
+              v-for="i in 48"
               :key="'ray-' + i"
               :x1="50 + 12 * Math.cos((i * 7.5 * Math.PI) / 180)"
               :y1="50 + 12 * Math.sin((i * 7.5 * Math.PI) / 180)"
@@ -169,8 +169,8 @@
 
           <!-- Center Label -->
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span class="text-xl font-bold text-white tabular-nums">{{ totalAppts }}</span>
-            <span class="text-[8px] uppercase tracking-wider text-ivory/40 font-semibold">Total</span>
+            <span class="text-xl font-bold text-theme-text tabular-nums">{{ totalAppts }}</span>
+            <span class="text-[8px] uppercase tracking-wider text-theme-text-muted font-semibold">Total</span>
           </div>
         </div>
 
@@ -184,15 +184,15 @@
             <!-- Bullet + Label -->
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="h-2 w-2 rounded-[2px] shrink-0" :style="{ backgroundColor: item.color }"></span>
-              <span class="text-ivory/70 group-hover/item:text-white transition-colors truncate capitalize">
+              <span class="text-theme-text-muted group-hover/item:text-theme-text transition-colors truncate capitalize">
                 {{ item.label.replace('_', ' ') }}
               </span>
             </div>
 
             <!-- Percentage + Count from Backend -->
             <div class="flex items-center gap-3 text-right shrink-0 font-mono">
-              <span class="text-ivory/40 tabular-nums">{{ item.pct }}%</span>
-              <span class="text-white font-semibold tabular-nums w-10 text-right">{{ item.count }}</span>
+              <span class="text-theme-text-muted tabular-nums">{{ item.pct }}%</span>
+              <span class="text-theme-text font-semibold tabular-nums w-10 text-right">{{ item.count }}</span>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
     <!-- Left Card: Stacked Segmented Equalizer Chart (8 cols) -->
-    <div class="lg:col-span-8 rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
+    <div class="lg:col-span-8 rounded-xl border border-theme-border bg-theme-surface/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
       <!-- Technical Corner Ticks with CandyCutz Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
       <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -9,15 +9,15 @@
       <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
       <!-- Header with Real Revenue Metric -->
-      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-white/[0.04]">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-theme-border">
         <div>
-          <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(periodRevenueTotal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Total Salon Revenue ({{ timeframeLabel }})</p>
+          <p class="text-xs text-theme-text-muted mt-0.5">Total Salon Revenue ({{ timeframeLabel }})</p>
 
           <!-- Legend with System Brand Colors -->
-          <div class="flex items-center gap-4 mt-2.5 text-xs text-ivory/60">
+          <div class="flex items-center gap-4 mt-2.5 text-xs text-theme-text-muted">
             <span class="flex items-center gap-1.5">
               <span class="h-2 w-2 rounded-full bg-admin"></span>
               <span>Revenue Volume (₦)</span>
@@ -31,7 +31,7 @@
 
         <!-- Timeframe Selector & Trend -->
         <div class="flex flex-col items-start sm:items-end gap-2">
-          <div class="inline-flex rounded-lg bg-[#141820] p-0.5 border border-white/[0.08]">
+          <div class="inline-flex rounded-lg bg-theme-bg p-0.5 border border-theme-border">
             <button
               v-for="tf in timeframes"
               :key="tf"
@@ -41,7 +41,7 @@
                 'rounded-md px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer',
                 activeTimeframe === tf
                   ? 'bg-admin text-white shadow-sm'
-                  : 'text-ivory/40 hover:text-white'
+                  : 'text-theme-text-muted hover:text-theme-text'
               ]"
             >
               {{ tf }}
@@ -59,7 +59,7 @@
       <div class="relative pt-6 pb-2">
         <div class="flex items-end gap-2 sm:gap-3 h-56">
           <!-- Y-Axis Scale -->
-          <div class="flex flex-col justify-between h-full text-[10px] text-ivory/30 font-mono pr-1 shrink-0 select-none pb-5">
+          <div class="flex flex-col justify-between h-full text-[10px] text-theme-text-muted font-mono pr-1 shrink-0 select-none pb-5">
             <span>{{ yAxisLabels[4] }}</span>
             <span>{{ yAxisLabels[3] }}</span>
             <span>{{ yAxisLabels[2] }}</span>
@@ -71,11 +71,11 @@
           <div class="flex-1 h-full flex flex-col justify-between relative">
             <!-- Horizontal Dashed Guide Lines -->
             <div class="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none opacity-10 pb-5">
-              <div class="border-b border-dashed border-white w-full"></div>
-              <div class="border-b border-dashed border-white w-full"></div>
-              <div class="border-b border-dashed border-white w-full"></div>
-              <div class="border-b border-dashed border-white w-full"></div>
-              <div class="border-b border-white w-full"></div>
+              <div class="border-b border-dashed border-theme-border w-full"></div>
+              <div class="border-b border-dashed border-theme-border w-full"></div>
+              <div class="border-b border-dashed border-theme-border w-full"></div>
+              <div class="border-b border-dashed border-theme-border w-full"></div>
+              <div class="border-b border-theme-border w-full"></div>
             </div>
 
             <!-- 28 Columns: Wider and Closer to Each Other -->
@@ -96,14 +96,14 @@
                 </div>
 
                 <!-- Hover Tooltip -->
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/bar:opacity-100 transition-all pointer-events-none bg-[#1A1E26] border border-admin/30 text-[10px] text-white px-2.5 py-1 rounded shadow-xl whitespace-nowrap z-30 tabular-nums">
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/bar:opacity-100 transition-all pointer-events-none bg-theme-card border border-admin/30 text-[10px] text-theme-text px-2.5 py-1 rounded shadow-xl whitespace-nowrap z-30 tabular-nums">
                   <span class="text-admin font-bold">{{ col.dateLabel }}:</span> ₦{{ formatCompact(col.revenue) }} ({{ col.bookings }} appts)
                 </div>
               </div>
             </div>
 
             <!-- X-Axis Labels: Evenly spaced dates along the 28 columns -->
-            <div class="flex justify-between text-[10px] text-ivory/40 font-mono pt-1">
+            <div class="flex justify-between text-[10px] text-theme-text-muted font-mono pt-1">
               <span v-for="dl in spacedDateLabels" :key="dl" class="truncate">
                 {{ dl }}
               </span>
@@ -114,7 +114,7 @@
     </div>
 
     <!-- Right Card: Monthly Segmented Bar Chart with Wide Bars (4 cols) -->
-    <div class="lg:col-span-4 rounded-xl border border-white/[0.08] bg-[#0B0F13]/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
+    <div class="lg:col-span-4 rounded-xl border border-theme-border bg-theme-surface/90 p-5 sm:p-6 relative overflow-hidden group hover:border-admin/40 transition-all flex flex-col justify-between">
       <!-- Technical Corner Ticks with CandyCutz Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
       <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 border-t border-r border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -122,12 +122,12 @@
       <span class="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-admin/30 group-hover:border-admin transition-colors"></span>
 
       <!-- Header with Real Peak/Current Revenue -->
-      <div class="flex items-start justify-between pb-6 border-b border-white/[0.04]">
+      <div class="flex items-start justify-between pb-6 border-b border-theme-border">
         <div>
-          <div class="text-2xl sm:text-[28px] font-bold text-white tracking-tight font-sans tabular-nums">
+          <div class="text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
             ₦{{ formatCurrency(topPeriodVal) }}
           </div>
-          <p class="text-xs text-ivory/50 mt-0.5">Monthly Revenue ({{ currentMonthName }})</p>
+          <p class="text-xs text-theme-text-muted mt-0.5">Monthly Revenue ({{ currentMonthName }})</p>
         </div>
 
         <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1 font-mono">
@@ -166,7 +166,7 @@
         </div>
 
         <!-- Month Labels -->
-        <div class="flex justify-between text-[10px] text-ivory/40 font-mono px-3">
+        <div class="flex justify-between text-[10px] text-theme-text-muted font-mono px-3">
           <span v-for="m in monthlyBars" :key="'lbl-' + m.month">{{ m.month }}</span>
         </div>
       </div>
