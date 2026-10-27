@@ -47,3 +47,4 @@ describe('TestimonialsStats.vue', () => {
     expect(wrapper.text()).toContain('All testimonials approved');
   });
 });
+
