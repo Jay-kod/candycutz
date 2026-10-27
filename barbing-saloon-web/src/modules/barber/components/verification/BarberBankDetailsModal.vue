@@ -1,11 +1,11 @@
 <template>
   <transition name="fade">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-obsidian/85 backdrop-blur-md" @click="$emit('close')"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="$emit('close')"></div>
       <div class="relative w-full max-w-xl rounded-3xl border border-gold/20 bg-theme-surface shadow-[0_25px_60px_rgba(0,0,0,0.5)] overflow-hidden animate-slide-up">
         
         <!-- Header with gradient -->
-        <div class="relative bg-gradient-to-r from-charcoal via-obsidian to-charcoal px-8 py-5 overflow-hidden">
+        <div class="relative bg-gradient-to-r from-theme-surface-subtle via-theme-surface to-theme-surface-subtle border-b border-theme-border px-8 py-5 overflow-hidden">
           <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(212,175,55,0.08),transparent_70%)]"></div>
           <div class="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div class="relative z-10 flex justify-between items-center">
@@ -15,10 +15,10 @@
               </div>
               <div>
                 <h3 class="font-display text-lg text-theme-text">Bank Details</h3>
-                <p class="text-[11px] text-ivory/40 mt-0.5">Where customers send payments</p>
+                <p class="text-[11px] text-theme-text-muted mt-0.5">Where customers send payments</p>
               </div>
             </div>
-            <button @click="$emit('close')" class="text-ivory/30 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all">
+            <button @click="$emit('close')" class="text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle rounded-full p-2 transition-all">
               <XMarkIcon class="h-5 w-5"/>
             </button>
           </div>
@@ -47,11 +47,11 @@
                   </p>
                   <div class="flex items-end justify-between pt-2">
                     <div>
-                      <p class="text-[9px] uppercase tracking-wider text-ivory/30 mb-0.5">Account Holder</p>
-                      <p class="text-sm font-semibold text-ivory/80">{{ form.account_name || 'Your Name' }}</p>
+                      <p class="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Account Holder</p>
+                      <p class="text-sm font-semibold text-white/90">{{ form.account_name || 'Your Name' }}</p>
                     </div>
                     <div class="text-right">
-                      <p class="text-[9px] uppercase tracking-wider text-ivory/30 mb-0.5">Bank</p>
+                      <p class="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Bank</p>
                       <p class="text-sm font-semibold text-gold/80">{{ form.bank_name || 'Bank Name' }}</p>
                     </div>
                   </div>
@@ -63,7 +63,7 @@
             <form @submit.prevent="$emit('save')" class="space-y-5 relative z-10">
               <!-- Bank Name -->
               <div>
-                <label class="flex items-center gap-1.5 text-xs font-semibold text-ivory/50 uppercase tracking-wider mb-2">
+                <label class="flex items-center gap-1.5 text-xs font-semibold text-theme-text-muted uppercase tracking-wider mb-2">
                   <BuildingLibraryIcon class="h-3.5 w-3.5 text-gold/60" />
                   Bank Name
                 </label>
@@ -73,14 +73,14 @@
                     type="text" 
                     required
                     placeholder="e.g. GTBank, Access Bank"
-                    class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-ivory/20"
+                    class="w-full rounded-xl border border-theme-border bg-theme-bg pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-theme-surface focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-theme-text-muted/40"
                   />
                 </div>
               </div>
 
               <!-- Account Name -->
               <div>
-                <label class="flex items-center gap-1.5 text-xs font-semibold text-ivory/50 uppercase tracking-wider mb-2">
+                <label class="flex items-center gap-1.5 text-xs font-semibold text-theme-text-muted uppercase tracking-wider mb-2">
                   <UserIcon class="h-3.5 w-3.5 text-gold/60" />
                   Account Holder Name
                 </label>
@@ -90,14 +90,14 @@
                     type="text" 
                     required
                     placeholder="e.g. James Jonathan"
-                    class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-ivory/20"
+                    class="w-full rounded-xl border border-theme-border bg-theme-bg pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-theme-surface focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-theme-text-muted/40"
                   />
                 </div>
               </div>
 
               <!-- Account Number -->
               <div>
-                <label class="flex items-center gap-1.5 text-xs font-semibold text-ivory/50 uppercase tracking-wider mb-2">
+                <label class="flex items-center gap-1.5 text-xs font-semibold text-theme-text-muted uppercase tracking-wider mb-2">
                   <HashtagIcon class="h-3.5 w-3.5 text-gold/60" />
                   Account Number
                 </label>
@@ -107,17 +107,17 @@
                     type="text" 
                     required
                     placeholder="e.g. 0123456789"
-                    class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-ivory/20 font-mono tracking-wider"
+                    class="w-full rounded-xl border border-theme-border bg-theme-bg pl-4 pr-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/40 focus:bg-theme-surface focus:shadow-[0_0_0_3px_rgba(212,175,55,0.08)] placeholder:text-theme-text-muted/40 font-mono tracking-wider"
                   />
                 </div>
               </div>
               
               <!-- Actions -->
-              <div class="flex items-center gap-3 pt-5 mt-2 border-t border-white/[0.06]">
+              <div class="flex items-center gap-3 pt-5 mt-2 border-t border-theme-border">
                 <button 
                   type="button" 
                   @click="$emit('close')"
-                  class="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-ivory/70 hover:bg-white/10 hover:text-white transition-all"
+                  class="flex-1 rounded-xl border border-theme-border bg-theme-surface-subtle py-3 text-sm font-semibold text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all"
                 >
                   Cancel
                 </button>

@@ -2,7 +2,7 @@
   <BarberLayout>
     <section class="space-y-6 animate-fade-in pb-20">
       <!-- Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-obsidian via-charcoal to-blue-900/20 p-8 shadow-2xl">
+      <div class="relative overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-8 shadow-2xl">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl"></div>
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -10,7 +10,7 @@
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text drop-shadow-lg">
               Payment <span class="text-blue-400">Verification</span>
             </h1>
-            <p class="mt-2 text-sm text-ivory/50">Review receipts and manage your bank account details.</p>
+            <p class="mt-2 text-sm text-theme-text-muted">Review receipts and manage your bank account details.</p>
           </div>
           <div class="flex flex-col sm:flex-row items-center gap-3">
             <button
@@ -29,13 +29,13 @@
               <BanknotesIcon class="h-4 w-4" />
               Manage Bank Details
             </button>
-            <div class="flex items-center gap-2 rounded-xl bg-white/[0.04] border border-theme-border px-4 py-2.5">
-              <MagnifyingGlassIcon class="h-4 w-4 text-ivory/30" />
+            <div class="flex items-center gap-2 rounded-xl bg-theme-surface-subtle border border-theme-border px-4 py-2.5">
+              <MagnifyingGlassIcon class="h-4 w-4 text-theme-text-muted" />
               <input
                 v-model="search"
                 type="text"
                 placeholder="Search by customer..."
-                class="bg-transparent text-sm text-theme-text placeholder:text-ivory/25 outline-none w-40"
+                class="bg-transparent text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none w-40"
               />
             </div>
           </div>
@@ -45,7 +45,7 @@
       <!-- Pending Payments List -->
       <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden shadow-xl">
         <!-- Table Header -->
-        <div class="hidden md:grid grid-cols-[1fr_1fr_0.7fr_auto] gap-4 border-b border-theme-border px-6 py-3.5 text-[11px] uppercase tracking-wider text-ivory/30 font-semibold bg-black/20">
+        <div class="hidden md:grid grid-cols-[1fr_1fr_0.7fr_auto] gap-4 border-b border-theme-border px-6 py-3.5 text-[11px] uppercase tracking-wider text-theme-text-muted font-semibold bg-theme-surface-subtle/40">
           <span>Customer & Service</span>
           <span>Date & Time</span>
           <span>Amount & Status</span>
@@ -56,11 +56,11 @@
           <div class="h-8 w-8 animate-spin rounded-full border-2 border-blue-400 border-t-transparent"></div>
         </div>
 
-        <div v-else class="divide-y divide-white/[0.04]">
+        <div v-else class="divide-y divide-theme-border">
           <div
             v-for="booking in paymentsList"
             :key="booking.id"
-            class="group md:grid md:grid-cols-[1fr_1fr_0.7fr_auto] md:items-center gap-4 px-6 py-5 transition-colors hover:bg-theme-surface/50"
+            class="group md:grid md:grid-cols-[1fr_1fr_0.7fr_auto] md:items-center gap-4 px-6 py-5 transition-colors hover:bg-theme-surface-subtle/50"
           >
             <!-- Customer -->
             <div class="flex items-center gap-3">
@@ -69,7 +69,7 @@
               </div>
               <div>
                 <p class="text-sm font-bold text-theme-text">{{ booking.customer_name }}</p>
-                <p class="text-xs text-ivory/40">{{ booking.service_name || 'General Service' }}</p>
+                <p class="text-xs text-theme-text-muted">{{ booking.service_name || 'General Service' }}</p>
               </div>
             </div>
 
@@ -116,7 +116,7 @@
               <div v-else class="flex items-center justify-end">
                 <button
                   @click="viewReceipt(booking)"
-                  class="inline-flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs font-bold text-ivory/70 hover:bg-white/10 hover:text-white transition-all"
+                  class="inline-flex items-center gap-1.5 rounded-xl bg-theme-surface-subtle border border-theme-border px-3 py-2 text-xs font-bold text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all"
                 >
                   <DocumentTextIcon class="h-3.5 w-3.5" />
                   View Receipt
@@ -132,7 +132,7 @@
             <CheckBadgeIcon class="h-8 w-8 text-blue-400/50" />
           </div>
           <p class="text-base font-display text-theme-text mb-1">You're all caught up!</p>
-          <p class="text-sm text-ivory/40">There are no pending payments requiring your verification.</p>
+          <p class="text-sm text-theme-text-muted">There are no pending payments requiring your verification.</p>
         </div>
       </div>
     </section>
