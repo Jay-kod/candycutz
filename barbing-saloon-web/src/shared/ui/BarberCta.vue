@@ -105,9 +105,10 @@ const resolvedOverlayOpacity = computed(() => {
   overflow: hidden;
   padding: clamp(6.5rem, 14vh, 9.5rem) 1.25rem clamp(4rem, 8vh, 6rem);
   background:
-    radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.075), transparent 58%),
-    #090909;
-  color: #f5f5f5;
+    radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.08), transparent 58%),
+    var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 .barber-cta__photo,
@@ -127,17 +128,17 @@ const resolvedOverlayOpacity = computed(() => {
 
 .barber-cta__shade {
   z-index: -1;
-  background: linear-gradient(180deg, rgba(9, 9, 9, 0.4), rgba(9, 9, 9, 0.55));
+  background: linear-gradient(180deg, var(--color-bg-primary), var(--color-bg-primary));
   opacity: 0.78;
 }
 
 .barber-cta__dot-field {
   z-index: -1;
-  background-image: radial-gradient(rgba(255, 184, 77, 0.24) 0.7px, transparent 0.7px);
+  background-image: radial-gradient(var(--color-accent) 0.7px, transparent 0.7px);
   background-position: center 12px;
   background-size: 12px 12px;
   mask-image: radial-gradient(ellipse at center, black 8%, transparent 76%);
-  opacity: 0.28;
+  opacity: 0.22;
 }
 
 .barber-cta__content {
@@ -152,26 +153,26 @@ const resolvedOverlayOpacity = computed(() => {
   min-height: 34px;
   align-items: center;
   gap: 0.65rem;
-  border: 1px solid rgba(255, 153, 0, 0.25);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 0.25rem 0.7rem 0.25rem 0.35rem;
-  background: rgba(13, 13, 13, 0.68);
-  color: #e7e7e7;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   font-size: 0.75rem;
   text-decoration: none;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .barber-cta__announcement:hover {
-  border-color: rgba(255, 153, 0, 0.5);
-  background: rgba(35, 28, 17, 0.85);
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
 }
 
 .barber-cta__announcement-badge {
-  border: 1px solid rgba(255, 153, 0, 0.35);
+  border: 1px solid var(--color-accent);
   border-radius: 999px;
   padding: 0.14rem 0.4rem;
-  color: #ffb84d;
+  color: var(--color-accent);
   font-size: 0.63rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -191,17 +192,17 @@ const resolvedOverlayOpacity = computed(() => {
 }
 
 .barber-cta__title-white {
-  color: #fafafa;
+  color: var(--color-text-primary);
 }
 
 .barber-cta__title-gold {
-  color: #ffb84d;
+  color: var(--color-accent);
 }
 
 .barber-cta__subtitle {
   max-width: 38rem;
   margin: 1rem auto 0;
-  color: #e5e5e5;
+  color: var(--color-text-secondary);
   font-size: clamp(0.9rem, 1.7vw, 1rem);
   letter-spacing: 0.025em;
   line-height: 1.6;
@@ -212,7 +213,7 @@ const resolvedOverlayOpacity = computed(() => {
 .barber-cta__caption {
   max-width: 34rem;
   margin: 0.5rem auto 0;
-  color: #a5a5a5;
+  color: var(--color-text-muted);
   font-size: clamp(0.75rem, 1.4vw, 0.875rem);
   line-height: 1.6;
   text-align: center;
@@ -233,7 +234,6 @@ const resolvedOverlayOpacity = computed(() => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   padding: 0.68rem 1rem;
   font-size: 0.875rem;
@@ -247,102 +247,29 @@ const resolvedOverlayOpacity = computed(() => {
 }
 
 .barber-cta__button--primary {
-  border-color: #ff9900;
-  background: #ff9900;
-  color: #0d0d0d;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-foreground);
+  box-shadow: 0 4px 14px rgba(255, 153, 0, 0.25);
 }
 
 .barber-cta__button--primary:hover {
-  border-color: #ffb84d;
-  background: #ffb84d;
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+  box-shadow: 0 6px 20px rgba(255, 153, 0, 0.35);
 }
 
 .barber-cta__button--secondary {
-  border-color: rgba(255, 153, 0, 0.35);
-  background: rgba(15, 15, 15, 0.72);
-  color: #ffb84d;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-accent);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .barber-cta__button--secondary:hover {
-  border-color: rgba(255, 153, 0, 0.65);
-  background: rgba(38, 29, 16, 0.88);
-}
-
-/* Light mode overrides for Hero */
-:global([data-theme="light"]) .barber-cta,
-:global(html:not(.dark)) .barber-cta {
-  background:
-    radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.1), transparent 58%),
-    #FAF9F6 !important;
-  color: #111827 !important;
-}
-
-:global([data-theme="light"]) .barber-cta__shade,
-:global(html:not(.dark)) .barber-cta__shade {
-  background: linear-gradient(180deg, rgba(250, 249, 246, 0.72), rgba(250, 249, 246, 0.92)) !important;
-  opacity: 0.88;
-}
-
-:global([data-theme="light"]) .barber-cta__photo,
-:global(html:not(.dark)) .barber-cta__photo {
-  opacity: 0.15;
-  filter: contrast(1.05) brightness(1.05);
-}
-
-:global([data-theme="light"]) .barber-cta__dot-field,
-:global(html:not(.dark)) .barber-cta__dot-field {
-  background-image: radial-gradient(rgba(204, 122, 0, 0.16) 0.8px, transparent 0.8px);
-  opacity: 0.35;
-}
-
-:global([data-theme="light"]) .barber-cta__announcement,
-:global(html:not(.dark)) .barber-cta__announcement {
-  border-color: rgba(255, 153, 0, 0.35);
-  background: rgba(255, 255, 255, 0.9);
-  color: #1F2937;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-:global([data-theme="light"]) .barber-cta__announcement:hover,
-:global(html:not(.dark)) .barber-cta__announcement:hover {
-  border-color: rgba(255, 153, 0, 0.6);
-  background: #FFF7ED;
-}
-
-:global([data-theme="light"]) .barber-cta__title-white,
-:global(html:not(.dark)) .barber-cta__title-white {
-  color: #111827 !important;
-}
-
-:global([data-theme="light"]) .barber-cta__title-gold,
-:global(html:not(.dark)) .barber-cta__title-gold {
-  color: #CC7A00 !important;
-}
-
-:global([data-theme="light"]) .barber-cta__subtitle,
-:global(html:not(.dark)) .barber-cta__subtitle {
-  color: #4B5563 !important;
-}
-
-:global([data-theme="light"]) .barber-cta__caption,
-:global(html:not(.dark)) .barber-cta__caption {
-  color: #6B7280 !important;
-}
-
-:global([data-theme="light"]) .barber-cta__button--secondary,
-:global(html:not(.dark)) .barber-cta__button--secondary {
-  border-color: rgba(204, 122, 0, 0.35);
-  background: rgba(255, 255, 255, 0.95);
-  color: #B45309;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-:global([data-theme="light"]) .barber-cta__button--secondary:hover,
-:global(html:not(.dark)) .barber-cta__button--secondary:hover {
-  border-color: #FF9900;
-  background: #FFF7ED;
-  color: #9A3412;
-  box-shadow: 0 4px 14px rgba(255, 153, 0, 0.15);
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent-hover);
 }
 
 .barber-cta--preview {
