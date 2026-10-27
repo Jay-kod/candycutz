@@ -11,7 +11,7 @@
             <h1 class="mt-2 font-display text-4xl lg:text-5xl text-theme-text drop-shadow-lg">
               <span :class="['text-transparent bg-clip-text bg-gradient-to-r', bannerGradientText]">System Configuration</span>
             </h1>
-            <p class="mt-3 text-sm lg:text-base text-ivory/60 max-w-2xl">
+            <p class="mt-3 text-sm lg:text-base text-theme-text-muted max-w-2xl">
               Manage general website and business settings across the platform.
             </p>
           </div>
@@ -45,7 +45,7 @@
             <article
               v-for="(groupSettings, groupName) in systemSettingsGroups"
               :key="groupName"
-              class="rounded-2xl border border-theme-border bg-black/20 p-6 space-y-4"
+              class="rounded-2xl border border-theme-border bg-theme-bg/50 p-6 space-y-4"
             >
               <h3 :class="['font-display text-xl capitalize', configHeadingClass]">{{ groupName }} Settings</h3>
               <div class="space-y-3">
@@ -96,7 +96,7 @@ const bannerBgClass = computed(() => {
       ? 'bg-gradient-to-br from-red-950/60 via-black to-black border-red-500/20'
       : 'bg-gradient-to-br from-emerald-50 via-white to-white border-emerald-500/20';
   }
-  return 'border-admin/20 bg-gradient-to-br from-obsidian via-charcoal to-[#2A1100]';
+  return 'border-admin/20 bg-gradient-to-br from-theme-surface via-theme-card to-theme-surface';
 });
 
 const bannerOrbClass = computed(() => isSuperAdmin.value
