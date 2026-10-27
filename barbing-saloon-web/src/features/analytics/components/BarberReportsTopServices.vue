@@ -1,12 +1,12 @@
 <template>
-  <div class="rounded-2xl border border-white/5 bg-black/20 p-6 backdrop-blur-sm">
+  <div class="rounded-2xl border border-theme-border bg-theme-surface p-6 backdrop-blur-sm">
     <h2 class="text-lg font-bold text-theme-text mb-6 flex items-center gap-2">
       <SparklesIcon class="h-5 w-5 text-gold" /> Most Popular Services
     </h2>
     
     <div class="space-y-4" v-if="topServices.length > 0">
       <div v-for="(service, index) in topServices" :key="index" 
-            class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+            class="flex items-center justify-between p-4 rounded-xl bg-theme-bg/50 border border-theme-border hover:bg-theme-surface transition-colors">
         <div class="flex items-center gap-4">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 font-bold text-emerald-400">
             #{{ index + 1 }}
