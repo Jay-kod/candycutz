@@ -9,7 +9,7 @@
         <h2 v-if="displayTitle" class="font-display text-3xl sm:text-4xl lg:text-5xl text-[var(--color-accent)] drop-shadow-sm">
           {{ displayTitle }}
         </h2>
-        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-neutral-600 dark:text-theme-muted font-light leading-relaxed text-center mx-auto max-w-2xl">
+        <p v-if="displaySubtitle" class="mt-4 text-sm sm:text-base text-[var(--color-text-secondary)] font-light leading-relaxed text-center mx-auto max-w-2xl">
           {{ displaySubtitle }}
         </p>
       </div>
@@ -20,10 +20,10 @@
           <div
             v-for="(feature, index) in featureList"
             :key="feature.title || index"
-            class="feature-card group relative flex flex-col items-center justify-center rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-white/[0.025] p-6 text-center shadow-md dark:shadow-lg shadow-black/5 dark:shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-gold/60 dark:hover:border-gold/40 hover:shadow-xl sm:p-7"
+            class="feature-card group relative flex flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 text-center shadow-md shadow-[var(--color-shadow)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)] hover:shadow-xl sm:p-7"
           >
             <!-- Feature Icon -->
-            <div class="relative flex items-center justify-center size-12 rounded-xl bg-gold/10 border border-gold/20 text-gold transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
+            <div class="relative flex items-center justify-center size-12 rounded-xl bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 text-[var(--color-accent)] transition-all duration-300 group-hover:scale-110 group-hover:bg-[var(--color-accent)]/20 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]">
               <component :is="resolveIcon(feature.icon)" class="size-6 transition-transform group-hover:rotate-6" />
             </div>
 
