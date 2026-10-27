@@ -60,7 +60,7 @@ Source: `barbing-saloon-api/app/Core/Enums/UserRole.php`, route files, controlle
 |-----------|------------|-----------|
 | `barbing-saloon-api` | Laravel 11, PHP 8.2, MySQL, Redis | `barbing-saloon-api/` |
 | `barbing-saloon-web` | Vue 3, Vite, Pinia, Tailwind CSS | `barbing-saloon-web/` |
-| `candycutz-mobile-app` | Expo, React Native, TypeScript, TanStack Query, Zustand | `candycutz-mobile-app/` |
+| Standalone mobile project | Expo, React Native, TypeScript, TanStack Query, Zustand | `MOBILE/` |
 
 Infrastructure: `docker-compose.yml` defines Nginx, PHP-FPM, queue worker, scheduler, MySQL, and Redis services.
 
@@ -115,5 +115,4 @@ All migrations squashed into `0001_01_01_000000_create_base_schema.php` plus int
 - **Web Lint & Type Check:** `npm run lint` in `barbing-saloon-web` exits 0
 - **Web Unit Tests:** `npm run test:unit -- --run` in `barbing-saloon-web` exits 0 (3 tests)
 - **Web Production Build:** `npm run build` in `barbing-saloon-web` exits 0
-- **Mobile Type Check:** `npx tsc --noEmit` in `candycutz-mobile-app` exits 0
-
+- **Mobile Type Check:** `npx tsc --noEmit` in `MOBILE/` exits 0

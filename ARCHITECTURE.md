@@ -2,7 +2,7 @@
 
 **Status:** Target state. This document is authoritative. Where the codebase disagrees with this document, the codebase is wrong.
 **Supersedes:** `docs/architecture/ARCHITECTURE.md`, `docs/Architecture.md`, `docs/Architecture-Essentials.md`, `docs/architecture/ARCHITECTURE_ESSENTIALS.md`
-**Scope:** `barbing-saloon-api` (Laravel 11), `barbing-saloon-web` (Vue 3), `candycutz-mobile-app` (Expo)
+**Scope:** `barbing-saloon-api` (Laravel 11) and `barbing-saloon-web` (Vue 3). The separately maintained Expo project lives in `MOBILE/`.
 
 ---
 
@@ -18,11 +18,11 @@ The rule going forward: **a document may only assert what a command can prove.**
 
 ## 1. System shape
 
-Three deployable units, one authority.
+The web platform has one API authority. The Expo project in `MOBILE/` is maintained separately from the web/API release.
 
 ```
 ┌─────────────────────┐   ┌──────────────────────┐   ┌────────────────────┐
-│ barbing-saloon-web  │   │ candycutz-mobile-app │   │   Stripe / Paystack│
+│ barbing-saloon-web  │   │ MOBILE/ standalone  │   │   Stripe / Paystack│
 │ Vue 3 SPA (PWA)     │   │ Expo / React Native  │   │   webhooks         │
 │ public + 4 portals  │   │ customer + barber    │   └─────────┬──────────┘
 └──────────┬──────────┘   └──────────┬───────────┘             │
@@ -372,9 +372,9 @@ Rules:
 - Delete `dist/` from version control and add to `.gitignore`.
 - Vitest for composables and API modules; Playwright (already a root dependency) for the four critical journeys: book, pay, verify receipt, cancel.
 
-### 8.2 Mobile — `candycutz-mobile-app`
+### 8.2 Standalone mobile project — `MOBILE/`
 
-Expo Router + TanStack Query + Zustand + TypeScript. **This is the healthiest part of the repository.** It already has the layering the other two lack.
+Expo Router + TanStack Query + Zustand + TypeScript. This project is kept separate from the CandyCutz web/API release workflow.
 
 - Keep the structure. Add `src/features/<domain>/` for anything beyond the current screen set.
 - Tokens in `expo-secure-store` (already correct). Never `AsyncStorage`.
@@ -532,6 +532,6 @@ A change is done when all of the following hold:
 - `./vendor/bin/pint --test` exits 0
 - `./vendor/bin/phpstan analyse` exits 0 at level 6
 - `npm run lint` exits 0 in `barbing-saloon-web`
-- `npx tsc --noEmit` exits 0 in `candycutz-mobile-app`
+- `npx tsc --noEmit` exits 0 in `MOBILE/`
 - The endpoint appears in the OpenAPI spec
 - Any claim added to a `.md` file is verifiable by a command written next to it

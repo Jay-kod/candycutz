@@ -6,11 +6,11 @@ The product supports both appointments at the CandyCutz shop and on-demand home-
 
 ## What This Project Contains
 
-CandyCutz is one platform with multiple clients and one backend:
+CandyCutz's active platform consists of the web client and one backend. The Expo project is kept separately under `MOBILE/` and can be developed and released independently:
 
 - **Laravel 11 API**: The source of truth for identity, permissions, services, availability, bookings, payments, notifications, and audit records.
 - **Vue 3 web application**: The public website, customer portal, barber portal, admin dashboard, super-admin controls, and installable PWA experience.
-- **One Expo mobile application**: A native React Native application with role-based navigation for both customers and barbers. It is not a WebView wrapper.
+- **Standalone Expo mobile project**: A native React Native application with role-based navigation for customers and barbers. It is not part of the web/API release workflow.
 - **CMS and Theme Studio**: Operational content management and controlled branding changes with draft, preview, publish, and rollback workflows.
 - **Single MySQL database**: All clients use the same relational data model through versioned API contracts.
 - **Redis infrastructure**: Used for cache, sessions, queues, and asynchronous work.
@@ -154,7 +154,7 @@ candycutz/
 ├── barbing-saloon-web/       # Vue 3 web client, PWA, portals, and CMS
 │   ├── src/core/             # Shared API, layouts, guards, components
 │   └── src/modules/          # Public, auth, customer, barber, admin modules
-├── candycutz-mobile-app/     # One Expo app with customer/barber role flows
+├── MOBILE/                   # Standalone Expo project, maintained separately
 │   ├── app/                  # Expo Router screens and layouts
 │   └── src/                  # API, state, types, and shared mobile code
 ├── infrastructure/           # Nginx, PHP, MySQL, and deployment definitions
@@ -285,10 +285,10 @@ Do not use `docker compose down -v` unless you intentionally want to remove loca
 
 ### Mobile development
 
-The mobile package is one role-aware application. It selects customer or barber navigation from the authenticated user's backend role.
+`MOBILE/` is a standalone Expo project, separate from the CandyCutz web/API application and release workflow. It selects customer or barber navigation from the authenticated user's backend role.
 
 ```powershell
-cd candycutz-mobile-app
+cd MOBILE
 npm install
 npm run type-check
 npm start

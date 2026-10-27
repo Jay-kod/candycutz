@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: candycutz-mobile-app
+        working-directory: MOBILE
 
     steps:
     - uses: actions/checkout@v4
