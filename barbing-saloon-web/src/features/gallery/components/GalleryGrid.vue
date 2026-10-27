@@ -7,9 +7,9 @@
 
     <!-- Empty State -->
     <div v-else-if="gallery.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
-      <PhotoIcon class="mx-auto h-12 w-12 text-ivory/20" />
+      <PhotoIcon class="mx-auto h-12 w-12 text-theme-text-muted" />
       <h3 class="mt-4 font-display text-xl text-theme-text">No gallery images yet</h3>
-      <p class="mt-2 text-sm text-ivory/50">Upload photos of your best cuts to attract customers.</p>
+      <p class="mt-2 text-sm text-theme-text-muted">Upload photos of your best cuts to attract customers.</p>
     </div>
 
     <!-- Gallery Grid -->
@@ -31,10 +31,10 @@
         <div class="absolute bottom-0 left-0 right-0 p-4 translate-y-0 opacity-100 sm:translate-y-4 sm:opacity-0 transition-all duration-300 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
           <div class="flex items-end justify-between gap-2">
             <div>
-              <p class="font-display text-lg text-theme-text">{{ item.title }}</p>
+              <p class="font-display text-lg text-white">{{ item.title }}</p>
               <div class="flex items-center gap-2">
                 <p class="text-[10px] uppercase font-bold" :class="colorTheme === 'gold' ? 'text-gold-light' : 'text-admin-light'">{{ item.category }}</p>
-                <p v-if="item.barber_name" class="text-[10px] text-ivory/50 flex items-center gap-1">
+                <p v-if="item.barber_name" class="text-[10px] text-white/70 flex items-center gap-1">
                     <ScissorsIcon class="h-3 w-3" /> By {{ item.barber_name }}
                 </p>
               </div>
@@ -42,7 +42,7 @@
             <div class="flex items-center gap-1.5 shrink-0">
               <button
                 @click="$emit('edit', item)"
-                class="rounded-lg bg-black/50 p-2.5 min-h-[38px] min-w-[38px] flex items-center justify-center text-ivory/80 transition-colors backdrop-blur-sm"
+                class="rounded-lg bg-black/50 p-2.5 min-h-[38px] min-w-[38px] flex items-center justify-center text-white/90 transition-colors backdrop-blur-sm"
                 :class="colorTheme === 'gold' ? 'hover:text-gold hover:bg-gold/10' : 'hover:text-admin-light hover:bg-admin/10'"
                 title="Edit"
                 aria-label="Edit"
