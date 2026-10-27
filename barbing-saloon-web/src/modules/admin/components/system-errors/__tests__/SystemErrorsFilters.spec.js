@@ -48,7 +48,7 @@ describe('SystemErrorsFilters.vue', () => {
       },
     })
 
-    const resetBtn = wrapper.find('button')
+    const resetBtn = wrapper.find('[data-test="reset-filters"]')
     expect(resetBtn.exists()).toBe(true)
     expect(resetBtn.text()).toContain('Reset Filters')
 

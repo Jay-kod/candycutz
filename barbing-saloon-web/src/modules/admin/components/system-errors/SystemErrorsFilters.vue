@@ -109,6 +109,7 @@ defineEmits([
     <button
       v-if="search || statusFilter || severityFilter || categoryFilter"
       type="button"
+      data-test="reset-filters"
       @click="$emit('clearFilters')"
       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.08] text-xs transition-colors"
     >
