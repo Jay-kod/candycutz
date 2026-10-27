@@ -4,19 +4,19 @@
       <!-- Loading State -->
       <div v-if="loading" class="max-w-6xl mx-auto space-y-8">
         <div class="flex items-center justify-between">
-          <div class="skeleton-block h-10 w-40"></div>
+          <div class="skeleton-block h-10 w-40 bg-[var(--color-bg-tertiary)] animate-pulse rounded-md"></div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="skeleton-block aspect-[4/3] w-full rounded-2xl"></div>
+          <div class="skeleton-block aspect-[4/3] w-full rounded-2xl bg-[var(--color-bg-tertiary)] animate-pulse"></div>
           <div class="space-y-4">
-            <div class="skeleton-block h-8 w-3/4"></div>
-            <div class="skeleton-block h-8 w-24 rounded-full"></div>
-            <div class="skeleton-block h-5 w-full"></div>
-            <div class="skeleton-block h-5 w-5/6"></div>
-            <div class="skeleton-block h-5 w-2/3"></div>
+            <div class="skeleton-block h-8 w-3/4 bg-[var(--color-bg-tertiary)] animate-pulse rounded-md"></div>
+            <div class="skeleton-block h-8 w-24 rounded-full bg-[var(--color-bg-tertiary)] animate-pulse"></div>
+            <div class="skeleton-block h-5 w-full bg-[var(--color-bg-tertiary)] animate-pulse rounded-md"></div>
+            <div class="skeleton-block h-5 w-5/6 bg-[var(--color-bg-tertiary)] animate-pulse rounded-md"></div>
+            <div class="skeleton-block h-5 w-2/3 bg-[var(--color-bg-tertiary)] animate-pulse rounded-md"></div>
             <div class="mt-6 flex gap-3">
-              <div class="skeleton-block h-14 w-40 rounded-xl"></div>
-              <div class="skeleton-block h-14 w-40 rounded-xl"></div>
+              <div class="skeleton-block h-14 w-40 rounded-xl bg-[var(--color-bg-tertiary)] animate-pulse"></div>
+              <div class="skeleton-block h-14 w-40 rounded-xl bg-[var(--color-bg-tertiary)] animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -25,8 +25,8 @@
       <div v-else-if="service" class="max-w-6xl mx-auto space-y-8">
         <!-- Header Actions -->
         <div class="flex items-center justify-between">
-          <button @click="$router.back()" class="flex items-center gap-2 text-sm font-semibold text-theme-muted hover:text-gold transition-colors group">
-            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-theme-surface border border-theme-border group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
+          <button @click="$router.back()" class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors group">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] group-hover:border-[var(--color-accent)]/30 group-hover:bg-[var(--color-accent)]/10 transition-all shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 group-hover:-translate-x-1 transition-transform">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
@@ -48,9 +48,9 @@
             />
 
             <!-- About Section -->
-            <div class="rounded-3xl border border-theme-border bg-theme-surface/60 p-8 backdrop-blur-sm">
-              <h2 class="text-2xl font-display text-theme-text mb-4">About this Service</h2>
-              <div class="prose prose-invert max-w-none text-theme-muted leading-relaxed">
+            <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-sm">
+              <h2 class="text-2xl font-display text-[var(--color-text-primary)] mb-4">About this Service</h2>
+              <div class="prose prose-invert max-w-none text-[var(--color-text-secondary)] leading-relaxed">
                 <p v-if="service.description">{{ service.description }}</p>
                 <p v-else class="italic opacity-70">No detailed description provided for this service.</p>
               </div>
@@ -76,12 +76,12 @@
 
       <!-- Not Found State -->
       <div v-else class="flex flex-col items-center justify-center py-24 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-theme-muted/40 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-[var(--color-text-muted)] mb-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
-        <h3 class="text-xl font-display text-theme-text mb-2">Service Not Found</h3>
-        <p class="text-theme-muted text-sm mb-6">The service you are looking for might have been removed or is currently unavailable.</p>
-        <button @click="$router.push('/customer/dashboard/services')" class="rounded-xl bg-theme-surface border border-theme-border px-6 py-2.5 text-sm font-semibold hover:bg-white/5 transition-colors">
+        <h3 class="text-xl font-display text-[var(--color-text-primary)] mb-2">Service Not Found</h3>
+        <p class="text-[var(--color-text-secondary)] text-sm mb-6">The service you are looking for might have been removed or is currently unavailable.</p>
+        <button @click="$router.push('/customer/dashboard/services')" class="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-6 py-2.5 text-sm font-semibold hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-colors">
           Browse All Services
         </button>
       </div>
