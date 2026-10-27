@@ -3,17 +3,17 @@
     <!-- Empty State -->
     <div 
       v-if="services.length === 0" 
-      class="rounded-3xl border border-white/[0.08] bg-[#12161C] p-12 text-center flex flex-col items-center justify-center min-h-[380px] shadow-xl"
+      class="rounded-3xl border border-theme-border bg-theme-surface p-12 text-center flex flex-col items-center justify-center min-h-[380px] shadow-xl"
     >
-      <div class="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/[0.08] mb-5">
-        <SparklesIcon class="h-8 w-8 text-white/30" />
+      <div class="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-theme-surface-subtle border border-theme-border mb-5">
+        <SparklesIcon class="h-8 w-8 text-theme-text-muted" />
       </div>
 
-      <h3 class="text-xl font-bold text-white mb-2">
+      <h3 class="text-xl font-bold text-theme-text mb-2">
         {{ emptyHeading }}
       </h3>
 
-      <p class="text-xs text-white/40 max-w-md mx-auto mb-6 leading-relaxed">
+      <p class="text-xs text-theme-text-muted max-w-md mx-auto mb-6 leading-relaxed">
         {{ emptyDescription }}
       </p>
 
@@ -21,7 +21,7 @@
         <button
           v-if="hasActiveFilters"
           @click="$emit('reset-filters')"
-          class="rounded-xl px-4 py-2.5 text-xs font-bold bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10"
+          class="rounded-xl px-4 py-2.5 text-xs font-bold bg-theme-surface-subtle text-theme-text hover:bg-theme-border/20 transition-all border border-theme-border"
         >
           Reset All Filters
         </button>
@@ -118,4 +118,3 @@ const emptyDescription = computed(() => {
   return 'Your salon catalog is currently empty. Create your first service offering to start receiving customer bookings.';
 });
 </script>
-
