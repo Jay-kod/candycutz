@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route as RouteFacade;
 
 class AuditRoutesCommand extends Command
@@ -118,7 +119,7 @@ class AuditRoutesCommand extends Command
         return false;
     }
 
-    private function isSignedStorageRoute(\Illuminate\Routing\Route $route): bool
+    private function isSignedStorageRoute(RoutingRoute $route): bool
     {
         $name = $route->getName();
         $disks = config('filesystems.disks', []);
