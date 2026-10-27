@@ -1,6 +1,6 @@
 <template>
   <section
-    class="testimonials-section relative overflow-hidden border-y border-white/5 bg-obsidian py-16 text-theme-text md:py-24 transition-colors duration-300"
+    class="testimonials-section relative overflow-hidden border-y border-neutral-200/80 dark:border-white/5 bg-[#FAF9F6] dark:bg-obsidian py-16 text-theme-text md:py-24 transition-colors duration-300"
     aria-labelledby="home-testimonials-title"
   >
     <!-- Ambient Glow -->
@@ -11,13 +11,13 @@
 
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
       <header class="text-center max-w-3xl mx-auto" data-reveal>
-        <span v-if="badge" class="mb-3 inline-block rounded-full bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gold">
+        <span v-if="badge" class="mb-3 inline-block rounded-full bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-gold">
           {{ badge }}
         </span>
-        <h2 id="home-testimonials-title" class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gold">
+        <h2 id="home-testimonials-title" class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-amber-600 dark:text-gold">
           {{ title }}
         </h2>
-        <p class="mt-4 text-sm sm:text-base leading-relaxed text-theme-muted max-w-2xl mx-auto">
+        <p class="mt-4 text-sm sm:text-base leading-relaxed text-neutral-600 dark:text-theme-muted max-w-2xl mx-auto">
           {{ subtitle }}
         </p>
       </header>
