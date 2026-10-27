@@ -1,17 +1,17 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="fixed inset-0 z-[100] flex flex-col bg-obsidian/95 backdrop-blur-md">
+      <div v-if="show" class="fixed inset-0 z-[100] flex flex-col bg-black/80 backdrop-blur-md">
         <!-- Preview Header -->
-        <div class="flex items-center justify-between border-b border-white/10 bg-black/40 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-theme-border bg-theme-surface/90 px-6 py-4">
           <div>
             <h2 class="text-xl font-bold text-theme-text">Report Preview</h2>
-            <p class="text-sm text-ivory/60">CandyCutz {{ activeRangeLabel }} Analytics</p>
+            <p class="text-sm text-theme-text-muted">CandyCutz {{ activeRangeLabel }} Analytics</p>
           </div>
           <div class="flex items-center gap-4">
             <button 
               @click="$emit('close')"
-              class="rounded-full p-2 text-ivory/60 transition-colors hover:bg-white/5 hover:text-white"
+              class="rounded-full p-2 text-theme-text-muted transition-colors hover:bg-theme-surface hover:text-theme-text"
             >
               <XMarkIcon class="h-6 w-6" />
             </button>

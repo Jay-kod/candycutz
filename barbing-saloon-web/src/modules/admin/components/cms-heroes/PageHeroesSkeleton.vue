@@ -1,0 +1,46 @@
+<template>
+  <div class="space-y-6 animate-pulse">
+    <!-- Header Skeleton -->
+    <div class="rounded-2xl border border-white/[0.08] bg-[#12161C]/60 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-2">
+        <div class="h-4 w-36 rounded bg-white/[0.05]"></div>
+        <div class="h-8 w-64 rounded bg-white/[0.08]"></div>
+        <div class="h-3 w-80 rounded bg-white/[0.04]"></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-28 rounded-xl bg-white/[0.05]"></div>
+        <div class="h-10 w-36 rounded-xl bg-white/[0.08]"></div>
+      </div>
+    </div>
+
+    <!-- Page Selector Skeleton -->
+    <div class="rounded-2xl border border-white/[0.06] bg-[#12161C]/50 p-4 space-y-3">
+      <div class="h-4 w-32 rounded bg-white/[0.06]"></div>
+      <div class="flex flex-wrap gap-2">
+        <div v-for="i in 8" :key="i" class="h-8 w-20 rounded-xl bg-white/[0.04]"></div>
+      </div>
+    </div>
+
+    <!-- 2 Column Studio Grid Skeleton -->
+    <div class="grid gap-6 xl:grid-cols-2">
+      <div class="rounded-2xl border border-white/[0.06] bg-[#12161C]/50 p-6 space-y-5">
+        <div class="h-5 w-44 rounded bg-white/[0.06]"></div>
+        <div class="space-y-2">
+          <div class="h-3 w-24 rounded bg-white/[0.05]"></div>
+          <div class="h-10 rounded-xl bg-white/[0.04]"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-3 w-28 rounded bg-white/[0.05]"></div>
+          <div class="h-24 rounded-xl bg-white/[0.04]"></div>
+        </div>
+        <div class="h-20 rounded-xl bg-white/[0.03]"></div>
+        <div class="h-12 rounded-xl bg-white/[0.03]"></div>
+      </div>
+
+      <div class="rounded-2xl border border-white/[0.06] bg-[#12161C]/50 p-6 space-y-4">
+        <div class="h-5 w-48 rounded bg-white/[0.06]"></div>
+        <div class="h-64 rounded-xl bg-white/[0.03]"></div>
+      </div>
+    </div>
+  </div>
+</template>
