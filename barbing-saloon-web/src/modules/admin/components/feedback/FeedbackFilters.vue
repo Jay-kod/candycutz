@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <!-- Left: Status Tabs -->
-    <div class="flex items-center gap-1.5 bg-[#12161C] p-1.5 rounded-2xl border border-white/[0.08] overflow-x-auto scrollbar-hide max-w-full">
+    <div class="flex items-center gap-1.5 bg-theme-surface p-1.5 rounded-2xl border border-theme-border overflow-x-auto scrollbar-hide max-w-full">
       <button
         @click="$emit('update:activeStatus', 'all')"
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatus === 'all'
           ? 'bg-admin text-obsidian shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         All ({{ totalItems }})
       </button>
@@ -28,7 +28,7 @@
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatus === 'reviewing'
           ? 'bg-sky-500 text-obsidian shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         Reviewing
       </button>
@@ -38,7 +38,7 @@
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatus === 'planned'
           ? 'bg-indigo-500 text-white shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         Planned
       </button>
@@ -48,7 +48,7 @@
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatus === 'completed'
           ? 'bg-emerald-500 text-obsidian shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         Completed
       </button>
@@ -57,8 +57,8 @@
         @click="$emit('update:activeStatus', 'declined')"
         class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all"
         :class="activeStatus === 'declined'
-          ? 'bg-white/20 text-white shadow-lg'
-          : 'text-white/50 hover:text-white hover:bg-white/[0.04]'"
+          ? 'bg-theme-surface-subtle text-theme-text shadow-lg'
+          : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-subtle'"
       >
         Declined
       </button>
@@ -71,14 +71,14 @@
         <select
           :value="activeCategory"
           @change="$emit('update:activeCategory', $event.target.value)"
-          class="appearance-none bg-[#12161C] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3.5 py-2 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs text-theme-text rounded-xl px-3.5 py-2 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
         >
-          <option value="all" class="bg-[#12161C] text-white">All Topics</option>
-          <option value="feature_request" class="bg-[#12161C] text-white">Feature Requests</option>
-          <option value="maintenance" class="bg-[#12161C] text-white">Maintenance</option>
-          <option value="improvement" class="bg-[#12161C] text-white">Improvements</option>
+          <option value="all" class="bg-theme-surface text-theme-text">All Topics</option>
+          <option value="feature_request" class="bg-theme-surface text-theme-text">Feature Requests</option>
+          <option value="maintenance" class="bg-theme-surface text-theme-text">Maintenance</option>
+          <option value="improvement" class="bg-theme-surface text-theme-text">Improvements</option>
         </select>
-        <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-theme-text-muted" />
       </div>
 
       <!-- Sort Selector -->
@@ -86,13 +86,13 @@
         <select
           :value="sortOrder"
           @change="$emit('update:sortOrder', $event.target.value)"
-          class="appearance-none bg-[#12161C] border border-white/[0.08] text-xs text-white/80 rounded-xl px-3.5 py-2 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
+          class="appearance-none bg-theme-surface border border-theme-border text-xs text-theme-text rounded-xl px-3.5 py-2 pr-8 outline-none transition-all focus:border-admin/50 cursor-pointer font-medium"
         >
-          <option value="newest" class="bg-[#12161C] text-white">Newest First</option>
-          <option value="oldest" class="bg-[#12161C] text-white">Oldest First</option>
-          <option value="name-asc" class="bg-[#12161C] text-white">Title: A to Z</option>
+          <option value="newest" class="bg-theme-surface text-theme-text">Newest First</option>
+          <option value="oldest" class="bg-theme-surface text-theme-text">Oldest First</option>
+          <option value="name-asc" class="bg-theme-surface text-theme-text">Title: A to Z</option>
         </select>
-        <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        <ChevronDownIcon class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-theme-text-muted" />
       </div>
     </div>
   </div>
@@ -131,4 +131,3 @@ defineEmits(['update:activeStatus', 'update:activeCategory', 'update:sortOrder']
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
-
