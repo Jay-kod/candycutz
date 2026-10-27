@@ -28,12 +28,12 @@
             </div>
 
             <!-- Title -->
-            <h3 class="font-heading mt-4 font-semibold text-sm md:text-base text-neutral-900 dark:text-theme-text group-hover:text-gold transition-colors">
+            <h3 class="font-heading mt-4 font-semibold text-sm md:text-base text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
               {{ feature.title }}
             </h3>
 
             <!-- Description -->
-            <p class="mt-2 text-xs text-neutral-600 dark:text-theme-muted leading-relaxed max-w-[200px] text-center mx-auto">
+            <p class="mt-2 text-xs text-[var(--color-text-secondary)] leading-relaxed max-w-[200px] text-center mx-auto">
               {{ feature.description }}
             </p>
           </div>
