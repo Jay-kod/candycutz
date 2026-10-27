@@ -2,7 +2,7 @@
   <transition name="fade">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-md" @click="$emit('close')"></div>
-      <div class="relative w-full max-w-xl rounded-[2.5rem] border border-white/10 bg-[#151515] shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden animate-slide-up">
+      <div class="relative w-full max-w-xl rounded-[2.5rem] border border-theme-border bg-theme-surface shadow-2xl overflow-hidden animate-slide-up">
         
         <div class="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-admin/10 blur-[80px]"></div>
         <div class="absolute -left-32 -bottom-32 h-64 w-64 rounded-full bg-purple-500/10 blur-[80px]"></div>
@@ -10,13 +10,13 @@
         <!-- Header -->
         <div class="relative px-10 pt-10 pb-6 flex justify-between items-start z-10">
           <div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-admin/20 to-purple-500/20 border border-white/10 mb-4">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-admin/20 to-purple-500/20 border border-theme-border mb-4">
               <BuildingLibraryIcon class="h-6 w-6 text-admin" />
             </div>
-            <h3 class="font-display text-3xl text-white">Bank Details</h3>
-            <p class="text-xs text-white/40 mt-1">Configure where customer payments are routed.</p>
+            <h3 class="font-display text-3xl text-theme-text">Bank Details</h3>
+            <p class="text-xs text-theme-text-muted mt-1">Configure where customer payments are routed.</p>
           </div>
-          <button @click="$emit('close')" class="text-white/30 hover:text-white hover:bg-white/10 rounded-full p-2.5 transition-all bg-white/5 border border-white/5">
+          <button @click="$emit('close')" class="text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-hover rounded-full p-2.5 transition-all bg-theme-bg border border-theme-border">
             <XMarkIcon class="h-5 w-5"/>
           </button>
         </div>
@@ -55,28 +55,28 @@
           <div class="space-y-4">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <BuildingLibraryIcon class="h-5 w-5 text-white/30" />
+                <BuildingLibraryIcon class="h-5 w-5 text-theme-text-muted" />
               </div>
-              <input v-model="form.bank_name" type="text" class="w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] pl-12 pr-4 py-4 text-sm text-white outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-admin/10 placeholder:text-white/20 font-medium" placeholder="Bank Name (e.g. Zenith Bank)" />
+              <input v-model="form.bank_name" type="text" class="w-full rounded-2xl border border-theme-border bg-theme-bg pl-12 pr-4 py-4 text-sm text-theme-text outline-none transition-all focus:border-admin/50 focus:bg-theme-surface focus:ring-4 focus:ring-admin/10 placeholder:text-theme-text-muted font-medium" placeholder="Bank Name (e.g. Zenith Bank)" />
             </div>
             
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <UserIcon class="h-5 w-5 text-white/30" />
+                <UserIcon class="h-5 w-5 text-theme-text-muted" />
               </div>
-              <input v-model="form.account_name" type="text" class="w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] pl-12 pr-4 py-4 text-sm text-white outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-admin/10 placeholder:text-white/20 font-medium" placeholder="Account Name" />
+              <input v-model="form.account_name" type="text" class="w-full rounded-2xl border border-theme-border bg-theme-bg pl-12 pr-4 py-4 text-sm text-theme-text outline-none transition-all focus:border-admin/50 focus:bg-theme-surface focus:ring-4 focus:ring-admin/10 placeholder:text-theme-text-muted font-medium" placeholder="Account Name" />
             </div>
             
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <HashtagIcon class="h-5 w-5 text-white/30" />
+                <HashtagIcon class="h-5 w-5 text-theme-text-muted" />
               </div>
-              <input v-model="form.account_number" type="text" class="w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] pl-12 pr-4 py-4 text-sm text-white outline-none transition-all focus:border-admin/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-admin/10 placeholder:text-white/20 font-mono tracking-widest text-lg" placeholder="Account Number" />
+              <input v-model="form.account_number" type="text" class="w-full rounded-2xl border border-theme-border bg-theme-bg pl-12 pr-4 py-4 text-sm text-theme-text outline-none transition-all focus:border-admin/50 focus:bg-theme-surface focus:ring-4 focus:ring-admin/10 placeholder:text-theme-text-muted font-mono tracking-widest text-lg" placeholder="Account Number" />
             </div>
           </div>
           
           <div class="flex items-center gap-3 pt-8 mt-4">
-            <button @click="$emit('close')" class="flex-1 py-4 px-6 rounded-2xl border border-white/10 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all">
+            <button @click="$emit('close')" class="flex-1 py-4 px-6 rounded-2xl border border-theme-border text-sm font-bold text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-hover transition-all">
               Cancel
             </button>
             <button @click="$emit('save', form)" :disabled="loading" class="flex-[2] flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-admin to-amber-500 px-6 py-4 text-sm font-bold text-obsidian transition-all hover:shadow-[0_8px_30px_rgba(255,103,0,0.4)] disabled:opacity-50 active:scale-[0.98]">
