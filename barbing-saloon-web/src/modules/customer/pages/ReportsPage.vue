@@ -2,29 +2,29 @@
   <CustomerLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8 shadow-2xl">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
+      <div class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-2xl">
+        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-bold">Account Reports</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-white">
-              Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-white">Reports</span>
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] font-bold">Account Reports</p>
+            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-[var(--color-text-primary)]">
+              Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-text-primary)]">Reports</span>
             </h1>
-            <p class="mt-2 max-w-xl text-sm text-white/60 leading-relaxed">
+            <p class="mt-2 max-w-xl text-sm text-[var(--color-text-secondary)] leading-relaxed">
               View a summary of your booking history, spending, and activity on CandyCutz.
             </p>
           </div>
 
           <!-- Time Range Selector -->
-          <div class="flex items-center gap-1.5 bg-theme-bg p-1.5 rounded-2xl border border-theme-border shadow-inner w-max">
+          <div class="flex items-center gap-1.5 bg-[var(--color-bg-tertiary)] p-1.5 rounded-2xl border border-[var(--color-border)] shadow-inner w-max">
             <button v-for="r in ranges" :key="r.value"
                     @click="setRange(r.value)"
                     :class="[
                       'px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300',
                       range === r.value 
-                        ? 'bg-gradient-to-r from-gold to-gold-dark text-obsidian shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
-                        : 'text-theme-muted hover:text-theme-text hover:bg-white/5'
+                        ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
                     ]">
               {{ r.label }}
             </button>
@@ -35,46 +35,46 @@
       <!-- Loading -->
       <div v-if="loading" class="space-y-6">
         <div class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <div v-for="i in 4" :key="i" class="h-32 rounded-2xl bg-theme-border/30 animate-pulse border border-theme-border"></div>
+          <div v-for="i in 4" :key="i" class="h-32 rounded-2xl bg-[var(--color-border)]/30 animate-pulse border border-[var(--color-border)]"></div>
         </div>
-        <div class="h-80 rounded-2xl bg-theme-border/30 animate-pulse border border-theme-border"></div>
+        <div class="h-80 rounded-2xl bg-[var(--color-border)]/30 animate-pulse border border-[var(--color-border)]"></div>
       </div>
 
       <template v-else>
         <!-- Summary Cards -->
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="stat in statCards" :key="stat.label"
-               class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-5 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]">
+               class="group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-5 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]">
             <div class="absolute -right-3 -top-3 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none">
               <component :is="stat.icon" class="w-24 h-24" />
             </div>
             <div class="relative z-10">
-              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted">{{ stat.label }}</p>
-              <p class="mt-2 font-display text-3xl text-theme-text group-hover:text-gold transition-colors duration-300 leading-none">{{ stat.value }}</p>
-              <p v-if="stat.sub" class="mt-1.5 text-[11px] text-white/40">{{ stat.sub }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">{{ stat.label }}</p>
+              <p class="mt-2 font-display text-3xl text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors duration-300 leading-none">{{ stat.value }}</p>
+              <p v-if="stat.sub" class="mt-1.5 text-[11px] text-[var(--color-text-secondary)]">{{ stat.sub }}</p>
             </div>
           </div>
         </div>
 
         <!-- Booking History Table -->
-        <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
-          <div class="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between">
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-sm overflow-hidden">
+          <div class="border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10 border border-gold/15">
-                <ClipboardDocumentCheckIcon class="h-4.5 w-4.5 text-gold" />
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20">
+                <ClipboardDocumentCheckIcon class="h-4.5 w-4.5 text-[var(--color-accent)]" />
               </div>
               <div>
-                <h2 class="text-sm font-bold text-theme-text">Booking History</h2>
-                <p class="text-[10px] text-white/35 mt-0.5">Your recent appointments</p>
+                <h2 class="text-sm font-bold text-[var(--color-text-primary)]">Booking History</h2>
+                <p class="text-[10px] text-[var(--color-text-secondary)] mt-0.5">Your recent appointments</p>
               </div>
             </div>
-            <span class="text-[10px] text-white/30 font-mono">{{ rangeLabel }}</span>
+            <span class="text-[10px] text-[var(--color-text-muted)] font-mono">{{ rangeLabel }}</span>
           </div>
 
           <div v-if="bookings.length > 0" class="overflow-x-auto">
             <table class="w-full text-sm min-w-[700px]">
               <thead>
-                <tr class="border-b border-white/[0.04] text-[10px] uppercase tracking-widest text-white/30 font-bold">
+                <tr class="border-b border-[var(--color-border)] text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] font-bold">
                   <th class="text-left px-6 py-3">Service</th>
                   <th class="text-left px-4 py-3">Barber</th>
                   <th class="text-left px-4 py-3">Date</th>
@@ -83,11 +83,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="b in bookings" :key="b.id" class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td class="px-6 py-3.5 text-white/80 font-medium">{{ b.service?.name || 'Service' }}</td>
-                  <td class="px-4 py-3.5 text-white/60">{{ b.barber?.name || 'Any Barber' }}</td>
-                  <td class="px-4 py-3.5 text-white/50 text-xs font-mono whitespace-nowrap">{{ formatDate(b.appointment_date) }}</td>
-                  <td class="px-4 py-3.5 text-emerald-400 font-bold">₦{{ Number(b.service?.price || 0).toLocaleString() }}</td>
+                <tr v-for="b in bookings" :key="b.id" class="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)]/50 transition-colors">
+                  <td class="px-6 py-3.5 text-[var(--color-text-primary)] font-medium">{{ b.service?.name || 'Service' }}</td>
+                  <td class="px-4 py-3.5 text-[var(--color-text-secondary)]">{{ b.barber?.name || 'Any Barber' }}</td>
+                  <td class="px-4 py-3.5 text-[var(--color-text-muted)] text-xs font-mono whitespace-nowrap">{{ formatDate(b.appointment_date) }}</td>
+                  <td class="px-4 py-3.5 text-[var(--color-success)] font-bold">₦{{ Number(b.service?.price || 0).toLocaleString() }}</td>
                   <td class="px-4 py-3.5">
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" :class="statusClass(b.status)">
                       <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(b.status)"></span>
@@ -98,7 +98,7 @@
               </tbody>
             </table>
           </div>
-          <div v-else class="flex flex-col items-center justify-center py-16 text-white/25">
+          <div v-else class="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)]">
             <CalendarDaysIcon class="h-12 w-12 mb-3 opacity-30" />
             <p class="text-sm font-medium">No bookings found for this period.</p>
           </div>
@@ -107,48 +107,48 @@
         <!-- Spending Breakdown -->
         <div class="grid gap-6 lg:grid-cols-2">
           <!-- Top Services -->
-          <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm p-6">
-            <h3 class="text-sm font-bold text-theme-text mb-5 flex items-center gap-2">
-              <SparklesIcon class="h-4 w-4 text-gold" /> Most Booked Services
+          <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-sm p-6">
+            <h3 class="text-sm font-bold text-[var(--color-text-primary)] mb-5 flex items-center gap-2">
+              <SparklesIcon class="h-4 w-4 text-[var(--color-accent)]" /> Most Booked Services
             </h3>
             <div v-if="topServices.length > 0" class="space-y-3">
               <div v-for="s in topServices" :key="s.name" class="group">
                 <div class="flex items-center justify-between mb-1.5">
-                  <span class="text-xs text-theme-text font-medium truncate max-w-[180px]">{{ s.name }}</span>
-                  <span class="text-[10px] text-white/40 font-bold tabular-nums">{{ s.count }} {{ s.count === 1 ? 'time' : 'times' }}</span>
+                  <span class="text-xs text-[var(--color-text-primary)] font-medium truncate max-w-[180px]">{{ s.name }}</span>
+                  <span class="text-[10px] text-[var(--color-text-secondary)] font-bold tabular-nums">{{ s.count }} {{ s.count === 1 ? 'time' : 'times' }}</span>
                 </div>
-                <div class="h-1.5 w-full rounded-full bg-white/[0.04] overflow-hidden">
-                  <div class="h-full rounded-full bg-gradient-to-r from-gold to-gold-dark transition-all duration-700 group-hover:opacity-90" :style="{ width: `${barWidth(s.count)}%` }"></div>
+                <div class="h-1.5 w-full rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
+                  <div class="h-full rounded-full bg-[var(--color-accent)] transition-all duration-700 group-hover:opacity-90" :style="{ width: `${barWidth(s.count)}%` }"></div>
                 </div>
               </div>
             </div>
-            <div v-else class="flex flex-col items-center py-8 text-white/20">
+            <div v-else class="flex flex-col items-center py-8 text-[var(--color-text-muted)]">
               <SparklesIcon class="h-8 w-8 mb-2" />
               <p class="text-xs">No service data yet</p>
             </div>
           </div>
 
           <!-- Spending Summary -->
-          <div class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm p-6">
-            <h3 class="text-sm font-bold text-theme-text mb-5 flex items-center gap-2">
-              <BanknotesIcon class="h-4 w-4 text-emerald-400" /> Spending Summary
+          <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-sm p-6">
+            <h3 class="text-sm font-bold text-[var(--color-text-primary)] mb-5 flex items-center gap-2">
+              <BanknotesIcon class="h-4 w-4 text-[var(--color-success)]" /> Spending Summary
             </h3>
             <div class="space-y-4">
-              <div class="flex items-center justify-between py-3 border-b border-white/[0.04]">
-                <span class="text-xs text-white/50 uppercase tracking-wider font-bold">Total Spent</span>
-                <span class="text-xl font-display text-emerald-400">₦{{ totalSpent.toLocaleString() }}</span>
+              <div class="flex items-center justify-between py-3 border-b border-[var(--color-border)]">
+                <span class="text-xs text-[var(--color-text-secondary)] uppercase tracking-wider font-bold">Total Spent</span>
+                <span class="text-xl font-display text-[var(--color-success)]">₦{{ totalSpent.toLocaleString() }}</span>
               </div>
-              <div class="flex items-center justify-between py-3 border-b border-white/[0.04]">
-                <span class="text-xs text-white/50 uppercase tracking-wider font-bold">Completed Bookings</span>
-                <span class="text-lg font-bold text-theme-text">{{ completedCount }}</span>
+              <div class="flex items-center justify-between py-3 border-b border-[var(--color-border)]">
+                <span class="text-xs text-[var(--color-text-secondary)] uppercase tracking-wider font-bold">Completed Bookings</span>
+                <span class="text-lg font-bold text-[var(--color-text-primary)]">{{ completedCount }}</span>
               </div>
-              <div class="flex items-center justify-between py-3 border-b border-white/[0.04]">
-                <span class="text-xs text-white/50 uppercase tracking-wider font-bold">Cancelled</span>
-                <span class="text-lg font-bold text-red-400">{{ cancelledCount }}</span>
+              <div class="flex items-center justify-between py-3 border-b border-[var(--color-border)]">
+                <span class="text-xs text-[var(--color-text-secondary)] uppercase tracking-wider font-bold">Cancelled</span>
+                <span class="text-lg font-bold text-[var(--color-danger)]">{{ cancelledCount }}</span>
               </div>
               <div class="flex items-center justify-between py-3">
-                <span class="text-xs text-white/50 uppercase tracking-wider font-bold">Avg. per Visit</span>
-                <span class="text-lg font-bold text-gold">₦{{ avgPerVisit.toLocaleString() }}</span>
+                <span class="text-xs text-[var(--color-text-secondary)] uppercase tracking-wider font-bold">Avg. per Visit</span>
+                <span class="text-lg font-bold text-[var(--color-accent)]">₦{{ avgPerVisit.toLocaleString() }}</span>
               </div>
             </div>
           </div>
@@ -261,18 +261,18 @@ function formatDate(d) {
 }
 
 const statusClass = (status) => ({
-  completed: 'bg-emerald-500/10 text-emerald-400',
-  confirmed: 'bg-blue-500/10 text-blue-400',
-  pending: 'bg-amber-500/10 text-amber-400',
-  cancelled: 'bg-red-500/10 text-red-400',
-}[status] || 'bg-white/5 text-white/40');
+  completed: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400',
+  confirmed: 'bg-blue-500/10 text-blue-500 dark:text-blue-400',
+  pending: 'bg-amber-500/10 text-amber-500 dark:text-amber-400',
+  cancelled: 'bg-red-500/10 text-red-500 dark:text-red-400',
+}[status] || 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]');
 
 const statusDot = (status) => ({
   completed: 'bg-emerald-400',
   confirmed: 'bg-blue-400',
   pending: 'bg-amber-400',
   cancelled: 'bg-red-400',
-}[status] || 'bg-white/30');
+}[status] || 'bg-[var(--color-text-muted)]/50');
 
 onMounted(fetchData);
 </script>
