@@ -2,7 +2,7 @@
   <BarberLayout>
     <section class="space-y-6 animate-fade-in min-h-full pb-6">
       <!-- Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-4 xs:p-6 sm:p-8 shadow-2xl">
+      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-4 xs:p-6 sm:p-8 shadow-2xl">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -30,14 +30,14 @@
         <div class="rounded-2xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-2xl relative">
           <div v-if="isEditing" class="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
           
-          <div class="flex items-center justify-between border-b border-theme-border px-6 py-5 bg-black/20">
+          <div class="flex items-center justify-between border-b border-theme-border px-6 py-5 bg-theme-surface-subtle/40">
             <div class="flex items-center gap-3">
               <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
                 <ClockIcon class="h-5 w-5 text-gold" />
               </div>
               <h2 class="font-display text-xl text-theme-text">Working Hours</h2>
             </div>
-            <p class="text-xs text-ivory/40 flex items-center gap-1.5"><PencilSquareIcon class="h-3.5 w-3.5"/> Edit your availability below</p>
+            <p class="text-xs text-theme-text-muted flex items-center gap-1.5"><PencilSquareIcon class="h-3.5 w-3.5"/> Edit your availability below</p>
           </div>
           
           <div class="p-3.5 xs:p-5 sm:p-6">
@@ -59,10 +59,10 @@
                   <!-- Premium Toggle -->
                   <button 
                     @click="hour.is_closed = !hour.is_closed"
-                    class="relative h-8 w-14 rounded-full transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-obsidian"
+                    class="relative h-8 w-14 rounded-full transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-theme-surface"
                     :class="hour.is_closed 
                       ? 'bg-gradient-to-r from-red-900/40 to-red-800/30 border border-red-500/25 focus:ring-red-500/40' 
-                      : 'bg-gradient-to-r from-emerald-900/50 to-emerald-800/40 border border-emerald-400/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] focus:ring-emerald-500/40'"
+                      : 'bg-gradient-to-r from-emerald-900/50 to-emerald-800/40 border border-emerald-400/30 shadow-[0_0_20px_rgba(168,85,247,0.15)] focus:ring-emerald-500/40'"
                   >
                     <span 
                       class="absolute top-1 inline-block h-6 w-6 rounded-full transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
@@ -91,7 +91,7 @@
                         <input 
                           type="time" 
                           v-model="hour.open_time" 
-                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
+                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border bg-theme-bg pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 hover:border-theme-border"
                         />
                       </div>
 
@@ -109,7 +109,7 @@
                         <input 
                           type="time" 
                           v-model="hour.close_time" 
-                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border/60 bg-black/50 pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 focus:bg-black/70 hover:border-theme-border [color-scheme:dark]"
+                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border bg-theme-bg pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 hover:border-theme-border"
                         />
                       </div>
                     </template>
@@ -127,7 +127,7 @@
 
         <!-- Upcoming Appointments Card -->
         <div class="rounded-2xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-2xl lg:sticky lg:top-8">
-          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5 bg-black/20">
+          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5 bg-theme-surface-subtle/40">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-400/10">
               <CalendarDaysIcon class="h-5 w-5 text-blue-400" />
             </div>
@@ -138,21 +138,21 @@
             <div class="h-8 w-8 animate-spin rounded-full border-2 border-blue-400 border-t-transparent shadow-[0_0_15px_rgba(96,165,250,0.5)]"></div>
           </div>
 
-          <div v-else class="divide-y divide-white/[0.04]">
+          <div v-else class="divide-y divide-theme-border">
             <div
               v-for="appointment in appointments"
               :key="appointment.id"
               class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-theme-surface/80 hover:bg-gradient-to-r hover:from-blue-500/5 hover:to-transparent"
             >
               <!-- Date Block -->
-              <div class="flex flex-col items-center shrink-0 rounded-xl bg-black/40 border border-theme-border px-3 py-2 min-w-[56px] shadow-inner">
-                <span class="text-[10px] uppercase tracking-widest text-ivory/40 font-bold">{{ getMonth(appointment.appointment_date) }}</span>
+              <div class="flex flex-col items-center shrink-0 rounded-xl bg-theme-surface-subtle border border-theme-border px-3 py-2 min-w-[56px] shadow-inner">
+                <span class="text-[10px] uppercase tracking-widest text-theme-text-muted font-bold">{{ getMonth(appointment.appointment_date) }}</span>
                 <span class="text-xl font-bold text-theme-text font-display leading-tight">{{ getDay(appointment.appointment_date) }}</span>
               </div>
 
               <div class="flex-1 min-w-0">
                 <p class="text-base font-semibold text-theme-text truncate">{{ appointment.client_name }}</p>
-                <p class="mt-0.5 text-xs text-ivory/50">{{ appointment.service?.name || 'General Service' }}</p>
+                <p class="mt-0.5 text-xs text-theme-text-muted">{{ appointment.service?.name || 'General Service' }}</p>
                 <div class="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gold/10 px-2 py-1 border border-gold/20">
                   <ClockIcon class="h-3 w-3 text-gold" />
                   <span class="text-[10px] text-gold font-bold tracking-wider">{{ formatTimeDisplay(appointment.appointment_time) }}</span>
@@ -161,11 +161,11 @@
             </div>
 
             <div v-if="appointments.length === 0" class="px-6 py-16 text-center">
-              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-theme-bg/50 border border-dashed border-white/10 mb-4">
-                <CalendarDaysIcon class="h-8 w-8 text-ivory/20" />
+              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-theme-surface-subtle border border-dashed border-theme-border mb-4">
+                <CalendarDaysIcon class="h-8 w-8 text-theme-text-muted" />
               </div>
               <p class="text-base font-display text-theme-text mb-1">No upcoming appointments</p>
-              <p class="text-sm text-ivory/40">Your future bookings will appear here.</p>
+              <p class="text-sm text-theme-text-muted">Your future bookings will appear here.</p>
             </div>
           </div>
         </div>
