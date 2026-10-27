@@ -1,5 +1,5 @@
 <template>
-  <header class="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#12161C] p-6 lg:p-8 shadow-2xl flex flex-col lg:flex-row lg:items-end justify-between gap-6 backdrop-blur-3xl">
+  <header class="relative overflow-hidden rounded-[2rem] border border-theme-border bg-theme-surface p-6 lg:p-8 shadow-2xl flex flex-col lg:flex-row lg:items-end justify-between gap-6 backdrop-blur-3xl">
     <!-- Ambient luxury background glow -->
     <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-admin/10 blur-[100px] pointer-events-none"></div>
     <div class="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-amber-500/10 blur-[80px] pointer-events-none"></div>
@@ -18,17 +18,17 @@
         </div>
       </div>
 
-      <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl text-white tracking-tight drop-shadow leading-tight flex items-center gap-3 flex-wrap">
+      <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text tracking-tight drop-shadow leading-tight flex items-center gap-3 flex-wrap">
         <span>Blog <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin via-amber-400 to-amber-200">Management</span></span>
-        <span v-if="totalItems > 0" class="inline-flex items-center justify-center h-8 px-3 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 font-sans font-medium">
+        <span v-if="totalItems > 0" class="inline-flex items-center justify-center h-8 px-3 rounded-full bg-theme-surface-subtle border border-theme-border text-sm text-theme-text-muted font-sans font-medium">
           {{ totalItems }} {{ totalItems === 1 ? 'article' : 'articles' }}
         </span>
       </h1>
 
       <!-- Live Clock & Operational Subtitle -->
-      <div class="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-white/50">
-        <span class="font-mono text-white/80 font-medium">{{ currentTime }}</span>
-        <span class="text-white/20">•</span>
+      <div class="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-theme-text-muted">
+        <span class="font-mono text-theme-text font-medium">{{ currentTime }}</span>
+        <span class="text-theme-text-muted/40">•</span>
         <span class="truncate">Draft, edit, publish and optimize hair grooming articles and saloon announcements.</span>
       </div>
     </div>
@@ -37,18 +37,18 @@
     <div class="relative z-10 flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end gap-3 shrink-0 w-full lg:w-auto">
       <!-- Search Bar -->
       <div class="relative w-full lg:w-84">
-        <MagnifyingGlassIcon class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+        <MagnifyingGlassIcon class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-theme-text-muted/50" />
         <input
           :value="modelValue"
           @input="$emit('update:modelValue', $event.target.value)"
           type="text"
           placeholder="Search by title, author, content..."
-          class="w-full bg-white/[0.03] border border-white/[0.08] text-xs text-white rounded-xl py-2.5 pl-11 pr-8 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 placeholder:text-white/25"
+          class="w-full bg-theme-bg border border-theme-border text-xs text-theme-text rounded-xl py-2.5 pl-11 pr-8 outline-none transition-all focus:border-admin/50 focus:bg-theme-surface focus:ring-2 focus:ring-admin/15 placeholder:text-theme-text-muted/40"
         />
         <button 
           v-if="modelValue"
           @click="$emit('update:modelValue', '')"
-          class="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-muted hover:text-theme-text transition-colors"
           title="Clear search"
         >
           <XMarkIcon class="h-4 w-4" />
@@ -62,21 +62,21 @@
           href="/blog"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-theme-border bg-theme-surface-subtle text-xs font-semibold text-theme-text-muted hover:text-theme-text hover:bg-theme-surface hover:border-theme-border transition-all"
           title="Open public blog in new tab"
         >
-          <ArrowTopRightOnSquareIcon class="h-4 w-4 text-white/60" />
+          <ArrowTopRightOnSquareIcon class="h-4 w-4 text-theme-text-muted" />
           <span>View Public Blog</span>
         </a>
 
         <!-- Sync / Refresh -->
         <button 
-          @click="$emit('refresh')"
+          @click="$emit('refresh')" 
           :disabled="isRefreshing"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-theme-border bg-theme-surface-subtle text-xs font-semibold text-theme-text-muted hover:text-theme-text hover:bg-theme-surface hover:border-theme-border transition-all disabled:opacity-50"
           title="Refresh article list"
         >
-          <ArrowPathIcon class="h-4 w-4 text-white/60" :class="{ 'animate-spin': isRefreshing }" />
+          <ArrowPathIcon class="h-4 w-4 text-theme-text-muted" :class="{ 'animate-spin': isRefreshing }" />
           <span>{{ isRefreshing ? 'Syncing...' : 'Sync' }}</span>
         </button>
 
@@ -147,4 +147,3 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 </script>
-

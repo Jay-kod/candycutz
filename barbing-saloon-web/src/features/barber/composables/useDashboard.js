@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { barberApi } from '@/shared/api/old_barberApi';
+import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 
 export function useBarberDashboard() {
@@ -17,8 +17,8 @@ export function useBarberDashboard() {
     try {
       loading.value = true;
       const [dashRes, bookingsRes] = await Promise.allSettled([
-        barberApi.dashboard(),
-        barberApi.getBookings()
+        client.get('/barber/dashboard'),
+        client.get('/barber/appointments')
       ]);
       
       let stats = { today_bookings: 0, upcoming_bookings: 0, completed_bookings: 0, no_show_count: 0 };
@@ -62,20 +62,28 @@ export function useBarberDashboard() {
         pending_payments: pendingPayments
       };
     } catch (e) {
-      // Ignore
+      console.error('Error loading barber dashboard:', e);
     } finally {
       loading.value = false;
     }
   }
 
   async function completeAppointment(id) {
-    await barberApi.complete(id);
-    await loadDashboard();
+    try {
+      await client.patch(`/barber/appointments/${id}/complete`);
+      await loadDashboard();
+    } catch (e) {
+      console.error('Error completing appointment:', e);
+    }
   }
 
   async function markNoShow(id) {
-    await barberApi.noShow(id);
-    await loadDashboard();
+    try {
+      await client.patch(`/barber/appointments/${id}/no-show`);
+      await loadDashboard();
+    } catch (e) {
+      console.error('Error marking appointment as no-show:', e);
+    }
   }
 
   return {
@@ -94,12 +102,12 @@ export function useBarberStatus() {
 
   async function loadMyStatus() {
     try {
-      const res = await barberApi.profile();
+      const res = await client.get('/barber/account');
       if (res.data?.data) {
         myStatus.value = res.data.data.status || 'active';
       }
     } catch (e) {
-      // Ignore error
+      console.error('Error loading barber profile status:', e);
     }
   }
 
@@ -120,7 +128,7 @@ export function useBarberStatus() {
     }
     
     try {
-      await barberApi.updateMyStatus({ status, is_available: status === 'active' });
+      await client.patch('/barber/my-status', { status, is_available: status === 'active' });
       myStatus.value = status;
       toast.success(`Status updated to ${status === 'active' ? 'Active' : 'Not Active'}`);
     } catch (error) {
@@ -150,7 +158,7 @@ export function useBarberNotification() {
     
     sendingNotification.value = true;
     try {
-      await barberApi.sendNotification(notificationForm.value);
+      await client.post('/barber/notifications', notificationForm.value);
       toast.success('Notification sent successfully!');
       showNotificationModal.value = false;
       notificationForm.value = { title: '', message: '' };
