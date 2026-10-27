@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-theme-bg text-theme-text flex flex-col transition-colors duration-300">
+  <div class="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] flex flex-col transition-colors duration-300">
     <header class="public-header">
       <div class="public-nav-shell" :class="{ 'public-nav-shell--scrolled': y > 20 || route.path !== '/' }">
         <RouterLink to="/" class="public-brand" :aria-label="`${brandName} home`">
