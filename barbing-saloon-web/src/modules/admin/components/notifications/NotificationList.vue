@@ -126,7 +126,7 @@ import {
   FunnelIcon,
   CalendarDaysIcon,
   BanknotesIcon,
-  ShieldAlertIcon,
+  ShieldExclamationIcon,
   CpuChipIcon,
   CheckIcon,
   TrashIcon
@@ -149,7 +149,7 @@ const getTypeIcon = (type) => {
   const t = String(type || '').toLowerCase();
   if (t.includes('booking') || t.includes('appointment')) return CalendarDaysIcon;
   if (t.includes('payment')) return BanknotesIcon;
-  if (t.includes('security') || t.includes('auth')) return ShieldAlertIcon;
+  if (t.includes('security') || t.includes('auth')) return ShieldExclamationIcon;
   if (t.includes('system')) return CpuChipIcon;
   return BellIcon;
 };

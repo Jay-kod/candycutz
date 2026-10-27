@@ -47,3 +47,4 @@ describe('NotificationStats.vue', () => {
     expect(text).toContain('System & Security');
   });
 });
+

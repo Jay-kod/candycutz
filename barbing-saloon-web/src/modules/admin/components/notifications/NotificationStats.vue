@@ -77,7 +77,7 @@ import {
   BellIcon,
   ExclamationTriangleIcon,
   CalendarDaysIcon,
-  ShieldAlertIcon
+  ShieldExclamationIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
