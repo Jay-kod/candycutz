@@ -37,9 +37,9 @@
 
     <!-- Verification Code Modal -->
     <div v-if="completingBookingId" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-obsidian/80 backdrop-blur-sm" @click="closeCompleteModal"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeCompleteModal"></div>
       <div class="relative w-full max-w-sm rounded-3xl border border-theme-border bg-theme-surface/90 p-8 shadow-2xl backdrop-blur-xl animate-fade-in text-center">
-        <button @click="closeCompleteModal" class="absolute top-4 right-4 text-ivory/40 hover:text-white transition-colors">
+        <button @click="closeCompleteModal" class="absolute top-4 right-4 text-theme-text-muted hover:text-theme-text transition-colors">
           <XMarkIcon class="h-6 w-6" />
         </button>
         
@@ -48,7 +48,7 @@
         </div>
         
         <h3 class="font-display text-2xl text-theme-text mb-2">Service Verification</h3>
-        <p class="text-sm text-ivory/60 mb-6">Ask the customer for their 12-character verification code to complete this booking.</p>
+        <p class="text-sm text-theme-text-muted mb-6">Ask the customer for their 12-character verification code to complete this booking.</p>
         
         <div class="space-y-4">
           <div>
@@ -56,14 +56,14 @@
               v-model="verificationCodeInput"
               type="text" 
               placeholder="e.g. ABCD-1234-EFGH"
-              class="w-full bg-black/40 border border-theme-border text-center text-lg tracking-[0.2em] font-bold text-white rounded-xl py-4 outline-none transition-all focus:border-gold/50 focus:ring-4 focus:ring-gold/10 uppercase placeholder:text-ivory/20"
+              class="w-full bg-theme-bg border border-theme-border text-center text-lg tracking-[0.2em] font-bold text-theme-text rounded-xl py-4 outline-none transition-all focus:border-gold/50 focus:ring-4 focus:ring-gold/10 uppercase placeholder:text-theme-text-muted/40"
               maxlength="14"
             />
           </div>
           
           <button
             @click="pasteCode"
-            class="w-full flex items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] py-3 text-xs font-bold uppercase tracking-wider text-ivory/70 transition-all hover:bg-white/[0.04] hover:text-white"
+            class="w-full flex items-center justify-center gap-2 rounded-xl border border-theme-border bg-theme-surface-subtle py-3 text-xs font-bold uppercase tracking-wider text-theme-text-muted transition-all hover:bg-theme-border/30 hover:text-theme-text"
           >
             <ClipboardDocumentIcon class="h-4 w-4" />
             Paste from Clipboard
