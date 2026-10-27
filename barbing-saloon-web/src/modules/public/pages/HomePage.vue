@@ -33,18 +33,18 @@
     />
 
     <!-- About Us Teaser -->
-    <section class="about-teaser-section bg-theme-surface text-theme-text py-16 md:py-24 border-y border-neutral-200/80 dark:border-white/5 transition-colors duration-300 overflow-hidden">
+    <section class="about-teaser-section bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] py-16 md:py-24 border-y border-[var(--color-border-subtle)] transition-colors duration-300 overflow-hidden">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-amber-600 dark:text-gold">
+            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl text-[var(--color-accent)]">
               {{ aboutSubtitle }}
             </h2>
-            <p class="mt-5 text-base sm:text-lg text-neutral-600 dark:text-theme-muted leading-relaxed whitespace-pre-wrap">
+            <p class="mt-5 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
               {{ aboutText }}
             </p>
             <div class="mt-8">
-              <RouterLink to="/about" class="inline-flex items-center gap-2 rounded-xl border border-amber-600/40 dark:border-gold/30 px-8 py-4 font-semibold text-amber-700 dark:text-gold bg-white/80 dark:bg-transparent shadow-sm dark:shadow-none transition-all hover:border-gold hover:bg-amber-50 dark:hover:bg-gold/10 hover:-translate-y-0.5">
+              <RouterLink to="/about" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-8 py-4 font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-primary)] shadow-sm transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:bg-[var(--color-bg-tertiary)] hover:-translate-y-0.5">
                 Learn More About Us
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
@@ -52,7 +52,7 @@
               </RouterLink>
             </div>
           </div>
-          <div class="relative overflow-hidden rounded-3xl aspect-[4/3] border border-theme-border shadow-2xl">
+          <div class="relative overflow-hidden rounded-3xl aspect-[4/3] border border-[var(--color-border)] shadow-2xl">
             <img :src="aboutImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
           </div>
         </div>
@@ -262,25 +262,3 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', refreshTestimonialsWhenVisible);
 });
 </script>
-
-<style scoped>
-:global([data-theme="light"]) .about-teaser-section {
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global([data-theme="light"]) .about-teaser-section h2 {
-  color: #CC7A00;
-}
-
-:global([data-theme="light"]) .about-teaser-section .border-gold\/30 {
-  border-color: rgba(204, 122, 0, 0.4);
-  color: #B45309;
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-:global([data-theme="light"]) .about-teaser-section .border-gold\/30:hover {
-  border-color: #FF9900;
-  color: #9A3412;
-  background-color: #FFF7ED;
-}
-</style>
