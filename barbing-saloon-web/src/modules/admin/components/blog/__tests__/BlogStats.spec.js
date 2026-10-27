@@ -46,3 +46,4 @@ describe('BlogStats.vue', () => {
     expect(wrapper.text()).toContain('Queue fully cleared');
   });
 });
+
