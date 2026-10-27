@@ -37,7 +37,7 @@ An audit of all 297 registered application routes was executed using `php artisa
 - **Authentication Handshake:** Uses Bearer token attached automatically to the `Authorization` header from `localStorage`.
 - **Status:** **Working / Verified**.
 
-### 2.2 Mobile Client Integration (`candycutz-mobile-app`)
+### 2.2 Standalone Mobile Client (`MOBILE/`)
 - **Central API Client:** `src/api/client.ts` uses Axios with `CONFIG.API_BASE_URL` (`${API_ROOT}/api/v1`).
 - **Token Security:** Tokens are persisted in `expo-secure-store` via `tokenStorage` with hardware encryption.
 - **Request Headers:** Automatically attaches `X-Client-Type: mobile`, `X-App-Version: 1.0.0`, `X-App-Platform: android|ios`.
@@ -79,4 +79,3 @@ An audit of all 297 registered application routes was executed using `php artisa
 | **Super Admin** | Above + `/superadmin/*`, `/super-admin/*`, user management, audit logs | Audit logged before-hook in policies |
 
 All route accesses verified by `Tests\Feature\AuthorizationMatrixTest` and `Tests\Feature\RouteGateAuditTest`.
-

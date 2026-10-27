@@ -57,5 +57,4 @@ Per `ARCHITECTURE.md` §11 and `AGENTS.md` Core Rules:
 2. **Payment Service Idempotency & Webhook Verification:** Preserved in `app/Domain/Payment/Services/PaymentConfirmer.php` and `PaymentWebhookApiController.php`. Paystack HMAC-SHA512 verification and event deduplication verified.
 3. **Receipt Storage Security:** Preserved on private storage disk (`storage/app/private/receipts/`), accessible only through signed, policy-checked endpoints (`ReceiptApiController.php`).
 4. **Token Expiration Policies:** Preserved in `ApiTokenIssuer.php` (12h admin, 30d customer/barber).
-5. **Base UI Components:** Preserved in `barbing-saloon-web/src/core/components/Base*.vue` and `candycutz-mobile-app/src/components/common/`.
-
+5. **Base UI Components:** Preserved in `barbing-saloon-web/src/core/components/Base*.vue` and `MOBILE/src/components/common/`.

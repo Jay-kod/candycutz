@@ -155,7 +155,7 @@ stopwaitsecs=3600
    ```
 4. **Mobile Client Release (EAS Build):**
    ```bash
-   cd /var/www/candycutz/candycutz-mobile-app
+   cd /var/www/candycutz/MOBILE
    eas build --platform android --profile production
    eas build --platform ios --profile production
    ```
@@ -166,4 +166,3 @@ stopwaitsecs=3600
    curl -I https://api.candycutz.ng/api/v1/health/ready
    # Expected: HTTP/2 200 OK
    ```
-

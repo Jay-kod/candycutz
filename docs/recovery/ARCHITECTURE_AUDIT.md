@@ -18,7 +18,7 @@ Following extensive remediation and recovery work:
 2. **Web Code Quality Gate Restored (RESOLVED):** All 34 ESLint errors (unused variables and empty catch block) were systematically resolved. Running `npm run lint` now completes with **exit code 0 (zero errors, zero warnings)**.
 3. **Backend Static Analysis Type Alignment (RESOLVED):** `GalleryApiController.php:116` was updated to cast string categories via `GalleryCategory::tryFrom()`, and `GalleryResource` was annotated with `@mixin \App\Models\Gallery`. Running `php vendor/bin/phpstan analyse` now reports **`[OK] No errors` at Level 6**.
 4. **Backend Test Suite (100% PASS):** `php artisan test` runs 176 feature and unit tests with 943 assertions in 23.55s with **100% PASS (0 failures)**.
-5. **Mobile Application Quality Gates (100% PASS):** `candycutz-mobile-app` passes TypeScript type checking (`npx tsc --noEmit` exits 0) and passes 68 automated unit tests across 14 test suites with **100% PASS (0 failures)**.
+5. **Mobile Application Quality Gates (100% PASS):** `MOBILE/` passes TypeScript type checking (`npx tsc --noEmit` exits 0) and passes 68 automated unit tests across 14 test suites with **100% PASS (0 failures)**.
 
 ---
 
@@ -68,4 +68,3 @@ Every finding is classified strictly according to:
 | Web Production Build | `npm run build` | Exit 0 | **All chunks emitted in 7.45s** | **PASS** |
 | Mobile TypeScript | `npx tsc --noEmit` | Exit 0 | **0 errors, clean exit** | **PASS** |
 | Mobile Test Suite | `npm test` | Exit 0 | **14 suites, 68 passed** (1.70s) | **PASS** |
-
