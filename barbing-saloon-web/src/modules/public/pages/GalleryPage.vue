@@ -8,7 +8,7 @@
       title-setting-key="gallery_title"
       subtitle-setting-key="gallery_subtitle"
     />
-    <section class="mx-auto max-w-7xl px-4 md:px-6 pt-12 pb-24 text-theme-text min-h-[50vh]">
+    <section class="mx-auto max-w-7xl px-4 md:px-6 pt-12 pb-24 text-[var(--color-text-primary)] min-h-[50vh]">
 
       <!-- Categories Filter Tabs -->
       <div data-reveal class="flex items-center justify-center flex-wrap gap-2.5 sm:gap-3 mb-12">
@@ -17,8 +17,8 @@
           @click="selectedCategory = 'All'"
           class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 border capitalize"
           :class="selectedCategory === 'All'
-            ? 'bg-gold text-obsidian border-gold shadow-lg shadow-gold/20 scale-105'
-            : 'bg-theme-surface text-theme-muted border-theme-border hover:border-gold/40 hover:text-gold'"
+            ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-lg shadow-[var(--color-shadow)] scale-105'
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'"
         >
           All ({{ gallery.length }})
         </button>
@@ -29,8 +29,8 @@
           @click="selectedCategory = cat"
           class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 border capitalize"
           :class="selectedCategory === cat
-            ? 'bg-gold text-obsidian border-gold shadow-lg shadow-gold/20 scale-105'
-            : 'bg-theme-surface text-theme-muted border-theme-border hover:border-gold/40 hover:text-gold'"
+            ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-lg shadow-[var(--color-shadow)] scale-105'
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'"
         >
           {{ formatCategory(cat) }}
         </button>
@@ -41,7 +41,7 @@
         <div
           v-for="n in 6"
           :key="'gal-skel-' + n"
-          class="overflow-hidden rounded-3xl border border-theme-border bg-theme-surface mb-6 break-inside-avoid"
+          class="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] mb-6 break-inside-avoid"
         >
           <div class="skeleton-shimmer w-full" :style="{ aspectRatio: n % 2 === 0 ? '4/5' : '4/3' }"></div>
         </div>
@@ -54,10 +54,10 @@
           :key="item.id"
           @click="openLightbox(index)"
           data-reveal
-          class="group overflow-hidden rounded-3xl border border-theme-border bg-theme-surface relative block mb-6 break-inside-avoid cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-gold/15 transition-all duration-500 hover:-translate-y-1 hover:border-gold/40"
+          class="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] relative block mb-6 break-inside-avoid cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-[var(--color-shadow)] transition-all duration-500 hover:-translate-y-1 hover:border-[var(--color-accent)]"
         >
           <div
-            class="relative w-full overflow-hidden bg-theme-bg"
+            class="relative w-full overflow-hidden bg-[var(--color-bg-tertiary)]"
             :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }"
           >
             <img
@@ -66,17 +66,17 @@
               :alt="item.title"
               class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
           </div>
 
           <!-- Hover Details Overlay -->
           <div class="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-6 text-white translate-y-0 sm:translate-y-6 transition-transform duration-500 sm:group-hover:translate-y-0">
             <div class="flex items-center justify-between opacity-100 sm:opacity-0 transition-opacity duration-500 sm:group-hover:opacity-100 delay-100">
-              <span class="text-[10px] uppercase tracking-[0.25em] text-gold font-bold">
+              <span class="text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)] font-bold">
                 {{ formatCategory(item.category) }}
               </span>
               <span v-if="item.barber_name" class="text-[10px] uppercase font-bold tracking-wider text-white/80 bg-black/60 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-gold">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-[var(--color-accent)]">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
                 {{ item.barber_name }}
@@ -93,7 +93,7 @@
 
             <!-- Expand Icon Button -->
             <button
-              class="absolute right-4 bottom-4 xs:right-6 xs:bottom-6 flex h-11 w-11 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg opacity-100 sm:opacity-0 transform translate-y-0 sm:translate-y-4 transition-all duration-500 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-gold-light"
+              class="absolute right-4 bottom-4 xs:right-6 xs:bottom-6 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] shadow-lg opacity-100 sm:opacity-0 transform translate-y-0 sm:translate-y-4 transition-all duration-500 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 delay-200 hover:scale-110 hover:bg-[var(--color-accent-hover)]"
               aria-label="View larger"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -105,16 +105,16 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-20 rounded-3xl border border-theme-border bg-theme-surface">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-14 h-14 mx-auto text-theme-muted mb-4">
+      <div v-else class="text-center py-20 rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-14 h-14 mx-auto text-[var(--color-text-muted)] mb-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
         </svg>
-        <h3 class="text-xl font-display text-theme-text font-bold">No gallery items found</h3>
-        <p class="text-sm text-theme-muted mt-2">There are currently no photos under {{ formatCategory(selectedCategory) }}.</p>
+        <h3 class="text-xl font-display text-[var(--color-text-primary)] font-bold">No gallery items found</h3>
+        <p class="text-sm text-[var(--color-text-secondary)] mt-2">There are currently no photos under {{ formatCategory(selectedCategory) }}.</p>
         <button
           type="button"
           @click="selectedCategory = 'All'"
-          class="mt-6 inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-6 py-2.5 text-xs font-bold text-gold hover:bg-gold hover:text-obsidian transition-colors"
+          class="mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--color-accent)] bg-[var(--color-accent)]/10 px-6 py-2.5 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)] transition-colors"
         >
           View All Gallery
         </button>
@@ -134,7 +134,7 @@
       <!-- Close Button -->
       <button
         @click="closeLightbox"
-        class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-[var(--color-accent)] transition-colors"
         aria-label="Close lightbox"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -145,7 +145,7 @@
       <!-- Previous Button -->
       <button
         @click.stop="prevImage"
-        class="absolute left-2 sm:left-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute left-2 sm:left-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-[var(--color-accent)] transition-colors"
         :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }"
         :disabled="currentIdx === 0"
         aria-label="Previous image"
@@ -165,7 +165,7 @@
         />
         <div class="mt-5 text-center text-white max-w-2xl">
           <div class="flex items-center justify-center gap-3">
-            <span class="text-xs font-bold uppercase tracking-widest text-gold">
+            <span class="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
               {{ formatCategory(filteredGallery[currentIdx]?.category) }}
             </span>
             <span v-if="filteredGallery[currentIdx]?.barber_name" class="text-white/40">•</span>
@@ -185,7 +185,7 @@
       <!-- Next Button -->
       <button
         @click.stop="nextImage"
-        class="absolute right-2 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-gold transition-colors"
+        class="absolute right-2 sm:right-6 z-20 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/10 p-3 text-white hover:bg-white/20 hover:text-[var(--color-accent)] transition-colors"
         :class="{ 'opacity-30 cursor-not-allowed': currentIdx === filteredGallery.length - 1 }"
         :disabled="currentIdx === filteredGallery.length - 1"
         aria-label="Next image"
@@ -207,7 +207,6 @@ import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const { init: initScrollReveal } = useScrollReveal();
-
 
 const gallery = ref([]);
 const selectedCategory = ref('All');
