@@ -109,37 +109,37 @@ const verifyPayment = async (action) => {
   <BarberLayout>
     <div class="max-w-6xl mx-auto h-[calc(100vh-160px)] flex flex-col">
       <div class="flex items-center gap-4 mb-6 shrink-0">
-        <button @click="router.push('/barber/payments')" class="p-2 rounded-xl bg-white/5 border border-white/10 text-ivory/70 hover:bg-white/10 hover:text-white transition-all">
+        <button @click="router.push('/barber/payments')" class="p-2 rounded-xl bg-theme-surface-subtle border border-theme-border text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all">
           <ArrowLeftIcon class="w-5 h-5" />
         </button>
         <div>
-          <h1 class="text-3xl font-bold text-ivory">Receipt Details</h1>
-          <p class="text-ivory/60 mt-1">Review the payment receipt for this booking.</p>
+          <h1 class="text-3xl font-bold text-theme-text">Receipt Details</h1>
+          <p class="text-theme-text-muted mt-1">Review the payment receipt for this booking.</p>
         </div>
       </div>
 
       <div v-if="isLoading" class="flex justify-center p-12 shrink-0">
-        <ArrowPathIcon class="w-8 h-8 text-ivory/30 animate-spin" />
+        <ArrowPathIcon class="w-8 h-8 text-theme-text-muted animate-spin" />
       </div>
 
       <div v-else-if="error" class="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-2xl shrink-0">
         {{ error }}
       </div>
 
-      <div v-else-if="booking" class="bg-theme-surface/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 min-h-0">
+      <div v-else-if="booking" class="bg-theme-surface/95 backdrop-blur-xl border border-theme-border rounded-3xl p-6 sm:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 min-h-0">
       
       <!-- Left Column: Receipt Image/Preview -->
       <div class="flex flex-col h-full min-h-[400px]">
-        <div class="flex-1 overflow-hidden bg-black/50 rounded-2xl border border-white/5 flex items-center justify-center p-4">
+        <div class="flex-1 overflow-hidden bg-theme-bg/60 rounded-2xl border border-theme-border flex items-center justify-center p-4">
           <template v-if="!receiptSrc">
-            <p class="text-ivory/40">No receipt uploaded yet.</p>
+            <p class="text-theme-text-muted">No receipt uploaded yet.</p>
           </template>
           <template v-else-if="isPdf">
             <div class="text-center">
-              <div class="w-16 h-16 mx-auto mb-4 bg-white/5 rounded-2xl flex items-center justify-center">
+              <div class="w-16 h-16 mx-auto mb-4 bg-theme-surface-subtle rounded-2xl flex items-center justify-center">
                 <svg class="w-8 h-8 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4z"/></svg>
               </div>
-              <p class="text-ivory mb-4">This receipt is a PDF.</p>
+              <p class="text-theme-text mb-4">This receipt is a PDF.</p>
               <a :href="receiptSrc" target="_blank" class="text-gold hover:text-gold/80 underline font-medium">View PDF in new tab →</a>
             </div>
           </template>
@@ -152,29 +152,29 @@ const verifyPayment = async (action) => {
       <!-- Right Column: Details & Actions -->
       <div class="flex flex-col h-full">
         <div class="mb-6">
-          <p class="text-ivory/60 text-lg">
-            <strong class="text-ivory">{{ booking.customer?.name }}</strong> — {{ booking.service?.name }}
+          <p class="text-theme-text-muted text-lg">
+            <strong class="text-theme-text">{{ booking.customer?.name }}</strong> — {{ booking.service?.name }}
             <br>
             <span class="text-gold font-bold">₦{{ (booking.service?.price || 0).toLocaleString() }}</span>
           </p>
         </div>
 
         <!-- Booking Info -->
-        <div class="bg-black/30 rounded-xl p-6 border border-white/5 mb-6 space-y-4 text-sm">
-          <div class="flex justify-between items-center border-b border-white/5 pb-3">
-            <span class="text-ivory/50">Date & Time</span>
-            <span class="text-ivory font-medium">{{ new Date(booking.appointment_date).toLocaleDateString() }} at {{ booking.appointment_time }}</span>
+        <div class="bg-theme-surface-subtle/50 rounded-xl p-6 border border-theme-border mb-6 space-y-4 text-sm">
+          <div class="flex justify-between items-center border-b border-theme-border pb-3">
+            <span class="text-theme-text-muted">Date & Time</span>
+            <span class="text-theme-text font-medium">{{ new Date(booking.appointment_date).toLocaleDateString() }} at {{ booking.appointment_time }}</span>
           </div>
-          <div class="flex justify-between items-center border-b border-white/5 pb-3">
-            <span class="text-ivory/50">Barber</span>
-            <span class="text-ivory font-medium">{{ booking.barber?.name }}</span>
+          <div class="flex justify-between items-center border-b border-theme-border pb-3">
+            <span class="text-theme-text-muted">Barber</span>
+            <span class="text-theme-text font-medium">{{ booking.barber?.name }}</span>
           </div>
-          <div v-if="booking.transaction_ref" class="flex justify-between items-center border-b border-white/5 pb-3">
-            <span class="text-ivory/50">Transaction Ref</span>
-            <span class="text-ivory font-mono text-xs bg-white/5 px-2 py-1 rounded">{{ booking.transaction_ref }}</span>
+          <div v-if="booking.transaction_ref" class="flex justify-between items-center border-b border-theme-border pb-3">
+            <span class="text-theme-text-muted">Transaction Ref</span>
+            <span class="text-theme-text font-mono text-xs bg-theme-surface-subtle px-2 py-1 rounded">{{ booking.transaction_ref }}</span>
           </div>
           <div class="flex justify-between items-center pt-1">
-            <span class="text-ivory/50">Payment Status</span>
+            <span class="text-theme-text-muted">Payment Status</span>
             <span class="text-amber-400 font-bold uppercase tracking-wider text-[10px] bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded-full">{{ booking.payment_status }}</span>
           </div>
         </div>
