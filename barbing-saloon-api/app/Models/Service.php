@@ -47,6 +47,9 @@ class Service extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * @return BelongsTo<ServiceCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceCategory::class, 'category_id');

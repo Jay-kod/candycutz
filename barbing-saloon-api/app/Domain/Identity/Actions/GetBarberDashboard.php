@@ -24,18 +24,18 @@ class GetBarberDashboard
             ->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
-                'client_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
-                'customer_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
+                'client_name' => $a->customer->name ?? $a->client_name ?? 'Client',
+                'customer_name' => $a->customer->name ?? $a->client_name ?? 'Client',
                 'appointment_time' => substr((string) $a->appointment_time, 0, 5),
                 'appointment_date' => $a->appointment_date,
-                'status' => $a->status?->value ?? $a->status,
+                'status' => $a->status->value ?? $a->status,
                 'verification_code' => $a->verification_code,
                 'service' => [
                     'id' => $a->service?->id,
-                    'name' => $a->service?->name ?? 'General Service',
-                    'price' => (float) ($a->service?->price ?? $a->total_price ?? 0),
+                    'name' => $a->service->name ?? 'General Service',
+                    'price' => (float) ($a->service->price ?? $a->total_price ?? 0),
                 ],
-                'price' => (float) ($a->total_price ?? $a->service?->price ?? 0),
+                'price' => (float) ($a->total_price ?? $a->service->price ?? 0),
             ]);
 
         $todayBookingsCount = Appointment::where('barber_id', $barber->id)
@@ -72,17 +72,17 @@ class GetBarberDashboard
             ->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
-                'customer_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
-                'customer_email' => $a->customer?->email ?? $a->client_email ?? '',
-                'customer_phone' => $a->customer?->phone ?? $a->client_phone ?? '',
-                'price' => (float) ($a->total_price ?? $a->service?->price ?? 0),
-                'service_name' => $a->service?->name ?? 'General Service',
-                'duration_minutes' => $a->service?->duration_minutes ?? 30,
-                'receipt_image' => $a->payment?->receipt_image ?? $a->payment?->receipt_url ?? null,
+                'customer_name' => $a->customer->name ?? $a->client_name ?? 'Client',
+                'customer_email' => $a->customer->email ?? $a->client_email ?? '',
+                'customer_phone' => $a->customer->phone ?? $a->client_phone ?? '',
+                'price' => (float) ($a->total_price ?? $a->service->price ?? 0),
+                'service_name' => $a->service->name ?? 'General Service',
+                'duration_minutes' => $a->service->duration_minutes ?? 30,
+                'receipt_image' => $a->payment->receipt_image ?? $a->payment->receipt_url ?? null,
                 'appointment_date' => $a->appointment_date,
                 'appointment_time' => substr((string) $a->appointment_time, 0, 5),
-                'status' => $a->status?->value ?? $a->status,
-                'payment_status' => $a->payment?->status ?? 'awaiting_verification',
+                'status' => $a->status->value ?? $a->status,
+                'payment_status' => $a->payment->status ?? 'awaiting_verification',
             ]);
 
         return [

@@ -19,8 +19,8 @@ class AppointmentResource extends JsonResource
         $userMediaUrl = app(UserMediaUrl::class);
         $service = $this->service;
         $barber = $this->barber;
-        $statusVal = $this->status?->value ?? $this->status;
-        $sourceVal = $this->source?->value ?? (is_string($this->source) ? $this->source : 'web');
+        $statusVal = $this->status->value ?? $this->status;
+        $sourceVal = $this->source->value ?? (is_string($this->source) ? $this->source : 'web');
         $sourceLabel = $this->source instanceof AppointmentSource ? $this->source->label() : (match ($sourceVal) {
             'app' => 'Mobile App',
             'walk_in' => 'Walk-In',
@@ -31,9 +31,9 @@ class AppointmentResource extends JsonResource
             'id' => $this->id,
             'booking_reference' => $this->booking_reference ?? "CC-{$this->id}",
             'customer_id' => $this->customer_id,
-            'client_name' => $this->client_name ?: ($this->customer?->name ?? 'Client'),
-            'client_phone' => $this->client_phone ?: ($this->customer?->phone ?? 'N/A'),
-            'client_email' => $this->client_email ?: ($this->customer?->email ?? ''),
+            'client_name' => $this->client_name ?: ($this->customer->name ?? 'Client'),
+            'client_phone' => $this->client_phone ?: ($this->customer->phone ?? 'N/A'),
+            'client_email' => $this->client_email ?: ($this->customer->email ?? ''),
             'appointment_date' => Carbon::parse($this->appointment_date)->toDateString(),
             'start_time' => substr((string) $this->appointment_time, 0, 5),
             'appointment_time' => substr((string) $this->appointment_time, 0, 5),
@@ -46,12 +46,12 @@ class AppointmentResource extends JsonResource
             'verification_code' => $this->verification_code,
             'payment_status' => $this->deposit_paid ? 'paid' : 'pending',
             'deposit_paid' => (bool) $this->deposit_paid,
-            'total_duration_minutes' => (int) ($this->total_duration_minutes ?? $service?->duration_minutes ?? 30),
-            'subtotal' => (float) ($this->total_price ?? $this->total_amount ?? $service?->price ?? 0),
+            'total_duration_minutes' => (int) ($this->total_duration_minutes ?? $service->duration_minutes ?? 30),
+            'subtotal' => (float) ($this->total_price ?? $this->total_amount ?? $service->price ?? 0),
             'home_service_surcharge' => (float) ($this->travel_fee ?? 0),
             'discount_amount' => (float) ($this->discount_amount ?? 0),
-            'grand_total' => (float) ($this->grand_total ?? $this->total_price ?? $service?->price ?? 0),
-            'total_price' => (float) ($this->total_price ?? $this->grand_total ?? $service?->price ?? 0),
+            'grand_total' => (float) ($this->grand_total ?? $this->total_price ?? $service->price ?? 0),
+            'total_price' => (float) ($this->total_price ?? $this->grand_total ?? $service->price ?? 0),
             'notes' => $this->notes,
             'customer' => $this->customer ? [
                 'id' => $this->customer->id,
@@ -66,12 +66,12 @@ class AppointmentResource extends JsonResource
                 'name' => $service->name,
                 'price' => (float) $service->price,
                 'duration_minutes' => (int) $service->duration_minutes,
-                'category' => $service->category?->name ?? 'Grooming',
+                'category' => $service->category->name ?? 'Grooming',
             ] : null,
             'barber' => $barber ? [
                 'id' => $barber->id,
-                'name' => $barber->user?->name ?? 'Master Barber',
-                'username' => $barber->user?->username ?? 'barber',
+                'name' => $barber->user->name ?? 'Master Barber',
+                'username' => $barber->user->username ?? 'barber',
                 'rating' => (float) ($barber->rating ?? 5.0),
                 'chair_status' => $barber->chair_status ?? 'free',
             ] : null,
