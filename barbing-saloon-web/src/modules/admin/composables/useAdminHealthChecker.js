@@ -2,7 +2,6 @@ import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import client from '@/shared/api/client'
 import { useToast } from '@/core/composables/useToast'
 import {
-  HeartIcon,
   ServerStackIcon,
   CircleStackIcon,
   CpuChipIcon,
@@ -11,24 +10,49 @@ import {
   CreditCardIcon,
   QueueListIcon,
   ShieldCheckIcon,
-  ArrowPathIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
   ClockIcon,
   SignalIcon,
   BoltIcon,
-  BeakerIcon,
-  PlayIcon,
   InformationCircleIcon,
   ExclamationCircleIcon,
-  WrenchScrewdriverIcon,
 } from '@heroicons/vue/24/outline'
+
+const STATUS_COLOR_MAP = {
+  optimal: 'text-emerald-400',
+  healthy: 'text-emerald-400',
+  operational: 'text-emerald-400',
+  connected: 'text-emerald-400',
+  configured: 'text-emerald-400',
+  attention: 'text-amber-400',
+  warning: 'text-amber-400',
+  degraded: 'text-orange-400',
+  sandbox_or_missing: 'text-amber-400',
+  not_configured: 'text-zinc-500',
+  error: 'text-rose-400',
+  disconnected: 'text-rose-400',
+}
+
+const STATUS_BG_MAP = {
+  optimal: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  healthy: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  operational: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  connected: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  configured: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  attention: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+  warning: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+  degraded: 'bg-orange-500/10 border-orange-500/20 text-orange-400',
+  sandbox_or_missing: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+  not_configured: 'bg-zinc-500/10 border-zinc-500/20 text-zinc-400',
+  error: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+  disconnected: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+}
 
 export function useAdminHealthChecker() {
   const toast = useToast()
 
-  // ── State ──
   const overview = ref(null)
   const healthDetail = ref(null)
   const overviewLoading = ref(true)
@@ -39,7 +63,6 @@ export function useAdminHealthChecker() {
   const lastRefreshed = ref(null)
   let refreshInterval = null
 
-  // ── Fetch Data ──
   const fetchOverview = async () => {
     try {
       const res = await client.get('/admin/system/overview')
@@ -67,12 +90,9 @@ export function useAdminHealthChecker() {
     detailLoading.value = true
     await Promise.all([fetchOverview(), fetchHealthDetail()])
     lastRefreshed.value = new Date()
-    if (!silent) {
-      toast.success('System diagnostics telemetry refreshed')
-    }
+    if (!silent) toast.success('System diagnostics telemetry refreshed')
   }
 
-  // ── Self-Test Diagnostics ──
   const runDiagnostic = async (type = 'all') => {
     selfTestRunning.value = true
     selfTestResults.value = null
@@ -92,130 +112,46 @@ export function useAdminHealthChecker() {
     }
   }
 
-  // ── Auto-Refresh Mechanism ──
   const toggleAutoRefresh = () => {
     autoRefresh.value = !autoRefresh.value
     if (autoRefresh.value) {
       refreshInterval = setInterval(() => refreshAll(true), 30000)
       toast.success('Live telemetry enabled (30s interval)')
     } else {
-      if (refreshInterval) {
-        clearInterval(refreshInterval)
-        refreshInterval = null
-      }
+      if (refreshInterval) clearInterval(refreshInterval)
+      refreshInterval = null
       toast.info('Live telemetry paused')
     }
   }
 
-  // ── Status Visual Helpers ──
-  const statusColor = (status) => {
-    const map = {
-      optimal: 'text-emerald-400',
-      healthy: 'text-emerald-400',
-      operational: 'text-emerald-400',
-      connected: 'text-emerald-400',
-      configured: 'text-emerald-400',
-      attention: 'text-amber-400',
-      warning: 'text-amber-400',
-      degraded: 'text-orange-400',
-      sandbox_or_missing: 'text-amber-400',
-      not_configured: 'text-zinc-500',
-      error: 'text-rose-400',
-      disconnected: 'text-rose-400',
-    }
-    return map[status] || 'text-zinc-400'
-  }
-
-  const statusBg = (status) => {
-    const map = {
-      optimal: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      healthy: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      operational: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      connected: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      configured: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      attention: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-      warning: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-      degraded: 'bg-orange-500/10 border-orange-500/20 text-orange-400',
-      sandbox_or_missing: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-      not_configured: 'bg-zinc-500/10 border-zinc-500/20 text-zinc-400',
-      error: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
-      disconnected: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
-    }
-    return map[status] || 'bg-white/[0.03] border-white/[0.08] text-zinc-400'
-  }
-
-  const statusIcon = (status) => {
-    if (['optimal', 'healthy', 'operational', 'connected', 'configured'].includes(status)) return markRaw(CheckCircleIcon)
-    if (['attention', 'warning', 'degraded', 'sandbox_or_missing'].includes(status)) return markRaw(ExclamationTriangleIcon)
-    if (['error', 'disconnected'].includes(status)) return markRaw(XCircleIcon)
+  const statusColor = (s) => STATUS_COLOR_MAP[s] || 'text-zinc-400'
+  const statusBg = (s) => STATUS_BG_MAP[s] || 'bg-white/[0.03] border-white/[0.08] text-zinc-400'
+  const statusIcon = (s) => {
+    if (['optimal', 'healthy', 'operational', 'connected', 'configured'].includes(s)) return markRaw(CheckCircleIcon)
+    if (['attention', 'warning', 'degraded', 'sandbox_or_missing'].includes(s)) return markRaw(ExclamationTriangleIcon)
+    if (['error', 'disconnected'].includes(s)) return markRaw(XCircleIcon)
     return markRaw(InformationCircleIcon)
   }
 
-  const formatTime = (iso) => {
-    if (!iso) return '—'
-    return new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
-  }
+  const formatTime = (iso) => iso ? new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
 
-  // ── Overview KPI Cards ──
   const overviewCards = computed(() => {
     const s = overview.value?.summary || {}
     return [
-      {
-        label: 'Database Core',
-        value: s.database_connected ? 'Connected' : 'Offline',
-        status: s.database_connected ? 'connected' : 'disconnected',
-        icon: markRaw(CircleStackIcon),
-      },
-      {
-        label: 'Open Errors',
-        value: s.open_groups_count ?? '0',
-        status: (s.critical_groups_count > 0) ? 'error' : (s.open_groups_count > 5 ? 'attention' : 'operational'),
-        icon: markRaw(ExclamationCircleIcon),
-      },
-      {
-        label: 'Critical Anomalies',
-        value: s.critical_groups_count ?? '0',
-        status: s.critical_groups_count > 0 ? 'error' : 'operational',
-        icon: markRaw(ShieldCheckIcon),
-      },
-      {
-        label: '5xx Events (24h)',
-        value: s.errors_5xx_count ?? '0',
-        status: (s.errors_5xx_count > 10) ? 'warning' : 'operational',
-        icon: markRaw(BoltIcon),
-      },
-      {
-        label: 'Telemetry Hits (24h)',
-        value: s.events_24h_count ?? '0',
-        status: 'operational',
-        icon: markRaw(SignalIcon),
-      },
-      {
-        label: 'System Snapshots',
-        value: s.backups_count ?? '0',
-        status: (s.backups_count ?? 0) === 0 ? 'warning' : 'operational',
-        icon: markRaw(FolderIcon),
-      },
-      {
-        label: 'Active Sessions',
-        value: s.active_sessions_count ?? '0',
-        status: 'operational',
-        icon: markRaw(QueueListIcon),
-      },
-      {
-        label: 'Latest Snapshot',
-        value: s.latest_backup_time ? formatTime(s.latest_backup_time) : 'None Available',
-        status: s.latest_backup_time ? 'operational' : 'warning',
-        icon: markRaw(ClockIcon),
-      },
+      { label: 'Database Core', value: s.database_connected ? 'Connected' : 'Offline', status: s.database_connected ? 'connected' : 'disconnected', icon: markRaw(CircleStackIcon) },
+      { label: 'Open Errors', value: s.open_groups_count ?? '0', status: (s.critical_groups_count > 0) ? 'error' : (s.open_groups_count > 5 ? 'attention' : 'operational'), icon: markRaw(ExclamationCircleIcon) },
+      { label: 'Critical Anomalies', value: s.critical_groups_count ?? '0', status: s.critical_groups_count > 0 ? 'error' : 'operational', icon: markRaw(ShieldCheckIcon) },
+      { label: '5xx Events (24h)', value: s.errors_5xx_count ?? '0', status: (s.errors_5xx_count > 10) ? 'warning' : 'operational', icon: markRaw(BoltIcon) },
+      { label: 'Telemetry Hits (24h)', value: s.events_24h_count ?? '0', status: 'operational', icon: markRaw(SignalIcon) },
+      { label: 'System Snapshots', value: s.backups_count ?? '0', status: (s.backups_count ?? 0) === 0 ? 'warning' : 'operational', icon: markRaw(FolderIcon) },
+      { label: 'Active Sessions', value: s.active_sessions_count ?? '0', status: 'operational', icon: markRaw(QueueListIcon) },
+      { label: 'Latest Snapshot', value: s.latest_backup_time ? formatTime(s.latest_backup_time) : 'None Available', status: s.latest_backup_time ? 'operational' : 'warning', icon: markRaw(ClockIcon) },
     ]
   })
 
-  // ── Health Detail Cards ──
   const healthCards = computed(() => {
     const c = healthDetail.value?.checks || {}
     const cards = []
-
     if (c.database) {
       cards.push({
         title: 'Database Engine',
@@ -229,7 +165,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.cache) {
       cards.push({
         title: 'Cache & Session Store',
@@ -242,7 +177,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.storage) {
       cards.push({
         title: 'Storage & Disks',
@@ -257,7 +191,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.mail) {
       cards.push({
         title: 'Mail Subsystem',
@@ -272,7 +205,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.payments) {
       cards.push({
         title: 'Payment Gateways',
@@ -286,7 +218,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.queue) {
       cards.push({
         title: 'Asynchronous Queues',
@@ -298,7 +229,6 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     if (c.environment) {
       cards.push({
         title: 'Execution Runtime',
@@ -314,20 +244,13 @@ export function useAdminHealthChecker() {
         ],
       })
     }
-
     return cards
   })
 
-  // ── Lifecycle ──
-  onMounted(() => {
-    refreshAll(true)
-  })
-
+  onMounted(() => refreshAll(true))
   onUnmounted(() => {
-    if (refreshInterval) {
-      clearInterval(refreshInterval)
-      refreshInterval = null
-    }
+    if (refreshInterval) clearInterval(refreshInterval)
+    refreshInterval = null
   })
 
   return {
