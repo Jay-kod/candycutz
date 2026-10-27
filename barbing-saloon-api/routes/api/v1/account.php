@@ -114,7 +114,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/barber/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
-    Route::post('/barber/appointments/walk-in', [AppointmentApiController::class, 'storeWalkIn']);
+    Route::middleware('check.role:barber,admin,super_admin')
+        ->post('/barber/appointments/walk-in', [AppointmentApiController::class, 'storeWalkIn']);
     Route::post('/barber/bookings/{id}/verify-payment', [PaymentApiController::class, 'verifyPayment'])->whereNumber('id');
 
     // Barber Notifications

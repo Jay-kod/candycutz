@@ -145,9 +145,15 @@ it('requires a valid barber_id for walk-in if actor is not a barber (DATA-2 fix)
 it('denies customers access to walk-in booking', function () {
     $customer = User::factory()->customer()->create();
 
-    $this->actingAs($customer)
-        ->postJson('/api/v1/appointments/walk-in', [])
-        ->assertForbidden();
+    foreach ([
+        '/api/v1/appointments/walk-in',
+        '/api/v1/barber/appointments/walk-in',
+        '/api/v1/admin/appointments/walk-in',
+    ] as $route) {
+        $this->actingAs($customer)
+            ->postJson($route, [])
+            ->assertForbidden();
+    }
 });
 
 it('creates an unpaid walk-in only for an authorized barber', function () {
