@@ -12,7 +12,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="grid gap-5 grid-cols-2 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="h-36 rounded-2xl bg-white/[0.03] animate-pulse border border-white/[0.04]"></div>
+        <div v-for="i in 8" :key="i" class="h-36 rounded-2xl bg-[var(--color-border)]/30 animate-pulse border border-[var(--color-border)]"></div>
       </div>
 
       <template v-else>
@@ -73,7 +73,7 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue'; // wait, it was '../layouts/BarberLayout.vue', probably in portals or core
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import ReceiptViewer from '@/core/components/ReceiptViewer.vue';
 
 import BarberWelcomeBanner from '@/features/barber/components/dashboard/BarberWelcomeBanner.vue';

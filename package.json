@@ -9,7 +9,6 @@
     "dev": "start cmd /k \"npm run dev:api\" && start cmd /k \"npm run dev:web\""
   },
   "dependencies": {
-    "dompurify": "^3.4.17",
     "playwright": "^1.61.0"
   }
 }
