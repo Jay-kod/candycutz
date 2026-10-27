@@ -1,5 +1,5 @@
 <template>
-  <div class="relative rounded-2xl p-6 sm:p-8 mb-8 bg-[#0B0F13]/90 border border-white/[0.08] overflow-hidden group shadow-2xl">
+  <div class="relative rounded-2xl p-6 sm:p-8 mb-8 bg-theme-surface border border-theme-border overflow-hidden group shadow-2xl">
     <!-- Ambient Orange Brand Glow -->
     <div class="absolute -top-24 -right-24 w-72 h-72 bg-admin/10 rounded-full blur-[90px] pointer-events-none group-hover:bg-admin/15 transition-all duration-700"></div>
     <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-500/5 rounded-full blur-[90px] pointer-events-none"></div>
@@ -16,19 +16,19 @@
           <span class="h-2 w-2 rounded-full bg-admin animate-pulse"></span>
           <span class="text-[10px] font-bold text-admin tracking-widest uppercase">Front Desk Concierge · Live Intake</span>
         </div>
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-theme-text tracking-tight">
           Walk-In <span class="text-transparent bg-clip-text bg-gradient-to-r from-admin via-amber-400 to-amber-200 font-serif italic">Check-In</span>
         </h1>
-        <p class="text-ivory/50 text-xs sm:text-sm mt-1 max-w-lg">
+        <p class="text-theme-text-muted text-xs sm:text-sm mt-1 max-w-lg">
           Instantly intake walk-in clients, allocate stylist chairs, issue digital tickets, and log realtime revenue.
         </p>
       </div>
 
       <!-- Live Clock & Salon Status Pill -->
       <div class="flex items-center gap-3 shrink-0 self-start md:self-auto">
-        <div class="px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-right">
-          <div class="text-sm font-mono font-bold text-white tracking-wider">{{ liveTime }}</div>
-          <div class="text-[10px] font-mono text-ivory/40 uppercase tracking-wider">{{ liveDate }}</div>
+        <div class="px-4 py-2.5 rounded-xl bg-theme-bg border border-theme-border text-right">
+          <div class="text-sm font-mono font-bold text-theme-text tracking-wider">{{ liveTime }}</div>
+          <div class="text-[10px] font-mono text-theme-text-muted uppercase tracking-wider">{{ liveDate }}</div>
         </div>
 
         <div class="px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-emerald-400 text-xs font-semibold">
@@ -62,4 +62,3 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 </script>
-
