@@ -2,15 +2,15 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8">
+      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-8">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Portfolio</p>
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-              Your <span class="text-gold">Gallery</span> <span class="text-xl text-ivory/50">({{ gallery.length }})</span>
+              Your <span class="text-gold">Gallery</span> <span class="text-xl text-theme-text-muted">({{ gallery.length }})</span>
             </h1>
-            <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
+            <p class="mt-2 max-w-xl text-sm text-theme-text-muted leading-relaxed">
               Showcase your best work. Upload haircut photos that customers can browse and bookmark.
             </p>
           </div>
