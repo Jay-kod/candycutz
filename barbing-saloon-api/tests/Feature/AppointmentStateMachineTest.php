@@ -142,6 +142,32 @@ it('requires a valid barber_id for walk-in if actor is not a barber (DATA-2 fix)
     expect($response->json('error.details.field_errors.barber_id'))->not->toBeNull();
 });
 
+it('denies customers access to walk-in booking', function () {
+    $customer = User::factory()->customer()->create();
+
+    $this->actingAs($customer)
+        ->postJson('/api/v1/appointments/walk-in', [])
+        ->assertForbidden();
+});
+
+it('creates an unpaid walk-in only for an authorized barber', function () {
+    $barberUser = User::factory()->barber()->create();
+    $barber = Barber::factory()->create(['user_id' => $barberUser->id]);
+    $service = Service::factory()->create();
+
+    $response = $this->actingAs($barberUser)
+        ->postJson('/api/v1/appointments/walk-in', [
+            'service_id' => $service->id,
+            'appointment_date' => now()->addDay()->toDateString(),
+            'appointment_time' => '10:00',
+            'client_name' => 'Walk In Guest',
+        ]);
+
+    $response->assertCreated();
+    expect(Appointment::findOrFail($response->json('data.id'))->barber_id)->toBe($barber->id);
+    expect(Appointment::findOrFail($response->json('data.id'))->deposit_paid)->toBeFalse();
+});
+
 it('prevents exact double booking at the database level via active_slot_key (C3 backstop)', function () {
     $barber = Barber::factory()->create();
     $customer1 = User::factory()->customer()->create();

@@ -15,8 +15,8 @@ services:
     container_name: candycutz-nginx
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT:-8000}:80"
-      - "${HTTPS_PORT:-8444}:443"
+      # Bind plaintext HTTP to loopback; a host-level TLS proxy must serve public traffic.
+      - "127.0.0.1:${HTTP_PORT:-8000}:80"
     volumes:
       - ./infrastructure/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./barbing-saloon-web/dist:/var/www/web/dist:ro

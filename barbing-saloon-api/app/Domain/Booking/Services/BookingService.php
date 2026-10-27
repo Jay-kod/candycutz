@@ -271,7 +271,7 @@ class BookingService
                 'travel_fee' => 0.0,
                 'grand_total' => (float) $service->price,
                 'status' => $initialStatus,
-                'deposit_paid' => true,
+                'deposit_paid' => false,
                 'deposit_amount' => (float) $service->price,
                 'notes' => $data->notes ?? 'Walk-in guest',
                 'source' => $source->value,

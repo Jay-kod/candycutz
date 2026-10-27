@@ -11,6 +11,7 @@ use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Enums\UserRole;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\StoreWalkInRequest;
 use App\Http\Requests\UpdateAppointmentStatusRequest;
@@ -142,7 +143,14 @@ class AppointmentApiController
 
     public function storeWalkIn(StoreWalkInRequest $request): JsonResponse
     {
-        $barber = $request->user()->barber;
+        $actor = $request->user();
+        $role = $actor->role instanceof UserRole ? $actor->role->value : (string) $actor->role;
+        $barber = $actor->barber;
+
+        if ($role === UserRole::barber->value && ! $barber) {
+            abort(403);
+        }
+
         $barberId = $barber?->id ?? $request->barber_id;
 
         if (! $barberId) {
@@ -152,7 +160,7 @@ class AppointmentApiController
         }
 
         $appointment = $this->createWalkIn->execute(
-            $request->user(),
+            $actor,
             Barber::findOrFail((int) $barberId),
             BookingData::fromRequest($request)
         );

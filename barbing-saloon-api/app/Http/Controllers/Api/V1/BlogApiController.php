@@ -11,6 +11,7 @@ use App\Http\Resources\BlogPostResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\BlogPost;
 use App\Models\BlogReaction;
+use App\Support\HtmlContentSanitizer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,10 @@ use Illuminate\Support\Str;
 class BlogApiController
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        protected HtmlContentSanitizer $htmlContentSanitizer
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -103,7 +108,7 @@ class BlogApiController
             'is_published' => 'nullable',
         ]);
 
-        $body = $validated['content'] ?? $validated['body'] ?? '';
+        $body = $this->htmlContentSanitizer->sanitize($validated['content'] ?? $validated['body'] ?? '');
         $status = 'draft';
         if (! empty($validated['status'])) {
             $status = $validated['status'];
@@ -156,9 +161,9 @@ class BlogApiController
             $post->excerpt = $validated['excerpt'];
         }
         if (isset($validated['content'])) {
-            $post->body = $validated['content'];
+            $post->body = $this->htmlContentSanitizer->sanitize($validated['content']);
         } elseif (isset($validated['body'])) {
-            $post->body = $validated['body'];
+            $post->body = $this->htmlContentSanitizer->sanitize($validated['body']);
         }
 
         if (isset($validated['status'])) {

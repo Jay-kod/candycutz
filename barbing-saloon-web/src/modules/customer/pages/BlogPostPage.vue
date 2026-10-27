@@ -53,7 +53,7 @@
             <div class="lg:col-span-8 min-w-0">
               <div data-reveal data-reveal-delay="100" class="blog-content text-[var(--color-text-primary)] font-light leading-relaxed">
                 <!-- Render the HTML content safely -->
-                <div v-html="post.content"></div>
+                <div v-html="sanitizedContent"></div>
               </div>
               
               <!-- Reactions & Sharing -->
@@ -129,7 +129,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import { publicApi } from '@/shared/api/old_publicApi';
@@ -137,12 +137,14 @@ import { customerApi } from '@/shared/api/old_customerApi';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { HeartIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
+import { sanitizeBlogContent } from '../utils/sanitizeBlogContent';
 
 const route = useRoute();
 const post = ref(null);
 const recentPosts = ref([]);
 const isLoading = ref(true);
 const error = ref(false);
+const sanitizedContent = computed(() => sanitizeBlogContent(post.value?.content));
 
 const { init: initScrollReveal } = useScrollReveal();
 
