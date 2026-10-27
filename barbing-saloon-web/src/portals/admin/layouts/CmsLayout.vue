@@ -1,9 +1,9 @@
 <template>
   <AdminLayout>
     <div class="pb-12">
-      <RouterView v-slot="{ Component }">
+      <RouterView v-slot="{ Component, route }">
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <component :is="Component" :key="route.fullPath" />
         </transition>
       </RouterView>
     </div>
