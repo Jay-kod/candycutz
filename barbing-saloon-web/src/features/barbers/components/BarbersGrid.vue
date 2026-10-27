@@ -12,19 +12,19 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="rounded-3xl border border-white/[0.08] bg-[#12161C] p-16 flex flex-col items-center justify-center text-center">
-      <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/[0.08] mb-4">
-        <ScissorsIcon class="h-8 w-8 text-white/30" />
+    <div v-else class="rounded-3xl border border-theme-border bg-theme-surface p-16 flex flex-col items-center justify-center text-center">
+      <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-theme-surface border border-theme-border mb-4">
+        <ScissorsIcon class="h-8 w-8 text-theme-text-muted/60" />
       </div>
-      <h3 class="text-lg font-bold text-white mb-1.5">No Barbers Found</h3>
-      <p class="text-xs text-white/40 max-w-sm mx-auto mb-5">
+      <h3 class="text-lg font-bold text-theme-text mb-1.5">No Barbers Found</h3>
+      <p class="text-xs text-theme-text-muted max-w-sm mx-auto mb-5">
         {{ search ? `No stylists match your search "${search}".` : `No staff members found matching the selected filters.` }}
       </p>
       <div class="flex items-center gap-3">
         <button 
           v-if="search || currentFilter !== 'all' || specialtyFilter !== 'all'" 
           @click="$emit('reset-filters')" 
-          class="px-4 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-xs font-semibold text-white hover:bg-white/10 transition-all"
+          class="px-4 py-2 rounded-xl bg-theme-surface border border-theme-border text-xs font-semibold text-theme-text hover:bg-theme-border/50 transition-all"
         >
           Reset Filters
         </button>
