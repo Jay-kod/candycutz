@@ -1,66 +1,77 @@
 <template>
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4 sm:gap-5">
     <!-- Total Codes -->
-    <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-admin/30 hover:bg-black/40">
-      <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-admin/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div class="relative z-10">
-        <div class="flex items-center justify-between mb-3">
-          <div class="h-9 w-9 rounded-xl bg-admin/10 border border-admin/20 flex items-center justify-center">
-            <HashtagIcon class="h-4 w-4 text-admin" />
-          </div>
-          <div class="h-6 w-6 rounded-full bg-white/5 flex items-center justify-center">
-            <ChevronRightIcon class="h-3 w-3 text-white/20" />
-          </div>
+    <div class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:shadow-xl">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-white/50">Total Codes</span>
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 group-hover:scale-105 transition-transform">
+          <HashtagIcon class="h-5 w-5" />
         </div>
-        <p class="font-display text-3xl text-white mb-1">{{ stats.total }}</p>
-        <p class="text-[10px] uppercase tracking-widest text-white/40 font-bold">Total Codes</p>
+      </div>
+      <div class="mt-4">
+        <span class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">
+          {{ Number(stats.total || 0).toLocaleString() }}
+        </span>
+        <p class="mt-1 text-xs text-white/40">Generated overall</p>
       </div>
     </div>
 
     <!-- Verified Today -->
-    <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/30 hover:bg-black/40">
-      <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-emerald-500/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div class="relative z-10">
-        <div class="flex items-center justify-between mb-3">
-          <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <CheckBadgeIcon class="h-4 w-4 text-emerald-400" />
-          </div>
-          <span v-if="stats.verified_today > 0" class="flex h-2 w-2">
-            <span class="animate-ping absolute h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative rounded-full h-2 w-2 bg-emerald-500"></span>
+    <div class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-white/50">Verified Today</span>
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 group-hover:scale-105 transition-transform">
+          <CheckBadgeIcon class="h-5 w-5" />
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-baseline gap-2">
+          <span class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-emerald-400 tabular-nums">
+            {{ Number(stats.verified_today || 0).toLocaleString() }}
+          </span>
+          <span v-if="stats.verified_today > 0" class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
         </div>
-        <p class="font-display text-3xl text-emerald-400 mb-1">{{ stats.verified_today }}</p>
-        <p class="text-[10px] uppercase tracking-widest text-emerald-400/50 font-bold">Verified Today</p>
+        <p class="mt-1 text-xs text-white/40">Redeemed service codes</p>
       </div>
     </div>
 
     <!-- Pending -->
-    <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-amber-500/30 hover:bg-black/40">
-      <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-amber-500/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div class="relative z-10">
-        <div class="flex items-center justify-between mb-3">
-          <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-            <ClockIcon class="h-4 w-4 text-amber-400" />
-          </div>
-          <span v-if="stats.pending > 0" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">{{ stats.pending }} waiting</span>
+    <div class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 backdrop-blur-xl transition-all duration-300 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-white/50">Pending Codes</span>
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 group-hover:scale-105 transition-transform">
+          <ClockIcon class="h-5 w-5" />
         </div>
-        <p class="font-display text-3xl text-amber-400 mb-1">{{ stats.pending }}</p>
-        <p class="text-[10px] uppercase tracking-widest text-amber-400/50 font-bold">Pending</p>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-baseline gap-2">
+          <span class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-amber-400 tabular-nums">
+            {{ Number(stats.pending || 0).toLocaleString() }}
+          </span>
+          <span v-if="stats.pending > 0" class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">
+            Awaiting check-in
+          </span>
+        </div>
+        <p class="mt-1 text-xs text-white/40">Confirmed appointments</p>
       </div>
     </div>
 
     <!-- Expired -->
-    <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-red-500/30 hover:bg-black/40">
-      <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-red-500/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div class="relative z-10">
-        <div class="flex items-center justify-between mb-3">
-          <div class="h-9 w-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <XCircleIcon class="h-4 w-4 text-red-400" />
-          </div>
+    <div class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C]/90 p-5 backdrop-blur-xl transition-all duration-300 hover:border-rose-500/30 hover:shadow-xl hover:shadow-rose-500/5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-white/50">Expired / Void</span>
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 group-hover:scale-105 transition-transform">
+          <XCircleIcon class="h-5 w-5" />
         </div>
-        <p class="font-display text-3xl text-red-400 mb-1">{{ stats.expired }}</p>
-        <p class="text-[10px] uppercase tracking-widest text-red-400/50 font-bold">Expired</p>
+      </div>
+      <div class="mt-4">
+        <span class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-rose-400 tabular-nums">
+          {{ Number(stats.expired || 0).toLocaleString() }}
+        </span>
+        <p class="mt-1 text-xs text-white/40">Past schedule window</p>
       </div>
     </div>
   </div>
@@ -69,7 +80,6 @@
 <script setup>
 import {
   HashtagIcon,
-  ChevronRightIcon,
   CheckBadgeIcon,
   ClockIcon,
   XCircleIcon
@@ -78,7 +88,6 @@ import {
 defineProps({
   stats: {
     type: Object,
-    required: true,
     default: () => ({ total: 0, verified_today: 0, pending: 0, expired: 0 })
   }
 });
