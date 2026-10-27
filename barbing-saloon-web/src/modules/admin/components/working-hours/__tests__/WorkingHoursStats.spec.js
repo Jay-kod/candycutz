@@ -46,3 +46,4 @@ describe('WorkingHoursStats.vue', () => {
     expect(wrapper.text()).toContain('0.0');
   });
 });
+
