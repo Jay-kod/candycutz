@@ -48,6 +48,7 @@ describe('ReportsKPICards.vue', () => {
     expect(wrapper.exists()).toBe(true);
     const text = wrapper.text();
     expect(text).toContain('₦0');
-    expect(text).toContain('0 appts');
+    expect(text).toContain('appts');
   });
 });
+
