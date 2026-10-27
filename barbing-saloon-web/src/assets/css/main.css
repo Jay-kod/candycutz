@@ -6,16 +6,33 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
 @config "../../../tailwind.config.js";
 
-:root,
+:root[data-theme="light"],
 [data-theme="light"],
 .light {
+  /* Theme Variable Contract (Light Mode) */
+  --color-bg-primary: #FAF9F6;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F4F1EA;
+  --color-bg-input: #FFFFFF;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #9CA3AF;
+  --color-border: rgba(0, 0, 0, 0.10);
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-accent: #CC7A00;
+  --color-accent-hover: #B45309;
+  --color-accent-foreground: #FFFFFF;
+  --color-danger: #DC2626;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Existing token compatibility */
   --color-bg: #FAF9F6;
   --color-surface: #FFFFFF;
   --color-surface-subtle: #F4F1EA;
   --color-text: #111827;
   --color-text-muted: #6B7280;
-  --color-accent: #FF9900;
-  --color-accent-hover: #E08500;
   --color-border: #E8E5DF;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
