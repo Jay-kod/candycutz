@@ -154,25 +154,3 @@ const resolveIcon = (iconName) => {
 };
 </script>
 
-<style scoped>
-:global([data-theme="light"]) .features-section {
-  background-color: var(--color-surface, #FFFFFF);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global([data-theme="light"]) .features-section h2 {
-  color: #CC7A00;
-}
-
-:global([data-theme="light"]) .feature-card {
-  background-color: #FFFFFF;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-:global([data-theme="light"]) .feature-card:hover {
-  background-color: #FFFFFF;
-  border-color: rgba(255, 153, 0, 0.5);
-  box-shadow: 0 12px 30px rgba(255, 153, 0, 0.12);
-}
-</style>
