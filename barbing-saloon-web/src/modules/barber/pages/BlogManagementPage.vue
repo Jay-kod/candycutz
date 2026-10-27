@@ -2,7 +2,7 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8">
+      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-card to-theme-surface p-8">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
@@ -10,7 +10,7 @@
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
               Your <span class="text-gold">Blog</span>
             </h1>
-            <p class="mt-2 max-w-xl text-sm text-ivory/50 leading-relaxed">
+            <p class="mt-2 max-w-xl text-sm text-theme-text-muted leading-relaxed">
               Write articles and tips about grooming, styling, and haircare for your audience.
             </p>
           </div>
@@ -31,9 +31,9 @@
 
       <!-- Empty State -->
       <div v-else-if="posts.length === 0" class="rounded-2xl border border-theme-border bg-theme-surface/80 py-20 text-center">
-        <PencilSquareIcon class="mx-auto h-12 w-12 text-ivory/20" />
+        <PencilSquareIcon class="mx-auto h-12 w-12 text-theme-text-muted/40" />
         <h3 class="mt-4 font-display text-xl text-theme-text">No blog posts yet</h3>
-        <p class="mt-2 text-sm text-ivory/50">Start writing to engage with your audience.</p>
+        <p class="mt-2 text-sm text-theme-text-muted">Start writing to engage with your audience.</p>
       </div>
 
       <!-- Posts List -->
@@ -56,10 +56,10 @@
                   <span class="h-1.5 w-1.5 rounded-full" :class="post.is_published == 1 ? 'bg-emerald-400' : 'bg-amber-400'"></span>
                   {{ post.is_published == 1 ? 'Published' : 'Draft' }}
                 </span>
-                <span class="text-xs text-ivory/30">{{ formatDate(post.created_at) }}</span>
+                <span class="text-xs text-theme-text-muted">{{ formatDate(post.created_at) }}</span>
               </div>
               <h3 class="mt-3 font-display text-xl text-theme-text group-hover:text-gold transition-colors line-clamp-1">{{ post.title }}</h3>
-              <p v-if="post.excerpt" class="mt-2 text-sm text-ivory/50 line-clamp-2">{{ post.excerpt }}</p>
+              <p v-if="post.excerpt" class="mt-2 text-sm text-theme-text-muted line-clamp-2">{{ post.excerpt }}</p>
               
               <div class="mt-4 flex items-center gap-4 text-xs font-medium">
                 <div class="flex items-center gap-1.5 text-gold" title="Loves">
@@ -73,14 +73,14 @@
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button @click="openEditor(post)" class="rounded-lg p-2.5 text-ivory/40 hover:bg-gold/10 hover:text-gold transition-colors" title="Edit">
+              <button @click="openEditor(post)" class="rounded-lg p-2.5 text-theme-text-muted hover:bg-gold/10 hover:text-gold transition-colors" title="Edit">
                 <PencilIcon class="h-4 w-4" />
               </button>
-              <button @click="togglePublish(post)" class="rounded-lg p-2.5 text-ivory/40 hover:bg-blue-500/10 hover:text-blue-400 transition-colors" :title="post.is_published == 1 ? 'Unpublish' : 'Publish'">
+              <button @click="togglePublish(post)" class="rounded-lg p-2.5 text-theme-text-muted hover:bg-blue-500/10 hover:text-blue-400 transition-colors" :title="post.is_published == 1 ? 'Unpublish' : 'Publish'">
                 <EyeIcon v-if="post.is_published != 1" class="h-4 w-4" />
                 <EyeSlashIcon v-else class="h-4 w-4" />
               </button>
-              <button @click="deletePost(post.id)" class="rounded-lg p-2.5 text-ivory/40 hover:bg-red-500/10 hover:text-red-400 transition-colors" title="Delete">
+              <button @click="deletePost(post.id)" class="rounded-lg p-2.5 text-theme-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors" title="Delete">
                 <TrashIcon class="h-4 w-4" />
               </button>
             </div>
@@ -177,7 +177,7 @@ onMounted(fetchPosts);
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-border);
   border-radius: 10px;
 }
 </style>

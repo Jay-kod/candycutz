@@ -10,7 +10,7 @@ The active platform comprises the API and web projects. The Expo project is main
 
 ```
 candycutz/
-├── barbing-saloon-api/      # Canonical Laravel 12 Monolith API (/api/v1/*)
+├── barbing-saloon-api/      # Canonical Laravel 12 API (/api/v1/*)
 ├── barbing-saloon-web/      # Vue 3 + Vite Single Page Application
 ├── MOBILE/                  # Standalone Expo / React Native project
 └── docs/                    # Authoritative platform documentation & OpenAPI specs

@@ -3,7 +3,7 @@
     <section class="animate-fade-in max-w-4xl mx-auto space-y-8">
       <!-- Header -->
       <div class="flex items-center justify-between">
-        <button @click="router.push('/barber/blog')" class="flex items-center gap-2 text-ivory/50 hover:text-gold transition-colors text-sm font-medium">
+        <button @click="router.push('/barber/blog')" class="flex items-center gap-2 text-theme-text-muted hover:text-gold transition-colors text-sm font-medium">
           <ArrowLeftIcon class="h-4 w-4" />
           Back to Blog
         </button>
@@ -11,14 +11,14 @@
 
       <div class="rounded-2xl border border-gold/20 bg-theme-surface p-8 shadow-2xl">
         <h1 class="font-display text-3xl text-theme-text mb-2">{{ isEditing ? 'Edit Post' : 'New Post' }}</h1>
-        <p class="text-sm text-ivory/50 mb-8">{{ isEditing ? 'Update your blog post details below.' : 'Create a new blog post for your audience.' }}</p>
+        <p class="text-sm text-theme-text-muted mb-8">{{ isEditing ? 'Update your blog post details below.' : 'Create a new blog post for your audience.' }}</p>
         
         <form @submit.prevent="savePost" class="space-y-8">
           
           <!-- Image Upload Section -->
           <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Featured Image</label>
-            <div class="relative w-full h-64 rounded-2xl border-2 border-dashed border-white/10 bg-black/30 overflow-hidden group hover:border-gold/50 transition-colors cursor-pointer flex items-center justify-center">
+            <label class="text-xs font-semibold uppercase tracking-widest text-theme-text-muted">Featured Image</label>
+            <div class="relative w-full h-64 rounded-2xl border-2 border-dashed border-theme-border bg-theme-bg/60 overflow-hidden group hover:border-gold/50 transition-colors cursor-pointer flex items-center justify-center">
               <input type="file" accept="image/*" @change="onFileSelected" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
               
               <template v-if="previewImage">
@@ -30,7 +30,7 @@
                 </div>
               </template>
               <template v-else>
-                <div class="text-center text-ivory/40 group-hover:text-gold/80 transition-colors pointer-events-none">
+                <div class="text-center text-theme-text-muted group-hover:text-gold/80 transition-colors pointer-events-none">
                   <PhotoIcon class="h-12 w-12 mx-auto mb-3" />
                   <p class="text-sm font-medium">Click to upload featured image</p>
                 </div>
@@ -39,31 +39,31 @@
           </div>
 
           <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Title</label>
-            <input v-model="form.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50" placeholder="e.g. 5 Tips for the Perfect Fade" />
+            <label class="text-xs font-semibold uppercase tracking-widest text-theme-text-muted">Title</label>
+            <input v-model="form.title" type="text" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-theme-bg" placeholder="e.g. 5 Tips for the Perfect Fade" />
           </div>
 
           <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Author / Source (Optional)</label>
-            <input v-model="form.author_display" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50" placeholder="Defaults to your name — or type a custom source" />
+            <label class="text-xs font-semibold uppercase tracking-widest text-theme-text-muted">Author / Source (Optional)</label>
+            <input v-model="form.author_display" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-theme-bg" placeholder="Defaults to your name — or type a custom source" />
           </div>
 
           <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Excerpt</label>
-            <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50 resize-none" placeholder="Brief summary shown in listings..."></textarea>
+            <label class="text-xs font-semibold uppercase tracking-widest text-theme-text-muted">Excerpt</label>
+            <textarea v-model="form.excerpt" rows="2" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-theme-bg resize-none" placeholder="Brief summary shown in listings..."></textarea>
           </div>
 
           <div class="space-y-3">
-            <label class="text-xs font-semibold uppercase tracking-widest text-ivory/50">Content</label>
-            <textarea v-model="form.content" rows="15" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-black/50 resize-y font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
+            <label class="text-xs font-semibold uppercase tracking-widest text-theme-text-muted">Content</label>
+            <textarea v-model="form.content" rows="15" required class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-theme-text placeholder-theme-muted outline-none transition-colors focus:border-gold/50 focus:bg-theme-bg resize-y font-mono text-sm leading-relaxed" placeholder="Write your blog post content here. You can use basic HTML tags for formatting..."></textarea>
           </div>
 
-          <div class="flex items-center gap-3 p-4 rounded-xl border border-white/5 bg-white/5">
+          <div class="flex items-center gap-3 p-4 rounded-xl border border-theme-border bg-theme-surface/50">
             <input v-model="form.is_published" type="checkbox" id="publish" class="h-5 w-5 rounded accent-gold cursor-pointer" />
-            <label for="publish" class="text-sm text-ivory/80 cursor-pointer font-medium select-none">Publish immediately</label>
+            <label for="publish" class="text-sm text-theme-text cursor-pointer font-medium select-none">Publish immediately</label>
           </div>
 
-          <div class="flex gap-4 pt-4 border-t border-white/10">
+          <div class="flex gap-4 pt-4 border-t border-theme-border">
             <button type="submit" :disabled="saving" class="flex-1 rounded-xl bg-gradient-to-r from-gold to-gold-dark py-4 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
               <span v-if="saving" class="h-4 w-4 border-2 border-obsidian border-t-transparent rounded-full animate-spin"></span>
               {{ saving ? 'Saving...' : (isEditing ? 'Update Post' : 'Create Post') }}
