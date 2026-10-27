@@ -47,7 +47,7 @@
           <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
           <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
-          <div class="py-2 px-3 flex items-center justify-between border-y border-white/10 my-1">
+          <div class="py-2 px-3 flex items-center justify-between border-y border-neutral-200/80 dark:border-white/10 my-1">
             <span class="text-xs font-bold uppercase tracking-wider text-theme-muted">Theme</span>
             <ThemeToggleSwitch />
           </div>
