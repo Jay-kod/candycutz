@@ -153,3 +153,4 @@ defineProps({
 
 defineEmits(['update:filterType', 'update:search']);
 </script>
+

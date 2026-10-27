@@ -41,3 +41,4 @@ describe('GateMetricsKPIs.vue', () => {
     expect(text).toContain('Error Rate (4xx / 5xx)');
   });
 });
+

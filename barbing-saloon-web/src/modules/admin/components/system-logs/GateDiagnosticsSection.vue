@@ -184,3 +184,4 @@ defineProps({
 
 defineEmits(['update:hotspotTab']);
 </script>
+
