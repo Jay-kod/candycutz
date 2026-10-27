@@ -104,3 +104,4 @@ const emptyDescription = computed(() => {
   return 'Your salon gallery is currently empty. Upload your best cuts, beard grooming, and shop photography to inspire customers.';
 });
 </script>
+

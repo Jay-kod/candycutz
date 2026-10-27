@@ -42,3 +42,4 @@ describe('AdminGalleryStats.vue', () => {
     expect(wrapper.text()).toContain('0');
   });
 });
+
