@@ -53,3 +53,4 @@ describe('AnalyticsKPICards.vue', () => {
     expect(wrapper.text()).toContain('25% of client base');
   });
 });
+

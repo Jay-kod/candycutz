@@ -77,3 +77,4 @@ const normalizedTrends = computed(() => {
   });
 });
 </script>
+

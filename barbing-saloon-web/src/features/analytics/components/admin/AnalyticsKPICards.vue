@@ -120,3 +120,4 @@ const customerAcquisitionRate = computed(() => {
   return Math.round((newClients / total) * 100);
 });
 </script>
+

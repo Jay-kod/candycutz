@@ -109,3 +109,4 @@ const computeRevenueShare = (revenue) => {
   return Math.round((rev / tot) * 100);
 };
 </script>
+

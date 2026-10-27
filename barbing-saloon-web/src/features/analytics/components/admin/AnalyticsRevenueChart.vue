@@ -152,3 +152,4 @@ const areaPath = computed(() => {
   return `${linePath.value} L ${last.x} 100 L ${first.x} 100 Z`;
 });
 </script>
+

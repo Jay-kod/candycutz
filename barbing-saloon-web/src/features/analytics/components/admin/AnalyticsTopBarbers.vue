@@ -103,3 +103,4 @@ const getInitials = (name) => {
   return String(name).slice(0, 2).toUpperCase();
 };
 </script>
+
