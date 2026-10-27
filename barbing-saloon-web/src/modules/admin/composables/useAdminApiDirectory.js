@@ -32,7 +32,7 @@ export function useAdminApiDirectory() {
         { method: 'GET', path: '/api/v1/blog/{slug}', auth: 'public', description: 'Single article full content & reaction metrics' },
         { method: 'GET', path: '/api/v1/settings', auth: 'public', description: 'Public brand parameters and salon hours' },
         { method: 'GET', path: '/api/v1/working-hours', auth: 'public', description: 'Overview of barber working schedules' },
-        { method: 'GET', path: '/api/v1/feature-flags', auth: 'public', description: 'Active client rollout flags for Web & Mobile' },
+        { method: 'GET', path: '/api/v1/feature-flags', auth: 'public', description: 'Active web client rollout flags' },
       ],
     },
     {
@@ -221,4 +221,3 @@ export function useAdminApiDirectory() {
     resetFilters,
   };
 }
-

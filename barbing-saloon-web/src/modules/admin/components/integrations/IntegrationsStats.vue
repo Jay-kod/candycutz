@@ -91,8 +91,8 @@
         <span class="text-xs text-white/40">OAuth 2.0</span>
       </div>
       <div class="mt-3 flex items-center justify-between text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
-        <span>Android client</span>
-        <span class="font-mono text-white/80 font-medium">{{ stats.googleAndroidConfigured ? 'Active' : 'Unset' }}</span>
+        <span>Web client</span>
+        <span class="font-mono text-white/80 font-medium">{{ stats.googleConfigured ? 'Active' : 'Unset' }}</span>
       </div>
     </div>
 
@@ -115,7 +115,7 @@
             ? 'bg-violet-500/20 text-violet-400 border-violet-500/40' 
             : 'bg-white/5 text-white/40 border-white/10'"
         >
-          <DevicePhoneMobileIcon class="h-4 w-4" />
+          <GlobeAltIcon class="h-4 w-4" />
         </span>
       </div>
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
@@ -128,8 +128,8 @@
         <span class="text-xs text-white/40">Services ID</span>
       </div>
       <div class="mt-3 flex items-center justify-between text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
-        <span>iOS & Web sign-in</span>
-        <span class="text-white/60">Cross-client</span>
+        <span>Browser sign-in</span>
+        <span class="text-white/60">Web client</span>
       </div>
     </div>
   </section>
@@ -139,8 +139,7 @@
 import { 
   CheckBadgeIcon, 
   EnvelopeIcon, 
-  GlobeAltIcon, 
-  DevicePhoneMobileIcon 
+  GlobeAltIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -154,9 +153,7 @@ defineProps({
       mailConfigured: false,
       googleConfigured: false,
       appleConfigured: false,
-      googleAndroidConfigured: false,
     })
   }
 });
 </script>
-

@@ -11,7 +11,6 @@ describe('IntegrationsStats.vue', () => {
       mailConfigured: true,
       googleConfigured: true,
       appleConfigured: true,
-      googleAndroidConfigured: true,
     };
 
     const wrapper = mount(IntegrationsStats, {
@@ -34,7 +33,6 @@ describe('IntegrationsStats.vue', () => {
       mailConfigured: false,
       googleConfigured: true,
       appleConfigured: false,
-      googleAndroidConfigured: false,
     };
 
     const wrapper = mount(IntegrationsStats, {
@@ -47,4 +45,3 @@ describe('IntegrationsStats.vue', () => {
     expect(wrapper.text()).toContain('Credentials required');
   });
 });
-

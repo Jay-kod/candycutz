@@ -4,14 +4,14 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 bg-white/[0.02] border-b border-white/[0.06]">
       <div class="flex items-center gap-3.5">
         <div class="h-11 w-11 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-[0_0_20px_rgba(139,92,246,0.15)]">
-          <DevicePhoneMobileIcon class="h-5 w-5" />
+          <GlobeAltIcon class="h-5 w-5" />
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h2 class="font-display text-lg font-bold text-white tracking-tight">Apple Sign-In</h2>
             <span class="text-[10px] font-mono font-bold text-violet-300 px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20">Services ID</span>
           </div>
-          <p class="text-xs text-white/50 mt-0.5">Allows iOS and web clients to authenticate using Apple ID accounts.</p>
+          <p class="text-xs text-white/50 mt-0.5">Allows web customers to authenticate using Apple ID accounts.</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@
 
 <script setup>
 import { 
-  DevicePhoneMobileIcon, 
+  GlobeAltIcon,
   ArrowPathIcon 
 } from '@heroicons/vue/24/outline';
 
@@ -114,4 +114,3 @@ defineProps({
 
 defineEmits(['save']);
 </script>
-

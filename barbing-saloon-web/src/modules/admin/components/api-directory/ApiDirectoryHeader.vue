@@ -42,7 +42,7 @@
       <div class="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-white/50">
         <span class="font-mono text-white/80 font-medium">{{ currentTime }}</span>
         <span class="text-white/20">•</span>
-        <span class="truncate">Live specification for web, mobile app, and backend micro-integrations.</span>
+        <span class="truncate">Live specification for the web portal and backend integrations.</span>
       </div>
     </div>
 
@@ -145,4 +145,3 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 </script>
-

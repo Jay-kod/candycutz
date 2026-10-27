@@ -35,8 +35,6 @@
           :google-configured="googleConfigured"
           :saving="saving"
           @save="saveIntegrations('Google Sign-In')"
-          @generate-android="generateGoogleAndroidDetails"
-          @copy="copyValue"
         />
 
         <!-- 6. Apple Sign-In Identity Provider Card -->
@@ -77,8 +75,6 @@ const {
   loadSettings,
   saveIntegrations,
   sendTestEmail,
-  generateGoogleAndroidDetails,
-  copyValue,
 } = useAdminIntegrations();
 
 onMounted(() => {

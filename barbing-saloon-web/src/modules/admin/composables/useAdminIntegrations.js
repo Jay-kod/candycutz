@@ -20,10 +20,6 @@ export function useAdminIntegrations() {
     mail_from: '',
     mail_from_name: 'CandyCutz',
     google_client_id: '',
-    google_android_client_id: '',
-    google_android_name: 'CandyCutz Android Debug',
-    google_android_package: 'com.candycutz.app',
-    google_android_sha1: '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25',
     apple_client_id: '',
     apple_team_id: '',
     apple_key_id: '',
@@ -64,7 +60,6 @@ export function useAdminIntegrations() {
       mailConfigured: mailConfigured.value,
       googleConfigured: googleConfigured.value,
       appleConfigured: appleConfigured.value,
-      googleAndroidConfigured: Boolean(form.google_android_client_id?.trim()),
     };
   });
 
@@ -77,10 +72,6 @@ export function useAdminIntegrations() {
     form.mail_from = s.mail_from || '';
     form.mail_from_name = s.mail_from_name || 'CandyCutz';
     form.google_client_id = s.google_client_id || '';
-    form.google_android_client_id = s.google_android_client_id || '';
-    form.google_android_name = s.google_android_name || 'CandyCutz Android Debug';
-    form.google_android_package = s.google_android_package || 'com.candycutz.app';
-    form.google_android_sha1 = s.google_android_sha1 || '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25';
     form.apple_client_id = s.apple_client_id || '';
     form.apple_team_id = s.apple_team_id || '';
     form.apple_key_id = s.apple_key_id || '';
@@ -147,22 +138,6 @@ export function useAdminIntegrations() {
     }
   };
 
-  const generateGoogleAndroidDetails = () => {
-    form.google_android_name = 'CandyCutz Android Debug';
-    form.google_android_package = 'com.candycutz.app';
-    form.google_android_sha1 = '5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25';
-    toast.info('Generated Android OAuth credentials template. Click Save to persist.');
-  };
-
-  const copyValue = async (value, label) => {
-    try {
-      await navigator.clipboard.writeText(value || '');
-      toast.success(`${label} copied to clipboard`);
-    } catch {
-      toast.error(`Could not copy ${label}`);
-    }
-  };
-
   return {
     form,
     loading,
@@ -178,8 +153,5 @@ export function useAdminIntegrations() {
     loadSettings,
     saveIntegrations,
     sendTestEmail,
-    generateGoogleAndroidDetails,
-    copyValue,
   };
 }
-

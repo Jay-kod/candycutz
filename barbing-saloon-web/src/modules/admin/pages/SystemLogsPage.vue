@@ -19,7 +19,6 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   TrashIcon,
-  DevicePhoneMobileIcon,
   GlobeAltIcon,
   BoltIcon,
   ChevronLeftIcon,
@@ -99,7 +98,7 @@ const gateLogs = ref([])
 const gateLogsLoading = ref(true)
 const gatePagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 25 })
 
-const gateClientFilter = ref('all')
+const gateClientFilter = ref('web')
 const gateIsSlow = ref(false)
 const gateBudgetExceeded = ref(false)
 const gateSearch = ref('')
@@ -192,7 +191,6 @@ const getMethodBadgeClass = (method) => {
 
 const getClientBadgeClass = (type) => {
   switch (type) {
-    case 'mobile': return 'text-purple-400 bg-purple-500/10 border-purple-500/20'
     case 'web': return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
     case 'webhook': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
     default: return 'text-gray-400 bg-gray-500/10 border-gray-500/20'
@@ -213,12 +211,11 @@ const formatDateTime = (isoString) => {
 }
 
 const clientDistributionPercent = computed(() => {
-  const dist = gateMetrics.value?.client_distribution || { web: 0, mobile: 0, webhook: 0 }
-  const total = (dist.web || 0) + (dist.mobile || 0) + (dist.webhook || 0)
-  if (total === 0) return { web: 0, mobile: 0, webhook: 0 }
+  const dist = gateMetrics.value?.client_distribution || { web: 0, webhook: 0 }
+  const total = (dist.web || 0) + (dist.webhook || 0)
+  if (total === 0) return { web: 0, webhook: 0 }
   return {
     web: Math.round(((dist.web || 0) / total) * 100),
-    mobile: Math.round(((dist.mobile || 0) / total) * 100),
     webhook: Math.round(((dist.webhook || 0) / total) * 100)
   }
 })
@@ -363,7 +360,7 @@ onMounted(() => {
                 <h3 class="text-sm font-bold uppercase tracking-wider text-ivory/80">Client Ingress Distribution</h3>
                 <span class="text-xs text-ivory/40 font-mono">24h telemetry</span>
               </div>
-              <p class="mt-1 text-xs text-ivory/50">Breakdown of requests handled across mobile app, browser website, and webhooks.</p>
+              <p class="mt-1 text-xs text-ivory/50">Breakdown of requests handled across the browser website and webhooks.</p>
               
               <div class="mt-5 space-y-4">
                 <!-- Web -->
@@ -376,19 +373,6 @@ onMounted(() => {
                   </div>
                   <div class="h-2 w-full rounded-full bg-white/5 overflow-hidden">
                     <div class="h-full bg-blue-500 rounded-full transition-all duration-500" :style="{ width: `${clientDistributionPercent.web}%` }"></div>
-                  </div>
-                </div>
-
-                <!-- Mobile -->
-                <div>
-                  <div class="flex items-center justify-between text-xs mb-1.5">
-                    <span class="flex items-center gap-1.5 text-purple-400 font-medium">
-                      <DevicePhoneMobileIcon class="w-3.5 h-3.5" /> Mobile App
-                    </span>
-                    <span class="font-mono text-ivory/70">{{ gateMetrics?.client_distribution?.mobile ?? 0 }} calls ({{ clientDistributionPercent.mobile }}%)</span>
-                  </div>
-                  <div class="h-2 w-full rounded-full bg-white/5 overflow-hidden">
-                    <div class="h-full bg-purple-500 rounded-full transition-all duration-500" :style="{ width: `${clientDistributionPercent.mobile}%` }"></div>
                   </div>
                 </div>
 
@@ -518,9 +502,7 @@ onMounted(() => {
               <div class="flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/10 px-3 py-2">
                 <FunnelIcon class="h-4 w-4 text-admin/60 shrink-0" />
                 <select v-model="gateClientFilter" class="bg-transparent text-ivory/80 text-xs outline-none cursor-pointer">
-                  <option value="all" class="bg-obsidian">All Clients</option>
                   <option value="web" class="bg-obsidian">Web Portal</option>
-                  <option value="mobile" class="bg-obsidian">Mobile App</option>
                   <option value="webhook" class="bg-obsidian">Webhooks</option>
                 </select>
               </div>
