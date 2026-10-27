@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 
@@ -13,8 +13,8 @@ export function useAdminLegalEditor(props) {
   const title = ref(props.pageTitle || 'Legal Documentation');
   const sections = ref((props.defaultSections || []).map(s => ({ ...s })));
 
-  const titleKey = `${props.settingPrefix}_title`;
-  const sectionsKey = `${props.settingPrefix}_sections`;
+  const titleKey = computed(() => `${props.settingPrefix}_title`);
+  const sectionsKey = computed(() => `${props.settingPrefix}_sections`);
 
   const originalSnapshot = ref('');
 
@@ -57,15 +57,15 @@ export function useAdminLegalEditor(props) {
       const response = await client.get('/admin/settings');
       const data = response.data?.data || {};
 
-      if (typeof data[titleKey] === 'string' && data[titleKey].trim()) {
-        title.value = data[titleKey];
+      if (typeof data[titleKey.value] === 'string' && data[titleKey.value].trim()) {
+        title.value = data[titleKey.value];
       }
 
-      if (data[sectionsKey]) {
+      if (data[sectionsKey.value]) {
         try {
-          const parsed = typeof data[sectionsKey] === 'string'
-            ? JSON.parse(data[sectionsKey])
-            : data[sectionsKey];
+          const parsed = typeof data[sectionsKey.value] === 'string'
+            ? JSON.parse(data[sectionsKey.value])
+            : data[sectionsKey.value];
           if (Array.isArray(parsed) && parsed.length > 0) {
             sections.value = parsed.map(s => ({
               heading: s.heading || '',
@@ -73,7 +73,7 @@ export function useAdminLegalEditor(props) {
             }));
           }
         } catch (e) {
-          console.warn(`Could not parse ${sectionsKey}:`, e);
+          console.warn(`Could not parse ${sectionsKey.value}:`, e);
         }
       }
 
@@ -102,8 +102,8 @@ export function useAdminLegalEditor(props) {
     saving.value = true;
     try {
       const formData = new FormData();
-      formData.append(`settings[${titleKey}]`, title.value.trim());
-      formData.append(`settings[${sectionsKey}]`, JSON.stringify(sections.value));
+      formData.append(`settings[${titleKey.value}]`, title.value.trim());
+      formData.append(`settings[${sectionsKey.value}]`, JSON.stringify(sections.value));
 
       await client.post('/admin/settings', formData);
 
@@ -118,6 +118,12 @@ export function useAdminLegalEditor(props) {
       saving.value = false;
     }
   };
+
+  watch(() => props.settingPrefix, () => {
+    title.value = props.pageTitle || 'Legal Documentation';
+    sections.value = (props.defaultSections || []).map(s => ({ ...s }));
+    fetchContent();
+  });
 
   onMounted(() => {
     fetchContent();
