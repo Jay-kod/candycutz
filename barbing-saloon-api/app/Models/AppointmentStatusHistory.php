@@ -27,6 +27,9 @@ class AppointmentStatusHistory extends Model
         'created_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Appointment, $this>
+     */
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);

@@ -27,7 +27,7 @@ class NotificationDispatcher
         $appointment->loadMissing(['service', 'barber.user', 'customer']);
 
         $serviceName = $appointment->service?->name ?? 'a service';
-        $barberName = $appointment->barber?->user?->name ?? 'your barber';
+        $barberName = $appointment->barber?->user->name ?? 'your barber';
         $customerName = $appointment->customer?->real_name ?? $appointment->customer?->name ?? $appointment->client_name ?? 'Customer';
 
         // Notify customer

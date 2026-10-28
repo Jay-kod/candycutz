@@ -46,6 +46,8 @@ use Illuminate\Support\Str;
  * @property string|null $flagged_reason
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Appointment $appointment
+ * @property-read User|null $customer
  */
 class Payment extends Model
 {
@@ -113,11 +115,17 @@ class Payment extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Appointment, $this>
+     */
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');

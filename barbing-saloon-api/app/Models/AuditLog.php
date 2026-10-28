@@ -14,6 +14,9 @@ class AuditLog extends Model
 
     protected $casts = ['old_value' => 'array', 'new_value' => 'array'];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

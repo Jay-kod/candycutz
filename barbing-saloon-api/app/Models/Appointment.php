@@ -12,6 +12,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property AppointmentStatus $status
+ * @property AppointmentPaymentStatus $payment_status
+ * @property bool $deposit_paid
+ * @property-read User|null $customer
+ * @property-read Barber|null $barber
+ * @property-read Service|null $service
+ * @property-read Payment|null $payment
+ */
 class Appointment extends Model
 {
     use HasFactory, SoftDeletes;
