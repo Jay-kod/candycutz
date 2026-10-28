@@ -24,6 +24,9 @@ class UpdateBarberAccount
             'specialties',
             'instagram_url',
             'experience_years',
+            'bank_name',
+            'account_name',
+            'account_number',
         ]));
         if (! empty($barberData) && $barber) {
             $barber->update($barberData);
