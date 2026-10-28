@@ -105,6 +105,9 @@ class BarberApiController
             'instagram_url' => 'sometimes|string|nullable',
             'avatar' => 'sometimes|image|max:5120',
             'cover_image' => 'sometimes|image|max:5120',
+            'bank_name' => 'sometimes|string|nullable|max:100',
+            'account_name' => 'sometimes|string|nullable|max:100',
+            'account_number' => 'sometimes|string|nullable|max:30',
         ]);
 
         if ($request->hasFile('avatar')) {
