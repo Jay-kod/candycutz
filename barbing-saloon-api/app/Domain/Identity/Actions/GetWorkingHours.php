@@ -16,7 +16,7 @@ class GetWorkingHours
         return $barbers->map(function (Barber $b): array {
             return [
                 'barber_id' => $b->id,
-                'barber_name' => $b->user?->name ?? 'Barber #'.$b->id,
+                'barber_name' => $b->user->name ?? 'Barber #'.$b->id,
                 'hours' => $b->workingHours->map(fn ($h) => [
                     'id' => $h->id,
                     'day_of_week' => $h->day_of_week,

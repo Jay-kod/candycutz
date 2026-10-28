@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_available
  * @property string $chair_status
  * @property-read User $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkingHour> $workingHours
+ * @property-read Collection<int, WorkingHour> $workingHours
  * @property string $status
  * @property string|null $bank_name
  * @property string|null $account_name
