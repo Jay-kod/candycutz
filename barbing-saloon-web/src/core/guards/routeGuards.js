@@ -23,7 +23,7 @@ export function registerRouteGuards(router) {
     if (requiresAuth) {
       // Only await auth readiness when trying to enter protected areas
       if (auth.status === 'booting') {
-        await auth.ready;
+        await auth.bootstrap();
       }
 
       if (!auth.isAuthenticated) {
