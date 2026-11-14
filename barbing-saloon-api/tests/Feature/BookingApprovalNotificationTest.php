@@ -98,6 +98,13 @@ class BookingApprovalNotificationTest extends TestCase
         $resCustomerA = $this->actingAs($customerA)->getJson('/api/v1/notifications');
         $resCustomerA->assertOk();
         $notifsCustomerA = $resCustomerA->json('data');
+        dump('All notifications in DB:', Notification::all(['id', 'recipient_type', 'recipient_id', 'type', 'title', 'message'])->toArray());
+
+        $resCustomerB = $this->actingAs($customerB)->getJson('/api/v1/notifications');
+        $resCustomerB->assertOk();
+        $notifsCustomerB = $resCustomerB->json('data');
+        dump('Customer B notifications:', $notifsCustomerB);
+
         $this->assertCount(1, $notifsCustomerA);
         $this->assertEquals('booking_approved', $notifsCustomerA[0]['type']);
         $this->assertEquals($customerA->id, $notifsCustomerA[0]['recipient_id']);
