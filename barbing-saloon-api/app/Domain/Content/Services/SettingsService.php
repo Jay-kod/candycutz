@@ -61,6 +61,20 @@ class SettingsService
     }
 
     /**
+     * Return settings for a specific group with dedicated cache key.
+     *
+     * @return array<string, mixed>
+     */
+    public function groupSettings(string $group): array
+    {
+        return Cache::remember("settings.group.{$group}", 3600, function () use ($group) {
+            $settings = Setting::where('group', $group)->get();
+
+            return $settings->keyBy('key')->map(fn ($item) => $item->value)->all();
+        });
+    }
+
+    /**
      * Return only public-safe settings (no secrets).
      *
      * @return array<string, mixed>
@@ -68,17 +82,16 @@ class SettingsService
     public function publicSettings(): array
     {
         return Cache::remember('settings.public', 3600, function () {
-            $settings = Setting::whereIn('group', self::PUBLIC_GROUPS)->get();
+            $grouped = [];
+            $flat = [];
 
-            $grouped = $settings
-                ->groupBy('group')
-                ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
-                ->all();
-
-            $flat = $settings
-                ->keyBy('key')
-                ->map(fn ($item) => $item->value)
-                ->all();
+            foreach (self::PUBLIC_GROUPS as $group) {
+                $groupData = $this->groupSettings($group);
+                if (! empty($groupData)) {
+                    $grouped[$group] = $groupData;
+                    $flat = array_merge($flat, $groupData);
+                }
+            }
 
             $merged = array_merge($flat, $grouped);
 
