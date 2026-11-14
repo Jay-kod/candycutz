@@ -226,11 +226,15 @@ export function useAdminServices() {
     );
     if (!ok) return;
 
+    // Optimistic removal
+    const previousServices = [...services.value];
+    services.value = services.value.filter(s => s.id !== service.id);
+
     try {
       await client.delete(`/services/${service.id}`);
       toast.success(`"${service.name}" has been removed`);
-      services.value = services.value.filter(s => s.id !== service.id);
     } catch (err) {
+      services.value = previousServices; // Rollback
       toast.error(err.response?.data?.message || 'Failed to delete service');
     }
   }
