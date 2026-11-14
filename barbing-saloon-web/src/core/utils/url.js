@@ -77,3 +77,19 @@ export function getStorageUrl(path, fallback = '') {
   const cleanPath = path.replace(/^\/+/, '');
   return `${STORAGE_BASE_URL}/${cleanPath}`;
 }
+
+/**
+ * Resolves a thumbnail variant URL for grid cards and previews.
+ * Attempts to load thumb_{basename}.webp if path is a storage upload, falling back to full image.
+ */
+export function getThumbnailUrl(path, fallback = '') {
+  if (!path) return fallback;
+  const fullUrl = getStorageUrl(path, fallback);
+  if (typeof path === 'string' && path.includes('.webp') && !path.includes('thumb_')) {
+    const parts = fullUrl.split('/');
+    const filename = parts.pop();
+    parts.push(`thumb_${filename}`);
+    return parts.join('/');
+  }
+  return fullUrl;
+}

@@ -25,12 +25,18 @@ class Setting extends Model
             }
         });
 
-        static::saved(function () {
+        static::saved(function (self $setting) {
+            if (! empty($setting->group)) {
+                \Illuminate\Support\Facades\Cache::forget("settings.group.{$setting->group}");
+            }
             \Illuminate\Support\Facades\Cache::forget('settings.public');
             \Illuminate\Support\Facades\Cache::forget('settings.all');
         });
 
-        static::deleted(function () {
+        static::deleted(function (self $setting) {
+            if (! empty($setting->group)) {
+                \Illuminate\Support\Facades\Cache::forget("settings.group.{$setting->group}");
+            }
             \Illuminate\Support\Facades\Cache::forget('settings.public');
             \Illuminate\Support\Facades\Cache::forget('settings.all');
         });
