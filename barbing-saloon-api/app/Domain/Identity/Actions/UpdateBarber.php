@@ -30,7 +30,8 @@ class UpdateBarber
             $barberUpdates['bio'] = $data['bio'];
         }
         if (isset($data['experience_years'])) {
-            $barberUpdates['years_experience'] = $data['experience_years'];
+            $barberUpdates['years_experience'] = (int) $data['experience_years'];
+            $barberUpdates['experience_years'] = (int) $data['experience_years'];
         }
         if (isset($data['status'])) {
             $barberUpdates['status'] = $data['status'];
