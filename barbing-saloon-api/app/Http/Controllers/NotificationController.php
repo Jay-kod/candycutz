@@ -26,6 +26,48 @@ class NotificationController
     }
 
     /**
+     * Build an authoritative query scoped strictly to the authenticated user.
+     * Prevents broadcast leakage of private appointment/payment lifecycle events
+     * to unrelated customers, and eliminates IDOR vulnerability in read/delete actions.
+     */
+    private function getScopedQuery(User $user): \Illuminate\Database\Eloquent\Builder
+    {
+        $role = $this->getUserRoleString($user);
+        $isAdmin = in_array($role, ['admin', 'super_admin'], true);
+
+        // Broadcast types permitted for this user's role
+        $broadcastRecipients = match ($role) {
+            'admin', 'super_admin' => ['all', 'all_admins', 'admin'],
+            'barber' => ['all', 'all_barbers'],
+            default => ['all', 'all_customers'],
+        };
+
+        return Notification::query()
+            ->where(function ($q) use ($user, $isAdmin, $broadcastRecipients) {
+                // 1. Direct personal notifications explicitly targeted to this user ID
+                $q->where('recipient_id', $user->id);
+
+                // 2. Broadcast notifications (recipient_id IS NULL)
+                if ($isAdmin) {
+                    // Admins see shop alert broadcasts (all_admins) and system announcements
+                    $q->orWhere(function ($sub) use ($broadcastRecipients) {
+                        $sub->whereNull('recipient_id')
+                            ->whereIn('recipient_type', $broadcastRecipients);
+                    });
+                } else {
+                    // Customers and Barbers can ONLY see general system broadcasts, NEVER appointment or payment updates
+                    $q->orWhere(function ($sub) use ($broadcastRecipients) {
+                        $sub->whereNull('recipient_id')
+                            ->whereIn('recipient_type', $broadcastRecipients)
+                            ->where('type', 'not like', 'booking_%')
+                            ->where('type', 'not like', 'payment_%')
+                            ->whereNotIn('type', ['booking', 'payment']);
+                    });
+                }
+            });
+    }
+
+    /**
      * Get all notifications for the authenticated user
      */
     public function index(Request $request): JsonResponse
@@ -36,33 +78,7 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $role = $this->getUserRoleString($user);
-
-        $broadcastTypes = [
-            'all',
-            'all_'.$role,
-            'all_'.$role.'s',
-            $role,
-        ];
-
-        // Specific aliases for common pluralizations
-        if ($role === 'customer') {
-            $broadcastTypes[] = 'all_customers';
-        } elseif ($role === 'barber') {
-            $broadcastTypes[] = 'all_barbers';
-        } elseif ($role === 'admin' || $role === 'super_admin') {
-            $broadcastTypes[] = 'all_admins';
-            $broadcastTypes[] = 'admin';
-        }
-
-        $query = Notification::query()
-            ->where(function ($q) use ($user, $broadcastTypes) {
-                $q->where('recipient_id', $user->id)
-                    ->orWhere(function ($sub) use ($broadcastTypes) {
-                        $sub->whereIn('recipient_type', $broadcastTypes)
-                            ->whereNull('recipient_id');
-                    });
-            });
+        $query = $this->getScopedQuery($user);
 
         // Optional filter by notification type (e.g. 'booking', 'payment', 'system_update')
         if ($request->has('type') && $request->filled('type') && $request->query('type') !== 'all') {
@@ -101,27 +117,8 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $role = $this->getUserRoleString($user);
-        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
-
-        if ($role === 'customer') {
-            $broadcastTypes[] = 'all_customers';
-        } elseif ($role === 'barber') {
-            $broadcastTypes[] = 'all_barbers';
-        } elseif ($role === 'admin' || $role === 'super_admin') {
-            $broadcastTypes[] = 'all_admins';
-            $broadcastTypes[] = 'admin';
-        }
-
-        $count = Notification::query()
+        $count = $this->getScopedQuery($user)
             ->where('is_read', false)
-            ->where(function ($q) use ($user, $broadcastTypes) {
-                $q->where('recipient_id', $user->id)
-                    ->orWhere(function ($sub) use ($broadcastTypes) {
-                        $sub->whereIn('recipient_type', $broadcastTypes)
-                            ->whereNull('recipient_id');
-                    });
-            })
             ->count();
 
         return response()->json([
@@ -141,6 +138,8 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
+        $role = $this->getUserRoleString($user);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'message' => 'required|string',
@@ -150,10 +149,21 @@ class NotificationController
             'related_entity_id' => 'nullable|integer',
         ]);
 
+        $recipientId = $validated['recipient_id'] ?? null;
+        $recipientType = $validated['recipient_type'] ?? 'all_customers';
+
+        // Authorization: Only admins and barbers can create broadcast notifications
+        if ($recipientId === null && ! in_array($role, ['admin', 'super_admin', 'barber'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to send broadcast notifications',
+            ], 403);
+        }
+
         $notification = Notification::create([
             'sender_id' => $user->id,
-            'recipient_type' => $validated['recipient_type'] ?? 'all_customers',
-            'recipient_id' => $validated['recipient_id'] ?? null,
+            'recipient_type' => $recipientType,
+            'recipient_id' => $recipientId,
             'type' => $validated['type'] ?? 'system_update',
             'title' => $validated['title'],
             'message' => $validated['message'],
@@ -181,14 +191,9 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $role = $this->getUserRoleString($user);
-        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
-
-        $notification = Notification::where('id', $id)
-            ->where(function ($query) use ($user, $broadcastTypes) {
-                $query->where('recipient_id', $user->id)
-                    ->orWhereIn('recipient_type', $broadcastTypes);
-            })->first();
+        $notification = $this->getScopedQuery($user)
+            ->where('id', $id)
+            ->first();
 
         if (! $notification) {
             return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
@@ -213,26 +218,8 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $role = $this->getUserRoleString($user);
-        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
-
-        if ($role === 'customer') {
-            $broadcastTypes[] = 'all_customers';
-        } elseif ($role === 'barber') {
-            $broadcastTypes[] = 'all_barbers';
-        } elseif ($role === 'admin' || $role === 'super_admin') {
-            $broadcastTypes[] = 'all_admins';
-            $broadcastTypes[] = 'admin';
-        }
-
-        Notification::where('is_read', false)
-            ->where(function ($q) use ($user, $broadcastTypes) {
-                $q->where('recipient_id', $user->id)
-                    ->orWhere(function ($sub) use ($broadcastTypes) {
-                        $sub->whereIn('recipient_type', $broadcastTypes)
-                            ->whereNull('recipient_id');
-                    });
-            })
+        $this->getScopedQuery($user)
+            ->where('is_read', false)
             ->update(['is_read' => true]);
 
         return response()->json([
@@ -252,14 +239,9 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        $role = $this->getUserRoleString($user);
-        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
-
-        $notification = Notification::where('id', $id)
-            ->where(function ($query) use ($user, $broadcastTypes) {
-                $query->where('recipient_id', $user->id)
-                    ->orWhereIn('recipient_type', $broadcastTypes);
-            })->first();
+        $notification = $this->getScopedQuery($user)
+            ->where('id', $id)
+            ->first();
 
         if (! $notification) {
             return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
