@@ -22,31 +22,79 @@ class SecureImageUpload
             || strtolower($file->getClientOriginalExtension()) === 'ico';
 
         $realPath = $file->getRealPath();
-        $isReadable = $realPath && @file_exists($realPath) && @is_readable($realPath);
+        $rawContents = $realPath ? @file_get_contents($realPath) : null;
+        $canReadContents = is_string($rawContents) && strlen($rawContents) > 0;
 
-        // Process through Intervention Image if available, GD extension loaded, and not an ICO file
-        if (! $isIco && class_exists(ImageManager::class) && extension_loaded('gd') && $isReadable) {
-            try {
-                $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver);
-                $image = $manager->read($realPath);
-                $encoded = $image->toWebp(90);
-                $filename = Str::random(40).'.webp';
-                $path = trim($directory, '/').'/'.$filename;
-                Storage::disk($disk)->put($path, (string) $encoded);
+        // Process through GD auto-WebP pipeline if GD extension loaded, imagewebp available, and not an ICO file
+        if (! $isIco && extension_loaded('gd') && function_exists('imagewebp') && $canReadContents) {
+            $img = @imagecreatefromstring($rawContents);
+            if ($img !== false) {
+                try {
+                    $width = imagesx($img);
+                    $height = imagesy($img);
 
-                if (! app()->runningUnitTests()) {
-                    $publicStoragePath = public_path('storage/'.$path);
-                    if (! file_exists($publicStoragePath)) {
-                        @mkdir(dirname($publicStoragePath), 0755, true);
-                        @file_put_contents($publicStoragePath, (string) $encoded);
+                    imagealphablending($img, false);
+                    imagesavealpha($img, true);
+
+                    // Scale down primary image if exceeding 1920px max dimension
+                    if ($width > 1920 || $height > 1920) {
+                        $scale = min(1920 / $width, 1920 / $height);
+                        $newWidth = (int) round($width * $scale);
+                        $newHeight = (int) round($height * $scale);
+                        $scaled = imagescale($img, $newWidth, $newHeight);
+                        if ($scaled !== false) {
+                            imagedestroy($img);
+                            $img = $scaled;
+                            imagealphablending($img, false);
+                            imagesavealpha($img, true);
+                        }
+                    }
+
+                    // Encode primary image to WebP (quality 82)
+                    ob_start();
+                    imagewebp($img, null, 82);
+                    $encodedMain = ob_get_clean();
+
+                    // Generate responsive companion thumbnail (480px width)
+                    $thumbWidth = min(480, imagesx($img));
+                    $thumbHeight = (int) round(imagesy($img) * ($thumbWidth / imagesx($img)));
+                    $thumbImg = imagescale($img, $thumbWidth, $thumbHeight);
+                    if ($thumbImg !== false) {
+                        imagealphablending($thumbImg, false);
+                        imagesavealpha($thumbImg, true);
+                        ob_start();
+                        imagewebp($thumbImg, null, 80);
+                        $encodedThumb = ob_get_clean();
+                        imagedestroy($thumbImg);
+                    } else {
+                        $encodedThumb = $encodedMain;
+                    }
+
+                    imagedestroy($img);
+
+                    $filename = Str::random(40).'.webp';
+                    $path = trim($directory, '/').'/'.$filename;
+                    $thumbPath = trim($directory, '/').'/thumb_'.$filename;
+
+                    Storage::disk($disk)->put($path, (string) $encodedMain);
+                    Storage::disk($disk)->put($thumbPath, (string) $encodedThumb);
+
+                    if (! app()->runningUnitTests()) {
+                        $publicStoragePath = public_path('storage/'.$path);
+                        $publicThumbPath = public_path('storage/'.$thumbPath);
+                        if (! file_exists($publicStoragePath)) {
+                            @mkdir(dirname($publicStoragePath), 0755, true);
+                            @file_put_contents($publicStoragePath, (string) $encodedMain);
+                            @file_put_contents($publicThumbPath, (string) $encodedThumb);
+                        }
+                    }
+
+                    return $path;
+                } catch (\Throwable) {
+                    if (isset($img) && is_resource($img)) {
+                        @imagedestroy($img);
                     }
                 }
-
-                return $path;
-            } catch (\Exception $e) {
-                throw ValidationException::withMessages([
-                    'image' => ['The uploaded file is not a valid image.'],
-                ]);
             }
         }
 
@@ -94,7 +142,7 @@ class SecureImageUpload
     protected function getMimeType(UploadedFile $file): ?string
     {
         $realPath = $file->getRealPath();
-        if ($realPath && @file_exists($realPath) && @is_readable($realPath)) {
+        if ($realPath && @file_exists($realPath)) {
             try {
                 return MimeTypes::getDefault()->guessMimeType($realPath) ?: $file->getMimeType();
             } catch (\Throwable) {
