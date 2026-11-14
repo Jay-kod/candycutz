@@ -176,6 +176,11 @@ export const useAuthStore = defineStore('auth', {
         localStorage.removeItem('candycutz_auth_token');
         localStorage.removeItem('candycutz_cached_user');
       }
+      try {
+        resetNotifications();
+      } catch (e) {
+        // Safe fallback in SSR or unmounted environments
+      }
     },
 
     setIntendedRoute(route) {
