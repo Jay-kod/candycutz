@@ -66,6 +66,24 @@ function showDesktopNotification(title, body) {
   }
 }
 
+/**
+ * Hard reset of all notifications reactive state.
+ * Prevents cross-account state bleeding upon logout or switching users.
+ */
+export function resetNotifications() {
+  notifications.value = []
+  unreadCount.value = 0
+  isLoading.value = false
+  isRefreshing.value = false
+  knownNotificationIds.clear()
+  isInitialized = false
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+  subscriberCount = 0
+}
+
 export function useNotifications() {
   /**
    * Fetch full notifications list.
@@ -74,7 +92,10 @@ export function useNotifications() {
   const fetchNotifications = async ({ silent = false } = {}) => {
     try {
       const token = localStorage.getItem('candycutz_auth_token') || localStorage.getItem('token')
-      if (!token) return
+      if (!token) {
+        resetNotifications()
+        return
+      }
 
       if (silent) {
         isRefreshing.value = true
@@ -223,5 +244,6 @@ export function useNotifications() {
     playChime,
     startPolling,
     stopPolling,
+    resetNotifications,
   }
 }

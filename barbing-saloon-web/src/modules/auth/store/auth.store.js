@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { authApi } from '@/shared/api/old_authApi';
+import { resetNotifications } from '@/core/composables/useNotifications';
 
 function getStoredToken() {
   try {
