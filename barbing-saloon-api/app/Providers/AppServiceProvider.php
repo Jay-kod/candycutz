@@ -71,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register Domain Event → Listener bindings
-        Event::listen(AppointmentStatusChanged::class, HandleAppointmentStatusChanged::class);
+        // Event::listen(AppointmentStatusChanged::class, HandleAppointmentStatusChanged::class);
         Event::listen(BookingCreated::class, HandleBookingCreated::class);
         Event::listen(PaymentConfirmed::class, HandlePaymentConfirmed::class);
         Event::listen(PaymentFailed::class, HandlePaymentFailed::class);
