@@ -11,6 +11,7 @@
           v-model="search"
           :is-refreshing="isRefreshing"
           @refresh="loadCustomers(true)"
+          @add-customer="openCreateModal"
         />
 
         <!-- 2. High-Level KPI Metric Cards -->
@@ -30,7 +31,12 @@
           <!-- Mobile Cards -->
           <CustomersMobileCards
             :customers="filteredCustomers"
+            :action-in-progress="actionInProgress"
             @view-profile="viewProfile"
+            @edit-customer="openEditModal"
+            @toggle-status="toggleStatus"
+            @reset-password="openPasswordModal"
+            @delete-customer="deleteCustomer"
           />
 
           <!-- Desktop Table -->
@@ -38,7 +44,12 @@
             :customers="filteredCustomers"
             :search="search"
             :current-filter="currentFilter"
+            :action-in-progress="actionInProgress"
             @view-profile="viewProfile"
+            @edit-customer="openEditModal"
+            @toggle-status="toggleStatus"
+            @reset-password="openPasswordModal"
+            @delete-customer="deleteCustomer"
             @reset-filters="resetFilters"
           />
         </div>
@@ -51,6 +62,29 @@
       :profile-loading="profileLoading"
       :profile-data="profileData"
       @close="closeProfile"
+      @edit-customer="openEditModal"
+      @toggle-status="toggleStatus"
+      @reset-password="openPasswordModal"
+      @delete-customer="deleteCustomer"
+    />
+
+    <!-- Customer Create/Edit Modal -->
+    <CustomerFormModal
+      :is-open="isCustomerModalOpen"
+      :mode="customerModalMode"
+      :initial-data="customerModalData"
+      :loading="customerModalLoading"
+      @close="closeCustomerModal"
+      @save="saveCustomer"
+    />
+
+    <!-- Reset Password Modal -->
+    <CustomerPasswordModal
+      :is-open="isPasswordModalOpen"
+      :customer="passwordModalCustomer"
+      :loading="passwordModalLoading"
+      @close="closePasswordModal"
+      @save="savePassword"
     />
   </AdminLayout>
 </template>
@@ -65,6 +99,8 @@ import CustomersFilters from '../components/CustomersFilters.vue';
 import CustomersTable from '../components/CustomersTable.vue';
 import CustomersMobileCards from '../components/CustomersMobileCards.vue';
 import CustomerProfilePanel from '../components/CustomerProfilePanel.vue';
+import CustomerFormModal from '../components/CustomerFormModal.vue';
+import CustomerPasswordModal from '../components/CustomerPasswordModal.vue';
 import { useCustomers } from '../composables/useCustomers';
 
 const {
@@ -83,7 +119,24 @@ const {
   profileLoading,
   profileData,
   viewProfile,
-  closeProfile
+  closeProfile,
+  isCustomerModalOpen,
+  customerModalMode,
+  customerModalData,
+  customerModalLoading,
+  openCreateModal,
+  openEditModal,
+  closeCustomerModal,
+  saveCustomer,
+  isPasswordModalOpen,
+  passwordModalCustomer,
+  passwordModalLoading,
+  openPasswordModal,
+  closePasswordModal,
+  savePassword,
+  toggleStatus,
+  deleteCustomer,
+  actionInProgress
 } = useCustomers();
 
 onMounted(() => {

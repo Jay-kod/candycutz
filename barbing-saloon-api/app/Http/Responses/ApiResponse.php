@@ -25,6 +25,9 @@ class ApiResponse
         return RequestContext::generateRequestId();
     }
 
+    /**
+     * @param  array<string, string>  $headers
+     */
     public static function success(mixed $data = null, string $message = 'Success', int $status = 200, array $headers = []): JsonResponse
     {
         $requestId = self::resolveRequestId();
@@ -121,6 +124,10 @@ class ApiResponse
         return response()->json($payload, $status, $headers);
     }
 
+    /**
+     * @param  LengthAwarePaginator<int, mixed>  $data
+     * @param  array<string, string>             $headers
+     */
     public static function paginated(LengthAwarePaginator $data, string $message = 'Success', int $status = 200, array $headers = []): JsonResponse
     {
         $requestId = self::resolveRequestId();

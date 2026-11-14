@@ -66,7 +66,20 @@ class NotificationController
 
         // Optional filter by notification type (e.g. 'booking', 'payment', 'system_update')
         if ($request->has('type') && $request->filled('type') && $request->query('type') !== 'all') {
-            $query->where('type', $request->query('type'));
+            $type = (string) $request->query('type');
+            if ($type === 'booking') {
+                $query->where(function ($q) {
+                    $q->where('type', 'booking')
+                        ->orWhere('type', 'like', 'booking_%');
+                });
+            } elseif ($type === 'payment') {
+                $query->where(function ($q) {
+                    $q->where('type', 'payment')
+                        ->orWhere('type', 'like', 'payment_%');
+                });
+            } else {
+                $query->where('type', $type);
+            }
         }
 
         $notifications = $query->orderBy('created_at', 'desc')->get();
@@ -200,8 +213,26 @@ class NotificationController
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
 
-        Notification::where('recipient_id', $user->id)
-            ->where('is_read', false)
+        $role = $this->getUserRoleString($user);
+        $broadcastTypes = ['all', 'all_'.$role, 'all_'.$role.'s', $role];
+
+        if ($role === 'customer') {
+            $broadcastTypes[] = 'all_customers';
+        } elseif ($role === 'barber') {
+            $broadcastTypes[] = 'all_barbers';
+        } elseif ($role === 'admin' || $role === 'super_admin') {
+            $broadcastTypes[] = 'all_admins';
+            $broadcastTypes[] = 'admin';
+        }
+
+        Notification::where('is_read', false)
+            ->where(function ($q) use ($user, $broadcastTypes) {
+                $q->where('recipient_id', $user->id)
+                    ->orWhere(function ($sub) use ($broadcastTypes) {
+                        $sub->whereIn('recipient_type', $broadcastTypes)
+                            ->whereNull('recipient_id');
+                    });
+            })
             ->update(['is_read' => true]);
 
         return response()->json([

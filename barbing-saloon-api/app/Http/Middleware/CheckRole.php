@@ -20,7 +20,7 @@ class CheckRole
             ], 401);
         }
 
-        $role = $user->role?->value ?? $user->role;
+        $role = $user->role->value ?? $user->role;
 
         // Super Admin has full administrative access to admin endpoints
         if ($role === 'super_admin') {

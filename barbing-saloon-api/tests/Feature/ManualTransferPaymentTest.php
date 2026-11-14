@@ -188,3 +188,45 @@ it('guards against illegal state transitions in state machine', function () {
     expect(fn () => $stateMachine->transition($payment, ManualTransferState::verified))
         ->toThrow(ValidationException::class);
 });
+
+it("loads payment details via customer checkout endpoint", function () {
+    $customer = User::factory()->create(["role" => "customer"]);
+    $appointment = Appointment::factory()->create([
+        "customer_id" => $customer->id,
+        "status" => "pending",
+        "grand_total" => 200000,
+    ]);
+
+    $response = $this->actingAs($customer)->getJson("/api/v1/customer/checkout/{$appointment->id}/payment-details");
+
+    $response->assertStatus(200);
+    $response->assertJsonPath("data.bank_name", "Zenith Bank");
+    $response->assertJsonPath("data.account_name", "Candy Cutz Luxury Grooming");
+    $response->assertJsonPath("data.account_number", "1012345678");
+});
+
+it("uploads receipt via customer checkout endpoint and creates payment transaction record", function () {
+    $customer = User::factory()->create(["role" => "customer"]);
+    $appointment = Appointment::factory()->create([
+        "customer_id" => $customer->id,
+        "status" => "pending",
+        "grand_total" => 150000,
+    ]);
+
+    $file = UploadedFile::fake()->create("my_receipt.png", 500, "image/png");
+
+    $response = $this->actingAs($customer)->postJson("/api/v1/customer/checkout/{$appointment->id}/receipt", [
+        "receipt" => $file,
+    ]);
+
+    $response->assertStatus(200);
+    
+    $payment = Payment::where("appointment_id", $appointment->id)->first();
+    expect($payment)->not->toBeNull();
+    expect($payment->status->value)->toBe("under_review");
+
+    $transactions = PaymentTransaction::where("payment_id", $payment->id)->get();
+    expect($transactions->count())->toBeGreaterThanOrEqual(2);
+    expect($transactions->first()->gateway)->toBe("manual_transfer");
+});
+

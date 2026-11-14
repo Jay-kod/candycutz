@@ -77,6 +77,12 @@ class SuperAdminApiController
     public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, SettingsService $settingsService): JsonResponse
     {
         $settings = $request->validated('settings', []);
+        if (empty($settings)) {
+            $input = $request->except(['hero_image', 'page_hero_image', 'page_hero_page', 'about_teaser_image', 'about_shop_image', 'splash_image', 'onboarding_image', 'login_image', 'logo', 'favicon']);
+            if (! empty($input)) {
+                $settings = $input;
+            }
+        }
 
         if ($request->hasFile('hero_image')) {
             $path = (new SecureImageUpload)->execute($request->file('hero_image'), 'uploads/settings');

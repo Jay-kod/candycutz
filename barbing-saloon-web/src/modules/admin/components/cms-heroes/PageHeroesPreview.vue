@@ -30,6 +30,7 @@
         :fallback-subtitle="form.subtitle || defaultSubtitle"
         :background-image="previewImage"
         :overlay-opacity="form.opacity"
+        :overlay-color="form.color"
         :load-settings="false"
       />
     </div>

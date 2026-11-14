@@ -50,7 +50,7 @@
             <!-- About Section -->
             <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-sm">
               <h2 class="text-2xl font-display text-[var(--color-text-primary)] mb-4">About this Service</h2>
-              <div class="prose prose-invert max-w-none text-[var(--color-text-secondary)] leading-relaxed">
+              <div class="prose dark:prose-invert max-w-none text-[var(--color-text-secondary)] leading-relaxed">
                 <p v-if="service.description">{{ service.description }}</p>
                 <p v-else class="italic opacity-70">No detailed description provided for this service.</p>
               </div>
@@ -93,7 +93,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
-import { publicApi } from '@/shared/api/old_publicApi'
+import client from '@/shared/api/client'
 import ServiceGallerySection from '../components/services/ServiceGallerySection.vue'
 import ServiceBookingCard from '../components/services/ServiceBookingCard.vue'
 import ServiceReviewsSection from '../components/services/ServiceReviewsSection.vue'
@@ -150,13 +150,17 @@ onMounted(async () => {
   loading.value = true
   reviewsLoading.value = true
   try {
-    const res = await publicApi.services()
-    const allServices = res.data.data || []
-    service.value = allServices.find(s => String(s.id) === String(serviceId))
-    
-    // Fetch reviews for this specific service
-    const reviewsRes = await publicApi.testimonials({ service_id: serviceId })
-    reviews.value = reviewsRes.data.data || []
+    const [serviceRes, reviewsRes] = await Promise.all([
+      client.get(`/services/${serviceId}`).catch(async () => {
+        const fallback = await client.get('/services');
+        const list = fallback.data?.data || fallback.data || [];
+        return { data: { data: list.find(s => String(s.id) === String(serviceId)) } };
+      }),
+      client.get('/testimonials', { params: { service_id: serviceId } }).catch(() => ({ data: { data: [] } }))
+    ]);
+
+    service.value = serviceRes.data?.data || serviceRes.data || null;
+    reviews.value = reviewsRes.data?.data || reviewsRes.data || [];
   } catch (err) {
     console.error('Failed to load service data', err)
   } finally {

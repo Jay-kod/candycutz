@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 class DatabaseBackupCommand extends Command
@@ -36,15 +37,46 @@ class DatabaseBackupCommand extends Command
 
         $dir = $this->option('directory') ?: storage_path('app/backups');
         if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            if (! mkdir($dir, 0755, true) && ! is_dir($dir)) {
+                $this->error("Backup directory could not be created: {$dir}");
+
+                return self::FAILURE;
+            }
+        }
+
+        $isWritable = is_writable($dir);
+        if (! $isWritable) {
+            $testFile = $dir.DIRECTORY_SEPARATOR.uniqid('test_', true).'.tmp';
+            if (@file_put_contents($testFile, 'test') !== false) {
+                @unlink($testFile);
+                $isWritable = true;
+            }
+        }
+
+        if (! $isWritable) {
+            $this->error("Backup directory is not writable: {$dir}");
+
+            return self::FAILURE;
         }
 
         $timestamp = date('Y-m-d_His');
         $ext = $connection === 'sqlite' ? 'sqlite' : 'sql';
         $filename = $this->option('filename') ?: "candycutz_backup_{$timestamp}.{$ext}";
+        if (basename($filename) !== $filename || ! preg_match('/\.(sql|sqlite)$/i', $filename)) {
+            $this->error('Backup filename must be a plain .sql or .sqlite filename.');
+
+            return self::FAILURE;
+        }
+
         $destination = $dir.DIRECTORY_SEPARATOR.$filename;
 
         try {
+            if (file_exists($destination)) {
+                $this->error("A backup already exists with this filename: {$filename}");
+
+                return self::FAILURE;
+            }
+
             if ($connection === 'sqlite') {
                 $dbPath = config('database.connections.sqlite.database');
                 if ($dbPath === ':memory:') {
@@ -59,7 +91,11 @@ class DatabaseBackupCommand extends Command
 
                         return self::FAILURE;
                     }
-                    copy($dbPath, $destination);
+                    if (! copy($dbPath, $destination)) {
+                        $this->error("SQLite database copy failed for: {$dbPath}");
+
+                        return self::FAILURE;
+                    }
                 }
             } elseif ($connection === 'mysql') {
                 $host = config('database.connections.mysql.host');
@@ -68,26 +104,32 @@ class DatabaseBackupCommand extends Command
                 $username = config('database.connections.mysql.username');
                 $password = config('database.connections.mysql.password');
 
-                $dumpCmd = sprintf(
-                    'mysqldump --host=%s --port=%s --user=%s %s %s > %s',
-                    escapeshellarg((string) $host),
-                    escapeshellarg((string) $port),
-                    escapeshellarg((string) $username),
-                    $password ? '--password='.escapeshellarg((string) $password) : '',
-                    escapeshellarg((string) $database),
-                    escapeshellarg($destination)
-                );
+                $process = new Process([
+                    'mariadb-dump',
+                    '--host='.(string) $host,
+                    '--port='.(string) $port,
+                    '--user='.(string) $username,
+                    '--single-transaction',
+                    '--quick',
+                    '--routines',
+                    '--triggers',
+                    '--events',
+                    '--hex-blob',
+                    '--default-character-set=utf8mb4',
+                    '--result-file='.$destination,
+                    (string) $database,
+                ]);
+                $process->setTimeout(null);
+                $process->run(null, ['MYSQL_PWD' => (string) $password]);
 
-                $result = null;
-                $output = [];
-                exec($dumpCmd, $output, $result);
-
-                if ($result !== 0 || ! file_exists($destination)) {
-                    // Fallback to PDO table export if mysqldump binary is unavailable
-                    $this->exportPdoDatabase($destination);
+                if (! $process->isSuccessful()) {
+                    $error = trim($process->getErrorOutput() ?: $process->getOutput());
+                    throw new \RuntimeException($error !== '' ? $error : 'mariadb-dump exited unsuccessfully.');
                 }
             } else {
-                $this->exportPdoDatabase($destination);
+                $this->error("Database driver [{$connection}] is not supported for backups.");
+
+                return self::FAILURE;
             }
 
             if (! file_exists($destination) || filesize($destination) === 0) {
@@ -104,6 +146,10 @@ class DatabaseBackupCommand extends Command
 
             return self::SUCCESS;
         } catch (Throwable $e) {
+            if (file_exists($destination)) {
+                unlink($destination);
+            }
+
             $this->error('Backup encountered an error: '.$e->getMessage());
 
             return self::FAILURE;
@@ -159,26 +205,5 @@ class DatabaseBackupCommand extends Command
         } finally {
             $target->exec('PRAGMA foreign_keys = ON;');
         }
-    }
-
-    private function exportPdoDatabase(string $destination): void
-    {
-        $pdo = DB::connection()->getPdo();
-        $tables = DB::connection()->getSchemaBuilder()->getTableListing();
-
-        $sql = "-- CandyCutz Database Snapshot\n-- Generated at: ".date('Y-m-d H:i:s')."\n\n";
-
-        foreach ($tables as $table) {
-            $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
-            foreach ($rows as $row) {
-                $cols = array_keys($row);
-                $colList = implode('`, `', $cols);
-                $values = array_map(fn ($v) => $v === null ? 'NULL' : $pdo->quote((string) $v), array_values($row));
-                $valList = implode(', ', $values);
-                $sql .= "INSERT INTO `{$table}` (`{$colList}`) VALUES ({$valList});\n";
-            }
-        }
-
-        file_put_contents($destination, $sql);
     }
 }

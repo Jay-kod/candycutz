@@ -32,7 +32,9 @@ class GetAvailability
         $timeSlots = [];
 
         if (! empty($validated['barber_id'])) {
-            $barber = Barber::find((int) $validated['barber_id']);
+            $barber = Barber::query()
+                ->activeForBooking()
+                ->find((int) $validated['barber_id']);
             if (! $barber) {
                 return null;
             }
@@ -46,7 +48,7 @@ class GetAvailability
                 ];
             }
         } else {
-            $activeBarbers = Barber::where('is_available', true)->get();
+            $activeBarbers = Barber::query()->activeForBooking()->get();
             $seenTimes = [];
 
             foreach ($activeBarbers as $barber) {

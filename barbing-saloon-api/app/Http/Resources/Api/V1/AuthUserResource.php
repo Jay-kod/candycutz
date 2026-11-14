@@ -23,7 +23,7 @@ class AuthUserResource extends JsonResource
             'real_name' => $this->real_name ?? $this->name,
             'username' => $this->username ?? strtolower(explode('@', $this->email)[0]),
             'email' => $this->email,
-            'role' => $this->role?->value ?? $this->role,
+            'role' => $this->role->value ?? $this->role,
             'avatar' => app(UserMediaUrl::class)->for($this->resource, $this->avatar),
             'cover_image' => app(UserMediaUrl::class)->for($this->resource, $this->cover_image),
             'phone' => $this->phone,

@@ -3,9 +3,8 @@
     class="flex h-screen h-[100dvh] text-[var(--color-text-primary)] font-sans overflow-hidden transition-colors duration-300"
     :class="layoutBgClass"
   >
-    <!-- Decomposed Sidebar -->
+    <!-- Decomposed Responsive Sidebar -->
     <DashboardSidebar
-      ref="sidebarRef"
       :portal-name="portalName"
       :home-route="homeRoute"
       :profile-route="profileRoute"
@@ -24,7 +23,7 @@
 
     <!-- Main Content Area -->
     <div class="flex flex-1 flex-col h-full min-h-0 min-w-0 overflow-hidden">
-      <!-- Decomposed Header -->
+      <!-- Top Navigation Header -->
       <DashboardHeader
         class="shrink-0"
         :current-route-name="currentRouteName"
@@ -44,7 +43,7 @@
         class="flex-1 min-h-0 overflow-y-auto p-3 xs:p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain focus:outline-none transition-colors duration-300"
         :class="mainBgClass"
       >
-        <div class="mx-auto max-w-7xl min-h-full pb-24">
+        <div class="mx-auto max-w-7xl min-h-full pb-20">
           <slot />
         </div>
       </main>
@@ -53,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from '@/core/composables/useTheme';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
@@ -62,6 +61,7 @@ import { useConfirm } from '../composables/useConfirm';
 import DashboardSidebar from './components/DashboardSidebar.vue';
 import DashboardHeader from './components/DashboardHeader.vue';
 import { getStorageUrl } from '@/core/utils/url';
+import { getPortalThemeConfig } from './components/sidebar/portalTheme';
 
 const props = defineProps({
   portalName: { type: String, default: 'Portal' },
@@ -79,28 +79,29 @@ const { confirm } = useConfirm();
 
 const isMobileSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
-const sidebarRef = ref(null);
 
 const { isDark } = useTheme();
 
 const layoutBgClass = computed(() => {
-  if (props.theme === 'superadmin') {
-    return isDark.value ? 'bg-black text-white' : 'bg-white text-slate-900';
-  }
-  if (props.theme === 'admin') {
-    return 'bg-[#010405]';
-  }
-  return 'bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]';
+  return isDark.value ? 'bg-[#0B0F17] text-slate-100' : 'bg-[#FAF9F6] text-slate-900';
 });
 
 const mainBgClass = computed(() => {
-  if (props.theme === 'superadmin') {
-    return isDark.value ? 'bg-black text-white' : 'bg-slate-50 text-slate-900';
-  }
-  if (props.theme === 'admin') {
-    return 'bg-[#010405]';
-  }
-  return 'bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]';
+  return isDark.value ? 'bg-[#0B0F17]' : 'bg-[#FAF9F6]';
+});
+
+const themeClasses = computed(() => {
+  const cfg = getPortalThemeConfig(props.portalName, isDark.value);
+  return {
+    ...cfg,
+    text: isDark.value ? 'text-white' : 'text-slate-900',
+    headerBg: isDark.value ? 'bg-[#0E131F]/90' : 'bg-white/95',
+    headerBorder: isDark.value ? 'border-white/10' : 'border-slate-200',
+    headerTitle: isDark.value ? 'text-white' : 'text-slate-900',
+    iconBtn: isDark.value ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900',
+    userPill: isDark.value ? 'border-white/10 bg-white/5 text-white' : 'border-slate-200 bg-slate-100 text-slate-800',
+    mainBg: mainBgClass.value,
+  };
 });
 
 const isActiveRoute = (to) => {
@@ -120,26 +121,32 @@ const groupedNavItems = computed(() => {
 
   const barberSections = {
     'Operations': ['Dashboard', 'Appointments', 'Walk-In', 'Schedule'],
-    'Services & Portfolio': ['Services', 'Gallery', 'Payments', 'Blog'],
+    'Services & Portfolio': ['Services', 'Gallery', 'Payments', 'Bank & Payments', 'Blog'],
     'Activity & Insights': ['Notifications', 'Analytics', 'Reports'],
   };
 
   const adminSections = {
-    'Overview & Operations': ['Dashboard', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'Operations': ['Dashboard', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
+    'Financials & Revenue': ['Bank & Payments', 'Payments', 'Analytics', 'Reports'],
     'The Website': [
       'Website Overview',
+      'Brand Identity',
       'Home Page',
-      'Homepage CTA',
+      'Features Block',
+      'Page Heroes',
       'About Us Page',
       'Services Page',
       'Gallery Page',
       'Contact Page',
       'Privacy Policy Page',
       'Terms of Service Page',
+      'Legal Stuff Page',
+      'Security Page',
+      'Manage Cookies Page',
       'Account Deletion Page'
     ],
     'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Feedback Inbox', 'Blog'],
-    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Analytics', 'Reports', 'Verifications', 'System Logs', 'Notifications'],
+    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Verifications', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore', 'Notifications'],
   };
 
   const superAdminSections = {
@@ -179,160 +186,6 @@ const groupedNavItems = computed(() => {
   return groups;
 });
 
-const themeClasses = computed(() => {
-  if (props.theme === 'superadmin') {
-    if (isDark.value) {
-      // Night Mode: Complete Red & Jet Black
-      return {
-        text: 'text-red-500',
-        textLight: 'text-red-400',
-        textLight70: 'text-red-400/80',
-        bg: 'bg-red-600',
-        bgRaw: 'bg-red-600',
-        bg10: 'bg-red-500/10',
-        bg15: 'bg-red-500/15',
-        bg20: 'bg-red-500/20',
-        gradient: 'from-red-600 via-red-700 to-red-900',
-        shadowLogo: 'shadow-[0_0_20px_rgba(239,68,68,0.45)]',
-        shadowNavLine: 'shadow-[0_0_12px_rgba(239,68,68,0.9)]',
-        shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(239,68,68,0.3)]',
-        borderHover: 'hover:border-red-500/40',
-        hoverTextLight: 'group-hover:text-red-400',
-        hoverText: 'hover:text-red-500',
-        bodyBg: 'bg-black',
-        surfaceBg: 'bg-black',
-        headerBg: 'bg-black/95',
-        headerBorder: 'border-red-950/60',
-        headerTitle: 'text-white',
-        iconBtn: 'text-red-400/70 hover:text-red-400',
-        userPill: 'border-red-950/60 bg-red-950/30 text-white',
-        mainBg: 'bg-black'
-      };
-    } else {
-      // Light Mode: Complete Green & Crisp White
-      return {
-        text: 'text-emerald-600',
-        textLight: 'text-emerald-500',
-        textLight70: 'text-emerald-700/80',
-        bg: 'bg-emerald-600',
-        bgRaw: 'bg-emerald-600',
-        bg10: 'bg-emerald-500/10',
-        bg15: 'bg-emerald-500/15',
-        bg20: 'bg-emerald-500/20',
-        gradient: 'from-emerald-600 to-green-700',
-        shadowLogo: 'shadow-[0_0_20px_rgba(16,185,129,0.3)]',
-        shadowNavLine: 'shadow-[0_0_12px_rgba(16,185,129,0.8)]',
-        shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(16,185,129,0.25)]',
-        borderHover: 'hover:border-emerald-500/40',
-        hoverTextLight: 'group-hover:text-emerald-600',
-        hoverText: 'hover:text-emerald-600',
-        bodyBg: 'bg-white',
-        surfaceBg: 'bg-white',
-        headerBg: 'bg-white/95',
-        headerBorder: 'border-emerald-100',
-        headerTitle: 'text-slate-900',
-        iconBtn: 'text-emerald-700/70 hover:text-emerald-800',
-        userPill: 'border-emerald-200/60 bg-emerald-50/60 text-slate-800',
-        mainBg: 'bg-slate-50'
-      };
-    }
-  }
-
-  if (props.theme === 'customer') {
-    return {
-      text: 'text-gold',
-      textLight: 'text-gold-light',
-      textLight70: 'text-gold-light/70',
-      bg: 'bg-gold',
-      bgRaw: 'bg-gold',
-      bg10: 'bg-gold/10',
-      bg15: 'bg-gold/15',
-      bg20: 'bg-gold/20',
-      gradient: 'from-gold to-gold-dark',
-      shadowLogo: 'shadow-[0_0_15px_rgba(212,175,55,0.3)]',
-      shadowNavLine: 'shadow-[0_0_10px_rgba(255,153,0,0.5)]',
-      shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]',
-      borderHover: 'hover:border-gold/30',
-      hoverTextLight: 'group-hover:text-gold-light',
-      hoverText: 'hover:text-gold',
-      bodyBg: 'bg-[var(--color-bg-primary)]',
-      surfaceBg: 'bg-[var(--color-bg-secondary)]',
-      headerBg: 'bg-[var(--color-bg-secondary)]/90',
-      mainBg: 'bg-[var(--color-bg-primary)]'
-    };
-  }
-
-  if (props.theme === 'admin') {
-    return {
-      text: 'text-admin',
-      textLight: 'text-admin-light',
-      textLight70: 'text-admin-light/70',
-      bg: 'bg-admin',
-      bgRaw: 'bg-admin',
-      bg10: 'bg-admin/10',
-      bg15: 'bg-admin/15',
-      bg20: 'bg-admin/20',
-      gradient: 'from-admin to-admin-dark',
-      shadowLogo: 'shadow-[0_0_15px_rgba(255,103,0,0.3)]',
-      shadowNavLine: 'shadow-[0_0_10px_rgba(255,103,0,0.5)]',
-      shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(255,103,0,0.2)]',
-      borderHover: 'hover:border-admin/30',
-      hoverTextLight: 'group-hover:text-admin-light',
-      hoverText: 'hover:text-admin',
-      bodyBg: 'bg-[#010405]',
-      surfaceBg: 'bg-[#030608]',
-      headerBg: 'bg-[#010405]/95',
-      mainBg: 'bg-[#010405]'
-    };
-  }
-
-  if (props.theme === 'blue') {
-    return {
-      text: 'text-blue-500',
-      textLight: 'text-blue-400',
-      textLight70: 'text-blue-400/70',
-      bg: 'bg-blue-500',
-      bgRaw: 'bg-blue-500',
-      bg10: 'bg-blue-500/10',
-      bg15: 'bg-blue-500/15',
-      bg20: 'bg-blue-500/20',
-      gradient: 'from-blue-500 to-blue-700',
-      shadowLogo: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]',
-      shadowNavLine: 'shadow-[0_0_10px_rgba(59,130,246,0.5)]',
-      shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)]',
-      borderHover: 'hover:border-blue-500/30',
-      hoverTextLight: 'group-hover:text-blue-400',
-      hoverText: 'hover:text-blue-500',
-      bodyBg: 'bg-[var(--color-bg-primary)]',
-      surfaceBg: 'bg-[var(--color-bg-secondary)]',
-      headerBg: 'bg-[var(--color-bg-secondary)]/90',
-      mainBg: 'bg-[var(--color-bg-primary)]'
-    };
-  }
-
-  return {
-    text: 'text-gold',
-    textLight: 'text-gold-light',
-    textLight70: 'text-gold-light/70',
-    bg: 'bg-gold',
-    bgRaw: 'bg-gold',
-    bg10: 'bg-gold/10',
-    bg15: 'bg-gold/15',
-    bg20: 'bg-gold/20',
-    gradient: 'from-gold to-gold-dark',
-    shadowLogo: 'shadow-[0_0_15px_rgba(212,175,55,0.3)]',
-    shadowNavLine: 'shadow-[0_0_10px_rgba(255,153,0,0.5)]',
-    shadowNavBox: 'shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]',
-    borderHover: 'hover:border-gold/30',
-    hoverTextLight: 'group-hover:text-gold-light',
-    hoverText: 'hover:text-gold',
-    bodyBg: 'bg-[var(--color-bg-primary)]',
-    surfaceBg: 'bg-[var(--color-bg-secondary)]',
-    headerBg: 'bg-[var(--color-bg-secondary)]/90',
-    mainBg: 'bg-[var(--color-bg-primary)]'
-  };
-});
-
 const currentRouteName = computed(() => {
   return route.name ? route.name.toString().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Dashboard';
 });
@@ -348,31 +201,16 @@ const userAvatarUrl = computed(() => {
   return getStorageUrl(avatar);
 });
 
-const scrollToActiveItem = async () => {
-  await nextTick();
-  const activeEl = document.getElementById('active-nav-item');
-  const container = sidebarRef.value?.navContainer;
-  if (activeEl && container) {
-    const scrollPos = activeEl.offsetTop - (container.offsetHeight / 2) + (activeEl.offsetHeight / 2);
-    if (activeEl.offsetTop < container.scrollTop || activeEl.offsetTop + activeEl.offsetHeight > container.scrollTop + container.offsetHeight) {
-      container.scrollTo({
-        top: scrollPos > 0 ? scrollPos : 0,
-        behavior: 'smooth'
-      });
-    }
-  }
-};
-
-onMounted(() => {
-  setTimeout(scrollToActiveItem, 100);
-});
-
-watch(() => route.path, () => {
-  scrollToActiveItem();
-});
-
 const handleLogout = async () => {
-  const ok = await confirm({ title: 'Sign Out', message: 'Are you sure you want to sign out of your account?', confirmText: 'Sign Out' });
+  const ok = await confirm({
+    title: 'Sign Out',
+    message: 'Are you sure you want to sign out of your account?',
+    confirmText: 'Sign Out',
+    resolutionType: 'confirmed',
+    resolutionTitle: 'Signed Out Successfully',
+    resolutionMessage: 'You have been signed out of your account.',
+    resolutionBadgeText: 'SIGNED OUT',
+  });
   if (!ok) return;
 
   try {
@@ -402,20 +240,13 @@ const handleLogout = async () => {
   scrollbar-color: var(--color-accent) var(--color-border-subtle);
 }
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--color-border-subtle);
-  border-radius: 9999px;
+  background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-accent);
-  opacity: 0.5;
+  background-color: rgba(212, 175, 55, 0.3);
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-accent-hover);
 }
 </style>

@@ -60,7 +60,7 @@
           <!-- Service Fee -->
           <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
             <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Amount Due</span>
-            <span class="font-bold text-emerald-400 font-mono text-sm">
+            <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-sm">
               ₦{{ (booking.total_price || booking.grand_total || booking.service?.price || 0).toLocaleString() }}
             </span>
           </div>
@@ -80,9 +80,9 @@
           <!-- Intake Channel -->
           <div class="flex justify-between items-center py-1.5 border-b border-theme-border">
             <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-semibold">Channel</span>
-            <span v-if="booking.booking_type === 'walk_in' || booking.source === 'walk_in'" class="font-bold text-amber-400">Walk-In Intake</span>
-            <span v-else-if="booking.source === 'app'" class="font-bold text-purple-400">Mobile App</span>
-            <span v-else class="font-bold text-sky-400">Website Booking</span>
+            <span v-if="booking.booking_type === 'walk_in' || booking.source === 'walk_in'" class="font-bold text-amber-600 dark:text-amber-400">Walk-In Intake</span>
+            <span v-else-if="booking.source === 'app'" class="font-bold text-purple-600 dark:text-purple-400">Mobile App</span>
+            <span v-else class="font-bold text-sky-600 dark:text-sky-400">Website Booking</span>
           </div>
 
           <!-- Payment Details -->
@@ -175,25 +175,25 @@ function formatDate(dateStr) {
 
 function statusClass(status) {
   const map = {
-    completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    confirmed: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
-    no_show: 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+    completed: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    confirmed: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    pending: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    cancelled: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
+    no_show: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
   };
   return map[status] || 'bg-theme-bg text-theme-text-muted border-theme-border';
 }
 
 function paymentStatusClass(status) {
   const map = {
-    verified: 'text-emerald-400 border-emerald-500/30',
-    paid: 'text-emerald-400 border-emerald-500/30',
-    approved: 'text-emerald-400 border-emerald-500/30',
-    successful: 'text-emerald-400 border-emerald-500/30',
-    awaiting_verification: 'text-amber-400 border-amber-500/30',
-    pending: 'text-amber-400 border-amber-500/30',
-    rejected: 'text-red-400 border-red-500/30',
-    failed: 'text-red-400 border-red-500/30'
+    verified: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    paid: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    approved: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    successful: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    awaiting_verification: 'text-amber-600 dark:text-amber-400 border-amber-500/30',
+    pending: 'text-amber-600 dark:text-amber-400 border-amber-500/30',
+    rejected: 'text-red-600 dark:text-red-400 border-red-500/30',
+    failed: 'text-red-600 dark:text-red-400 border-red-500/30'
   };
   return map[status] || 'text-theme-text-muted border-theme-border';
 }

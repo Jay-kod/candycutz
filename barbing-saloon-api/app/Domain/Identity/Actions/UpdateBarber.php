@@ -25,10 +25,6 @@ class UpdateBarber
         if (! empty($userUpdates) && $barber->user) {
             $barber->user->update($userUpdates);
         }
-        if (isset($data['status']) && $barber->user) {
-            $barber->user->status = $data['status'];
-            $barber->user->save();
-        }
 
         $barberUpdates = [];
         if (isset($data['bio'])) {
@@ -44,6 +40,15 @@ class UpdateBarber
             $barberUpdates['specialties'] = is_string($data['specialties'])
                 ? array_filter(array_map('trim', explode(',', $data['specialties'])))
                 : $data['specialties'];
+        }
+        if (array_key_exists('bank_name', $data)) {
+            $barberUpdates['bank_name'] = $data['bank_name'];
+        }
+        if (array_key_exists('account_name', $data)) {
+            $barberUpdates['account_name'] = $data['account_name'];
+        }
+        if (array_key_exists('account_number', $data)) {
+            $barberUpdates['account_number'] = $data['account_number'];
         }
 
         if (! empty($barberUpdates)) {

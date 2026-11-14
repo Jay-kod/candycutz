@@ -14,7 +14,7 @@ class WebUserSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── 1. Web Accounts ──────────────────────────────────────
+        // ── 1. Web Customer Accounts ──────────────────────────────
 
         // Customer: kefas@customer.com / customer123
         $this->updateOrCreateUser(
@@ -30,6 +30,23 @@ class WebUserSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        // Customer: customer@candycutz.com / customer123
+        $this->updateOrCreateUser(
+            ['email' => 'customer@candycutz.com'],
+            [
+                'name' => 'Chinedu Customer',
+                'real_name' => 'Chinedu Okafor',
+                'username' => 'customer',
+                'password' => Hash::make('customer123'),
+                'role' => UserRole::customer->value,
+                'phone' => '08030000003',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        // ── 2. Web Barber Accounts ───────────────────────────────
 
         // Barber: mark@barber.com / barber123 (with linked active Barber profile)
         $markUser = $this->updateOrCreateUser(
@@ -62,6 +79,39 @@ class WebUserSeeder extends Seeder
             ]
         );
 
+        // Barber: marcus@candycutz.com / barber123
+        $marcusUser = $this->updateOrCreateUser(
+            ['email' => 'marcus@candycutz.com'],
+            [
+                'name' => 'Marcus Vance',
+                'real_name' => 'Marcus Vance',
+                'username' => 'marcus',
+                'password' => Hash::make('barber123'),
+                'role' => UserRole::barber->value,
+                'phone' => '08030000002',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        Barber::updateOrCreate(
+            ['user_id' => $marcusUser->id],
+            [
+                'bio' => 'Lead Stylist & Grooming Director. Master of skin fades, beard sculpting, and VIP styling.',
+                'specialties' => ['fade', 'line-up', 'beard trim', 'executive cut'],
+                'years_experience' => 8,
+                'experience_years' => 8,
+                'is_available' => true,
+                'is_home_service_ready' => true,
+                'chair_status' => 'free',
+                'rating' => 4.95,
+                'total_reviews' => 38,
+                'is_featured' => true,
+            ]
+        );
+
+        // ── 3. Admin Accounts ─────────────────────────────────────
+
         // Admin: webadmin@candycutz.com / admin123
         $this->updateOrCreateUser(
             ['email' => 'webadmin@candycutz.com'],
@@ -76,6 +126,23 @@ class WebUserSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        // Admin: admin@candycutz.com / admin123
+        $this->updateOrCreateUser(
+            ['email' => 'admin@candycutz.com'],
+            [
+                'name' => 'Admin Manager',
+                'real_name' => 'Admin Manager',
+                'username' => 'admin',
+                'password' => Hash::make('admin123'),
+                'role' => UserRole::admin->value,
+                'phone' => '08030000002',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        // ── 4. Super Admin Accounts ───────────────────────────────
 
         // Super Admin: websuperadmin@candycutz.com / superadmin123
         $this->updateOrCreateUser(
@@ -92,7 +159,22 @@ class WebUserSeeder extends Seeder
             ]
         );
 
-        // ── 2. Preserved Mobile App Accounts ──────────────────────
+        // Super Admin: superadmin@candycutz.com / superadmin123
+        $this->updateOrCreateUser(
+            ['email' => 'superadmin@candycutz.com'],
+            [
+                'name' => 'Super Admin',
+                'real_name' => 'Super Admin',
+                'username' => 'superadmin',
+                'password' => Hash::make('superadmin123'),
+                'role' => UserRole::super_admin->value,
+                'phone' => '08030000001',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        // ── 5. Preserved Mobile App Accounts ──────────────────────
 
         // Customer: jay@candycutz.com / customer123
         $this->updateOrCreateUser(
@@ -140,7 +222,7 @@ class WebUserSeeder extends Seeder
             ]
         );
 
-        // ── 3. Designated Mobile Demo Accounts ────────────────────
+        // ── 6. Designated Mobile Demo Accounts ────────────────────
 
         // Customer: fonetestcuz@candycutz.com / customer123
         $this->updateOrCreateUser(
@@ -196,7 +278,10 @@ class WebUserSeeder extends Seeder
         $isActive = $attributes['is_active'];
         unset($attributes['role'], $attributes['status'], $attributes['is_active']);
 
-        $user = User::firstOrNew($identity);
+        $user = User::withTrashed()->firstOrNew($identity);
+        if ($user->trashed()) {
+            $user->restore();
+        }
         $user->fill($attributes);
         $user->role = $role;
         $user->status = $status;

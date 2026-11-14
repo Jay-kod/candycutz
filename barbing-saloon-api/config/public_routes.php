@@ -68,6 +68,8 @@ return [
         // Webhooks & Payment Returns
         'api/v1/payments/webhook',
         'api/v1/payments/return',
+        'api/v1/payments/checkout-data',
+        'api/v1/payments/confirm-transfer',
         'pay/return',
 
         // Infrastructure & Web root

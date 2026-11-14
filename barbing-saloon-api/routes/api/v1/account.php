@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountApiController;
+use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
@@ -88,7 +89,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/barbers/account', [BarberApiController::class, 'account']);
     Route::get('/barber/account', [BarberApiController::class, 'account']);
+    Route::get('/barbers/bank-details', [AdminApiController::class, 'bankDetails']);
+    Route::get('/barber/bank-details', [AdminApiController::class, 'bankDetails']);
     Route::post('/barbers/account', [BarberApiController::class, 'updateAccount']);
+    Route::post('/barber/account', [BarberApiController::class, 'updateAccount']);
     Route::put('/barbers/account', [BarberApiController::class, 'updateAccount']);
     Route::patch('/barbers/account', [BarberApiController::class, 'updateAccount']);
     Route::patch('/barber/account', [BarberApiController::class, 'updateAccount']);
@@ -121,6 +125,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Barber Notifications
     Route::get('/barber/notifications', [NotificationController::class, 'index']);
     Route::post('/barber/notifications', [NotificationController::class, 'store']);
+
+    // Barber Reviews / Testimonials
+    Route::get('/barber/reviews', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barbers/reviews', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barber/testimonials', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barbers/testimonials', [TestimonialApiController::class, 'barberReviews']);
 
     // Barber Services
     Route::get('/barber/services', [ServiceApiController::class, 'index']);

@@ -34,6 +34,8 @@ class GetCustomers
                     'name' => $u->name,
                     'email' => $u->email,
                     'phone' => $u->phone ?? 'N/A',
+                    'is_active' => (bool) $u->is_active,
+                    'status' => $u->status ?? ($u->is_active ? 'active' : 'suspended'),
                     'auth_provider' => $u->auth_provider ?: 'local',
                     'registered_via' => $u->auth_provider && $u->auth_provider !== 'local' ? ucfirst($u->auth_provider) : 'Registration form',
                     'avatar' => $mediaUrl->for($u, $u->avatar),

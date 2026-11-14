@@ -80,13 +80,13 @@ const formatTime = (time) => {
 const getStatusClass = (status) => {
   switch (status) {
     case 'completed':
-      return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
     case 'confirmed':
-      return 'bg-sky-500/10 text-sky-400 border border-sky-500/20';
+      return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20';
     case 'cancelled':
-      return 'bg-red-500/10 text-red-400 border border-red-500/20';
+      return 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20';
     default:
-      return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
   }
 };
 </script>

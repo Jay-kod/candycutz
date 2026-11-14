@@ -17,14 +17,16 @@ class AppointmentSeeder extends Seeder
         $customers = User::where('role', 'customer')->orderBy('id')->get();
         $barbers = Barber::orderBy('id')->get();
         $services = Service::orderBy('id')->get();
+        $verifier = User::whereIn('role', ['admin', 'super_admin'])->first();
 
         if ($customers->isEmpty() || $barbers->isEmpty() || $services->isEmpty()) {
             return;
         }
 
-        // Clean existing test appointments and payments
-        Appointment::withTrashed()->forceDelete();
-        Payment::query()->delete();
+        // Preserve existing user appointments! Only seed baseline sample appointments if none exist
+        if (Appointment::count() >= 5) {
+            return;
+        }
 
         $scheduleOffsets = [
             // Today (4 appointments)
@@ -68,6 +70,15 @@ class AppointmentSeeder extends Seeder
             $isPaid = in_array($slot['status'], ['confirmed', 'completed'], true);
             $date = now()->addDays($slot['days'])->toDateString();
 
+            // Skip if an appointment is already booked for this barber at this exact slot
+            $alreadyBooked = Appointment::where('barber_id', $barber->id)
+                ->where('appointment_date', $date)
+                ->where('appointment_time', $slot['time'])
+                ->exists();
+            if ($alreadyBooked) {
+                continue;
+            }
+
             $appt = Appointment::create([
                 'booking_reference' => 'CC-'.strtoupper(Str::random(8)),
                 'customer_id' => $customer->id,
@@ -100,7 +111,7 @@ class AppointmentSeeder extends Seeder
                     'payment_method' => $slot['type'] === 'walk_in' ? 'cash' : 'card',
                     'transaction_ref' => 'TXN-'.strtoupper(Str::random(10)),
                     'verified_at' => now()->addDays($slot['days']),
-                    'verified_by_user_id' => 1,
+                    'verified_by_user_id' => $verifier?->id,
                 ]);
             }
         }

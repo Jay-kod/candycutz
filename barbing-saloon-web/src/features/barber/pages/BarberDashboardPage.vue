@@ -1,56 +1,49 @@
 <template>
   <BarberLayout>
-    <section class="space-y-8 animate-fade-in">
-      
-      <BarberWelcomeBanner 
-        :currentTime="currentTime"
-        :currentDate="currentDate"
-        :myStatus="myStatus"
-        :formatStatus="formatStatus"
-        @toggle-status="toggleMyStatus"
-      />
-
-      <!-- Loading State -->
-      <div v-if="loading" class="grid gap-5 grid-cols-2 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="h-36 rounded-2xl bg-[var(--color-border)]/30 animate-pulse border border-[var(--color-border)]"></div>
-      </div>
+    <section class="max-w-7xl mx-auto pb-16 pt-4 px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- Loading Skeleton -->
+      <BarberDashboardSkeleton v-if="loading" />
 
       <template v-else>
-        
+        <BarberWelcomeBanner
+          :currentTime="currentTime"
+          :currentDate="currentDate"
+          :myStatus="myStatus"
+          :formatStatus="formatStatus"
+          @toggle-status="toggleMyStatus"
+        />
+
         <BarberKpiGrid :stats="dashboard.stats" />
 
-        <div class="grid gap-6 lg:grid-cols-3">
-          <!-- Left Column (2/3) - Today's Appointments & Payments -->
+        <div class="grid gap-6 lg:grid-cols-3 items-start">
+          <!-- Left Column (2/3) - Today's Appointments & Pending Payments -->
           <div class="lg:col-span-2 space-y-6">
-            
-            <BarberPendingPayments 
-              :payments="dashboard.pending_payments" 
-              @view-receipt="viewReceipt" 
+            <BarberPendingPayments
+              :payments="dashboard.pending_payments"
+              @view-receipt="viewReceipt"
             />
 
-            <BarberTodayAppointments 
-              :appointments="dashboard.today_appointments" 
+            <BarberTodayAppointments
+              :appointments="dashboard.today_appointments"
               @complete="completeAppointment"
               @no-show="markNoShow"
             />
-
           </div>
 
           <!-- Right Column (1/3) - Quick Actions & Progress -->
-          <div class="space-y-6">
-            
-            <BarberQuickActions 
+          <div class="space-y-6 lg:sticky lg:top-8">
+            <BarberQuickActions
               :stats="dashboard.stats"
               :progressWidth="progressWidth"
               :currentDate="currentDate"
               @open-notification="showNotificationModal = true"
             />
-
           </div>
         </div>
       </template>
-      
-      <BroadcastNotificationModal 
+
+      <!-- Broadcast Modal -->
+      <BroadcastNotificationModal
         :show="showNotificationModal"
         :sending="sendingNotification"
         :form="notificationForm"
@@ -59,9 +52,9 @@
       />
 
       <!-- Receipt Viewer Modal -->
-      <ReceiptViewer 
-        v-if="selectedReceipt" 
-        :booking="selectedReceipt" 
+      <ReceiptViewer
+        v-if="selectedReceipt"
+        :booking="selectedReceipt"
         @close="selectedReceipt = null"
         @approve="onPaymentVerified"
         @reject="onPaymentVerified"
@@ -82,16 +75,26 @@ import BarberPendingPayments from '@/features/barber/components/dashboard/Barber
 import BarberTodayAppointments from '@/features/barber/components/dashboard/BarberTodayAppointments.vue';
 import BarberQuickActions from '@/features/barber/components/dashboard/BarberQuickActions.vue';
 import BroadcastNotificationModal from '@/features/barber/components/dashboard/BroadcastNotificationModal.vue';
+import BarberDashboardSkeleton from '@/features/barber/components/dashboard/BarberDashboardSkeleton.vue';
 
-import { useBarberDashboard, useBarberStatus, useBarberNotification } from '@/features/barber/composables/useDashboard';
+import {
+  useBarberDashboard,
+  useBarberStatus,
+  useBarberNotification,
+} from '@/features/barber/composables/useDashboard';
 
 const {
-  dashboard, loading, progressWidth,
-  loadDashboard, completeAppointment, markNoShow
+  dashboard,
+  loading,
+  progressWidth,
+  loadDashboard,
+  completeAppointment,
+  markNoShow,
 } = useBarberDashboard();
 
 const { myStatus, loadMyStatus, formatStatus, toggleMyStatus } = useBarberStatus();
-const { showNotificationModal, sendingNotification, notificationForm, sendNotification } = useBarberNotification();
+const { showNotificationModal, sendingNotification, notificationForm, sendNotification } =
+  useBarberNotification();
 
 const selectedReceipt = ref(null);
 
@@ -101,32 +104,25 @@ let clockInterval = null;
 
 const updateClock = () => {
   const now = new Date();
-  currentTime.value = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-  currentDate.value = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  currentTime.value = now.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  currentDate.value = now.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 };
 
-function viewReceipt(booking) {
-  const mapped = {
-    ...booking,
-    customer: {
-      name: booking.customer_name,
-      email: booking.customer_email,
-      phone: booking.customer_phone
-    },
-    service: {
-      name: booking.service_name,
-      price: booking.price,
-      duration_minutes: booking.duration_minutes
-    },
-    barber: { name: 'You' }
-  };
-  selectedReceipt.value = mapped;
-}
+const viewReceipt = (booking) => {
+  selectedReceipt.value = booking;
+};
 
-function onPaymentVerified() {
+const onPaymentVerified = () => {
   selectedReceipt.value = null;
   loadDashboard();
-}
+};
 
 onMounted(() => {
   updateClock();
@@ -139,20 +135,3 @@ onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
 });
 </script>
-
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

@@ -1,118 +1,133 @@
 <template>
   <CustomerLayout>
-    <section class="animate-fade-in space-y-8">
-      <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-xl">
+    <section class="animate-fade-in space-y-8 pb-12">
+      <!-- Luxury Header Banner -->
+      <div class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-white dark:from-[#12161C] dark:via-[#0E1217] dark:to-[#12161C] p-8 lg:p-10 shadow-2xl">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div class="flex items-center gap-6">
             <!-- Avatar in Header -->
             <div class="relative group cursor-pointer shrink-0" @click="$refs.avatarInput.click()">
-              <div class="h-24 w-24 rounded-full border-2 border-[var(--color-accent)]/40 overflow-hidden shadow-sm transition-all group-hover:border-[var(--color-accent)] group-hover:shadow-md">
+              <div class="h-20 w-20 md:h-24 md:w-24 rounded-2xl border-2 border-[var(--color-accent)]/40 overflow-hidden shadow-lg transition-all group-hover:border-[var(--color-accent)] bg-slate-100 dark:bg-black/40">
                 <img v-if="avatarPreview" :src="avatarPreview" alt="Avatar" class="h-full w-full object-cover" />
                 <div v-else class="h-full w-full bg-[var(--color-accent)]/10 flex items-center justify-center">
                   <span class="text-2xl font-display font-bold text-[var(--color-accent)]">{{ initials }}</span>
                 </div>
               </div>
               <!-- Camera overlay -->
-              <div class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+              <div class="absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <CameraIcon class="w-6 h-6 text-white" />
               </div>
               <!-- Edit badge -->
-              <div class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-[var(--color-accent)] flex items-center justify-center border-2 border-[var(--color-bg-secondary)] shadow-sm">
-                <svg class="w-3.5 h-3.5 text-[var(--color-accent-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
+              <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-lg bg-[var(--color-accent)] flex items-center justify-center border border-white dark:border-black shadow-sm text-white">
+                <PencilSquareIcon class="w-3.5 h-3.5" />
               </div>
             </div>
+
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)]/80 font-medium">Customer Dashboard</p>
-              <h1 class="mt-2 font-display text-3xl lg:text-4xl text-[var(--color-text-primary)]">
-                Your <span class="text-[var(--color-accent)]">Profile</span>
+              <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] font-bold">Personal Account</p>
+              <h1 class="mt-1 font-display text-3xl lg:text-4xl text-slate-900 dark:text-white">
+                Account <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-amber-200">Settings</span>
               </h1>
-              <p class="mt-2 max-w-xl text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                Manage your personal information and view your recent activity.
+              <p class="mt-1.5 max-w-xl text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                Update your contact details, grooming preferences, and review your account activity.
               </p>
             </div>
           </div>
         </div>
-        <!-- Hidden file input -->
         <input ref="avatarInput" type="file" accept="image/*" @change="handleFile" class="hidden" />
       </div>
 
-      <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <form class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-sm" @submit.prevent="submit">
-          <h2 class="font-display text-2xl text-[var(--color-text-primary)]">Personal Info</h2>
+      <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <!-- Personal Info Form -->
+        <form class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl" @submit.prevent="submit">
+          <h2 class="font-display text-xl text-slate-900 dark:text-white pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center gap-2">
+            <UserCircleIcon class="w-5 h-5 text-[var(--color-accent)]" />
+            Personal Details
+          </h2>
 
-          <!-- Avatar Preview Card -->
-          <div v-if="avatarPreview" class="mt-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-4 flex items-center gap-4">
-            <img :src="avatarPreview" alt="Profile picture" class="h-14 w-14 rounded-full object-cover border border-[var(--color-accent)]/30" />
+          <!-- Avatar Preview Row -->
+          <div v-if="avatarPreview" class="mt-5 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.03] p-3.5 flex items-center gap-4">
+            <img :src="avatarPreview" alt="Profile picture" class="h-12 w-12 rounded-xl object-cover border border-[var(--color-accent)]/30" />
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-[var(--color-text-primary)] truncate">{{ form.name || form.username || 'Your photo' }}</p>
-              <p class="text-xs text-[var(--color-text-muted)]">Click the avatar in the header to change your picture</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ form.name || form.username || 'Custom Avatar' }}</p>
+              <p class="text-[11px] text-[var(--color-text-secondary)]">Click avatar to select replacement</p>
             </div>
-            <button type="button" @click="removeAvatar" class="text-xs text-[var(--color-danger)] hover:underline transition-colors px-3 py-1.5 rounded-lg border border-[var(--color-danger)]/20 hover:bg-[var(--color-danger)]/10">
+            <button type="button" @click="removeAvatar" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors px-3 py-1 rounded-lg border border-red-500/20 hover:bg-red-50 dark:hover:bg-red-500/10">
               Remove
             </button>
           </div>
-          <div v-else class="mt-5 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-4 flex items-center gap-4 cursor-pointer hover:border-[var(--color-accent)]/40 transition-colors" @click="$refs.avatarInput.click()">
-            <div class="h-14 w-14 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 flex items-center justify-center shrink-0">
-              <svg class="w-6 h-6 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
+          <div v-else class="mt-5 rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4 flex items-center gap-3.5 cursor-pointer hover:border-amber-400/50 dark:hover:border-white/20 transition-colors" @click="$refs.avatarInput.click()">
+            <div class="h-11 w-11 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
+              <CameraIcon class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-sm font-semibold text-[var(--color-text-primary)]">Upload a profile picture</p>
-              <p class="text-xs text-[var(--color-text-muted)]">JPG, PNG or WebP. Max 5MB.</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">Upload Profile Photo</p>
+              <p class="text-[11px] text-[var(--color-text-secondary)]">PNG, JPG or WebP (max 5MB)</p>
             </div>
           </div>
 
-          <div class="mt-6 space-y-5">
-            <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">Username</label>
-              <input v-model="form.username" placeholder="Not set" :disabled="!canChangeUsername" class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-input)] px-4 py-3 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-accent)]/50 disabled:opacity-50 disabled:cursor-not-allowed" />
-              <p v-if="!canChangeUsername" class="text-[10px] text-[var(--color-danger)]">You can only change your username once every 30 days. Try again in {{ usernameChangeCountdown }} day{{ usernameChangeCountdown !== 1 ? 's' : '' }}.</p>
+          <div class="mt-5 space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Username</label>
+              <input v-model="form.username" placeholder="Not set" :disabled="!canChangeUsername" class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40 disabled:opacity-50 disabled:cursor-not-allowed" />
+              <p v-if="!canChangeUsername" class="text-[10px] text-amber-500 dark:text-amber-400">Username can be updated once every 30 days. {{ usernameChangeCountdown }} day(s) remaining.</p>
             </div>
-            <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">Real Name / Display Name</label>
-              <input v-model="form.name" placeholder="Not set" class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-input)] px-4 py-3 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-accent)]/50" />
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Full Name</label>
+              <input v-model="form.name" placeholder="Not set" class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40" />
             </div>
-            <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">Email</label>
-              <input v-model="form.email" type="email" placeholder="Not set" :disabled="!canChangeEmail" class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-input)] px-4 py-3 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-accent)]/50 disabled:opacity-50 disabled:cursor-not-allowed" />
-              <p v-if="!canChangeEmail" class="text-[10px] text-[var(--color-danger)]">You can only change your email once every 30 days.</p>
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Email Address</label>
+              <input v-model="form.email" type="email" placeholder="Not set" :disabled="!canChangeEmail" class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40 disabled:opacity-50 disabled:cursor-not-allowed" />
+              <p v-if="!canChangeEmail" class="text-[10px] text-amber-500 dark:text-amber-400">Email address can only be changed once every 30 days.</p>
             </div>
-            <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">Phone</label>
-              <input v-model="form.phone" placeholder="Not set" class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-input)] px-4 py-3 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-accent)]/50" />
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Phone Number</label>
+              <input v-model="form.phone" placeholder="+234..." class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40" />
             </div>
-            <div class="space-y-2">
-              <label class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">Bio & Grooming Preferences</label>
-              <textarea v-model="form.bio" rows="3" placeholder="Tell your barber about your style preferences, skin sensitivities, or grooming notes..." class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-input)] px-4 py-3 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-accent)]/50 resize-none"></textarea>
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Grooming & Style Preferences</label>
+              <textarea v-model="form.bio" rows="3" placeholder="Notes for your barbers (e.g. skin sensitivities, preferred blade lengths, parting styles)..." class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40 resize-none leading-relaxed"></textarea>
             </div>
           </div>
-          <button class="mt-8 w-full rounded-xl bg-[var(--color-accent)] py-4 text-sm font-bold text-[var(--color-accent-foreground)] shadow-sm transition-all hover:bg-[var(--color-accent-hover)] hover:scale-[1.02]">
-            Save profile
+
+          <button 
+            type="submit"
+            :disabled="saving"
+            class="mt-6 w-full rounded-xl bg-[var(--color-accent)] py-3 text-xs font-bold text-white shadow-lg shadow-[var(--color-accent)]/20 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+          >
+            {{ saving ? 'Saving Profile...' : 'Save Profile Changes' }}
           </button>
-          <p v-if="status" class="mt-4 text-center text-sm font-medium text-[var(--color-success)] bg-[var(--color-success)]/10 py-2 rounded-lg border border-[var(--color-success)]/20">{{ status }}</p>
+          <p v-if="status" class="mt-3 text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 py-2 rounded-lg border border-emerald-500/20">{{ status }}</p>
         </form>
 
-        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-sm">
-          <h2 class="font-display text-2xl text-[var(--color-text-primary)]">Recent <span class="text-[var(--color-accent)]">Activity</span></h2>
-          <div class="mt-6 space-y-4">
-            <article v-for="booking in history.latest_bookings || []" :key="booking.id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5 transition-all hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-bg-secondary)]">
-              <div class="flex items-start justify-between">
-                <div>
-                  <p class="font-display text-lg text-[var(--color-text-primary)]">{{ booking.service?.name }}</p>
-                  <p class="mt-1 text-sm text-[var(--color-text-secondary)]">{{ booking.appointment_date }} at {{ booking.appointment_time }}</p>
+        <!-- Recent Activity Feed -->
+        <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl flex flex-col justify-between">
+          <div>
+            <h2 class="font-display text-xl text-slate-900 dark:text-white pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center gap-2">
+              <ClockIcon class="w-5 h-5 text-[var(--color-accent)]" />
+              Recent <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-amber-200">Activity</span>
+            </h2>
+            <div class="mt-5 space-y-3">
+              <article 
+                v-for="booking in history.latest_bookings || []" 
+                :key="booking.id" 
+                class="rounded-2xl border border-slate-200/80 dark:border-white/[0.06] bg-slate-50 dark:bg-[#1E232B]/40 p-4 transition-all hover:border-amber-400/40 dark:hover:border-white/20 hover:bg-slate-100 dark:hover:bg-[#1E232B]"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-display text-base text-slate-900 dark:text-white">{{ booking.service?.name || 'Grooming Cut' }}</p>
+                    <p class="mt-1 text-xs text-[var(--color-text-secondary)]">{{ booking.appointment_date }} at {{ booking.appointment_time }}</p>
+                  </div>
+                  <span class="rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-700 dark:text-white/70 capitalize">
+                    {{ booking.status }}
+                  </span>
                 </div>
+              </article>
+              <div v-if="(history.latest_bookings || []).length === 0" class="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-10 text-center bg-slate-50/50 dark:bg-white/[0.02]">
+                <p class="text-xs text-[var(--color-text-secondary)]">No recent appointments recorded.</p>
               </div>
-            </article>
-            <div v-if="(history.latest_bookings || []).length === 0" class="rounded-xl border border-dashed border-[var(--color-border)] p-8 text-center">
-              <p class="text-sm text-[var(--color-text-muted)]">No recent activity.</p>
             </div>
           </div>
         </div>
@@ -124,15 +139,22 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
-import { customerApi } from '@/shared/api/old_customerApi';
+import { client } from '@/shared/api/client';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';
 import { getStorageUrl } from '@/core/utils/url';
+import { 
+  UserCircleIcon, 
+  CameraIcon, 
+  PencilSquareIcon, 
+  ClockIcon 
+} from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const authStore = useAuthStore();
 const form = reactive({ name: '', username: '', email: '', phone: '', bio: '', avatar: null });
 const status = ref('');
+const saving = ref(false);
 const history = ref({});
 const originalProfile = ref({});
 const avatarPreview = ref(null);
@@ -191,6 +213,7 @@ function removeAvatar() {
 }
 
 async function submit() {
+  saving.value = true;
   const payload = new FormData();
   payload.append('name', form.name);
   payload.append('phone', form.phone || '');
@@ -203,31 +226,39 @@ async function submit() {
   }
 
   try {
-    const response = await customerApi.updateProfile(payload);
-    status.value = response.data.message;
+    const response = await client.post('/customer/profile', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    status.value = response.data?.message || 'Profile updated successfully!';
     toast.success('Profile updated');
     await loadProfile();
     await authStore.fetchUser();
   } catch (error) {
     toast.error(error.response?.data?.error || 'Failed to update profile');
+  } finally {
+    saving.value = false;
   }
 }
 
 async function loadProfile() {
-  const response = await customerApi.profile();
-  const profile = response.data.data.profile.data ?? response.data.data.profile;
-  originalProfile.value = profile;
-  form.name = profile.name || '';
-  form.username = profile.username || '';
-  form.email = profile.email || '';
-  form.phone = profile.phone || '';
-  form.bio = profile.bio || '';
-  history.value = response.data.data.history;
+  try {
+    const response = await client.get('/customer/profile');
+    const profile = response.data?.data?.profile?.data ?? response.data?.data?.profile ?? {};
+    originalProfile.value = profile;
+    form.name = profile.name || '';
+    form.username = profile.username || '';
+    form.email = profile.email || '';
+    form.phone = profile.phone || '';
+    form.bio = profile.bio || '';
+    history.value = response.data?.data?.history || {};
 
-  if (profile.avatar) {
-    avatarPreview.value = getStorageUrl(profile.avatar);
-  } else {
-    avatarPreview.value = null;
+    if (profile.avatar) {
+      avatarPreview.value = getStorageUrl(profile.avatar);
+    } else {
+      avatarPreview.value = null;
+    }
+  } catch (err) {
+    console.error('Failed to load profile:', err);
   }
 }
 

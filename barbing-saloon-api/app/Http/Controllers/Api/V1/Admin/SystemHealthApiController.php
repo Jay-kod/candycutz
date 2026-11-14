@@ -9,6 +9,7 @@ use App\Models\ApiRequestLog;
 use App\Models\ErrorEvent;
 use App\Models\ErrorGroup;
 use Carbon\Carbon;
+use Illuminate\Database\Connection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -103,19 +104,22 @@ class SystemHealthApiController
         $dbStatus = 'disconnected';
         $dbLatency = 0.0;
         $tableCount = 0;
-        $connectionName = config('database.default');
+        $connection = DB::connection();
+        $connectionName = $connection->getName();
+        $databaseName = null;
         $dbError = null;
 
         try {
-            DB::connection()->getPdo();
+            $connection->getPdo();
+            $databaseName = $this->getActiveDatabaseName($connection);
             $dbLatency = round((microtime(true) - $dbStart) * 1000, 2);
             $dbStatus = 'connected';
 
-            if ($connectionName === 'mysql') {
-                $tables = DB::select('SHOW TABLES');
+            if ($connection->getDriverName() === 'mysql') {
+                $tables = $connection->select('SHOW TABLES');
                 $tableCount = count($tables);
-            } elseif ($connectionName === 'sqlite') {
-                $tables = DB::select("SELECT name FROM sqlite_master WHERE type='table'");
+            } elseif ($connection->getDriverName() === 'sqlite') {
+                $tables = $connection->select("SELECT name FROM sqlite_master WHERE type='table'");
                 $tableCount = count($tables);
             }
         } catch (Throwable $e) {
@@ -127,6 +131,8 @@ class SystemHealthApiController
             'status' => $dbStatus,
             'latency_ms' => $dbLatency,
             'connection' => $connectionName,
+            'driver' => $connection->getDriverName(),
+            'database_name' => $databaseName,
             'tables_count' => $tableCount,
             'error' => $dbError,
         ];
@@ -193,8 +199,8 @@ class SystemHealthApiController
         ];
 
         // 5. Payment Gateways
-        $paystackSecret = env('PAYSTACK_SECRET_KEY');
-        $stripeSecret = env('STRIPE_SECRET');
+        $paystackSecret = config('payments.gateways.paystack.secret_key');
+        $stripeSecret = config('payments.gateways.stripe.secret_key');
         $checks['payments'] = [
             'paystack' => [
                 'status' => ! empty($paystackSecret) && ! str_contains($paystackSecret, 'sk_test_placeholder') ? 'configured' : 'sandbox_or_missing',
@@ -250,12 +256,15 @@ class SystemHealthApiController
         if (in_array($validated['type'], ['all', 'database'], true)) {
             $t0 = microtime(true);
             try {
-                $res = DB::select('SELECT 1 as ping');
+                $connection = DB::connection();
+                $connection->selectOne('SELECT 1 as ping');
                 $ms = round((microtime(true) - $t0) * 1000, 2);
                 $results['database'] = [
                     'passed' => true,
                     'latency_ms' => $ms,
-                    'message' => 'Database responded successfully to diagnostic query.',
+                    'connection' => $connection->getName(),
+                    'database_name' => $this->getActiveDatabaseName($connection),
+                    'message' => 'The active application database responded successfully to a read-only diagnostic query.',
                 ];
             } catch (Throwable $e) {
                 $results['database'] = [
@@ -317,6 +326,24 @@ class SystemHealthApiController
             'results' => $results,
             'timestamp' => now()->toIso8601String(),
         ], $allPassed ? 'Diagnostic tests passed' : 'Diagnostic issues detected');
+    }
+
+    private function getActiveDatabaseName(Connection $connection): ?string
+    {
+        return match ($connection->getDriverName()) {
+            'mysql' => $connection->selectOne('SELECT DATABASE() AS database_name')?->database_name,
+            'pgsql' => $connection->selectOne('SELECT current_database() AS database_name')?->database_name,
+            'sqlite' => $this->getSqliteDatabaseName($connection),
+            default => $connection->getDatabaseName(),
+        };
+    }
+
+    private function getSqliteDatabaseName(Connection $connection): string
+    {
+        $database = $connection->selectOne('PRAGMA database_list');
+        $file = $database->file ?? '';
+
+        return $file === '' ? ':memory:' : basename($file);
     }
 
     public function errors(Request $request): JsonResponse

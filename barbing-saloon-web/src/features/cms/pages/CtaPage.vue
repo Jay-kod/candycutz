@@ -92,6 +92,54 @@
             <p class="mt-2 text-xs text-ivory/50">This appears below the supporting line and above the booking button.</p>
           </div>
 
+                    <div>
+            <div class="mb-2 flex items-center justify-between">
+              <label for="cta-overlay-color" class="block text-sm font-semibold text-theme-text">Overlay color tone</label>
+              <span class="inline-flex items-center gap-1.5 rounded bg-white/[0.05] px-2 py-0.5 text-xs font-mono font-bold text-white">
+                <span class="h-2 w-2 rounded-full border border-white/30" :style="{ backgroundColor: settings.hero_overlay_color || '#D4AF37' }"></span>
+                <span>{{ settings.hero_overlay_color || '#D4AF37' }}</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input
+                id="cta-overlay-color"
+                v-model="settings.hero_overlay_color"
+                type="color"
+                class="h-8 w-10 cursor-pointer rounded border border-white/20 bg-transparent p-0"
+              />
+              <input
+                v-model="settings.hero_overlay_color"
+                type="text"
+                maxlength="7"
+                placeholder="#D4AF37"
+                class="cta-input uppercase font-mono text-xs w-28"
+              />
+              <button
+                type="button"
+                @click="settings.hero_overlay_color = '#D4AF37'"
+                class="text-xs text-admin hover:underline font-mono"
+              >
+                Reset Gold
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-2 flex items-center justify-between">
+              <label for="cta-overlay-opacity" class="block text-sm font-semibold text-theme-text">Gold overlay opacity</label>
+              <span class="rounded bg-admin/15 px-2 py-0.5 text-xs font-mono font-bold text-admin">{{ settings.hero_overlay_opacity }}%</span>
+            </div>
+            <input
+              id="cta-overlay-opacity"
+              v-model.number="settings.hero_overlay_opacity"
+              type="range"
+              min="0"
+              max="100"
+              class="w-full accent-[#FF6700] cursor-pointer"
+            />
+            <p class="mt-2 text-xs text-ivory/50">Controls the intensity of the luxury gold gradient overlay across the homepage hero photography.</p>
+          </div>
+
           <div class="grid gap-5">
             <div>
               <label for="cta-primary" class="mb-2 block text-sm font-semibold text-theme-text">Booking button</label>
@@ -187,6 +235,8 @@ const loadSettings = async () => {
     settings.cta_primary_text = data.cta_primary_text || data.hero_btn1_text || settings.cta_primary_text;
     settings.hero_image = data.hero_image || null;
     settings.hero_image_opacity = data.hero_image_opacity ?? data.hero_opacity ?? 22;
+    settings.hero_overlay_opacity = Number(data.hero_overlay_opacity ?? data.page_hero_home_overlay_opacity ?? 45);
+    settings.hero_overlay_color = data.hero_overlay_color || data.page_hero_home_overlay_color || '#D4AF37';
   } catch (error) {
     console.error('Failed to load homepage CTA settings:', error);
     toast.error('Could not load homepage CTA settings');
@@ -213,6 +263,8 @@ const save = async () => {
     Object.entries(settings).forEach(([key, value]) => {
       formData.append(`settings[${key}]`, value);
     });
+    formData.append('settings[page_hero_home_overlay_opacity]', String(settings.hero_overlay_opacity));
+    formData.append('settings[page_hero_home_overlay_color]', settings.hero_overlay_color);
     await api.post('/v1/admin/settings', formData);
     toast.success('Homepage CTA updated');
   } catch (error) {

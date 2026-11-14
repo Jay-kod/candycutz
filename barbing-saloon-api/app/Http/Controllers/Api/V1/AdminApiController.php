@@ -7,8 +7,10 @@ use App\Domain\Booking\Actions\GetVerificationStats;
 use App\Domain\Booking\Actions\VerifyAppointment;
 use App\Domain\Content\Actions\GetSettings;
 use App\Domain\Content\Actions\UpdateSettings;
+use App\Domain\Identity\Actions\CreateCustomer;
 use App\Domain\Identity\Actions\CreateHoliday;
 use App\Domain\Identity\Actions\CreateWorkingHour;
+use App\Domain\Identity\Actions\DeleteCustomer;
 use App\Domain\Identity\Actions\DeleteHoliday;
 use App\Domain\Identity\Actions\DeleteWorkingHour;
 use App\Domain\Identity\Actions\GetAuditLogs;
@@ -16,13 +18,18 @@ use App\Domain\Identity\Actions\GetCustomerProfile;
 use App\Domain\Identity\Actions\GetCustomers;
 use App\Domain\Identity\Actions\GetHolidays;
 use App\Domain\Identity\Actions\GetWorkingHours;
+use App\Domain\Identity\Actions\ResetCustomerPassword;
 use App\Domain\Identity\Actions\UpdateBarberWorkingHours;
+use App\Domain\Identity\Actions\UpdateCustomer;
+use App\Domain\Identity\Actions\UpdateCustomerStatus;
 use App\Domain\Identity\Actions\UpdateHoliday;
 use App\Domain\Identity\Actions\UpdateWorkingHour;
 use App\Domain\Notification\Services\BrevoApiClient;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\System\Actions\GetDashboardStats;
+use App\Domain\System\Actions\GetReportHistory;
 use App\Domain\System\Actions\GetReports;
+use App\Domain\System\Actions\LogReportExport;
 use App\Http\Requests\Api\V1\Admin\StoreHolidayRequest;
 use App\Http\Requests\Api\V1\Admin\StoreWorkingHourRequest;
 use App\Http\Requests\Api\V1\Admin\UpdateHolidayRequest;
@@ -31,6 +38,7 @@ use App\Http\Requests\Api\V1\Admin\UpdateWorkingHourRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Holiday;
+use App\Models\Setting;
 use App\Models\WorkingHour;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,6 +55,33 @@ class AdminApiController
         return ApiResponse::success($action->execute($request->query('range', '7d')), 'Reports loaded');
     }
 
+    public function reportHistory(Request $request, GetReportHistory $action): JsonResponse
+    {
+        return ApiResponse::success(
+            $action->execute($request->query('action'), $request->query('search')),
+            'Report export history loaded'
+        );
+    }
+
+    public function logReportExport(Request $request, LogReportExport $action): JsonResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|max:50',
+            'report_id' => 'required|string|max:100',
+            'range' => 'nullable|string|max:20',
+            'range_label' => 'nullable|string|max:50',
+            'title' => 'nullable|string|max:150',
+            'metadata' => 'nullable|array',
+            'checksum' => 'nullable|string|max:100',
+        ]);
+
+        return ApiResponse::success(
+            $action->execute($request->user(), $validated, $request),
+            'Report export event recorded',
+            201
+        );
+    }
+
     public function settings(GetSettings $action): JsonResponse
     {
         return ApiResponse::success($action->execute(), 'Settings loaded');
@@ -55,6 +90,12 @@ class AdminApiController
     public function updateSettings(UpdateSettingsRequest $request, UpdateSettings $action, GetSettings $getSettings): JsonResponse
     {
         $settings = $request->validated('settings', []);
+        if (empty($settings)) {
+            $input = $request->except(['hero_image', 'page_hero_image', 'page_hero_page', 'about_teaser_image', 'about_shop_image', 'splash_image', 'onboarding_image', 'login_image', 'logo', 'favicon']);
+            if (! empty($input)) {
+                $settings = $input;
+            }
+        }
 
         if ($request->hasFile('hero_image')) {
             $path = (new SecureImageUpload)->execute($request->file('hero_image'), 'uploads/settings');
@@ -199,9 +240,58 @@ class AdminApiController
         return ApiResponse::success($action->execute(), 'Customers loaded');
     }
 
+    public function storeCustomer(Request $request, CreateCustomer $action): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        return ApiResponse::success($action->execute($validated), 'Customer created successfully', 201);
+    }
+
     public function customerProfile(int $id, GetCustomerProfile $action): JsonResponse
     {
         return ApiResponse::success($action->execute($id), 'Customer profile loaded');
+    }
+
+    public function updateCustomer(Request $request, int $id, UpdateCustomer $action): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', 'unique:users,email,'.$id],
+            'phone' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        return ApiResponse::success($action->execute($id, $validated), 'Customer updated successfully');
+    }
+
+    public function updateCustomerStatus(Request $request, int $id, UpdateCustomerStatus $action): JsonResponse
+    {
+        $validated = $request->validate([
+            'is_active' => ['sometimes', 'boolean'],
+            'status' => ['sometimes', 'string', 'in:active,suspended,deactivated'],
+        ]);
+
+        return ApiResponse::success($action->execute($id, $validated), 'Customer status updated successfully');
+    }
+
+    public function resetCustomerPassword(Request $request, int $id, ResetCustomerPassword $action): JsonResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        return ApiResponse::success($action->execute($id, $validated['password']), 'Customer password reset successfully');
+    }
+
+    public function deleteCustomer(int $id, DeleteCustomer $action): JsonResponse
+    {
+        $action->execute($id);
+
+        return ApiResponse::success(null, 'Customer deleted successfully');
     }
 
     public function logs(GetAuditLogs $action): JsonResponse
@@ -240,5 +330,119 @@ class AdminApiController
         }
 
         return ApiResponse::success(['sent_to' => $to], 'Test email sent successfully');
+    }
+
+    public function bankDetails(): JsonResponse
+    {
+        $bankName = Setting::query()->where('key', 'bank_name')->value('value')
+            ?? Setting::query()->where('key', 'manual_transfer_bank')->value('value')
+            ?? config('payments.gateways.manual_transfer.default_bank_name', 'Sterling Bank');
+
+        $accountName = Setting::query()->where('key', 'account_name')->value('value')
+            ?? Setting::query()->where('key', 'manual_transfer_account_name')->value('value')
+            ?? config('payments.gateways.manual_transfer.default_account_name', 'NextGen PG');
+
+        $accountNumber = Setting::query()->where('key', 'account_number')->value('value')
+            ?? Setting::query()->where('key', 'manual_transfer_account_number')->value('value')
+            ?? config('payments.gateways.manual_transfer.default_account_number', '5261935770');
+
+        $instructions = Setting::query()->where('key', 'payment_instructions')->value('value')
+            ?? 'Please include your Booking Reference in your transfer remarks to speed up instant confirmation.';
+
+        $gatewayTitle = Setting::query()->where('key', 'payment_gateway_title')->value('value')
+            ?? 'MTN FlyX Registration • CandyCutz';
+
+        $expiryMinutes = (int) (Setting::query()->where('key', 'payment_expiry_minutes')->value('value') ?? 120);
+
+        $noticeText = Setting::query()->where('key', 'payment_notice_text')->value('value')
+            ?? 'Before transferring, make sure the account name shown by your bank matches the one provided below.';
+
+        $rawChannels = Setting::query()->where('key', 'payment_channels')->value('value');
+        $channels = $rawChannels ? json_decode($rawChannels, true) : ['bank_transfer', 'ussd', 'bank_account', 'nqr', 'card'];
+
+        $ussdTemplate = Setting::query()->where('key', 'ussd_code_template')->value('value')
+            ?? '*737*2*{amount}*{account_number}#';
+
+        $autoConfirm = filter_var(Setting::query()->where('key', 'payment_auto_confirm')->value('value') ?? true, FILTER_VALIDATE_BOOLEAN);
+
+        return ApiResponse::success([
+            'bank_name' => (string) $bankName,
+            'account_name' => (string) $accountName,
+            'account_number' => (string) $accountNumber,
+            'instructions' => (string) $instructions,
+            'payment_gateway_title' => (string) $gatewayTitle,
+            'payment_expiry_minutes' => $expiryMinutes,
+            'payment_notice_text' => (string) $noticeText,
+            'payment_channels' => is_array($channels) ? $channels : ['bank_transfer', 'ussd', 'bank_account', 'nqr', 'card'],
+            'ussd_code_template' => (string) $ussdTemplate,
+            'auto_confirm' => (bool) $autoConfirm,
+        ], 'Bank account details loaded');
+    }
+
+    public function updateBankDetails(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'bank_name' => ['required', 'string', 'max:120'],
+            'account_name' => ['required', 'string', 'max:120'],
+            'account_number' => ['required', 'string', 'max:50'],
+            'instructions' => ['nullable', 'string', 'max:500'],
+            'payment_gateway_title' => ['nullable', 'string', 'max:150'],
+            'payment_expiry_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
+            'payment_notice_text' => ['nullable', 'string', 'max:500'],
+            'payment_channels' => ['nullable', 'array'],
+            'payment_channels.*' => ['string', 'in:bank_transfer,ussd,bank_account,nqr,card'],
+            'ussd_code_template' => ['nullable', 'string', 'max:100'],
+            'auto_confirm' => ['nullable', 'boolean'],
+        ]);
+
+        Setting::updateOrCreate(['key' => 'bank_name'], ['value' => $validated['bank_name'], 'group' => 'payment']);
+        Setting::updateOrCreate(['key' => 'account_name'], ['value' => $validated['account_name'], 'group' => 'payment']);
+        Setting::updateOrCreate(['key' => 'account_number'], ['value' => $validated['account_number'], 'group' => 'payment']);
+
+        // Keep manual_transfer_* aliases in sync
+        Setting::updateOrCreate(['key' => 'manual_transfer_bank'], ['value' => $validated['bank_name'], 'group' => 'payment']);
+        Setting::updateOrCreate(['key' => 'manual_transfer_account_name'], ['value' => $validated['account_name'], 'group' => 'payment']);
+        Setting::updateOrCreate(['key' => 'manual_transfer_account_number'], ['value' => $validated['account_number'], 'group' => 'payment']);
+
+        if (array_key_exists('instructions', $validated)) {
+            Setting::updateOrCreate(['key' => 'payment_instructions'], ['value' => $validated['instructions'] ?? '', 'group' => 'payment']);
+        }
+
+        if (array_key_exists('payment_gateway_title', $validated) && $validated['payment_gateway_title'] !== null) {
+            Setting::updateOrCreate(['key' => 'payment_gateway_title'], ['value' => $validated['payment_gateway_title'], 'group' => 'payment']);
+        }
+
+        if (array_key_exists('payment_expiry_minutes', $validated) && $validated['payment_expiry_minutes'] !== null) {
+            Setting::updateOrCreate(['key' => 'payment_expiry_minutes'], ['value' => (string) $validated['payment_expiry_minutes'], 'group' => 'payment']);
+        }
+
+        if (array_key_exists('payment_notice_text', $validated) && $validated['payment_notice_text'] !== null) {
+            Setting::updateOrCreate(['key' => 'payment_notice_text'], ['value' => $validated['payment_notice_text'], 'group' => 'payment']);
+        }
+
+        if (array_key_exists('payment_channels', $validated) && is_array($validated['payment_channels'])) {
+            Setting::updateOrCreate(['key' => 'payment_channels'], ['value' => json_encode($validated['payment_channels']), 'group' => 'payment']);
+        }
+
+        if (array_key_exists('ussd_code_template', $validated) && $validated['ussd_code_template'] !== null) {
+            Setting::updateOrCreate(['key' => 'ussd_code_template'], ['value' => $validated['ussd_code_template'], 'group' => 'payment']);
+        }
+
+        if (array_key_exists('auto_confirm', $validated)) {
+            Setting::updateOrCreate(['key' => 'payment_auto_confirm'], ['value' => $validated['auto_confirm'] ? '1' : '0', 'group' => 'payment']);
+        }
+
+        return ApiResponse::success([
+            'bank_name' => $validated['bank_name'],
+            'account_name' => $validated['account_name'],
+            'account_number' => $validated['account_number'],
+            'instructions' => $validated['instructions'] ?? '',
+            'payment_gateway_title' => $validated['payment_gateway_title'] ?? Setting::query()->where('key', 'payment_gateway_title')->value('value') ?? 'MTN FlyX Registration • CandyCutz',
+            'payment_expiry_minutes' => (int) ($validated['payment_expiry_minutes'] ?? Setting::query()->where('key', 'payment_expiry_minutes')->value('value') ?? 120),
+            'payment_notice_text' => $validated['payment_notice_text'] ?? Setting::query()->where('key', 'payment_notice_text')->value('value') ?? 'Before transferring, make sure the account name shown by your bank matches the one provided below.',
+            'payment_channels' => $validated['payment_channels'] ?? ['bank_transfer', 'ussd', 'bank_account', 'nqr', 'card'],
+            'ussd_code_template' => $validated['ussd_code_template'] ?? '*737*2*{amount}*{account_number}#',
+            'auto_confirm' => array_key_exists('auto_confirm', $validated) ? (bool) $validated['auto_confirm'] : true,
+        ], 'Bank account details saved to database successfully');
     }
 }

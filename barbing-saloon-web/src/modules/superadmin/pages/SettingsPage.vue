@@ -69,7 +69,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useDark } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import { CheckIcon } from '@heroicons/vue/24/outline';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue';
@@ -79,12 +79,7 @@ import { useToast } from '@/core/composables/useToast';
 
 const route = useRoute();
 const toast = useToast();
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
+const { isDark } = useTheme();
 
 const isSuperAdmin = computed(() => !route.path.startsWith('/admin'));
 const layout = computed(() => route.path.startsWith('/admin') ? AdminLayout : SuperAdminLayout);
@@ -132,10 +127,40 @@ const rawSettings = ref({});
 
 const systemSettingsGroups = computed(() => {
   const groups = {};
-  for (const [group, values] of Object.entries(rawSettings.value)) {
-    if (group === 'mobile') continue;
-    if (typeof values === 'object' && values !== null && !Array.isArray(values)) {
-      groups[group] = { ...values };
+  const entries = Object.entries(rawSettings.value || {});
+  
+  // Check if rawSettings contains nested group objects
+  const hasGroupObjects = entries.some(
+    ([, v]) => typeof v === 'object' && v !== null && !Array.isArray(v)
+  );
+
+  if (hasGroupObjects) {
+    for (const [group, values] of entries) {
+      if (group === 'mobile') continue;
+      if (typeof values === 'object' && values !== null && !Array.isArray(values)) {
+        groups[group] = { ...values };
+      }
+    }
+  } else {
+    // Flat map: infer group for each key
+    for (const [key, value] of entries) {
+      if (key === 'mobile' || typeof value === 'object') continue;
+      let group = 'general';
+      if (key.startsWith('hero_') || key.startsWith('cta_') || key.startsWith('page_hero_')) {
+        group = 'hero';
+      } else if (key.startsWith('about_')) {
+        group = 'about';
+      } else if (key.startsWith('contact_') || ['phone', 'email', 'address', 'city', 'state', 'latitude', 'longitude', 'map_link'].includes(key)) {
+        group = 'contact';
+      } else if (key.startsWith('bank_') || key.startsWith('manual_transfer_') || ['bank_name', 'account_name', 'account_number'].includes(key)) {
+        group = 'payment';
+      } else if (key.startsWith('booking_') || ['deposit_amount', 'min_notice_hours', 'max_days_ahead', 'slot_interval_minutes'].includes(key)) {
+        group = 'booking';
+      } else if (key.startsWith('social_') || ['instagram', 'facebook', 'whatsapp', 'twitter', 'tiktok', 'youtube'].includes(key)) {
+        group = 'social';
+      }
+      if (!groups[group]) groups[group] = {};
+      groups[group][key] = value;
     }
   }
   return groups;
@@ -162,6 +187,16 @@ async function saveAll() {
       for (const [key, value] of Object.entries(groupValues)) {
         formData.append(`settings[${key}]`, value ?? '');
       }
+    }
+
+    if (systemSettingsGroups.value.payment?.bank_name) {
+      formData.append('settings[manual_transfer_bank]', systemSettingsGroups.value.payment.bank_name);
+    }
+    if (systemSettingsGroups.value.payment?.account_name) {
+      formData.append('settings[manual_transfer_account_name]', systemSettingsGroups.value.payment.account_name);
+    }
+    if (systemSettingsGroups.value.payment?.account_number) {
+      formData.append('settings[manual_transfer_account_number]', systemSettingsGroups.value.payment.account_number);
     }
 
     await currentApi.value.updateSettings(formData);

@@ -22,29 +22,9 @@ class CleanPlatformSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Initiating safe, surgical database cleanup and seed...');
+        $this->command->info('Initiating safe, non-destructive platform sync and seed...');
 
-        // 1. Temporarily disable foreign key constraints for clean truncation
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-        // 2. Truncate transaction, token, and communication tables
-        DB::table('personal_access_tokens')->truncate();
-        DB::table('device_tokens')->truncate();
-        DB::table('notifications')->truncate();
-        DB::table('audit_logs')->truncate();
-        DB::table('testimonials')->truncate();
-        DB::table('payment_transactions')->truncate();
-        DB::table('payments')->truncate();
-        DB::table('appointment_status_history')->truncate();
-        DB::table('appointment_items')->truncate();
-        DB::table('appointments')->truncate();
-        DB::table('blocked_periods')->truncate();
-        DB::table('barber_services')->truncate();
-        DB::table('working_hours')->truncate();
-        DB::table('barbers')->truncate();
-        DB::table('users')->truncate();
-
-        // 3. Create the 3 authoritative accounts with clean IDs (1, 2, 3)
+        // 1. Safe User Synchronization (Non-destructive)
         $superAdmin = $this->createUserWithPrivileges([
             'id' => 1,
             'name' => 'Super Admin',
@@ -188,25 +168,22 @@ class CleanPlatformSeeder extends Seeder
         ]);
 
         $this->command->info('Seeded 2 realistic sample appointments (1 upcoming, 1 completed).');
-
-        // 9. Re-enable foreign key constraints
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        $this->command->info('Database cleanup and seed completed successfully!');
+        $this->command->info('Database sync and seed completed successfully!');
     }
 
     private function createUserWithPrivileges(array $attributes): User
     {
-        $id = $attributes['id'] ?? null;
+        $email = $attributes['email'];
         $role = $attributes['role'];
         $status = $attributes['status'];
         $isActive = $attributes['is_active'];
         unset($attributes['id'], $attributes['role'], $attributes['status'], $attributes['is_active']);
 
-        $user = new User($attributes);
-        if ($id !== null) {
-            $user->id = $id;
+        $user = User::withTrashed()->firstOrNew(['email' => $email]);
+        if ($user->trashed()) {
+            $user->restore();
         }
+        $user->fill($attributes);
         $user->role = $role;
         $user->status = $status;
         $user->is_active = $isActive;

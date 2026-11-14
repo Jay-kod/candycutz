@@ -84,13 +84,13 @@
           
           <!-- Email Input -->
           <div class="relative group">
-            <label for="email" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Email Address</label>
+            <label for="email" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Email or Username</label>
             <input 
               v-model="email" 
               id="email"
               class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
               placeholder="you@example.com" 
-              type="email" 
+              type="text" 
             />
             <p v-if="errors.email" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.email }}</p>
           </div>
@@ -188,17 +188,8 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
 import SocialAuthButtons from '../components/SocialAuthButtons.vue';
-import { useDark } from '@vueuse/core';
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
-
-isDark.value = true;
 
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
@@ -215,7 +206,7 @@ const errors = reactive({
 });
 
 const schema = object({
-  email: string().required('Email is required').email('Enter a valid email'),
+  email: string().required('Email or username is required'),
   password: string().required('Password is required'),
 });
 
@@ -252,7 +243,18 @@ async function submitForm() {
       return;
     }
 
-    generalError.value = error?.response?.data?.message || 'Credentials not correct, either the password or the email.';
+    if (error?.details?.field_errors) {
+      Object.entries(error.details.field_errors).forEach(([field, msgs]) => {
+        if (errors[field] !== undefined) {
+          errors[field] = Array.isArray(msgs) ? msgs[0] : msgs;
+        }
+      });
+    }
+
+    generalError.value =
+      error?.message ||
+      error?.response?.data?.message ||
+      'Credentials not correct, either the password or the email.';
   } finally {
     loading.value = false;
   }

@@ -34,7 +34,7 @@ defineEmits(['runDiagnostic'])
         </div>
         <div>
           <h2 class="text-sm font-bold text-white tracking-tight">Active Self-Diagnostics Probes</h2>
-          <p class="text-xs text-zinc-400">Execute on-demand round-trip verification across infrastructure primitives</p>
+          <p class="text-xs text-zinc-400">Database probes query the active application database (read-only), never a backup snapshot.</p>
         </div>
       </div>
       <span class="text-[11px] text-zinc-400 font-mono">
@@ -150,6 +150,14 @@ defineEmits(['runDiagnostic'])
 
             <p class="text-xs text-zinc-300">{{ result.message }}</p>
 
+            <p
+              v-if="key === 'database' && result.database_name"
+              class="mt-2 text-[11px] text-zinc-400"
+            >
+              Active database: <span class="font-mono text-zinc-200">{{ result.database_name }}</span>
+              <span v-if="result.connection"> ({{ result.connection }})</span>
+            </p>
+
             <div v-if="result.latency_ms !== undefined" class="mt-2 text-[11px] text-zinc-400 flex items-center justify-between">
               <span>Execution Latency:</span>
               <span class="font-mono text-white font-semibold">{{ result.latency_ms }}ms</span>
@@ -164,4 +172,3 @@ defineEmits(['runDiagnostic'])
     </div>
   </div>
 </template>
-

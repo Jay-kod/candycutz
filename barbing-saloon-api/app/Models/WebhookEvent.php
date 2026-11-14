@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * @property string $event
  * @property string $provider_event_key
  * @property bool $signature_valid
- * @property array $payload
+ * @property array<string, mixed> $payload
  * @property string $status
  * @property int $attempts
  * @property string|null $error

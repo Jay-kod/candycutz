@@ -41,11 +41,11 @@ class GetVerifications
                 'appointment_date' => $a->appointment_date->toDateString(),
                 'appointment_time' => $a->appointment_time,
                 'total_price' => (float) $a->total_price,
-                'customer_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
-                'customer_phone' => $a->customer?->phone ?? $a->client_phone ?? 'N/A',
-                'customer_email' => $a->customer?->email ?? $a->client_email ?? '',
-                'barber_name' => $a->barber?->user?->name ?? 'Master Barber',
-                'service_name' => $a->service?->name ?? 'Service',
+                'customer_name' => $a->customer->name ?? $a->client_name ?? 'Client',
+                'customer_phone' => $a->customer->phone ?? $a->client_phone ?? 'N/A',
+                'customer_email' => $a->customer->email ?? $a->client_email ?? '',
+                'barber_name' => $a->barber?->user->name ?? 'Master Barber',
+                'service_name' => $a->service->name ?? 'Service',
             ];
         })->all();
     }

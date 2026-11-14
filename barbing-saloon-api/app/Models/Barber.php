@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property int $user_id
  * @property string|null $bio
+ * @property string|null $bank_name
+ * @property string|null $account_name
+ * @property string|null $account_number
  * @property array<int, string>|null $specialties
  * @property int|null $experience_years
  * @property float $rating
@@ -20,18 +24,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User $user
  * @property-read Collection<int, WorkingHour> $workingHours
  * @property string $status
- * @property string|null $bank_name
- * @property string|null $account_name
- * @property string|null $account_number
  */
 class Barber extends Model
 {
     use HasFactory;
 
+    public const STATUSES = ['active', 'pending_approval', 'on_leave', 'suspended'];
+
     protected $fillable = [
         'user_id',
         'branch_id',
         'bio',
+        'bank_name',
+        'account_name',
+        'account_number',
         'specialties',
         'years_experience',
         'experience_years',
@@ -59,6 +65,26 @@ class Barber extends Model
     }
 
     /**
+     * Limit barbers to accounts that can be shown and selected for booking.
+     *
+     * @param  Builder<Barber>  $query
+     * @return Builder<Barber>
+     */
+    public function scopeActiveForBooking(Builder $query): Builder
+    {
+        return $query
+            ->where('status', 'active')
+            ->where('is_available', true)
+            ->whereHas('user', function (Builder $userQuery): void {
+                $userQuery
+                    ->where('is_active', true)
+                    ->where(function (Builder $statusQuery): void {
+                        $statusQuery->whereNull('status')->orWhere('status', 'active');
+                    });
+            });
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -66,6 +92,9 @@ class Barber extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<Appointment, $this>
+     */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);

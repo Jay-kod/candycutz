@@ -44,9 +44,5 @@ if errorlevel 1 exit /b 1
 git push origin "%BRANCH%"
 if errorlevel 1 exit /b 1
 
-if "%BRANCH%"=="remediation/phase-0-ground-truth" (
-    git push origin "%BRANCH%":main >nul 2>&1
-)
-
 echo Uploaded to GitHub on branch "%BRANCH%".
 endlocal

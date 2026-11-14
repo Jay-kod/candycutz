@@ -36,6 +36,7 @@ import {
   BugAntIcon,
   ArchiveBoxIcon,
   BuildingStorefrontIcon,
+  BuildingLibraryIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -73,6 +74,7 @@ const navItems = [
 
   // Settings
   { name: 'Settings', to: '/superadmin/settings', icon: Cog6ToothIcon },
+  { name: 'Bank Details', to: '/superadmin/bank-details', icon: BuildingLibraryIcon },
   { name: 'Brand Identity', to: '/superadmin/brand-identity', icon: BuildingStorefrontIcon },
 ];
 </script>

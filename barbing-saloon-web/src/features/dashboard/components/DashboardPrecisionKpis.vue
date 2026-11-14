@@ -3,7 +3,7 @@
     <article
       v-for="(card, idx) in cards"
       :key="card.label || idx"
-      class="group relative overflow-hidden rounded-xl border border-theme-border bg-theme-surface/90 p-3.5 xs:p-4 sm:p-5 transition-all duration-300 hover:border-admin/40 hover:bg-theme-card"
+      class="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-theme-border bg-white dark:bg-theme-surface/90 p-3.5 xs:p-4 sm:p-5 transition-all duration-300 hover:border-admin/40 hover:bg-slate-50 dark:hover:bg-theme-card shadow-sm"
     >
       <!-- Technical Corner Ticks with CandyCutz Orange Accent -->
       <span class="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-admin/30 group-hover:border-admin transition-colors"></span>
@@ -14,14 +14,14 @@
       <!-- Card Content -->
       <div class="flex flex-col justify-between h-full gap-3">
         <!-- Top Row: Icon + Label -->
-        <div class="flex items-center gap-2 text-theme-text-muted text-xs font-medium">
+        <div class="flex items-center gap-2 text-slate-500 dark:text-theme-text-muted text-xs font-medium">
           <component :is="card.icon" class="h-4 w-4" :class="card.iconColor" />
           <span class="tracking-wide">{{ card.label }}</span>
         </div>
 
         <!-- Middle: Dynamic Main Value -->
         <div>
-          <div class="text-xl xs:text-2xl sm:text-[28px] font-bold text-theme-text tracking-tight font-sans tabular-nums">
+          <div class="text-xl xs:text-2xl sm:text-[28px] font-bold text-slate-900 dark:text-theme-text tracking-tight font-sans tabular-nums">
             {{ card.value }}
           </div>
         </div>
@@ -29,7 +29,7 @@
         <!-- Bottom Row: Dynamic Trend + Equalizer Sparkline -->
         <div class="flex items-center justify-between pt-1">
           <!-- Trend text -->
-          <div class="flex items-center gap-1 text-[11px] font-medium" :class="card.trendPositive ? 'text-emerald-400' : 'text-amber-400'">
+          <div class="flex items-center gap-1 text-[11px] font-medium" :class="card.trendPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
             <span class="font-bold">{{ card.trendPositive ? '↑' : '•' }}</span>
             <span class="truncate max-w-[140px]">{{ card.trendText }}</span>
           </div>
@@ -40,7 +40,7 @@
               v-for="(bar, bIdx) in card.equalizer"
               :key="bIdx"
               class="w-[3px] rounded-t-[1px] transition-all duration-300"
-              :class="bar.highlight ? 'bg-admin' : 'bg-admin/30 group-hover:bg-admin/50'"
+              :class="bar.highlight ? 'bg-admin' : 'bg-orange-200 dark:bg-admin/30 group-hover:bg-orange-300 dark:group-hover:bg-admin/50'"
               :style="{ height: `${bar.height}%` }"
             ></span>
           </div>
@@ -125,7 +125,7 @@ const cards = computed(() => {
       label: 'Total Revenue',
       value: `₦${formatCurrency(totalRev)}`,
       icon: BanknotesIcon,
-      iconColor: 'text-emerald-400',
+      iconColor: 'text-emerald-500 dark:text-emerald-400',
       trendPositive: todayRev > 0,
       trendText: todayRev > 0 ? `₦${formatCurrency(todayRev)} today` : 'Verified ledger',
       equalizer: revEqualizer.length ? revEqualizer : defaultEqualizer
@@ -143,7 +143,7 @@ const cards = computed(() => {
       label: 'Average Service Value',
       value: `₦${formatCurrency(avgTicket)}`,
       icon: CreditCardIcon,
-      iconColor: 'text-amber-400',
+      iconColor: 'text-amber-500 dark:text-amber-400',
       trendPositive: avgTicket > 0,
       trendText: 'Per salon visit',
       equalizer: revEqualizer.length ? revEqualizer : defaultEqualizer

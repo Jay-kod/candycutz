@@ -24,6 +24,8 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
+    Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
+    Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
     Route::get('/admin/animations', [AnimationApiController::class, 'index']);
     Route::post('/admin/animations', [AnimationApiController::class, 'update']);
     Route::post('/admin/animations/reset', [AnimationApiController::class, 'reset']);
@@ -33,11 +35,18 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/verifications', [AdminApiController::class, 'verifications']);
     Route::patch('/admin/verifications/{id}/verify', [AdminApiController::class, 'verifyAppointment']);
     Route::get('/admin/reports', [AdminApiController::class, 'reports']);
+    Route::get('/admin/reports/history', [AdminApiController::class, 'reportHistory']);
+    Route::post('/admin/reports/log', [AdminApiController::class, 'logReportExport']);
     Route::get('/admin/feedback', [FeedbackSubmissionApiController::class, 'index']);
     Route::patch('/admin/feedback/{submission}', [FeedbackSubmissionApiController::class, 'update'])->whereNumber('submission');
     Route::get('/admin/analytics', [AdminApiController::class, 'analytics']);
     Route::get('/admin/customers', [AdminApiController::class, 'customers']);
-    Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile']);
+    Route::post('/admin/customers', [AdminApiController::class, 'storeCustomer']);
+    Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile'])->whereNumber('id');
+    Route::match(['put', 'patch'], '/admin/customers/{id}', [AdminApiController::class, 'updateCustomer'])->whereNumber('id');
+    Route::patch('/admin/customers/{id}/status', [AdminApiController::class, 'updateCustomerStatus'])->whereNumber('id');
+    Route::post('/admin/customers/{id}/reset-password', [AdminApiController::class, 'resetCustomerPassword'])->whereNumber('id');
+    Route::delete('/admin/customers/{id}', [AdminApiController::class, 'deleteCustomer'])->whereNumber('id');
     Route::get('/admin/working-hours', [AdminApiController::class, 'workingHours']);
     Route::put('/admin/working-hours/{barberId}', [AdminApiController::class, 'updateBarberWorkingHours']);
     Route::post('/admin/working-hours', [AdminApiController::class, 'storeWorkingHour']);
@@ -125,6 +134,9 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     // Admin Payments & Webhook Events
     Route::get('/admin/payments', [AdminPaymentApiController::class, 'index']);
     Route::get('/admin/payments/{id}', [AdminPaymentApiController::class, 'show'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/verify', [AdminPaymentApiController::class, 'verifyPayment'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reassign-barber', [AdminPaymentApiController::class, 'reassignBarber'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reject', [AdminPaymentApiController::class, 'rejectPayment'])->whereNumber('id');
     Route::post('/admin/payments/{id}/reverify', [AdminPaymentApiController::class, 'reverify'])->whereNumber('id');
     Route::post('/admin/payments/{id}/refund', [AdminPaymentApiController::class, 'refund'])->whereNumber('id');
     Route::get('/admin/webhook-events', [AdminPaymentApiController::class, 'webhookEvents']);

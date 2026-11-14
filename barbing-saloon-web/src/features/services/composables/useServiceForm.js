@@ -79,6 +79,9 @@ export function useServiceForm() {
         isEditing.value ? client.get(`/services/${serviceId.value}`) : Promise.resolve(null),
       ]);
       serviceCategories.value = categoryResponse.data?.data || categoryResponse.data || [];
+      if (!isEditing.value && serviceCategories.value.length > 0 && !form.value.category_id) {
+        form.value.category_id = serviceCategories.value[0].id;
+      }
 
       if (isEditing.value) {
         const service = serviceResponse?.data?.data;

@@ -1,79 +1,132 @@
 <template>
   <CustomerLayout>
-    <main class="min-h-screen bg-[var(--color-bg-primary)] pb-32">
+    <main class="min-h-screen pb-32 animate-fade-in space-y-6">
       
-      <!-- Skeleton Loader -->
-      <div v-if="isLoading" class="mx-auto max-w-7xl px-6 pt-32 space-y-12">
-        <div class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
-          <div class="skeleton-block h-72 w-full bg-[var(--color-bg-tertiary)] animate-pulse"></div>
-          <div class="p-8 -mt-16 relative z-10 flex flex-col md:flex-row md:items-end gap-6">
-            <div class="skeleton-block h-32 w-32 rounded-full ring-4 ring-[var(--color-bg-primary)] bg-[var(--color-bg-tertiary)] animate-pulse shrink-0"></div>
-            <div class="flex-1 space-y-3">
-              <div class="skeleton-block h-8 w-56 bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-              <div class="skeleton-block h-4 w-40 bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-              <div class="skeleton-block h-4 w-full max-w-md bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-            </div>
+      <!-- Top Breadcrumb & Back Link -->
+      <nav class="flex items-center justify-between">
+        <RouterLink
+          to="/customer/dashboard/barbers"
+          class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-gold transition-colors"
+        >
+          <ChevronLeftIcon class="h-4 w-4" />
+          <span>Back to All Barbers</span>
+        </RouterLink>
+
+        <span class="text-[11px] font-mono text-slate-500">Stylist Profile</span>
+      </nav>
+
+      <!-- Zero-CLS Skeleton Loader -->
+      <div v-if="isLoading" class="mx-auto max-w-6xl space-y-8">
+        <div class="h-72 rounded-3xl bg-white/5 border border-white/5 animate-pulse"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-8 space-y-6">
+            <div class="h-40 w-full rounded-3xl bg-white/5 animate-pulse"></div>
+            <div class="h-40 w-full rounded-3xl bg-white/5 animate-pulse"></div>
           </div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div class="lg:col-span-7 space-y-4">
-            <div class="skeleton-block h-5 w-full bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-            <div class="skeleton-block h-5 w-5/6 bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-            <div class="skeleton-block h-5 w-2/3 bg-[var(--color-bg-tertiary)] animate-pulse rounded"></div>
-          </div>
-          <div class="lg:col-span-5 space-y-3">
-            <div class="skeleton-block h-28 w-full rounded-2xl bg-[var(--color-bg-tertiary)] animate-pulse"></div>
-            <div class="skeleton-block h-28 w-full rounded-2xl bg-[var(--color-bg-tertiary)] animate-pulse"></div>
-          </div>
+          <div class="lg:col-span-4 h-72 rounded-3xl bg-white/5 animate-pulse"></div>
         </div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="mx-auto max-w-2xl px-6 text-center py-40">
-        <h1 class="font-display text-5xl text-[var(--color-accent)]">Barber not found</h1>
-        <p class="mt-6 text-[var(--color-text-secondary)] text-lg">The profile you're looking for doesn't exist or is currently unavailable.</p>
-        <RouterLink to="/customer/dashboard/services" class="mt-10 inline-block rounded-full bg-[var(--color-accent)] px-8 py-4 text-[var(--color-accent-foreground)] font-bold tracking-wide hover:bg-[var(--color-accent-hover)] transition-all">Back to Services</RouterLink>
+      <div v-else-if="error" class="mx-auto max-w-xl text-center py-24 rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-8 space-y-4">
+        <div class="h-16 w-16 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 dark:text-red-400">
+          <ExclamationTriangleIcon class="w-8 h-8" />
+        </div>
+        <h1 class="font-display text-2xl text-slate-900 dark:text-white font-bold">Stylist Not Found</h1>
+        <p class="text-xs text-slate-600 dark:text-slate-400">The requested barber profile does not exist or is currently inactive.</p>
+        <RouterLink 
+          to="/customer/dashboard/barbers" 
+          class="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 text-xs font-bold text-obsidian shadow-lg hover:brightness-110 transition-all"
+        >
+          View All Barbers
+        </RouterLink>
       </div>
 
-      <!-- Content -->
-      <div v-else>
-        <!-- Hero Section with Parallax Feel -->
-        <section class="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
-          <div class="absolute inset-0">
-            <img v-if="barber.avatar" :src="getFullImageUrl(barber.avatar)" :alt="barber.name" class="h-full w-full object-cover scale-105" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/70 to-transparent"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-primary)]/90 via-[var(--color-bg-primary)]/50 to-transparent"></div>
+      <!-- Barber Profile Content -->
+      <div v-else class="space-y-8">
+        
+        <!-- Hero Banner Header -->
+        <section class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-white dark:from-[#12161C] dark:via-[#0E1217] dark:to-black p-8 lg:p-12 shadow-2xl">
+          <div v-if="barber.cover_image || barber.cover_image_url || barber.avatar || barber.avatar_url" class="absolute inset-0">
+            <img :src="getFullImageUrl(barber.cover_image || barber.cover_image_url || barber.avatar || barber.avatar_url)" :alt="barber.name" class="h-full w-full object-cover opacity-20" />
+            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 dark:from-[#0E1217] dark:via-[#0E1217]/80 to-transparent"></div>
           </div>
+
+          <!-- Cover Image Full View Action -->
+          <button
+            v-if="barber.cover_image || barber.cover_image_url"
+            type="button"
+            @click="openSingleImageViewer('cover')"
+            class="absolute top-6 right-6 z-20 flex items-center gap-2 rounded-xl border border-white/10 bg-black/60 px-3.5 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-md transition-all hover:bg-black/80 hover:border-gold/40 hover:text-gold"
+            data-test="btn-view-cover"
+            title="View Cover Picture in full resolution"
+          >
+            <PhotoIcon class="h-4 w-4 text-gold" />
+            <span>View Cover</span>
+          </button>
           
-          <div class="absolute inset-0 flex items-end">
-            <div class="mx-auto w-full max-w-7xl px-6 pb-20">
-              <div data-reveal class="max-w-3xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)] mb-4">Master Barber</p>
-                <h1 class="font-display text-6xl md:text-8xl font-bold text-[var(--color-text-primary)] drop-shadow-md">{{ barber.name }}</h1>
+          <div class="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-6">
+            <!-- Large Portrait Avatar (Clickable to view full size) -->
+            <div
+              class="relative h-28 w-28 md:h-36 md:w-36 rounded-3xl overflow-hidden border-2 border-gold/40 shadow-2xl bg-[#161B22] shrink-0 group transition-all"
+              :class="(barber.avatar || barber.avatar_url) ? 'cursor-pointer hover:border-gold hover:shadow-gold/20' : ''"
+              :tabindex="(barber.avatar || barber.avatar_url) ? 0 : -1"
+              :role="(barber.avatar || barber.avatar_url) ? 'button' : undefined"
+              :title="(barber.avatar || barber.avatar_url) ? 'Click to view profile picture' : barber.name"
+              data-test="btn-view-avatar"
+              @click="openSingleImageViewer('avatar')"
+              @keydown.enter="openSingleImageViewer('avatar')"
+            >
+              <img
+                v-if="barber.avatar || barber.avatar_url"
+                :src="getFullImageUrl(barber.avatar || barber.avatar_url)"
+                :alt="barber.name"
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div v-else class="h-full w-full flex items-center justify-center bg-gradient-to-br from-gold/20 to-amber-900/40 text-gold text-3xl font-display font-bold">
+                {{ getInitials(barber.name) }}
+              </div>
+              <div
+                v-if="barber.avatar || barber.avatar_url"
+                class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+              >
+                <EyeIcon class="h-7 w-7 text-white drop-shadow" />
+              </div>
+            </div>
+
+            <!-- Stylist Header Info -->
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex h-2.5 w-2.5 rounded-full" :class="barber.is_available ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"></span>
+                <p class="text-[11px] uppercase tracking-[0.25em] font-bold text-gold">Master Barber & Stylist</p>
+              </div>
+              
+              <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white leading-tight">
+                {{ barber.name }}
+              </h1>
+              
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <!-- Stat: Experience -->
+                <div class="flex items-center gap-2.5 bg-white/80 dark:bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+                  <span class="font-display text-lg text-gold font-bold">{{ barber.experience_years || barber.years_experience || '5+' }}</span>
+                  <span class="text-[9px] uppercase tracking-wider text-slate-600 dark:text-slate-300 font-bold">Years Exp</span>
+                </div>
                 
-                <div class="mt-8 flex flex-wrap items-center gap-8">
-                  <!-- Stat: Experience -->
-                  <div class="flex items-center gap-3 bg-[var(--color-bg-secondary)]/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-[var(--color-border)] shadow-sm">
-                    <span class="font-display text-3xl text-[var(--color-accent)]">{{ barber.years_experience }}</span>
-                    <span class="text-xs uppercase tracking-widest text-[var(--color-text-secondary)] leading-tight">Years<br>Exp</span>
+                <!-- Stat: Rating -->
+                <div class="flex items-center gap-2.5 bg-white/80 dark:bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+                  <span class="font-display text-lg text-amber-500 dark:text-amber-400 font-bold">{{ Number(barber.rating || 5.0).toFixed(1) }}</span>
+                  <div class="flex text-amber-500 dark:text-amber-400">
+                    <StarIcon v-for="i in 5" :key="i" class="w-3.5 h-3.5 fill-current" />
                   </div>
-                  <!-- Stat: Rating -->
-                  <div class="flex items-center gap-3 bg-[var(--color-bg-secondary)]/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-[var(--color-border)] shadow-sm">
-                    <span class="font-display text-3xl text-[var(--color-accent)]">{{ barber.rating }}</span>
-                    <div class="flex flex-col">
-                      <div class="flex text-[var(--color-accent)]">
-                        <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
-                      </div>
-                      <span class="text-xs uppercase tracking-widest text-[var(--color-text-secondary)] mt-1">Rating</span>
-                    </div>
-                  </div>
-                  <!-- Stat: Status -->
-                  <div class="flex items-center gap-3 bg-[var(--color-bg-secondary)]/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-[var(--color-border)] shadow-sm">
-                    <span class="font-display text-2xl uppercase" :class="barber.status === 'active' ? 'text-[var(--color-success)]' : 'text-amber-500'">
-                      {{ barber.status === 'active' ? 'Available' : 'Not Active' }}
-                    </span>
-                    <span class="text-xs uppercase tracking-widest text-[var(--color-text-secondary)] leading-tight">Status</span>
-                  </div>
+                  <span class="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">({{ barber.total_reviews || 12 }})</span>
+                </div>
+                
+                <!-- Stat: Status -->
+                <div class="flex items-center gap-2 bg-white/80 dark:bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+                  <span class="h-2 w-2 rounded-full" :class="barber.is_available ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-amber-500 dark:bg-amber-400'"></span>
+                  <span class="text-xs uppercase tracking-wider font-bold" :class="barber.is_available ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
+                    {{ barber.is_available ? 'Available For Booking' : 'Chair Busy' }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -81,127 +134,261 @@
         </section>
 
         <!-- Detailed Content Grid -->
-        <section class="mx-auto max-w-7xl px-6 py-20">
-          <div class="grid gap-16 lg:grid-cols-12 lg:items-start">
+        <section class="grid gap-8 lg:grid-cols-12 lg:items-start">
+          
+          <!-- Left Column: Bio, Signature Specializations, Working Hours (8 cols) -->
+          <div class="lg:col-span-8 space-y-6">
             
-            <!-- Left: Bio & Specialties -->
-            <div class="lg:col-span-7 space-y-16">
-              <div data-reveal>
-                <h2 class="font-display text-4xl text-[var(--color-accent)] mb-6">The Artist</h2>
-                <p class="text-xl text-[var(--color-text-primary)] leading-relaxed font-light">{{ barber.bio }}</p>
-              </div>
+            <!-- Bio Card -->
+            <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl">
+              <h2 class="font-display text-xl text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <ScissorsIcon class="w-5 h-5 text-gold" />
+                <span>About</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-amber-500 dark:to-amber-200">{{ barber.name }}</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                {{ barber.bio || 'Specializing in precision scissor cuts, skin fades, beard shaping, hot towel grooming, and customized luxury salon experiences.' }}
+              </p>
+            </div>
 
-              <div data-reveal data-reveal-delay="100" v-if="barber.specialties && barber.specialties.length">
-                <h2 class="font-display text-4xl text-[var(--color-accent)] mb-6">Signatures</h2>
-                <div class="flex flex-wrap gap-4">
-                  <span v-for="spec in barber.specialties" :key="spec" class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-6 py-3 text-sm tracking-wide text-[var(--color-text-primary)] shadow-sm">
-                    {{ spec }}
+            <!-- Signature Specializations -->
+            <div v-if="barber.specialties && barber.specialties.length" class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl">
+              <h2 class="font-display text-lg text-slate-900 dark:text-white mb-3">Signature Specialties & Craft</h2>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="spec in barber.specialties"
+                  :key="spec"
+                  class="rounded-xl border border-gold/30 bg-gold/10 px-3.5 py-1.5 text-xs font-semibold text-gold tracking-wide"
+                >
+                  {{ spec }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Working Schedule (if loaded) -->
+            <div v-if="barber.working_hours && barber.working_hours.length" class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl space-y-4">
+              <div class="flex items-center gap-2">
+                <ClockIcon class="h-5 w-5 text-gold" />
+                <h2 class="font-display text-lg text-slate-900 dark:text-white font-bold">Regular Chair Hours</h2>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div
+                  v-for="wh in barber.working_hours"
+                  :key="wh.day_of_week"
+                  class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-black/40 p-2.5 text-center"
+                >
+                  <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">{{ formatDay(wh.day_of_week) }}</span>
+                  <span v-if="!wh.is_closed && wh.is_working !== false" class="text-xs font-mono text-gold font-bold block mt-0.5">
+                    {{ (wh.open_time || wh.start_time)?.slice(0, 5) }} - {{ (wh.close_time || wh.end_time)?.slice(0, 5) }}
                   </span>
+                  <span v-else class="text-xs font-medium text-slate-400 dark:text-slate-500 block mt-0.5">Off Day</span>
                 </div>
               </div>
             </div>
 
-            <!-- Right: Booking Widget -->
-            <div class="lg:col-span-5 lg:sticky lg:top-32" data-reveal data-reveal-delay="200">
-              <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent)]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                
-                <h3 class="font-display text-3xl text-[var(--color-text-primary)] mb-2">Book an Appointment</h3>
-                <p class="text-[var(--color-text-secondary)] text-sm mb-8">Secure your slot with {{ barber.name }} today.</p>
-                
-                <RouterLink to="/customer/dashboard/services" class="group flex w-full items-center justify-center gap-3 rounded-2xl bg-[var(--color-accent)] py-5 text-lg font-bold text-[var(--color-accent-foreground)] shadow-md hover:bg-[var(--color-accent-hover)] transition-all duration-300 hover:-translate-y-1">
-                  Browse Services
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:translate-x-1"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-                </RouterLink>
-                
-                <ul class="mt-8 space-y-4 text-sm text-[var(--color-text-secondary)]">
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Complimentary beverage included
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Hot towel finish
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Premium styling products
-                  </li>
-                </ul>
+            <!-- Client Reviews / Testimonials (if present) -->
+            <div v-if="barber.testimonials && barber.testimonials.length" class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl space-y-4">
+              <h2 class="font-display text-lg text-slate-900 dark:text-white font-bold flex items-center gap-2">
+                <StarIcon class="h-5 w-5 text-amber-500 dark:text-amber-400" />
+                <span>Client Feedback & Reviews</span>
+              </h2>
+              <div class="space-y-3">
+                <div
+                  v-for="rev in barber.testimonials"
+                  :key="rev.id"
+                  class="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-black/30 p-4 space-y-1.5"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-900 dark:text-white">{{ rev.customer?.name || 'Verified Client' }}</span>
+                    <div class="flex text-amber-500 dark:text-amber-400">
+                      <StarIcon v-for="s in (rev.rating || 5)" :key="s" class="w-3.5 h-3.5 fill-current" />
+                    </div>
+                  </div>
+                  <p class="text-xs text-slate-600 dark:text-slate-300 italic">"{{ rev.content || rev.comment }}"</p>
+                </div>
               </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Book With Barber Card (4 cols, sticky) -->
+          <div class="lg:col-span-4 lg:sticky lg:top-28">
+            <div class="rounded-3xl border border-gold/30 bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-2xl relative overflow-hidden space-y-6">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+              
+              <div>
+                <span class="text-[10px] uppercase font-bold text-gold tracking-widest block mb-1">Chair Reservation</span>
+                <h3 class="font-display text-2xl text-slate-900 dark:text-white font-bold">Book {{ barber.name.split(' ')[0] }}</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Select your service and reserve an appointment directly with this master stylist.</p>
+              </div>
+              
+              <RouterLink 
+                :to="{ path: '/customer/dashboard/services', query: { barber_id: barber.id } }" 
+                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-amber-500 py-3.5 text-xs font-bold text-obsidian shadow-lg shadow-gold/20 hover:brightness-110 active:scale-[0.98] transition-all"
+              >
+                <span>Select Services & Book</span>
+                <ChevronRightIcon class="w-4 h-4" />
+              </RouterLink>
+              
+              <ul class="pt-4 border-t border-slate-100 dark:border-white/[0.08] space-y-3 text-xs text-slate-600 dark:text-slate-300">
+                <li class="flex items-center gap-2.5">
+                  <CheckCircleIcon class="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                  <span>Complimentary warm beverage included</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <CheckCircleIcon class="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                  <span>Invigorating hot towel finish</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <CheckCircleIcon class="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                  <span>Signature beard & scalp conditioning</span>
+                </li>
+              </ul>
             </div>
           </div>
         </section>
 
-        <!-- Barber's Gallery (Full Width Masonry) -->
-        <section class="mt-10" v-if="barber.gallery && barber.gallery.length" data-reveal>
-          <div class="mx-auto max-w-7xl px-6 mb-12 flex items-end justify-between">
+        <!-- Barber Gallery Masonry -->
+        <section v-if="barber.gallery && barber.gallery.length" class="space-y-6">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
             <div>
-              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)] mb-2">Portfolio</p>
-              <h2 class="font-display text-5xl text-[var(--color-accent)]">The Masterpieces</h2>
+              <p class="text-xs uppercase tracking-[0.2em] text-gold font-bold">Lookbook Portfolio</p>
+              <h2 class="font-display text-2xl text-slate-900 dark:text-white font-bold">Recent Cuts & Grooming by {{ barber.name }}</h2>
             </div>
           </div>
           
-          <div class="px-6 mx-auto max-w-7xl columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-            <article v-for="(item, index) in barber.gallery" :key="item.id" @click="openLightbox(index)" class="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] relative block mb-6 break-inside-avoid cursor-pointer shadow-md hover:shadow-xl hover:border-[var(--color-accent)]/40 transition-all duration-500 hover:-translate-y-1">
-              <div class="relative w-full overflow-hidden bg-[var(--color-bg-tertiary)]" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '1/1') }">
-                <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
+          <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            <article 
+              v-for="(item, index) in barber.gallery" 
+              :key="item.id" 
+              @click="openLightbox(index)" 
+              class="group overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] relative block mb-6 break-inside-avoid cursor-pointer shadow-lg hover:border-gold/40 transition-all duration-300"
+            >
+              <div class="relative w-full overflow-hidden bg-white/[0.02]" :style="{ aspectRatio: index % 2 === 0 ? '4/5' : '1/1' }">
+                <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
               </div>
-              <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 text-[var(--color-text-primary)] translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
-                <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] font-bold opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">{{ item.category }}</p>
-                <h3 class="mt-2 font-display text-3xl">{{ item.title }}</h3>
-                
-                <div class="absolute right-8 bottom-8 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
-                </div>
+              <div class="absolute inset-0 z-10 flex flex-col justify-end p-5 text-white">
+                <p class="text-[10px] uppercase tracking-wider text-gold font-bold">{{ item.category || 'Cut' }}</p>
+                <h3 class="mt-1 font-display text-lg font-bold">{{ item.title }}</h3>
               </div>
             </article>
           </div>
         </section>
+
       </div>
     </main>
 
-    <!-- Lightbox Overlay -->
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-bg-primary)]/95 backdrop-blur-md" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
-      <!-- Close Button -->
-      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Lightbox Modal (Supports Single Image [Avatar/Cover] & Gallery Portfolio) -->
+    <div 
+      v-if="isLightboxOpen" 
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4" 
+      @keydown.esc="closeLightbox" 
+      tabindex="0" 
+      ref="lightboxRef"
+      data-test="lightbox-modal"
+    >
+      <button 
+        @click="closeLightbox" 
+        class="absolute top-6 right-6 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
+        data-test="lightbox-close"
+        title="Close Preview"
+      >
+        <XMarkIcon class="w-6 h-6" />
       </button>
 
-      <!-- Previous Button -->
-      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors shadow-md" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-      </button>
-
-      <!-- Main Image -->
-      <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
-        <img v-if="barber.gallery[currentIdx]?.image_path" :src="barber.gallery[currentIdx].image_path" :alt="barber.gallery[currentIdx].title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
-        <div class="mt-6 text-center text-[var(--color-text-primary)]">
-          <p class="text-sm font-semibold uppercase tracking-widest text-[var(--color-accent)]">{{ barber.gallery[currentIdx]?.category }}</p>
-          <h2 class="mt-2 font-display text-2xl md:text-3xl">{{ barber.gallery[currentIdx]?.title }}</h2>
-          <p class="mt-2 text-[var(--color-text-secondary)] max-w-2xl mx-auto">{{ barber.gallery[currentIdx]?.description }}</p>
+      <!-- Single Image Mode (Avatar or Cover Picture) -->
+      <template v-if="lightboxMode === 'single'">
+        <div class="relative max-h-[85vh] max-w-4xl w-full flex flex-col items-center justify-center p-2">
+          <img 
+            :src="singleImage.url" 
+            :alt="singleImage.title" 
+            class="max-h-[72vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-white/10"
+            data-test="lightbox-single-img"
+          />
+          <div class="mt-4 text-center text-white">
+            <p class="text-xs uppercase tracking-wider text-gold font-bold">{{ singleImage.subtitle }}</p>
+            <h2 class="mt-1 font-display text-xl font-bold">{{ singleImage.title }}</h2>
+          </div>
         </div>
-      </div>
+      </template>
 
-      <!-- Next Button -->
-      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors shadow-md" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === (barber.gallery.length - 1) }" :disabled="currentIdx === (barber.gallery.length - 1)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-      </button>
+      <!-- Gallery Mode -->
+      <template v-else-if="barber && barber.gallery && barber.gallery.length">
+        <button 
+          @click.stop="prevImage" 
+          class="absolute left-6 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors disabled:opacity-30" 
+          :disabled="currentIdx === 0"
+        >
+          <ChevronLeftIcon class="w-6 h-6" />
+        </button>
+
+        <div class="relative max-h-[85vh] max-w-3xl w-full flex flex-col items-center justify-center">
+          <img 
+            v-if="barber.gallery[currentIdx]?.image_path || barber.gallery[currentIdx]?.image_url" 
+            :src="getImageUrl(barber.gallery[currentIdx]?.image_path || barber.gallery[currentIdx]?.image_url)" 
+            :alt="barber.gallery[currentIdx]?.title" 
+            class="max-h-[70vh] w-auto rounded-2xl object-contain shadow-2xl border border-white/10" 
+          />
+          <div class="mt-4 text-center text-white">
+            <p class="text-xs uppercase tracking-wider text-gold font-bold">{{ barber.gallery[currentIdx]?.category }}</p>
+            <h2 class="mt-1 font-display text-xl font-bold">{{ barber.gallery[currentIdx]?.title }}</h2>
+            <p v-if="barber.gallery[currentIdx]?.description" class="mt-1 text-xs text-white/60 max-w-xl mx-auto">{{ barber.gallery[currentIdx]?.description }}</p>
+          </div>
+        </div>
+
+        <button 
+          @click.stop="nextImage" 
+          class="absolute right-6 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors disabled:opacity-30" 
+          :disabled="currentIdx === (barber.gallery.length - 1)"
+        >
+          <ChevronRightIcon class="w-6 h-6" />
+        </button>
+      </template>
     </div>
   </CustomerLayout>
 </template>
 
 <script setup>
 import { onMounted, ref, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
-import { publicApi } from '@/shared/api/old_publicApi';
-import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { client } from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { 
+  ScissorsIcon, 
+  StarIcon, 
+  CheckCircleIcon, 
+  ChevronRightIcon, 
+  ChevronLeftIcon,
+  XMarkIcon, 
+  ClockIcon,
+  ExclamationTriangleIcon,
+  PhotoIcon,
+  EyeIcon
+} from '@heroicons/vue/24/outline';
 
 function getFullImageUrl(path) {
   return getStorageUrl(path);
+}
+
+function getImageUrl(path) {
+  return getStorageUrl(path);
+}
+
+function getInitials(name) {
+  if (!name) return 'CC';
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+function formatDay(day) {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[day] || `Day ${day}`;
 }
 
 const route = useRoute();
@@ -209,16 +396,11 @@ const barber = ref(null);
 const isLoading = ref(true);
 const error = ref(false);
 
-const { init: initScrollReveal } = useScrollReveal();
-
-// Lightbox state
 const isLightboxOpen = ref(false);
+const lightboxMode = ref('gallery'); // 'gallery' | 'single'
+const singleImage = ref({ url: '', title: '', subtitle: '' });
 const currentIdx = ref(0);
 const lightboxRef = ref(null);
-
-function getImageUrl(path) {
-  return getStorageUrl(path);
-}
 
 onMounted(async () => {
   window.scrollTo(0, 0);
@@ -229,20 +411,44 @@ onMounted(async () => {
       isLoading.value = false;
       return;
     }
-    const response = await publicApi.barber(id);
-    barber.value = response.data.data;
-    isLoading.value = false;
-    setTimeout(() => {
-      initScrollReveal();
-    }, 100);
+    const response = await client.get(`/barbers/${id}`);
+    barber.value = response.data?.data || response.data;
   } catch (err) {
     console.error('Failed to load barber profile:', err);
     error.value = true;
+  } finally {
     isLoading.value = false;
   }
 });
 
+function openSingleImageViewer(type) {
+  if (type === 'avatar') {
+    const avatarPath = barber.value?.avatar || barber.value?.avatar_url;
+    if (!avatarPath) return;
+    singleImage.value = {
+      url: getFullImageUrl(avatarPath),
+      title: `${barber.value?.name || 'Barber'} — Profile Picture`,
+      subtitle: 'Official Barber Headshot',
+    };
+  } else if (type === 'cover') {
+    const coverPath = barber.value?.cover_image || barber.value?.cover_image_url;
+    if (!coverPath) return;
+    singleImage.value = {
+      url: getFullImageUrl(coverPath),
+      title: `${barber.value?.name || 'Barber'} — Cover Picture`,
+      subtitle: 'Barber Suite & Showcase Cover Banner',
+    };
+  }
+  lightboxMode.value = 'single';
+  isLightboxOpen.value = true;
+  document.body.style.overflow = 'hidden';
+  nextTick(() => {
+    lightboxRef.value?.focus();
+  });
+}
+
 function openLightbox(index) {
+  lightboxMode.value = 'gallery';
   currentIdx.value = index;
   isLightboxOpen.value = true;
   document.body.style.overflow = 'hidden';
@@ -257,7 +463,7 @@ function closeLightbox() {
 }
 
 function nextImage() {
-  if (barber.value?.gallery && currentIdx.value < barber.value.gallery.length - 1) {
+  if (currentIdx.value < barber.value.gallery.length - 1) {
     currentIdx.value++;
   }
 }

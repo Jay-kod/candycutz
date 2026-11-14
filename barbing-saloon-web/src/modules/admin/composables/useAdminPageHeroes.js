@@ -34,14 +34,16 @@ export function useAdminPageHeroes() {
     title: '',
     subtitle: '',
     image: '',
-    opacity: 76
+    opacity: 76,
+    color: '#D4AF37'
   });
 
   const originalState = reactive({
     title: '',
     subtitle: '',
     image: '',
-    opacity: 76
+    opacity: 76,
+    color: '#D4AF37'
   });
 
   const currentPage = computed(() => {
@@ -64,6 +66,7 @@ export function useAdminPageHeroes() {
     return form.title !== originalState.title ||
       form.subtitle !== originalState.subtitle ||
       form.opacity !== originalState.opacity ||
+      form.color !== originalState.color ||
       selectedFile.value !== null ||
       removeImage.value === true;
   });
@@ -83,12 +86,20 @@ export function useAdminPageHeroes() {
     form.title = settings.value[titleKey.value] || fallbackTitle || page.defaultTitle;
     form.subtitle = settings.value[subtitleKey.value] || fallbackSubtitle || page.defaultSubtitle;
     form.image = settings.value[imageKey.value] || '';
-    form.opacity = Number(settings.value[opacityKey.value] ?? (isHome.value ? 22 : 76));
+    form.opacity = Number(
+      isHome.value
+        ? (settings.value.hero_overlay_opacity ?? settings.value[opacityKey.value] ?? 45)
+        : (settings.value[opacityKey.value] ?? 76)
+    );
 
     originalState.title = form.title;
     originalState.subtitle = form.subtitle;
     originalState.image = form.image;
+    form.color = isHome.value
+      ? (settings.value.hero_overlay_color || settings.value.page_hero_home_overlay_color || '#D4AF37')
+      : (settings.value[`page_hero_${selectedPage.value}_overlay_color`] || '#111827');
     originalState.opacity = form.opacity;
+    originalState.color = form.color;
 
     selectedFile.value = null;
     removeImage.value = false;
@@ -147,6 +158,13 @@ export function useAdminPageHeroes() {
       formData.append(`settings[${titleKey.value}]`, form.title.trim());
       formData.append(`settings[${subtitleKey.value}]`, form.subtitle.trim());
       formData.append(`settings[${opacityKey.value}]`, String(form.opacity));
+      if (isHome.value) {
+        formData.append('settings[hero_overlay_opacity]', String(form.opacity));
+      }
+      formData.append(`settings[page_hero_${selectedPage.value}_overlay_color]`, form.color);
+      if (isHome.value) {
+        formData.append('settings[hero_overlay_color]', form.color);
+      }
       formData.append('page_hero_page', selectedPage.value);
 
       if (selectedFile.value) {

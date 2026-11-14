@@ -10,6 +10,7 @@ return [
     |
     */
     'default' => env('PAYMENT_GATEWAY', 'paystack'),
+    'fake' => env('PAYSTACK_FAKE', false),
 
     /*
     |--------------------------------------------------------------------------

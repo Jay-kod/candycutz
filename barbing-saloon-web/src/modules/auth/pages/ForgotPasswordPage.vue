@@ -96,17 +96,8 @@ import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { RouterLink } from 'vue-router';
 import { object, string } from 'yup';
 import { authApi } from '@/shared/api/old_authApi';
-import { useDark } from '@vueuse/core';
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
-
-isDark.value = true;
 
 const email = ref('');
 const loading = ref(false);

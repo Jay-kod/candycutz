@@ -83,12 +83,12 @@ class GetDashboardStats
             ->map(function ($appt) {
                 return [
                     'id' => $appt->id,
-                    'client_name' => $appt->client_name ?: ($appt->customer?->name ?? 'Walk-In Client'),
+                    'client_name' => $appt->client_name ?: ($appt->customer->name ?? 'Walk-In Client'),
                     'appointment_date' => $appt->appointment_date?->toDateString(),
                     'appointment_time' => substr((string) $appt->appointment_time, 0, 5),
-                    'status' => $appt->status?->value ?? $appt->status,
-                    'price' => (float) ($appt->service?->price ?? $appt->total_price ?? 0),
-                    'total_price' => (float) ($appt->total_price ?? $appt->service?->price ?? 0),
+                    'status' => $appt->status->value ?? $appt->status,
+                    'price' => (float) ($appt->service->price ?? $appt->total_price ?? 0),
+                    'total_price' => (float) ($appt->total_price ?? $appt->service->price ?? 0),
                     'service' => $appt->service ? [
                         'id' => $appt->service->id,
                         'name' => $appt->service->name,
@@ -96,7 +96,7 @@ class GetDashboardStats
                     ] : null,
                     'barber' => $appt->barber ? [
                         'id' => $appt->barber->id,
-                        'name' => $appt->barber->user?->name ?? 'Master Barber',
+                        'name' => $appt->barber->user->name ?? 'Master Barber',
                     ] : null,
                     'customer' => $appt->customer ? [
                         'id' => $appt->customer->id,
@@ -115,7 +115,7 @@ class GetDashboardStats
             ->map(function ($log) {
                 return [
                     'id' => $log->id,
-                    'user_name' => $log->user?->name ?? 'System',
+                    'user_name' => $log->user->name ?? 'System',
                     'action' => $log->action,
                     'description' => $log->description ?? $log->action,
                     'created_at' => $log->created_at?->toIso8601String() ?? now()->toIso8601String(),

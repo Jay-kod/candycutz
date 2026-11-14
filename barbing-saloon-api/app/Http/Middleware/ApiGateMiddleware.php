@@ -78,7 +78,7 @@ class ApiGateMiddleware
                 'query_duration_ms' => $queryDurationMs,
                 'memory_bytes' => $memoryBytes,
                 'user_id' => $request->user()?->id,
-                'user_role' => $request->user()?->role?->value ?? null,
+                'user_role' => $request->user()?->role->value ?? null,
                 'ip_address' => $request->ip(),
                 'is_slow' => $durationMs > 500,
                 'budget_exceeded' => $queryCount > DatabaseGateTracker::QUERY_BUDGET_THRESHOLD,

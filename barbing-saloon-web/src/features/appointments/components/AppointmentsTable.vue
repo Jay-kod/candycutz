@@ -68,7 +68,7 @@
                   <p class="text-xs text-theme-text font-semibold">{{ formatDate(appointment.appointment_date) }}</p>
                   <span 
                     v-if="isToday(appointment.appointment_date)" 
-                    class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
                   >
                     Today
                   </span>
@@ -82,13 +82,13 @@
 
             <!-- Channel / Source -->
             <td class="px-5 py-4 align-middle">
-              <span v-if="appointment.source === 'app'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/15 text-purple-300 border border-purple-500/30 shadow-sm">
+              <span v-if="appointment.source === 'app'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 shadow-sm">
                 <DevicePhoneMobileIcon class="h-3.5 w-3.5" /> App
               </span>
-              <span v-else-if="appointment.source === 'walk_in' || appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm">
+              <span v-else-if="appointment.source === 'walk_in' || appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-sm">
                 <UserPlusIcon class="h-3.5 w-3.5" /> Walk-In
               </span>
-              <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm">
+              <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 shadow-sm">
                 <GlobeAltIcon class="h-3.5 w-3.5" /> Web
               </span>
             </td>
@@ -129,14 +129,14 @@
                   <button 
                     v-if="!appointment.receipt_image || appointment.payment_status !== 'awaiting_verification'" 
                     @click="$emit('approve', appointment.id)" 
-                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" 
+                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" 
                     title="Approve Booking"
                   >
                     <CheckIcon class="h-4 w-4" />
                   </button>
                   <button 
                     @click="$emit('force-approve', appointment.id)" 
-                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm" 
+                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm" 
                     title="Force Approve (Bypass Payment)"
                   >
                     <ShieldCheckIcon class="h-4 w-4" />
@@ -144,14 +144,14 @@
                   <button 
                     v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'" 
                     @click="$emit('view-receipt', appointment)" 
-                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm" 
+                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm" 
                     title="Verify Uploaded Receipt"
                   >
                     <DocumentTextIcon class="h-4 w-4" />
                   </button>
                   <button 
                     @click="$emit('cancel', appointment.id)" 
-                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" 
+                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" 
                     title="Cancel Booking"
                   >
                     <XMarkIcon class="h-4 w-4" />
@@ -243,11 +243,11 @@ function isToday(dateStr) {
 
 function statusClass(status) {
   const map = {
-    completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    confirmed: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
-    no_show: 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+    completed: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    confirmed: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    pending: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    cancelled: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
+    no_show: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
   };
   return map[status] || 'bg-theme-bg text-theme-text-muted border-theme-border';
 }

@@ -64,16 +64,16 @@
 
         <button
           @click="$emit('open-notification')"
-          class="group relative flex items-center gap-4 rounded-xl border border-theme-border bg-theme-surface-subtle/50 p-3.5 transition-all duration-300 hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-[0_4px_20px_rgba(168,85,247,0.05)] hover:-translate-y-0.5 text-left"
+          class="group relative flex items-center gap-4 rounded-xl border border-theme-border bg-theme-surface-subtle/50 p-3.5 transition-all duration-300 hover:border-gold/30 hover:bg-gold/5 hover:shadow-[0_4px_20px_rgba(255,153,0,0.05)] hover:-translate-y-0.5 text-left"
         >
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors border shadow-sm bg-purple-500/10 border-purple-500/20 group-hover:bg-purple-500/20">
-            <MegaphoneIcon class="h-5 w-5 text-purple-400" />
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors border shadow-sm bg-gold/10 border-gold/20 group-hover:bg-gold/20">
+            <MegaphoneIcon class="h-5 w-5 text-gold" />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-theme-text group-hover:text-purple-400 transition-colors truncate">Notify Customers</p>
+            <p class="text-sm font-bold text-theme-text group-hover:text-gold transition-colors truncate">Notify Customers</p>
             <p class="text-[11px] text-theme-text-muted mt-0.5 truncate">Send a quick broadcast alert</p>
           </div>
-          <ChevronRightIcon class="h-4 w-4 text-theme-text-muted transition-all group-hover:text-purple-400/60 group-hover:translate-x-1" />
+          <ChevronRightIcon class="h-4 w-4 text-theme-text-muted transition-all group-hover:text-gold/60 group-hover:translate-x-1" />
         </button>
       </div>
     </div>
@@ -82,7 +82,7 @@
 
 <script setup>
 import { RouterLink } from 'vue-router';
-import { ClockIcon, ChevronRightIcon, CalendarIcon, ClipboardDocumentCheckIcon, UserIcon, MegaphoneIcon } from '@heroicons/vue/24/outline';
+import { ClockIcon, ChevronRightIcon, CalendarIcon, ClipboardDocumentCheckIcon, UserIcon, MegaphoneIcon, StarIcon } from '@heroicons/vue/24/outline';
 import { BoltIcon } from '@heroicons/vue/24/solid';
 
 defineProps({
@@ -115,8 +115,16 @@ const quickActions = [
     description: 'Update your details',
     to: '/barber/profile',
     icon: UserIcon,
-    iconWrap: 'bg-emerald-400/10 border-emerald-400/20',
-    iconColor: 'text-emerald-400',
+    iconWrap: 'bg-gold/10 border-gold/20',
+    iconColor: 'text-gold',
+  },
+  {
+    label: 'Client Reviews',
+    description: 'Check service ratings & feedback',
+    to: '/barber/reviews',
+    icon: StarIcon,
+    iconWrap: 'bg-amber-400/10 border-amber-400/20',
+    iconColor: 'text-amber-400',
   },
   {
     label: 'Payments & Account',

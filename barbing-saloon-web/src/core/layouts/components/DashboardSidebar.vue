@@ -7,275 +7,70 @@
       @click="$emit('closeMobile')"
     ></div>
 
-    <!-- Sidebar Container -->
+    <!-- Sidebar Aside Container -->
     <aside
       :class="[
         'fixed inset-y-0 left-0 z-50 flex flex-col h-full h-[100dvh] max-h-screen transition-all duration-300 ease-in-out',
         'lg:static lg:h-full lg:max-h-full lg:translate-x-0',
         'sidebar-panel backdrop-blur-xl',
-        themeClasses.surfaceBg || 'bg-[var(--color-bg-secondary)]/95',
-        'border-r',
-        portalConfig.sidebarBorder || 'border-[var(--color-border)]',
+        'bg-[var(--color-bg-secondary)]/95 dark:bg-[#0E131F]/95',
+        'border-r border-[var(--color-border)] dark:border-white/[0.08]',
         isMobileSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/80' : '-translate-x-full',
         isSidebarCollapsed ? 'lg:w-[88px]' : 'w-72'
       ]"
     >
-      <!-- Ambient Decorative Lighting -->
+      <!-- Subtle Luxury Ambient Glow -->
       <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div :class="['absolute -top-28 -right-28 h-60 w-60 rounded-full blur-[100px] opacity-[0.12]', themeClasses.bgRaw || 'bg-amber-500']"></div>
-        <div :class="['absolute -bottom-24 -left-24 h-48 w-48 rounded-full blur-[90px] opacity-[0.08]', themeClasses.bgRaw || 'bg-amber-500']"></div>
+        <div class="absolute -top-24 -right-24 h-56 w-56 rounded-full blur-[90px] opacity-[0.08] bg-amber-500"></div>
+        <div class="absolute -bottom-24 -left-24 h-48 w-48 rounded-full blur-[80px] opacity-[0.05] bg-amber-500"></div>
       </div>
 
-      <!-- Sidebar Header / Brand Emblem -->
-      <div :class="['relative z-10 flex h-20 shrink-0 items-center justify-between px-5 border-b', portalConfig.headerBorder || 'border-[var(--color-border-subtle)]']">
-        <RouterLink :to="homeRoute" class="flex items-center gap-3 group min-w-0">
-          <!-- Logo Emblem with Luxury Rim -->
-          <div class="relative flex items-center justify-center shrink-0">
-            <div :class="['h-11 w-11 rounded-2xl p-[1px] bg-gradient-to-br flex items-center justify-center group-hover:scale-105 transition-transform duration-300', portalConfig.rimGradient]">
-              <div class="h-full w-full rounded-[15px] bg-[var(--color-bg-secondary)] flex items-center justify-center overflow-hidden">
-                <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-6 w-6 object-contain" />
-              </div>
-            </div>
-          </div>
+      <!-- 1. Brand & Emblem Header -->
+      <SidebarBrand
+        :home-route="homeRoute"
+        :portal-config="portalTheme"
+        :is-collapsed="isSidebarCollapsed"
+        @close-mobile="$emit('closeMobile')"
+      />
 
-          <!-- Brand Typography & Portal Badge -->
-          <div
-            :class="[
-              'min-w-0 transition-all duration-300',
-              isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100'
-            ]"
-          >
-            <div :class="['font-display text-xl font-bold tracking-tight leading-none', portalConfig.brandText || 'text-[var(--color-text-primary)]']">
-              <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
-            </div>
-            <div :class="['inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border', portalConfig.badgeClass]">
-              <span :class="['h-1.5 w-1.5 rounded-full', portalConfig.dotClass]"></span>
-              {{ portalConfig.title }}
-            </div>
-          </div>
-        </RouterLink>
-
-        <!-- Mobile Close Button -->
-        <button
-          @click="$emit('closeMobile')"
-          :class="['lg:hidden p-2 transition-colors rounded-xl', portalConfig.closeBtn || 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]']"
-          aria-label="Close sidebar"
-        >
-          <XMarkIcon class="h-5 w-5" />
-        </button>
+      <!-- 2. Scrollable Accordion Navigation -->
+      <div class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain">
+        <SidebarNavAccordion
+          :groups="groupedNavItems"
+          :portal-config="portalTheme"
+          :is-collapsed="isSidebarCollapsed"
+          :is-active-route="isActiveRoute"
+        />
       </div>
 
-      <!-- Navigation Links Container (Scrollable) -->
-      <div
-        ref="navContainer"
-        class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 px-2.5 custom-scrollbar space-y-2 overscroll-contain"
-      >
-        <div v-for="(group, gIdx) in groupedNavItems" :key="gIdx" class="space-y-0.5">
-          <!-- Section Label -->
-          <div v-if="group.label" class="px-2.5 pt-1.5 pb-0.5 flex items-center justify-between">
-            <p
-              :class="[
-                'text-[9.5px] uppercase tracking-[0.2em] font-bold transition-all duration-300',
-                themeClasses.textLight70 || 'text-amber-400/80',
-                isSidebarCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-80'
-              ]"
-            >
-              {{ group.label }}
-            </p>
-            <div
-              v-if="!isSidebarCollapsed"
-              :class="['h-px flex-1 ml-2.5', portalConfig.sectionLine || 'bg-gradient-to-r from-[var(--color-border)] to-transparent']"
-            ></div>
-          </div>
-
-          <!-- Nav Items -->
-          <nav class="space-y-0.5">
-            <RouterLink
-              v-for="item in group.items"
-              :key="item.name"
-              :to="item.to"
-              :id="(isActiveRoute(item.to)) ? 'active-nav-item' : undefined"
-              :class="[
-                'group relative flex items-center rounded-lg transition-all duration-200',
-                isSidebarCollapsed ? 'justify-center p-1.5' : 'gap-2.5 px-2.5 py-1',
-                isActiveRoute(item.to)
-                  ? [
-                      portalConfig.activeGradient,
-                      'border',
-                      portalConfig.activeBorder,
-                      'shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]'
-                    ]
-                  : (portalConfig.navInactive || 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] border border-transparent hover:border-[var(--color-border-subtle)]')
-              ]"
-              :title="isSidebarCollapsed ? item.name : ''"
-            >
-              <!-- Active Indicator Bar (Left Edge) -->
-              <div
-                v-if="isActiveRoute(item.to)"
-                :class="['absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-1 rounded-r-full', portalConfig.activeIndicator]"
-              ></div>
-
-              <!-- Icon Container -->
-              <div
-                :class="[
-                  'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-200',
-                  isActiveRoute(item.to)
-                    ? [portalConfig.iconActive, 'border']
-                    : (portalConfig.iconInactive || ['bg-transparent text-[var(--color-text-muted)] group-hover:bg-[var(--color-bg-tertiary)]', portalConfig.iconHover])
-                ]"
-              >
-                <component
-                  :is="item.icon"
-                  class="h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-110"
-                />
-              </div>
-
-              <!-- Item Label -->
-              <span
-                :class="[
-                  'text-[12.5px] leading-tight tracking-wide whitespace-nowrap transition-all duration-200',
-                  isSidebarCollapsed ? 'lg:opacity-0 lg:w-0 lg:hidden' : 'opacity-100 w-auto',
-                  isActiveRoute(item.to) ? ['font-semibold', themeClasses.text || 'text-[var(--color-text-primary)]'] : ['font-medium', portalConfig.navLabelHover || 'group-hover:text-[var(--color-text-primary)]']
-                ]"
-              >
-                {{ item.name }}
-              </span>
-
-              <!-- Badge (if applicable) -->
-              <span
-                v-if="item.badge && !isSidebarCollapsed"
-                :class="['ml-auto text-[8.5px] font-bold px-1.5 py-0.5 rounded-full border', portalConfig.badgeClass]"
-              >
-                {{ item.badge }}
-              </span>
-
-              <!-- Subtle Chevron for Active Item -->
-              <ChevronRightIcon
-                v-if="isActiveRoute(item.to) && !isSidebarCollapsed"
-                :class="['ml-auto h-3 w-3 shrink-0', portalConfig.chevronColor]"
-              />
-            </RouterLink>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Profile Card & Sign Out Footer (Pinned) -->
-      <div :class="['relative z-10 shrink-0 mt-auto border-t p-2.5', portalConfig.profileBorder || 'border-[var(--color-border)]']">
-        <!-- Expanded Profile Card -->
-        <div
-          v-if="!isSidebarCollapsed"
-          :class="['rounded-xl border p-2 transition-all duration-200', portalConfig.profileCard || 'border-[var(--color-border)] bg-[var(--color-bg-tertiary)] hover:border-[var(--color-accent)]/30']"
-        >
-          <div class="flex items-center gap-2.5">
-            <!-- User Avatar with Status Indicator -->
-            <RouterLink
-              v-if="profileRoute"
-              :to="profileRoute"
-              :class="['relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden border group', portalConfig.avatarRing]"
-              title="View Profile"
-            >
-              <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
-              <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
-                {{ userInitials }}
-              </div>
-              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
-            </RouterLink>
-            <div
-              v-else
-              :class="['relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden border', portalConfig.avatarRing]"
-            >
-              <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
-              <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
-                {{ userInitials }}
-              </div>
-              <span :class="['absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
-            </div>
-
-            <!-- User Name and Role/Email -->
-            <div class="min-w-0 flex-1">
-              <RouterLink
-                v-if="profileRoute"
-                :to="profileRoute"
-                :class="['block truncate text-xs font-semibold transition-colors', portalConfig.profileName || 'text-[var(--color-text-primary)]', portalConfig.hoverText]"
-              >
-                {{ userName }}
-              </RouterLink>
-              <span v-else :class="['block truncate text-xs font-semibold', portalConfig.profileName || 'text-[var(--color-text-primary)]']">
-                {{ userName }}
-              </span>
-              <p :class="['truncate text-[10px]', portalConfig.profileEmail || 'text-[var(--color-text-secondary)]']">
-                {{ userEmail || (portalName + ' Staff') }}
-              </p>
-            </div>
-
-            <!-- Quick Action Buttons -->
-            <div class="flex items-center gap-1 shrink-0">
-              <RouterLink
-                v-if="profileRoute"
-                :to="profileRoute"
-                :class="['flex h-6 w-6 items-center justify-center rounded-lg transition-colors', portalConfig.profileActionBtn || 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]', portalConfig.hoverText]"
-                title="Settings"
-              >
-                <Cog6ToothIcon class="h-3.5 w-3.5" />
-              </RouterLink>
-              <button
-                @click="$emit('logout')"
-                :class="['flex items-center justify-center rounded-lg transition-colors', portalConfig.logoutBtn || 'h-6 w-6 text-[var(--color-danger)]/70 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]']"
-                title="Sign Out"
-              >
-                <ArrowRightOnRectangleIcon class="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Collapsed Profile & Sign Out -->
-        <div v-else class="flex flex-col items-center gap-2">
-          <RouterLink
-            v-if="profileRoute"
-            :to="profileRoute"
-            :class="['relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden border group', portalConfig.avatarRing]"
-            :title="userName + ' - Profile'"
-          >
-            <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="Avatar" class="h-full w-full object-cover" />
-            <div v-else :class="['flex h-full w-full items-center justify-center text-xs font-bold', themeClasses.bg20, portalConfig.avatarText]">
-              {{ userInitials }}
-            </div>
-            <span :class="['absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--color-bg-secondary)]', portalConfig.dotClass]"></span>
-          </RouterLink>
-
-          <button
-            @click="$emit('logout')"
-            :class="['flex h-9 w-9 items-center justify-center rounded-xl transition-colors', portalConfig.logoutBtn || 'text-[var(--color-danger)]/70 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]']"
-            title="Sign Out"
-          >
-            <ArrowRightOnRectangleIcon class="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+      <!-- 3. Pinned User Profile & Quick Actions Footer -->
+      <SidebarUserProfile
+        :portal-name="portalName"
+        :profile-route="profileRoute"
+        :is-collapsed="isSidebarCollapsed"
+        :user-avatar-url="userAvatarUrl"
+        :user-initials="userInitials"
+        :user-name="userName"
+        :user-email="userEmail"
+        @logout="$emit('logout')"
+      />
     </aside>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useTheme } from '@/core/composables/useTheme';
-import {
-  XMarkIcon,
-  ArrowRightOnRectangleIcon,
-  ChevronRightIcon,
-  Cog6ToothIcon,
-} from '@heroicons/vue/24/outline';
-import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
-import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
-
-const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
+import { getPortalThemeConfig } from './sidebar/portalTheme';
+import SidebarBrand from './sidebar/SidebarBrand.vue';
+import SidebarNavAccordion from './sidebar/SidebarNavAccordion.vue';
+import SidebarUserProfile from './sidebar/SidebarUserProfile.vue';
 
 const props = defineProps({
   portalName: { type: String, default: 'Portal' },
   homeRoute: { type: String, required: true },
   profileRoute: { type: String, default: '' },
-  themeClasses: { type: Object, required: true },
+  themeClasses: { type: Object, default: () => ({}) },
   groupedNavItems: { type: Array, required: true },
   isSidebarCollapsed: { type: Boolean, default: false },
   isMobileSidebarOpen: { type: Boolean, default: false },
@@ -290,147 +85,31 @@ defineEmits(['closeMobile', 'logout']);
 
 const { isDark } = useTheme();
 
-const portalConfig = computed(() => {
-  const p = props.portalName?.toLowerCase() || '';
-  if (p === 'super admin') {
-    if (isDark.value) {
-      // Night Mode: Complete Red & Jet Black
-      return {
-        title: 'Command Center',
-        badgeClass: 'bg-red-500/15 text-red-400 border-red-500/30',
-        dotClass: 'bg-red-500 animate-pulse',
-        rimGradient: 'from-red-500/60 via-red-600/20 to-transparent shadow-[0_0_20px_rgba(239,68,68,0.3)]',
-        activeGradient: 'bg-gradient-to-r from-red-500/20 via-red-500/10 to-transparent',
-        activeBorder: 'border-red-500/30',
-        activeIndicator: 'bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_12px_rgba(239,68,68,0.9)]',
-        iconActive: 'bg-red-500/20 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.35)]',
-        iconHover: 'group-hover:text-red-400',
-        avatarRing: 'border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.25)]',
-        avatarText: 'text-red-400',
-        chevronColor: 'text-red-500/70',
-        hoverText: 'hover:text-red-400',
-        sidebarBorder: 'border-red-950/60',
-        headerBorder: 'border-red-950/60',
-        brandText: 'text-white',
-        navInactive: 'text-white/60 hover:text-white hover:bg-red-500/[0.08] border border-transparent hover:border-red-500/20',
-        iconInactive: 'bg-transparent text-white/40 group-hover:bg-red-500/15 group-hover:text-red-400',
-        navLabelHover: 'group-hover:text-white',
-        sectionLine: 'bg-gradient-to-r from-red-900/40 to-transparent',
-        profileBorder: 'border-red-950/60',
-        profileCard: 'border-red-950/60 bg-red-950/20 hover:border-red-500/30 hover:bg-red-950/30',
-        profileName: 'text-white',
-        profileEmail: 'text-white/40',
-        profileActionBtn: 'text-white/40 hover:bg-white/10 hover:text-white',
-        logoutBtn: 'h-6 w-6 text-red-400/60 hover:bg-red-500/10 hover:text-red-400',
-        closeBtn: 'text-white/50 hover:text-white hover:bg-white/5',
-      };
-    } else {
-      // Light Mode: Complete Green & Crisp White
-      return {
-        title: 'Command Center',
-        badgeClass: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30',
-        dotClass: 'bg-emerald-500 animate-pulse',
-        rimGradient: 'from-emerald-500/60 via-emerald-600/20 to-transparent shadow-[0_0_20px_rgba(16,185,129,0.25)]',
-        activeGradient: 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent',
-        activeBorder: 'border-emerald-500/30',
-        activeIndicator: 'bg-gradient-to-b from-emerald-500 to-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.8)]',
-        iconActive: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.25)]',
-        iconHover: 'group-hover:text-emerald-700',
-        avatarRing: 'border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]',
-        avatarText: 'text-emerald-700',
-        chevronColor: 'text-emerald-600/70',
-        hoverText: 'hover:text-emerald-600',
-        sidebarBorder: 'border-emerald-100',
-        headerBorder: 'border-emerald-100',
-        brandText: 'text-slate-900',
-        navInactive: 'text-slate-600 hover:text-slate-900 hover:bg-emerald-50/80 border border-transparent hover:border-emerald-200/60',
-        iconInactive: 'bg-transparent text-slate-400 group-hover:bg-emerald-100/50 group-hover:text-emerald-700',
-        navLabelHover: 'group-hover:text-slate-900',
-        sectionLine: 'bg-gradient-to-r from-emerald-200/70 to-transparent',
-        profileBorder: 'border-emerald-100',
-        profileCard: 'border-emerald-200/60 bg-emerald-50/50 hover:border-emerald-300 hover:bg-emerald-50/80',
-        profileName: 'text-slate-900',
-        profileEmail: 'text-slate-500',
-        profileActionBtn: 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
-        logoutBtn: 'h-6 w-6 text-red-500/70 hover:bg-red-50 hover:text-red-600',
-        closeBtn: 'text-slate-500 hover:text-slate-800 hover:bg-slate-100',
-      };
-    }
-  }
-  if (p === 'admin') {
-    return {
-      title: 'Admin Center',
-      badgeClass: 'bg-admin/15 text-admin-light border-admin/30',
-      dotClass: 'bg-admin animate-pulse',
-      rimGradient: 'from-admin/60 via-admin/20 to-transparent shadow-[0_0_20px_rgba(255,103,0,0.25)]',
-      activeGradient: 'bg-gradient-to-r from-admin/20 via-admin/10 to-transparent',
-      activeBorder: 'border-admin/30',
-      activeIndicator: 'bg-gradient-to-b from-admin-light to-admin shadow-[0_0_12px_rgba(255,103,0,0.8)]',
-      iconActive: 'bg-admin/20 border-admin/30 text-admin-light shadow-[0_0_12px_rgba(255,103,0,0.3)]',
-      iconHover: 'group-hover:text-admin-light',
-      avatarRing: 'border-admin/40 shadow-[0_0_10px_rgba(255,103,0,0.2)]',
-      avatarText: 'text-admin-light',
-      chevronColor: 'text-admin/70',
-      hoverText: 'hover:text-admin-light',
-    };
-  }
-  if (p === 'barber') {
-    return {
-      title: 'Staff Desk',
-      badgeClass: 'bg-gold/15 text-gold-light border-gold/30',
-      dotClass: 'bg-gold animate-pulse',
-      rimGradient: 'from-gold/50 via-gold/20 to-transparent shadow-[0_0_20px_rgba(212,175,55,0.2)]',
-      activeGradient: 'bg-gradient-to-r from-gold/20 via-gold/10 to-transparent',
-      activeBorder: 'border-gold/30',
-      activeIndicator: 'bg-gradient-to-b from-gold-light to-gold shadow-[0_0_12px_rgba(255,153,0,0.8)]',
-      iconActive: 'bg-gold/20 border-gold/30 text-gold-light shadow-[0_0_12px_rgba(212,175,55,0.25)]',
-      iconHover: 'group-hover:text-gold-light',
-      avatarRing: 'border-gold/40 shadow-[0_0_10px_rgba(212,175,55,0.2)]',
-      avatarText: 'text-gold-light',
-      chevronColor: 'text-gold/70',
-      hoverText: 'hover:text-gold-light',
-    };
-  }
-  // Default Customer
-  return {
-    title: 'Customer Portal',
-    badgeClass: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-    dotClass: 'bg-emerald-400 animate-pulse',
-    rimGradient: 'from-amber-400/50 via-amber-500/20 to-transparent shadow-[0_0_20px_rgba(255,153,0,0.18)]',
-    activeGradient: 'bg-gradient-to-r from-amber-500/15 via-amber-500/[0.08] to-transparent',
-    activeBorder: 'border-amber-500/25',
-    activeIndicator: 'bg-gradient-to-b from-amber-300 to-amber-500 shadow-[0_0_12px_rgba(255,153,0,0.8)]',
-    iconActive: 'bg-amber-500/20 border-amber-500/30 text-amber-300 shadow-[0_0_12px_rgba(255,153,0,0.25)]',
-    iconHover: 'group-hover:text-amber-300',
-    avatarRing: 'border-amber-500/30 shadow-[0_0_10px_rgba(255,153,0,0.15)]',
-    avatarText: 'text-amber-300',
-    chevronColor: 'text-amber-400/60',
-    hoverText: 'hover:text-amber-300',
-  };
+const portalTheme = computed(() => {
+  return getPortalThemeConfig(props.portalName, isDark.value);
 });
-
-const navContainer = ref(null);
-defineExpose({ navContainer });
 </script>
 
 <style scoped>
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-accent) transparent;
-  -webkit-overflow-scrolling: touch;
+  scrollbar-color: rgba(212, 175, 55, 0.45) transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-accent);
-  opacity: 0.3;
   border-radius: 9999px;
+  background-color: rgba(212, 175, 55, 0.45);
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-accent-hover);
+  background-color: rgba(212, 175, 55, 0.7);
 }
 </style>

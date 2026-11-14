@@ -26,22 +26,44 @@
           :style="{ opacity: computedOpacity }"
           class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300"
         />
-        <!-- Ambient radial glow -->
+        <!-- Ambient Gold Overlay -->
+        <div 
+          class="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          :style="{
+            background: computedOverlayGradient,
+            opacity: computedGoldOverlayOpacity
+          }"
+        ></div>
+        <!-- Ambient bottom shade -->
         <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F13] via-transparent to-transparent pointer-events-none"></div>
 
         <div class="relative z-10 max-w-2xl space-y-4">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-admin/30 bg-admin/10 text-admin text-[11px] font-bold uppercase tracking-wider">
             Premium Barbering Salon
           </div>
-          <h1 class="font-display text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-md">
-            {{ settings.hero_title || 'Premium grooming with a sharper standard.' }}
+          <h1 class="font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight drop-shadow-md">
+            <template v-if="settings.cta_title_part_one || settings.cta_title_part_two">
+              <span :class="settings.cta_title_color_order === 'first-gold' ? 'text-[#D4AF37]' : 'text-white'">
+                {{ settings.cta_title_part_one }}
+              </span>
+              {{ ' ' }}
+              <span :class="settings.cta_title_color_order === 'first-gold' ? 'text-white' : 'text-[#D4AF37]'">
+                {{ settings.cta_title_part_two }}
+              </span>
+            </template>
+            <span v-else class="text-white">
+              {{ settings.hero_title || 'Premium grooming with a sharper standard.' }}
+            </span>
           </h1>
           <p class="text-xs sm:text-sm text-white/70 leading-relaxed max-w-xl mx-auto">
-            {{ settings.hero_subtitle || 'Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.' }}
+            {{ settings.cta_subtitle || settings.hero_subtitle || 'Experience the CandyCutz difference. Log in to explore our full menu of premium services, meet our expert barbers, and book your next appointment seamlessly.' }}
+          </p>
+          <p v-if="settings.cta_caption" class="text-[11px] sm:text-xs text-white/50 leading-relaxed max-w-md mx-auto">
+            {{ settings.cta_caption }}
           </p>
           <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
             <span class="px-6 py-3 rounded-xl bg-gradient-to-r from-admin to-admin-light text-obsidian text-xs font-bold shadow-lg pointer-events-none">
-              {{ settings.hero_btn1_text || 'Book a Service' }}
+              {{ settings.cta_primary_text || settings.hero_btn1_text || 'Book a Service' }}
             </span>
             <span class="px-6 py-3 rounded-xl border border-white/20 bg-white/[0.05] text-white text-xs font-bold pointer-events-none">
               {{ settings.hero_btn2_text || 'About Us' }}
@@ -123,6 +145,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { buildOverlayGradient } from '@/core/utils/heroOverlay';
 
 const props = defineProps({
   settings: {
@@ -170,6 +193,16 @@ const computedOpacity = computed(() => {
   if (raw === undefined || raw === null || raw === '') return 0.22;
   const num = Number(raw);
   if (isNaN(num)) return 0.22;
+  const clamped = Math.max(0, Math.min(100, num));
+  return clamped > 1 ? clamped / 100 : clamped;
+});
+const computedOverlayGradient = computed(() => buildOverlayGradient(props.settings?.hero_overlay_color));
+
+const computedGoldOverlayOpacity = computed(() => {
+  const raw = props.settings?.hero_overlay_opacity;
+  if (raw === undefined || raw === null || raw === '') return 0.45;
+  const num = Number(raw);
+  if (isNaN(num)) return 0.45;
   const clamped = Math.max(0, Math.min(100, num));
   return clamped > 1 ? clamped / 100 : clamped;
 });

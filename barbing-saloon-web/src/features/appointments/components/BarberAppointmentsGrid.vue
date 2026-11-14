@@ -54,11 +54,11 @@
       <!-- Booking Type & Payment Info -->
       <div class="mb-4 relative z-10 flex flex-wrap items-center gap-1.5">
         <!-- Walk-In / Online Badge -->
-        <span v-if="appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-purple-500/20 bg-purple-500/10 text-purple-400">
+        <span v-if="appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400">
           <UserPlusIcon class="h-3 w-3" />
           Walk-In
         </span>
-        <span v-else class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+        <span v-else class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-cyan-500/20 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
           <GlobeAltIcon class="h-3 w-3" />
           Online
         </span>
@@ -107,7 +107,7 @@
           <button
             v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'"
             @click="$emit('viewReceipt', appointment)"
-            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
+            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-gold/10 border border-gold/30 py-2.5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-obsidian transition-all shadow-sm"
           >
             Receipt
           </button>
@@ -199,45 +199,45 @@ const statusColors = {
     card: 'border-amber-500/20 bg-gradient-to-br from-amber-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-amber-400/35 hover:shadow-[0_20px_50px_rgba(245,158,11,0.12)]',
     glow: 'bg-amber-500/8 group-hover:bg-amber-500/15',
     accentLine: 'bg-gradient-to-r from-transparent via-amber-400/60 to-transparent',
-    avatar: 'bg-gradient-to-br from-amber-500/25 to-amber-600/10 text-amber-400 border-amber-500/25',
-    serviceText: 'text-amber-400/80',
-    badge: 'bg-amber-400/15 text-amber-400 border-amber-400/25 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
+    avatar: 'bg-gradient-to-br from-amber-500/25 to-amber-600/10 text-amber-600 dark:text-amber-400 border-amber-500/25',
+    serviceText: 'text-amber-600/90 dark:text-amber-400/80',
+    badge: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
     detailsCard: 'bg-amber-500/10 border-amber-500/15',
-    icon: 'text-amber-400/70',
-    timeText: 'text-amber-400',
+    icon: 'text-amber-600/80 dark:text-amber-400/70',
+    timeText: 'text-amber-600 dark:text-amber-400',
   },
   confirmed: {
     card: 'border-blue-500/20 bg-gradient-to-br from-blue-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-blue-400/35 hover:shadow-[0_20px_50px_rgba(59,130,246,0.12)]',
     glow: 'bg-blue-500/8 group-hover:bg-blue-500/15',
     accentLine: 'bg-gradient-to-r from-transparent via-blue-400/60 to-transparent',
-    avatar: 'bg-gradient-to-br from-blue-500/25 to-blue-600/10 text-blue-400 border-blue-500/25',
-    serviceText: 'text-blue-400/80',
-    badge: 'bg-blue-400/15 text-blue-400 border-blue-400/25 shadow-[0_0_10px_rgba(59,130,246,0.1)]',
+    avatar: 'bg-gradient-to-br from-blue-500/25 to-blue-600/10 text-blue-600 dark:text-blue-400 border-blue-500/25',
+    serviceText: 'text-blue-600/90 dark:text-blue-400/80',
+    badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/25 shadow-[0_0_10px_rgba(59,130,246,0.1)]',
     detailsCard: 'bg-blue-500/10 border-blue-500/15',
-    icon: 'text-blue-400/70',
-    timeText: 'text-blue-400',
+    icon: 'text-blue-600/80 dark:text-blue-400/70',
+    timeText: 'text-blue-600 dark:text-blue-400',
   },
   completed: {
     card: 'border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-emerald-400/35 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)]',
     glow: 'bg-emerald-500/8 group-hover:bg-emerald-500/15',
     accentLine: 'bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent',
-    avatar: 'bg-gradient-to-br from-emerald-500/25 to-emerald-600/10 text-emerald-400 border-emerald-500/25',
-    serviceText: 'text-emerald-400/80',
-    badge: 'bg-emerald-400/15 text-emerald-400 border-emerald-400/25 shadow-[0_0_10px_rgba(16,185,129,0.1)]',
+    avatar: 'bg-gradient-to-br from-emerald-500/25 to-emerald-600/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
+    serviceText: 'text-emerald-600/90 dark:text-emerald-400/80',
+    badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 shadow-[0_0_10px_rgba(16,185,129,0.1)]',
     detailsCard: 'bg-emerald-500/10 border-emerald-500/15',
-    icon: 'text-emerald-400/70',
-    timeText: 'text-emerald-400',
+    icon: 'text-emerald-600/80 dark:text-emerald-400/70',
+    timeText: 'text-emerald-600 dark:text-emerald-400',
   },
   cancelled: {
     card: 'border-red-500/20 bg-gradient-to-br from-red-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-red-400/35 hover:shadow-[0_20px_50px_rgba(239,68,68,0.12)]',
     glow: 'bg-red-500/8 group-hover:bg-red-500/15',
     accentLine: 'bg-gradient-to-r from-transparent via-red-400/60 to-transparent',
-    avatar: 'bg-gradient-to-br from-red-500/25 to-red-600/10 text-red-400 border-red-500/25',
-    serviceText: 'text-red-400/80',
-    badge: 'bg-red-400/15 text-red-400 border-red-400/25 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
+    avatar: 'bg-gradient-to-br from-red-500/25 to-red-600/10 text-red-600 dark:text-red-400 border-red-500/25',
+    serviceText: 'text-red-600/90 dark:text-red-400/80',
+    badge: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/25 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
     detailsCard: 'bg-red-500/10 border-red-500/15',
-    icon: 'text-red-400/70',
-    timeText: 'text-red-400',
+    icon: 'text-red-600/80 dark:text-red-400/70',
+    timeText: 'text-red-600 dark:text-red-400',
   },
   no_show: {
     card: 'border-gray-500/20 bg-gradient-to-br from-gray-500/[0.04] via-theme-surface/60 to-theme-surface/60 hover:border-gray-400/30 hover:shadow-[0_20px_50px_rgba(107,114,128,0.08)]',

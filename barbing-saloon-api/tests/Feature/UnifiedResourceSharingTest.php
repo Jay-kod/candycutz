@@ -69,17 +69,14 @@ it('allows barbers to upload gallery cut photos and syncs across platforms', fun
     $barberUser = User::factory()->create(['role' => 'barber']);
     $barber = Barber::factory()->create(['user_id' => $barberUser->id]);
 
-    $tempFile = tempnam(sys_get_temp_dir(), 'test_img');
-    $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
-    file_put_contents($tempFile, $jpegBytes);
-    $file = new UploadedFile($tempFile, 'fresh_fade.jpg', 'image/jpeg', null, true);
+    $file = UploadedFile::fake()->image('fresh_fade.jpg');
 
-    $response = $this->actingAs($barberUser)->postJson('/api/v1/gallery', [
+    $response = $this->actingAs($barberUser)->post('/api/v1/gallery', [
         'title' => 'Signature Burst Fade',
         'category' => 'haircut',
         'description' => 'Clean taper with textured crown',
         'image' => $file,
-    ]);
+    ], ['Accept' => 'application/json']);
 
     $response->assertStatus(201);
     $galleryId = $response->json('data.id');

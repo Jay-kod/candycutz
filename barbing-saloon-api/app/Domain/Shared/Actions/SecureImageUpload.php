@@ -8,7 +8,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 use Symfony\Component\Mime\MimeTypes;
 
@@ -18,24 +17,29 @@ class SecureImageUpload
     {
         $this->validateMime($file);
 
-        $actualMime = MimeTypes::getDefault()->guessMimeType($file->getRealPath());
+        $actualMime = $this->getMimeType($file);
         $isIco = in_array($actualMime, ['image/x-icon', 'image/vnd.microsoft.icon', 'image/x-ico'], true)
             || strtolower($file->getClientOriginalExtension()) === 'ico';
 
+        $realPath = $file->getRealPath();
+        $isReadable = $realPath && @file_exists($realPath) && @is_readable($realPath);
+
         // Process through Intervention Image if available, GD extension loaded, and not an ICO file
-        if (! $isIco && class_exists(ImageManager::class) && extension_loaded('gd')) {
+        if (! $isIco && class_exists(ImageManager::class) && extension_loaded('gd') && $isReadable) {
             try {
-                $manager = new ImageManager(new Driver);
-                $image = $manager->read($file->getRealPath());
+                $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver);
+                $image = $manager->read($realPath);
                 $encoded = $image->toWebp(90);
                 $filename = Str::random(40).'.webp';
                 $path = trim($directory, '/').'/'.$filename;
                 Storage::disk($disk)->put($path, (string) $encoded);
 
-                $publicStoragePath = public_path('storage/'.$path);
-                if (! file_exists($publicStoragePath)) {
-                    @mkdir(dirname($publicStoragePath), 0755, true);
-                    @file_put_contents($publicStoragePath, (string) $encoded);
+                if (! app()->runningUnitTests()) {
+                    $publicStoragePath = public_path('storage/'.$path);
+                    if (! file_exists($publicStoragePath)) {
+                        @mkdir(dirname($publicStoragePath), 0755, true);
+                        @file_put_contents($publicStoragePath, (string) $encoded);
+                    }
                 }
 
                 return $path;
@@ -51,10 +55,12 @@ class SecureImageUpload
         $path = trim($directory, '/').'/'.$filename;
         Storage::disk($disk)->putFileAs(trim($directory, '/'), $file, $filename);
 
-        $publicStoragePath = public_path('storage/'.$path);
-        if (! file_exists($publicStoragePath)) {
-            @mkdir(dirname($publicStoragePath), 0755, true);
-            @copy($file->getRealPath(), $publicStoragePath);
+        if (! app()->runningUnitTests() && $isReadable) {
+            $publicStoragePath = public_path('storage/'.$path);
+            if (! file_exists($publicStoragePath)) {
+                @mkdir(dirname($publicStoragePath), 0755, true);
+                @copy($realPath, $publicStoragePath);
+            }
         }
 
         return $path;
@@ -70,7 +76,7 @@ class SecureImageUpload
             'image/vnd.microsoft.icon',
             'image/x-ico',
         ];
-        $actualMime = MimeTypes::getDefault()->guessMimeType($file->getRealPath());
+        $actualMime = $this->getMimeType($file);
 
         if ((! in_array($actualMime, $allowedMimes, true) || ! in_array($file->getMimeType(), $allowedMimes, true)) && strtolower($file->getClientOriginalExtension()) !== 'ico') {
             throw ValidationException::withMessages([
@@ -83,5 +89,19 @@ class SecureImageUpload
                 'image' => ['Image may not be greater than 5MB.'],
             ]);
         }
+    }
+
+    protected function getMimeType(UploadedFile $file): ?string
+    {
+        $realPath = $file->getRealPath();
+        if ($realPath && @file_exists($realPath) && @is_readable($realPath)) {
+            try {
+                return MimeTypes::getDefault()->guessMimeType($realPath) ?: $file->getMimeType();
+            } catch (\Throwable) {
+                return $file->getMimeType();
+            }
+        }
+
+        return $file->getMimeType();
     }
 }

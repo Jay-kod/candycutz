@@ -2,23 +2,33 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-8">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Portfolio</p>
-            <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text">
-              Your <span class="text-gold">Gallery</span> <span class="text-xl text-theme-text-muted">({{ gallery.length }})</span>
-            </h1>
-            <p class="mt-2 max-w-xl text-sm text-theme-text-muted leading-relaxed">
-              Showcase your best work. Upload haircut photos that customers can browse and bookmark.
-            </p>
+      <div class="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#12161C] p-6 sm:p-8 md:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 group">
+        <div class="absolute -top-36 -right-36 w-80 h-80 bg-gold/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-gold/15 transition-colors duration-700"></div>
+        <div class="absolute -bottom-36 -left-36 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-700"></div>
+
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20 mb-4">
+            <PhotoIcon class="h-3.5 w-3.5 text-gold" />
+            <span class="text-[10px] font-bold text-gold tracking-widest uppercase">Visual Portfolio</span>
           </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white tracking-tight mb-2">
+            Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-400 to-amber-200">Gallery</span>
+            <span v-if="!loading" class="ml-3 inline-flex items-center justify-center h-8 px-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-slate-300 font-normal align-middle">
+              {{ gallery.length }}
+            </span>
+          </h1>
+          <p class="text-slate-400 text-xs sm:text-sm max-w-lg leading-relaxed">
+            Showcase your best haircuts, precision trims, and styling craft. Upload photos that clients can browse and bookmark.
+          </p>
+        </div>
+
+        <div class="relative z-10 flex items-center gap-3 shrink-0">
           <button
             @click="openUploadForm"
-            class="flex items-center gap-2 shrink-0 rounded-xl bg-gradient-to-r from-gold to-gold-dark px-5 py-3 text-sm font-bold text-obsidian shadow-[0_0_20px_rgba(212,175,55,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-[1.02]"
+            class="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-amber-500 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-obsidian shadow-lg shadow-gold/20 hover:shadow-[0_8px_30px_rgba(255,153,0,0.35)] transition-all hover:-translate-y-0.5 active:translate-y-0"
+            data-test="upload-image-btn"
           >
-            <PlusIcon class="h-5 w-5" />
+            <PlusIcon class="h-4 w-4" />
             Upload Image
           </button>
         </div>
@@ -53,7 +63,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { PlusIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import GalleryGrid from '../components/GalleryGrid.vue';
 import GalleryUploadModal from '../components/GalleryUploadModal.vue';

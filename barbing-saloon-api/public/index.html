@@ -1,21 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#C9A84C" />
+    <meta name="theme-color" content="#FAF9F6" />
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('theme') || localStorage.getItem('vueuse-color-scheme');
+          var root = document.documentElement;
+          var isDark = false;
+
+          if (stored === 'dark') {
+            isDark = true;
+          } else if (stored === 'light') {
+            isDark = false;
+          } else {
+            // Default of the website is light mode
+            isDark = false;
+          }
+
+          if (isDark) {
+            root.setAttribute('data-theme', 'dark');
+            root.classList.add('dark');
+            root.classList.remove('light');
+          } else {
+            root.setAttribute('data-theme', 'light');
+            root.classList.add('light');
+            root.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
     <title>CandyCutz</title>
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <script type="module" crossorigin src="/assets/index-pFNupFaW.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/runtime-core.esm-bundler-CvTHluui.js">
+    <script type="module" crossorigin src="/assets/index-C84hhmxO.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-vue-CnE0cJPr.js">
     <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-CNOWq4Kh.js">
-    <link rel="modulepreload" crossorigin href="/assets/client-CwkaQsJA.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-CkM8sih6.css">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-utils-BM_tu4vD.js">
+    <link rel="modulepreload" crossorigin href="/assets/client-DI3MMChU.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CoZVa3hf.css">
   </head>
   <body class="min-h-screen">
-    <div id="app"></div>
+    <div id="app"></div>
   </body>
-  </html>
+</html>

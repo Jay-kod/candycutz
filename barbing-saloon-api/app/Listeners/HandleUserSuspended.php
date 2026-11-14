@@ -21,7 +21,7 @@ class HandleUserSuspended implements ShouldQueue
     public function handle(UserSuspended $event): void
     {
         $user = $event->user;
-        $actorName = $event->actor?->name ?? 'System';
+        $actorName = $event->actor->name ?? 'System';
         $reason = $event->reason ?? 'No reason provided';
 
         Log::warning("User suspended: {$user->email} by {$actorName}. Reason: {$reason}", [

@@ -150,11 +150,13 @@ class ApiExceptionRenderer
         }
 
         // 9. Database / Query Exceptions
-        if ($e instanceof QueryException) {
+        if ($e instanceof QueryException || $e instanceof \PDOException) {
             $state = (string) $e->getCode();
-            $sqlCode = $e->errorInfo[1] ?? null;
+            $sqlCode = ($e instanceof QueryException) ? ($e->errorInfo[1] ?? null) : null;
 
-            if (in_array($state, ['2002', '2006', 'HY000'], true) || str_contains($e->getMessage(), 'Connection refused')) {
+            $msg = $e->getMessage();
+
+            if (in_array($state, ['2002', '2006', 'HY000'], true) || str_contains($msg, 'Connection refused') || str_contains($msg, 'actively refused') || str_contains($msg, 'No connection could be made')) {
                 $code = ErrorCode::DB_UNAVAILABLE;
             } elseif (in_array((string) $sqlCode, ['1213', '40001'], true) || in_array($state, ['40001'], true)) {
                 $code = ErrorCode::DB_DEADLOCK;

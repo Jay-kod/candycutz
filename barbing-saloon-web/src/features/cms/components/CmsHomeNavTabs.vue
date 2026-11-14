@@ -60,7 +60,7 @@ defineEmits(['update:activeTab']);
 
 const tabs = [
   { id: 'all', label: 'All Sections', icon: Squares2X2Icon },
-  { id: 'hero', label: 'Hero Showcase', icon: PhotoIcon, badge: 'Main' },
+  { id: 'hero', label: 'Hero & CTA', icon: PhotoIcon, badge: 'Main' },
   { id: 'stats', label: 'Social Proof', icon: SparklesIcon, badge: '4' },
   { id: 'about', label: 'Philosophy', icon: BookmarkSquareIcon },
   { id: 'portal', label: 'Portal Gateway', icon: UserGroupIcon },

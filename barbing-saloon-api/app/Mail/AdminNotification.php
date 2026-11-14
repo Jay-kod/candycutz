@@ -56,6 +56,7 @@ class AdminNotification extends Mailable implements ShouldQueue
         );
     }
 
+    /** @return array<int, \Illuminate\Mail\Mailables\Attachment> */
     public function attachments(): array
     {
         return [];

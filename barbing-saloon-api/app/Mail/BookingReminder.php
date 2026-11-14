@@ -42,9 +42,9 @@ class BookingReminder extends Mailable implements ShouldQueue
             view: 'mail.booking-reminder',
             with: [
                 'appointment' => $this->appointment,
-                'customerName' => $this->appointment->customer?->name ?? ($this->appointment->client_name ?? 'Valued Customer'),
-                'barberName' => $this->appointment->barber?->user?->name ?? 'Our Team',
-                'serviceName' => $this->appointment->service?->name ?? 'Grooming Service',
+                'customerName' => $this->appointment->customer->name ?? ($this->appointment->client_name ?? 'Valued Customer'),
+                'barberName' => $this->appointment->barber?->user->name ?? 'Our Team',
+                'serviceName' => $this->appointment->service->name ?? 'Grooming Service',
                 'appointmentDate' => $dateStr,
                 'appointmentTime' => $formattedTime,
             ],

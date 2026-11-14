@@ -69,6 +69,8 @@
             v-if="service.image || service.image_url"
             :src="getImageUrl(service.image || service.image_url)"
             :alt="service.name"
+            loading="lazy"
+            decoding="async"
             class="absolute inset-0 -z-20 h-full w-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105"
           />
           <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-[var(--color-bg-tertiary)]">
@@ -152,16 +154,17 @@ import { ref, computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import PageHero from '@/shared/ui/PageHero.vue';
-import { publicApi } from '@/shared/api/old_publicApi';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { formatNairaAmount } from '../../../core/utils';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const { init: initScrollReveal } = useScrollReveal();
+const publicStore = usePublicContentStore();
 
-const services = ref([]);
+const services = ref(publicStore.services || []);
 const selectedCategory = ref('All');
-const isLoading = ref(true);
+const isLoading = ref(publicStore.services.length === 0);
 
 const categories = computed(() => {
   const cats = services.value
@@ -180,8 +183,8 @@ const filteredServices = computed(() => {
 
 const fetchContent = async () => {
   try {
-    const servicesRes = await publicApi.services().catch(() => ({ data: { data: [] } }));
-    services.value = servicesRes.data?.data || [];
+    const data = await publicStore.getServices();
+    if (data) services.value = data;
   } catch (error) {
     console.error('Failed to load services page data:', error);
   } finally {

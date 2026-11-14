@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Domain\Notification\NotificationDispatcher;
 use App\Events\PaymentFailed;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Reacts to failed payments — logs the failure and notifies
- * the customer with a retry prompt.
+ * the customer, barber, and admins.
  */
 class HandlePaymentFailed implements ShouldQueue
 {
@@ -28,6 +29,12 @@ class HandlePaymentFailed implements ShouldQueue
             'reason' => $reason,
         ]);
 
-        // Future: Notify customer via NotificationDispatcher once paymentFailed() method is added
+        if ($payment->appointment) {
+            try {
+                app(NotificationDispatcher::class)->paymentFailed($payment->appointment, $reason);
+            } catch (\Throwable $e) {
+                Log::warning("HandlePaymentFailed: notification failed for appointment {$payment->appointment->id}: ".$e->getMessage());
+            }
+        }
     }
 }

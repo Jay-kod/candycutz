@@ -10,8 +10,8 @@
         </div>
         
         <div class="flex items-center gap-4 mb-6">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20 shadow-inner">
-            <MegaphoneIcon class="h-6 w-6 text-purple-400" />
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/20 to-amber-500/10 border border-gold/20 shadow-inner">
+            <MegaphoneIcon class="h-6 w-6 text-gold" />
           </div>
           <div>
             <h3 class="font-display text-xl text-theme-text">Broadcast Alert</h3>
@@ -22,13 +22,13 @@
         <div class="space-y-5">
           <div>
             <label class="text-[11px] font-bold uppercase tracking-widest text-theme-text-muted ml-1 mb-2 block">Alert Title</label>
-            <input v-model="form.title" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50" placeholder="e.g. I am back at the shop!" />
+            <input v-model="form.title" type="text" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/50 focus:ring-1 focus:ring-gold/50" placeholder="e.g. I am back at the shop!" />
           </div>
           <div>
             <label class="text-[11px] font-bold uppercase tracking-widest text-theme-text-muted ml-1 mb-2 block">Message content</label>
-            <textarea v-model="form.message" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 resize-none" placeholder="Let your customers know you are available, running late, or have a new promo..."></textarea>
+            <textarea v-model="form.message" rows="3" class="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3.5 text-sm text-theme-text outline-none transition-all focus:border-gold/50 focus:ring-1 focus:ring-gold/50 resize-none" placeholder="Let your customers know you are available, running late, or have a new promo..."></textarea>
           </div>
-          <button @click="$emit('send')" :disabled="sending" class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 py-3.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] disabled:opacity-50 mt-4 active:scale-[0.98]">
+          <button @click="$emit('send')" :disabled="sending" class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold via-amber-400 to-amber-500 py-3.5 text-sm font-bold text-obsidian transition-all hover:shadow-[0_0_20px_rgba(255,153,0,0.4)] disabled:opacity-50 mt-4 active:scale-[0.98]">
             <MegaphoneIcon v-if="!sending" class="h-4.5 w-4.5" />
             {{ sending ? 'Broadcasting...' : 'Send Broadcast' }}
           </button>

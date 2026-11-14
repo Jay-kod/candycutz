@@ -33,7 +33,7 @@ class RequestPasswordReset
             );
 
             try {
-                $frontendUrl = config('app.frontend_url') ?: env('FRONTEND_URL', 'http://localhost:5173');
+                $frontendUrl = config('app.frontend_url');
                 $resetUrl = "{$frontendUrl}/reset-password?token={$token}&email=".urlencode($user->email);
 
                 Mail::send([], [], function ($message) use ($user, $resetUrl) {

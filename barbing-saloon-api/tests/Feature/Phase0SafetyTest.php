@@ -131,10 +131,15 @@ it('never returns a placeholder bank account and returns 422 when bank details a
         'service_id' => $service->id,
     ]);
 
-    // Ensure config has no fallback accounts
+    // Ensure config and DB have no fallback accounts
     Config::set('payments.gateways.manual.bank_accounts', []);
     Config::set('payments.gateways.manual_transfer.default_account_number', null);
     Config::set('payments.gateways.manual_transfer.default_bank_name', null);
+    \App\Models\Setting::whereIn('key', [
+        'bank_name', 'manual_transfer_bank',
+        'account_name', 'manual_transfer_account_name',
+        'account_number', 'manual_transfer_account_number',
+    ])->delete();
 
     $response = $this->actingAs($customer)->getJson("/api/v1/payments/appointments/{$appointment->id}/details");
 

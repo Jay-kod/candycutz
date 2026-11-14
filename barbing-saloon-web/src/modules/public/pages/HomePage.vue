@@ -12,6 +12,7 @@
       :background-image="heroImage"
       :image-opacity="heroImageOpacity"
       :overlay-opacity="heroOverlayOpacity"
+      :overlay-color="heroOverlayColor"
     />
 
     <!-- Features Block (@efferd/features-1) -->
@@ -53,7 +54,7 @@
             </div>
           </div>
           <div class="relative overflow-hidden rounded-3xl aspect-[4/3] border border-[var(--color-border)] shadow-2xl">
-            <img :src="aboutImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+            <img :src="aboutImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
           </div>
         </div>
       </div>
@@ -88,7 +89,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
-import { publicApi } from '@/shared/api/old_publicApi';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { getStorageUrl } from '@/core/utils/url';
 import BarberCta from '@/shared/ui/BarberCta.vue';
 import FeaturesSection from '@/components/FeaturesSection.vue';
@@ -96,6 +97,7 @@ import PortalCtaSection from '@/components/PortalCtaSection.vue';
 import StatisticsSection from '@/components/StatisticsSection.vue';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee.vue';
 
+const publicStore = usePublicContentStore();
 const { init: initScrollReveal } = useScrollReveal();
 
 const featuresBadge = ref('');
@@ -109,7 +111,8 @@ const heroBtn1Text = ref('Book a Service');
 const heroBtn2Text = ref('About Us');
 const heroImage = ref(null);
 const heroImageOpacity = ref(null);
-const heroOverlayOpacity = ref(null);
+const heroOverlayOpacity = ref(45);
+const heroOverlayColor = ref('#D4AF37');
 const ctaTitle = ref('Fresh Cut. Zero Stress.');
 const ctaTitlePartOne = ref('Fresh Cut.');
 const ctaTitlePartTwo = ref('Zero Stress.');
@@ -138,8 +141,7 @@ const portalText = ref('Create an account to browse our extensive list of servic
 
 const fetchSettings = async () => {
   try {
-    const response = await publicApi.settings();
-    const settings = response.data.data;
+    const settings = await publicStore.getSettings();
     if (settings) {
       if (settings.hero_title) heroTitle.value = settings.hero_title;
       if (settings.hero_subtitle) heroSubtitle.value = settings.hero_subtitle;
@@ -151,8 +153,17 @@ const fetchSettings = async () => {
       } else if (settings.hero_opacity !== undefined && settings.hero_opacity !== null) {
         heroImageOpacity.value = settings.hero_opacity;
       }
-      if (settings.page_hero_home_overlay_opacity !== undefined && settings.page_hero_home_overlay_opacity !== null) {
-        heroOverlayOpacity.value = settings.page_hero_home_overlay_opacity;
+      if (settings.hero_overlay_opacity !== undefined && settings.hero_overlay_opacity !== null) {
+        heroOverlayOpacity.value = Number(settings.hero_overlay_opacity);
+      } else if (settings.page_hero_home_overlay_opacity !== undefined && settings.page_hero_home_overlay_opacity !== null) {
+        heroOverlayOpacity.value = Number(settings.page_hero_home_overlay_opacity);
+      } else {
+        heroOverlayOpacity.value = 45;
+      }
+      if (settings.hero_overlay_color) {
+        heroOverlayColor.value = settings.hero_overlay_color;
+      } else if (settings.page_hero_home_overlay_color) {
+        heroOverlayColor.value = settings.page_hero_home_overlay_color;
       }
       ctaTitle.value = settings.cta_title || settings.hero_title || ctaTitle.value;
       const titleParts = splitHeadline(ctaTitle.value);
@@ -212,19 +223,10 @@ const fetchSettings = async () => {
 
 const fetchTestimonials = async () => {
   try {
-    const response = await publicApi.testimonials();
-    const items = response.data?.data;
-    if (!Array.isArray(items)) {
-      throw new TypeError('The testimonials response did not contain a list.');
+    const items = await publicStore.getTestimonials();
+    if (Array.isArray(items)) {
+      testimonials.value = items;
     }
-    testimonials.value = items
-      .filter((item) => item.review || item.comment)
-      .slice(0, 12)
-      .map((item) => ({
-        ...item,
-        client_name: item.client_name || item.customer_name || 'CandyCutz client',
-        client_avatar: item.client_avatar || item.avatar_url || null,
-      }));
   } catch (error) {
     console.error('Failed to load homepage testimonials:', error);
   } finally {

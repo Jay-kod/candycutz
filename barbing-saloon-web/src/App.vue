@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-[100dvh] w-full bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans">
+    <SystemConnectionBanner />
     <div class="scroll-progress" aria-hidden="true"></div>
     <router-view />
     <ConfirmModal />
@@ -11,15 +12,19 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
 import ConfirmModal from './core/components/ConfirmModal.vue';
+import SystemConnectionBanner from './core/components/SystemConnectionBanner.vue';
 import ToastNotification from './core/components/ToastNotification.vue';
 import BackToTop from './core/components/BackToTop.vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
+import { useConnectionStatus } from '@/core/composables/useConnectionStatus';
 
 let revealObserver = null;
 const { loadBrandIdentity } = useBrandIdentity();
+const { checkHealth } = useConnectionStatus();
 
 onMounted(() => {
   loadBrandIdentity();
+  checkHealth();
   const mapDelays = () => {
     document.querySelectorAll('[data-reveal]').forEach((el) => {
       const delay = el.dataset.revealDelay;

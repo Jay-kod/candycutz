@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { barberApi } from '@/shared/api/old_barberApi';
+import api from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
 
@@ -13,9 +13,12 @@ export function useBarberAppointments() {
   const loadAppointments = async () => {
     loading.value = true;
     try {
-      const response = await barberApi.getBookings();
-      appointments.value = response.data;
-    } catch (e) {
+      const response = await api.get('/barber/appointments');
+      const data = response.data?.data || [];
+      appointments.value = {
+        data: Array.isArray(data) ? data : (data.items || []),
+      };
+    } catch {
       toast.error('Failed to load appointments');
     } finally {
       loading.value = false;
@@ -25,10 +28,10 @@ export function useBarberAppointments() {
   const approve = async (id) => {
     if (await confirm('Approve Booking', 'Are you sure you want to approve this booking manually?')) {
       try {
-        await barberApi.approveBooking(id);
+        await api.patch(`/barber/appointments/${id}/approve`);
         await loadAppointments();
         toast.success('Booking approved and confirmed!');
-      } catch (err) {
+      } catch {
         toast.error('Failed to approve booking');
       }
     }
@@ -37,10 +40,10 @@ export function useBarberAppointments() {
   const cancel = async (id) => {
     if (await confirm('Cancel Booking', 'Are you sure you want to cancel this booking? This action cannot be undone.')) {
       try {
-        await barberApi.cancelBooking(id);
+        await api.patch(`/barber/appointments/${id}/cancel`);
         await loadAppointments();
         toast.success('Booking cancelled');
-      } catch (err) {
+      } catch {
         toast.error('Failed to cancel booking');
       }
     }
@@ -48,21 +51,21 @@ export function useBarberAppointments() {
 
   const complete = async (id, verificationCode = '') => {
     try {
-      await barberApi.complete(id, { verification_code: verificationCode });
+      await api.patch(`/barber/appointments/${id}/complete`, { verification_code: verificationCode });
       await loadAppointments();
       toast.success('Booking verified and marked as completed!');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to verify booking');
+      toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to verify booking');
       throw err;
     }
   };
 
   const markNoShow = async (id) => {
     try {
-      await barberApi.noShow(id);
+      await api.patch(`/barber/appointments/${id}/no-show`);
       await loadAppointments();
       toast.success('Booking marked as no-show');
-    } catch (err) {
+    } catch {
       toast.error('Failed to mark as no-show');
     }
   };
@@ -74,6 +77,6 @@ export function useBarberAppointments() {
     approve,
     cancel,
     complete,
-    markNoShow
+    markNoShow,
   };
 }

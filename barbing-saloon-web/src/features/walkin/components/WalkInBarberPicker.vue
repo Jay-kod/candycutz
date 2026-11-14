@@ -74,11 +74,11 @@
             <h3 class="text-xs font-bold text-theme-text group-hover/barber:text-admin-light transition-colors truncate">
               {{ b.name }}
             </h3>
-            <span class="text-[10px] text-amber-400 font-mono shrink-0">★ {{ b.rating || '5.0' }}</span>
+            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono shrink-0">★ {{ b.rating || '5.0' }}</span>
           </div>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] text-emerald-400 font-mono">Available</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">Available</span>
           </div>
         </div>
       </div>

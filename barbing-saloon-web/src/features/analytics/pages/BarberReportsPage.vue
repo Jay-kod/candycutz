@@ -3,13 +3,15 @@
     <section class="space-y-6 animate-fade-in pb-12">
       <ReportsHeader
         title="Operational"
-        titleHighlight="Analytics"
+        titleHighlight="Reports"
         subtitle="Comprehensive overview of revenue, performance, and trends."
         theme="gold"
         :activeRangeLabel="activeRangeLabel"
         :selectedRange="selectedRange"
+        :rangeOptions="rangeOptions"
         :loading="loading"
         @update:selectedRange="setRange"
+        @generate="showReportPreview = true"
         @export="showReportPreview = true"
       />
 
@@ -62,6 +64,7 @@ const {
   loading,
   showReportPreview,
   selectedRange,
+  rangeOptions,
   activeRangeLabel,
   performanceMetrics,
   topServices,

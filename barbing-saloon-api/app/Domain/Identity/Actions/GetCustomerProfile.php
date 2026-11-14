@@ -26,8 +26,8 @@ class GetCustomerProfile
                 'date' => $a->appointment_date,
                 'time' => $a->appointment_time,
                 'status' => $a->status,
-                'service_name' => $a->service?->name ?? 'Custom Service',
-                'barber_name' => $a->barber?->user?->name ?? 'Master Barber',
+                'service_name' => $a->service->name ?? 'Custom Service',
+                'barber_name' => $a->barber?->user->name ?? 'Master Barber',
                 'amount' => (float) $a->total_price,
             ]);
 
@@ -41,6 +41,8 @@ class GetCustomerProfile
                 'name' => $customer->name,
                 'email' => $customer->email,
                 'phone' => $customer->phone ?? 'N/A',
+                'is_active' => (bool) $customer->is_active,
+                'status' => $customer->status ?? ($customer->is_active ? 'active' : 'suspended'),
                 'auth_provider' => $customer->auth_provider ?: 'local',
                 'registered_via' => $customer->auth_provider && $customer->auth_provider !== 'local' ? ucfirst($customer->auth_provider) : 'Registration form',
                 'avatar' => app(UserMediaUrl::class)->for($customer, $customer->avatar),

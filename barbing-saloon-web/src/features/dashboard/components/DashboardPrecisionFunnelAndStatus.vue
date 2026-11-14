@@ -136,7 +136,7 @@
         <div class="relative w-36 h-36 shrink-0 flex items-center justify-center">
           <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
             <!-- Ray Lines Circle Texture -->
-            <circle cx="50" cy="50" r="44" fill="var(--color-bg)" stroke="rgba(255,103,0,0.15)" stroke-width="1" />
+            <circle cx="50" cy="50" r="44" fill="var(--color-bg-surface, #ffffff)" stroke="rgba(255,103,0,0.15)" stroke-width="1" />
             
             <!-- Radiating Texture Lines (48 rays) -->
             <line

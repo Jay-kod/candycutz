@@ -19,7 +19,7 @@ class LogApiRequest
 
             AuditLog::create([
                 'user_id' => auth()->id(),
-                'user_role' => auth()->user()?->role?->value ?? null,
+                'user_role' => auth()->user()?->role->value ?? null,
                 'action' => $request->method().' '.$request->path(),
                 'module' => $module,
                 'ip_address' => $request->ip(),

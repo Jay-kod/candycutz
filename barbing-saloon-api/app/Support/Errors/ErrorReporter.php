@@ -158,7 +158,7 @@ class ErrorReporter
             'route_uri' => $routeUri,
             'url_redacted' => $this->redactUrl($request?->fullUrl()),
             'user_id' => $context?->userId() ?? $request?->user()?->id,
-            'role' => $context?->role() ?? ($request?->user()?->role instanceof \BackedEnum ? $request->user()->role->value : (string) ($request?->user()?->role ?? '')),
+            'role' => $context?->role() ?? ($request?->user()?->role instanceof \BackedEnum ? $request->user()->role->value : (string) ($request?->user()->role ?? '')),
             'client' => $context?->client(),
             'app_version' => $context?->appVersion(),
             'device_label' => $context?->deviceId(),
@@ -272,6 +272,7 @@ class ErrorReporter
             'network_state' => $payload['network_state'] ?? null,
             'platform' => $payload['platform'] ?? null,
             'breadcrumbs' => $this->redactData($payload['breadcrumbs'] ?? []),
+            'api_request' => $this->sanitiseApiRequest($payload['api_request'] ?? null),
         ];
 
         $event = new ErrorEvent([
@@ -283,7 +284,7 @@ class ErrorReporter
             'route_uri' => $route,
             'url_redacted' => $route,
             'user_id' => $request?->user()?->id,
-            'role' => $request?->user()?->role instanceof \BackedEnum ? $request->user()->role->value : (string) ($request?->user()?->role ?? ''),
+            'role' => $request?->user()?->role instanceof \BackedEnum ? $request->user()->role->value : (string) ($request?->user()->role ?? ''),
             'client' => $source,
             'app_version' => (string) ($payload['app_version'] ?? $request?->header('X-App-Version') ?? ''),
             'device_label' => (string) ($payload['device'] ?? $request?->header('X-Device-Id') ?? ''),
@@ -300,6 +301,47 @@ class ErrorReporter
         ]);
 
         $event->save();
+    }
+
+    /**
+     * @return array{method: string, path: string, timeout_ms: int|null, elapsed_ms: int|null, retry_count: int, error_code: string}|null
+     */
+    private function sanitiseApiRequest(mixed $request): ?array
+    {
+        if (! is_array($request) || ! is_string($request['path'] ?? null)) {
+            return null;
+        }
+
+        $path = parse_url($request['path'], PHP_URL_PATH);
+        if (! is_string($path) || ! str_starts_with($path, '/')) {
+            return null;
+        }
+
+        $method = strtoupper((string) ($request['method'] ?? 'GET'));
+        if (! in_array($method, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], true)) {
+            $method = 'GET';
+        }
+
+        $boundedInteger = static function (mixed $value, int $maximum): ?int {
+            if (! is_numeric($value)) {
+                return null;
+            }
+
+            return max(0, min((int) $value, $maximum));
+        };
+
+        $errorCode = is_string($request['error_code'] ?? null)
+            ? substr($request['error_code'], 0, 64)
+            : 'CLIENT_ERROR';
+
+        return [
+            'method' => $method,
+            'path' => substr($path, 0, 255),
+            'timeout_ms' => $boundedInteger($request['timeout_ms'] ?? null, 600000),
+            'elapsed_ms' => $boundedInteger($request['elapsed_ms'] ?? null, 600000),
+            'retry_count' => $boundedInteger($request['retry_count'] ?? null, 5) ?? 0,
+            'error_code' => $errorCode,
+        ];
     }
 
     private function resolveErrorCode(Throwable $e): ErrorCode
@@ -446,7 +488,7 @@ class ErrorReporter
         $payload = [
             'timestamp' => Carbon::now()->toIso8601String(),
             'fallback_reason' => $cause,
-            'error_code' => $errorCode?->value ?? ($e instanceof AppException ? $e->getErrorCode()->value : 'SERVER_ERROR'),
+            'error_code' => $errorCode->value ?? ($e instanceof AppException ? $e->getErrorCode()->value : 'SERVER_ERROR'),
             'exception_class' => get_class($e),
             'message' => $e->getMessage(),
             'file' => $this->normalisePath($e->getFile()),

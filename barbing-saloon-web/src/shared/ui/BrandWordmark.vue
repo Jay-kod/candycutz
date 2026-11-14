@@ -1,8 +1,8 @@
 <template>
   <span class="brand-wordmark" aria-label="Shop name">
-    <span :class="goldFirst ? 'brand-wordmark__gold' : 'brand-wordmark__white'">{{ first }}</span>
+    <span :class="goldFirst ? 'brand-wordmark__gold' : 'brand-wordmark__white brand-wordmark__primary'">{{ first }}</span>
     <span v-if="spaceBetween" aria-hidden="true">&nbsp;</span>
-    <span :class="goldFirst ? 'brand-wordmark__white' : 'brand-wordmark__gold'">{{ second }}</span>
+    <span :class="goldFirst ? 'brand-wordmark__white brand-wordmark__primary' : 'brand-wordmark__gold'">{{ second }}</span>
   </span>
 </template>
 
@@ -21,17 +21,14 @@ defineProps({
   align-items: baseline;
 }
 
-.brand-wordmark__white {
-  color: var(--brand-wordmark-white, #fff);
+.brand-wordmark__white,
+.brand-wordmark__primary {
+  color: var(--brand-wordmark-color, var(--brand-wordmark-white, var(--color-text-primary, currentColor)));
   transition: color 200ms ease;
 }
 
-:global([data-theme="light"]) .brand-wordmark__white,
-:global(html:not(.dark)) .brand-wordmark__white {
-  color: var(--brand-wordmark-white, #111827);
-}
-
 .brand-wordmark__gold {
-  color: #ff9900;
+  color: var(--brand-wordmark-gold, var(--color-accent, #ff9900));
+  transition: color 200ms ease;
 }
 </style>

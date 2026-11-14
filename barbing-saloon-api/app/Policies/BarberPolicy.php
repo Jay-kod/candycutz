@@ -12,7 +12,7 @@ class BarberPolicy
 
     public function before(User $user, string $ability): ?bool
     {
-        if (in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+        if (in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
             return true;
         }
 
@@ -31,18 +31,18 @@ class BarberPolicy
 
     public function create(User $user): bool
     {
-        return in_array($user->role?->value ?? $user->role, ['admin', 'super_admin']);
+        return in_array($user->role->value ?? $user->role, ['admin', 'super_admin']);
     }
 
     public function update(User $user, Barber $barber): bool
     {
         // Barbers can update their own profile, but admin/super_admin is handled in before()
-        return ($user->role?->value ?? $user->role) === 'barber' &&
+        return ($user->role->value ?? $user->role) === 'barber' &&
                $barber->user_id === $user->id;
     }
 
     public function delete(User $user, Barber $barber): bool
     {
-        return in_array($user->role?->value ?? $user->role, ['admin', 'super_admin']);
+        return in_array($user->role->value ?? $user->role, ['admin', 'super_admin']);
     }
 }

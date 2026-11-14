@@ -34,10 +34,8 @@ class SendExpoPush implements ShouldQueue
     public int $backoff = 10;
 
     /**
-     * @param  array<string>  $tokens  Expo push tokens
-     * @param  string  $title  Notification title
-     * @param  string  $body  Notification body text
-     * @param  array  $data  Extra data payload for deep linking
+     * @param  array<int, string>  $tokens  Expo push tokens
+     * @param  array<string, mixed>  $data  Extra data payload for deep linking
      */
     public function __construct(
         public array $tokens,

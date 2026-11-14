@@ -17,7 +17,7 @@ class UpdateServiceCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $serviceCategoryId = $this->route('serviceCategory')?->id ?? $this->route('serviceCategory');
+        $serviceCategoryId = $this->route('serviceCategory')->id ?? $this->route('serviceCategory');
 
         return [
             'name' => ['required', 'string', 'max:150'],

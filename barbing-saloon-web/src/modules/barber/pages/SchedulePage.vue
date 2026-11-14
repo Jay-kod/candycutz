@@ -1,298 +1,51 @@
 <template>
   <BarberLayout>
-    <section class="space-y-6 animate-fade-in min-h-full pb-6">
-      <!-- Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-subtle p-4 xs:p-6 sm:p-8 shadow-2xl">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl"></div>
-        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-medium">Schedule</p>
-            <h1 class="mt-2 font-display text-2xl xs:text-3xl sm:text-4xl text-theme-text drop-shadow-lg">
-              Working Hours & <span class="text-gold">Bookings</span>
-            </h1>
-          </div>
-          <button 
-            @click="saveSchedule" 
-            :disabled="isSaving"
-            class="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-gold/30 bg-gold px-6 py-3 text-sm font-bold text-obsidian transition-all hover:bg-gold-light hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50"
-          >
-            <ArrowPathIcon v-if="isSaving" class="h-5 w-5 animate-spin" />
-            <CheckCircleIcon v-else class="h-5 w-5" />
-            {{ isSaving ? 'Saving...' : 'Save Schedule' }}
-          </button>
-        </div>
-      </div>
+    <section class="max-w-7xl mx-auto pb-16 pt-4 px-4 sm:px-6 lg:px-8 space-y-6">
+      <ScheduleSkeleton v-if="loading" />
 
-      <!-- Grid: Working Hours + Upcoming -->
-      <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
-        
-        <!-- Working Hours Card -->
-        <div class="rounded-2xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-2xl relative">
-          <div v-if="isEditing" class="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-          
-          <div class="flex items-center justify-between border-b border-theme-border px-6 py-5 bg-theme-surface-subtle/40">
-            <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
-                <ClockIcon class="h-5 w-5 text-gold" />
-              </div>
-              <h2 class="font-display text-xl text-theme-text">Working Hours</h2>
-            </div>
-            <p class="text-xs text-theme-text-muted flex items-center gap-1.5"><PencilSquareIcon class="h-3.5 w-3.5"/> Edit your availability below</p>
-          </div>
-          
-          <div class="p-3.5 xs:p-5 sm:p-6">
-            <div v-if="loading" class="py-12 flex justify-center">
-              <div class="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent shadow-[0_0_15px_rgba(212,175,55,0.5)]"></div>
-            </div>
+      <template v-else>
+        <ScheduleHeader
+          :is-saving="isSaving"
+          @save="saveSchedule"
+        />
 
-            <div v-else class="space-y-2.5">
-              <div
-                v-for="hour in workingHours"
-                :key="hour.day_of_week"
-                class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-3.5 xs:p-4 sm:p-5 transition-all duration-300"
-                :class="hour.is_closed 
-                  ? 'border-red-500/15 bg-gradient-to-r from-red-500/[0.04] to-transparent' 
-                  : 'border-gold/10 bg-gradient-to-r from-gold/[0.03] to-transparent hover:border-gold/25 hover:shadow-[0_0_30px_rgba(212,175,55,0.04)]'"
-              >
-                <!-- Day Label + Toggle -->
-                <div class="flex items-center gap-5 mb-3 sm:mb-0">
-                  <!-- Premium Toggle -->
-                  <button 
-                    @click="hour.is_closed = !hour.is_closed"
-                    class="relative h-8 w-14 rounded-full transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-theme-surface"
-                    :class="hour.is_closed 
-                      ? 'bg-gradient-to-r from-red-900/40 to-red-800/30 border border-red-500/25 focus:ring-red-500/40' 
-                      : 'bg-gradient-to-r from-emerald-900/50 to-emerald-800/40 border border-emerald-400/30 shadow-[0_0_20px_rgba(168,85,247,0.15)] focus:ring-emerald-500/40'"
-                  >
-                    <span 
-                      class="absolute top-1 inline-block h-6 w-6 rounded-full transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                      :class="hour.is_closed 
-                        ? 'left-1 bg-gradient-to-br from-red-400 to-red-500 shadow-[0_2px_8px_rgba(248,113,113,0.4)]' 
-                        : 'left-[1.625rem] bg-gradient-to-br from-emerald-300 to-emerald-400 shadow-[0_2px_12px_rgba(52,211,153,0.6),0_0_20px_rgba(52,211,153,0.3)]'"
-                    />
-                  </button>
+        <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] items-start">
+          <ScheduleHoursCard
+            :working-hours="workingHours"
+            :day-name="dayName"
+          />
 
-                  <div class="flex flex-col">
-                    <span class="text-base text-theme-text font-semibold tracking-wide">{{ dayName(hour.day_of_week) }}</span>
-                    <span class="text-[11px] mt-0.5" :class="hour.is_closed ? 'text-red-400/60' : 'text-emerald-400/60'">
-                      {{ hour.is_closed ? 'Day off' : 'Available' }}
-                    </span>
-                  </div>
-                </div>
-                
-                <!-- Time Selection -->
-                <div class="flex flex-wrap xs:flex-nowrap items-center gap-2 xs:gap-3 w-full sm:w-auto">
-                    <template v-if="!hour.is_closed">
-                      <!-- Open Time -->
-                      <div class="relative flex items-center flex-1 xs:flex-initial">
-                        <div class="absolute left-3 pointer-events-none">
-                          <div class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                        </div>
-                        <input 
-                          type="time" 
-                          v-model="hour.open_time" 
-                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border bg-theme-bg pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 hover:border-theme-border"
-                        />
-                      </div>
-
-                      <div class="flex items-center gap-1.5 px-1 shrink-0">
-                        <div class="h-px w-3 xs:w-4 bg-gold/30"></div>
-                        <span class="text-[10px] uppercase tracking-widest text-gold/40 font-bold">to</span>
-                        <div class="h-px w-3 xs:w-4 bg-gold/30"></div>
-                      </div>
-
-                      <!-- Close Time -->
-                      <div class="relative flex items-center flex-1 xs:flex-initial">
-                        <div class="absolute left-3 pointer-events-none">
-                          <div class="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"></div>
-                        </div>
-                        <input 
-                          type="time" 
-                          v-model="hour.close_time" 
-                          class="w-full xs:w-[125px] sm:w-[140px] rounded-xl border border-theme-border bg-theme-bg pl-8 pr-3 py-2.5 text-sm text-theme-text font-medium outline-none transition-all duration-200 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 hover:border-theme-border"
-                        />
-                      </div>
-                    </template>
-
-                    <div v-else class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/[0.07] border border-red-500/15">
-                      <div class="h-1.5 w-1.5 rounded-full bg-red-400/60"></div>
-                      <span class="text-red-400/70 text-xs font-bold uppercase tracking-[0.2em]">Closed</span>
-                    </div>
-                </div>
-              </div>
-
-            </div>
+          <div class="lg:sticky lg:top-8">
+            <ScheduleUpcomingCard
+              :appointments="appointments"
+              :get-month="getMonth"
+              :get-day="getDay"
+              :format-time-display="formatTimeDisplay"
+            />
           </div>
         </div>
-
-        <!-- Upcoming Appointments Card -->
-        <div class="rounded-2xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden shadow-2xl lg:sticky lg:top-8">
-          <div class="flex items-center gap-3 border-b border-theme-border px-6 py-5 bg-theme-surface-subtle/40">
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-400/10">
-              <CalendarDaysIcon class="h-5 w-5 text-blue-400" />
-            </div>
-            <h2 class="font-display text-xl text-theme-text">Upcoming Appointments</h2>
-          </div>
-
-          <div v-if="loading" class="py-12 flex justify-center">
-            <div class="h-8 w-8 animate-spin rounded-full border-2 border-blue-400 border-t-transparent shadow-[0_0_15px_rgba(96,165,250,0.5)]"></div>
-          </div>
-
-          <div v-else class="divide-y divide-theme-border">
-            <div
-              v-for="appointment in appointments"
-              :key="appointment.id"
-              class="group flex items-start gap-4 px-6 py-4 transition-colors hover:bg-theme-surface/80 hover:bg-gradient-to-r hover:from-blue-500/5 hover:to-transparent"
-            >
-              <!-- Date Block -->
-              <div class="flex flex-col items-center shrink-0 rounded-xl bg-theme-surface-subtle border border-theme-border px-3 py-2 min-w-[56px] shadow-inner">
-                <span class="text-[10px] uppercase tracking-widest text-theme-text-muted font-bold">{{ getMonth(appointment.appointment_date) }}</span>
-                <span class="text-xl font-bold text-theme-text font-display leading-tight">{{ getDay(appointment.appointment_date) }}</span>
-              </div>
-
-              <div class="flex-1 min-w-0">
-                <p class="text-base font-semibold text-theme-text truncate">{{ appointment.client_name }}</p>
-                <p class="mt-0.5 text-xs text-theme-text-muted">{{ appointment.service?.name || 'General Service' }}</p>
-                <div class="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gold/10 px-2 py-1 border border-gold/20">
-                  <ClockIcon class="h-3 w-3 text-gold" />
-                  <span class="text-[10px] text-gold font-bold tracking-wider">{{ formatTimeDisplay(appointment.appointment_time) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="appointments.length === 0" class="px-6 py-16 text-center">
-              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-theme-surface-subtle border border-dashed border-theme-border mb-4">
-                <CalendarDaysIcon class="h-8 w-8 text-theme-text-muted" />
-              </div>
-              <p class="text-base font-display text-theme-text mb-1">No upcoming appointments</p>
-              <p class="text-sm text-theme-text-muted">Your future bookings will appear here.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </template>
     </section>
   </BarberLayout>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
-import { barberApi } from '@/shared/api/old_barberApi';
-import { useToast } from '../../../core/composables/useToast';
-import { 
-  ClockIcon, 
-  CalendarDaysIcon, 
-  PencilSquareIcon, 
-  CheckCircleIcon, 
-  ArrowPathIcon
-} from '@heroicons/vue/24/outline';
+import { useBarberSchedule } from '../composables/useBarberSchedule';
+import ScheduleHeader from '../components/schedule/ScheduleHeader.vue';
+import ScheduleHoursCard from '../components/schedule/ScheduleHoursCard.vue';
+import ScheduleUpcomingCard from '../components/schedule/ScheduleUpcomingCard.vue';
+import ScheduleSkeleton from '../components/schedule/ScheduleSkeleton.vue';
 
-const toast = useToast();
-
-const loading = ref(true);
-const isSaving = ref(false);
-
-const appointments = ref([]);
-const workingHours = ref([]);
-const originalHours = ref([]);
-
-const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-function dayName(dayNum) {
-  return dayNames[dayNum] || `Day ${dayNum}`;
-}
-
-function getMonth(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleString('en-US', { month: 'short' });
-}
-
-function getDay(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.getDate();
-}
-
-function formatTimeDisplay(timeStr) {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':');
-  const d = new Date();
-  d.setHours(h, m, 0);
-  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
-
-const isEditing = ref(false); // Just a placeholder for UI state if needed
-
-const getDefaultHours = () => {
-  return Array.from({ length: 7 }, (_, i) => ({
-    day_of_week: i,
-    open_time: '09:00',
-    close_time: '17:00',
-    is_closed: i === 0 || i === 6 // Closed on weekends by default
-  }));
-};
-
-async function loadData() {
-  loading.value = true;
-  try {
-    const response = await barberApi.schedule();
-    const data = response.data.data || {};
-    
-    appointments.value = data.appointments || [];
-    
-    if (data.working_hours && data.working_hours.length > 0) {
-      // Map existing hours and fill in missing days
-      const map = {};
-      data.working_hours.forEach(h => { map[h.day_of_week] = h; });
-      const full = [];
-      for (let d = 0; d < 7; d++) {
-        full.push(map[d] || {
-          id: null,
-          day_of_week: d,
-          open_time: '09:00',
-          close_time: '17:00',
-          is_closed: true // Default missing to closed
-        });
-      }
-      workingHours.value = full;
-    } else {
-      workingHours.value = getDefaultHours();
-    }
-    // Save original state for cancel
-    originalHours.value = JSON.parse(JSON.stringify(workingHours.value));
-  } catch (e) {
-    toast.error('Failed to load schedule');
-    workingHours.value = getDefaultHours();
-    originalHours.value = JSON.parse(JSON.stringify(workingHours.value));
-  } finally {
-    loading.value = false;
-  }
-}
-
-
-async function saveSchedule() {
-  // Validate working hours
-  for (const hour of workingHours.value) {
-    if (!hour.is_closed && hour.open_time >= hour.close_time) {
-      toast.error(`Invalid hours for ${dayName(hour.day_of_week)}: Open time must be before close time.`);
-      return;
-    }
-  }
-
-  isSaving.value = true;
-  try {
-    await barberApi.updateSchedule({ working_hours: workingHours.value });
-    toast.success('Schedule updated successfully');
-    originalHours.value = JSON.parse(JSON.stringify(workingHours.value));
-  } catch (e) {
-    toast.error('Failed to save schedule');
-  } finally {
-    isSaving.value = false;
-  }
-}
-
-onMounted(() => {
-  loadData();
-});
+const {
+  loading,
+  isSaving,
+  appointments,
+  workingHours,
+  dayName,
+  getMonth,
+  getDay,
+  formatTimeDisplay,
+  saveSchedule,
+} = useBarberSchedule();
 </script>

@@ -5,9 +5,14 @@ export default [
   { path: '/customer/dashboard/profile', name: 'customer-profile', component: () => import('../../modules/customer/pages/ProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/reviews', name: 'customer-reviews', component: () => import('../../modules/customer/pages/ReviewsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/feedback', name: 'customer-feedback', component: () => import('../../modules/customer/pages/FeedbackPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/barbers', name: 'customer-barbers', component: () => import('../../modules/customer/pages/BarbersPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/barbers/:id', name: 'customer-barber-details', component: () => import('../../modules/customer/pages/BarberProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/barber/:id', name: 'customer-barber-profile', component: () => import('../../modules/customer/pages/BarberProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/services', name: 'customer-services', component: () => import('../../modules/customer/pages/BrowseServicesPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/services/:id', name: 'customer-service-details', component: () => import('../../modules/customer/pages/ServiceDetailsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/book/:serviceId', name: 'customer-book-service', component: () => import('../../modules/customer/pages/BookServicePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/payment', name: 'customer-payment', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/payment/:appointmentId', name: 'customer-payment-appointment', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/wishlist', name: 'customer-wishlist', component: () => import('../../modules/customer/pages/WishlistPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/gallery', name: 'customer-gallery', component: () => import('../../modules/customer/pages/GalleryPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/blog', name: 'customer-blog', component: () => import('../../modules/customer/pages/BlogPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
@@ -17,5 +22,9 @@ export default [
   { path: '/customer/dashboard/notification-settings', name: 'customer-notification-settings', component: () => import('../../modules/customer/pages/NotificationSettingsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/analytics', name: 'customer-analytics', component: () => import('@/features/analytics/pages/CustomerAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/reports', name: 'customer-reports', component: () => import('../../modules/customer/pages/ReportsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
-  { path: '/customer/dashboard/barber/:id', name: 'customer-barber-profile', component: () => import('../../modules/customer/pages/BarberProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+
+  // Direct redirects for /customer/barbers, /customer/barber
+  { path: '/customer/barbers', redirect: '/customer/dashboard/barbers' },
+  { path: '/customer/barber', redirect: '/customer/dashboard/barbers' },
+  { path: '/customer/barber/:id', redirect: to => `/customer/dashboard/barber/${to.params.id}` },
 ];

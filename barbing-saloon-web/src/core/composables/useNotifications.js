@@ -1,11 +1,13 @@
 import { ref } from 'vue'
 import api from '@/shared/api/client'
 
-// Global shared state so all components see the same unread count
+// Global shared state so all components (header bell, view, portals) share identical reactive state
 const notifications = ref([])
 const unreadCount = ref(0)
 const isLoading = ref(false)
+const isRefreshing = ref(false)
 let pollTimer = null
+let subscriberCount = 0
 let knownNotificationIds = new Set()
 let isInitialized = false
 
@@ -43,7 +45,7 @@ function playChime() {
     osc2.start(now + 0.1)
     osc2.stop(now + 0.45)
   } catch (e) {
-    // AudioContext blocked or not supported
+    void e // AudioContext blocked by browser policy or not supported
   }
 }
 
@@ -60,23 +62,32 @@ function showDesktopNotification(title, body) {
       })
     }
   } catch (e) {
-    // Notifications not permitted or error
+    void e // Desktop notifications not permitted or unsupported
   }
 }
 
 export function useNotifications() {
-  const fetchNotifications = async () => {
+  /**
+   * Fetch full notifications list.
+   * Supports silent background refresh to prevent UI flickering.
+   */
+  const fetchNotifications = async ({ silent = false } = {}) => {
     try {
-      const token = localStorage.getItem('candycutz_auth_token')
+      const token = localStorage.getItem('candycutz_auth_token') || localStorage.getItem('token')
       if (!token) return
 
-      isLoading.value = true
+      if (silent) {
+        isRefreshing.value = true
+      } else {
+        isLoading.value = true
+      }
+
       const res = await api.get('/v1/notifications')
       const list = res.data?.data || []
       notifications.value = list
       unreadCount.value = list.filter((n) => !n.is_read).length
 
-      // Check for new incoming notifications to play sound / show desktop notification
+      // Detect new incoming unread notifications to trigger auditory chime and desktop notification
       if (isInitialized) {
         const newItems = list.filter((n) => !n.is_read && !knownNotificationIds.has(n.id))
         if (newItems.length > 0) {
@@ -93,31 +104,37 @@ export function useNotifications() {
       console.error('Failed to fetch notifications:', err)
     } finally {
       isLoading.value = false
+      isRefreshing.value = false
     }
   }
 
+  /**
+   * Lightweight unread count check (performs fast indexed COUNT query)
+   */
   const fetchUnreadCount = async () => {
     try {
-      const token = localStorage.getItem('candycutz_auth_token')
+      const token = localStorage.getItem('candycutz_auth_token') || localStorage.getItem('token')
       if (!token) return
 
       const res = await api.get('/v1/notifications/unread-count')
       const count = res.data?.data?.count ?? 0
 
-      // If count increased, fetch full notifications to get the new item details
+      // If count increased or changed, silently re-fetch full payload
       if (count > unreadCount.value) {
-        await fetchNotifications()
+        await fetchNotifications({ silent: true })
       } else {
         unreadCount.value = count
       }
     } catch (err) {
-      // Fallback silently on network errors
+      void err // Fallback silently on network errors
     }
   }
 
+  /**
+   * Instant optimistic update when marking a single notification as read
+   */
   const markAsRead = async (id) => {
     try {
-      // Optimistic update
       const n = notifications.value.find((item) => item.id === id)
       if (n && !n.is_read) {
         n.is_read = true
@@ -129,9 +146,11 @@ export function useNotifications() {
     }
   }
 
+  /**
+   * Instant optimistic update when marking all notifications as read
+   */
   const markAllRead = async () => {
     try {
-      // Optimistic update
       notifications.value.forEach((n) => {
         n.is_read = true
       })
@@ -142,6 +161,9 @@ export function useNotifications() {
     }
   }
 
+  /**
+   * Instant optimistic update when deleting a notification
+   */
   const deleteNotification = async (id) => {
     try {
       const index = notifications.value.findIndex((n) => n.id === id)
@@ -168,14 +190,20 @@ export function useNotifications() {
     return false
   }
 
-  const startPolling = (intervalMs = 30000) => {
-    if (pollTimer) return
-    fetchUnreadCount()
-    pollTimer = setInterval(fetchUnreadCount, intervalMs)
+  /**
+   * Reference-counted polling: multiple components can subscribe without duplicate timers
+   */
+  const startPolling = (intervalMs = 15000) => {
+    subscriberCount++
+    if (!pollTimer) {
+      fetchUnreadCount()
+      pollTimer = setInterval(fetchUnreadCount, intervalMs)
+    }
   }
 
   const stopPolling = () => {
-    if (pollTimer) {
+    subscriberCount = Math.max(0, subscriberCount - 1)
+    if (subscriberCount === 0 && pollTimer) {
       clearInterval(pollTimer)
       pollTimer = null
     }
@@ -185,6 +213,7 @@ export function useNotifications() {
     notifications,
     unreadCount,
     isLoading,
+    isRefreshing,
     fetchNotifications,
     fetchUnreadCount,
     markAsRead,

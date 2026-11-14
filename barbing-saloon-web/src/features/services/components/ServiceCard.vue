@@ -20,10 +20,11 @@
     <!-- Media Cover / Image Section -->
     <div class="relative w-full h-44 bg-theme-surface-subtle overflow-hidden shrink-0">
       <img 
-        v-if="service.image || service.image_url"
-        :src="service.image_url || service.image" 
+        v-if="serviceImage"
+        :src="serviceImage" 
         :alt="service.name" 
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+        @error="hasImageError = true"
       />
       <!-- Luxury Placeholder if no image -->
       <div v-else class="w-full h-full flex flex-col items-center justify-center bg-theme-surface-subtle relative">
@@ -188,6 +189,7 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import { 
   SparklesIcon,
   TagIcon,
@@ -199,8 +201,9 @@ import {
   PencilSquareIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
+import { getStorageUrl } from '@/core/utils/url';
 
-defineProps({
+const props = defineProps({
   service: {
     type: Object,
     required: true
@@ -216,4 +219,13 @@ defineProps({
 });
 
 defineEmits(['approve', 'reject', 'toggle-active', 'delete']);
+
+const hasImageError = ref(false);
+
+const serviceImage = computed(() => {
+  if (hasImageError.value) return null;
+  const raw = props.service.image_url || props.service.image;
+  if (!raw) return null;
+  return getStorageUrl(raw);
+});
 </script>

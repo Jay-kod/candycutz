@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Identity\Services;
 
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
 use App\Models\Testimonial;
 use App\Models\User;
@@ -32,7 +33,7 @@ class CustomerService
         $reviewsCount = Testimonial::where('customer_id', $user->id)->count();
 
         $upcomingAppointments = Appointment::query()
-            ->with(['service', 'barber.user'])
+            ->with(['service.category', 'barber.user', 'serviceZone', 'customer', 'payment'])
             ->where('customer_id', $user->id)
             ->where('appointment_date', '>=', $today)
             ->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
@@ -40,24 +41,32 @@ class CustomerService
             ->orderBy('appointment_time')
             ->limit(10)
             ->get()
-            ->map(fn ($a) => [
-                'id' => $a->id,
-                'appointment_date' => $a->appointment_date,
-                'appointment_time' => substr((string) $a->appointment_time, 0, 5),
-                'status' => $a->status?->value ?? $a->status,
-                'verification_code' => $a->verification_code,
-                'total_price' => (float) ($a->total_price ?? $a->grand_total ?? $a->service?->price ?? 0),
-                'notes' => $a->notes,
-                'service' => $a->service ? [
-                    'id' => $a->service->id,
-                    'name' => $a->service->name,
-                    'price' => (float) $a->service->price,
-                ] : null,
-                'barber' => $a->barber ? [
-                    'id' => $a->barber->id,
-                    'name' => $a->barber->user?->name ?? 'Barber',
-                ] : null,
-            ]);
+            ->map(function ($a) {
+                $res = (new AppointmentResource($a))->resolve();
+                return [
+                    'id' => $a->id,
+                    'booking_reference' => $res['booking_reference'] ?? "CC-{$a->id}",
+                    'appointment_date' => $a->appointment_date,
+                    'appointment_time' => substr((string) $a->appointment_time, 0, 5),
+                    'status' => $a->status->value ?? $a->status,
+                    'verification_code' => $a->verification_code,
+                    'total_price' => (float) ($a->total_price ?? $a->grand_total ?? $a->service->price ?? 0),
+                    'grand_total' => (float) ($a->grand_total ?? $a->total_price ?? $a->service->price ?? 0),
+                    'payment_status' => $res['payment_status'] ?? 'pending',
+                    'deposit_paid' => (bool) $a->deposit_paid,
+                    'bank_details' => $res['bank_details'] ?? null,
+                    'notes' => $a->notes,
+                    'service' => $a->service ? [
+                        'id' => $a->service->id,
+                        'name' => $a->service->name,
+                        'price' => (float) $a->service->price,
+                    ] : null,
+                    'barber' => $a->barber ? [
+                        'id' => $a->barber->id,
+                        'name' => $a->barber->user->name ?? 'Barber',
+                    ] : null,
+                ];
+            });
 
         $recentAppointments = Appointment::query()
             ->with(['service', 'barber.user'])

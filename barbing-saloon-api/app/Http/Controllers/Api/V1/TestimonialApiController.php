@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Domain\Content\Actions\ApproveTestimonial;
 use App\Domain\Content\Actions\DeleteTestimonial;
 use App\Domain\Content\Actions\FeatureTestimonial;
+use App\Domain\Content\Actions\GetBarberReviews;
 use App\Domain\Shared\Services\CatalogueCache;
 use App\Events\ReviewSubmitted;
 use App\Http\Resources\TestimonialResource;
@@ -94,6 +95,23 @@ class TestimonialApiController
             ->get();
 
         return ApiResponse::success(TestimonialResource::collection($testimonials), 'Customer reviews loaded');
+    }
+
+    public function barberReviews(Request $request, GetBarberReviews $action): JsonResponse
+    {
+        $user = $request->user();
+        $barber = $user->barber;
+
+        if (! $barber) {
+            return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
+        }
+
+        $reviews = $action->execute($barber, $request);
+
+        return ApiResponse::success(
+            TestimonialResource::collection($reviews),
+            'Barber reviews loaded successfully'
+        );
     }
 
     public function update(Request $request, int $id): JsonResponse

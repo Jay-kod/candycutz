@@ -1,15 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
 @config "../../../tailwind.config.js";
 
+:root,
 :root[data-theme="light"],
 [data-theme="light"],
 .light {
-  /* Theme Variable Contract (Light Mode) */
+  /* Theme Variable Contract (Light Mode - Default) */
   --color-bg-primary: #FAF9F6;
   --color-bg-secondary: #FFFFFF;
   --color-bg-tertiary: #F4F1EA;
@@ -31,6 +31,7 @@
   --color-bg: #FAF9F6;
   --color-surface: #FFFFFF;
   --color-surface-subtle: #F4F1EA;
+  --color-surface-hover: #F4F1EA;
   --color-text: #111827;
   --color-text-muted: #6B7280;
   --color-border: #E8E5DF;
@@ -68,11 +69,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-:root,
 :root[data-theme="dark"],
 [data-theme="dark"],
 .dark {
-  /* Theme Variable Contract (Dark Mode - Default) */
+  /* Theme Variable Contract (Dark Mode) */
   --color-bg-primary: #0D0D0D;
   --color-bg-secondary: #141418;
   --color-bg-tertiary: #1F1F24;
@@ -94,6 +94,7 @@
   --color-bg: #0D0D0D;
   --color-surface: #141418;
   --color-surface-subtle: #1F1F24;
+  --color-surface-hover: #1A1A20;
   --color-text: #FAFAF8;
   --color-text-muted: #9CA3AF;
   --color-accent: #FF9900;
@@ -101,7 +102,15 @@
   --color-border: rgba(255, 255, 255, 0.12);
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Fluid Typography Tokens: Scale smoothly from mobile (375px) to desktop (1440px) */
+  --font-hero: clamp(2.25rem, 5vw + 1rem, 4.5rem);
+  --font-h1: clamp(1.75rem, 3vw + 0.8rem, 3rem);
+  --font-h2: clamp(1.375rem, 2vw + 0.6rem, 2.25rem);
+  --font-h3: clamp(1.125rem, 1vw + 0.5rem, 1.5rem);
+}
+
 body {
   margin: 0;
   background: var(--color-bg-primary, var(--color-bg));
@@ -111,9 +120,54 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-p {
-  text-align: inherit;
+/* ============================================================
+   Paragraph Justification & Optical Typography
+   - Justifies text to eliminate left-hanging / ragged edges.
+   - Uses inter-word justification and hyphenation for natural spacing.
+   - Uses modern text-wrap: pretty to prevent single trailing orphan words.
+   - Preserves intentional alignment on badges, buttons, centered titles.
+   ============================================================ */
+p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption):not(.badge):not(.nav-link) {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
 }
+
+/* Explicit container alignment overrides */
+.text-center p,
+[class*="text-center"] p,
+.text-center {
+  text-align: center !important;
+}
+
+.text-left p,
+[class*="text-left"] p,
+.text-left {
+  text-align: left !important;
+}
+
+.text-right p,
+[class*="text-right"] p,
+.text-right {
+  text-align: right !important;
+}
+
+.text-justify,
+.paragraph-justified {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  hyphens: auto !important;
+  -webkit-hyphens: auto !important;
+  text-wrap: pretty !important;
+}
+
+/* Fluid Heading Utilities */
+.text-fluid-hero { font-size: var(--font-hero); line-height: 1.1; }
+.text-fluid-h1 { font-size: var(--font-h1); line-height: 1.2; }
+.text-fluid-h2 { font-size: var(--font-h2); line-height: 1.25; }
+.text-fluid-h3 { font-size: var(--font-h3); line-height: 1.35; }
 
 /* Restrict universal transitions to color/background/border to avoid resize thrashing */
 *,

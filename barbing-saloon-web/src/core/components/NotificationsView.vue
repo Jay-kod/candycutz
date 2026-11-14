@@ -12,10 +12,22 @@
             {{ unreadCount }}
           </span>
         </h1>
-        <p class="mt-2 text-sm text-[var(--color-text-secondary)]">Stay updated on recent events and alerts.</p>
+        <p class="mt-2 text-sm text-[var(--color-text-secondary)]">Stay updated on recent events and alerts in real-time.</p>
       </div>
       
-      <div class="relative z-10 flex items-center gap-3">
+      <div class="relative z-10 flex items-center gap-3 flex-wrap">
+        <!-- Quick Refresh Button -->
+        <button 
+          @click="refresh"
+          :disabled="isLoading || isRefreshing"
+          class="flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-4 py-3 text-sm font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/30 transition-all shrink-0 active:scale-95 disabled:opacity-50"
+          title="Refresh notifications"
+        >
+          <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading || isRefreshing }" />
+          <span class="hidden sm:inline">Refresh</span>
+        </button>
+
+        <!-- Filters Toggle -->
         <button 
           @click="showFilters = !showFilters"
           class="flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-all shrink-0"
@@ -27,6 +39,8 @@
             {{ (activeTimeFilter !== 'all' ? 1 : 0) + (activeTypeFilter !== 'all' ? 1 : 0) }}
           </span>
         </button>
+
+        <!-- Customer Settings -->
         <button 
           v-if="authStore.isCustomer"
           @click="router.push('/customer/dashboard/notification-settings')" 
@@ -35,6 +49,8 @@
           <Cog6ToothIcon class="w-5 h-5" />
           Settings
         </button>
+
+        <!-- Mark All Read -->
         <button 
           v-if="unreadCount > 0" 
           @click="markAllRead" 
@@ -63,15 +79,13 @@
 
     <!-- Notification List -->
     <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl overflow-hidden flex flex-col min-h-[500px]">
-      <div v-if="loading" class="p-24 flex flex-col items-center justify-center gap-4 text-center">
+      <!-- Initial Loading Skeleton (only displayed when list is completely empty) -->
+      <div v-if="isLoading && notifications.length === 0" class="p-24 flex flex-col items-center justify-center gap-4 text-center">
         <div class="h-12 w-12 rounded-full border-4 border-[var(--color-accent)]/20 border-t-[var(--color-accent)] animate-spin"></div>
         <p class="text-[var(--color-text-secondary)] font-medium">Loading activity stream...</p>
       </div>
       
-      <div v-else-if="error" class="p-24 text-center">
-        <p class="text-[var(--color-danger)] font-medium bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 inline-block px-6 py-3 rounded-xl">{{ error }}</p>
-      </div>
-      
+      <!-- Empty state: No notifications in inbox -->
       <div v-else-if="notifications.length === 0" class="p-24 flex flex-col items-center justify-center text-center">
         <div class="h-24 w-24 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-full flex items-center justify-center mb-6 shadow-inner relative">
           <BellIcon class="w-10 h-10 text-[var(--color-text-muted)]/50" />
@@ -80,16 +94,16 @@
           </div>
         </div>
         <h2 class="font-display text-2xl text-[var(--color-text-primary)] mb-2">You're all caught up!</h2>
-        <p class="text-[var(--color-text-secondary)] max-w-sm">When you have new notifications about your bookings or profile, they will appear here.</p>
+        <p class="text-[var(--color-text-secondary)] max-w-sm">When new bookings, status updates, or payment notifications arrive, they will appear here in real-time.</p>
       </div>
 
-      <!-- No results for filters -->
+      <!-- Filtered empty state: No results for current filter combination -->
       <div v-else-if="filteredNotifications.length === 0" class="p-24 flex flex-col items-center justify-center text-center">
         <div class="h-24 w-24 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-full flex items-center justify-center mb-6 shadow-inner">
           <FunnelIcon class="w-10 h-10 text-[var(--color-text-muted)]/50" />
         </div>
         <h2 class="font-display text-2xl text-[var(--color-text-primary)] mb-2">No matching notifications</h2>
-        <p class="text-[var(--color-text-secondary)] max-w-sm mb-6">Try adjusting your filters to see more notifications.</p>
+        <p class="text-[var(--color-text-secondary)] max-w-sm mb-6">Try adjusting or clearing your filters to see more activity.</p>
         <button @click="clearFilters" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 text-[var(--color-accent)] text-sm font-bold hover:bg-[var(--color-accent)]/20 transition-colors">
           <XMarkIcon class="h-4 w-4" />
           Clear Filters
@@ -110,7 +124,7 @@
           </div>
 
           <div class="divide-y divide-[var(--color-border)]">
-            <!-- Decomposed Notification Row -->
+            <!-- Decomposed Notification Row with instant optimistic actions -->
             <NotificationRow
               v-for="notif in group.items"
               :key="notif.id"
@@ -133,10 +147,11 @@ import {
   CheckCircleIcon, 
   Cog6ToothIcon,
   FunnelIcon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../modules/auth/store/auth.store'
-import client from '@/shared/api/client'
+import { useNotifications } from '@/core/composables/useNotifications'
 import NotificationFilterBar from './notifications/NotificationFilterBar.vue'
 import NotificationRow from './notifications/NotificationRow.vue'
 import { timeFilters, typeFilters } from './notifications/notificationUtils'
@@ -144,16 +159,25 @@ import { timeFilters, typeFilters } from './notifications/notificationUtils'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const notifications = ref([])
-const loading = ref(true)
-const error = ref('')
+// Consume centralized notification state and reactive methods
+const {
+  notifications,
+  unreadCount,
+  isLoading,
+  isRefreshing,
+  fetchNotifications,
+  markAsRead,
+  markAllRead,
+  deleteNotification,
+  startPolling,
+  stopPolling,
+} = useNotifications()
 
 const activeTimeFilter = ref('all')
 const activeTypeFilter = ref('all')
 const showFilters = ref(false)
 
 const hasActiveFilters = computed(() => activeTimeFilter.value !== 'all' || activeTypeFilter.value !== 'all')
-const unreadCount = computed(() => notifications.value.filter(n => !n.is_read).length)
 
 const filteredNotifications = computed(() => {
   let result = notifications.value
@@ -184,7 +208,16 @@ const filteredNotifications = computed(() => {
   }
 
   if (activeTypeFilter.value !== 'all') {
-    result = result.filter(n => n.type === activeTypeFilter.value)
+    result = result.filter(n => {
+      const t = (n.type || '').toLowerCase()
+      if (activeTypeFilter.value === 'booking') {
+        return t === 'booking' || t.startsWith('booking_')
+      }
+      if (activeTypeFilter.value === 'payment') {
+        return t === 'payment' || t.startsWith('payment_')
+      }
+      return t === activeTypeFilter.value
+    })
   }
 
   return result
@@ -227,55 +260,16 @@ function clearFilters() {
   activeTypeFilter.value = 'all'
 }
 
-const fetchNotifications = async () => {
-  loading.value = true
-  try {
-    const res = await client.get('/notifications')
-    notifications.value = res.data.data || res.data
-  } catch (err) {
-    error.value = 'Network error loading notifications'
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
+const refresh = async () => {
+  await fetchNotifications({ silent: notifications.value.length > 0 })
 }
-
-const markAsRead = async (id) => {
-  try {
-    await client.patch(`/notifications/${id}/read`)
-    const n = notifications.value.find(n => n.id === id)
-    if (n) n.is_read = true
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-const deleteNotification = async (id) => {
-  try {
-    await client.delete(`/notifications/${id}`)
-    notifications.value = notifications.value.filter(n => n.id !== id)
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-const markAllRead = async () => {
-  try {
-    await client.patch(`/notifications/read-all`)
-    notifications.value = notifications.value.map(n => ({...n, is_read: true}))
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-let pollInterval = null
 
 onMounted(() => {
   fetchNotifications()
-  pollInterval = setInterval(fetchNotifications, 30000)
+  startPolling(15000)
 })
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval)
+  stopPolling()
 })
 </script>

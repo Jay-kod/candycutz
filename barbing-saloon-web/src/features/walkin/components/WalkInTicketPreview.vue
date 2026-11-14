@@ -51,7 +51,7 @@
         <!-- Schedule Window -->
         <div class="flex items-center justify-between text-xs">
           <span class="text-theme-text-muted uppercase tracking-wider text-[10px] font-mono">Window</span>
-          <span class="font-mono text-emerald-400">
+          <span class="font-mono text-emerald-600 dark:text-emerald-400">
             {{ form.appointment_time || 'Now' }} <span v-if="finishTime">→ {{ finishTime }}</span>
           </span>
         </div>

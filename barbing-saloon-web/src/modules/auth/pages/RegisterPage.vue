@@ -162,17 +162,8 @@ import { RouterLink, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
 import SocialAuthButtons from '../components/SocialAuthButtons.vue';
-import { useDark } from '@vueuse/core';
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
-
-isDark.value = true;
 
 const router = useRouter();
 const { register, redirectAfterLogin } = useAuth();

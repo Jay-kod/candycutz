@@ -61,14 +61,17 @@ export function useAdminHealthChecker() {
   const selfTestResults = ref(null)
   const autoRefresh = ref(false)
   const lastRefreshed = ref(null)
+  const refreshInProgress = ref(false)
   let refreshInterval = null
 
   const fetchOverview = async () => {
     try {
       const res = await client.get('/admin/system/overview')
       overview.value = res.data?.data || res.data || null
+      return true
     } catch (err) {
       console.error('System overview fetch failed:', err)
+      return false
     } finally {
       overviewLoading.value = false
     }
@@ -78,35 +81,65 @@ export function useAdminHealthChecker() {
     try {
       const res = await client.get('/admin/system/health/detail')
       healthDetail.value = res.data?.data || res.data || null
+      return true
     } catch (err) {
       console.error('Health detail fetch failed:', err)
+      return false
     } finally {
       detailLoading.value = false
     }
   }
 
-  const refreshAll = async (silent = false) => {
+  const refreshAll = async (silent = false, includeProbes = true) => {
+    if (refreshInProgress.value) return false
+
+    refreshInProgress.value = true
     overviewLoading.value = true
     detailLoading.value = true
-    await Promise.all([fetchOverview(), fetchHealthDetail()])
-    lastRefreshed.value = new Date()
-    if (!silent) toast.success('System diagnostics telemetry refreshed')
+    try {
+      const results = await Promise.all([
+        fetchOverview(),
+        fetchHealthDetail(),
+        includeProbes ? runDiagnostic('all', true) : Promise.resolve(true),
+      ])
+      const allSucceeded = results.every(Boolean)
+      lastRefreshed.value = new Date()
+
+      if (!silent) {
+        if (allSucceeded) {
+          toast.success('All health checks refreshed. No database data was changed.')
+        } else {
+          toast.error('Health refresh incomplete. Review the failed checks and try again.')
+        }
+      }
+
+      return allSucceeded
+    } finally {
+      refreshInProgress.value = false
+    }
   }
 
-  const runDiagnostic = async (type = 'all') => {
+  const runDiagnostic = async (type = 'all', silent = false) => {
     selfTestRunning.value = true
     selfTestResults.value = null
     try {
       const res = await client.post('/admin/system/health/test', { type })
       selfTestResults.value = res.data?.data || res.data || null
-      if (selfTestResults.value?.all_passed) {
-        toast.success('All diagnostics verified successfully')
-      } else {
-        toast.error('Diagnostic anomalies detected — review report')
+      const passed = selfTestResults.value?.all_passed === true
+
+      if (!silent) {
+        if (passed) {
+          toast.success('All diagnostics verified successfully')
+        } else {
+          toast.error('Diagnostic anomalies detected — review report')
+        }
       }
+
+      return passed
     } catch (err) {
-      toast.error('Self-test execution failed')
       console.error('Self-test error:', err)
+      if (!silent) toast.error('Self-test execution failed')
+      return false
     } finally {
       selfTestRunning.value = false
     }
@@ -115,7 +148,7 @@ export function useAdminHealthChecker() {
   const toggleAutoRefresh = () => {
     autoRefresh.value = !autoRefresh.value
     if (autoRefresh.value) {
-      refreshInterval = setInterval(() => refreshAll(true), 30000)
+      refreshInterval = setInterval(() => refreshAll(true, false), 30000)
       toast.success('Live telemetry enabled (30s interval)')
     } else {
       if (refreshInterval) clearInterval(refreshInterval)
@@ -143,9 +176,9 @@ export function useAdminHealthChecker() {
       { label: 'Critical Anomalies', value: s.critical_groups_count ?? '0', status: s.critical_groups_count > 0 ? 'error' : 'operational', icon: markRaw(ShieldCheckIcon) },
       { label: '5xx Events (24h)', value: s.errors_5xx_count ?? '0', status: (s.errors_5xx_count > 10) ? 'warning' : 'operational', icon: markRaw(BoltIcon) },
       { label: 'Telemetry Hits (24h)', value: s.events_24h_count ?? '0', status: 'operational', icon: markRaw(SignalIcon) },
-      { label: 'System Snapshots', value: s.backups_count ?? '0', status: (s.backups_count ?? 0) === 0 ? 'warning' : 'operational', icon: markRaw(FolderIcon) },
+      { label: 'Backup Files Stored', value: s.backups_count ?? '0', status: (s.backups_count ?? 0) === 0 ? 'warning' : 'operational', icon: markRaw(FolderIcon) },
       { label: 'Active Sessions', value: s.active_sessions_count ?? '0', status: 'operational', icon: markRaw(QueueListIcon) },
-      { label: 'Latest Snapshot', value: s.latest_backup_time ? formatTime(s.latest_backup_time) : 'None Available', status: s.latest_backup_time ? 'operational' : 'warning', icon: markRaw(ClockIcon) },
+      { label: 'Latest Backup File', value: s.latest_backup_time ? formatTime(s.latest_backup_time) : 'None Available', status: s.latest_backup_time ? 'operational' : 'warning', icon: markRaw(ClockIcon) },
     ]
   })
 
@@ -158,7 +191,9 @@ export function useAdminHealthChecker() {
         icon: markRaw(CircleStackIcon),
         status: c.database.status,
         items: [
-          { label: 'Driver Connection', value: c.database.connection || 'MySQL / MariaDB' },
+          { label: 'Active Connection', value: c.database.connection || 'Not reported' },
+          { label: 'Database Driver', value: c.database.driver || 'Not reported' },
+          { label: 'Current Database', value: c.database.database_name || 'Not reported' },
           { label: 'Response Latency', value: `${c.database.latency_ms ?? 0}ms` },
           { label: 'Registered Tables', value: c.database.tables_count ?? 0 },
           ...(c.database.error ? [{ label: 'Exception', value: c.database.error, warn: true }] : []),
@@ -247,7 +282,7 @@ export function useAdminHealthChecker() {
     return cards
   })
 
-  onMounted(() => refreshAll(true))
+  onMounted(() => refreshAll(true, false))
   onUnmounted(() => {
     if (refreshInterval) clearInterval(refreshInterval)
     refreshInterval = null
@@ -275,4 +310,3 @@ export function useAdminHealthChecker() {
     healthCards,
   }
 }
-

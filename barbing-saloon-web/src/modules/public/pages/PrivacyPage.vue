@@ -10,7 +10,7 @@
 
     <!-- Content Section -->
     <section class="bg-theme-surface py-20">
-      <div class="mx-auto max-w-3xl px-6 text-theme-text leading-relaxed prose prose-invert prose-gold">
+      <div class="mx-auto max-w-3xl px-6 text-theme-text leading-relaxed prose dark:prose-invert prose-gold">
         <p class="mb-10 text-sm text-theme-muted">Last updated: {{ currentDate }}</p>
         <div v-for="(section, index) in pageSections" :key="index" data-reveal :data-reveal-delay="100 + (index * 50)">
           <h2 class="font-display text-3xl text-gold mb-6">{{ section.heading }}</h2>

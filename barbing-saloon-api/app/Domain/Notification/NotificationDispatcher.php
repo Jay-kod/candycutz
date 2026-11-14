@@ -13,24 +13,25 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Central notification dispatcher — creates in-app notification records
- * and queues Expo push notifications for all key business events.
+ * and queues Expo push notifications for all key business events across
+ * the core triad: Actor / Barber, Customer, and Admin.
  */
 class NotificationDispatcher
 {
     // ─── Booking Events ───────────────────────────────────────────
 
     /**
-     * Booking created — notify customer + assigned barber.
+     * Booking created — notify customer, assigned barber, and admins.
      */
-    public static function bookingCreated(Appointment $appointment): void
+    public static function bookingCreated(Appointment $appointment, ?User $actor = null): void
     {
         $appointment->loadMissing(['service', 'barber.user', 'customer']);
 
-        $serviceName = $appointment->service?->name ?? 'a service';
+        $serviceName = $appointment->service->name ?? 'a service';
         $barberName = $appointment->barber?->user->name ?? 'your barber';
-        $customerName = $appointment->customer?->real_name ?? $appointment->customer?->name ?? $appointment->client_name ?? 'Customer';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
-        // Notify customer
+        // 1. Notify customer
         if ($appointment->customer_id) {
             static::createAndPush(
                 recipientId: $appointment->customer_id,
@@ -42,7 +43,7 @@ class NotificationDispatcher
             );
         }
 
-        // Notify assigned barber
+        // 2. Notify assigned barber
         if ($appointment->barber?->user_id) {
             static::createAndPush(
                 recipientId: $appointment->barber->user_id,
@@ -53,128 +54,334 @@ class NotificationDispatcher
                 recipientType: 'barber',
             );
         }
-    }
 
-    /**
-     * Booking approved by barber — notify customer.
-     */
-    public static function bookingApproved(Appointment $appointment): void
-    {
-        $appointment->loadMissing(['service']);
-
-        if (! $appointment->customer_id) {
-            return;
-        }
-
-        $serviceName = $appointment->service?->name ?? 'your appointment';
-
-        static::createAndPush(
-            recipientId: $appointment->customer_id,
-            type: 'booking_approved',
-            title: 'Booking Approved ✅',
-            message: "Your appointment for {$serviceName} on {$appointment->appointment_date} has been approved. See you there!",
+        // 3. Broadcast to branch & system admins
+        static::createBroadcast(
+            type: 'booking_created',
+            title: 'New Booking Created 📋',
+            message: "{$customerName} booked {$serviceName} with {$barberName} for {$appointment->appointment_date} at {$appointment->appointment_time}. Ref: {$appointment->booking_reference}",
+            recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
-            recipientType: 'customer',
+            senderId: $actor?->id,
         );
     }
 
     /**
-     * Booking cancelled — notify the other party.
+     * Booking approved / confirmed — notify customer, barber confirmation, and admins.
+     */
+    public static function bookingApproved(Appointment $appointment, ?User $actor = null): void
+    {
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_approved',
+                title: 'Booking Approved ✅',
+                message: "Your appointment for {$serviceName} on {$appointment->appointment_date} at {$appointment->appointment_time} has been approved. See you there!",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Confirmation record for assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_approved',
+                title: 'Booking Approved ✅',
+                message: "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) on {$appointment->appointment_date} at {$appointment->appointment_time} has been approved.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'booking_approved',
+            title: 'Booking Approved ✅',
+            message: "Appointment {$appointment->booking_reference} ({$customerName} with {$barberName}) was approved for {$appointment->appointment_date}.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            senderId: $actor?->id,
+        );
+    }
+
+    /**
+     * Booking cancelled — notify customer, barber, and admins.
      */
     public static function bookingCancelled(Appointment $appointment, User $cancelledBy): void
     {
         $appointment->loadMissing(['service', 'barber.user', 'customer']);
 
-        $serviceName = $appointment->service?->name ?? 'your appointment';
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
         $reason = $appointment->cancellation_reason ?: 'No reason provided';
+        $cancellerName = $cancelledBy->real_name ?? $cancelledBy->name ?? 'User';
 
         $cancellerIsCustomer = $appointment->customer_id === $cancelledBy->id;
+        $cancellerIsBarber = $appointment->barber?->user_id === $cancelledBy->id;
 
-        if ($cancellerIsCustomer) {
-            // Customer cancelled → notify barber
-            if ($appointment->barber?->user_id) {
-                $customerName = $cancelledBy->real_name ?? $cancelledBy->name;
-                static::createAndPush(
-                    recipientId: $appointment->barber->user_id,
-                    type: 'booking_cancelled',
-                    title: 'Booking Cancelled ❌',
-                    message: "{$customerName} cancelled their {$serviceName} appointment ({$appointment->booking_reference}). Reason: {$reason}",
-                    relatedEntityId: $appointment->id,
-                    recipientType: 'barber',
-                );
-            }
-        } else {
-            // Barber/admin cancelled → notify customer
-            if ($appointment->customer_id) {
-                static::createAndPush(
-                    recipientId: $appointment->customer_id,
-                    type: 'booking_cancelled',
-                    title: 'Booking Cancelled ❌',
-                    message: "Your appointment for {$serviceName} ({$appointment->booking_reference}) has been cancelled. Reason: {$reason}",
-                    relatedEntityId: $appointment->id,
-                    recipientType: 'customer',
-                );
-            }
-        }
-    }
+        // 1. Customer record
+        if ($appointment->customer_id) {
+            $customerMsg = $cancellerIsCustomer
+                ? "You cancelled your {$serviceName} appointment ({$appointment->booking_reference}). Reason: {$reason}"
+                : "Your appointment for {$serviceName} ({$appointment->booking_reference}) has been cancelled by {$cancellerName}. Reason: {$reason}";
 
-    /**
-     * Booking completed — notify customer.
-     */
-    public static function bookingCompleted(Appointment $appointment): void
-    {
-        if (! $appointment->customer_id) {
-            return;
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_cancelled',
+                title: 'Booking Cancelled ❌',
+                message: $customerMsg,
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+                senderId: $cancelledBy->id,
+            );
         }
 
-        $appointment->loadMissing(['service']);
-        $serviceName = $appointment->service?->name ?? 'your appointment';
+        // 2. Barber record
+        if ($appointment->barber?->user_id) {
+            $barberMsg = $cancellerIsBarber
+                ? "You cancelled appointment {$appointment->booking_reference} for {$customerName}. Reason: {$reason}"
+                : "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) was cancelled by {$cancellerName}. Reason: {$reason}";
 
-        static::createAndPush(
-            recipientId: $appointment->customer_id,
-            type: 'booking_completed',
-            title: 'Session Complete 💈',
-            message: "Your {$serviceName} session is complete! We hope you enjoyed it. Leave a review to share your experience.",
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_cancelled',
+                title: 'Booking Cancelled ❌',
+                message: $barberMsg,
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+                senderId: $cancelledBy->id,
+            );
+        }
+
+        // 3. Admin broadcast
+        static::createBroadcast(
+            type: 'booking_cancelled',
+            title: 'Booking Cancelled ❌',
+            message: "Appointment {$appointment->booking_reference} ({$customerName} with {$barberName}) was cancelled by {$cancellerName}. Reason: {$reason}",
+            recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
-            recipientType: 'customer',
+            senderId: $cancelledBy->id,
         );
     }
 
     /**
-     * No-show marked — notify customer.
+     * Booking completed — notify customer, barber summary, and admins.
      */
-    public static function bookingNoShow(Appointment $appointment): void
+    public static function bookingCompleted(Appointment $appointment, ?User $actor = null): void
     {
-        if (! $appointment->customer_id) {
-            return;
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_completed',
+                title: 'Session Complete 💈',
+                message: "Your {$serviceName} session is complete! We hope you enjoyed it. Leave a review to share your experience.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
         }
 
-        $appointment->loadMissing(['service']);
-        $serviceName = $appointment->service?->name ?? 'your appointment';
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_completed',
+                title: 'Session Completed 💈',
+                message: "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) marked complete.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
 
-        static::createAndPush(
-            recipientId: $appointment->customer_id,
-            type: 'booking_no_show',
-            title: 'Missed Appointment ⚠️',
-            message: "You were marked as a no-show for your {$serviceName} appointment ({$appointment->booking_reference}). Please reschedule or contact us.",
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'booking_completed',
+            title: 'Booking Completed 💈',
+            message: "Appointment {$appointment->booking_reference} ({$customerName} with {$barberName}) was marked completed.",
+            recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
-            recipientType: 'customer',
+            senderId: $actor?->id,
+        );
+    }
+
+    /**
+     * No-show marked — notify customer, barber, and admins.
+     */
+    public static function bookingNoShow(Appointment $appointment, ?User $actor = null): void
+    {
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_no_show',
+                title: 'Missed Appointment ⚠️',
+                message: "You were marked as a no-show for your {$serviceName} appointment ({$appointment->booking_reference}). Please reschedule or contact us.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_no_show',
+                title: 'No-Show Recorded ⚠️',
+                message: "Appointment {$appointment->booking_reference} for {$customerName} was recorded as a no-show.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'booking_no_show',
+            title: 'No-Show Recorded ⚠️',
+            message: "Appointment {$appointment->booking_reference} ({$customerName} with {$barberName}) was recorded as a no-show.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            senderId: $actor?->id,
+        );
+    }
+
+    /**
+     * Client checked in — notify customer, barber, and admins.
+     */
+    public static function bookingCheckedIn(Appointment $appointment, ?User $actor = null): void
+    {
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'your barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_checked_in',
+                title: 'Checked In 📍',
+                message: "You are checked in for {$serviceName} with {$barberName}. Your barber will attend to you shortly.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_checked_in',
+                title: 'Client Checked In 📍',
+                message: "{$customerName} has checked in for appointment {$appointment->booking_reference} ({$serviceName}).",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'booking_checked_in',
+            title: 'Client Checked In 📍',
+            message: "{$customerName} checked in for appointment {$appointment->booking_reference} with {$barberName}.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            senderId: $actor?->id,
+        );
+    }
+
+    /**
+     * Service in progress — notify customer, barber, and admins.
+     */
+    public static function bookingInProgress(Appointment $appointment, ?User $actor = null): void
+    {
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'your barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'booking_in_progress',
+                title: 'Service Started ✂️',
+                message: "Your {$serviceName} session with {$barberName} is now in progress.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'booking_in_progress',
+                title: 'Session In Progress ✂️',
+                message: "Appointment {$appointment->booking_reference} with {$customerName} ({$serviceName}) is now in progress.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'booking_in_progress',
+            title: 'Service In Progress ✂️',
+            message: "Appointment {$appointment->booking_reference} ({$customerName} with {$barberName}) is now in progress.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            senderId: $actor?->id,
         );
     }
 
     // ─── Payment Events ──────────────────────────────────────────
 
     /**
-     * Payment receipt uploaded — notify barber + admin.
+     * Payment receipt uploaded — notify customer, barber, and admin.
      */
     public static function paymentReceived(Appointment $appointment): void
     {
         $appointment->loadMissing(['barber.user', 'customer']);
 
-        $customerName = $appointment->customer?->real_name ?? $appointment->customer?->name ?? 'A customer';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'A customer';
         $amount = number_format((float) $appointment->grand_total, 2);
 
-        // Notify assigned barber
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'payment_received',
+                title: 'Payment Receipt Submitted 💳',
+                message: "Your payment receipt for booking {$appointment->booking_reference} (₦{$amount}) has been received and is being verified.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
         if ($appointment->barber?->user_id) {
             static::createAndPush(
                 recipientId: $appointment->barber->user_id,
@@ -186,7 +393,7 @@ class NotificationDispatcher
             );
         }
 
-        // Broadcast to admins
+        // 3. Broadcast to admins
         static::createBroadcast(
             type: 'payment_received',
             title: 'New Payment Receipt 💳',
@@ -197,23 +404,92 @@ class NotificationDispatcher
     }
 
     /**
-     * Payment verified — notify customer.
+     * Payment verified / confirmed — notify customer, barber, and admin.
      */
     public static function paymentVerified(Appointment $appointment): void
     {
-        if (! $appointment->customer_id) {
-            return;
-        }
+        $appointment->loadMissing(['barber.user', 'customer']);
 
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'A customer';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
         $amount = number_format((float) $appointment->grand_total, 2);
 
-        static::createAndPush(
-            recipientId: $appointment->customer_id,
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'payment_verified',
+                title: 'Payment Confirmed ✅',
+                message: "Your payment of ₦{$amount} for booking {$appointment->booking_reference} has been verified. Thank you!",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'payment_verified',
+                title: 'Payment Confirmed ✅',
+                message: "Payment of ₦{$amount} for appointment {$appointment->booking_reference} ({$customerName}) has been confirmed.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
             type: 'payment_verified',
             title: 'Payment Confirmed ✅',
-            message: "Your payment of ₦{$amount} for booking {$appointment->booking_reference} has been verified. Thank you!",
+            message: "Payment of ₦{$amount} confirmed for booking {$appointment->booking_reference} ({$customerName} with {$barberName}).",
+            recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
-            recipientType: 'customer',
+        );
+    }
+
+    /**
+     * Payment failed — notify customer, barber, and admin.
+     */
+    public static function paymentFailed(Appointment $appointment, ?string $reason = null): void
+    {
+        $appointment->loadMissing(['barber.user', 'customer']);
+
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+        $barberName = $appointment->barber?->user->name ?? 'Barber';
+        $failureReason = $reason ?: 'The transaction could not be completed';
+
+        // 1. Notify customer
+        if ($appointment->customer_id) {
+            static::createAndPush(
+                recipientId: $appointment->customer_id,
+                type: 'payment_failed',
+                title: 'Payment Failed ⚠️',
+                message: "Payment for booking {$appointment->booking_reference} could not be processed. Reason: {$failureReason}. Please retry your payment.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+            );
+        }
+
+        // 2. Notify assigned barber
+        if ($appointment->barber?->user_id) {
+            static::createAndPush(
+                recipientId: $appointment->barber->user_id,
+                type: 'payment_failed',
+                title: 'Payment Failed ⚠️',
+                message: "Payment attempt for booking {$appointment->booking_reference} ({$customerName}) failed. Reason: {$failureReason}.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+            );
+        }
+
+        // 3. Broadcast to admins
+        static::createBroadcast(
+            type: 'payment_failed',
+            title: 'Payment Failed ⚠️',
+            message: "Payment attempt for booking {$appointment->booking_reference} ({$customerName} with {$barberName}) failed. Reason: {$failureReason}.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
         );
     }
 
@@ -269,7 +545,7 @@ class NotificationDispatcher
     }
 
     /**
-     * Create a broadcast notification (no specific recipient_id, uses recipient_type).
+     * Create a broadcast notification and dispatch push notifications to role members.
      */
     protected static function createBroadcast(
         string $type,
@@ -279,7 +555,7 @@ class NotificationDispatcher
         ?int $relatedEntityId = null,
         ?int $senderId = null,
     ): Notification {
-        return Notification::create([
+        $notification = Notification::create([
             'sender_id' => $senderId,
             'recipient_type' => $recipientType,
             'recipient_id' => null,
@@ -289,10 +565,21 @@ class NotificationDispatcher
             'related_entity_id' => $relatedEntityId,
             'is_read' => false,
         ]);
+
+        // Queue push notifications to all users matching this role
+        static::queuePushForRole($recipientType, $title, $message, [
+            'type' => $type,
+            'notification_id' => $notification->id,
+            'related_entity_id' => $relatedEntityId,
+        ]);
+
+        return $notification;
     }
 
     /**
      * Dispatch push notifications to all registered devices for a given user.
+     *
+     * @param  array<string, mixed>  $data
      */
     protected static function queuePush(int $userId, string $title, string $body, array $data = []): void
     {
@@ -306,6 +593,41 @@ class NotificationDispatcher
             SendExpoPush::dispatch($tokens, $title, $body, $data);
         } catch (\Throwable $e) {
             Log::warning("Failed to queue push notification for user {$userId}: ".$e->getMessage());
+        }
+    }
+
+    /**
+     * Dispatch push notifications to all users of a given role.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected static function queuePushForRole(string $recipientType, string $title, string $body, array $data = []): void
+    {
+        try {
+            $roles = match ($recipientType) {
+                'all_admins', 'admin' => ['admin', 'super_admin'],
+                'all_barbers', 'barber' => ['barber'],
+                'all_customers', 'customer' => ['customer'],
+                default => null,
+            };
+
+            if (! $roles) {
+                return;
+            }
+
+            $userIds = User::whereIn('role', $roles)->pluck('id');
+            if ($userIds->isEmpty()) {
+                return;
+            }
+
+            $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+            if (empty($tokens)) {
+                return;
+            }
+
+            SendExpoPush::dispatch($tokens, $title, $body, $data);
+        } catch (\Throwable $e) {
+            Log::warning("Failed to queue push notification for role {$recipientType}: ".$e->getMessage());
         }
     }
 }

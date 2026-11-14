@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class BlogPostResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         $imageUrl = null;
@@ -44,9 +45,9 @@ class BlogPostResource extends JsonResource
             'status' => ($this->status instanceof BlogStatus) ? $this->status->value : ($this->status ?? 'draft'),
             'author' => [
                 'id' => $this->author->id ?? null,
-                'name' => $this->author_display ?? $this->author?->name ?? 'CandyCutz Team',
+                'name' => $this->author_display ?? $this->author->name ?? 'CandyCutz Team',
             ],
-            'author_display' => $this->author_display ?? $this->author?->name ?? 'CandyCutz Team',
+            'author_display' => $this->author_display ?? $this->author->name ?? 'CandyCutz Team',
             'created_at' => $this->created_at?->toISOString(),
             'loves_count' => (int) ($this->relationLoaded('reactions') ? ($this->reactions->where('reaction_type', 'love')->count() ?? 0) : 0),
             'dislikes_count' => (int) ($this->relationLoaded('reactions') ? ($this->reactions->where('reaction_type', 'dislike')->count() ?? 0) : 0),

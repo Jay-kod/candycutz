@@ -272,6 +272,10 @@ The stack includes:
 - MySQL 8.0
 - Redis 7.2 for cache, sessions, and queues
 
+On startup, the API waits for healthy database and Redis services, applies
+pending migrations, and then starts PHP-FPM. The database is persisted in a
+Docker volume; the full database seeder is intentionally not run on every boot.
+
 Useful commands:
 
 ```powershell
@@ -280,6 +284,11 @@ docker compose logs -f app worker scheduler
 docker compose down
 docker compose down -v  # Deletes local database and Redis volumes
 ```
+
+The services use Docker's `unless-stopped` restart policy. After the first
+`docker compose up -d --build`, Docker starts them again whenever its engine
+starts. On Windows, enable **Start Docker Desktop when you sign in** in Docker
+Desktop's General settings if you also want Docker to start when you log in.
 
 Do not use `docker compose down -v` unless you intentionally want to remove local persisted data.
 

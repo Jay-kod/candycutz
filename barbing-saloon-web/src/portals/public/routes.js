@@ -32,11 +32,14 @@ export default [
 			defaultSections: [
 				{ heading: 'Security information', body: 'Security information is being prepared. For questions or to report a security concern, please contact CandyCutz.' },
 			],
+			showLegalLinks: true,
 		},
 		meta: { public: true },
 	},
 	{ path: '/cookies', name: 'cookie-preferences', component: () => import('../../modules/public/pages/CookiePreferencesPage.vue'), meta: { public: true } },
 	{ path: '/account-deletion', name: 'account-deletion', component: () => import('../../modules/public/pages/AccountDeletionPage.vue'), meta: { public: true } },
+	{ path: '/payment', name: 'payment-page', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { public: true } },
+	{ path: '/payment/:appointmentId', name: 'payment-page-appointment', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { public: true } },
 
 	// Error pages
 	{ path: '/403', name: 'forbidden', component: () => import('../../modules/public/pages/ForbiddenPage.vue'), meta: { public: true } },

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import {
   BuildingOfficeIcon,
+  BuildingLibraryIcon,
   CalendarDaysIcon,
   MapPinIcon,
   ShareIcon,
@@ -37,6 +38,7 @@ const props = defineProps({
 const getCategoryIcon = (id) => {
   switch (id) {
     case 'general': return BuildingOfficeIcon
+    case 'payment': return BuildingLibraryIcon
     case 'booking': return CalendarDaysIcon
     case 'contact': return MapPinIcon
     case 'social': return ShareIcon
@@ -65,10 +67,10 @@ const displayedCategories = computed(() => {
     <!-- Notice if in search mode -->
     <div
       v-if="searchQuery"
-      class="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.08] flex items-center justify-between text-xs text-zinc-400"
+      class="p-3.5 rounded-xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.08] flex items-center justify-between text-xs text-slate-600 dark:text-zinc-400"
     >
-      <span>Displaying search results matching <strong class="text-white">"{{ searchQuery }}"</strong></span>
-      <span class="font-mono text-[11px] text-zinc-500">
+      <span>Displaying search results matching <strong class="text-slate-900 dark:text-white">"{{ searchQuery }}"</strong></span>
+      <span class="font-mono text-[11px] text-slate-500 dark:text-zinc-500">
         {{ displayedCategories.reduce((sum, c) => sum + (categorizedSettings[c.id]?.length || 0), 0) }} Settings Found
       </span>
     </div>
@@ -77,20 +79,20 @@ const displayedCategories = computed(() => {
     <div
       v-for="cat in displayedCategories"
       :key="cat.id"
-      class="rounded-2xl bg-[#12161C] border border-white/[0.08] overflow-hidden shadow-xl"
+      class="rounded-2xl bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] overflow-hidden shadow-xl"
     >
       <!-- Card Section Header -->
-      <div class="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+      <div class="px-6 py-4 border-b border-slate-200 dark:border-white/[0.08] flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg bg-[#FF6700]/10 border border-[#FF6700]/25 flex items-center justify-center">
             <component :is="getCategoryIcon(cat.id)" class="w-4 h-4 text-[#FF6700]" />
           </div>
           <div>
-            <h2 class="text-sm font-bold text-white tracking-tight">{{ cat.label }}</h2>
-            <p class="text-xs text-zinc-400">Manage parameters and values for this category</p>
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{{ cat.label }}</h2>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Manage parameters and values for this category</p>
           </div>
         </div>
-        <span class="text-xs font-mono text-zinc-500">
+        <span class="text-xs font-mono text-slate-400 dark:text-zinc-500">
           {{ (categorizedSettings[cat.id] || []).length }} Keys
         </span>
       </div>
@@ -99,7 +101,7 @@ const displayedCategories = computed(() => {
       <div class="p-6">
         <div
           v-if="!categorizedSettings[cat.id]?.length"
-          class="py-8 text-center text-xs text-zinc-500"
+          class="py-8 text-center text-xs text-slate-400 dark:text-zinc-500"
         >
           No configuration parameters registered for this group.
         </div>
@@ -114,10 +116,10 @@ const displayedCategories = computed(() => {
             ]"
           >
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-zinc-300">
+              <label class="text-xs font-semibold text-slate-700 dark:text-zinc-300">
                 {{ field.label }}
               </label>
-              <span class="text-[10px] font-mono text-zinc-500">
+              <span class="text-[10px] font-mono text-slate-400 dark:text-zinc-500">
                 {{ field.key }}
               </span>
             </div>
@@ -128,7 +130,7 @@ const displayedCategories = computed(() => {
               v-model="rawSettings[field.key]"
               rows="3"
               :placeholder="field.placeholder"
-              class="w-full p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all font-sans leading-relaxed"
+              class="w-full p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all font-sans leading-relaxed"
             ></textarea>
 
             <!-- Number Control -->
@@ -137,7 +139,7 @@ const displayedCategories = computed(() => {
               v-model="rawSettings[field.key]"
               type="number"
               :placeholder="field.placeholder"
-              class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all"
             />
 
             <!-- Standard Text Control -->
@@ -146,7 +148,7 @@ const displayedCategories = computed(() => {
               v-model="rawSettings[field.key]"
               type="text"
               :placeholder="field.placeholder"
-              class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#FF6700]/50 focus:ring-1 focus:ring-[#FF6700]/30 transition-all"
             />
           </div>
         </div>
@@ -154,4 +156,3 @@ const displayedCategories = computed(() => {
     </div>
   </div>
 </template>
-

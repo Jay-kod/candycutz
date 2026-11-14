@@ -71,7 +71,7 @@ class CatalogueService
         return CatalogueCache::remember('barbers', 'all', function () {
             return Barber::query()
                 ->with(['user'])
-                ->where('is_available', true)
+                ->activeForBooking()
                 ->orderBy('rating', 'desc')
                 ->get()
                 ->map(fn (Barber $barber) => $this->barberData($barber))
@@ -85,7 +85,10 @@ class CatalogueService
     public function barberById(int $id): ?array
     {
         return CatalogueCache::remember('barbers', "id:{$id}", function () use ($id) {
-            $barber = Barber::query()->with(['user'])->find($id);
+            $barber = Barber::query()
+                ->activeForBooking()
+                ->with(['user'])
+                ->find($id);
 
             return $barber ? $this->barberData($barber) : null;
         });
@@ -120,7 +123,7 @@ class CatalogueService
      */
     public function availableSlots(Carbon $date, int $barberId, int $serviceId): array
     {
-        $barber = Barber::query()->find($barberId);
+        $barber = Barber::query()->activeForBooking()->find($barberId);
         $service = Service::query()->find($serviceId);
 
         if (! $barber || ! $service) {

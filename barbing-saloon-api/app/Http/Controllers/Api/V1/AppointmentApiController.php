@@ -151,7 +151,7 @@ class AppointmentApiController
             abort(403);
         }
 
-        $barberId = $barber?->id ?? $request->barber_id;
+        $barberId = $barber->id ?? $request->barber_id;
 
         if (! $barberId) {
             throw ValidationException::withMessages([

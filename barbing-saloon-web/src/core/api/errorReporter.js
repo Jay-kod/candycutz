@@ -81,7 +81,13 @@ export async function flushErrorQueue() {
     const remaining = queue.slice(batch.length);
     saveQueue(remaining);
   } catch (err) {
-    // If rate-limited (429) or offline, keep in queue for next flush attempt
+    // Discard batch if payload is oversized (413) or rejected as unprocessable (400/422)
+    // so it does not permanently poison the queue and loop forever
+    const status = err?.response?.status;
+    if (status === 413 || status === 400 || status === 422) {
+      const remaining = queue.slice(batch.length);
+      saveQueue(remaining);
+    }
   } finally {
     isFlushing = false;
   }
@@ -119,6 +125,7 @@ export function recordClientError(err, context = {}) {
     network_state: typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
     occurred_at: new Date().toISOString(),
     breadcrumbs: getBreadcrumbs(),
+    ...(context.apiRequest ? { api_request: context.apiRequest } : {}),
   };
 
   queueClientError(payload);

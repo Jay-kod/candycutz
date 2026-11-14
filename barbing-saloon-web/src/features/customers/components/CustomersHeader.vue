@@ -12,7 +12,7 @@
           <UserGroupIcon class="h-3.5 w-3.5" />
           User Management
         </span>
-        <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-0.5 text-[10px] font-semibold text-emerald-400">
+        <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
           <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           Client Base Synchronized
         </div>
@@ -55,11 +55,19 @@
       <!-- Action Buttons -->
       <div class="flex flex-wrap items-center gap-2.5 justify-end">
         <button 
-          @click="$router.push('/admin/walk-in')" 
+          @click="$emit('addCustomer')" 
           class="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-admin to-admin-light px-3.5 py-2 text-xs font-bold text-obsidian shadow-[0_4px_15px_rgba(255,103,0,0.25)] hover:shadow-[0_6px_20px_rgba(255,103,0,0.4)] transition-all group"
         >
           <UserPlusIcon class="h-4 w-4 group-hover:scale-110 transition-transform" />
-          <span>New Walk-In</span>
+          <span>Add Customer</span>
+        </button>
+
+        <button 
+          @click="$router.push('/admin/walk-in')" 
+          class="flex items-center justify-center gap-1.5 rounded-xl bg-theme-surface border border-theme-border px-3.5 py-2 text-xs font-bold text-theme-text hover:bg-theme-border/50 transition-all group"
+        >
+          <TicketIcon class="h-4 w-4 text-theme-text-muted group-hover:text-theme-text transition-colors" />
+          <span class="hidden sm:inline">New Walk-In</span>
         </button>
 
         <button 
@@ -85,7 +93,8 @@ import {
   MagnifyingGlassIcon,
   UserPlusIcon,
   ArrowPathIcon,
-  XMarkIcon
+  XMarkIcon,
+  TicketIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -99,7 +108,7 @@ defineProps({
   }
 });
 
-defineEmits(['update:modelValue', 'refresh']);
+defineEmits(['update:modelValue', 'refresh', 'addCustomer']);
 
 const currentTime = ref('');
 let clockTimer = null;

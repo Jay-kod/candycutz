@@ -23,7 +23,7 @@
             <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border shadow-sm" :class="statusStyle(barber.status)">
               {{ statusLabel(barber.status) }}
             </span>
-            <span class="text-amber-400 text-xs font-mono font-bold flex items-center gap-0.5">
+            <span class="text-amber-500 dark:text-amber-400 text-xs font-mono font-bold flex items-center gap-0.5">
               <span>★</span>
               <span>{{ Number(barber.rating || 5.0).toFixed(1) }}</span>
             </span>
@@ -64,7 +64,7 @@
         </div>
         <span 
           class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
-          :class="isChairReady(barber) ? 'bg-emerald-500/10 text-emerald-400' : 'bg-theme-border/50 text-theme-text-muted'"
+          :class="isChairReady(barber) ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-theme-border/50 text-theme-text-muted'"
         >
           {{ isChairReady(barber) ? 'Chair Ready' : 'Chair Busy' }}
         </span>
@@ -102,10 +102,10 @@
         @change="$emit('status-change', barber, $event.target.value)"
         class="rounded-xl border border-theme-border bg-theme-surface px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-theme-text outline-none focus:border-admin/50 cursor-pointer transition-all"
       >
-        <option value="active" class="bg-theme-surface text-emerald-400">🟢 Active</option>
-        <option value="pending_approval" class="bg-theme-surface text-amber-400">🟡 Pending</option>
-        <option value="on_leave" class="bg-theme-surface text-blue-400">⚪ On Leave</option>
-        <option value="suspended" class="bg-theme-surface text-red-400">🔴 Suspended</option>
+        <option value="active" class="bg-theme-surface text-emerald-600 dark:text-emerald-400">🟢 Active</option>
+        <option value="pending_approval" class="bg-theme-surface text-amber-600 dark:text-amber-400">🟡 Pending</option>
+        <option value="on_leave" class="bg-theme-surface text-blue-600 dark:text-blue-400">⚪ On Leave</option>
+        <option value="suspended" class="bg-theme-surface text-red-600 dark:text-red-400">🔴 Suspended</option>
       </select>
     </div>
   </div>
@@ -139,10 +139,10 @@ function isChairReady(b) {
 
 function statusStyle(status) {
   const map = {
-    active: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    pending_approval: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    suspended: 'bg-red-500/15 text-red-400 border-red-500/30',
-    on_leave: 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+    active: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    pending_approval: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    suspended: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
+    on_leave: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30'
   };
   return map[status] || 'bg-theme-border/50 text-theme-text-muted border-theme-border';
 }

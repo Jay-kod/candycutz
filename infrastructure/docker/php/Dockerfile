@@ -9,6 +9,7 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
+    mariadb-client \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -17,6 +18,7 @@ RUN apk add --no-cache \
     unzip \
     oniguruma-dev \
     icu-dev \
+    sqlite-dev \
     linux-headers \
     $PHPIZE_DEPS
 
@@ -24,6 +26,7 @@ RUN apk add --no-cache \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j2 \
         pdo_mysql \
+        pdo_sqlite \
         mbstring \
         bcmath \
         gd \

@@ -47,6 +47,32 @@ describe('TestimonialsMarquee', () => {
     expect(wrapper.find('.testimonials-track[aria-hidden="true"]').findAll('article')).toHaveLength(1);
   });
 
+  it('shows five stars with the customer rating filled instead of a source label', () => {
+    const wrapper = mount(TestimonialsMarquee, {
+      props: {
+        testimonials: [
+          {
+            id: 'rated',
+            client_name: 'Rated Client',
+            review: 'Great cut.',
+            rating: 4,
+            is_approved: true,
+            is_featured: true,
+          },
+        ],
+      },
+    });
+
+    const rating = wrapper.find('.testimonial-source');
+    const stars = rating.findAll('span');
+    expect(stars).toHaveLength(5);
+    expect(stars.filter((star) => star.classes().includes('text-amber-400'))).toHaveLength(4);
+    expect(stars.filter((star) => star.classes().includes('text-[var(--color-text-muted)]/40'))).toHaveLength(1);
+    expect(rating.text()).toContain('★★★★☆');
+    expect(rating.text()).not.toContain('x.com');
+    expect(rating.attributes('aria-label')).toBe('Customer rating: 4 out of 5 stars');
+  });
+
   it('uses the selected direction and speed for automatic scrolling', () => {
     const testimonials = [
       { id: 'shown', client_name: 'Approved Client', review: 'Great cut.', is_approved: true, is_featured: true },

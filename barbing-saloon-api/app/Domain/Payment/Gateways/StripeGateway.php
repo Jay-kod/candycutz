@@ -41,7 +41,7 @@ class StripeGateway implements PaymentGateway
                 'price_data' => [
                     'currency' => 'usd', // Stripe doesn't support NGN easily without special setup
                     'product_data' => [
-                        'name' => 'Appointment for '.($payment->appointment?->service?->name ?? 'Service'),
+                        'name' => 'Appointment for '.($payment->appointment->service->name ?? 'Service'),
                     ],
                     'unit_amount' => $amountKobo,
                 ],
@@ -148,8 +148,12 @@ class StripeGateway implements PaymentGateway
 
         /** @var StripeObject $data */
         $data = $event->data;
-        /** @var Session $session */
-        $session = $data->object;
+        /** @var mixed $object */
+        $object = $data->object ?? null;
+        if (! $object instanceof Session) {
+            throw new RuntimeException('Invalid Stripe webhook payload shape.');
+        }
+        $session = $object;
         $reference = $session->client_reference_id ?? '';
         $amount = $session->amount_total ?? 0;
         $eventId = $event->id;

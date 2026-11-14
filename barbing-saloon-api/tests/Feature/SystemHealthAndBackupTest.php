@@ -38,13 +38,20 @@ it('allows admin to fetch system overview and health details', function () {
         'data' => [
             'status',
             'checks' => [
-                'database',
+                'database' => [
+                    'status',
+                    'connection',
+                    'driver',
+                    'database_name',
+                    'tables_count',
+                ],
                 'cache',
                 'storage',
                 'environment',
             ],
         ],
     ]);
+    $detailResponse->assertJsonPath('data.checks.database.database_name', ':memory:');
 });
 
 it('allows admin to run live interactive self diagnostic test', function () {
@@ -58,6 +65,8 @@ it('allows admin to run live interactive self diagnostic test', function () {
     $response->assertJsonPath('success', true);
     $response->assertJsonPath('data.all_passed', true);
     expect($response->json('data.results.database.passed'))->toBeTrue();
+    expect($response->json('data.results.database.connection'))->toBe('sqlite');
+    expect($response->json('data.results.database.database_name'))->toBe(':memory:');
     expect($response->json('data.results.cache.passed'))->toBeTrue();
     expect($response->json('data.results.storage.passed'))->toBeTrue();
 });
@@ -74,7 +83,14 @@ it('allows admin to create, list, and delete backups', function () {
     $createResponse->assertOk();
     $createResponse->assertJsonPath('success', true);
     $createdFile = $createResponse->json('data.filename');
-    expect($createdFile)->not->toBeNull();
+    expect($createdFile)->toBe($customName);
+    $backupPath = storage_path('app/backups/'.$createdFile);
+    expect(File::exists($backupPath))->toBeTrue();
+    expect(File::size($backupPath))->toBeGreaterThan(0);
+
+    $snapshot = new PDO('sqlite:'.$backupPath);
+    expect($snapshot->query('PRAGMA integrity_check')->fetchColumn())->toBe('ok');
+    unset($snapshot);
 
     // 2. List backups
     $listResponse = $this->actingAs($admin)->getJson('/api/v1/admin/system/backups');

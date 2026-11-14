@@ -13,6 +13,9 @@
           @refresh="loadDashboardData(true)"
         />
 
+        <!-- Urgent Action Ribbon (Pending Approvals & Verification Queue) -->
+        <UrgentActionBanner :stats="dashboard.stats" />
+
         <!-- Row 1: 4 Metric Cards with Mini Equalizer Sparklines -->
         <DashboardPrecisionKpis 
           :stats="dashboard.stats" 
@@ -37,7 +40,13 @@
           :status-breakdown="dashboard.status_breakdown" 
         />
 
-        <!-- Row 4: 4 Cards (Top Services + Team + Hourly Heatmap Matrix + Quick Actions) -->
+        <!-- Row 4: Recent Appointments Live Data Table -->
+        <DashboardRecentBookingsTable 
+          :appointments="dashboard.recent_appointments"
+          :loading="isRefreshing"
+        />
+
+        <!-- Row 5: 4 Cards (Top Services + Team + Hourly Heatmap Matrix + Quick Actions) -->
         <DashboardPrecisionBottomCards 
           :stats="dashboard.stats"
           :top-services="dashboard.top_services" 
@@ -54,9 +63,11 @@
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import { useAdminDashboard } from '@/features/dashboard/composables/useAdminDashboard';
 import DashboardPrecisionHeader from '@/features/dashboard/components/DashboardPrecisionHeader.vue';
+import UrgentActionBanner from '@/features/dashboard/components/UrgentActionBanner.vue';
 import DashboardPrecisionKpis from '@/features/dashboard/components/DashboardPrecisionKpis.vue';
 import DashboardPrecisionRevenueCharts from '@/features/dashboard/components/DashboardPrecisionRevenueCharts.vue';
 import DashboardPrecisionFunnelAndStatus from '@/features/dashboard/components/DashboardPrecisionFunnelAndStatus.vue';
+import DashboardRecentBookingsTable from '@/features/dashboard/components/DashboardRecentBookingsTable.vue';
 import DashboardPrecisionBottomCards from '@/features/dashboard/components/DashboardPrecisionBottomCards.vue';
 import DashboardPrecisionSkeleton from '@/features/dashboard/components/DashboardPrecisionSkeleton.vue';
 

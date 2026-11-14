@@ -47,12 +47,26 @@
                 <div>
                   <h3 class="text-lg font-bold text-theme-text">{{ profileData.name }}</h3>
                   <p class="text-xs text-theme-text-muted mt-0.5">Joined {{ formatDate(profileData.created_at) }}</p>
-                  <span 
-                    class="inline-flex mt-1 rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                    :class="profileData.auth_provider && profileData.auth_provider !== 'local' ? 'text-red-500 dark:text-red-300 bg-red-500/10 border-red-500/20' : 'text-theme-text-muted bg-theme-surface-subtle border-theme-border'"
-                  >
-                    {{ profileData.registered_via || 'Registration Form' }}
-                  </span>
+                  <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                    <span 
+                      class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                      :class="profileData.auth_provider && profileData.auth_provider !== 'local' ? 'text-red-500 dark:text-red-300 bg-red-500/10 border-red-500/20' : 'text-theme-text-muted bg-theme-surface-subtle border-theme-border'"
+                    >
+                      {{ profileData.registered_via || 'Registration Form' }}
+                    </span>
+                    <span
+                      v-if="profileData.is_active === false || profileData.status === 'suspended'"
+                      class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-500 bg-red-500/10 border-red-500/20"
+                    >
+                      Suspended
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    >
+                      Active
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -77,6 +91,46 @@
                   <span>Email</span>
                 </a>
               </div>
+            </div>
+          </div>
+
+          <!-- Admin Management Bar -->
+          <div class="rounded-2xl border border-theme-border bg-theme-surface-subtle p-3 flex flex-wrap items-center justify-between gap-2.5">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-theme-text-muted px-1">Admin Controls</span>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button
+                @click="$emit('editCustomer', profileData)"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-theme-border bg-theme-surface text-xs font-semibold text-theme-text hover:bg-theme-border/40 hover:text-blue-500 transition-all shadow-sm"
+              >
+                <PencilSquareIcon class="h-3.5 w-3.5 text-blue-500" />
+                <span>Edit</span>
+              </button>
+
+              <button
+                @click="$emit('resetPassword', profileData)"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-theme-border bg-theme-surface text-xs font-semibold text-theme-text hover:bg-theme-border/40 hover:text-amber-500 transition-all shadow-sm"
+              >
+                <KeyIcon class="h-3.5 w-3.5 text-amber-500" />
+                <span>Password</span>
+              </button>
+
+              <button
+                @click="$emit('toggleStatus', profileData)"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-theme-border bg-theme-surface text-xs font-semibold transition-all shadow-sm"
+                :class="profileData.is_active === false ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-amber-600 hover:bg-amber-500/10'"
+              >
+                <CheckCircleIcon v-if="profileData.is_active === false" class="h-3.5 w-3.5" />
+                <NoSymbolIcon v-else class="h-3.5 w-3.5" />
+                <span>{{ profileData.is_active === false ? 'Activate' : 'Suspend' }}</span>
+              </button>
+
+              <button
+                @click="$emit('deleteCustomer', profileData)"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
+              >
+                <TrashIcon class="h-3.5 w-3.5" />
+                <span>Delete</span>
+              </button>
             </div>
           </div>
 
@@ -164,7 +218,12 @@ import {
   ClockIcon, 
   CalendarDaysIcon, 
   EnvelopeIcon, 
-  PhoneIcon 
+  PhoneIcon,
+  PencilSquareIcon,
+  KeyIcon,
+  NoSymbolIcon,
+  CheckCircleIcon,
+  TrashIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -173,7 +232,7 @@ defineProps({
   profileData: Object
 });
 
-defineEmits(['close']);
+defineEmits(['close', 'editCustomer', 'toggleStatus', 'resetPassword', 'deleteCustomer']);
 
 function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

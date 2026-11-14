@@ -51,9 +51,9 @@
       <div class="w-full max-w-sm">
         <div class="mb-8">
           <div class="text-center">
-            <h1 class="font-display font-bold text-3xl sm:text-4xl text-admin mb-4">Admin Portal</h1>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-admin mb-4">{{ isSuperAdminPortal ? 'Super Admin Portal' : 'Admin Portal' }}</h1>
           </div>
-          <p class="text-theme-muted text-xs sm:text-sm mb-4">Please enter your credentials to access the admin dashboard.</p>
+          <p class="text-theme-muted text-xs sm:text-sm mb-4">{{ isSuperAdminPortal ? 'Please enter your credentials to access the super admin dashboard.' : 'Please enter your credentials to access the admin dashboard.' }}</p>
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
             <div class="flex items-center justify-between mb-1.5">
@@ -100,7 +100,7 @@
               id="email"
               class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-admin focus:ring-1 focus:ring-admin transition-all duration-300 outline-none" 
               placeholder="you@example.com" 
-              type="email" 
+              type="text" 
             />
             <p v-if="errors.email" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.email }}</p>
           </div>
@@ -197,29 +197,23 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
-import { useDark } from '@vueuse/core';
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
 
-isDark.value = true;
-
+const route = useRoute();
 const router = useRouter();
 const { login, redirectAfterLogin, user, logout } = useAuth();
 
-const email = ref('webadmin@candycutz.com');
-const password = ref('admin123');
+const isSuperAdminPortal = computed(() => route?.path?.includes('superadmin') || false);
+
+const email = ref(isSuperAdminPortal.value ? 'websuperadmin@candycutz.com' : 'webadmin@candycutz.com');
+const password = ref(isSuperAdminPortal.value ? 'superadmin123' : 'admin123');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -230,7 +224,7 @@ const errors = reactive({
 });
 
 const schema = object({
-  email: string().required('Email is required').email('Enter a valid email'),
+  email: string().required('Email or username is required'),
   password: string().required('Password is required'),
 });
 
@@ -289,7 +283,18 @@ async function submitForm() {
       return;
     }
 
-    generalError.value = error?.response?.data?.message || 'Credentials not correct, either the password or the email.';
+    if (error?.details?.field_errors) {
+      Object.entries(error.details.field_errors).forEach(([field, msgs]) => {
+        if (errors[field] !== undefined) {
+          errors[field] = Array.isArray(msgs) ? msgs[0] : msgs;
+        }
+      });
+    }
+
+    generalError.value =
+      error?.message ||
+      error?.response?.data?.message ||
+      'Credentials not correct, either the password or the email.';
   } finally {
     loading.value = false;
   }

@@ -1,12 +1,15 @@
 <template>
-  <section class="barber-cta" :class="{ 'barber-cta--preview': compact }">
+  <section class="barber-cta" :class="{ 'barber-cta--preview': compact, 'barber-cta--has-image': Boolean(backgroundImage) }">
     <div
       v-if="backgroundImage"
       class="barber-cta__photo"
       :style="{ backgroundImage: `url('${backgroundImage}')`, ...(resolvedPhotoOpacity !== undefined ? { opacity: resolvedPhotoOpacity } : {}) }"
       aria-hidden="true"
-    ></div>
-    <div class="barber-cta__shade" :style="resolvedOverlayOpacity !== undefined ? { opacity: resolvedOverlayOpacity } : {}" aria-hidden="true"></div>
+    >
+      <img :src="backgroundImage" alt="" fetchpriority="high" decoding="async" class="barber-cta__lcp-img" />
+    </div>
+    <div class="barber-cta__shade" :style="{ opacity: resolvedOverlayOpacity, background: overlayBackground }" aria-hidden="true"></div>
+    <div class="barber-cta__gradient" aria-hidden="true"></div>
     <div v-if="!compact" class="barber-cta__dot-field" aria-hidden="true"></div>
 
     <div class="barber-cta__content">
@@ -33,6 +36,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { buildOverlayGradient, DEFAULT_OVERLAY_COLOR } from '@/core/utils/heroOverlay';
 import { RouterLink } from 'vue-router';
 import { ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline';
 
@@ -49,6 +53,7 @@ const props = defineProps({
   backgroundImage: { type: String, default: '' },
   imageOpacity: { type: [Number, String], default: null },
   overlayOpacity: { type: [Number, String], default: null },
+  overlayColor: { type: String, default: DEFAULT_OVERLAY_COLOR },
   compact: { type: Boolean, default: false }
 });
 
@@ -85,11 +90,16 @@ const resolvedPhotoOpacity = computed(() => {
 });
 
 const resolvedOverlayOpacity = computed(() => {
-  if (props.overlayOpacity === null || props.overlayOpacity === undefined || props.overlayOpacity === '') return undefined;
+  if (props.overlayOpacity === null || props.overlayOpacity === undefined || props.overlayOpacity === '') {
+    return 0.45;
+  }
   const val = Number(props.overlayOpacity);
-  if (!Number.isFinite(val)) return undefined;
-  return Math.max(0, Math.min(100, val)) / 100;
+  if (!Number.isFinite(val)) return 0.45;
+  const clamped = Math.max(0, Math.min(100, val));
+  return clamped > 1 ? clamped / 100 : clamped;
 });
+
+const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor));
 </script>
 
 <style scoped>
@@ -111,34 +121,73 @@ const resolvedOverlayOpacity = computed(() => {
   transition: background-color 300ms ease, color 300ms ease;
 }
 
+.barber-cta--has-image {
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 153, 0, 0.05) 0%, transparent 70%),
+    #0E0B08;
+}
+
+.barber-cta--has-image .barber-cta__title {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+}
+
+.barber-cta--has-image .barber-cta__subtitle {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+
 .barber-cta__photo,
 .barber-cta__shade,
+.barber-cta__gradient,
 .barber-cta__dot-field {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.barber-cta__photo {
-  z-index: -2;
+.barber-cta__gradient {
+  z-index: -1;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    url('/images/hero-pattern.png');
+  background-size: 16px 16px, 16px 16px;
+  background-repeat: repeat;
   background-position: center;
-  background-size: cover;
-  opacity: 0.22;
+  opacity: 0.28;
 }
 
-.barber-cta__shade {
-  z-index: -1;
-  background: linear-gradient(180deg, var(--color-bg-primary), var(--color-bg-primary));
-  opacity: 0.78;
+:root[data-theme="light"] .barber-cta .barber-cta__gradient,
+.light .barber-cta .barber-cta__gradient {
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.14) 1px, transparent 1px),
+    url('/images/hero-pattern.png');
+  filter: invert(1);
+  opacity: 0.22;
 }
 
 .barber-cta__dot-field {
-  z-index: -1;
-  background-image: radial-gradient(var(--color-accent) 0.7px, transparent 0.7px);
-  background-position: center 12px;
-  background-size: 12px 12px;
-  mask-image: radial-gradient(ellipse at center, black 8%, transparent 76%);
-  opacity: 0.22;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.barber-cta__lcp-img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.barber-cta__photo {
+  z-index: -3;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.35;
+}
+
+.barber-cta__shade {
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(250, 190, 60, 0.20) 0%, rgba(212, 143, 24, 0.26) 38%, rgba(138, 86, 11, 0.45) 72%, rgba(20, 14, 6, 0.82) 100%),
+    linear-gradient(180deg, rgba(230, 168, 23, 0.10) 0%, rgba(14, 10, 4, 0.68) 100%);
+  transition: opacity 300ms ease;
+}
+
+.barber-cta__dot-field {
+  display: none;
 }
 
 .barber-cta__content {
@@ -180,11 +229,13 @@ const resolvedOverlayOpacity = computed(() => {
 
 .barber-cta__title {
   margin: 0;
+  max-width: 100%;
   font-size: clamp(1.25rem, 6vw, 4.15rem);
   font-weight: 700;
   letter-spacing: -0.055em;
   line-height: 1.06;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .barber-cta__title span {
@@ -291,7 +342,8 @@ const resolvedOverlayOpacity = computed(() => {
   }
 
   .barber-cta__title {
-    font-size: clamp(1.25rem, 6vw, 3.5rem);
+    font-size: clamp(1.45rem, 8vw, 3.5rem);
+    line-height: 1.1;
   }
 
   .barber-cta__subtitle {

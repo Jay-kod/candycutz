@@ -9,9 +9,15 @@
           <PhotoIcon class="h-4 w-4" />
         </span>
       </div>
-      <div class="mt-3 flex items-baseline gap-2 relative z-10">
-        <span class="font-display text-3xl font-bold text-white tracking-tight">{{ heroOpacity }}%</span>
-        <span class="text-xs text-white/40">image opacity</span>
+      <div class="mt-3 flex items-baseline justify-between relative z-10">
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-display text-2xl font-bold text-white tracking-tight">{{ heroOpacity }}%</span>
+          <span class="text-[11px] text-white/40">image</span>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-display text-2xl font-bold text-admin tracking-tight">{{ heroOverlayOpacity }}%</span>
+          <span class="text-[11px] text-admin/70">gold tint</span>
+        </div>
       </div>
       <div class="mt-3 flex items-center justify-between text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
         <span class="truncate">{{ ctaLabels }}</span>
@@ -114,13 +120,18 @@ const props = defineProps({
   }
 });
 
+const heroOverlayOpacity = computed(() => {
+  const val = props.settings?.hero_overlay_opacity;
+  return (val !== undefined && val !== null) ? val : 45;
+});
+
 const heroOpacity = computed(() => {
   const val = props.settings?.hero_image_opacity;
   return (val !== undefined && val !== null) ? val : 22;
 });
 
 const ctaLabels = computed(() => {
-  const btn1 = props.settings?.hero_btn1_text || 'Book';
+  const btn1 = props.settings?.cta_primary_text || props.settings?.hero_btn1_text || 'Book';
   const btn2 = props.settings?.hero_btn2_text || 'About';
   return `${btn1} • ${btn2}`;
 });

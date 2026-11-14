@@ -35,7 +35,7 @@ class TestimonialResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'customer_name' => $this->client_name ?? $this->customer?->name ?? 'Anonymous',
+            'customer_name' => $this->client_name ?? $this->customer->name ?? 'Anonymous',
             'avatar_url' => $avatarUrl,
             'rating' => (int) $this->rating,
             'review' => $this->review ?? $this->comment ?? '',
@@ -50,7 +50,7 @@ class TestimonialResource extends JsonResource
             'barber_id' => $this->barber_id,
             'barber' => $this->barber ? [
                 'id' => $this->barber->id,
-                'name' => $this->barber->name ?? $this->barber->user?->name ?? 'Unknown',
+                'name' => $this->barber->user->name ?? 'Unknown',
             ] : null,
             'created_at' => $this->created_at?->toISOString(),
             'is_approved' => (bool) $this->is_approved,

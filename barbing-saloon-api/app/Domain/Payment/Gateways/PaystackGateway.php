@@ -36,7 +36,7 @@ class PaystackGateway implements PaymentGateway
         $email = $payment->customer->email ?? 'customer@candycutz.com';
         $reference = $payment->transaction_ref ?? 'TXN_'.strtoupper(uniqid());
 
-        $isFakeAllowed = app()->environment('local', 'testing') && (config('payments.fake') || env('PAYSTACK_FAKE'));
+        $isFakeAllowed = app()->environment('local', 'testing') && config('payments.fake', false);
 
         if (empty($this->secretKey)) {
             if ($isFakeAllowed) {
@@ -90,7 +90,7 @@ class PaystackGateway implements PaymentGateway
 
     public function verify(string $reference): GatewayResult
     {
-        $isFakeAllowed = app()->environment('local', 'testing') && (config('payments.fake') || env('PAYSTACK_FAKE'));
+        $isFakeAllowed = app()->environment('local', 'testing') && config('payments.fake', false);
 
         if (empty($this->secretKey)) {
             if ($isFakeAllowed) {

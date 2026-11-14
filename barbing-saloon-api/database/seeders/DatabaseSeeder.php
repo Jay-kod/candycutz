@@ -9,9 +9,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            LegacyDataSeeder::class,
+            KeffiOperationsSeeder::class,
+            ServiceCategorySeeder::class,
+            ServiceSeeder::class,
+            UserSeeder::class,
             WebUserSeeder::class,
+            WorkingHourSeeder::class,
+            SettingSeeder::class,
             AnimationSettingsSeeder::class,
+            AppointmentSeeder::class,
+            SampleTestimonialsSeeder::class,
+            BlogSeeder::class,
         ]);
     }
 }

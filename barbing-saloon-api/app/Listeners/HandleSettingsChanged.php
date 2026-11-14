@@ -22,7 +22,7 @@ class HandleSettingsChanged implements ShouldQueue
 
     public function handle(SettingsChanged $event): void
     {
-        $actorName = $event->actor?->name ?? 'System';
+        $actorName = $event->actor->name ?? 'System';
 
         Log::info("Setting changed: {$event->key}", [
             'key' => $event->key,

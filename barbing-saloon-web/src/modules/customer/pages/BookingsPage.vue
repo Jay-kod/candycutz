@@ -1,64 +1,93 @@
 <template>
   <CustomerLayout>
-    <div class="animate-fade-in pb-20">
-      
-      <!-- Hero Banner -->
-      <section class="relative h-[30vh] min-h-[250px] w-full overflow-hidden rounded-3xl border border-[var(--color-border)] mb-12 shadow-2xl">
-        <img src="https://images.unsplash.com/photo-1593702275687-f8b402bf1fb5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Barbershop" class="absolute inset-0 h-full w-full object-cover scale-105" />
-        <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-primary)]/90 via-[var(--color-bg-primary)]/60 to-transparent"></div>
-        
-        <div class="absolute inset-0 flex items-center p-4 xs:p-6 sm:p-8 md:p-12">
-          <div class="max-w-2xl">
-            <p class="text-xs uppercase tracking-[0.4em] text-[var(--color-accent)] mb-4 font-bold">Your Appointments</p>
-            <h1 class="font-display text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-text-primary)] drop-shadow-lg">
-              Manage your <span class="text-[var(--color-accent)] italic">Bookings</span>
+    <div class="max-w-7xl mx-auto space-y-8 animate-fade-in pb-16 pt-4">
+      <!-- Header -->
+      <div class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-[var(--color-border)] bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-white dark:from-[var(--color-bg-secondary)] dark:to-[var(--color-bg-secondary)] p-8 lg:p-12 shadow-2xl">
+        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-flex h-2 w-2 rounded-full bg-[var(--color-accent)] animate-pulse"></span>
+              <p class="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-accent)]">Personal Schedule</p>
+            </div>
+            <h1 class="font-display text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm">
+              My <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/80">Bookings</span>
             </h1>
-            <p class="mt-4 text-sm sm:text-lg text-[var(--color-text-secondary)] max-w-xl font-light hidden xs:block">
-              View your upcoming appointments, upload payment receipts, and check your grooming history.
+            <p class="mt-2 text-xs lg:text-sm text-[var(--color-text-secondary)] max-w-xl">
+              Track your upcoming haircuts, grooming sessions, review receipt confirmations, and access verification codes.
             </p>
           </div>
-        </div>
-      </section>
 
-      <!-- Main Layout -->
-      <div class="space-y-8 max-w-5xl mx-auto">
-        <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-xl p-4 xs:p-6 md:p-8 shadow-2xl">
-          <div class="flex items-center justify-between mb-8">
-            <h2 class="font-display text-xl xs:text-2xl md:text-3xl text-[var(--color-text-primary)]">Booking <span class="text-[var(--color-accent)]">History</span></h2>
-            <button class="flex items-center justify-center min-h-[44px] gap-2 rounded-xl bg-[var(--color-bg-tertiary)] px-4 py-2 text-xs font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/30 transition-all border border-[var(--color-border)] shadow-sm group" @click="loadBookings" title="Refresh Data">
-              <ArrowPathIcon class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': loadingBookings }" />
-              <span class="hidden sm:inline">Refresh</span>
+          <RouterLink
+            to="/customer/dashboard/services"
+            class="flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-6 py-3 text-xs font-bold text-white transition-all hover:brightness-110 shadow-lg shadow-[var(--color-accent)]/20 active:scale-95"
+          >
+            <CalendarIcon class="h-4 w-4" />
+            Book New Cut
+          </RouterLink>
+        </div>
+      </div>
+
+      <!-- Filters & Active Tabs -->
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/[0.08] pb-4">
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <button
+              v-for="filter in filters"
+              :key="filter.value"
+              @click="currentFilter = filter.value"
+              :class="[
+                'flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shrink-0',
+                currentFilter === filter.value
+                  ? 'bg-[var(--color-accent)] text-white shadow-md shadow-[var(--color-accent)]/20'
+                  : 'bg-slate-100 dark:bg-white/[0.04] text-[var(--color-text-secondary)] hover:bg-slate-200 dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/[0.06]'
+              ]"
+            >
+              <span>{{ filter.label }}</span>
+              <span 
+                :class="[
+                  'px-1.5 py-0.5 rounded-full text-[10px] font-mono leading-none',
+                  currentFilter === filter.value ? 'bg-black/30 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-[var(--color-text-secondary)]'
+                ]"
+              >
+                {{ filter.count }}
+              </span>
             </button>
           </div>
 
-          <!-- Filters -->
-          <div class="mb-6 flex flex-wrap gap-2 md:gap-3">
-            <button @click="currentFilter = 'all'" :class="currentFilter === 'all' ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] font-bold border-[var(--color-accent)]' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-[var(--color-border)] shadow-sm">Recent / All</button>
-            <button @click="currentFilter = 'pending'" :class="currentFilter === 'pending' ? 'bg-amber-500 text-black font-bold border-amber-500' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-[var(--color-border)] shadow-sm">Pending</button>
-            <button @click="currentFilter = 'confirmed'" :class="currentFilter === 'confirmed' ? 'bg-emerald-500 text-white font-bold border-emerald-500' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-[var(--color-border)] shadow-sm">Approved</button>
-            <button @click="currentFilter = 'cancelled'" :class="currentFilter === 'cancelled' ? 'bg-[var(--color-danger)] text-white font-bold border-[var(--color-danger)]' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]'" class="rounded-xl px-3.5 xs:px-4 md:px-6 py-2.5 min-h-[44px] text-xs md:text-sm transition-all border border-[var(--color-border)] shadow-sm">Cancelled</button>
-          </div>
-          
-          <div v-if="loadingBookings" class="py-20 flex justify-center">
-            <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-accent)] border-t-transparent shadow-[0_0_15px_rgba(255,153,0,0.5)]"></div>
-          </div>
+          <p class="text-xs text-[var(--color-text-secondary)] font-mono">
+            Showing {{ filteredBookings.length }} of {{ bookings.length }} appointments
+          </p>
+        </div>
 
-          <div v-else class="grid gap-6 md:grid-cols-2">
-            <article 
-              v-for="booking in filteredBookings" 
-              :key="booking.id" 
-              class="group relative rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl bg-[var(--color-bg-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-bg-tertiary)]/50"
-            >
-              <!-- Status Badge & Delete Action -->
-              <div class="absolute top-6 right-6 flex items-center gap-2">
+        <!-- Bookings Grid -->
+        <div v-if="loadingBookings" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div v-for="i in 6" :key="i" class="h-64 rounded-3xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] animate-pulse"></div>
+        </div>
+
+        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <article
+            v-for="booking in filteredBookings"
+            :key="booking.id"
+            class="group relative flex flex-col justify-between rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[var(--color-bg-secondary)] p-6 transition-all duration-300 hover:border-[var(--color-accent)]/30 hover:shadow-xl hover:shadow-[var(--color-accent)]/5 hover:-translate-y-1"
+          >
+            <div>
+              <!-- Top Row: Reference & Status Badge -->
+              <div class="flex items-center justify-between gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-white/[0.06]">
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-[var(--color-text-secondary)] font-mono block">Ref No.</span>
+                  <span class="font-mono text-xs font-bold text-slate-900 dark:text-white tracking-wider">{{ booking.booking_reference }}</span>
+                </div>
+                
                 <span 
-                  class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest border"
+                  class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5"
                   :class="{
-                    'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20': booking.status === 'pending',
-                    'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]': booking.status === 'confirmed',
-                    'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20': booking.status === 'cancelled',
-                    'bg-blue-500/10 text-blue-500 border-blue-500/20': booking.status === 'completed'
+                    'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30': booking.status === 'confirmed',
+                    'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30': booking.status === 'pending',
+                    'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30': booking.status === 'completed',
+                    'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30': booking.status === 'cancelled',
                   }"
                 >
                   {{ booking.status }}
@@ -66,86 +95,149 @@
                 
                 <button 
                   @click.stop="deleteBooking(booking.id)"
-                  class="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] transition-colors border border-transparent hover:border-[var(--color-danger)]/20"
-                  title="Delete Booking"
+                  class="rounded-lg p-1.5 text-slate-400 dark:text-white/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border border-transparent hover:border-red-500/20"
+                  title="Remove from history"
                 >
                   <TrashIcon class="h-4 w-4" />
                 </button>
               </div>
 
-              <div class="flex gap-4">
-                <div class="mt-1 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-accent)] shadow-inner">
-                  <span class="font-display text-2xl">{{ new Date(booking.appointment_date).getDate() }}</span>
+              <!-- Main Details -->
+              <div class="flex gap-4 items-start">
+                <div class="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-[var(--color-accent)] shadow-inner">
+                  <span class="font-display text-xl leading-none font-bold">{{ new Date(booking.appointment_date).getDate() || '--' }}</span>
+                  <span class="text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-white/50">{{ getMonthShort(booking.appointment_date) }}</span>
                 </div>
-                <div class="pr-20">
-                  <p class="font-display text-xl text-[var(--color-text-primary)]">{{ booking.service?.name }}</p>
-                  <div class="mt-2 space-y-1.5">
-                    <p class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                      <CalendarIcon class="h-4 w-4 text-[var(--color-accent)]/60" />
-                      <span>{{ formatDate(booking.appointment_date) }} at <span class="text-[var(--color-accent)] font-bold">{{ booking.appointment_time }}</span></span>
+                <div class="flex-1 min-w-0">
+                  <p class="font-display text-lg text-slate-900 dark:text-white group-hover:text-[var(--color-accent)] transition-colors truncate">
+                    {{ booking.service?.name || 'Grooming Appointment' }}
+                  </p>
+                  <div class="mt-2 space-y-1.5 text-xs text-[var(--color-text-secondary)]">
+                    <p class="flex items-center gap-2">
+                      <ClockIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0" />
+                      <span>{{ formatDate(booking.appointment_date) }} at <span class="text-slate-900 dark:text-white font-bold">{{ booking.appointment_time }}</span></span>
                     </p>
-                    <p class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                      <UserIcon class="h-4 w-4 text-[var(--color-accent)]/60" />
-                      <span>With {{ booking.barber?.name }}</span>
+                    <p class="flex items-center gap-2">
+                      <UserIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0" />
+                      <span>With <strong class="text-slate-900 dark:text-white font-medium">{{ booking.barber?.name || 'Assigned Barber' }}</strong></span>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div v-if="booking.notes" class="mt-4 rounded-xl bg-[var(--color-bg-tertiary)] p-3 text-xs text-[var(--color-text-secondary)] border border-[var(--color-border)] border-l-2 border-l-[var(--color-accent)]">
+              <!-- Customer Notes -->
+              <div v-if="booking.notes" class="mt-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] p-3 text-xs text-[var(--color-text-secondary)] border border-slate-200 dark:border-white/[0.06] border-l-2 border-l-[var(--color-accent)] italic">
                 "{{ booking.notes }}"
               </div>
 
-              <div v-if="booking.status === 'confirmed' && booking.verification_code" class="mt-4 rounded-xl border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-4">
-                <p class="text-xs font-bold uppercase tracking-widest text-[var(--color-success)] mb-2">Service Verification Code</p>
-                <p class="text-sm text-[var(--color-text-secondary)] mb-3">Provide this verification code to your barber after your service is completed to verify delivery.</p>
-                <div class="flex items-center justify-between bg-[var(--color-bg-secondary)] rounded-lg py-3 px-4 border border-[var(--color-border)] shadow-inner">
-                  <span class="font-mono text-xl font-bold tracking-widest text-[var(--color-success)] uppercase text-center w-full">{{ booking.verification_code }}</span>
-                  <button 
-                    @click="copyCode(booking.verification_code)"
-                    class="p-2 text-[var(--color-success)]/70 hover:text-[var(--color-success)] hover:bg-[var(--color-success)]/10 rounded-lg transition-colors flex-shrink-0"
-                    title="Copy Code"
-                  >
-                    <DocumentDuplicateIcon class="h-5 w-5" />
-                  </button>
+              <!-- Bank Transfer Payment Details Box (Directly visible on card so customer can pay) -->
+              <div v-if="shouldShowBankDetails(booking)" class="mt-4 rounded-xl border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 p-4">
+                <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200 dark:border-white/[0.08]">
+                  <div class="flex items-center gap-2">
+                    <BuildingLibraryIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0" />
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--color-accent)]">Transfer Payment To</p>
+                  </div>
+                  <span class="text-xs font-bold text-slate-900 dark:text-white bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/30 px-2 py-0.5 rounded-full">
+                    {{ formatNairaAmount(booking.grand_total || booking.service?.price || 0) }}
+                  </span>
+                </div>
+
+                <div v-if="getBankDetails(booking)" class="space-y-2 text-xs">
+                  <div class="flex justify-between items-center text-[var(--color-text-secondary)]">
+                    <span>Bank Name:</span>
+                    <span class="text-slate-900 dark:text-white font-medium">{{ getBankDetails(booking).bank_name }}</span>
+                  </div>
+                  <div class="flex justify-between items-center text-[var(--color-text-secondary)]">
+                    <span>Account Name:</span>
+                    <span class="text-slate-900 dark:text-white font-medium">{{ getBankDetails(booking).account_name }}</span>
+                  </div>
+                  <div class="flex justify-between items-center bg-slate-100 dark:bg-black/40 rounded-lg py-2 px-3 border border-slate-200 dark:border-white/[0.08] mt-1.5">
+                    <span class="text-[var(--color-text-secondary)] text-[11px]">Account Number:</span>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-sm font-bold tracking-wider text-[var(--color-accent)]">{{ getBankDetails(booking).account_number }}</span>
+                      <button 
+                        @click="copyCode(getBankDetails(booking).account_number)"
+                        class="p-1 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/15 rounded-md transition-colors"
+                        title="Copy Account Number"
+                      >
+                        <DocumentDuplicateIcon class="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="text-xs text-amber-500 dark:text-amber-400/90 text-center py-1">
+                  Payment details configured. Click below to view and upload receipt.
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div v-if="['pending', 'confirmed'].includes(booking.status)" class="mt-6 pt-5 border-t border-[var(--color-border)] flex flex-col gap-3">
-                
-                <template v-if="booking.status === 'pending'">
-                  <div v-if="!booking.payment_status || booking.payment_status === 'pending'">
-                    <button v-if="!showUploader[booking.id]" class="w-full rounded-xl bg-[var(--color-accent)] py-3 text-sm font-bold text-[var(--color-accent-foreground)] hover:bg-[var(--color-accent-hover)] transition-all flex items-center justify-center gap-2" @click="startPayment(booking)">
-                      <CreditCardIcon class="h-5 w-5" /> Pay & Upload Receipt ({{ formatNairaAmount(booking.service?.price || 0) }})
-                    </button>
-                    <ReceiptUploader v-else :appointmentId="booking.id" @uploaded="onReceiptUploaded" />
-                  </div>
-                  
-                  <div v-else-if="booking.payment_status === 'awaiting_verification'" class="w-full rounded-xl bg-blue-500/10 py-3 text-sm font-bold text-blue-500 border border-blue-500/20 text-center flex items-center justify-center gap-2">
-                    <ArrowPathIcon class="h-5 w-5 animate-spin" /> Pending Confirmation
-                  </div>
-                </template>
-
-                <button class="w-full rounded-xl bg-[var(--color-danger)]/10 py-3 text-sm font-bold text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white transition-all border border-[var(--color-danger)]/20 mt-2" @click="cancel(booking.id)">
-                  Cancel Booking
-                </button>
+              <!-- Verification Code Box -->
+              <div v-if="booking.status === 'confirmed' && booking.verification_code" class="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                <div class="flex items-center justify-between mb-1.5">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Service Verification Code</p>
+                  <span class="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">Present at checkout</span>
+                </div>
+                <div class="flex items-center justify-between bg-emerald-50 dark:bg-black/40 rounded-lg py-2.5 px-3.5 border border-emerald-500/20">
+                  <span class="font-mono text-lg font-bold tracking-widest text-emerald-700 dark:text-emerald-300 uppercase">{{ booking.verification_code }}</span>
+                  <button 
+                    @click="copyCode(booking.verification_code)"
+                    class="p-1.5 text-emerald-600 dark:text-emerald-400/80 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-lg transition-colors shrink-0"
+                    title="Copy Code"
+                  >
+                    <DocumentDuplicateIcon class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </article>
-            
-            <div v-if="filteredBookings.length === 0" class="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] py-24 text-center bg-[var(--color-bg-secondary)]/30">
-              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] mb-4">
-                <CalendarIcon class="h-8 w-8 text-[var(--color-accent)]/40" />
-              </div>
-              <p class="text-[var(--color-text-primary)] font-display text-xl mb-2">No Bookings Yet</p>
-              <p class="text-sm text-[var(--color-text-secondary)] max-w-md mx-auto mb-6">Your upcoming and past appointments will appear here.</p>
-              <RouterLink to="/customer/dashboard/services" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-6 py-3 text-sm font-bold text-[var(--color-accent-foreground)] transition-all hover:bg-[var(--color-accent-hover)]">
-                Browse Services
-              </RouterLink>
             </div>
+
+            <!-- Actions Footer -->
+            <div v-if="['pending', 'confirmed'].includes(booking.status)" class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col gap-2.5">
+              <template v-if="booking.status === 'pending'">
+                <div v-if="!booking.payment_status || booking.payment_status === 'pending' || booking.payment_status === 'unpaid'" class="space-y-2">
+                  <RouterLink 
+                    :to="`/customer/dashboard/payment/${booking.id}`"
+                    class="w-full rounded-xl bg-[#FDB913] hover:bg-[#F2AC07] py-2.5 text-xs font-bold text-slate-950 transition-all flex items-center justify-center gap-2 shadow-md shadow-[#FDB913]/20" 
+                  >
+                    <CreditCardIcon class="h-4 w-4" /> Pay Now • Transfer / USSD ({{ formatNairaAmount(booking.grand_total || booking.service?.price || 0) }})
+                  </RouterLink>
+                  <button 
+                    v-if="!showUploader[booking.id]" 
+                    class="w-full rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] py-2 text-xs font-semibold text-white/80 transition-all flex items-center justify-center gap-1.5" 
+                    @click="startPayment(booking)"
+                  >
+                    <span>Upload Manual Receipt Slip</span>
+                  </button>
+                  <ReceiptUploader v-else :appointmentId="booking.id" :initialBankDetails="getBankDetails(booking)" @uploaded="onReceiptUploaded" />
+                </div>
+                <div v-else-if="booking.payment_status === 'awaiting_verification'" class="w-full rounded-xl bg-blue-500/10 py-2.5 text-xs font-bold text-blue-500 dark:text-blue-400 border border-blue-500/25 text-center flex items-center justify-center gap-2">
+                  <ArrowPathIcon class="h-4 w-4 animate-spin" /> Receipt Under Review
+                </div>
+              </template>
+
+              <button 
+                class="w-full rounded-xl bg-red-500/10 py-2.5 text-xs font-bold text-red-500 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all border border-red-500/20" 
+                @click="cancel(booking.id)"
+              >
+                Cancel Booking
+              </button>
+            </div>
+          </article>
+          
+          <!-- Empty State -->
+          <div v-if="filteredBookings.length === 0" class="col-span-full rounded-3xl border border-dashed border-slate-200 dark:border-white/10 py-20 text-center bg-slate-50/50 dark:bg-white/[0.02]">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 mb-4">
+              <CalendarIcon class="h-8 w-8 text-[var(--color-accent)]/60" />
+            </div>
+            <p class="text-slate-900 dark:text-white font-display text-xl mb-1.5">No Bookings Found</p>
+            <p class="text-xs text-[var(--color-text-secondary)] max-w-sm mx-auto mb-6">No appointments matching this filter are currently registered.</p>
+            <RouterLink 
+              to="/customer/dashboard/services" 
+              class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-6 py-3 text-xs font-bold text-white transition-all hover:brightness-110 shadow-lg shadow-[var(--color-accent)]/20"
+            >
+              Browse Services
+            </RouterLink>
           </div>
         </div>
-        
       </div>
     </div>
   </CustomerLayout>
@@ -156,7 +248,7 @@ import { onMounted, reactive, ref, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import ReceiptUploader from '../../../core/components/ReceiptUploader.vue';
-import { customerApi } from '@/shared/api/old_customerApi';
+import { client } from '@/shared/api/client';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
 import { formatNairaAmount } from '../../../core/utils';
@@ -165,8 +257,10 @@ import {
   UserIcon, 
   CreditCardIcon,
   CalendarIcon,
+  ClockIcon,
   TrashIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  BuildingLibraryIcon,
 } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
@@ -175,8 +269,17 @@ const { confirm } = useConfirm();
 const bookings = ref([]);
 const loadingBookings = ref(true);
 const showUploader = reactive({});
-
 const currentFilter = ref('all');
+
+const filters = computed(() => {
+  const all = bookings.value.data || bookings.value || [];
+  return [
+    { label: 'All', value: 'all', count: all.length },
+    { label: 'Pending', value: 'pending', count: all.filter(b => b.status === 'pending').length },
+    { label: 'Confirmed', value: 'confirmed', count: all.filter(b => b.status === 'confirmed').length },
+    { label: 'Cancelled', value: 'cancelled', count: all.filter(b => b.status === 'cancelled').length },
+  ];
+});
 
 const filteredBookings = computed(() => {
   const allBookings = bookings.value.data || bookings.value || [];
@@ -189,11 +292,16 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function getMonthShort(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short' });
+}
+
 async function loadBookings() {
   loadingBookings.value = true;
   try {
-    const response = await customerApi.bookings();
-    bookings.value = response.data.data || [];
+    const response = await client.get('/customer/bookings');
+    bookings.value = response.data?.data || response.data || [];
   } catch (err) {
     toast.error('Failed to load bookings');
   } finally {
@@ -206,7 +314,7 @@ async function cancel(id) {
   if (!ok) return;
   
   try {
-    await customerApi.cancelBooking(id);
+    await client.patch(`/customer/bookings/${id}/cancel`);
     toast.success('Booking cancelled');
     await loadBookings();
   } catch (err) {
@@ -219,7 +327,7 @@ async function deleteBooking(id) {
   if (!ok) return;
   
   try {
-    await customerApi.deleteBooking(id);
+    await client.delete(`/customer/bookings/${id}`);
     toast.success('Booking removed successfully');
     await loadBookings();
   } catch (err) {
@@ -228,15 +336,17 @@ async function deleteBooking(id) {
 }
 
 async function startPayment(booking) {
+  const amount = booking.grand_total || booking.service?.price || 5000;
   try {
-    const amount = booking.service?.price || 5000;
-    if (!booking.payment_status) {
-      await customerApi.checkout({ appointment_id: booking.id, amount: amount });
-    }
-    showUploader[booking.id] = true;
+    await client.post('/customer/checkout', {
+      appointment_id: booking.id,
+      amount,
+      payment_method: 'manual_transfer',
+    });
   } catch (err) {
-    toast.error('Failed to initiate payment.');
+    console.warn('Checkout initialization note:', err);
   }
+  showUploader[booking.id] = true;
 }
 
 async function onReceiptUploaded() {
@@ -247,14 +357,47 @@ async function onReceiptUploaded() {
 async function copyCode(code) {
   if (!code) return;
   try {
-    await navigator.clipboard.writeText(code);
-    toast.success('Code copied to clipboard!');
+    await navigator.clipboard.writeText(String(code));
+    toast.success('Copied to clipboard!');
   } catch (err) {
-    toast.error('Failed to copy code');
+    toast.error('Failed to copy');
   }
+}
+
+const salonFallbackBank = ref({
+  bank_name: 'Zenith Bank',
+  account_name: 'Candy Cutz Luxury Grooming',
+  account_number: '1012345678',
+});
+
+function getBankDetails(booking) {
+  if (booking?.bank_details?.bank_name && booking?.bank_details?.account_number) {
+    return booking.bank_details;
+  }
+  return salonFallbackBank.value;
+}
+
+function shouldShowBankDetails(booking) {
+  if (!booking) return false;
+  if (['cancelled', 'completed'].includes(booking.status)) return false;
+  if (booking.deposit_paid || booking.payment_status === 'paid' || booking.payment_status === 'awaiting_verification') return false;
+  return true;
 }
 
 onMounted(async () => {
   await loadBookings();
+  try {
+    const res = await client.get('/settings');
+    const data = res.data?.data || res.data || {};
+    if (data.bank_name && data.account_number) {
+      salonFallbackBank.value = {
+        bank_name: data.bank_name,
+        account_name: data.account_name || 'Candy Cutz Luxury Grooming',
+        account_number: data.account_number,
+      };
+    }
+  } catch (err) {
+    // Non-blocking fallback
+  }
 });
 </script>

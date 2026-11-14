@@ -35,7 +35,7 @@ class EnsureUserActive
             $request->setUserResolver(fn () => $user);
         }
 
-        if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
+        if (! ($user->is_active ?? false) || in_array($user->status ?? '', ['deactivated', 'suspended'], true)) {
             // Revoke the current token immediately so it cannot be reused
             if ($currentToken && method_exists($currentToken, 'delete')) {
                 $currentToken->delete();

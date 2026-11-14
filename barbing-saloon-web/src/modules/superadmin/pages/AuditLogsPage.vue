@@ -138,7 +138,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useDark } from '@vueuse/core';
+import { useTheme } from '@/core/composables/useTheme';
 import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import { useToast } from '@/core/composables/useToast';
@@ -150,12 +150,7 @@ import {
 
 const toast = useToast();
 
-const isDark = useDark({
-  selector: 'html',
-  attribute: 'data-theme',
-  valueDark: 'dark',
-  valueLight: 'light',
-});
+const { isDark } = useTheme();
 
 const logs = ref([]);
 const loading = ref(true);

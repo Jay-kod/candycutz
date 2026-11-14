@@ -29,7 +29,7 @@ if (preg_match('/^\/(uploads|storage)\//', $requestUri) && ! preg_match('/^\/upl
 }
 
 // Serve Vue frontend for non-API routes when index.html exists
-if (strpos($requestUri, '/api') !== 0 && strpos($requestUri, '/up') !== 0 && strpos($requestUri, '/sanctum') !== 0) {
+if (!str_contains($requestUri, '/api') && !str_contains($requestUri, '/up') && !str_contains($requestUri, '/sanctum')) {
     if (file_exists(__DIR__.$requestUri) && is_file(__DIR__.$requestUri)) {
         return false; // serve requested file as-is
     } elseif (file_exists(__DIR__.'/index.html')) {

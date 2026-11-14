@@ -36,7 +36,7 @@
       
       <p class="text-base leading-relaxed" :class="!notif.is_read ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'">{{ notif.message }}</p>
       
-      <div class="mt-5 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+      <div class="mt-4 flex items-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 sm:translate-y-1 sm:group-hover:translate-y-0">
         <button 
           v-if="!notif.is_read" 
           @click="$emit('read', notif.id)" 

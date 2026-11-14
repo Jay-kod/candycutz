@@ -9,8 +9,11 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class SystemBackupApiController
@@ -63,45 +66,71 @@ class SystemBackupApiController
 
     public function create(Request $request): JsonResponse
     {
-        $dir = $this->getBackupDirectory();
-        $timestamp = date('Y-m-d_His');
-        $customName = $request->input('filename');
+        $validated = $request->validate([
+            'filename' => 'nullable|string|max:120',
+        ]);
 
-        $params = [];
-        if ($customName) {
-            $sanitised = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', (string) $customName);
-            if (! str_ends_with($sanitised, '.sql') && ! str_ends_with($sanitised, '.sqlite')) {
-                $sanitised .= '.sql';
+        $dir = $this->getBackupDirectory();
+        $driver = DB::connection()->getDriverName();
+        $extension = match ($driver) {
+            'mysql' => 'sql',
+            'sqlite' => 'sqlite',
+            default => null,
+        };
+
+        if ($extension === null) {
+            return ApiResponse::error("Database driver [{$driver}] is not supported for backups.", [], 422, 'BACKUP_UNSUPPORTED_DRIVER');
+        }
+
+        $customName = trim((string) ($validated['filename'] ?? ''));
+        if ($customName !== '') {
+            $stem = pathinfo($customName, PATHINFO_FILENAME);
+            $sanitisedStem = trim((string) preg_replace('/[^a-zA-Z0-9_-]+/', '_', $stem), '_-');
+            if ($sanitisedStem === '') {
+                return ApiResponse::error('Enter a filename containing letters or numbers.', [], 422, 'VALIDATION_FAILED');
             }
-            $params['--filename'] = $sanitised;
+            $filename = $sanitisedStem.'.'.$extension;
+        } else {
+            $filename = 'candycutz_backup_'.now()->format('Y-m-d_His_u').'.'.$extension;
+        }
+
+        $destination = $dir.DIRECTORY_SEPARATOR.$filename;
+        if (File::exists($destination)) {
+            return ApiResponse::error('A backup already exists with that filename. Choose a different name.', [], 409, 'BACKUP_ALREADY_EXISTS');
         }
 
         try {
-            $exitCode = Artisan::call('db:backup', $params);
+            $exitCode = Artisan::call('db:backup', [
+                '--filename' => $filename,
+                '--directory' => $dir,
+            ]);
             $output = Artisan::output();
 
-            if ($exitCode !== 0) {
-                return ApiResponse::error('Database backup failed: '.$output, [], 500, 'BACKUP_FAILED');
-            }
+            if ($exitCode !== 0 || ! File::exists($destination) || File::size($destination) === 0) {
+                $message = trim($output) ?: 'The backup command did not produce a valid file.';
+                Log::error('Database snapshot generation failed.', [
+                    'connection' => $driver,
+                    'filename' => $filename,
+                    'command_output' => $message,
+                ]);
 
-            // Find the most recently created file
-            $files = File::files($dir);
-            $latestFile = null;
-            $latestMtime = 0;
-            foreach ($files as $f) {
-                if ($f->getMTime() > $latestMtime) {
-                    $latestMtime = $f->getMTime();
-                    $latestFile = $f;
-                }
+                return ApiResponse::error('Database backup failed: '.$message, [], 500, 'BACKUP_FAILED');
             }
 
             return ApiResponse::success([
-                'filename' => $latestFile ? $latestFile->getFilename() : null,
-                'size_formatted' => $latestFile ? $this->formatBytes($latestFile->getSize()) : null,
-                'created_at' => now()->toIso8601String(),
+                'filename' => $filename,
+                'size_bytes' => File::size($destination),
+                'size_formatted' => $this->formatBytes(File::size($destination)),
+                'created_at' => Carbon::createFromTimestamp(File::lastModified($destination))->toIso8601String(),
                 'output' => trim($output),
             ], 'Database snapshot generated successfully');
         } catch (Throwable $e) {
+            Log::error('Database snapshot generation threw an exception.', [
+                'connection' => $driver,
+                'filename' => $filename,
+                'exception' => $e,
+            ]);
+
             return ApiResponse::error('Failed generating backup: '.$e->getMessage(), [], 500, 'BACKUP_FAILED');
         }
     }
@@ -170,7 +199,7 @@ class SystemBackupApiController
         ], 'Backup file uploaded and registered successfully');
     }
 
-    public function download(string $filename): BinaryFileResponse|JsonResponse
+    public function download(string $filename): StreamedResponse|BinaryFileResponse|JsonResponse
     {
         $safeFilename = basename($filename);
         $dir = $this->getBackupDirectory();
@@ -180,7 +209,16 @@ class SystemBackupApiController
             return ApiResponse::error("Backup file not found: {$safeFilename}", [], 404, 'RESOURCE_NOT_FOUND');
         }
 
-        return response()->download($filePath, $safeFilename);
+        return response()->streamDownload(function () use ($filePath) {
+            $stream = fopen($filePath, 'rb');
+            if ($stream !== false) {
+                fpassthru($stream);
+                fclose($stream);
+            }
+        }, $safeFilename, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Length' => (string) File::size($filePath),
+        ]);
     }
 
     public function destroy(string $filename): JsonResponse

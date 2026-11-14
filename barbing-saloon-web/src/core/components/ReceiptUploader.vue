@@ -1,12 +1,20 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { CloudArrowUpIcon, DocumentTextIcon, XMarkIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { CloudArrowUpIcon, DocumentTextIcon, XMarkIcon, CheckCircleIcon, ArrowPathIcon, DocumentDuplicateIcon } from '@heroicons/vue/24/outline'
 import { customerApi } from '@/shared/api/old_customerApi';
+import { client } from '@/shared/api/client';
+import { useToast } from '@/core/composables/useToast';
+
+const toast = useToast();
 
 const props = defineProps({
   appointmentId: {
     type: [Number, String],
     required: true
+  },
+  initialBankDetails: {
+    type: Object,
+    default: () => null
   }
 })
 
@@ -25,22 +33,56 @@ const bankDetails = ref({
 })
 const loadingSettings = ref(true)
 
-onMounted(async () => {
+async function copyAccountNumber(num) {
+  if (!num) return
   try {
-    const res = await customerApi.getPaymentDetails(props.appointmentId)
-    const data = res.data.data || {}
-    bankDetails.value.bank_name = data.bank_name || ''
-    bankDetails.value.account_name = data.account_name || ''
-    bankDetails.value.account_number = data.account_number || ''
+    await navigator.clipboard.writeText(String(num))
+    toast.success('Account number copied!')
   } catch (err) {
-    console.error('Failed to load payment settings', err)
-  } finally {
+    toast.error('Failed to copy')
+  }
+}
+
+onMounted(async () => {
+  if (props.initialBankDetails && props.initialBankDetails.bank_name && props.initialBankDetails.account_number) {
+    bankDetails.value.bank_name = props.initialBankDetails.bank_name
+    bankDetails.value.account_name = props.initialBankDetails.account_name || ''
+    bankDetails.value.account_number = props.initialBankDetails.account_number
     loadingSettings.value = false
   }
+
+  try {
+    const res = await customerApi.getPaymentDetails(props.appointmentId)
+    const data = res.data?.data || res.data || {}
+    if (data.bank_name && data.account_number) {
+      bankDetails.value.bank_name = data.bank_name
+      bankDetails.value.account_name = data.account_name || ''
+      bankDetails.value.account_number = data.account_number
+    }
+  } catch (err) {
+    console.warn('Failed to load payment settings', err)
+  }
+
+  // Fallback to global salon settings if still missing
+  if (!bankDetails.value.bank_name || !bankDetails.value.account_number) {
+    try {
+      const setRes = await client.get('/settings')
+      const sData = setRes.data?.data || setRes.data || {}
+      if (sData.bank_name && sData.account_number) {
+        bankDetails.value.bank_name = sData.bank_name
+        bankDetails.value.account_name = sData.account_name || 'Candy Cutz Luxury Grooming'
+        bankDetails.value.account_number = sData.account_number
+      }
+    } catch (e) {
+      // Non-blocking fallback
+    }
+  }
+
+  loadingSettings.value = false
 })
 
 const hasBankDetails = () => {
-  return bankDetails.value.bank_name && bankDetails.value.account_name && bankDetails.value.account_number
+  return Boolean(bankDetails.value.bank_name && bankDetails.value.account_name && bankDetails.value.account_number)
 }
 
 const handleFileChange = (e) => {
@@ -83,7 +125,12 @@ const uploadReceipt = async () => {
     const res = await customerApi.uploadReceipt(props.appointmentId, formData)
     emit('uploaded', res.data)
   } catch (err) {
-    error.value = err.response?.data?.error || err.message || 'Upload failed'
+    const rawMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Upload failed'
+    if (typeof rawMsg === 'string' && (rawMsg.includes('SQLSTATE') || rawMsg.includes('Base table'))) {
+      error.value = 'Failed to submit receipt. Please try again or contact salon support.'
+    } else {
+      error.value = typeof rawMsg === 'string' ? rawMsg : 'Upload failed. Please check the file and try again.'
+    }
   } finally {
     isUploading.value = false
   }
@@ -123,9 +170,19 @@ watch(previewUrl, (newUrl, oldUrl) => {
           <span class="text-[var(--color-text-secondary)] text-sm">Account Name</span>
           <span class="text-[var(--color-text-primary)] font-medium">{{ bankDetails.account_name }}</span>
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center bg-black/30 rounded-xl px-3 py-2 border border-white/[0.06]">
           <span class="text-[var(--color-text-secondary)] text-sm">Account Number</span>
-          <span class="text-[var(--color-accent)] font-display text-lg tracking-wider">{{ bankDetails.account_number }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-accent)] font-mono text-base font-bold tracking-wider">{{ bankDetails.account_number }}</span>
+            <button
+              type="button"
+              @click="copyAccountNumber(bankDetails.account_number)"
+              class="p-1 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/15 rounded-md transition-colors"
+              title="Copy Account Number"
+            >
+              <DocumentDuplicateIcon class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,83 +1,134 @@
 <template>
   <CustomerLayout>
-    <section class="mx-auto max-w-7xl px-4 md:px-6 py-20 text-[var(--color-text-primary)]">
-      <div data-reveal class="mb-10">
-        <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">Gallery</p>
-        <h1 class="mt-3 font-display text-4xl sm:text-5xl text-[var(--color-accent)] md:text-6xl">
-          {{ pageTitle }} <span class="text-2xl sm:text-3xl md:text-4xl text-[var(--color-accent)]/50">({{ gallery.length }})</span>
-        </h1>
-        <p v-if="pageSubtitle" class="mt-4 max-w-2xl text-base text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
-          {{ pageSubtitle }}
-        </p>
-      </div>
+    <section class="space-y-8 animate-fade-in pb-12">
+      <!-- Luxury Header Banner -->
+      <div class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-white dark:from-[#12161C] dark:via-[#0E1217] dark:to-[#12161C] p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[var(--color-accent)]/5 blur-[80px] pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-[var(--color-accent)]/5 blur-[60px] pointer-events-none"></div>
+        
+        <div class="relative z-10">
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] font-bold mb-2 flex items-center gap-2">
+            <PhotoIcon class="w-4 h-4 text-[var(--color-accent)]" />
+            Style Showcase
+          </p>
+          <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white drop-shadow-sm">
+            {{ pageTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-amber-500 dark:to-amber-200">({{ gallery.length }})</span>
+          </h1>
+          <p class="mt-2 max-w-xl text-xs sm:text-sm text-slate-600 dark:text-[var(--color-text-secondary)] leading-relaxed">
+            {{ pageSubtitle }}
+          </p>
+        </div>
 
-      <!-- Gallery Skeleton -->
-      <div v-if="isLoading" class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-        <div v-for="n in 6" :key="'gal-skel-'+n" class="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] mb-6 break-inside-avoid">
-          <div class="skeleton-shimmer w-full" :style="{ aspectRatio: n % 2 === 0 ? '4/5' : '4/3' }"></div>
+        <div class="relative z-10 flex items-center gap-3">
+          <RouterLink 
+            to="/customer/dashboard/services"
+            class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[var(--color-accent)]/20 hover:brightness-110 active:scale-[0.98] transition-all"
+          >
+            <ScissorsIcon class="w-4 h-4" />
+            Book a Cut
+          </RouterLink>
         </div>
       </div>
 
-      <!-- Gallery Real -->
-      <div v-else class="mt-10 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-        <article v-for="(item, index) in gallery" :key="item.id" @click="openLightbox(index)" :data-reveal-delay="index * 100" data-reveal class="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] relative block mb-6 break-inside-avoid cursor-pointer shadow-md hover:shadow-2xl hover:shadow-[var(--color-accent)]/10 transition-shadow duration-500">
-          <div class="relative w-full overflow-hidden bg-[var(--color-bg-tertiary)]" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }">
-             <img v-if="item.image_path || item.image_url" :src="getImageUrl(item.image_path || item.image_url)" :alt="item.title" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-             <!-- Smart Gradient Overlay -->
-             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
+      <!-- Zero-CLS Skeleton Grid -->
+      <div v-if="isLoading" class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+        <div v-for="n in 6" :key="'gal-skel-'+n" class="overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#12161C] mb-6 break-inside-avoid">
+          <div class="w-full bg-slate-200/60 dark:bg-white/5 animate-pulse" :style="{ aspectRatio: n % 2 === 0 ? '4/5' : '4/3' }"></div>
+        </div>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div v-else class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+        <article 
+          v-for="(item, index) in gallery" 
+          :key="item.id" 
+          @click="openLightbox(index)" 
+          class="group overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] relative block mb-6 break-inside-avoid cursor-pointer shadow-lg hover:border-gold/40 hover:shadow-2xl transition-all duration-300"
+        >
+          <div class="relative w-full overflow-hidden bg-white/[0.02]" :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }">
+             <img 
+               v-if="item.image_path || item.image_url" 
+               :src="getImageUrl(item.image_path || item.image_url)" 
+               :alt="item.title" 
+               class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" 
+             />
+             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"></div>
           </div>
-          <!-- Smart Hover Content -->
-          <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 text-white translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
-            <div class="flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-100">
-                <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)] font-semibold">{{ item.category }}</p>
-                <p class="text-[10px] uppercase font-bold tracking-widest text-white/60 bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                    {{ item.barber_name || 'CandyCutz Admin' }}
-                </p>
+
+          <!-- Card Overlay Content -->
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-5 text-white">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)] font-bold bg-[var(--color-accent)]/10 px-2.5 py-0.5 rounded-md border border-[var(--color-accent)]/20 backdrop-blur-sm">
+                {{ item.category || 'Cut' }}
+              </span>
+              <span class="text-[10px] font-bold text-white/80 bg-black/60 px-2.5 py-0.5 rounded-md border border-white/10 backdrop-blur-sm flex items-center gap-1">
+                <UserIcon class="w-3 h-3 text-[var(--color-accent)]" />
+                {{ item.barber_name || 'CandyCutz Master' }}
+              </span>
             </div>
-            <h2 class="mt-2 font-display text-2xl font-semibold">{{ item.title }}</h2>
-            <p class="mt-2 text-sm text-white/80 line-clamp-2 opacity-0 transition-opacity duration-500 group-hover:opacity-100 delay-150">{{ item.description }}</p>
-            <!-- Expand action button -->
-            <button class="absolute right-6 bottom-6 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] shadow-lg opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 delay-200 hover:scale-110 hover:brightness-110" aria-label="View larger">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
-            </button>
+            
+            <h2 class="mt-2 font-display text-lg font-bold text-white group-hover:text-[var(--color-accent)] transition-colors">{{ item.title }}</h2>
+            <p v-if="item.description" class="mt-1 text-xs text-white/70 line-clamp-2">{{ item.description }}</p>
           </div>
         </article>
       </div>
+
+      <!-- Empty State -->
+      <div v-if="!isLoading && gallery.length === 0" class="rounded-3xl border border-dashed border-slate-300 dark:border-white/10 p-16 text-center bg-slate-50/50 dark:bg-white/[0.02]">
+        <PhotoIcon class="w-12 h-12 text-slate-400 dark:text-white/30 mx-auto mb-3" />
+        <h3 class="font-display text-xl text-slate-900 dark:text-white mb-1 font-bold">No Gallery Images Available</h3>
+        <p class="text-xs text-slate-600 dark:text-[var(--color-text-secondary)]">Check back soon for fresh portfolio updates from our stylists.</p>
+      </div>
     </section>
 
-    <!-- Lightbox Overlay -->
-    <div v-if="isLightboxOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-bg-primary)]/95 backdrop-blur-sm" @keydown.esc="closeLightbox" tabindex="0" ref="lightboxRef">
-      <!-- Close Button -->
-      <button @click="closeLightbox" class="absolute top-6 right-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-2 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Lightbox Modal -->
+    <div 
+      v-if="isLightboxOpen" 
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4" 
+      @keydown.esc="closeLightbox" 
+      tabindex="0" 
+      ref="lightboxRef"
+    >
+      <button 
+        @click="closeLightbox" 
+        class="absolute top-6 right-6 z-10 rounded-full bg-white/10 p-2.5 text-white hover:bg-white/20 transition-colors"
+        title="Close"
+      >
+        <XMarkIcon class="w-6 h-6" />
       </button>
 
-      <!-- Previous Button -->
-      <button @click.stop="prevImage" class="absolute left-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-3 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === 0 }" :disabled="currentIdx === 0">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+      <button 
+        @click.stop="prevImage" 
+        class="absolute left-6 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" 
+        :disabled="currentIdx === 0"
+      >
+        <ChevronLeftIcon class="w-6 h-6" />
       </button>
 
-      <!-- Main Image -->
-      <div class="relative max-h-[85vh] max-w-[85vw] w-full flex flex-col items-center justify-center">
-        <img v-if="gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url" :src="getImageUrl(gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url)" :alt="gallery[currentIdx]?.title" class="max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl" />
-        <div class="mt-6 text-center text-[var(--color-text-primary)]">
-          <div class="flex items-center justify-center gap-3">
-              <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">{{ gallery[currentIdx]?.category }}</p>
-              <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"></span>
-              <p class="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)] flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                  By {{ gallery[currentIdx]?.barber_name || 'CandyCutz Admin' }}
-              </p>
+      <div class="relative max-h-[85vh] max-w-4xl w-full flex flex-col items-center justify-center">
+        <img 
+          v-if="gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url" 
+          :src="getImageUrl(gallery[currentIdx]?.image_path || gallery[currentIdx]?.image_url)" 
+          :alt="gallery[currentIdx]?.title" 
+          class="max-h-[70vh] w-auto rounded-2xl object-contain shadow-2xl border border-white/10" 
+        />
+        <div class="mt-5 text-center text-white">
+          <div class="flex items-center justify-center gap-2 mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">{{ gallery[currentIdx]?.category }}</span>
+            <span class="text-white/30">•</span>
+            <span class="text-xs text-white/70">Crafted by {{ gallery[currentIdx]?.barber_name || 'CandyCutz Master' }}</span>
           </div>
-          <h2 class="mt-3 font-display text-2xl md:text-3xl">{{ gallery[currentIdx]?.title }}</h2>
-          <p class="mt-3 text-[var(--color-text-secondary)] max-w-2xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
+          <h2 class="font-display text-2xl font-bold">{{ gallery[currentIdx]?.title }}</h2>
+          <p v-if="gallery[currentIdx]?.description" class="mt-2 text-xs text-white/60 max-w-xl mx-auto">{{ gallery[currentIdx]?.description }}</p>
         </div>
       </div>
 
-      <!-- Next Button -->
-      <button @click.stop="nextImage" class="absolute right-6 z-10 rounded-full bg-[var(--color-bg-tertiary)]/80 p-3 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors" :class="{ 'opacity-30 cursor-not-allowed': currentIdx === gallery.length - 1 }" :disabled="currentIdx === gallery.length - 1">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+      <button 
+        @click.stop="nextImage" 
+        class="absolute right-6 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" 
+        :disabled="currentIdx === gallery.length - 1"
+      >
+        <ChevronRightIcon class="w-6 h-6" />
       </button>
     </div>
   </CustomerLayout>
@@ -85,13 +136,21 @@
 
 <script setup>
 import { onMounted, ref, nextTick } from 'vue';
+import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
-import { publicApi } from '@/shared/api/old_publicApi';
-import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { client } from '@/shared/api/client';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
+import { 
+  PhotoIcon, 
+  ScissorsIcon, 
+  UserIcon, 
+  XMarkIcon, 
+  ChevronLeftIcon, 
+  ChevronRightIcon 
+} from '@heroicons/vue/24/outline';
 
 const pageTitle = ref('Our Gallery');
-const pageSubtitle = ref('Browse our portfolio of premium cuts, styles, and grooming transformations.');
+const pageSubtitle = ref('Browse our portfolio of cuts, fades, beard care, and grooming styles.');
 const gallery = ref([]);
 const isLoading = ref(true);
 
@@ -99,14 +158,12 @@ const isLightboxOpen = ref(false);
 const currentIdx = ref(0);
 const lightboxRef = ref(null);
 
-const { init: initScrollReveal } = useScrollReveal();
-
 function openLightbox(index) {
   currentIdx.value = index;
   isLightboxOpen.value = true;
-  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  document.body.style.overflow = 'hidden';
   nextTick(() => {
-    lightboxRef.value?.focus(); // Focus lightbox for keyboard events
+    lightboxRef.value?.focus();
   });
 }
 
@@ -130,8 +187,8 @@ function prevImage() {
 onMounted(async () => {
   try {
     const [settingsRes, galleryRes] = await Promise.all([
-      publicApi.settings().catch(() => ({ data: { data: {} } })),
-      publicApi.gallery().catch(() => ({ data: { data: [] } }))
+      client.get('/settings').catch(() => ({ data: { data: {} } })),
+      client.get('/gallery').catch(() => ({ data: { data: [] } }))
     ]);
 
     const settings = settingsRes.data?.data;
@@ -141,12 +198,9 @@ onMounted(async () => {
     }
 
     gallery.value = galleryRes.data?.data || [];
-    isLoading.value = false;
-    setTimeout(() => {
-      initScrollReveal();
-    }, 100);
   } catch (error) {
     console.error('Failed to load gallery:', error);
+  } finally {
     isLoading.value = false;
   }
 });

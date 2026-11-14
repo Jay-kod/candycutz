@@ -4,7 +4,6 @@ import {
   HeartIcon,
   SignalIcon,
   ArrowPathIcon,
-  ShieldCheckIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -17,6 +16,10 @@ const props = defineProps({
     default: false,
   },
   detailLoading: {
+    type: Boolean,
+    default: false,
+  },
+  selfTestRunning: {
     type: Boolean,
     default: false,
   },
@@ -48,7 +51,7 @@ const props = defineProps({
 
 defineEmits(['refresh', 'toggleAutoRefresh'])
 
-const isRefreshing = computed(() => props.overviewLoading || props.detailLoading)
+const isRefreshing = computed(() => props.overviewLoading || props.detailLoading || props.selfTestRunning)
 const statusName = computed(() => {
   const s = props.overview?.status || 'operational'
   return s.charAt(0).toUpperCase() + s.slice(1)
@@ -71,7 +74,7 @@ const statusName = computed(() => {
                 Live Telemetry
               </span>
             </div>
-            <p class="text-xs text-zinc-400 mt-0.5">Real-time subsystem vitality, gateway performance & self-diagnostics</p>
+            <p class="text-xs text-zinc-400 mt-0.5">Live checks query the active application database; backup snapshots are separate.</p>
           </div>
         </div>
       </div>
@@ -103,10 +106,11 @@ const statusName = computed(() => {
           type="button"
           @click="$emit('refresh')"
           :disabled="isRefreshing"
+          title="Reruns health checks only. It does not reset data or stop the database."
           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#12161C] border border-white/[0.08] text-zinc-200 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.16] transition-all text-xs font-semibold disabled:opacity-50 shadow-sm"
         >
           <ArrowPathIcon class="w-3.5 h-3.5" :class="{ 'animate-spin': isRefreshing }" />
-          <span>{{ isRefreshing ? 'Scanning…' : 'Refresh Telemetry' }}</span>
+          <span>{{ isRefreshing ? 'Scanning…' : 'Refresh All Health' }}</span>
         </button>
       </div>
     </div>
@@ -148,4 +152,3 @@ const statusName = computed(() => {
     </div>
   </div>
 </template>
-

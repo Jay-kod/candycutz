@@ -22,14 +22,14 @@ export const timeFilters = [
 
 export const typeFilters = [
   { value: 'all', label: 'All Types', icon: TagIcon },
-  { value: 'booking', label: 'Bookings', color: 'text-gold', bg: 'bg-gold/10 border-gold/20' },
-  { value: 'payment', label: 'Payments', color: 'text-cyan-400', bg: 'bg-cyan-400/10 border-cyan-400/20' },
-  { value: 'system_update', label: 'System', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
-  { value: 'wishlist_update', label: 'Wishlist', color: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/20' },
-  { value: 'blog_update', label: 'Blog', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
-  { value: 'general_update', label: 'General', color: 'text-purple-400', bg: 'bg-purple-400/10 border-purple-400/20' },
-  { value: 'review', label: 'Reviews', color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
-  { value: 'review_approved', label: 'Approved', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
+  { value: 'booking', label: 'Bookings', color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent)]/10 border-[var(--color-accent)]/20' },
+  { value: 'payment', label: 'Payments', color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/20' },
+  { value: 'system_update', label: 'System', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  { value: 'wishlist_update', label: 'Wishlist', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20' },
+  { value: 'blog_update', label: 'Blog', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+  { value: 'general_update', label: 'General', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+  { value: 'review', label: 'Reviews', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  { value: 'review_approved', label: 'Approved', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
 ]
 
 export const formatRelativeTime = (dateString) => {
@@ -53,9 +53,10 @@ export const formatFullDate = (dateString) => {
 }
 
 export const getIconForType = (type) => {
-  switch (type) {
-    case 'booking': return CalendarDaysIcon
-    case 'payment': return CreditCardIcon
+  const t = (type || '').toLowerCase()
+  if (t.startsWith('booking')) return CalendarDaysIcon
+  if (t.startsWith('payment')) return CreditCardIcon
+  switch (t) {
     case 'system_update': return UserIcon
     case 'wishlist_update': return HeartIcon
     case 'blog_update': return DocumentTextIcon
@@ -67,9 +68,20 @@ export const getIconForType = (type) => {
 }
 
 export const getLabelForType = (type) => {
-  switch (type) {
+  const t = (type || '').toLowerCase()
+  switch (t) {
     case 'booking': return 'Booking'
+    case 'booking_created': return 'New Booking'
+    case 'booking_approved': return 'Approved'
+    case 'booking_cancelled': return 'Cancelled'
+    case 'booking_completed': return 'Completed'
+    case 'booking_no_show': return 'No-Show'
+    case 'booking_checked_in': return 'Checked In'
+    case 'booking_in_progress': return 'In Progress'
     case 'payment': return 'Payment'
+    case 'payment_received': return 'Payment Receipt'
+    case 'payment_verified': return 'Confirmed'
+    case 'payment_failed': return 'Failed'
     case 'system_update': return 'System'
     case 'wishlist_update': return 'Wishlist'
     case 'blog_update': return 'Blog'
@@ -81,29 +93,49 @@ export const getLabelForType = (type) => {
 }
 
 export const getIconColorForType = (type) => {
-  switch (type) {
-    case 'booking': return 'text-gold'
-    case 'payment': return 'text-cyan-400'
-    case 'system_update': return 'text-blue-400'
-    case 'wishlist_update': return 'text-rose-400'
-    case 'blog_update': return 'text-emerald-400'
-    case 'general_update': return 'text-purple-400'
-    case 'review': return 'text-amber-400'
-    case 'review_approved': return 'text-emerald-400'
-    default: return 'text-theme-muted'
+  const t = (type || '').toLowerCase()
+  if (t === 'booking_cancelled' || t === 'booking_no_show' || t === 'payment_failed') {
+    return 'text-[var(--color-danger)]'
+  }
+  if (t === 'booking_approved' || t === 'booking_completed' || t === 'payment_verified' || t === 'review_approved') {
+    return 'text-emerald-600 dark:text-emerald-400'
+  }
+  if (t.startsWith('booking')) {
+    return 'text-[var(--color-accent)]'
+  }
+  if (t.startsWith('payment')) {
+    return 'text-cyan-600 dark:text-cyan-400'
+  }
+  switch (t) {
+    case 'system_update': return 'text-blue-600 dark:text-blue-400'
+    case 'wishlist_update': return 'text-rose-600 dark:text-rose-400'
+    case 'blog_update': return 'text-emerald-600 dark:text-emerald-400'
+    case 'general_update': return 'text-purple-600 dark:text-purple-400'
+    case 'review': return 'text-amber-600 dark:text-amber-400'
+    default: return 'text-[var(--color-text-secondary)]'
   }
 }
 
 export const getBgColorForType = (type) => {
-  switch (type) {
-    case 'booking': return 'bg-gold/10 border-gold/20'
-    case 'payment': return 'bg-cyan-400/10 border-cyan-400/20'
-    case 'system_update': return 'bg-blue-400/10 border-blue-400/20'
-    case 'wishlist_update': return 'bg-rose-400/10 border-rose-400/20'
-    case 'blog_update': return 'bg-emerald-400/10 border-emerald-400/20'
-    case 'general_update': return 'bg-purple-400/10 border-purple-400/20'
-    case 'review': return 'bg-amber-400/10 border-amber-400/20'
-    case 'review_approved': return 'bg-emerald-400/10 border-emerald-400/20'
-    default: return 'bg-theme-border/30 border-theme-border/50'
+  const t = (type || '').toLowerCase()
+  if (t === 'booking_cancelled' || t === 'booking_no_show' || t === 'payment_failed') {
+    return 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
+  }
+  if (t === 'booking_approved' || t === 'booking_completed' || t === 'payment_verified' || t === 'review_approved') {
+    return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+  }
+  if (t.startsWith('booking')) {
+    return 'bg-[var(--color-accent)]/10 border-[var(--color-accent)]/20 text-[var(--color-accent)]'
+  }
+  if (t.startsWith('payment')) {
+    return 'bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400'
+  }
+  switch (t) {
+    case 'system_update': return 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400'
+    case 'wishlist_update': return 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+    case 'blog_update': return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+    case 'general_update': return 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400'
+    case 'review': return 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+    default: return 'bg-[var(--color-bg-tertiary)] border-[var(--color-border)] text-[var(--color-text-secondary)]'
   }
 }

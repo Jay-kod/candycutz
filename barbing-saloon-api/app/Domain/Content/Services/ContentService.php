@@ -47,9 +47,9 @@ class ContentService
                         'description' => $gallery->description,
                         'image_path' => $gallery->image_path,
                         'image_url' => $imageUrl,
-                        'category' => $gallery->category->value,
+                        'category' => $gallery->category instanceof \BackedEnum ? $gallery->category->value : $gallery->category,
                         'barber_id' => $gallery->barber_id,
-                        'barber_name' => $gallery->barber?->user?->name,
+                        'barber_name' => $gallery->barber && $gallery->barber->user ? $gallery->barber->user->name : null,
                         'is_featured' => $gallery->is_featured,
                         'display_order' => $gallery->display_order,
                         'barber' => $gallery->barber ? $this->barberData($gallery->barber) : null,
@@ -75,8 +75,8 @@ class ContentService
                 ->get()
                 ->map(fn (Testimonial $testimonial): array => [
                     'id' => $testimonial->id,
-                    'client_name' => $testimonial->customer->name ?? $testimonial->client_name ?? 'Anonymous',
-                    'client_avatar' => ($testimonial->client_avatar ? (str_starts_with($testimonial->client_avatar, 'http') ? $testimonial->client_avatar : url('storage/'.ltrim(str_replace('storage/', '', $testimonial->client_avatar), '/'))) : null) ?? app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer?->avatar),
+                    'client_name' => ($testimonial->customer && $testimonial->customer->name) ? $testimonial->customer->name : ($testimonial->client_name ?: 'Anonymous'),
+                    'client_avatar' => ($testimonial->client_avatar ? (str_starts_with($testimonial->client_avatar, 'http') ? $testimonial->client_avatar : url('storage/'.ltrim(str_replace('storage/', '', $testimonial->client_avatar), '/'))) : null) ?? app(UserMediaUrl::class)->for($testimonial->customer, $testimonial->customer && $testimonial->customer->avatar ? $testimonial->customer->avatar : null),
                     'rating' => $testimonial->rating,
                     'review' => $testimonial->review,
                     'barber' => $testimonial->barber ? $this->barberData($testimonial->barber) : null,

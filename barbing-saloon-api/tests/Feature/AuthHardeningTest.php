@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Domain\Identity\Actions\CreateBarber;
 use App\Domain\Identity\Actions\ManageUsers;
+use App\Domain\Identity\Actions\UpdateBarber;
 use App\Domain\Identity\Actions\UpdateBarberStatus;
 use App\Domain\Shared\Enums\UserRole;
 use App\Models\Barber;
@@ -182,6 +184,51 @@ it('requires admin authorization inside the barber status action', function () {
 
     expect(fn () => app(UpdateBarberStatus::class)->execute($barber->id, 'suspended'))
         ->toThrow(AuthorizationException::class);
+});
+
+it('updates barber profile status without changing user account status', function () {
+    $admin = User::factory()->admin()->create();
+    $barber = Barber::factory()->create();
+    $user = User::findOrFail($barber->user_id);
+
+    $response = $this->actingAs($admin)->patchJson(
+        "/api/v1/admin/barbers/{$barber->id}/status",
+        ['status' => 'pending_approval']
+    );
+
+    $response->assertOk()->assertJsonPath('data.status', 'pending_approval');
+    expect($barber->fresh()->status)->toBe('pending_approval');
+    expect($user->fresh()->status)->toBe('active');
+});
+
+it('keeps barber creation and profile edits independent from user account status', function () {
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin);
+
+    $created = app(CreateBarber::class)->execute([
+        'name' => 'Status Test Barber',
+        'email' => 'status-test-barber@example.com',
+        'status' => 'pending_approval',
+    ]);
+
+    $barber = Barber::findOrFail($created['id']);
+    $user = User::findOrFail($barber->user_id);
+    expect($barber->status)->toBe('pending_approval');
+    expect($user->status)->toBe('active');
+
+    app(UpdateBarber::class)->execute($barber->id, ['status' => 'on_leave']);
+
+    expect($barber->fresh()->status)->toBe('on_leave');
+    expect($user->fresh()->status)->toBe('active');
+});
+
+it('rejects unknown barber profile statuses', function () {
+    $admin = User::factory()->admin()->create();
+    $barber = Barber::factory()->create();
+
+    $this->actingAs($admin)
+        ->patchJson("/api/v1/admin/barbers/{$barber->id}/status", ['status' => 'unknown'])
+        ->assertUnprocessable();
 });
 
 it('preserves explicit roles and account status when user seeders run', function () {

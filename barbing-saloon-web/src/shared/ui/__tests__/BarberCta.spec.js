@@ -51,4 +51,32 @@ describe('BarberCta', () => {
     expect(wrapper.find('.barber-cta__title-white').text()).toBe('Fresh Cut.');
     expect(wrapper.find('.barber-cta__title-gold').text()).toBe('Zero Stress.');
   });
+  it('defaults gold overlay opacity to 45% when not specified', () => {
+    const wrapper = mountCta();
+    const shade = wrapper.find('.barber-cta__shade');
+    expect(shade.attributes('style')).toContain('opacity: 0.45');
+  });
+
+  it('applies custom gold overlay opacity from props', () => {
+    const wrapper = mountCta({ overlayOpacity: 70 });
+    const shade = wrapper.find('.barber-cta__shade');
+    expect(shade.attributes('style')).toContain('opacity: 0.7');
+  });
+
+  it('adds barber-cta--has-image class when background image is present', () => {
+    const wrapper = mountCta({ backgroundImage: 'https://example.com/shop.jpg' });
+    expect(wrapper.find('section').classes()).toContain('barber-cta--has-image');
+  });
+
+  it('renders the hero gradient pattern layer', () => {
+    const wrapper = mountCta();
+    expect(wrapper.find('.barber-cta__gradient').exists()).toBe(true);
+  });
+
+  it('applies custom overlay color gradient from props', () => {
+    const wrapper = mountCta({ overlayColor: '#059669' });
+    const shade = wrapper.find('.barber-cta__shade');
+    expect(shade.attributes('style')).toContain('radial-gradient');
+    expect(shade.attributes('style')).toContain('5, 150, 105');
+  });
 });

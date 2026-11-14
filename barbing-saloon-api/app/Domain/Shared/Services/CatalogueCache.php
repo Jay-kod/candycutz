@@ -50,11 +50,8 @@ class CatalogueCache
     public static function bust(string $entity): void
     {
         try {
-            if (! Cache::has("catalogue_version:{$entity}")) {
-                Cache::forever("catalogue_version:{$entity}", 2);
-            } else {
-                Cache::increment("catalogue_version:{$entity}");
-            }
+            $current = (int) Cache::get("catalogue_version:{$entity}", 1);
+            Cache::forever("catalogue_version:{$entity}", $current + 1);
         } catch (\Throwable) {
             Cache::forever("catalogue_version:{$entity}", (int) (microtime(true) * 1000));
         }

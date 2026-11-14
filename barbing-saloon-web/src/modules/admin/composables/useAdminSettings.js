@@ -4,6 +4,7 @@ import { useToast } from '@/core/composables/useToast'
 
 export const SETTINGS_CATEGORIES = [
   { id: 'general', label: 'General & Business' },
+  { id: 'payment', label: 'Bank & Payments' },
   { id: 'booking', label: 'Booking & Policies' },
   { id: 'contact', label: 'Contact & Location' },
   { id: 'social', label: 'Social Channels' },
@@ -19,6 +20,13 @@ export const KEY_METADATA = {
   brand_tagline: { label: 'Brand Tagline / Slogan', placeholder: 'e.g. Master Grooming & Luxury Barbering', type: 'text', category: 'general' },
   currency: { label: 'Default Currency Code', placeholder: 'e.g. NGN, USD, GBP', type: 'text', category: 'general' },
   timezone: { label: 'Server Timezone', placeholder: 'e.g. Africa/Lagos, UTC', type: 'text', category: 'general' },
+
+  bank_name: { label: 'Salon Bank Name', placeholder: 'e.g. Zenith Bank, GTBank', type: 'text', category: 'payment' },
+  account_name: { label: 'Salon Account Name', placeholder: 'e.g. Candy Cutz Luxury Grooming', type: 'text', category: 'payment' },
+  account_number: { label: 'Salon Account Number', placeholder: 'e.g. 1012345678', type: 'text', category: 'payment' },
+  manual_transfer_bank: { label: 'Fallback Bank Name', placeholder: 'e.g. Zenith Bank', type: 'text', category: 'payment' },
+  manual_transfer_account_name: { label: 'Fallback Account Name', placeholder: 'e.g. Candy Cutz Luxury Grooming', type: 'text', category: 'payment' },
+  manual_transfer_account_number: { label: 'Fallback Account Number', placeholder: 'e.g. 1012345678', type: 'text', category: 'payment' },
 
   deposit_amount: { label: 'Standard Booking Deposit', placeholder: 'e.g. 2500', type: 'number', category: 'booking' },
   min_notice_hours: { label: 'Minimum Notice (Hours)', placeholder: 'e.g. 2', type: 'number', category: 'booking' },
@@ -65,6 +73,7 @@ export function useAdminSettings() {
   // ── Infer category for a setting key ──
   const inferCategory = (key) => {
     if (KEY_METADATA[key]?.category) return KEY_METADATA[key].category
+    if (key.startsWith('bank_') || key.startsWith('account_') || key.startsWith('manual_transfer_') || key.includes('payment') || key.includes('transfer')) return 'payment'
     if (key.startsWith('booking_') || key.includes('deposit') || key.includes('notice') || key.includes('slot')) return 'booking'
     if (key.startsWith('contact_') || ['phone', 'email', 'address', 'city', 'state', 'map_link', 'latitude', 'longitude'].includes(key)) return 'contact'
     if (key.startsWith('social_') || ['instagram', 'facebook', 'whatsapp', 'twitter', 'tiktok', 'youtube'].includes(key)) return 'social'
@@ -123,6 +132,15 @@ export function useAdminSettings() {
       const payload = { settings: {} }
       for (const [key, value] of Object.entries(rawSettings.value)) {
         payload.settings[key] = value ?? ''
+      }
+      if (rawSettings.value.bank_name) {
+        payload.settings.manual_transfer_bank = rawSettings.value.bank_name
+      }
+      if (rawSettings.value.account_name) {
+        payload.settings.manual_transfer_account_name = rawSettings.value.account_name
+      }
+      if (rawSettings.value.account_number) {
+        payload.settings.manual_transfer_account_number = rawSettings.value.account_number
       }
 
       await client.post('/admin/settings', payload)

@@ -58,7 +58,11 @@ export function useAdminBackups() {
       customFilename.value = ''
       await fetchBackups(true)
     } catch (err) {
-      const msg = err.response?.data?.message || 'Snapshot generation failed'
+      const responseData = err.response?.data
+      const msg = responseData?.message
+        || responseData?.error?.message
+        || (err.request ? 'Could not reach the backup service. Check the API connection and try again.' : err.message)
+        || 'Snapshot generation failed'
       toast.error(msg)
       console.error('Create backup error:', err)
     } finally {
@@ -240,4 +244,3 @@ export function useAdminBackups() {
     extColor,
   }
 }
-

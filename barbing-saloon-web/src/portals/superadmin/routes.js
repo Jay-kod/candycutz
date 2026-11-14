@@ -33,5 +33,6 @@ export default [
 
   // Settings
   { path: '/superadmin/settings', name: 'superadmin-settings', component: () => import('../../modules/superadmin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/bank-details', name: 'superadmin-bank-details', component: () => import('../../modules/admin/pages/BankDetailsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/brand-identity', name: 'superadmin-brand-identity', component: () => import('../../modules/admin/pages/cms/BrandIdentityPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
 ];

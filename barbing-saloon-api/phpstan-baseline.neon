@@ -867,7 +867,7 @@ parameters:
 
 		-
 			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Http\\\\Request\\. Use \\-\\> instead\\.$#"
-			count: 9
+			count: 7
 			path: app/Support/Errors/ErrorReporter.php
 
 		-

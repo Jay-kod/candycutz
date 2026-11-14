@@ -1,14 +1,14 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.07] bg-[#0A0F12]/80 backdrop-blur-xl shadow-xl overflow-hidden">
+  <div class="rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#0A0F12]/80 backdrop-blur-xl shadow-xl overflow-hidden">
     <!-- Header -->
-    <div class="px-5 lg:px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
+    <div class="px-5 lg:px-6 py-4 border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-admin/10 border border-admin/20 text-admin shrink-0">
           <CalendarDaysIcon class="h-5 w-5" />
         </div>
         <div>
-          <h2 class="text-sm font-bold text-white tracking-wide">Recent Appointments</h2>
-          <p class="text-[11px] text-white/40">Latest bookings and walk-ins</p>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white tracking-wide">Recent Appointments</h2>
+          <p class="text-[11px] text-slate-500 dark:text-white/40">Latest bookings and walk-ins</p>
         </div>
       </div>
 
@@ -22,11 +22,11 @@
     </div>
 
     <!-- Appointment Rows -->
-    <div class="divide-y divide-white/[0.04]">
+    <div class="divide-y divide-slate-100 dark:divide-white/[0.04]">
       <div 
         v-for="appt in appointments" 
         :key="appt.id" 
-        class="px-5 lg:px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors group"
+        class="px-5 lg:px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group"
       >
         <!-- Client & Service Info -->
         <div class="flex items-center gap-3.5 min-w-0">
@@ -34,13 +34,13 @@
             <span class="text-xs font-bold text-admin">{{ getInitials(appt.client_name) }}</span>
           </div>
           <div class="min-w-0">
-            <p class="text-sm font-semibold text-white group-hover:text-admin-light transition-colors truncate">
+            <p class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-admin-light transition-colors truncate">
               {{ appt.client_name || 'Walk-In Client' }}
             </p>
-            <div class="flex items-center gap-2 text-xs text-white/40 mt-0.5 truncate">
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-white/40 mt-0.5 truncate">
               <span class="truncate">{{ appt.service?.name || 'General Service' }}</span>
-              <span class="text-white/20">&bull;</span>
-              <span class="text-white/50 truncate">{{ appt.barber?.name || 'Any Barber' }}</span>
+              <span class="text-slate-300 dark:text-white/20">&bull;</span>
+              <span class="text-slate-600 dark:text-white/50 truncate">{{ appt.barber?.name || 'Any Barber' }}</span>
             </div>
           </div>
         </div>
@@ -48,10 +48,10 @@
         <!-- Time & Status Badges -->
         <div class="flex items-center gap-3 shrink-0">
           <div class="text-right hidden sm:block">
-            <p class="text-xs font-semibold text-white/80 tabular-nums">
+            <p class="text-xs font-semibold text-slate-700 dark:text-white/80 tabular-nums">
               {{ appt.appointment_time || '--:--' }}
             </p>
-            <p class="text-[10px] text-white/35 mt-0.5 font-medium">
+            <p class="text-[10px] text-slate-400 dark:text-white/35 mt-0.5 font-medium">
               {{ formatDate(appt.appointment_date) }}
             </p>
           </div>
@@ -66,7 +66,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="!appointments?.length" class="flex flex-col items-center justify-center py-12 text-white/30">
+      <div v-if="!appointments?.length" class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-white/30">
         <CalendarDaysIcon class="h-10 w-10 mb-2 opacity-40 text-admin" />
         <p class="text-xs font-medium">No recent appointment activity</p>
       </div>

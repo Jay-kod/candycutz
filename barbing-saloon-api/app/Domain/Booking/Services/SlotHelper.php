@@ -73,7 +73,7 @@ class SlotHelper
                 $appointmentStart = Carbon::parse($appointmentDate.' '.$appointment->appointment_time);
                 $appointmentEnd = $appointment->end_time
                     ? Carbon::parse($appointmentDate.' '.$appointment->end_time)
-                    : $appointmentStart->copy()->addMinutes($appointment->service?->duration_minutes ?? 30);
+                    : $appointmentStart->copy()->addMinutes($appointment->service->duration_minutes ?? 30);
 
                 return $slotStart->lt($appointmentEnd) && $slotEnd->gt($appointmentStart);
             });

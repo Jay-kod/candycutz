@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 class ManageUsers
 {
     /**
-     * @return LengthAwarePaginator<User>
+     * @return LengthAwarePaginator<int, User>
      */
     public function listUsers(): LengthAwarePaginator
     {

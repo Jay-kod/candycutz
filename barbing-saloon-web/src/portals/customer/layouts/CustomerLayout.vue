@@ -18,6 +18,7 @@ import {
   StarIcon,
   HeartIcon,
   ScissorsIcon,
+  UserGroupIcon,
   PhotoIcon,
   BookOpenIcon,
   BellAlertIcon,
@@ -29,6 +30,7 @@ import {
 const navItems = [
   { name: 'Dashboard', to: '/customer/dashboard', icon: HomeIcon },
   { name: 'Browse Services', to: '/customer/dashboard/services', icon: ScissorsIcon },
+  { name: 'Our Barbers', to: '/customer/dashboard/barbers', icon: UserGroupIcon },
   { name: 'My Bookings', to: '/customer/dashboard/bookings', icon: CalendarDaysIcon },
   { name: 'My Codes', to: '/customer/dashboard/my-codes', icon: QrCodeIcon },
   { name: 'Reviews', to: '/customer/dashboard/reviews', icon: StarIcon },

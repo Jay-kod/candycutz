@@ -12,9 +12,6 @@ use Symfony\Component\Mime\Email;
 
 class BrevoApiClient
 {
-    /**
-     * @param  array<string, mixed>  $to
-     */
     public function send(string $recipient, string $subject, string $htmlContent): void
     {
         $settings = Setting::query()

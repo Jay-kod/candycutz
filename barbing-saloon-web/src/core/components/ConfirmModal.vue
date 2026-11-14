@@ -19,7 +19,7 @@
         <Transition name="scale">
           <div
             v-if="isOpen"
-            class="relative w-full max-w-[390px] overflow-hidden rounded-2xl border border-white/[0.09] bg-[#141418] p-6 text-center shadow-2xl shadow-black/80 transition-all"
+            class="relative w-full max-w-[390px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#141418] p-6 text-center shadow-2xl shadow-slate-900/10 dark:shadow-black/80 transition-all"
             @click.stop
           >
             <!-- Top luminous accent rim -->
@@ -74,10 +74,10 @@
               </div>
 
               <!-- Title & Message -->
-              <h3 class="font-sans text-xl font-bold tracking-tight text-white mb-2">
+              <h3 class="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
                 {{ resTheme.title }}
               </h3>
-              <p class="text-sm text-gray-400 leading-relaxed mb-4 px-2">
+              <p class="text-sm text-slate-600 dark:text-gray-400 leading-relaxed mb-4 px-2">
                 {{ resTheme.message }}
               </p>
 
@@ -171,10 +171,10 @@
               </div>
 
               <!-- Title & Message -->
-              <h3 class="font-sans text-xl font-bold tracking-tight text-white mb-2">
+              <h3 class="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
                 {{ title }}
               </h3>
-              <p class="text-sm text-gray-400 leading-relaxed mb-6 px-2">
+              <p class="text-sm text-slate-600 dark:text-gray-400 leading-relaxed mb-6 px-2">
                 {{ message }}
               </p>
 
@@ -182,7 +182,7 @@
               <div class="grid grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
-                  class="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-300 transition-all hover:bg-white/[0.08] hover:text-white hover:border-white/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
+                  class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-gray-300 transition-all hover:bg-slate-200 dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-white/20 disabled:opacity-50"
                   :disabled="isProcessing"
                   @click="cancel"
                 >

@@ -1,7 +1,12 @@
 import { useAuthStore } from '../../modules/auth/store/auth.store';
+import { syncThemeForRoute } from '../composables/useTheme';
 
 function matchesRole(routeRoles, userRole) {
   if (!routeRoles || routeRoles.length === 0) {
+    return true;
+  }
+
+  if (userRole === 'super_admin' && (routeRoles.includes('admin') || routeRoles.includes('super_admin'))) {
     return true;
   }
 
@@ -10,6 +15,7 @@ function matchesRole(routeRoles, userRole) {
 
 export function registerRouteGuards(router) {
   router.beforeEach(async (to) => {
+    syncThemeForRoute(to);
     const auth = useAuthStore();
     const routeRoles = to.meta.roles || [];
     const requiresAuth = Boolean(to.meta.requiresAuth);
@@ -21,7 +27,7 @@ export function registerRouteGuards(router) {
     }
 
     if (requiresAuth) {
-      // Only await auth readiness when trying to enter protected areas
+      // Resolve the saved session before deciding whether to redirect to login.
       if (auth.status === 'booting') {
         await auth.bootstrap();
       }

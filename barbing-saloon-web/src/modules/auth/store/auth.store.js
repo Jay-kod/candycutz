@@ -30,16 +30,6 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
-    get ready() {
-      if (this.status !== 'booting') {
-        return Promise.resolve();
-      }
-      if (!this._readyPromise) {
-        this.bootstrap();
-      }
-      return this._readyPromise;
-    },
-
     setUser(user) {
       this.user = user;
       if (user && typeof localStorage !== 'undefined') {
@@ -217,7 +207,23 @@ export const useAuthStore = defineStore('auth', {
       }
 
       if (preferredRoute) {
-        return preferredRoute;
+        const isSuperAdminRoute = preferredRoute.startsWith('/superadmin');
+        const isAdminRoute = preferredRoute.startsWith('/admin');
+        const isBarberRoute = preferredRoute.startsWith('/barber');
+        const isCustomerRoute = !isAdminRoute && !isBarberRoute && !isSuperAdminRoute;
+
+        if (role === 'super_admin' && (isSuperAdminRoute || isAdminRoute)) {
+          return preferredRoute;
+        }
+        if (role === 'admin' && isAdminRoute) {
+          return preferredRoute;
+        }
+        if (role === 'barber' && isBarberRoute) {
+          return preferredRoute;
+        }
+        if (role === 'customer' && isCustomerRoute) {
+          return preferredRoute;
+        }
       }
 
       if (role === 'super_admin') {

@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const backendTarget = env.BACKEND_URL || process.env.BACKEND_URL || 'http://127.0.0.1:8000';
+  const backendTarget = process.env.BACKEND_URL || env.BACKEND_URL || 'http://127.0.0.1:8000';
 
   return {
     server: {
@@ -44,7 +44,24 @@ export default defineConfig(({ mode }) => {
     build: {
       cssMinify: true,
       target: 'es2020',
-      chunkSizeWarningLimit: 600,
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('vue') || id.includes('pinia')) {
+                return 'vendor-vue';
+              }
+              if (id.includes('@heroicons') || id.includes('lucide-vue-next')) {
+                return 'vendor-icons';
+              }
+              if (id.includes('axios') || id.includes('dayjs') || id.includes('dompurify')) {
+                return 'vendor-utils';
+              }
+            }
+          },
+        },
+      },
     },
   };
 });

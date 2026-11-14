@@ -133,7 +133,10 @@ const verifyPayment = async (action) => {
         <div class="p-8 md:p-10 flex flex-col min-h-full">
           
           <div class="mb-8 pr-12">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-admin/10 border border-admin/20 text-admin text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm">
+            <div 
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm border"
+              :class="portal === 'barber' ? 'bg-gold/10 border-gold/20 text-gold' : 'bg-admin/10 border-admin/20 text-admin'"
+            >
               Payment Verification
             </div>
             <h3 class="font-display text-3xl font-bold text-white leading-tight mb-2">Booking Details</h3>
@@ -150,18 +153,18 @@ const verifyPayment = async (action) => {
           <div class="bg-black/40 rounded-2xl border border-white/[0.05] mb-8">
             <div class="flex justify-between items-center p-5 border-b border-white/[0.05]">
               <span class="text-white/40 uppercase tracking-wider text-[10px] font-bold">Amount Due</span>
-              <span class="text-emerald-400 font-bold text-xl">₦{{ (booking.service?.price || 0).toLocaleString() }}</span>
+              <span class="font-bold text-xl" :class="portal === 'barber' ? 'text-gold' : 'text-emerald-400'">₦{{ (booking.service?.price || 0).toLocaleString() }}</span>
             </div>
             <div class="flex justify-between items-center p-5 border-b border-white/[0.05]">
               <span class="text-white/40 uppercase tracking-wider text-[10px] font-bold">Date & Time</span>
               <span class="text-white font-medium text-sm text-right leading-tight">
                 {{ new Date(booking.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }} <br> 
-                <span class="text-admin">{{ booking.appointment_time }}</span>
+                <span :class="portal === 'barber' ? 'text-gold' : 'text-admin'">{{ booking.appointment_time }}</span>
               </span>
             </div>
             <div class="flex justify-between items-center p-5 border-b border-white/[0.05]">
               <span class="text-white/40 uppercase tracking-wider text-[10px] font-bold">Provider</span>
-              <span class="text-white text-sm font-bold flex items-center gap-1.5"><div class="h-2 w-2 rounded-full bg-admin/50"></div> {{ booking.barber?.name || 'Any Barber' }}</span>
+              <span class="text-white text-sm font-bold flex items-center gap-1.5"><div class="h-2 w-2 rounded-full" :class="portal === 'barber' ? 'bg-gold/50' : 'bg-admin/50'"></div> {{ booking.barber?.name || 'Any Barber' }}</span>
             </div>
             <div v-if="booking.transaction_ref" class="flex justify-between items-center p-5 border-b border-white/[0.05]">
               <span class="text-white/40 uppercase tracking-wider text-[10px] font-bold">Trans. Ref</span>
@@ -179,7 +182,9 @@ const verifyPayment = async (action) => {
               <button 
                 @click="verifyPayment('approve')"
                 :disabled="isProcessing"
-                class="w-full py-4.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-obsidian hover:shadow-[0_8px_30px_rgba(16,185,129,0.3)] transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-sm uppercase tracking-wider group relative overflow-hidden">
+                class="w-full py-4.5 px-6 rounded-2xl text-obsidian transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-sm uppercase tracking-wider group relative overflow-hidden"
+                :class="portal === 'barber' ? 'bg-gradient-to-r from-gold via-amber-400 to-amber-500 hover:shadow-[0_8px_30px_rgba(255,153,0,0.3)]' : 'bg-gradient-to-r from-emerald-500 to-emerald-400 hover:shadow-[0_8px_30px_rgba(16,185,129,0.3)]'"
+              >
                 <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <ArrowPathIcon v-if="isProcessing" class="w-5 h-5 animate-spin relative z-10" />
                 <CheckIcon v-else class="w-5 h-5 group-hover:scale-110 transition-transform relative z-10" />

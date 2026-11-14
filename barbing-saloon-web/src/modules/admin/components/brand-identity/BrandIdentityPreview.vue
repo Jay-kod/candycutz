@@ -36,8 +36,14 @@
       :class="[
         previewTheme === 'dark'
           ? 'border-white/10 bg-[#0B0F13] text-white'
-          : 'border-zinc-200 bg-zinc-50 text-zinc-900 [data-theme=light]'
+          : 'border-zinc-200 bg-zinc-50 text-zinc-900'
       ]"
+      :data-theme="previewTheme"
+      :style="{
+        '--color-text-primary': previewTheme === 'dark' ? '#FAFAF8' : '#111827',
+        '--color-text-secondary': previewTheme === 'dark' ? '#A1A1AA' : '#4B5563',
+        '--color-accent': previewTheme === 'dark' ? '#FF9900' : '#CC7A00'
+      }"
     >
       <!-- Simulation 1: Main Navigation Header Mock -->
       <div class="space-y-2">

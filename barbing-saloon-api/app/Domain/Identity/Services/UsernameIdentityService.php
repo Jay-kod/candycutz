@@ -58,7 +58,7 @@ class UsernameIdentityService
         // 4. Cooldown enforcement: 30 days for barbers, 60 days for customers (unless bypassed by Super Admin)
         if (! $isSuperAdminOverride && $user->last_username_change_at) {
             $daysSinceChange = Carbon::parse($user->last_username_change_at)->diffInDays(now());
-            $roleValue = $user->role?->value ?? $user->role;
+            $roleValue = $user->role->value ?? $user->role;
             $cooldownDays = ($roleValue === 'barber') ? 30 : 60;
             if ($daysSinceChange < $cooldownDays) {
                 $daysRemaining = (int) ceil($cooldownDays - $daysSinceChange);

@@ -61,7 +61,7 @@ class ReleaseUnpaidBookingsCommand extends Command
             }
 
             try {
-                $previousStatus = $appointment->status?->value ?? $appointment->status;
+                $previousStatus = $appointment->status->value ?? $appointment->status;
 
                 $appointment->update([
                     'status' => AppointmentStatus::cancelled->value,

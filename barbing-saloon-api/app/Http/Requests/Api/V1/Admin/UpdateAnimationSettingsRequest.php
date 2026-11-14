@@ -18,7 +18,7 @@ class UpdateAnimationSettingsRequest extends FormRequest
             return false;
         }
 
-        return $user->can('update', Setting::class) || in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'], true);
+        return $user->can('update', Setting::class) || in_array($user->role->value ?? $user->role, ['admin', 'super_admin'], true);
     }
 
     /**

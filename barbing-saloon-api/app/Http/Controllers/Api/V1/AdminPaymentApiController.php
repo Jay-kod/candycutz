@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Payment\Contracts\PaymentGateway;
+use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Payment\Enums\PaymentStatus;
 use App\Domain\Payment\Exceptions\PaymentException;
 use App\Domain\Payment\Services\PaymentConfirmer;
 use App\Domain\Payment\Services\PaymentStateMachine;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Http\Responses\ApiResponse;
+use App\Models\Appointment;
 use App\Models\AuditLog;
+use App\Models\Barber;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\WebhookEvent;
@@ -28,7 +32,7 @@ class AdminPaymentApiController
 
     public function index(Request $request): JsonResponse
     {
-        $query = Payment::with(['appointment.customer', 'customer'])
+        $query = Payment::with(['appointment.customer', 'appointment.barber.user', 'appointment.service', 'customer'])
             ->orderBy('created_at', 'desc');
 
         if ($status = $request->input('status')) {
@@ -206,5 +210,144 @@ class AdminPaymentApiController
         }
 
         return ApiResponse::success($event->fresh(), 'Webhook event replayed successfully.');
+    }
+
+    public function verifyPayment(Request $request, int $id): JsonResponse
+    {
+        $payment = Payment::with(['appointment'])->findOrFail($id);
+        $user = $request->user();
+
+        $payment->update([
+            'status' => PaymentStatus::successful->value,
+            'verified_at' => now(),
+            'verified_by_user_id' => $user?->id,
+            'gateway_response' => 'Payment manually verified and approved by admin',
+        ]);
+
+        if ($payment->appointment) {
+            $payment->appointment->update([
+                'status' => AppointmentStatus::confirmed->value,
+                'payment_status' => AppointmentPaymentStatus::paid,
+                'deposit_paid' => true,
+            ]);
+        }
+
+        PaymentTransaction::firstOrCreate(
+            ['payment_id' => $payment->id, 'gateway_event_id' => 'admin_verify_'.$payment->id],
+            [
+                'transaction_type' => 'verification',
+                'gateway' => $payment->provider ?: 'manual_transfer',
+                'amount' => $payment->amount,
+                'amount_minor' => $payment->amount_minor ?: ($payment->amount * 100),
+                'raw_payload' => ['verified_by' => $user?->id, 'action' => 'admin_manual_verification'],
+                'status' => 'successful',
+                'created_at' => now(),
+            ]
+        );
+
+        try {
+            AuditLog::create([
+                'user_id' => $user?->id ?? 1,
+                'user_role' => $user && $user->role instanceof \BackedEnum ? $user->role->value : 'admin',
+                'action' => 'payment.verified',
+                'module' => 'Payment',
+                'target_type' => Payment::class,
+                'target_id' => $payment->id,
+                'new_value' => ['status' => 'successful', 'appointment_id' => $payment->appointment_id],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Could not write audit log for payment verification: '.$e->getMessage());
+        }
+
+        return ApiResponse::success(
+            $payment->load(['appointment.customer', 'appointment.barber.user', 'appointment.service']),
+            'Payment verified successfully.'
+        );
+    }
+
+    public function reassignBarber(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'barber_id' => 'required|integer|exists:barbers,id',
+        ]);
+
+        $payment = Payment::with(['appointment.barber'])->findOrFail($id);
+        $user = $request->user();
+
+        if (! $payment->appointment) {
+            return ApiResponse::error('This payment is not linked to any appointment.', [], 422, 'NO_APPOINTMENT');
+        }
+
+        $oldBarberId = $payment->appointment->barber_id;
+        $newBarberId = (int) $validated['barber_id'];
+
+        $payment->appointment->update([
+            'barber_id' => $newBarberId,
+        ]);
+
+        try {
+            AuditLog::create([
+                'user_id' => $user?->id ?? 1,
+                'user_role' => $user && $user->role instanceof \BackedEnum ? $user->role->value : 'admin',
+                'action' => 'appointment.barber_reassigned',
+                'module' => 'Appointment',
+                'target_type' => Appointment::class,
+                'target_id' => $payment->appointment->id,
+                'old_value' => ['barber_id' => $oldBarberId],
+                'new_value' => ['barber_id' => $newBarberId, 'payment_id' => $payment->id],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Could not write audit log for barber reassignment: '.$e->getMessage());
+        }
+
+        return ApiResponse::success(
+            $payment->load(['appointment.customer', 'appointment.barber.user', 'appointment.service']),
+            'Barber reassigned successfully.'
+        );
+    }
+
+    public function rejectPayment(Request $request, int $id): JsonResponse
+    {
+        $payment = Payment::with(['appointment'])->findOrFail($id);
+        $user = $request->user();
+
+        $reason = (string) $request->input('reason', 'Verification rejected by administrator');
+
+        $payment->update([
+            'status' => PaymentStatus::failed->value,
+            'gateway_response' => 'Payment rejected by admin: '.$reason,
+        ]);
+
+        if ($payment->appointment) {
+            $payment->appointment->update([
+                'payment_status' => AppointmentPaymentStatus::unpaid,
+                'deposit_paid' => false,
+            ]);
+        }
+
+        try {
+            AuditLog::create([
+                'user_id' => $user?->id ?? 1,
+                'user_role' => $user && $user->role instanceof \BackedEnum ? $user->role->value : 'admin',
+                'action' => 'payment.rejected',
+                'module' => 'Payment',
+                'target_type' => Payment::class,
+                'target_id' => $payment->id,
+                'new_value' => ['status' => 'failed', 'reason' => $reason],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Could not write audit log for payment rejection: '.$e->getMessage());
+        }
+
+        return ApiResponse::success(
+            $payment->load(['appointment.customer', 'appointment.barber.user', 'appointment.service']),
+            'Payment rejected.'
+        );
     }
 }

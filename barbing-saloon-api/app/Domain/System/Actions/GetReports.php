@@ -43,14 +43,29 @@ class GetReports
             ->selectRaw("
                 SUM(CASE WHEN a.status IN ('completed', 'confirmed') THEN {$expr} ELSE 0 END) as total_rev,
                 SUM(CASE WHEN a.status = 'completed' THEN {$expr} ELSE 0 END) as realized_rev,
+                SUM(CASE WHEN a.status = 'pending' THEN {$expr} ELSE 0 END) as pending_rev,
+                SUM(CASE WHEN a.status = 'cancelled' THEN {$expr} ELSE 0 END) as cancelled_rev,
+                SUM(CASE WHEN a.status = 'no_show' THEN {$expr} ELSE 0 END) as no_show_rev,
                 COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as completed_count,
+                COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) as confirmed_count,
+                COUNT(CASE WHEN a.status = 'pending' THEN 1 END) as pending_count,
+                COUNT(CASE WHEN a.status = 'cancelled' THEN 1 END) as cancelled_count,
+                COUNT(CASE WHEN a.status = 'no_show' THEN 1 END) as no_show_count,
                 COUNT(*) as total_count
             ")
             ->first();
 
         $totalRevenue = (float) ($statsRow->total_rev ?? 0);
         $realizedRevenue = (float) ($statsRow->realized_rev ?? 0);
+        $pendingRevenue = (float) ($statsRow->pending_rev ?? 0);
+        $cancelledRevenue = (float) ($statsRow->cancelled_rev ?? 0);
+        $noShowRevenue = (float) ($statsRow->no_show_rev ?? 0);
+        $lostRevenue = $cancelledRevenue + $noShowRevenue;
+
         $totalAppointments = (int) ($statsRow->completed_count ?? 0);
+        $allAppointments = (int) ($statsRow->total_count ?? 0);
+        $completedCount = (int) ($statsRow->completed_count ?? 0);
+        $completionRate = $allAppointments > 0 ? (int) round(($completedCount / $allAppointments) * 100) : 0;
 
         $newCustomers = User::query()
             ->where('role', 'customer')
@@ -64,7 +79,16 @@ class GetReports
         $businessStats = [
             'total_revenue' => $totalRevenue,
             'realized_revenue' => $realizedRevenue,
+            'pending_revenue' => $pendingRevenue,
+            'lost_revenue' => $lostRevenue,
             'total_appointments' => $totalAppointments,
+            'all_appointments' => $allAppointments,
+            'completed_count' => $completedCount,
+            'confirmed_count' => (int) ($statsRow->confirmed_count ?? 0),
+            'pending_count' => (int) ($statsRow->pending_count ?? 0),
+            'cancelled_count' => (int) ($statsRow->cancelled_count ?? 0),
+            'no_show_count' => (int) ($statsRow->no_show_count ?? 0),
+            'completion_rate' => $completionRate,
             'new_customers' => $newCustomers,
             'total_customers' => $totalCustomers,
             'average_ticket' => $totalAppointments > 0 ? round($realizedRevenue / $totalAppointments, 2) : 0,
@@ -93,15 +117,25 @@ class GetReports
             'no_show' => Appointment::query()->where('appointment_date', '>=', $sinceDate)->where('status', AppointmentStatus::no_show->value)->count(),
         ];
 
-        // Revenue trends & Booking trends
+        // Revenue trends & Booking trends & Daily ledger
         $revenueTrends = [];
         $bookingTrends = [];
+        $dailyLedger = [];
 
         if ($range === 'all') {
             $monthlyData = $this->engine->computeMonthlyTimeline(today());
             foreach ($monthlyData as $m) {
-                $revenueTrends[] = ['month' => $m['month'], 'revenue' => $m['revenue']];
-                $bookingTrends[] = ['month' => $m['month'], 'count' => $m['count']];
+                $rev = (float) $m['revenue'];
+                $cnt = (int) $m['count'];
+                $revenueTrends[] = ['month' => $m['month'], 'revenue' => $rev];
+                $bookingTrends[] = ['month' => $m['month'], 'count' => $cnt];
+                $dailyLedger[] = [
+                    'label' => $m['month'].' ('.$m['ym'].')',
+                    'date' => $m['ym'],
+                    'revenue' => $rev,
+                    'count' => $cnt,
+                    'avg_ticket' => $cnt > 0 ? round($rev / $cnt, 2) : 0,
+                ];
             }
         } else {
             $daysCount = match ($range) {
@@ -114,8 +148,19 @@ class GetReports
             $slice = array_slice($dailyTimeline['thirty_day_trend'], -$daysCount);
 
             foreach ($slice as $entry) {
-                $revenueTrends[] = ['month' => $entry['day'], 'date' => $entry['date'], 'revenue' => $entry['revenue']];
-                $bookingTrends[] = ['month' => $entry['day'], 'date' => $entry['date'], 'count' => $entry['count']];
+                $rev = (float) $entry['revenue'];
+                $cnt = (int) $entry['count'];
+                $revenueTrends[] = ['month' => $entry['day'], 'date' => $entry['date'], 'revenue' => $rev];
+                $bookingTrends[] = ['month' => $entry['day'], 'date' => $entry['date'], 'count' => $cnt];
+                $dailyLedger[] = [
+                    'label' => $entry['day'].', '.$entry['date_label'],
+                    'day' => $entry['day'],
+                    'date' => $entry['date'],
+                    'date_label' => $entry['date_label'],
+                    'revenue' => $rev,
+                    'count' => $cnt,
+                    'avg_ticket' => $cnt > 0 ? round($rev / $cnt, 2) : 0,
+                ];
             }
         }
 
@@ -127,6 +172,7 @@ class GetReports
             'status_breakdown' => $statusBreakdown,
             'revenue_trends' => $revenueTrends,
             'booking_trends' => $bookingTrends,
+            'daily_ledger' => $dailyLedger,
 
             // Legacy keys preserved
             'appointments_by_status' => Appointment::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),

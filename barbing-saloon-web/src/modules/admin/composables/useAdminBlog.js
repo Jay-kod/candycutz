@@ -129,9 +129,6 @@ export function useAdminBlog() {
       formData.append('excerpt', post.excerpt || '');
       formData.append('is_published', nextPublished ? '1' : '0');
       formData.append('status', nextPublished ? 'published' : 'draft');
-      if (post.featured_image) {
-        formData.append('featured_image', post.featured_image);
-      }
 
       await client.post(`/admin/blog/${post.id}`, formData);
 
@@ -199,4 +196,3 @@ export function useAdminBlog() {
     resetFilters,
   };
 }
-

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Catalogue\Actions;
 
+use App\Domain\Shared\Services\CatalogueCache;
 use App\Models\Service;
 
 class GetServices
@@ -11,6 +12,8 @@ class GetServices
      */
     public function execute(): array
     {
-        return Service::query()->with('category')->orderBy('name')->get()->all();
+        return CatalogueCache::remember('services', 'all_with_category', function () {
+            return Service::query()->with('category')->orderBy('name')->get()->all();
+        });
     }
 }

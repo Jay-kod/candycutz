@@ -1,165 +1,141 @@
 <template>
   <AdminLayout>
-    <section class="animate-fade-in max-w-4xl mx-auto space-y-8 pb-12">
-      <!-- Top Navigation Header -->
-      <div class="flex items-center justify-between">
-        <button 
-          @click="router.push('/admin/blog')" 
-          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-        >
-          <ArrowLeftIcon class="h-4 w-4" />
-          <span>Back to Articles</span>
-        </button>
-
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border" :class="form.is_published ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30' : 'bg-amber-950/80 text-amber-400 border-amber-500/30'">
-          <span class="h-1.5 w-1.5 rounded-full" :class="form.is_published ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'"></span>
-          {{ form.is_published ? 'Will Publish Live' : 'Saving as Draft' }}
-        </span>
+    <section class="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-2 sm:px-6 lg:px-8">
+      <div v-if="loading" class="animate-pulse space-y-6">
+        <div class="h-44 rounded-3xl border border-white/[0.08] bg-[#12161C]"></div>
+        <div class="grid gap-6 lg:grid-cols-12">
+          <div class="h-[760px] rounded-3xl bg-[#12161C] lg:col-span-8"></div>
+          <div class="h-[520px] rounded-3xl bg-[#12161C] lg:col-span-4"></div>
+        </div>
       </div>
 
-      <!-- Editor Card -->
-      <div class="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#12161C] p-8 shadow-2xl backdrop-blur-2xl">
-        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-admin/10 blur-[90px] pointer-events-none"></div>
+      <template v-else>
+        <BlogEditorHeader :is-editing="isEditing" :is-published="form.is_published" :saving="saving" @save="savePost" />
 
-        <div class="relative z-10 mb-8 border-b border-white/[0.06] pb-6">
-          <h1 class="font-display text-2xl sm:text-3xl text-white tracking-tight">
-            {{ isEditing ? 'Edit Article' : 'Compose New Article' }}
-          </h1>
-          <p class="mt-1 text-xs text-white/50">
-            {{ isEditing ? 'Refine your article content, update images, and manage publication status.' : 'Write engaging saloon announcements, hair styling guides and care tips.' }}
-          </p>
-        </div>
-        
-        <form @submit.prevent="savePost" class="relative z-10 space-y-6">
-          <!-- Featured Cover Image Upload -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Featured Cover Image</label>
-            <div class="relative w-full h-64 rounded-2xl border-2 border-dashed border-white/10 bg-black/40 overflow-hidden group hover:border-admin/50 transition-colors cursor-pointer flex items-center justify-center">
-              <input 
-                type="file" 
-                accept="image/*" 
-                @change="onFileSelected" 
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-              />
-              
-              <template v-if="previewImage">
-                <img :src="previewImage" alt="Preview" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity" />
-                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  <span class="bg-black/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md flex items-center gap-2 border border-white/10">
-                    <PhotoIcon class="h-4 w-4 text-admin" /> Change Cover Image
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+          <form class="space-y-5 lg:col-span-8" @submit.prevent="savePost">
+            <section class="space-y-4 rounded-3xl border border-white/[0.08] bg-[#12161C] p-5 shadow-2xl sm:p-7">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-xs font-bold uppercase tracking-wider text-white">Featured cover image</h2>
+                  <p class="mt-1 text-[11px] text-slate-400">Horizontal banner for the article and blog cards.</p>
+                </div>
+                <span v-if="previewImage" class="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                  Image ready
+                </span>
+              </div>
+
+              <div
+                class="group relative flex min-h-52 items-center justify-center overflow-hidden rounded-2xl border-2 transition"
+                :class="[
+                  isDragging ? 'scale-[0.99] border-admin bg-admin/5' : 'border-dashed border-white/[0.15] bg-[#0B0F13] hover:border-admin/50',
+                  previewImage ? 'border-solid' : '',
+                ]"
+                @dragover="onDragOver"
+                @dragleave="onDragLeave"
+                @drop="onDrop"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  aria-label="Upload featured cover image"
+                  class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                  @change="onFileSelected"
+                />
+                <img v-if="previewImage" :src="previewImage" alt="Cover preview" class="absolute inset-0 h-full w-full object-cover" />
+                <div v-if="previewImage" class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100">
+                  <span class="rounded-xl border border-white/10 bg-black/80 px-4 py-2 text-xs font-semibold text-white">
+                    <PhotoIcon class="mr-2 inline h-4 w-4 text-admin-light" />Replace cover image
                   </span>
                 </div>
-              </template>
-              <template v-else>
-                <div class="text-center text-white/40 group-hover:text-admin transition-colors pointer-events-none px-4">
-                  <PhotoIcon class="h-10 w-10 mx-auto mb-2 opacity-60" />
-                  <p class="text-xs font-semibold">Click or drag image to upload cover</p>
-                  <p class="text-[10px] text-white/30 mt-1">Recommended: 1200x630px JPG, PNG, WebP (Max 2MB)</p>
+                <div v-else class="pointer-events-none px-6 py-10 text-center text-slate-400 transition group-hover:text-admin-light">
+                  <PhotoIcon class="mx-auto mb-3 h-8 w-8" />
+                  <p class="text-xs font-semibold text-white">Click or drag a cover image here</p>
+                  <p class="mt-1 text-[10px] text-slate-500">Recommended 1200 x 630px · JPG, PNG, or WebP · Max 2MB</p>
                 </div>
-              </template>
-            </div>
-          </div>
+              </div>
+            </section>
 
-          <!-- Title Input -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Article Title <span class="text-admin">*</span></label>
-            <input 
-              v-model="form.title" 
-              type="text" 
-              required 
-              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15" 
-              placeholder="e.g. Master the Perfect Beard Fade: Expert Barbering Guide" 
+            <BlogTitleExcerptCard v-model:title="form.title" v-model:excerpt="form.excerpt" :preview-slug="previewSlug" />
+
+            <section class="space-y-4 rounded-3xl border border-white/[0.08] bg-[#12161C] p-5 shadow-2xl sm:p-7">
+              <div class="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <label for="article-content" class="text-xs font-bold uppercase tracking-wider text-white">Article content <span class="text-admin-light">*</span></label>
+                  <p class="mt-1 text-[11px] text-slate-400">Write the full article. Basic Markdown formatting is available below.</p>
+                </div>
+                <span class="text-xs text-slate-400">{{ wordCount }} words · {{ readingTime }}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#0B0F13] p-2">
+                <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Format</span>
+                <button v-for="format in formats" :key="format.type" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.08] hover:text-white" :title="format.title" @click="insertFormatting(format.type)">
+                  {{ format.label }}
+                </button>
+              </div>
+              <textarea
+                id="article-content"
+                ref="contentInput"
+                v-model="form.content"
+                rows="16"
+                required
+                class="w-full resize-y rounded-2xl border border-white/[0.08] bg-[#0B0F13] p-4 text-sm leading-relaxed text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-admin/50 focus:ring-1 focus:ring-admin/30"
+                placeholder="Write your article content here..."
+              ></textarea>
+            </section>
+
+            <BlogPublishingCard
+              v-model:author-display="form.author_display"
+              v-model:is-published="form.is_published"
+              :saving="saving"
+              :is-editing="isEditing"
             />
-          </div>
+          </form>
 
-          <!-- Author Display -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Author / Source Display</label>
-            <input 
-              v-model="form.author_display" 
-              type="text" 
-              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15" 
-              placeholder="Defaults to 'CandyCutz Team' or enter specific barber / stylist name" 
+          <div class="space-y-5 lg:sticky lg:top-8 lg:col-span-4">
+            <AdminBlogLivePreview
+              :title="form.title"
+              :excerpt="form.excerpt"
+              :content="form.content"
+              :preview-image="previewImage"
+              :author-display="form.author_display"
+              :is-published="form.is_published"
+              :reading-time="readingTime"
+              :formatted-date="formattedDate"
             />
-          </div>
-
-          <!-- Excerpt Summary -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Excerpt / Brief Summary</label>
-            <textarea 
-              v-model="form.excerpt" 
-              rows="2" 
-              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 resize-none" 
-              placeholder="Short summary displayed on public blog cards and social previews..."
-            ></textarea>
-          </div>
-
-          <!-- Article Content Body -->
-          <div class="space-y-2">
-            <label class="text-[11px] font-bold uppercase tracking-wider text-white/50">Article Content <span class="text-admin">*</span></label>
-            <textarea 
-              v-model="form.content" 
-              rows="14" 
-              required 
-              class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm font-sans text-white/90 leading-relaxed placeholder:text-white/30 outline-none transition-all focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 resize-y" 
-              placeholder="Write your article content here. Paragraphs and formatting are preserved..."
-            ></textarea>
-          </div>
-
-          <!-- Publication Checkbox -->
-          <div class="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] bg-white/[0.02]">
-            <input 
-              v-model="form.is_published" 
-              type="checkbox" 
-              id="publish" 
-              class="h-4 w-4 rounded accent-admin cursor-pointer" 
-            />
-            <label for="publish" class="text-xs text-white/80 cursor-pointer font-medium select-none">
-              Publish immediately (visible to all clients on public website)
-            </label>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="flex items-center gap-4 pt-4 border-t border-white/[0.08]">
-            <button 
-              type="button" 
-              @click="router.push('/admin/blog')" 
-              class="px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              :disabled="saving" 
-              class="flex-1 rounded-xl bg-gradient-to-r from-admin to-admin-light py-3 text-xs font-bold text-obsidian shadow-[0_4px_20px_rgba(255,103,0,0.25)] hover:shadow-[0_6px_28px_rgba(255,103,0,0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-            >
-              <span v-if="saving" class="h-4 w-4 border-2 border-obsidian border-t-transparent rounded-full animate-spin"></span>
-              <span>{{ saving ? 'Saving Article...' : (isEditing ? 'Update Article' : 'Publish Article') }}</span>
+            <button type="button" :disabled="saving" class="hidden w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-admin to-admin-light py-3.5 text-xs font-bold uppercase tracking-wider text-obsidian shadow-lg shadow-admin/20 transition hover:-translate-y-0.5 disabled:opacity-50 lg:flex" @click="savePost">
+              <CheckIcon class="h-4 w-4" />
+              {{ saving ? 'Saving...' : isEditing ? 'Update article' : 'Publish article' }}
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </template>
     </section>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { CheckIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
-import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import { getStorageUrl } from '@/core/utils/url';
+import AdminBlogLivePreview from '@/modules/admin/components/blog/AdminBlogLivePreview.vue';
+import BlogEditorHeader from '@/modules/admin/components/blog/BlogEditorHeader.vue';
+import BlogPublishingCard from '@/modules/admin/components/blog/BlogPublishingCard.vue';
+import BlogTitleExcerptCard from '@/modules/admin/components/blog/BlogTitleExcerptCard.vue';
 
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
-
-const isEditing = computed(() => !!route.params.id);
+const isEditing = computed(() => Boolean(route.params.id));
+const loading = ref(Boolean(route.params.id));
 const saving = ref(false);
 const previewImage = ref('');
 const selectedFile = ref(null);
+const isDragging = ref(false);
+const contentInput = ref(null);
 
 const form = reactive({
   title: '',
@@ -168,50 +144,113 @@ const form = reactive({
   is_published: false,
   featured_image: '',
   author_display: '',
+  created_at: null,
 });
 
+const formats = [
+  { type: 'bold', label: 'B', title: 'Bold' },
+  { type: 'italic', label: 'I', title: 'Italic' },
+  { type: 'h2', label: 'H2', title: 'Heading 2' },
+  { type: 'h3', label: 'H3', title: 'Heading 3' },
+  { type: 'bullet', label: '• List', title: 'Bullet list' },
+  { type: 'number', label: '1. Steps', title: 'Numbered list' },
+  { type: 'quote', label: '“ Quote', title: 'Quote' },
+  { type: 'divider', label: '― Divider', title: 'Divider' },
+];
+
+const wordCount = computed(() => form.content.trim().split(/\s+/).filter(Boolean).length);
+const readingTime = computed(() => `${Math.max(1, Math.ceil(wordCount.value / 200))} min read`);
+const previewSlug = computed(() => form.title.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') || 'article-title');
+const formattedDate = computed(() => new Date(form.created_at || Date.now()).toLocaleDateString('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+}));
+
 function getImageUrl(path) {
-  return getStorageUrl(path);
+  return path?.startsWith('http') ? path : getStorageUrl(path);
+}
+
+function selectFile(file) {
+  if (!file) return;
+  selectedFile.value = file;
+  previewImage.value = URL.createObjectURL(file);
 }
 
 function onFileSelected(event) {
-  const file = event.target.files[0];
-  if (file) {
-    selectedFile.value = file;
-    previewImage.value = URL.createObjectURL(file);
-  } else {
-    selectedFile.value = null;
-    previewImage.value = form.featured_image ? getImageUrl(form.featured_image) : '';
-  }
+  selectFile(event.target.files?.[0]);
+}
+
+function onDragOver(event) {
+  event.preventDefault();
+  isDragging.value = true;
+}
+
+function onDragLeave(event) {
+  event.preventDefault();
+  isDragging.value = false;
+}
+
+function onDrop(event) {
+  event.preventDefault();
+  isDragging.value = false;
+  selectFile(event.dataTransfer?.files?.[0]);
+}
+
+function insertFormatting(type) {
+  const textarea = contentInput.value;
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selected = form.content.slice(start, end);
+  const formatsByType = {
+    bold: ['**', '**', 'bold text'],
+    italic: ['*', '*', 'italic text'],
+    h2: ['\n## ', '\n', 'Section heading'],
+    h3: ['\n### ', '\n', 'Subheading'],
+    bullet: ['\n- ', '', 'List item'],
+    number: ['\n1. ', '', 'Step description'],
+    quote: ['\n> ', '\n', 'Quote'],
+    divider: ['\n\n---\n\n', '', ''],
+  };
+  const [before, after, fallback] = formatsByType[type] || [];
+  if (before === undefined) return;
+  const insertion = selected || fallback;
+  form.content = `${form.content.slice(0, start)}${before}${insertion}${after}${form.content.slice(end)}`;
+  requestAnimationFrame(() => {
+    textarea.focus();
+    const cursor = start + before.length + insertion.length;
+    textarea.setSelectionRange(cursor, cursor);
+  });
 }
 
 async function loadPost() {
   if (!isEditing.value) return;
-  
   try {
     const res = await client.get('/admin/blog');
-    const posts = Array.isArray(res.data?.data) 
-      ? res.data.data 
+    const posts = Array.isArray(res.data?.data)
+      ? res.data.data
       : (res.data?.data?.data || []);
-      
-    const post = posts.find(p => String(p.id) === String(route.params.id));
-    if (post) {
-      form.title = post.title || '';
-      form.excerpt = post.excerpt || '';
-      form.content = post.content || post.body || '';
-      form.is_published = post.is_published == 1 || post.status === 'published';
-      form.featured_image = post.featured_image || post.featured_image_url || '';
-      form.author_display = post.author_display || post.author?.name || '';
-      if (form.featured_image) {
-        previewImage.value = getImageUrl(form.featured_image);
-      }
-    } else {
+    const post = posts.find((item) => String(item.id) === String(route.params.id));
+    if (!post) {
       toast.error('Article not found');
       router.push('/admin/blog');
+      return;
     }
+
+    form.title = post.title || '';
+    form.excerpt = post.excerpt || '';
+    form.content = post.content || post.body || '';
+    form.is_published = post.is_published == 1 || post.status === 'published';
+    form.featured_image = post.featured_image || post.featured_image_url || '';
+    form.author_display = post.author_display || post.author?.name || '';
+    form.created_at = post.created_at || null;
+    if (form.featured_image) previewImage.value = getImageUrl(form.featured_image);
   } catch (err) {
     console.error('[BlogEditor] Failed to load post:', err);
     toast.error('Failed to load article');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -225,14 +264,7 @@ async function savePost() {
     formData.append('is_published', form.is_published ? '1' : '0');
     formData.append('status', form.is_published ? 'published' : 'draft');
     formData.append('author_display', form.author_display || '');
-    
-    if (form.featured_image && !selectedFile.value) {
-      formData.append('featured_image', form.featured_image);
-    }
-    if (selectedFile.value) {
-      formData.append('featured_image', selectedFile.value);
-      formData.append('image', selectedFile.value);
-    }
+    if (selectedFile.value) formData.append('featured_image', selectedFile.value);
 
     if (isEditing.value) {
       await client.post(`/admin/blog/${route.params.id}`, formData);
@@ -244,14 +276,11 @@ async function savePost() {
     router.push('/admin/blog');
   } catch (err) {
     console.error('[BlogEditor] Failed to save post:', err);
-    const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to save article';
-    toast.error(errorMsg);
+    toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to save article');
   } finally {
     saving.value = false;
   }
 }
 
-onMounted(() => {
-  loadPost();
-});
+onMounted(loadPost);
 </script>

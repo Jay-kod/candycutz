@@ -31,13 +31,13 @@ class ServiceApiController
     public function index(Request $request): JsonResponse
     {
         $user = $request->user('sanctum');
-        $role = $user ? ($user->role?->value ?? $user->role) : null;
+        $role = $user ? ($user->role->value ?? $user->role) : null;
 
         $query = Service::query()->with(['category', 'barber.user']);
 
         if ($role === 'barber') {
             $barberId = $user->barber?->id;
-            if ($request->boolean('my_services_only') || $request->is('api/v1/barber/*') || $request->is('api/barber/*')) {
+            if ($request->boolean('my_services_only')) {
                 $query->where('barber_id', $barberId);
             } else {
                 $query->where(function ($q) use ($barberId) {
@@ -72,7 +72,11 @@ class ServiceApiController
             }
         }
 
-        if (! $role || $role === 'customer') {
+        $bypassCache = $request->header('Cache-Control') === 'no-cache'
+            || $request->header('Pragma') === 'no-cache'
+            || $request->boolean('fresh');
+
+        if ((! $role || $role === 'customer') && ! $bypassCache) {
             $cacheKey = 'query:'.md5(json_encode($request->all()));
             $services = CatalogueCache::remember('services', $cacheKey, function () use ($query) {
                 return $query->orderBy('display_order')->orderBy('name')->get();
@@ -101,19 +105,21 @@ class ServiceApiController
 
     public function categories(): JsonResponse
     {
-        $categories = ServiceCategory::query()
-            ->withCount(['services' => fn ($q) => $q->where('approval_status', 'approved')->where('is_active', true)])
-            ->orderBy('display_order')
-            ->orderBy('name')
-            ->get();
+        $data = CatalogueCache::remember('categories', 'public_list', function () {
+            $categories = ServiceCategory::query()
+                ->withCount(['services' => fn ($q) => $q->where('approval_status', 'approved')->where('is_active', true)])
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
 
-        $data = $categories->map(fn (ServiceCategory $cat) => [
-            'id' => $cat->id,
-            'name' => $cat->name,
-            'slug' => $cat->slug ?? Str::slug($cat->name),
-            'icon' => $cat->icon,
-            'services_count' => $cat->services_count ?? 0,
-        ]);
+            return $categories->map(fn (ServiceCategory $cat) => [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'slug' => $cat->slug ?? Str::slug($cat->name),
+                'icon' => $cat->icon,
+                'services_count' => $cat->services_count ?? 0,
+            ])->all();
+        });
 
         return ApiResponse::success($data, 'Service categories retrieved');
     }
@@ -121,7 +127,7 @@ class ServiceApiController
     public function store(StoreServiceRequest $request): JsonResponse
     {
         $user = $request->user();
-        $isBarber = ($user->role?->value ?? $user->role) === 'barber';
+        $isBarber = ($user->role->value ?? $user->role) === 'barber';
 
         $data = ServiceData::fromRequest($request)->toArray();
         unset($data['image_url']);
@@ -221,7 +227,7 @@ class ServiceApiController
     public function approve(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        if (! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+        if (! in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
             return ApiResponse::error('Unauthorized', [], 403);
         }
 
@@ -248,7 +254,7 @@ class ServiceApiController
     public function reject(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        if (! in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+        if (! in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
             return ApiResponse::error('Unauthorized', [], 403);
         }
 

@@ -15,7 +15,7 @@ trait HasAuditLog
     {
         AuditLog::create([
             'user_id' => auth()->id(),
-            'user_role' => auth()->user()?->role?->value ?? null,
+            'user_role' => auth()->user()?->role->value ?? null,
             'action' => $action,
             'module' => class_basename(static::class),
             'target_type' => $target::class,

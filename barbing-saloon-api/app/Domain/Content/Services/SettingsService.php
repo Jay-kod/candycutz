@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Content\Services;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 
 class SettingsService
 {
@@ -18,6 +19,7 @@ class SettingsService
         'about',
         'features',
         'contact',
+        'payment',
         'booking',
         'social',
         'seo',
@@ -35,25 +37,27 @@ class SettingsService
      */
     public function settings(): array
     {
-        $settings = Setting::all();
+        return Cache::remember('settings.all', 3600, function () {
+            $settings = Setting::all();
 
-        $grouped = $settings
-            ->groupBy('group')
-            ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
-            ->all();
+            $grouped = $settings
+                ->groupBy('group')
+                ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
+                ->all();
 
-        $flat = $settings
-            ->keyBy('key')
-            ->map(fn ($item) => $item->value)
-            ->all();
+            $flat = $settings
+                ->keyBy('key')
+                ->map(fn ($item) => $item->value)
+                ->all();
 
-        $merged = array_merge($flat, $grouped);
+            $merged = array_merge($flat, $grouped);
 
-        /** @var AnimationSettingsService $animationService */
-        $animationService = app(AnimationSettingsService::class);
-        $merged['animation_resolved'] = $animationService->getResolvedSettings();
+            /** @var AnimationSettingsService $animationService */
+            $animationService = app(AnimationSettingsService::class);
+            $merged['animation_resolved'] = $animationService->getResolvedSettings();
 
-        return $merged;
+            return $merged;
+        });
     }
 
     /**
@@ -63,24 +67,26 @@ class SettingsService
      */
     public function publicSettings(): array
     {
-        $settings = Setting::whereIn('group', self::PUBLIC_GROUPS)->get();
+        return Cache::remember('settings.public', 3600, function () {
+            $settings = Setting::whereIn('group', self::PUBLIC_GROUPS)->get();
 
-        $grouped = $settings
-            ->groupBy('group')
-            ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
-            ->all();
+            $grouped = $settings
+                ->groupBy('group')
+                ->map(fn ($group) => $group->keyBy('key')->map(fn ($item) => $item->value))
+                ->all();
 
-        $flat = $settings
-            ->keyBy('key')
-            ->map(fn ($item) => $item->value)
-            ->all();
+            $flat = $settings
+                ->keyBy('key')
+                ->map(fn ($item) => $item->value)
+                ->all();
 
-        $merged = array_merge($flat, $grouped);
+            $merged = array_merge($flat, $grouped);
 
-        /** @var AnimationSettingsService $animationService */
-        $animationService = app(AnimationSettingsService::class);
-        $merged['animation_resolved'] = $animationService->getResolvedSettings();
+            /** @var AnimationSettingsService $animationService */
+            $animationService = app(AnimationSettingsService::class);
+            $merged['animation_resolved'] = $animationService->getResolvedSettings();
 
-        return $merged;
+            return $merged;
+        });
     }
 }

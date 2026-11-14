@@ -1,8 +1,8 @@
 <template>
   <div class="rounded-3xl border border-theme-border bg-theme-surface/60 backdrop-blur-xl overflow-hidden h-fit shadow-xl">
     <div class="flex items-center gap-3 border-b border-theme-border px-8 py-6 bg-theme-surface-subtle/40">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 shadow-inner">
-        <SparklesIcon class="h-5 w-5 text-purple-400" />
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 border border-gold/20 shadow-inner">
+        <SparklesIcon class="h-5 w-5 text-gold" />
       </div>
       <div>
         <h2 class="font-display text-xl text-theme-text">Specialties</h2>
@@ -38,13 +38,13 @@
           <input
             v-model="newSpecialty"
             @keydown.enter.prevent="handleAdd"
-            class="flex-1 rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-purple-500/50 focus:bg-theme-surface focus:ring-1 focus:ring-purple-500/30"
+            class="flex-1 rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text placeholder:text-theme-text-muted/40 outline-none transition-all focus:border-gold/50 focus:bg-theme-surface focus:ring-1 focus:ring-gold/30"
             placeholder="Type a custom style name..."
           />
           <button
             type="button"
             @click="handleAdd"
-            class="rounded-xl bg-purple-500/20 hover:bg-purple-500 text-purple-400 hover:text-white px-5 py-3 text-sm font-bold transition-all border border-purple-500/30 hover:border-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+            class="rounded-xl bg-gold/20 hover:bg-gold text-gold hover:text-obsidian px-5 py-3 text-sm font-bold transition-all border border-gold/30 hover:border-gold hover:shadow-[0_0_15px_rgba(255,153,0,0.4)]"
           >
             Add
           </button>

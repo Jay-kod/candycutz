@@ -37,7 +37,7 @@ class GetAuditLogs
 
         return $recentAppts->map(fn ($a) => [
             'id' => $a->id,
-            'user_name' => $a->customer?->name ?? 'System',
+            'user_name' => $a->customer->name ?? 'System',
             'action' => 'booking_'.$a->status->value,
             'entity_type' => 'appointment',
             'ip_address' => '127.0.0.1',

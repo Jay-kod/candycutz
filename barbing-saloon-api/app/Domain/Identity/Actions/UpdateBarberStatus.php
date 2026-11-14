@@ -4,23 +4,23 @@ namespace App\Domain\Identity\Actions;
 
 use App\Models\Barber;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class UpdateBarberStatus
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function execute(int $id, string $status): array
+    public function execute(int $id, string $status): Barber
     {
         Gate::authorize('manage-barber-accounts');
 
-        $barber = Barber::with('user')->findOrFail($id);
-        $barber->update(['status' => $status]);
-        if ($barber->user) {
-            $barber->user->status = $status;
-            $barber->user->save();
+        if (! in_array($status, Barber::STATUSES, true)) {
+            throw ValidationException::withMessages([
+                'status' => 'The selected barber status is invalid.',
+            ]);
         }
 
-        return ['id' => $barber->id, 'status' => $status];
+        $barber = Barber::with('user')->findOrFail($id);
+        $barber->update(['status' => $status]);
+
+        return $barber->refresh();
     }
 }

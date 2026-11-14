@@ -57,16 +57,16 @@ class AppManagementApiController
         return ApiResponse::success([
             'versions' => [
                 'android' => [
-                    'minimum' => $minVersionAndroid?->version ?? '1.0.0',
-                    'latest' => $latestAndroid?->version ?? '1.0.0',
-                    'force_update' => (bool) ($minVersionAndroid?->force_update ?? false),
-                    'store_url' => $minVersionAndroid?->store_url ?? '',
+                    'minimum' => $minVersionAndroid->version ?? '1.0.0',
+                    'latest' => $latestAndroid->version ?? '1.0.0',
+                    'force_update' => (bool) ($minVersionAndroid->force_update ?? false),
+                    'store_url' => $minVersionAndroid->store_url ?? '',
                 ],
                 'ios' => [
-                    'minimum' => $minVersionIos?->version ?? '1.0.0',
-                    'latest' => $latestIos?->version ?? '1.0.0',
-                    'force_update' => (bool) ($minVersionIos?->force_update ?? false),
-                    'store_url' => $minVersionIos?->store_url ?? '',
+                    'minimum' => $minVersionIos->version ?? '1.0.0',
+                    'latest' => $latestIos->version ?? '1.0.0',
+                    'force_update' => (bool) ($minVersionIos->force_update ?? false),
+                    'store_url' => $minVersionIos->store_url ?? '',
                 ],
             ],
             'maintenance' => [

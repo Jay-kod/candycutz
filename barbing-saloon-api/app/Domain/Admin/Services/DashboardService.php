@@ -28,7 +28,7 @@ class DashboardService
     }
 
     /**
-     * @return LengthAwarePaginator<AuditLog>
+     * @return LengthAwarePaginator<int, AuditLog>
      */
     public function auditLogs(): LengthAwarePaginator
     {

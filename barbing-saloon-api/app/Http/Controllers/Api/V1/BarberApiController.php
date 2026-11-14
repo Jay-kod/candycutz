@@ -26,19 +26,24 @@ use App\Models\BlockedPeriod;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BarberApiController
 {
     use AuthorizesRequests;
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $barbers = Barber::query()
+        $query = Barber::query()
             ->with(['user', 'workingHours'])
-            ->where('is_available', true)
             ->orderBy('display_order')
-            ->orderByDesc('rating')
-            ->get();
+            ->orderByDesc('rating');
+
+        if (! $request->is('api/v1/admin/barbers*')) {
+            $query->activeForBooking();
+        }
+
+        $barbers = $query->get();
 
         return ApiResponse::success(BarberResource::collection($barbers), 'Barbers retrieved successfully');
     }
@@ -141,11 +146,16 @@ class BarberApiController
         return ApiResponse::success(new AuthUserResource($user->refresh()), 'Username updated');
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
-        $barber = Barber::query()
-            ->with(['user', 'workingHours', 'testimonials.customer'])
-            ->find($id);
+        $query = Barber::query()
+            ->with(['user', 'workingHours', 'testimonials.customer']);
+
+        if (! $request->is('api/v1/admin/barbers*')) {
+            $query->activeForBooking();
+        }
+
+        $barber = $query->find($id);
 
         if (! $barber) {
             return ApiResponse::error("Barber #{$id} not found.", [], 404, 'RESOURCE_NOT_FOUND');
@@ -320,7 +330,10 @@ class BarberApiController
             'experience_years' => 'nullable|integer',
             'specialties' => 'nullable',
             'bio' => 'nullable|string',
-            'status' => 'nullable|string',
+            'status' => ['nullable', 'string', Rule::in(Barber::STATUSES)],
+            'bank_name' => 'nullable|string|max:100',
+            'account_name' => 'nullable|string|max:100',
+            'account_number' => 'nullable|string|max:50',
         ]);
 
         $barber = $action->execute($data);
@@ -342,7 +355,10 @@ class BarberApiController
             'experience_years' => 'nullable|integer',
             'specialties' => 'nullable',
             'bio' => 'nullable|string',
-            'status' => 'nullable|string',
+            'status' => ['sometimes', 'nullable', 'string', Rule::in(Barber::STATUSES)],
+            'bank_name' => 'nullable|string|max:100',
+            'account_name' => 'nullable|string|max:100',
+            'account_number' => 'nullable|string|max:50',
         ]);
 
         $updatedBarber = $action->execute($id, $data);
@@ -356,7 +372,11 @@ class BarberApiController
         $barber = Barber::findOrFail($id);
         $this->authorize('update', $barber);
 
-        $status = $request->input('status', 'active');
+        $validated = $request->validate([
+            'status' => ['required', 'string', Rule::in(Barber::STATUSES)],
+        ]);
+
+        $status = $validated['status'];
         $updatedBarber = $action->execute($id, $status);
         CatalogueCache::bust('barbers');
 

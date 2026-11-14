@@ -192,7 +192,7 @@ class AuthApiController
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (($user->role?->value ?? $user->role) === UserRole::barber->value) {
+        if (($user->role->value ?? $user->role) === UserRole::barber->value) {
             $user->loadMissing('barber');
         }
 

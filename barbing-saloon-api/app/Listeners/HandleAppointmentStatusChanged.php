@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Reacts to appointment status transitions by dispatching
- * in-app notifications, push notifications, and emails.
+ * in-app notifications, push notifications, and emails across
+ * the core triad: Barber, Customer, and Admin.
  *
  * This listener decouples BookingService from notification concerns.
  */
@@ -28,15 +29,17 @@ class HandleAppointmentStatusChanged implements ShouldQueue
         $newStatus = $event->newStatus;
         $actor = $event->actor;
 
-        // 1. Status-specific in-app + push notifications
+        // 1. Status-specific in-app + push notifications across Customer, Barber & Admin
         try {
             $dispatcher = app(NotificationDispatcher::class);
 
             match ($newStatus) {
-                'confirmed' => $dispatcher->bookingApproved($appointment),
+                'confirmed' => $dispatcher->bookingApproved($appointment, $actor),
                 'cancelled' => $dispatcher->bookingCancelled($appointment, $actor),
-                'completed' => $dispatcher->bookingCompleted($appointment),
-                'no_show' => $dispatcher->bookingNoShow($appointment),
+                'completed' => $dispatcher->bookingCompleted($appointment, $actor),
+                'no_show' => $dispatcher->bookingNoShow($appointment, $actor),
+                'checked_in' => $dispatcher->bookingCheckedIn($appointment, $actor),
+                'in_progress' => $dispatcher->bookingInProgress($appointment, $actor),
                 default => null,
             };
         } catch (\Throwable $e) {

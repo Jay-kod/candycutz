@@ -116,7 +116,7 @@ class AccountApiController
                 'id' => $a->id,
                 'appointment_date' => $a->appointment_date,
                 'appointment_time' => $a->appointment_time,
-                'status' => $a->status?->value ?? $a->status,
+                'status' => $a->status->value ?? $a->status,
                 'verification_code' => $a->verification_code,
                 'service_name' => $a->service?->name,
                 'service_image' => $a->service?->image,

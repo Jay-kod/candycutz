@@ -28,7 +28,7 @@
           <div class="flex justify-between"><span class="text-[var(--color-text-secondary)]">Service</span><span class="text-[var(--color-text-primary)] font-semibold">{{ service.name }}</span></div>
           <div class="flex justify-between"><span class="text-[var(--color-text-secondary)]">Barber</span><span class="text-[var(--color-text-primary)] font-semibold">{{ selectedBarberName }}</span></div>
           <div class="flex justify-between"><span class="text-[var(--color-text-secondary)]">Date</span><span class="text-[var(--color-text-primary)] font-semibold">{{ formatDate(appointmentDate) }}</span></div>
-          <div class="flex justify-between"><span class="text-[var(--color-text-secondary)]">Time</span><span class="text-[var(--color-accent)] font-bold">{{ appointmentTime }}</span></div>
+          <div class="flex justify-between"><span class="text-[var(--color-text-secondary)]">Time</span><span class="text-[var(--color-accent)] font-bold">{{ format12Hour(appointmentTime) }}</span></div>
           <div class="flex justify-between border-t border-[var(--color-accent)]/20 pt-2 mt-2"><span class="text-[var(--color-text-secondary)]">Total</span><span class="text-[var(--color-accent)] font-display text-lg font-bold">{{ formatNairaAmount(service.price) }}</span></div>
         </div>
       </div>
@@ -65,4 +65,15 @@ defineProps({
 })
 
 defineEmits(['update:notes'])
+
+function format12Hour(timeStr) {
+  if (!timeStr) return ''
+  const [hStr, mStr] = timeStr.split(':')
+  const h = parseInt(hStr, 10)
+  if (isNaN(h)) return timeStr
+  const m = mStr || '00'
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const displayH = h % 12 === 0 ? 12 : h % 12
+  return `${String(displayH).padStart(2, '0')}:${m} ${ampm}`
+}
 </script>

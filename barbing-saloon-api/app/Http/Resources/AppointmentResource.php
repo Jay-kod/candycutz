@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,6 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class AppointmentResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         $userMediaUrl = app(UserMediaUrl::class);
@@ -26,6 +28,51 @@ class AppointmentResource extends JsonResource
             'walk_in' => 'Walk-In',
             default => 'Website',
         });
+
+        // Resolve bank transfer details
+        $bankAccounts = config('payments.gateways.manual.bank_accounts');
+        $firstAccount = is_array($bankAccounts) ? collect($bankAccounts)->first() : null;
+
+        $dbBankName = Setting::query()->where('key', 'bank_name')->value('value')
+            ?: Setting::query()->where('key', 'manual_transfer_bank')->value('value');
+        $dbAccountName = Setting::query()->where('key', 'account_name')->value('value')
+            ?: Setting::query()->where('key', 'manual_transfer_account_name')->value('value');
+        $dbAccountNumber = Setting::query()->where('key', 'account_number')->value('value')
+            ?: Setting::query()->where('key', 'manual_transfer_account_number')->value('value');
+
+        $bankName = $dbBankName
+            ?: ($barber?->bank_name
+            ?: ($firstAccount['bank_name']
+            ?? config('payments.gateways.manual_transfer.default_bank_name')));
+
+        $accountName = $dbAccountName
+            ?: ($barber?->account_name
+            ?: ($firstAccount['account_name']
+            ?? config('payments.gateways.manual_transfer.default_account_name')));
+
+        $accountNumber = $dbAccountNumber
+            ?: ($barber?->account_number
+            ?: ($firstAccount['account_number']
+            ?? config('payments.gateways.manual_transfer.default_account_number')));
+
+        $isPlaceholder = in_array((string) $accountNumber, ['0000000000', ''], true);
+        $bankDetails = (! $isPlaceholder && $bankName && $accountNumber) ? [
+            'bank_name' => (string) $bankName,
+            'account_name' => (string) ($accountName ?: 'Candy Cutz Saloon'),
+            'account_number' => (string) $accountNumber,
+        ] : null;
+
+        $payment = $this->relationLoaded('payment') ? $this->payment : $this->payment()->first();
+        $paymentStatus = 'pending';
+        if ($this->deposit_paid || ($payment && in_array($payment->status?->value ?? $payment->status, ['verified', 'successful'], true))) {
+            $paymentStatus = 'paid';
+        } elseif ($payment && in_array($payment->status?->value ?? $payment->status, ['receipt_uploaded', 'under_review', 'awaiting_verification'], true)) {
+            $paymentStatus = 'awaiting_verification';
+        } elseif ($this->payment_status === 'unpaid') {
+            $paymentStatus = 'pending';
+        }
+
+        $receiptUrl = $payment?->receipt_url ? url('/api/v1/payments/appointments/'.$this->id.'/receipt') : null;
 
         return [
             'id' => $this->id,
@@ -44,8 +91,26 @@ class AppointmentResource extends JsonResource
             'source_label' => $sourceLabel,
             'status' => $statusVal,
             'verification_code' => $this->verification_code,
-            'payment_status' => $this->deposit_paid ? 'paid' : 'pending',
+            'payment_status' => $paymentStatus,
             'deposit_paid' => (bool) $this->deposit_paid,
+            'bank_details' => $bankDetails,
+            'payment_method' => $payment?->payment_method ?? ($this->appointment_type === 'walk_in' ? 'pay_at_venue' : 'manual_transfer'),
+            'transaction_ref' => $payment?->transaction_ref ?? $payment?->reference,
+            'receipt_url' => $receiptUrl,
+            'receipt_image' => $receiptUrl,
+            'paid_at' => $payment?->paid_at?->toIso8601String(),
+            'verified_at' => $payment?->verified_at?->toIso8601String(),
+            'payment' => $payment ? [
+                'id' => $payment->id,
+                'status' => $payment->status instanceof \BackedEnum ? $payment->status->value : $payment->status,
+                'amount' => (float) ($payment->amount ?? $this->total_price ?? 0),
+                'payment_method' => $payment->payment_method,
+                'reference' => $payment->reference,
+                'transaction_ref' => $payment->transaction_ref,
+                'receipt_url' => $receiptUrl,
+                'paid_at' => $payment->paid_at?->toIso8601String(),
+                'verified_at' => $payment->verified_at?->toIso8601String(),
+            ] : null,
             'total_duration_minutes' => (int) ($this->total_duration_minutes ?? $service->duration_minutes ?? 30),
             'subtotal' => (float) ($this->total_price ?? $this->total_amount ?? $service->price ?? 0),
             'home_service_surcharge' => (float) ($this->travel_fee ?? 0),

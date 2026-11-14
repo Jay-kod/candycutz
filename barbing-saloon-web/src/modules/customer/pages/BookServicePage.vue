@@ -100,8 +100,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { formatNairaAmount } from '@/core/utils'
 import { useRoute, useRouter } from 'vue-router'
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
-import { publicApi } from '@/shared/api/old_publicApi'
-import { customerApi } from '@/shared/api/old_customerApi'
+import client from '@/shared/api/client'
 import { useToast } from '../../../core/composables/useToast'
 import BookingBarberSelect from '../components/booking/BookingBarberSelect.vue'
 import BookingTimeSlotPicker from '../components/booking/BookingTimeSlotPicker.vue'
@@ -155,15 +154,19 @@ function formatDate(dateStr) {
 async function loadData() {
   loadingService.value = true
   try {
-    const [servicesResponse, barbersResponse] = await Promise.all([
-      publicApi.services(),
-      publicApi.barbers(),
+    const [serviceRes, barbersResponse] = await Promise.all([
+      client.get(`/services/${serviceId}`).catch(async () => {
+        const fallback = await client.get('/services')
+        const list = fallback.data?.data || fallback.data || []
+        return { data: { data: list.find(s => String(s.id) === String(serviceId)) } }
+      }),
+      client.get('/barbers'),
     ])
 
-    barbers.value = barbersResponse.data.data || []
+    barbers.value = barbersResponse.data?.data || barbersResponse.data || []
     
     // Find the specific service
-    const foundService = (servicesResponse.data.data || []).find(s => s.id == serviceId)
+    const foundService = serviceRes.data?.data || serviceRes.data
     if (!foundService) {
       toast.error('Service not found')
       loadingService.value = false
@@ -173,11 +176,32 @@ async function loadData() {
     service.value = foundService
     
     // Auto-select preferred barber
-    if (foundService.barber_id) {
+    if (route.query.barber_id && barbers.value.some(b => String(b.id) === String(route.query.barber_id))) {
+      form.barber_id = Number(route.query.barber_id)
+    } else if (foundService.barber_id) {
       form.barber_id = foundService.barber_id
     } else if (barbers.value.length > 0) {
       const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0]
       form.barber_id = preferred.id
+    }
+
+    // Auto-select initial appointment date (tomorrow if evening, else today)
+    if (!form.appointment_date) {
+      const now = new Date()
+      if (now.getHours() >= 18) {
+        const tomorrow = new Date(now)
+        tomorrow.setDate(now.getDate() + 1)
+        const y = tomorrow.getFullYear()
+        const m = String(tomorrow.getMonth() + 1).padStart(2, '0')
+        const d = String(tomorrow.getDate()).padStart(2, '0')
+        form.appointment_date = `${y}-${m}-${d}`
+      } else {
+        form.appointment_date = todayStr
+      }
+    }
+
+    if (form.barber_id && form.service_id && form.appointment_date) {
+      await loadSlots()
     }
     
   } catch (err) {
@@ -195,12 +219,14 @@ async function loadSlots() {
 
   loadingSlots.value = true
   try {
-    const response = await publicApi.availableSlots({
-      barber_id: form.barber_id,
-      service_id: form.service_id,
-      date: form.appointment_date,
+    const response = await client.get('/available-slots', {
+      params: {
+        barber_id: form.barber_id,
+        service_id: form.service_id,
+        date: form.appointment_date,
+      }
     })
-    slots.value = response.data.data || []
+    slots.value = response.data?.data || response.data || []
     
     if (form.appointment_time && !slots.value.includes(form.appointment_time)) {
       form.appointment_time = ''
@@ -220,11 +246,17 @@ async function submit() {
   
   isSubmitting.value = true
   try {
-    await customerApi.createBooking(form)
-    toast.success('Booking created successfully! Please pay to confirm.')
-    router.push('/customer/dashboard/bookings')
+    const res = await client.post('/customer/bookings', form)
+    const data = res.data?.data || res.data || {}
+    const apptId = data.id || data.appointment?.id
+    toast.success('Booking created! Please complete payment.')
+    if (apptId) {
+      router.push(`/customer/dashboard/payment/${apptId}`)
+    } else {
+      router.push('/customer/dashboard/bookings')
+    }
   } catch (err) {
-    toast.error(err.response?.data?.error || 'Failed to create booking')
+    toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to create booking')
   } finally {
     isSubmitting.value = false
   }

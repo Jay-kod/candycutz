@@ -57,13 +57,13 @@
         <div class="flex items-center justify-between gap-2 pt-0.5">
           <div class="flex items-center gap-2">
             <!-- Channel Pill -->
-            <span v-if="appointment.source === 'app'" class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">
+            <span v-if="appointment.source === 'app'" class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
               App
             </span>
-            <span v-else-if="appointment.source === 'walk_in' || appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <span v-else-if="appointment.source === 'walk_in' || appointment.booking_type === 'walk_in'" class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               Walk-In
             </span>
-            <span v-else class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-sky-500/15 text-sky-300 border border-sky-500/30">
+            <span v-else class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30">
               Web
             </span>
 
@@ -86,7 +86,7 @@
               <button 
                 v-if="!appointment.receipt_image || appointment.payment_status !== 'awaiting_verification'" 
                 @click="$emit('approve', appointment.id)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all" 
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all" 
                 title="Approve"
               >
                 <CheckIcon class="h-4 w-4" />
@@ -94,14 +94,14 @@
               <button 
                 v-if="appointment.receipt_image && appointment.payment_status === 'awaiting_verification'" 
                 @click="$emit('view-receipt', appointment)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition-all" 
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all" 
                 title="Verify Receipt"
               >
                 <DocumentTextIcon class="h-4 w-4" />
               </button>
               <button 
                 @click="$emit('cancel', appointment.id)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-all" 
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all" 
                 title="Cancel Booking"
               >
                 <XMarkIcon class="h-4 w-4" />
@@ -187,11 +187,11 @@ function formatDate(dateStr) {
 
 function statusClass(status) {
   const map = {
-    completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    confirmed: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
-    no_show: 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+    completed: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    confirmed: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    pending: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    cancelled: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
+    no_show: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
   };
   return map[status] || 'bg-theme-bg text-theme-text-muted border-theme-border';
 }

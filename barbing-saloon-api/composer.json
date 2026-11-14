@@ -36,7 +36,8 @@
     "laravel/pint": "^1.18",
     "mockery/mockery": "^1.6",
     "fakerphp/faker": "^1.24",
-    "barryvdh/laravel-ide-helper": "^3.0"
+    "barryvdh/laravel-ide-helper": "^3.0",
+    "laravel/tinker": "^2.10"
   },
   "config": {
     "platform": {

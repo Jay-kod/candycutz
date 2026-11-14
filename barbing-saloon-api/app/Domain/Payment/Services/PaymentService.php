@@ -57,7 +57,7 @@ class PaymentService
             'reference' => $reference,
             'transaction_ref' => $reference,
             'client' => $client,
-            'customer_email' => $appointment->customer?->email ?? $appointment->client_email,
+            'customer_email' => $appointment->customer->email ?? $appointment->client_email,
             'expires_at' => now()->addMinutes(30),
         ]);
 

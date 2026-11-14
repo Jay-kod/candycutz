@@ -45,6 +45,40 @@ it('ingests a single client-reported error event', function () {
     expect($event->route_uri)->toBe('/book/confirm');
 });
 
+it('stores failed API request details without URL query parameters', function () {
+    $eventId = 'evt_timeout_'.uniqid();
+    $payload = [
+        'event_id' => $eventId,
+        'source' => 'client_web',
+        'level' => 'warning',
+        'name' => 'ApiError',
+        'message' => 'Request timed out. Please check your network and try again.',
+        'error_code' => 'NETWORK_TIMEOUT',
+        'http_status' => 0,
+        'route' => '/admin/health',
+        'api_request' => [
+            'method' => 'GET',
+            'path' => '/v1/admin/system/health/detail?token=should-not-be-stored',
+            'timeout_ms' => 15000,
+            'elapsed_ms' => 45250,
+            'retry_count' => 2,
+            'error_code' => 'NETWORK_TIMEOUT',
+        ],
+    ];
+
+    $this->postJson('/api/v1/system/client-errors', $payload)->assertCreated();
+
+    $event = ErrorEvent::query()->where('context->event_id', $eventId)->firstOrFail();
+    expect($event->context['api_request'])->toEqual([
+        'method' => 'GET',
+        'path' => '/v1/admin/system/health/detail',
+        'timeout_ms' => 15000,
+        'elapsed_ms' => 45250,
+        'retry_count' => 2,
+        'error_code' => 'NETWORK_TIMEOUT',
+    ]);
+});
+
 it('enforces idempotency on duplicate client event_id', function () {
     $eventId = 'evt_duplicate_'.uniqid();
     $payload = [

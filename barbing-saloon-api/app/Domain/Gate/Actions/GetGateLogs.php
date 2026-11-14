@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Domain\Gate\Actions;
 
 use App\Models\ApiGateLog;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class GetGateLogs
 {
     /**
      * @param  array<string, mixed>  $filters
-     * @return LengthAwarePaginator<ApiGateLog>
+     * @return LengthAwarePaginator<int, ApiGateLog>
      */
     public function execute(array $filters = [], int $perPage = 50): LengthAwarePaginator
     {

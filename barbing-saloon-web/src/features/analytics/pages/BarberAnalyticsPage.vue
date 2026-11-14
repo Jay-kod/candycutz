@@ -2,30 +2,36 @@
   <BarberLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-theme-surface via-theme-card to-theme-surface p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
-        
+      <div class="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#12161C] p-6 sm:p-8 md:p-10 shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 group">
+        <div class="absolute -top-36 -right-36 w-80 h-80 bg-gold/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-gold/15 transition-colors duration-700"></div>
+        <div class="absolute -bottom-36 -left-36 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-700"></div>
+
         <div class="relative z-10">
-          <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-bold">Barber Dashboard</p>
-          <h1 class="mt-2 font-display text-3xl lg:text-4xl text-theme-text drop-shadow-lg">
-            Performance <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">Analytics</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20 mb-4">
+            <PresentationChartLineIcon class="h-3.5 w-3.5 text-gold" />
+            <span class="text-[10px] font-bold text-gold tracking-widest uppercase">Telemetry & Metrics</span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white tracking-tight mb-2">
+            Performance <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-400 to-amber-200">Analytics</span>
           </h1>
-          <p class="mt-2 text-sm text-theme-text-muted max-w-xl">
-            Track your revenue, client retention, and service popularity over time.
+          <p class="text-slate-400 text-xs sm:text-sm max-w-lg leading-relaxed">
+            Track revenue trends, guest retention rates, chair occupancy, and haircut volume across time periods.
           </p>
         </div>
 
         <!-- Time Range Selector -->
-        <div class="relative z-10 flex items-center gap-2 bg-theme-bg/80 backdrop-blur p-1 rounded-xl border border-theme-border shadow-inner w-max">
-          <button v-for="r in ranges" :key="r.value"
-                  @click="setRange(r.value)"
-                  :class="[
-                    'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300',
-                    range === r.value 
-                      ? 'bg-gold text-obsidian shadow-md' 
-                      : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
-                  ]">
+        <div class="relative z-10 flex items-center gap-1.5 bg-[#0B0F13] p-1.5 rounded-2xl border border-white/[0.08] shrink-0">
+          <button
+            v-for="r in ranges"
+            :key="r.value"
+            @click="setRange(r.value)"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300"
+            :class="
+              range === r.value
+                ? 'bg-gradient-to-r from-gold via-amber-400 to-amber-500 text-obsidian shadow-md shadow-gold/25 font-black'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+            "
+          >
             {{ r.label }}
           </button>
         </div>
@@ -166,7 +172,8 @@ import {
   UsersIcon, 
   CheckBadgeIcon, 
   StarIcon,
-  SparklesIcon
+  SparklesIcon,
+  PresentationChartLineIcon
 } from '@heroicons/vue/24/outline';
 import { useDashboardAnalytics } from '../composables/useDashboardAnalytics';
 import DashboardStatCard from '../components/DashboardStatCard.vue';

@@ -1,206 +1,279 @@
-<script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftIcon, CheckIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
-import { barberApi } from '@/shared/api/old_barberApi';
-import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue'
-import api from '@/shared/api/client'
-import { API_V1_BASE_URL } from '@/core/utils/url'
-
-const route = useRoute()
-const router = useRouter()
-const bookingId = route.params.id
-
-const booking = ref(null)
-const isLoading = ref(true)
-const isProcessing = ref(false)
-const error = ref('')
-const receiptSrc = ref(null)
-let receiptObjectUrl = null
-
-const fetchBooking = async () => {
-  isLoading.value = true
-  try {
-    const res = await barberApi.getBookings()
-    const appointments = res.data.data
-    const found = appointments.find(a => String(a.id) === String(bookingId))
-    if (found) {
-      booking.value = {
-        ...found,
-        customer: {
-          name: found.customer_name,
-          email: found.customer_email,
-          phone: found.customer_phone
-        },
-        service: {
-          name: found.service_name,
-          price: found.price,
-          duration_minutes: found.duration_minutes
-        },
-        barber: {
-          name: 'You'
-        }
-      }
-    } else {
-      error.value = 'Receipt not found.'
-    }
-  } catch (err) {
-    error.value = 'Failed to load booking.'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchBooking()
-})
-
-const loadReceipt = async () => {
-  if (receiptObjectUrl) {
-    URL.revokeObjectURL(receiptObjectUrl)
-    receiptObjectUrl = null
-  }
-  receiptSrc.value = null
-
-  if (!booking.value?.receipt_image) return
-
-  try {
-    const token = localStorage.getItem('candycutz_auth_token')
-    const response = await fetch(`${API_V1_BASE_URL}/payments/appointments/${booking.value.id}/receipt`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    if (!response.ok) throw new Error('Unable to load receipt.')
-    receiptObjectUrl = URL.createObjectURL(await response.blob())
-    receiptSrc.value = receiptObjectUrl
-  } catch (loadError) {
-    error.value = loadError.message
-  }
-}
-
-watch(() => booking.value, loadReceipt)
-onUnmounted(() => {
-  if (receiptObjectUrl) URL.revokeObjectURL(receiptObjectUrl)
-})
-
-const isPdf = computed(() => {
-  return booking.value?.receipt_image?.toLowerCase().endsWith('.pdf')
-})
-
-const verifyPayment = async (action) => {
-  isProcessing.value = true
-  error.value = ''
-  
-  try {
-    await api.patch(`/v1/appointments/${booking.value.id}/status`, {
-      status: action === 'approve' ? 'confirmed' : 'cancelled',
-      reason: action === 'approve' ? 'Payment confirmed by barber' : 'Receipt rejected by barber'
-    })
-    
-    router.push('/barber/payments')
-  } catch (err) {
-    error.value = err.response?.data?.message || err.message || 'Verification failed'
-  } finally {
-    isProcessing.value = false
-  }
-}
-</script>
-
 <template>
   <BarberLayout>
-    <div class="max-w-6xl mx-auto h-[calc(100vh-160px)] flex flex-col">
-      <div class="flex items-center gap-4 mb-6 shrink-0">
-        <button @click="router.push('/barber/payments')" class="p-2 rounded-xl bg-theme-surface-subtle border border-theme-border text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all">
+    <div class="max-w-6xl mx-auto pb-16 pt-4 px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="flex items-center gap-4">
+        <button
+          @click="router.push('/barber/payments')"
+          class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-white transition-all"
+        >
           <ArrowLeftIcon class="w-5 h-5" />
         </button>
         <div>
-          <h1 class="text-3xl font-bold text-theme-text">Receipt Details</h1>
-          <p class="text-theme-text-muted mt-1">Review the payment receipt for this booking.</p>
+          <h1 class="text-2xl sm:text-3xl font-display font-bold text-slate-900 dark:text-white">Payment Receipt Audit</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Inspect uploaded bank transfer evidence and settle booking status.</p>
         </div>
       </div>
 
-      <div v-if="isLoading" class="flex justify-center p-12 shrink-0">
-        <ArrowPathIcon class="w-8 h-8 text-theme-text-muted animate-spin" />
+      <div v-if="isLoading" class="flex justify-center p-16">
+        <ArrowPathIcon class="w-8 h-8 text-gold animate-spin" />
       </div>
 
-      <div v-else-if="error" class="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-2xl shrink-0">
+      <div v-else-if="error" class="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-6 rounded-3xl text-sm">
         {{ error }}
       </div>
 
-      <div v-else-if="booking" class="bg-theme-surface/95 backdrop-blur-xl border border-theme-border rounded-3xl p-6 sm:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 min-h-0">
-      
-      <!-- Left Column: Receipt Image/Preview -->
-      <div class="flex flex-col h-full min-h-[400px]">
-        <div class="flex-1 overflow-hidden bg-theme-bg/60 rounded-2xl border border-theme-border flex items-center justify-center p-4">
-          <template v-if="!receiptSrc">
-            <p class="text-theme-text-muted">No receipt uploaded yet.</p>
-          </template>
-          <template v-else-if="isPdf">
-            <div class="text-center">
-              <div class="w-16 h-16 mx-auto mb-4 bg-theme-surface-subtle rounded-2xl flex items-center justify-center">
-                <svg class="w-8 h-8 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4z"/></svg>
+      <div v-else-if="booking" class="bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left Column: Receipt Document Preview -->
+        <div class="flex flex-col h-full min-h-[420px]">
+          <div class="flex-1 overflow-hidden bg-slate-100 dark:bg-[#0B0F13] rounded-2xl border border-slate-200 dark:border-white/[0.08] flex items-center justify-center p-4">
+            <template v-if="!receiptSrc">
+              <div class="text-center p-8">
+                <DocumentTextIcon class="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
+                <p class="text-xs text-slate-500 font-medium">No transfer receipt image attached to this booking.</p>
               </div>
-              <p class="text-theme-text mb-4">This receipt is a PDF.</p>
-              <a :href="receiptSrc" target="_blank" class="text-gold hover:text-gold/80 underline font-medium">View PDF in new tab →</a>
+            </template>
+            <template v-else-if="isPdf">
+              <div class="text-center p-8">
+                <div class="w-16 h-16 mx-auto mb-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center text-red-600 dark:text-red-400 font-bold">
+                  PDF
+                </div>
+                <p class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Customer Uploaded a PDF Document</p>
+                <a
+                  :href="receiptSrc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-gold hover:underline"
+                >
+                  Open PDF Receipt in New Tab →
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <img
+                :src="receiptSrc"
+                alt="Customer Bank Transfer Receipt"
+                class="max-h-full max-w-full h-auto w-auto object-contain rounded-xl shadow-lg"
+              />
+            </template>
+          </div>
+        </div>
+
+        <!-- Right Column: Booking Details & Verification Settle Actions -->
+        <div class="flex flex-col justify-between space-y-6">
+          <div>
+            <div class="mb-6 pb-6 border-b border-slate-200 dark:border-white/[0.06]">
+              <span class="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/[0.08] mb-3">
+                Booking #{{ booking.id }}
+              </span>
+              <h2 class="text-2xl font-display font-bold text-slate-900 dark:text-white mb-1">
+                {{ booking.customer?.name || booking.customer_name || booking.client_name }}
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Service: <span class="text-slate-800 dark:text-slate-200 font-medium">{{ booking.service?.name || booking.service_name }}</span>
+              </p>
+              <p class="text-2xl font-bold font-mono text-amber-700 dark:text-gold mt-2">
+                ₦{{ Number(booking.service?.price || booking.price || 0).toLocaleString() }}
+              </p>
             </div>
-          </template>
-          <template v-else>
-            <img :src="receiptSrc" alt="Payment Receipt" class="max-h-full max-w-full h-full w-full object-contain rounded-xl" />
-          </template>
+
+            <div class="bg-slate-50 dark:bg-[#0B0F13] rounded-2xl p-5 border border-slate-200 dark:border-white/[0.06] space-y-3.5 text-xs">
+              <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/[0.04] pb-2.5">
+                <span class="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Date & Time</span>
+                <span class="text-slate-900 dark:text-white font-medium">
+                  {{ formatDate(booking.appointment_date) }} at {{ booking.appointment_time }}
+                </span>
+              </div>
+
+              <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/[0.04] pb-2.5">
+                <span class="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Client Phone</span>
+                <span class="text-slate-900 dark:text-white font-medium">
+                  {{ booking.customer?.phone || booking.customer_phone || booking.client_phone || '—' }}
+                </span>
+              </div>
+
+              <div v-if="booking.transaction_ref" class="flex justify-between items-center border-b border-slate-200 dark:border-white/[0.04] pb-2.5">
+                <span class="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Reference</span>
+                <span class="text-amber-800 dark:text-gold font-mono text-[11px] bg-gold/10 px-2 py-0.5 rounded border border-gold/20">
+                  {{ booking.transaction_ref }}
+                </span>
+              </div>
+
+              <div class="flex justify-between items-center pt-1">
+                <span class="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Payment Status</span>
+                <span
+                  class="font-bold uppercase tracking-wider text-[9px] px-2.5 py-0.5 rounded-full border"
+                  :class="
+                    booking.payment_status === 'completed' || booking.payment_status === 'successful'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                  "
+                >
+                  {{ booking.payment_status || 'Awaiting Verification' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Area -->
+          <div v-if="isPending" class="flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-slate-200 dark:border-white/[0.06]">
+            <button
+              @click="verifyPayment('reject')"
+              :disabled="isProcessing"
+              class="w-full sm:flex-1 py-3.5 px-5 rounded-2xl border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <XCircleIcon class="w-4 h-4" />
+              <span>Decline Receipt</span>
+            </button>
+
+            <button
+              @click="verifyPayment('approve')"
+              :disabled="isProcessing"
+              class="w-full sm:flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-amber-500 text-obsidian text-xs font-bold uppercase tracking-wider shadow-lg shadow-gold/20 hover:shadow-[0_8px_30px_rgba(255,153,0,0.35)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <ArrowPathIcon v-if="isProcessing" class="w-4 h-4 animate-spin" />
+              <CheckIcon v-else class="w-4 h-4" />
+              <span>Approve & Confirm</span>
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- Right Column: Details & Actions -->
-      <div class="flex flex-col h-full">
-        <div class="mb-6">
-          <p class="text-theme-text-muted text-lg">
-            <strong class="text-theme-text">{{ booking.customer?.name }}</strong> — {{ booking.service?.name }}
-            <br>
-            <span class="text-gold font-bold">₦{{ (booking.service?.price || 0).toLocaleString() }}</span>
-          </p>
-        </div>
-
-        <!-- Booking Info -->
-        <div class="bg-theme-surface-subtle/50 rounded-xl p-6 border border-theme-border mb-6 space-y-4 text-sm">
-          <div class="flex justify-between items-center border-b border-theme-border pb-3">
-            <span class="text-theme-text-muted">Date & Time</span>
-            <span class="text-theme-text font-medium">{{ new Date(booking.appointment_date).toLocaleDateString() }} at {{ booking.appointment_time }}</span>
-          </div>
-          <div class="flex justify-between items-center border-b border-theme-border pb-3">
-            <span class="text-theme-text-muted">Barber</span>
-            <span class="text-theme-text font-medium">{{ booking.barber?.name }}</span>
-          </div>
-          <div v-if="booking.transaction_ref" class="flex justify-between items-center border-b border-theme-border pb-3">
-            <span class="text-theme-text-muted">Transaction Ref</span>
-            <span class="text-theme-text font-mono text-xs bg-theme-surface-subtle px-2 py-1 rounded">{{ booking.transaction_ref }}</span>
-          </div>
-          <div class="flex justify-between items-center pt-1">
-            <span class="text-theme-text-muted">Payment Status</span>
-            <span class="text-amber-400 font-bold uppercase tracking-wider text-[10px] bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded-full">{{ booking.payment_status }}</span>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div v-if="(!booking.payment_status || ['pending', 'awaiting_verification'].includes(booking.payment_status.toLowerCase()))" class="flex flex-col sm:flex-row items-center gap-4 mt-auto">
-          <button 
-            @click="verifyPayment('reject')"
-            :disabled="isProcessing"
-            class="w-full sm:flex-1 py-4 px-6 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
-            <XCircleIcon class="w-5 h-5" />
-            <span>Reject</span>
-          </button>
-          
-          <button 
-            @click="verifyPayment('approve')"
-            :disabled="isProcessing"
-            class="w-full sm:flex-1 py-4 px-6 rounded-xl bg-gradient-to-r from-gold to-gold-light text-obsidian hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50">
-            <ArrowPathIcon v-if="isProcessing" class="w-5 h-5 animate-spin" />
-            <CheckIcon v-else class="w-5 h-5" />
-            <span>Approve Payment</span>
-          </button>
-        </div>
-      </div>
-      
     </div>
-  </div>
   </BarberLayout>
 </template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
+import api from '@/shared/api/client';
+import { useToast } from '@/core/composables/useToast';
+import { API_V1_BASE_URL } from '@/core/utils/url';
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  DocumentTextIcon,
+} from '@heroicons/vue/24/outline';
+
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const bookingId = route.params.id;
+
+const booking = ref(null);
+const isLoading = ref(true);
+const isProcessing = ref(false);
+const error = ref('');
+const receiptSrc = ref(null);
+let receiptObjectUrl = null;
+
+const isPending = computed(() => {
+  const st = (booking.value?.payment_status || '').toLowerCase();
+  return !st || st === 'pending' || st === 'awaiting_verification';
+});
+
+const isPdf = computed(() => {
+  return booking.value?.receipt_image?.toLowerCase().endsWith('.pdf');
+});
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Today';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+async function fetchBooking() {
+  isLoading.value = true;
+  try {
+    const res = await api.get('/barber/appointments');
+    const appointments = res.data?.data || [];
+    const list = Array.isArray(appointments) ? appointments : (appointments.items || []);
+    const found = list.find((a) => String(a.id) === String(bookingId));
+
+    if (found) {
+      booking.value = found;
+    } else {
+      error.value = 'Booking receipt record not found.';
+    }
+  } catch {
+    error.value = 'Failed to load booking details.';
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function loadReceipt() {
+  if (receiptObjectUrl) {
+    URL.revokeObjectURL(receiptObjectUrl);
+    receiptObjectUrl = null;
+  }
+  receiptSrc.value = null;
+
+  if (!booking.value?.receipt_image && !booking.value?.receipt_url) return;
+
+  try {
+    const token = localStorage.getItem('candycutz_auth_token');
+    const response = await fetch(`${API_V1_BASE_URL}/payments/appointments/${booking.value.id}/receipt`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Accept: 'image/*, application/pdf',
+      },
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      receiptObjectUrl = URL.createObjectURL(blob);
+      receiptSrc.value = receiptObjectUrl;
+    } else {
+      const raw = booking.value.receipt_url || booking.value.receipt_image;
+      if (raw) {
+        receiptSrc.value = raw.startsWith('http') ? raw : `${API_V1_BASE_URL}/storage/${raw}`;
+      }
+    }
+  } catch {
+    const raw = booking.value.receipt_url || booking.value.receipt_image;
+    if (raw) {
+      receiptSrc.value = raw.startsWith('http') ? raw : `${API_V1_BASE_URL}/storage/${raw}`;
+    }
+  }
+}
+
+async function verifyPayment(action) {
+  isProcessing.value = true;
+  try {
+    await api.post(`/barber/payments/${bookingId}/verify`, {
+      action,
+    });
+    toast.success(`Payment successfully ${action === 'approve' ? 'approved' : 'rejected'}`);
+    await fetchBooking();
+  } catch (err) {
+    toast.error(err.response?.data?.message || `Failed to ${action} payment.`);
+  } finally {
+    isProcessing.value = false;
+  }
+}
+
+watch(
+  () => booking.value,
+  () => {
+    if (booking.value) {
+      loadReceipt();
+    }
+  }
+);
+
+onMounted(() => {
+  fetchBooking();
+});
+
+onUnmounted(() => {
+  if (receiptObjectUrl) {
+    URL.revokeObjectURL(receiptObjectUrl);
+    receiptObjectUrl = null;
+  }
+});
+</script>

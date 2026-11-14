@@ -1,5 +1,5 @@
 <template>
-  <section class="page-hero" :class="{ 'page-hero--has-image': Boolean(backgroundImage) }">
+  <section class="page-hero" :class="{ 'page-hero--has-image': Boolean(backgroundImage), 'page-hero--home': pageKey === 'home' }">
     <div
       v-if="backgroundImage"
       class="page-hero__image"
@@ -8,7 +8,8 @@
       }"
       aria-hidden="true"
     ></div>
-    <div v-if="backgroundImage" class="page-hero__overlay" :style="{ opacity: overlayOpacity / 100 }" aria-hidden="true"></div>
+    <div v-if="backgroundImage" class="page-hero__overlay" :style="{ opacity: overlayOpacity / 100, background: overlayBackground }" aria-hidden="true"></div>
+    <div class="page-hero__gradient" aria-hidden="true"></div>
     <div class="page-hero__content text-center">
       <h1 class="page-hero__title text-center">{{ title }}</h1>
       <p v-if="subtitle" class="page-hero__subtitle text-center">{{ subtitle }}</p>
@@ -18,6 +19,9 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { getActivePinia } from 'pinia';
+import { buildOverlayGradient } from '@/core/utils/heroOverlay';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { publicApi } from '@/shared/api/old_publicApi';
 import { getStorageUrl } from '@/core/utils/url';
 
@@ -30,10 +34,21 @@ const props = defineProps({
   subtitleSettingKey: { type: String, default: '' },
   backgroundImage: { type: String, default: undefined },
   overlayOpacity: { type: Number, default: undefined },
+  overlayColor: { type: String, default: undefined },
   loadSettings: { type: Boolean, default: true },
 });
 
-const settings = ref({});
+const resolveInitialSettings = () => {
+  if (getActivePinia()) {
+    try {
+      return usePublicContentStore().settings || {};
+    } catch {
+      return {};
+    }
+  }
+  return {};
+};
+const settings = ref(resolveInitialSettings());
 const savedValue = (key, fallback) => (
   settings.value[key] !== undefined && settings.value[key] !== null
     ? settings.value[key]
@@ -57,15 +72,28 @@ const backgroundImage = computed(() => (
     : settings.value[imageKey.value] ? getStorageUrl(settings.value[imageKey.value]) : ''
 ));
 const overlayOpacity = computed(() => {
-  const value = Number(props.overlayOpacity ?? settings.value[`page_hero_${props.pageKey}_overlay_opacity`] ?? 76);
-  return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 76;
+  const fallback = props.pageKey === 'home' ? 45 : 76;
+  const raw = props.overlayOpacity ??
+    (props.pageKey === 'home' ? (settings.value.hero_overlay_opacity ?? settings.value.page_hero_home_overlay_opacity) : settings.value[`page_hero_${props.pageKey}_overlay_opacity`]) ??
+    fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
+});
+
+
+const overlayBackground = computed(() => {
+  const color = props.overlayColor ??
+    (props.pageKey === 'home'
+      ? (settings.value.hero_overlay_color ?? settings.value.page_hero_home_overlay_color ?? '#D4AF37')
+      : (settings.value[`page_hero_${props.pageKey}_overlay_color`] ?? '#111827'));
+  return buildOverlayGradient(color);
 });
 
 onMounted(async () => {
   if (!props.loadSettings) return;
   try {
-    const response = await publicApi.settings();
-    settings.value = response.data?.data || {};
+    const data = await publicStore.getSettings();
+    if (data) settings.value = data;
   } catch (error) {
     console.error(`Failed to load ${props.pageKey} hero settings:`, error);
   }
@@ -95,21 +123,42 @@ onMounted(async () => {
 }
 
 .page-hero__image,
-.page-hero__overlay {
+.page-hero__overlay,
+.page-hero__gradient {
   position: absolute;
-  z-index: -2;
   inset: 0;
   pointer-events: none;
 }
 
 .page-hero__image {
+  z-index: -3;
   background-position: center;
   background-size: cover;
 }
 
 .page-hero__overlay {
-  z-index: -1;
+  z-index: -2;
   background: linear-gradient(180deg, rgba(9, 9, 9, 0.62), rgba(9, 9, 9, 0.78));
+}
+
+.page-hero__gradient {
+  z-index: -1;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    url('/images/hero-pattern.png');
+  background-size: 16px 16px, 16px 16px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.28;
+}
+
+:root[data-theme="light"] .page-hero .page-hero__gradient,
+.light .page-hero .page-hero__gradient {
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.14) 1px, transparent 1px),
+    url('/images/hero-pattern.png');
+  filter: invert(1);
+  opacity: 0.22;
 }
 
 .page-hero__content {

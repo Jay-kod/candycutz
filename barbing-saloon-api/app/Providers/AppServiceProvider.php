@@ -102,9 +102,10 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
-        Gate::define('manage-users', static fn (User $user): bool => ($user->role?->value ?? $user->role) === 'super_admin');
-        Gate::define('manage-barber-accounts', static fn (User $user): bool => in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'], true));
-        Gate::define('manage-settings', static fn (User $user): bool => in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'], true));
+        Gate::define('manage-users', static fn (User $user): bool => ($user->role->value ?? $user->role) === 'super_admin');
+        Gate::define('manage-barber-accounts', static fn (User $user): bool => in_array($user->role->value ?? $user->role, ['admin', 'super_admin'], true));
+        Gate::define('manage-customers', static fn (User $user): bool => in_array($user->role->value ?? $user->role, ['admin', 'super_admin'], true));
+        Gate::define('manage-settings', static fn (User $user): bool => in_array($user->role->value ?? $user->role, ['admin', 'super_admin'], true));
 
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(Barber::class, BarberPolicy::class);

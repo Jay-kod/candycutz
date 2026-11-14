@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import { registerRouteGuards } from './core/guards/routeGuards';
+import { syncThemeForRoute } from './core/composables/useTheme';
 import { useAuthStore } from './modules/auth/store/auth.store';
 import { recordClientError, addBreadcrumb } from './core/api/errorReporter';
 import './assets/css/main.css';
@@ -43,6 +44,17 @@ if (typeof window !== 'undefined') {
       });
     }
   };
+
+  // Auto-reload on Vite chunk / CSS preload failure caused by asset rebuilds
+  window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    const lastReload = sessionStorage.getItem('chunk_reload');
+    const now = Date.now();
+    if (!lastReload || now - Number(lastReload) > 8000) {
+      sessionStorage.setItem('chunk_reload', String(now));
+      window.location.reload();
+    }
+  });
 }
 
 router.onError((error) => {
@@ -51,9 +63,20 @@ router.onError((error) => {
     level: 'error',
     category: 'router',
   });
+
+  const isPreloadError = /Failed to fetch dynamically imported module|Unable to preload CSS|Importing a module script failed/i.test(error?.message);
+  if (isPreloadError && typeof window !== 'undefined') {
+    const lastReload = sessionStorage.getItem('chunk_reload');
+    const now = Date.now();
+    if (!lastReload || now - Number(lastReload) > 8000) {
+      sessionStorage.setItem('chunk_reload', String(now));
+      window.location.reload();
+    }
+  }
 });
 
 router.afterEach((to) => {
+  syncThemeForRoute(to);
   addBreadcrumb({
     type: 'navigation',
     category: 'router',

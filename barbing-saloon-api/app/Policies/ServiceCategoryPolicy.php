@@ -12,7 +12,7 @@ class ServiceCategoryPolicy
 
     public function before(User $user, string $ability): ?bool
     {
-        if (in_array($user->role?->value ?? $user->role, ['admin', 'super_admin'])) {
+        if (in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
             return true;
         }
 

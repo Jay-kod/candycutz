@@ -7,17 +7,20 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray($request): array
     {
+        $user = $this->resource;
+
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'avatar' => app(UserMediaUrl::class)->for($this->resource, $this->avatar),
-            'role' => $this->role?->value ?? $this->role,
-            'is_active' => $this->is_active,
-            'created_at' => $this->created_at,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'avatar' => app(UserMediaUrl::class)->for($user, $user->avatar),
+            'role' => $user->role instanceof \BackedEnum ? $user->role->value : $user->role,
+            'is_active' => (bool) ($user->is_active ?? false),
+            'created_at' => $user->created_at,
         ];
     }
 }

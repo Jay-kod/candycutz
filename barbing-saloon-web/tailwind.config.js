@@ -41,6 +41,9 @@ export default {
         theme: {
           bg: 'var(--color-bg)',
           surface: 'var(--color-surface)',
+          'surface-subtle': 'var(--color-surface-subtle)',
+          'surface-hover': 'var(--color-surface-hover, var(--color-surface-subtle))',
+          card: 'var(--color-surface)',
           text: 'var(--color-text)',
           muted: 'var(--color-text-muted)',
           border: 'var(--color-border)',

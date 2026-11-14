@@ -60,7 +60,7 @@ class GalleryApiController
 
         $user = $request->user();
         $barber = $user->barber;
-        $barberId = $barber?->id ?? ($request->has('barber_id') ? (int) $request->barber_id : null);
+        $barberId = $barber->id ?? ($request->has('barber_id') ? (int) $request->barber_id : null);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -125,7 +125,7 @@ class GalleryApiController
             $item->description = $validated['description'];
         }
 
-        $userRole = $request->user()->role?->value ?? $request->user()->role;
+        $userRole = $request->user()->role->value ?? $request->user()->role;
         if (in_array($userRole, ['admin', 'super_admin'], true) && array_key_exists('barber_id', $validated)) {
             $item->barber_id = $validated['barber_id'] ? (int) $validated['barber_id'] : null;
         }

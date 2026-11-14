@@ -56,10 +56,11 @@ class BookingService
             // Resolve barber
             $barberId = $data->barberId
                 ? $data->barberId
-                : (Barber::where('is_available', true)->value('id') ?? 1);
+                : (Barber::query()->activeForBooking()->value('id') ?? 1);
             // Serialize bookings per barber before checking an empty slot. Appointment-row
             // locks alone cannot protect a slot that has no appointment yet.
             $barber = Barber::query()
+                ->activeForBooking()
                 ->whereKey($barberId)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -83,7 +84,7 @@ class BookingService
                 $zoneId = $data->destinationAddress['service_zone_id'] ?? null;
                 $zone = $zoneId ? ServiceZone::find($zoneId) : ServiceZone::where('is_active', true)->first();
                 $zoneId = $zone?->id;
-                $travelFee = (float) ($zone?->base_travel_fee ?? 1500.0);
+                $travelFee = (float) ($zone->base_travel_fee ?? 1500.0);
             }
 
             $grandTotal = $totalAmount + $travelFee;
@@ -290,6 +291,9 @@ class BookingService
             } catch (\Throwable $e) {
                 Log::warning('Could not create status history for walk-in: '.$e->getMessage());
             }
+
+            // Dispatch domain event — listeners handle notification triad (Customer, Barber, Admin)
+            BookingCreated::dispatch($appointment, $actor);
 
             return $appointment->load(['service.category', 'barber.user']);
         });

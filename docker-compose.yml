@@ -41,6 +41,8 @@ services:
       dockerfile: infrastructure/docker/php/Dockerfile
     container_name: candycutz-app
     restart: unless-stopped
+    command: >
+      sh -c "php artisan migrate --force && exec php-fpm"
     volumes:
       - app-storage:/var/www/html/storage
       - ./barbing-saloon-api:/var/www/html
@@ -51,8 +53,8 @@ services:
       APP_DEBUG: "${APP_DEBUG:-false}"
       APP_URL: "${APP_URL:-https://candycutz.com}"
       DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
       DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
       DB_USERNAME: "${DB_USERNAME:-candycutz}"
       DB_PASSWORD: "${DB_PASSWORD:-secret}"
@@ -62,9 +64,9 @@ services:
       SESSION_DRIVER: redis
       QUEUE_CONNECTION: redis
       SANCTUM_STATEFUL_DOMAINS: "${SANCTUM_STATEFUL_DOMAINS:-candycutz.com,admin.candycutz.com,localhost}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -95,8 +97,8 @@ services:
       APP_DEBUG: "${APP_DEBUG:-false}"
       APP_URL: "${APP_URL:-https://candycutz.com}"
       DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
       DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
       DB_USERNAME: "${DB_USERNAME:-candycutz}"
       DB_PASSWORD: "${DB_PASSWORD:-secret}"
@@ -105,6 +107,8 @@ services:
       CACHE_STORE: redis
       SESSION_DRIVER: redis
       QUEUE_CONNECTION: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       app:
         condition: service_healthy
@@ -133,8 +137,8 @@ services:
       APP_DEBUG: "${APP_DEBUG:-false}"
       APP_URL: "${APP_URL:-https://candycutz.com}"
       DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
       DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
       DB_USERNAME: "${DB_USERNAME:-candycutz}"
       DB_PASSWORD: "${DB_PASSWORD:-secret}"
@@ -143,21 +147,25 @@ services:
       CACHE_STORE: redis
       SESSION_DRIVER: redis
       QUEUE_CONNECTION: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       app:
-        condition: service_healthy
-      db:
         condition: service_healthy
     networks:
       - candycutz-net
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 5. Primary Transactional Database (MySQL 8.0, Internal Only)
+  # 5. Primary Transactional Database (Optional Containerized MySQL)
+  # Activated only via --profile container-db. Default is host XAMPP MySQL.
   # ──────────────────────────────────────────────────────────────────────────
   db:
+    profiles: ["container-db"]
     image: mysql:8.0
     container_name: candycutz-db
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-secret}"
       MYSQL_DATABASE: "${DB_DATABASE:-candycutz_db}"
@@ -189,6 +197,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 7. Web Frontend Development Server (Vue 3 / Vite with HMR on port 5173)
+  # ──────────────────────────────────────────────────────────────────────────
+  web:
+    build:
+      context: ./barbing-saloon-web
+      dockerfile: Dockerfile
+    image: candycutz-web:latest
+    container_name: candycutz-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./barbing-saloon-web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=/api
+      - BACKEND_URL=http://nginx:80
+    depends_on:
+      nginx:
+        condition: service_healthy
     networks:
       - candycutz-net
 

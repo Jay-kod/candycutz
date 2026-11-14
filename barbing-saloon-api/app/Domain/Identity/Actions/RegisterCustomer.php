@@ -60,7 +60,7 @@ class RegisterCustomer
         $this->logAction('auth.register', $user, [], [
             'email' => $user->email,
             'username' => $user->username,
-            'role' => $user->role?->value ?? $user->role,
+            'role' => $user->role->value ?? $user->role,
         ]);
 
         UserRegistered::dispatch($user);

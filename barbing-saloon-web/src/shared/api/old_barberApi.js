@@ -11,11 +11,12 @@ export const barberApi = {
   updateProfile: (data) => (data instanceof FormData ? client.post('/barbers/account', data, { headers: { 'Content-Type': 'multipart/form-data' } }) : client.put('/barbers/account', data)),
   updateMyStatus: (data) => client.patch('/barber/my-status', data),
   getAccountDetails: () => client.get('/barber/account'),
-  updateAccountDetails: (data) => client.patch('/barber/account', data),
+  getBankDetails: () => client.get('/barber/bank-details'),
   
   // Bookings / Payments
   getBookings: () => client.get('/barber/bookings'),
   verifyPayment: (id, action) => client.post(`/barber/bookings/${id}/verify-payment`, { action }),
+  collectPayment: (id) => client.post(`/barber/appointments/${id}/collect-payment`),
   approveBooking: (id) => client.patch(`/barber/appointments/${id}/approve`),
   cancelBooking: (id) => client.patch(`/barber/appointments/${id}/cancel`),
   createWalkIn: (data) => client.post('/barber/appointments/walk-in', data),

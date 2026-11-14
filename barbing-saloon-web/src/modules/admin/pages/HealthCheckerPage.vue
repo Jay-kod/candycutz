@@ -36,6 +36,7 @@ const {
         :overview="overview"
         :overview-loading="overviewLoading"
         :detail-loading="detailLoading"
+        :self-test-running="selfTestRunning"
         :auto-refresh="autoRefresh"
         :last-refreshed="lastRefreshed"
         :status-color="statusColor"

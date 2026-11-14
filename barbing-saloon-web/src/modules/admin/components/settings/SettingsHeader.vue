@@ -33,18 +33,18 @@ defineEmits(['save', 'revert', 'refresh'])
       </div>
       <div>
         <div class="flex items-center gap-2.5">
-          <h1 class="text-2xl font-bold tracking-tight text-white">System Configuration</h1>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">System Configuration</h1>
           <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#FF6700]/10 text-[#FF6700] border border-[#FF6700]/25">
             Master Registry
           </span>
           <span
             v-if="isDirty"
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse"
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/30 animate-pulse"
           >
             Unsaved Edits
           </span>
         </div>
-        <p class="text-xs text-zinc-400 mt-0.5">Platform parameters, appointment rules, localized contact & brand metadata</p>
+        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Platform parameters, appointment rules, localized contact & brand metadata</p>
       </div>
     </div>
 
@@ -54,7 +54,7 @@ defineEmits(['save', 'revert', 'refresh'])
         type="button"
         @click="$emit('refresh')"
         :disabled="loading || saving"
-        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#12161C] border border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.16] transition-all text-xs font-semibold disabled:opacity-50 shadow-sm"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.16] transition-all text-xs font-semibold disabled:opacity-50 shadow-sm"
         title="Reload Configuration from Server"
       >
         <ArrowPathIcon class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" />
@@ -66,7 +66,7 @@ defineEmits(['save', 'revert', 'refresh'])
         type="button"
         @click="$emit('revert')"
         :disabled="saving"
-        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all text-xs font-semibold"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-all text-xs font-semibold"
       >
         <ArrowUturnLeftIcon class="w-3.5 h-3.5" />
         <span>Discard Changes</span>
@@ -85,4 +85,3 @@ defineEmits(['save', 'revert', 'refresh'])
     </div>
   </div>
 </template>
-

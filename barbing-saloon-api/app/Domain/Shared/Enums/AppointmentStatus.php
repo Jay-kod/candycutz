@@ -13,6 +13,7 @@ enum AppointmentStatus: string
     case no_show = 'no_show';
 
     /**
+     * @return array<int, self>
      * Statuses considered "active" (not terminal).
      */
     public static function activeStatuses(): array
@@ -26,6 +27,7 @@ enum AppointmentStatus: string
     }
 
     /**
+     * @return array<int, self>
      * Statuses considered "terminal" (no further transitions possible).
      */
     public static function terminalStatuses(): array

@@ -42,13 +42,26 @@
           class="public-mobile-menu"
           aria-label="Mobile navigation"
         >
+          <div class="public-mobile-menu__header">
+            <span class="public-mobile-menu__name">{{ brandName }}</span>
+            <button
+              type="button"
+              class="public-mobile-menu__close"
+              aria-label="Close navigation menu"
+              @click="mobileMenuOpen = false"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
           <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Home</RouterLink>
           <RouterLink to="/about" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">About</RouterLink>
           <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
           <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
           <div class="py-2 px-3 flex items-center justify-between border-y border-[var(--color-border-subtle)] my-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-theme-muted">Theme</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Theme</span>
             <ThemeToggleSwitch />
           </div>
           <RouterLink to="/customer/register" class="public-mobile-signup" @click="mobileMenuOpen = false">Sign Up</RouterLink>
@@ -322,7 +335,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(16px);
   color: var(--color-text-primary);
   box-shadow: 0 8px 32px var(--color-shadow);
-  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
 }
 
 .public-nav-shell--scrolled {
@@ -340,6 +353,7 @@ onUnmounted(() => {
   font-size: 1rem;
   font-weight: 750;
   letter-spacing: -0.025em;
+  transition: color 200ms ease;
   text-decoration: none;
 }
 
@@ -544,20 +558,79 @@ onUnmounted(() => {
   }
 
   .public-mobile-menu {
-    position: absolute;
-    top: calc(100% + 0.45rem);
+    position: fixed;
+    z-index: 20;
+    top: 0;
     right: 0;
-    left: 0;
+    width: min(88vw, 340px);
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    border-right: 0;
+    border-radius: 16px 0 0 16px;
+    padding: 1rem 0.75rem 1.25rem;
+    background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent);
+    backdrop-filter: blur(28px) saturate(135%);
+    -webkit-backdrop-filter: blur(28px) saturate(135%);
+    box-shadow: 0 16px 36px var(--color-shadow), 0 0 20px rgba(255, 153, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
+    animation: public-mobile-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .public-mobile-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin-bottom: 0.5rem;
+    padding: 0 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .public-mobile-menu__name {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+  }
+
+  .public-mobile-menu__close {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--color-border);
-    border-radius: 14px;
-    padding: 0.65rem;
-    background: var(--color-bg-secondary);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 16px 36px var(--color-shadow), 0 0 20px rgba(255, 153, 0, 0.12);
+    border-radius: 7px;
+    background: var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .public-mobile-menu__close:hover {
+    border-color: var(--color-accent);
+    background: rgba(255, 153, 0, 0.1);
+    color: var(--color-accent);
+  }
+
+  .public-mobile-menu__close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @keyframes public-mobile-menu-in {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .public-mobile-link {
@@ -596,8 +669,11 @@ onUnmounted(() => {
   .public-nav-link,
   .public-login,
   .public-signup,
-  .public-mobile-signup {
+  .public-mobile-signup,
+  .public-mobile-menu,
+  .public-mobile-menu__close {
     transition: none;
+    animation: none;
   }
 }
 </style>

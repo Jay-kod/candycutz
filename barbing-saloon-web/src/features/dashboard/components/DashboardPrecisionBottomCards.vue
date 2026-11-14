@@ -148,10 +148,10 @@
 
       <div class="flex items-center justify-start gap-1 text-[9px] text-theme-text-muted font-mono pt-1 border-t border-theme-border">
         <span>Lower</span>
-        <span class="h-2 w-2 rounded-[1px] bg-[#16181F]"></span>
-        <span class="h-2 w-2 rounded-[1px] bg-[#4A2600]"></span>
-        <span class="h-2 w-2 rounded-[1px] bg-[#803300]"></span>
-        <span class="h-2 w-2 rounded-[1px] bg-[#CC5200]"></span>
+        <span class="h-2 w-2 rounded-[1px] bg-slate-200 dark:bg-[#16181F]"></span>
+        <span class="h-2 w-2 rounded-[1px] bg-amber-200 dark:bg-[#4A2600]"></span>
+        <span class="h-2 w-2 rounded-[1px] bg-amber-400 dark:bg-[#803300]"></span>
+        <span class="h-2 w-2 rounded-[1px] bg-amber-500 dark:bg-[#CC5200]"></span>
         <span class="h-2 w-2 rounded-[1px] bg-[#FF6700]"></span>
         <span>Higher</span>
       </div>
@@ -256,10 +256,10 @@ const getSalonCellColor = (day, hour) => {
   const hrCount = Number(props.hourlyDistribution?.[hour] || 0);
   if (hrCount > 0) {
     if (hrCount >= 4) return 'bg-[#FF6700]';
-    if (hrCount >= 2) return 'bg-[#CC5200]';
-    return 'bg-[#803300]';
+    if (hrCount >= 2) return 'bg-amber-500 dark:bg-[#CC5200]';
+    return 'bg-amber-400 dark:bg-[#803300]';
   }
   const isOperatingHour = hour >= 9 && hour <= 19;
-  return isOperatingHour ? 'bg-[#22160E]' : 'bg-[#12141A]';
+  return isOperatingHour ? 'bg-amber-100/70 dark:bg-[#22160E]' : 'bg-slate-100 dark:bg-[#12141A]';
 };
 </script>

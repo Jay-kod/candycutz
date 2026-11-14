@@ -24,12 +24,12 @@
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-500/5 blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-text-muted">Lifetime Volume</span>
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
           <BanknotesIcon class="h-4 w-4" />
         </span>
       </div>
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
-        <span class="font-display text-2xl font-bold text-emerald-400 tracking-tight">₦{{ stats.totalSpent.toLocaleString() }}</span>
+        <span class="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">₦{{ stats.totalSpent.toLocaleString() }}</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-theme-text-muted relative z-10 pt-2 border-t border-theme-border/50">
         <span>Avg. ₦{{ stats.avgSpend.toLocaleString() }} / client</span>
@@ -41,12 +41,12 @@
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl group-hover:bg-amber-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-text-muted">VIP & Top Spenders</span>
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
           <TrophyIcon class="h-4 w-4" />
         </span>
       </div>
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
-        <span class="font-display text-3xl font-bold text-amber-400 tracking-tight">{{ stats.vipCount }}</span>
+        <span class="font-display text-3xl font-bold text-amber-600 dark:text-amber-400 tracking-tight">{{ stats.vipCount }}</span>
         <span class="text-xs text-theme-text-muted">VIP accounts</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-theme-text-muted relative z-10 pt-2 border-t border-theme-border/50 truncate">
@@ -62,7 +62,7 @@
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-sky-500/5 blur-2xl group-hover:bg-sky-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-text-muted">Booking Volume</span>
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/30">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
           <ChartBarIcon class="h-4 w-4" />
         </span>
       </div>

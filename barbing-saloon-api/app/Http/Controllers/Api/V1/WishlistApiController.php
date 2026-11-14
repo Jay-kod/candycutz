@@ -22,13 +22,13 @@ class WishlistApiController
                 $mapped = (array) $item;
                 if ($item->item_type === 'service') {
                     $service = DB::table('services')->where('id', $item->item_id)->first();
-                    $mapped['service_name'] = $service?->name ?? 'Service';
+                    $mapped['service_name'] = $service->name ?? 'Service';
                     $mapped['service_image'] = $service?->image;
-                    $mapped['price'] = (float) ($service?->price ?? 0);
+                    $mapped['price'] = (float) ($service->price ?? 0);
                 } elseif ($item->item_type === 'gallery') {
                     $gallery = DB::table('gallery')->where('id', $item->item_id)->first();
-                    $mapped['gallery_title'] = $gallery?->title ?? 'Style';
-                    $mapped['gallery_image'] = $gallery?->image_url ?? $gallery?->image;
+                    $mapped['gallery_title'] = $gallery->title ?? 'Style';
+                    $mapped['gallery_image'] = $gallery->image_url ?? $gallery->image;
                 }
 
                 return $mapped;

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Shared\Enums\UserRole;
 use App\Models\Barber;
 use App\Models\User;
 use App\Models\WorkingHour;
@@ -32,8 +33,7 @@ class CreateBarber
             'password' => Hash::make($password),
             'phone' => $data['phone'] ?? null,
         ]);
-        $user->role = 'barber';
-        $user->status = $data['status'] ?? 'active';
+        $user->role = UserRole::barber;
         $user->is_active = true;
         $user->save();
 
@@ -48,6 +48,9 @@ class CreateBarber
             'specialties' => $specialties,
             'years_experience' => $data['experience_years'] ?? 3,
             'status' => $data['status'] ?? 'active',
+            'bank_name' => $data['bank_name'] ?? null,
+            'account_name' => $data['account_name'] ?? null,
+            'account_number' => $data['account_number'] ?? null,
             'is_available' => true,
             'rating' => 5.0,
         ]);

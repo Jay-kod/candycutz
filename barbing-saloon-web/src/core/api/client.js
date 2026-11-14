@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ApiError } from './ApiError';
 import { recordClientError, addBreadcrumb } from './errorReporter';
 import { API_BASE_URL } from '@/core/utils/url';
+import { useConnectionStatus } from '../composables/useConnectionStatus';
 
 const APP_VERSION = '1.0.0';
 
@@ -12,6 +13,16 @@ export function generateRequestId() {
   const rand = Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
   const timestamp = Date.now().toString(36);
   return `req_${timestamp}${rand}`.substring(0, 32);
+}
+
+function getRequestPath(url) {
+  if (typeof url !== 'string') return '';
+
+  try {
+    return new URL(url, API_BASE_URL).pathname.slice(0, 255);
+  } catch {
+    return url.split(/[?#]/, 1)[0].slice(0, 255);
+  }
 }
 
 export function setupApiClient() {
@@ -30,6 +41,10 @@ export function setupApiClient() {
   // Request interceptor
   api.interceptors.request.use(
     (config) => {
+      if (typeof config.__requestStartedAt !== 'number') {
+        config.__requestStartedAt = Date.now();
+      }
+
       // Normalize requested URL to guarantee clean /v1/ routing without duplicate prefixes
       if (config.url) {
         let url = config.url;
@@ -72,11 +87,11 @@ export function setupApiClient() {
       addBreadcrumb({
         type: 'http',
         category: 'request',
-        message: `${(config.method || 'get').toUpperCase()} ${config.url}`,
+        message: `${(config.method || 'get').toUpperCase()} ${getRequestPath(config.url)}`,
         data: {
           requestId: config.headers['X-Request-Id'],
           method: config.method,
-          url: config.url,
+          path: getRequestPath(config.url),
         },
       });
 
@@ -88,10 +103,20 @@ export function setupApiClient() {
   // Response interceptor
   api.interceptors.response.use(
     (response) => {
+      if (!response.config?.__skipConnectionTracking) {
+        try {
+          const { isDisconnected, markConnected } = useConnectionStatus();
+          if (isDisconnected.value) {
+            markConnected();
+          }
+        } catch {
+          // ignore connection status evaluation failures
+        }
+      }
       addBreadcrumb({
         type: 'http',
         category: 'response',
-        message: `HTTP ${response.status} from ${(response.config.method || 'get').toUpperCase()} ${response.config.url}`,
+        message: `HTTP ${response.status} from ${(response.config.method || 'get').toUpperCase()} ${getRequestPath(response.config.url)}`,
         data: {
           requestId: response.headers['x-request-id'] || response.config.headers['X-Request-Id'],
           status: response.status,
@@ -151,7 +176,7 @@ export function setupApiClient() {
         const code =
           errObj.code ||
           (status === 401
-            ? 'AUTH_TOKEN_INVALID'
+            ? 'AUTHENTICATION_REQUIRED'
             : status === 403
             ? 'AUTH_FORBIDDEN_ROLE'
             : status === 404
@@ -166,7 +191,7 @@ export function setupApiClient() {
           errObj.message ||
           data.message ||
           (status === 401
-            ? 'Session expired or unauthenticated.'
+            ? 'Authentication is required for this request.'
             : status === 403
             ? 'You do not have permission to perform this action.'
             : status === 404
@@ -177,9 +202,21 @@ export function setupApiClient() {
             ? 'Too many requests. Please wait before retrying.'
             : 'A server error occurred. Please try again later.');
 
+        const tokenFailureCodes = [
+          'AUTH_TOKEN_INVALID',
+          'AUTH_TOKEN_EXPIRED',
+          'AUTH_TOKEN_REVOKED',
+          'AUTH_ACCOUNT_SUSPENDED',
+        ];
         const action =
           errObj.action ||
-          (status === 401 ? 'logout' : status === 422 ? 'fix_input' : status === 429 ? 'wait' : 'none');
+          (status === 401 && tokenFailureCodes.includes(errObj.code)
+            ? 'logout'
+            : status === 422
+            ? 'fix_input'
+            : status === 429
+            ? 'wait'
+            : 'none');
 
         const details = errObj.details || (data.errors ? { field_errors: data.errors } : {});
         const retryable = errObj.retryable !== undefined ? Boolean(errObj.retryable) : status >= 500;
@@ -199,13 +236,49 @@ export function setupApiClient() {
         });
       }
 
+      // Check for DB or Network disconnection
+      if (!config.__skipConnectionTracking) {
+        try {
+          const { markDisconnected } = useConnectionStatus();
+          if (apiError.isNetwork) {
+            markDisconnected('server', apiError.message);
+          } else if (
+            apiError.code === 'DB_UNAVAILABLE' ||
+            apiError.code === 'DB_DEADLOCK' ||
+            (response?.status === 503 && response?.data?.data?.services?.database === 'disconnected') ||
+            (typeof apiError.message === 'string' && /SQLSTATE|database|Connection refused/i.test(apiError.message))
+          ) {
+            markDisconnected('database', apiError.message);
+          }
+        } catch {
+          // ignore connection status evaluation failures
+        }
+      }
+
       // Report 5xx, network failures, or unclassified SERVER_ERROR to client error ingestion
       if (apiError.status >= 500 || apiError.isNetwork || apiError.code === 'SERVER_ERROR') {
+        const apiRequest = {
+          method: method.toUpperCase(),
+          path: getRequestPath(config.url),
+          timeout_ms: Number(config.timeout) || null,
+          elapsed_ms: Math.max(0, Date.now() - (config.__requestStartedAt || Date.now())),
+          retry_count: retryCount,
+          error_code: apiError.code,
+        };
+
+        addBreadcrumb({
+          type: 'http',
+          category: 'error',
+          message: `${apiRequest.method} ${apiRequest.path} failed with ${apiError.code}`,
+          data: apiRequest,
+        });
+
         recordClientError(apiError, {
           route: config.url,
           requestId: apiError.requestId,
           httpStatus: apiError.status,
           errorCode: apiError.code,
+          apiRequest,
         });
       }
 

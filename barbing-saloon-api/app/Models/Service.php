@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read Barber|null $barber
+ */
 class Service extends Model
 {
     use HasFactory, SoftDeletes;
@@ -55,6 +58,9 @@ class Service extends Model
         return $this->belongsTo(ServiceCategory::class, 'category_id');
     }
 
+    /**
+     * @return BelongsTo<Barber, $this>
+     */
     public function barber(): BelongsTo
     {
         return $this->belongsTo(Barber::class);

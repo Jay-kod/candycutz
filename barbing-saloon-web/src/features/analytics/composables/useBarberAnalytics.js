@@ -1,35 +1,37 @@
 import { ref, computed } from 'vue';
-import { barberApi } from '@/shared/api/old_barberApi';
+import api from '@/shared/api/client';
 
 export function useBarberAnalytics() {
   const loading = ref(true);
   const selectedRange = ref('7d');
-  
+
   const performanceMetrics = ref({});
   const topServices = ref([]);
   const statusBreakdown = ref([]);
-  
+
   const rangeOptions = [
     { label: '7 Days', value: '7d' },
     { label: '30 Days', value: '30d' },
     { label: 'This Month', value: 'month' },
-    { label: 'All Time', value: 'all' }
+    { label: 'All Time', value: 'all' },
   ];
 
   const activeRangeLabel = computed(() => {
-    const match = rangeOptions.find(o => o.value === selectedRange.value);
+    const match = rangeOptions.find((o) => o.value === selectedRange.value);
     return match ? match.label : selectedRange.value;
   });
 
   const fetchAnalytics = async () => {
     loading.value = true;
     try {
-      const response = await barberApi.analytics(selectedRange.value);
+      const response = await api.get('/barber/analytics', {
+        params: { range: selectedRange.value },
+      });
       const data = response.data?.data || response.data || {};
-      
+
       performanceMetrics.value = data.performance_metrics || {};
       topServices.value = data.top_services || [];
-      
+
       const sb = data.status_breakdown || {};
       if (Array.isArray(sb)) {
         statusBreakdown.value = sb;
@@ -60,6 +62,6 @@ export function useBarberAnalytics() {
     topServices,
     statusBreakdown,
     fetchAnalytics,
-    setRange
+    setRange,
   };
 }

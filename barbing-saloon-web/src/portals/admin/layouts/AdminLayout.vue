@@ -34,7 +34,6 @@ import {
   FlagIcon,
   HeartIcon,
   Cog6ToothIcon,
-  ScissorsIcon,
   InformationCircleIcon,
   EnvelopeIcon,
   TrashIcon,
@@ -42,6 +41,7 @@ import {
   ArchiveBoxIcon,
   RectangleStackIcon,
   BuildingStorefrontIcon,
+  BuildingLibraryIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -49,6 +49,7 @@ const navItems = [
   { name: 'Dashboard', to: '/admin/dashboard', icon: HomeIcon },
   { name: 'Walk-In', to: '/admin/walk-in', icon: UserPlusIcon },
   { name: 'Appointments', to: '/admin/appointments', icon: CalendarDaysIcon },
+  { name: 'Bank & Payments', to: '/admin/bank-details', icon: BuildingLibraryIcon },
   { name: 'Customers', to: '/admin/customers', icon: UserGroupIcon },
   { name: 'Barbers', to: '/admin/barbers', icon: UsersIcon },
 
@@ -57,7 +58,6 @@ const navItems = [
   { name: 'Brand Identity', to: '/admin/brand-identity', icon: BuildingStorefrontIcon },
   { name: 'Home Page', to: '/admin/websites/home', icon: HomeIcon },
   { name: 'Features Block', to: '/admin/websites/features', icon: SparklesIcon, badge: 'Block' },
-  { name: 'Homepage CTA', to: '/admin/websites/cta', icon: ScissorsIcon },
   { name: 'Page Heroes', to: '/admin/websites/heroes', icon: RectangleStackIcon },
   { name: 'About Us Page', to: '/admin/websites/about', icon: InformationCircleIcon },
   { name: 'Services Page', to: '/admin/websites/services', icon: SparklesIcon },

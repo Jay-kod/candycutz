@@ -24,6 +24,16 @@ class Setting extends Model
                 $setting->group = self::resolveGroupForKey($setting->key ?? '');
             }
         });
+
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('settings.public');
+            \Illuminate\Support\Facades\Cache::forget('settings.all');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('settings.public');
+            \Illuminate\Support\Facades\Cache::forget('settings.all');
+        });
     }
 
     public static function resolveGroupForKey(string $key): string
@@ -46,6 +56,10 @@ class Setting extends Model
 
         if (str_starts_with($key, 'contact_') || in_array($key, ['phone', 'email', 'address', 'city', 'state', 'latitude', 'longitude', 'map_link'], true)) {
             return 'contact';
+        }
+
+        if (str_starts_with($key, 'bank_') || str_starts_with($key, 'manual_transfer_') || in_array($key, ['bank_name', 'account_name', 'account_number'], true)) {
+            return 'payment';
         }
 
         if (str_starts_with($key, 'booking_') || in_array($key, ['deposit_amount', 'min_notice_hours', 'max_days_ahead', 'slot_interval_minutes'], true)) {

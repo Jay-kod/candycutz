@@ -21,6 +21,7 @@ export default [
 	{ path: '/admin/api', name: 'admin-api', component: () => import('../../modules/admin/pages/ApiReferencePage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('@/features/analytics/pages/AdminAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/settings', name: 'admin-settings', component: () => import('../../modules/admin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/bank-details', name: 'admin-bank-details', component: () => import('../../modules/admin/pages/BankDetailsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/brand-identity', name: 'admin-brand-identity', component: () => import('../../modules/admin/pages/cms/BrandIdentityPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/reports', name: 'admin-reports', component: () => import('@/features/analytics/pages/AdminReportsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{
@@ -32,7 +33,7 @@ export default [
 			{ path: '', redirect: '/admin/websites/home' },
 			{ path: 'home', name: 'admin-cms-home', component: () => import('../../features/cms/pages/HomePage.vue') },
 			{ path: 'features', name: 'admin-cms-features', component: () => import('../../modules/admin/pages/cms/FeaturesPage.vue') },
-			{ path: 'cta', name: 'admin-cms-cta', component: () => import('../../features/cms/pages/CtaPage.vue') },
+			{ path: 'cta', redirect: '/admin/websites/home' },
 			{ path: 'heroes', name: 'admin-cms-page-heroes', component: () => import('../../modules/admin/pages/cms/PageHeroesPage.vue') },
 			{ path: 'about', name: 'admin-cms-about', component: () => import('../../modules/admin/pages/cms/AboutPage.vue') },
 			{ path: 'services', name: 'admin-cms-services', component: () => import('../../modules/admin/pages/cms/ServicesPage.vue') },

@@ -1,24 +1,24 @@
 <template>
-  <div class="rounded-2xl border border-white/[0.07] bg-[#0A0F12]/80 backdrop-blur-xl p-5 lg:p-6 shadow-xl flex flex-col justify-between">
+  <div class="rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#0A0F12]/80 backdrop-blur-xl p-5 lg:p-6 shadow-xl flex flex-col justify-between">
     <!-- Header with Metric Toggles -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.05]">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/[0.05]">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-admin/10 border border-admin/20 text-admin shrink-0">
           <component :is="activeTab === 'revenue' ? BanknotesIcon : CalendarDaysIcon" class="h-5 w-5" />
         </div>
         <div>
-          <h2 class="text-sm font-bold text-white tracking-wide">Performance Trends</h2>
-          <p class="text-[11px] text-white/40">Last 7 days performance</p>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white tracking-wide">Performance Trends</h2>
+          <p class="text-[11px] text-slate-500 dark:text-white/40">Last 7 days performance</p>
         </div>
       </div>
 
       <!-- Segmented Tabs & 7-Day Total -->
       <div class="flex items-center gap-3 self-end sm:self-auto">
-        <span class="hidden md:inline-block text-xs font-semibold text-white/60 tabular-nums">
+        <span class="hidden md:inline-block text-xs font-semibold text-slate-600 dark:text-white/60 tabular-nums">
           {{ activeTab === 'revenue' ? `Total: ₦${formatCurrency(totalRevenue)}` : `Total: ${totalBookings} bookings` }}
         </span>
 
-        <div class="inline-flex rounded-xl bg-white/[0.04] p-1 border border-white/[0.06]">
+        <div class="inline-flex rounded-xl bg-slate-100 dark:bg-white/[0.04] p-1 border border-slate-200 dark:border-white/[0.06]">
           <button 
             type="button"
             @click="activeTab = 'revenue'"
@@ -26,7 +26,7 @@
               'rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer',
               activeTab === 'revenue' 
                 ? 'bg-admin text-white shadow-sm font-bold' 
-                : 'text-white/50 hover:text-white'
+                : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
             ]"
           >
             Revenue
@@ -38,7 +38,7 @@
               'rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer',
               activeTab === 'bookings' 
                 ? 'bg-sky-500 text-white shadow-sm font-bold' 
-                : 'text-white/50 hover:text-white'
+                : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
             ]"
           >
             Bookings

@@ -40,17 +40,17 @@
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
         <span 
           class="font-display text-3xl font-bold tracking-tight"
-          :class="stats.pendingCount > 0 ? 'text-amber-400' : 'text-theme-text'"
+          :class="stats.pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-theme-text'"
         >
           {{ stats.pendingCount }}
         </span>
         <span class="text-xs text-theme-text-muted">awaiting action</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-theme-text-muted relative z-10 pt-2 border-t border-theme-border">
-        <span v-if="stats.awaitingReceipts > 0" class="text-amber-400 font-medium flex items-center gap-1">
+        <span v-if="stats.awaitingReceipts > 0" class="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
           <DocumentTextIcon class="h-3.5 w-3.5" /> {{ stats.awaitingReceipts }} receipts to verify
         </span>
-        <span v-else class="text-emerald-400 font-medium flex items-center gap-1">
+        <span v-else class="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
           <CheckCircleIcon class="h-3.5 w-3.5" /> Queue is up to date
         </span>
       </div>
@@ -61,13 +61,13 @@
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-500/5 blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-text-muted">Confirmed / Active</span>
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
           <CheckBadgeIcon class="h-4 w-4" />
         </span>
       </div>
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
         <span class="font-display text-3xl font-bold text-theme-text tracking-tight">{{ stats.confirmedCount }}</span>
-        <span class="text-xs text-emerald-400 font-medium">+{{ stats.completedCount }} done</span>
+        <span class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">+{{ stats.completedCount }} done</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-theme-text-muted relative z-10 pt-2 border-t border-theme-border">
         <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>

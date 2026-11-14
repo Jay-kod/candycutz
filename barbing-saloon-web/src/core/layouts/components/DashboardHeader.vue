@@ -30,6 +30,9 @@
     </div>
 
     <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+      <!-- Live Database Status Badge -->
+      <DatabaseStatusBadge />
+
       <div class="flex items-center gap-1 xs:gap-2">
         <!-- Notification Bell -->
         <NotificationBell />
@@ -62,6 +65,7 @@
 <script setup>
 import { useTheme } from '@/core/composables/useTheme';
 import NotificationBell from '@/core/components/NotificationBell.vue';
+import DatabaseStatusBadge from '@/core/components/DatabaseStatusBadge.vue';
 import {
   SunIcon,
   MoonIcon,

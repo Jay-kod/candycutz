@@ -44,15 +44,25 @@
           :key="`${loopIndex}-${testimonial.id || idx}`"
           class="testimonial-card group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 transition-colors duration-200 hover:bg-[var(--color-bg-tertiary)] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
         >
-          <!-- Card Header: Quote Icon + Source Pill -->
+          <!-- Card Header: Quote Icon + Customer Rating -->
           <div class="flex items-center justify-between gap-4">
             <div class="text-[var(--color-text-muted)] transition-colors group-hover/card:text-[var(--color-accent)]">
               <svg class="size-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
             </div>
-            <span class="testimonial-source inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)]">
-              {{ getSource(testimonial) }}
+            <span
+              class="testimonial-source inline-flex items-center gap-0.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-1 text-sm leading-none"
+              :aria-label="getRatingLabel(testimonial.rating)"
+            >
+              <span
+                v-for="star in 5"
+                :key="star"
+                :class="star <= getRating(testimonial.rating) ? 'text-amber-400' : 'text-[var(--color-text-muted)]/40'"
+                aria-hidden="true"
+              >
+                {{ star <= getRating(testimonial.rating) ? '★' : '☆' }}
+              </span>
             </span>
           </div>
 
@@ -153,10 +163,14 @@ const getSubtitle = (item) => {
   return 'Customer testimonial';
 };
 
-const getSource = (item) => {
-  if (item.source) return item.source;
-  if (item.client_name?.startsWith('Sample Customer ')) return 'Demo sample';
-  return 'x.com';
+const getRating = (rating) => {
+  const value = Number(rating);
+  return Number.isInteger(value) && value >= 1 && value <= 5 ? value : 0;
+};
+
+const getRatingLabel = (rating) => {
+  const value = getRating(rating);
+  return value ? `Customer rating: ${value} out of 5 stars` : 'Customer rating unavailable';
 };
 </script>
 

@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $body
  * @property string|null $featured_image
  * @property int $author_id
- * @property string $status
+ * @property string|null $author_display
+ * @property BlogStatus|string $status
  * @property Carbon|null $published_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -29,7 +30,7 @@ class BlogPost extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['title', 'slug', 'excerpt', 'body', 'featured_image', 'author_id', 'status', 'published_at'];
+    protected $fillable = ['title', 'slug', 'excerpt', 'body', 'featured_image', 'author_id', 'author_display', 'status', 'published_at'];
 
     protected $casts = ['status' => BlogStatus::class, 'published_at' => 'datetime'];
 
