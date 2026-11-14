@@ -116,11 +116,15 @@ export function useBarbers() {
 
     if (!ok) return;
 
+    // Optimistic removal
+    const previousList = [...barbers.value];
+    barbers.value = barbers.value.filter(b => b.id !== barber.id);
+
     try {
       await adminApi.deleteBarber(barber.id);
       toast.success('Barber removed successfully');
-      await loadBarbers(true);
     } catch (error) {
+      barbers.value = previousList; // Rollback
       const errorMsg =
         error.details?.field_errors?.barber?.[0] ||
         error.response?.data?.errors?.barber?.[0] ||
@@ -140,13 +144,15 @@ export function useBarbers() {
       on_leave: 'On Leave'
     };
 
+    const previousStatus = barber.status;
+    barber.status = newStatus; // Optimistic immediate update
+
     try {
       await adminApi.updateBarberStatus(barber.id, newStatus);
-      barber.status = newStatus;
       toast.success(`${barber.name} status updated to ${statusLabels[newStatus] || newStatus}`);
     } catch (error) {
+      barber.status = previousStatus; // Rollback
       toast.error('Failed to update barber status');
-      await loadBarbers(true);
     }
   }
 
