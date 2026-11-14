@@ -6,6 +6,7 @@ namespace App\Domain\Notification;
 
 use App\Jobs\SendExpoPush;
 use App\Models\Appointment;
+use App\Models\Barber;
 use App\Models\DeviceToken;
 use App\Models\Notification;
 use App\Models\User;
@@ -18,6 +19,44 @@ use Illuminate\Support\Facades\Log;
  */
 class NotificationDispatcher
 {
+    /**
+     * Resolve valid customer user ID from appointment relation or client email fallback.
+     */
+    private static function resolveCustomerId(Appointment $appointment): ?int
+    {
+        if ($appointment->customer_id) {
+            return (int) $appointment->customer_id;
+        }
+
+        if (! empty($appointment->client_email)) {
+            $userId = User::where('email', $appointment->client_email)->value('id');
+            if ($userId) {
+                return (int) $userId;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve valid barber user ID from barber relation or barber_id model lookup.
+     */
+    private static function resolveBarberUserId(Appointment $appointment): ?int
+    {
+        if ($appointment->barber?->user_id) {
+            return (int) $appointment->barber->user_id;
+        }
+
+        if ($appointment->barber_id) {
+            $userId = Barber::where('id', $appointment->barber_id)->value('user_id');
+            if ($userId) {
+                return (int) $userId;
+            }
+        }
+
+        return null;
+    }
+
     // ─── Booking Events ───────────────────────────────────────────
 
     /**
@@ -31,10 +70,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'your barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_created',
                 title: 'Booking Confirmed ✂️',
                 message: "Your appointment for {$serviceName} with {$barberName} on {$appointment->appointment_date} at {$appointment->appointment_time} has been booked. Ref: {$appointment->booking_reference}",
@@ -44,9 +86,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_created',
                 title: 'New Booking Assigned 📋',
                 message: "{$customerName} booked {$serviceName} for {$appointment->appointment_date} at {$appointment->appointment_time}. Ref: {$appointment->booking_reference}",
@@ -77,10 +119,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'Barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_approved',
                 title: 'Booking Approved ✅',
                 message: "Your appointment for {$serviceName} on {$appointment->appointment_date} at {$appointment->appointment_time} has been approved. See you there!",
@@ -90,9 +135,9 @@ class NotificationDispatcher
         }
 
         // 2. Confirmation record for assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_approved',
                 title: 'Booking Approved ✅',
                 message: "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) on {$appointment->appointment_date} at {$appointment->appointment_time} has been approved.",
@@ -125,17 +170,20 @@ class NotificationDispatcher
         $reason = $appointment->cancellation_reason ?: 'No reason provided';
         $cancellerName = $cancelledBy->real_name ?? $cancelledBy->name ?? 'User';
 
-        $cancellerIsCustomer = $appointment->customer_id === $cancelledBy->id;
-        $cancellerIsBarber = $appointment->barber?->user_id === $cancelledBy->id;
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
+        $cancellerIsCustomer = $customerId === $cancelledBy->id;
+        $cancellerIsBarber = $barberUserId === $cancelledBy->id;
 
         // 1. Customer record
-        if ($appointment->customer_id) {
+        if ($customerId) {
             $customerMsg = $cancellerIsCustomer
                 ? "You cancelled your {$serviceName} appointment ({$appointment->booking_reference}). Reason: {$reason}"
                 : "Your appointment for {$serviceName} ({$appointment->booking_reference}) has been cancelled by {$cancellerName}. Reason: {$reason}";
 
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_cancelled',
                 title: 'Booking Cancelled ❌',
                 message: $customerMsg,
@@ -146,13 +194,13 @@ class NotificationDispatcher
         }
 
         // 2. Barber record
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             $barberMsg = $cancellerIsBarber
                 ? "You cancelled appointment {$appointment->booking_reference} for {$customerName}. Reason: {$reason}"
                 : "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) was cancelled by {$cancellerName}. Reason: {$reason}";
 
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_cancelled',
                 title: 'Booking Cancelled ❌',
                 message: $barberMsg,
@@ -184,10 +232,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'Barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_completed',
                 title: 'Session Complete 💈',
                 message: "Your {$serviceName} session is complete! We hope you enjoyed it. Leave a review to share your experience.",
@@ -197,9 +248,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_completed',
                 title: 'Session Completed 💈',
                 message: "Appointment {$appointment->booking_reference} for {$customerName} ({$serviceName}) marked complete.",
@@ -230,10 +281,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'Barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_no_show',
                 title: 'Missed Appointment ⚠️',
                 message: "You were marked as a no-show for your {$serviceName} appointment ({$appointment->booking_reference}). Please reschedule or contact us.",
@@ -243,9 +297,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_no_show',
                 title: 'No-Show Recorded ⚠️',
                 message: "Appointment {$appointment->booking_reference} for {$customerName} was recorded as a no-show.",
@@ -276,10 +330,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'your barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_checked_in',
                 title: 'Checked In 📍',
                 message: "You are checked in for {$serviceName} with {$barberName}. Your barber will attend to you shortly.",
@@ -289,9 +346,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_checked_in',
                 title: 'Client Checked In 📍',
                 message: "{$customerName} has checked in for appointment {$appointment->booking_reference} ({$serviceName}).",
@@ -322,10 +379,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'your barber';
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'booking_in_progress',
                 title: 'Service Started ✂️',
                 message: "Your {$serviceName} session with {$barberName} is now in progress.",
@@ -335,9 +395,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'booking_in_progress',
                 title: 'Session In Progress ✂️',
                 message: "Appointment {$appointment->booking_reference} with {$customerName} ({$serviceName}) is now in progress.",
@@ -369,10 +429,13 @@ class NotificationDispatcher
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'A customer';
         $amount = number_format((float) $appointment->grand_total, 2);
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'payment_received',
                 title: 'Payment Receipt Submitted 💳',
                 message: "Your payment receipt for booking {$appointment->booking_reference} (₦{$amount}) has been received and is being verified.",
@@ -382,9 +445,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'payment_received',
                 title: 'Payment Receipt Uploaded 💳',
                 message: "{$customerName} uploaded a payment receipt (₦{$amount}) for booking {$appointment->booking_reference}. Please verify.",
@@ -414,10 +477,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'Barber';
         $amount = number_format((float) $appointment->grand_total, 2);
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'payment_verified',
                 title: 'Payment Confirmed ✅',
                 message: "Your payment of ₦{$amount} for booking {$appointment->booking_reference} has been verified. Thank you!",
@@ -427,9 +493,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'payment_verified',
                 title: 'Payment Confirmed ✅',
                 message: "Payment of ₦{$amount} for appointment {$appointment->booking_reference} ({$customerName}) has been confirmed.",
@@ -459,10 +525,13 @@ class NotificationDispatcher
         $barberName = $appointment->barber?->user->name ?? 'Barber';
         $failureReason = $reason ?: 'The transaction could not be completed';
 
+        $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+
         // 1. Notify customer
-        if ($appointment->customer_id) {
+        if ($customerId) {
             static::createAndPush(
-                recipientId: $appointment->customer_id,
+                recipientId: $customerId,
                 type: 'payment_failed',
                 title: 'Payment Failed ⚠️',
                 message: "Payment for booking {$appointment->booking_reference} could not be processed. Reason: {$failureReason}. Please retry your payment.",
@@ -472,9 +541,9 @@ class NotificationDispatcher
         }
 
         // 2. Notify assigned barber
-        if ($appointment->barber?->user_id) {
+        if ($barberUserId) {
             static::createAndPush(
-                recipientId: $appointment->barber->user_id,
+                recipientId: $barberUserId,
                 type: 'payment_failed',
                 title: 'Payment Failed ⚠️',
                 message: "Payment attempt for booking {$appointment->booking_reference} ({$customerName}) failed. Reason: {$failureReason}.",
@@ -522,7 +591,12 @@ class NotificationDispatcher
         ?int $relatedEntityId = null,
         string $recipientType = 'customer',
         ?int $senderId = null,
-    ): Notification {
+    ): ?Notification {
+        if ($recipientId <= 0) {
+            Log::warning("NotificationDispatcher: skipping notification with invalid recipientId: {$recipientId}");
+            return null;
+        }
+
         $notification = Notification::create([
             'sender_id' => $senderId,
             'recipient_type' => $recipientType,
