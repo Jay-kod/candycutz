@@ -12,7 +12,7 @@
           <RouterLink to="/about" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
           <RouterLink to="/services" @mouseenter="prefetchServices" @focus="prefetchServices" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
           <RouterLink to="/gallery" @mouseenter="prefetchGallery" @focus="prefetchGallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
-          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
+          <RouterLink to="/contact" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
         </nav>
 
         <div class="public-nav-actions flex items-center">
@@ -175,6 +175,33 @@ import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
+import { getActivePinia } from 'pinia';
+
+const getStore = () => (getActivePinia() ? usePublicContentStore() : null);
+
+const prefetchServices = () => {
+  const store = getStore();
+  if (store) {
+    store.getServices();
+    store.getCategories();
+  }
+};
+
+const prefetchAbout = () => {
+  const store = getStore();
+  if (store) {
+    store.getSettings();
+    store.getTestimonials();
+  }
+};
+
+const prefetchGallery = () => {
+  const store = getStore();
+  if (store) {
+    store.getSettings();
+  }
+};
 
 const route = useRoute();
 const { y } = useWindowScroll();
