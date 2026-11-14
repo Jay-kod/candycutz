@@ -10,9 +10,8 @@ class UpdateBarber
 {
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
-    public function execute(int $id, array $data): array
+    public function execute(int $id, array $data): Barber
     {
         Gate::authorize('manage-barber-accounts');
 
@@ -55,11 +54,6 @@ class UpdateBarber
             $barber->update($barberUpdates);
         }
 
-        return [
-            'id' => $barber->id,
-            'name' => $barber->user?->name,
-            'email' => $barber->user?->email,
-            'status' => $barber->status,
-        ];
+        return $barber->refresh()->load(['user', 'workingHours', 'testimonials']);
     }
 }
