@@ -9,9 +9,9 @@
 
         <nav class="public-nav-links" aria-label="Main navigation">
           <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-nav-link">Home</RouterLink>
-          <RouterLink to="/about" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
-          <RouterLink to="/services" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
-          <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
+          <RouterLink to="/about" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
+          <RouterLink to="/services" @mouseenter="prefetchServices" @focus="prefetchServices" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
+          <RouterLink to="/gallery" @mouseenter="prefetchGallery" @focus="prefetchGallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
         </nav>
 
