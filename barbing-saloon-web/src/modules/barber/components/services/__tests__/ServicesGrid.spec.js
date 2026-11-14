@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import ServicesGrid from '../ServicesGrid.vue';
+import { getStorageUrl } from '@/core/utils/url';
 
 describe('ServicesGrid.vue', () => {
   const mockServices = [
@@ -83,7 +84,7 @@ describe('ServicesGrid.vue', () => {
     const images = wrapper.findAll('[data-test="service-image"]');
     expect(images.length).toBe(2);
     expect(images[0].attributes('src')).toBe('/images/services/service-1.png');
-    expect(images[1].attributes('src')).toBe('http://localhost:8000/storage/uploads/services/beard.jpg');
+    expect(images[1].attributes('src')).toBe(getStorageUrl(mockServices[1].image_url));
   });
 
   it('falls back to signature luxury placeholder when an image fails to load', async () => {
