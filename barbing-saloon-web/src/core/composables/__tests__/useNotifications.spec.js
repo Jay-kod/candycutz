@@ -98,6 +98,19 @@ describe('useNotifications composable', () => {
     expect(unreadCount.value).toBe(0)
     expect(api.delete).toHaveBeenCalledWith('/v1/notifications/401')
   })
+
+  it('resets notifications state upon resetNotifications call', () => {
+    const { notifications, unreadCount, resetNotifications } = useNotifications()
+    notifications.value = [
+      { id: 501, title: 'Previous User Notif', is_read: false },
+    ]
+    unreadCount.value = 1
+
+    resetNotifications()
+
+    expect(notifications.value).toHaveLength(0)
+    expect(unreadCount.value).toBe(0)
+  })
 })
 
 describe('notificationUtils mapping', () => {
