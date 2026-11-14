@@ -7,25 +7,7 @@ use App\Domain\Payment\Contracts\PaymentGateway;
 use App\Domain\Payment\Gateways\ManualTransferGateway;
 use App\Domain\Payment\Gateways\PaystackGateway;
 use App\Domain\Payment\Gateways\StripeGateway;
-use App\Events\AppointmentStatusChanged;
-use App\Events\BookingCreated;
-use App\Events\PasswordChanged;
-use App\Events\PaymentConfirmed;
-use App\Events\PaymentFailed;
-use App\Events\ReviewSubmitted;
-use App\Events\SettingsChanged;
-use App\Events\UserRegistered;
-use App\Events\UserSuspended;
 use App\Http\Responses\ApiResponse;
-use App\Listeners\HandleAppointmentStatusChanged;
-use App\Listeners\HandleBookingCreated;
-use App\Listeners\HandlePasswordChanged;
-use App\Listeners\HandlePaymentConfirmed;
-use App\Listeners\HandlePaymentFailed;
-use App\Listeners\HandleReviewSubmitted;
-use App\Listeners\HandleSettingsChanged;
-use App\Listeners\HandleUserRegistered;
-use App\Listeners\HandleUserSuspended;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlogPost;
@@ -70,17 +52,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Register Domain Event → Listener bindings
-        // Event::listen(AppointmentStatusChanged::class, HandleAppointmentStatusChanged::class);
-        Event::listen(BookingCreated::class, HandleBookingCreated::class);
-        Event::listen(PaymentConfirmed::class, HandlePaymentConfirmed::class);
-        Event::listen(PaymentFailed::class, HandlePaymentFailed::class);
-        Event::listen(UserRegistered::class, HandleUserRegistered::class);
-        Event::listen(UserSuspended::class, HandleUserSuspended::class);
-        Event::listen(SettingsChanged::class, HandleSettingsChanged::class);
-        Event::listen(PasswordChanged::class, HandlePasswordChanged::class);
-        Event::listen(ReviewSubmitted::class, HandleReviewSubmitted::class);
-
+        // Domain Event -> Listener bindings are automatically discovered from app/Listeners by Laravel 12.
         // Boot Database Gate query tracking listener
         $this->app->make(DatabaseGateTracker::class)->bootListener();
 
