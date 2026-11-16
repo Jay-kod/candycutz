@@ -97,14 +97,14 @@
                   </p>
                 </div>
                 <div class="h-11 w-11 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] overflow-hidden shrink-0 flex items-center justify-center">
-                  <img v-if="item.service_image" :src="item.service_image" class="h-full w-full object-cover" />
+                  <img v-if="item.service_image" :src="getStorageUrl(item.service_image)" class="h-full w-full object-cover" />
                   <ScissorsIcon v-else class="h-5 w-5 text-slate-400 dark:text-white/40" />
                 </div>
               </div>
 
               <div class="pt-3 border-t border-slate-100 dark:border-white/[0.06] flex items-center gap-3">
                 <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 overflow-hidden flex items-center justify-center text-slate-700 dark:text-white/70 text-xs font-bold">
-                  <img v-if="item.barber_avatar" :src="item.barber_avatar" class="h-full w-full object-cover" />
+                  <img v-if="item.barber_avatar" :src="getStorageUrl(item.barber_avatar)" class="h-full w-full object-cover" />
                   <span v-else>{{ initials(item.barber_name) }}</span>
                 </div>
                 <div>
@@ -138,6 +138,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';

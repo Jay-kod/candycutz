@@ -26,6 +26,9 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
     Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
     Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
+    Route::get('/admin/paystack/settings', [AdminApiController::class, 'getPaystackSettings']);
+    Route::post('/admin/paystack/settings', [AdminApiController::class, 'updatePaystackSettings']);
+    Route::post('/admin/paystack/test-connection', [AdminApiController::class, 'testPaystackConnection']);
     Route::get('/admin/animations', [AnimationApiController::class, 'index']);
     Route::post('/admin/animations', [AnimationApiController::class, 'update']);
     Route::post('/admin/animations/reset', [AnimationApiController::class, 'reset']);

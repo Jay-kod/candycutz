@@ -17,6 +17,7 @@ use App\Models\AppointmentItem;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
+use App\Models\Branch;
 use App\Models\Service;
 use App\Models\ServiceZone;
 use App\Models\User;
@@ -64,6 +65,7 @@ class BookingService
                 ->whereKey($barberId)
                 ->lockForUpdate()
                 ->firstOrFail();
+            $branchId = $this->resolveBranchId($barber);
 
             // Resolve service(s)
             $serviceId = $data->serviceId;
@@ -163,7 +165,7 @@ class BookingService
 
             $appointment = Appointment::create([
                 'booking_reference' => $bookingReference,
-                'branch_id' => 1, // Branch removed from DTO to simplify, usually defaults to 1
+                'branch_id' => $branchId,
                 'customer_id' => $customer->id,
                 'client_name' => $data->clientName ?? ($customer->real_name ?: $customer->name),
                 'client_phone' => $data->clientPhone ?? ($customer->phone ?: ''),
@@ -223,6 +225,7 @@ class BookingService
     public function createWalkIn(User $actor, Barber $barber, BookingData $data, AppointmentSource $source = AppointmentSource::walk_in): Appointment
     {
         return DB::transaction(function () use ($actor, $barber, $data, $source) {
+            $branchId = $this->resolveBranchId($barber);
             $service = Service::findOrFail($data->serviceId);
             $date = Carbon::parse($data->appointmentDate)->toDateString();
             $startTime = substr(trim((string) $data->appointmentTime), 0, 5);
@@ -255,7 +258,7 @@ class BookingService
 
             $appointment = Appointment::create([
                 'booking_reference' => $bookingReference,
-                'branch_id' => 1,
+                'branch_id' => $branchId,
                 'customer_id' => null, // Guest walk-in
                 'client_name' => $data->clientName ?? 'Walk-In Guest',
                 'client_phone' => $data->clientPhone ?? '',
@@ -297,6 +300,18 @@ class BookingService
 
             return $appointment->load(['service.category', 'barber.user']);
         });
+    }
+
+    private function resolveBranchId(Barber $barber): int
+    {
+        $branchId = $barber->branch_id
+            ?? Branch::query()->where('is_active', true)->value('id');
+
+        if (! $branchId) {
+            throw BookingException::failed('No active branch is configured for this booking.');
+        }
+
+        return (int) $branchId;
     }
 
     /**

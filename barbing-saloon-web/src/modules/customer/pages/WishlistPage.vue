@@ -79,13 +79,13 @@
             
             <img 
               v-if="item.item_type === 'gallery' && item.gallery_image" 
-              :src="item.gallery_image" 
+              :src="getStorageUrl(item.gallery_image)" 
               alt="Style" 
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <img 
               v-else-if="item.item_type === 'service' && item.service_image" 
-              :src="item.service_image" 
+              :src="getStorageUrl(item.service_image)" 
               alt="Service" 
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
@@ -155,6 +155,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';

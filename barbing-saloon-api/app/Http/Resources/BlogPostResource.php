@@ -17,14 +17,17 @@ class BlogPostResource extends JsonResource
     {
         $imageUrl = null;
         if ($this->featured_image) {
-            if (str_starts_with($this->featured_image, 'http')) {
+            if (str_starts_with($this->featured_image, 'http') || str_starts_with($this->featured_image, 'data:')) {
                 $imageUrl = $this->featured_image;
             } else {
                 $normalized = ltrim($this->featured_image, '/');
                 if (str_starts_with($normalized, 'storage/')) {
-                    $normalized = substr($normalized, strlen('storage/'));
+                    $imageUrl = url($normalized);
+                } elseif (str_starts_with($normalized, 'images/')) {
+                    $imageUrl = url($normalized);
+                } else {
+                    $imageUrl = url('storage/'.$normalized);
                 }
-                $imageUrl = url('storage/'.$normalized);
             }
         }
 

@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { DEFAULT_PRIVACY_CONTENT, DEFAULT_PRIVACY_SECTIONS } from './privacyConstants';
 
 export function usePrivacyCms() {
@@ -177,6 +179,10 @@ export function usePrivacyCms() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Privacy policy content saved successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
 
       const data = response.data?.data;
       if (data) {

@@ -1,7 +1,9 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
+import { getActivePinia } from 'pinia';
 import client from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
 import { useToast } from '@/core/composables/useToast';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export const HERO_PAGES = [
   { key: 'home', label: 'Home', defaultTitle: 'Precision Cuts. Made for You.', defaultSubtitle: 'Expert barbers. Fresh fades. A better kind of barbershop experience.' },
@@ -175,6 +177,9 @@ export function useAdminPageHeroes() {
 
       const response = await client.post('/admin/settings', formData);
       settings.value = response.data?.data || settings.value;
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
       loadSelectedPage();
       toast.success(`${currentPage.value.label} hero saved.`);
       return true;

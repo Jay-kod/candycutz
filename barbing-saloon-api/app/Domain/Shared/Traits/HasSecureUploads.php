@@ -2,10 +2,10 @@
 
 namespace App\Domain\Shared\Traits;
 
+use App\Domain\Shared\Actions\SecureImageUpload;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 trait HasSecureUploads
 {
@@ -22,23 +22,18 @@ trait HasSecureUploads
             throw new HttpResponseException(response()->json(['success' => false, 'message' => 'File exceeds 2MB limit', 'code' => 422], 422));
         }
 
-        $folder = trim($folder, '/');
-        $fileName = Str::uuid().'-'.time().'.webp';
-
-        $stored = $file->storePubliclyAs($folder, $fileName, 'public');
-        $publicStoragePath = public_path('storage/'.$stored);
-        if (! file_exists($publicStoragePath)) {
-            @mkdir(dirname($publicStoragePath), 0755, true);
-            @copy($file->getRealPath(), $publicStoragePath);
-        }
-
-        return $stored;
+        return app(SecureImageUpload::class)->execute($file, trim($folder, '/'), 'public');
     }
 
     public function deleteFile(string $path): void
     {
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
+        }
+
+        $thumbnailPath = dirname($path).'/thumb_'.basename($path);
+        if (Storage::disk('public')->exists($thumbnailPath)) {
+            Storage::disk('public')->delete($thumbnailPath);
         }
     }
 

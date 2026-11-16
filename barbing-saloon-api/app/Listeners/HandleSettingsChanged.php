@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Domain\Content\Services\SettingsService;
 use App\Domain\Shared\Services\CatalogueCache;
 use App\Events\SettingsChanged;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -32,8 +33,7 @@ class HandleSettingsChanged implements ShouldQueue
         ]);
 
         // Bust all cached settings so the next read gets fresh data
-        Cache::forget('system_settings');
+        app(SettingsService::class)->clearCache();
         Cache::forget("setting:{$event->key}");
-        CatalogueCache::bust('settings');
     }
 }

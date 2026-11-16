@@ -1,7 +1,9 @@
 import { ref, computed, onBeforeUnmount } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useServicesCms() {
   const toast = useToast();
@@ -131,6 +133,10 @@ export function useServicesCms() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Services page content saved successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
       
       const data = response.data?.data;
       if (data) currentHeroImage.value = data.page_hero_services_image || '';

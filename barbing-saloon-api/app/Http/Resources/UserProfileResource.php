@@ -22,8 +22,13 @@ class UserProfileResource extends JsonResource
         /** @var array<string, mixed> $data */
         $data = parent::toArray($request);
         $mediaUrl = app(UserMediaUrl::class);
-        $data['avatar'] = $mediaUrl->for($this->resource, $this->avatar);
-        $data['cover_image'] = $mediaUrl->for($this->resource, $this->cover_image);
+        $avatarUrl = $mediaUrl->for($this->resource, $this->avatar);
+        $coverImageUrl = $mediaUrl->for($this->resource, $this->cover_image);
+
+        $data['avatar'] = $avatarUrl;
+        $data['avatar_url'] = $avatarUrl;
+        $data['cover_image'] = $coverImageUrl;
+        $data['cover_image_url'] = $coverImageUrl;
 
         return $data;
     }

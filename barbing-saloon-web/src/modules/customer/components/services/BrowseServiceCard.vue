@@ -6,7 +6,7 @@
     <RouterLink :to="`/customer/dashboard/services/${service.id}`" class="relative aspect-[4/3] w-full overflow-hidden block bg-[var(--color-bg-tertiary)]">
       <img 
         v-if="service.image || service.image_url" 
-        :src="service.image || service.image_url" 
+        :src="getStorageUrl(service.image || service.image_url)" 
         :alt="service.name" 
         class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" 
         style="-webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%); mask-image: linear-gradient(to bottom, black 65%, transparent 100%);"
@@ -100,6 +100,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { formatNairaAmount } from '@/core/utils';

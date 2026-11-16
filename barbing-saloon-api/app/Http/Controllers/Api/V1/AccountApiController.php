@@ -47,15 +47,20 @@ class AccountApiController
             'bio' => ['nullable', 'string', 'max:1000'],
             'username' => ['nullable', 'string', 'min:3', 'max:30'],
             'avatar' => ['nullable', 'image', 'max:5120'],
+            'remove_avatar' => ['nullable', 'boolean'],
         ]);
 
-        if ($request->hasFile('avatar')) {
+        $removeAvatar = $request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true';
+        if ($removeAvatar) {
+            $validated['avatar'] = null;
+        } elseif ($request->hasFile('avatar')) {
             $validated['avatar'] = (new SecureImageUpload)->execute(
                 $request->file('avatar'),
                 'user-media/'.$user->id.'/avatar',
                 'local'
             );
         }
+        unset($validated['remove_avatar']);
 
         // Handle username update through domain service with cooldown enforcement
         if (! empty($validated['username']) && strtolower(trim($validated['username'])) !== strtolower((string) $user->username)) {
@@ -125,5 +130,37 @@ class AccountApiController
             ]);
 
         return ApiResponse::success($codes, 'My verification codes loaded');
+    }
+
+    public function uploadAvatar(Request $request, SecureImageUpload $imageUpload): JsonResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:5120'],
+        ]);
+
+        $user = $request->user();
+        $path = $imageUpload->execute(
+            $request->file('avatar'),
+            'user-media/'.$user->id.'/avatar',
+            'local'
+        );
+
+        $user->update(['avatar' => $path]);
+
+        return ApiResponse::success(
+            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            'Avatar uploaded successfully'
+        );
+    }
+
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update(['avatar' => null]);
+
+        return ApiResponse::success(
+            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            'Avatar removed successfully'
+        );
     }
 }

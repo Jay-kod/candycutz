@@ -129,11 +129,12 @@ export function setupApiClient() {
       const method = (config.method || 'get').toLowerCase();
       const hasIdempotencyKey = Boolean(config.headers && config.headers['Idempotency-Key']);
       const isIdempotent = method === 'get' || method === 'head' || method === 'options' || hasIdempotencyKey;
+      const isCanceled = Boolean((typeof axios?.isCancel === 'function' && axios.isCancel(error)) || error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError');
 
-      // Jittered backoff retry for idempotent requests on network errors or 502/503/504
+      // Jittered backoff retry for idempotent requests on network errors or 502/503/504 (never retry canceled requests)
       const retryCount = config.__retryCount || 0;
       const status = error.response?.status;
-      const isRetryableError = !error.response || status === 502 || status === 503 || status === 504 || error.code === 'ECONNABORTED';
+      const isRetryableError = !isCanceled && (!error.response || status === 502 || status === 503 || status === 504 || error.code === 'ECONNABORTED');
 
       if (isIdempotent && isRetryableError && retryCount < 2) {
         config.__retryCount = retryCount + 1;
@@ -152,7 +153,21 @@ export function setupApiClient() {
         config.headers?.['X-Request-Id'] ||
         null;
 
-      if (!response) {
+      if (isCanceled) {
+        config.__skipConnectionTracking = true;
+        apiError = new ApiError({
+          message: 'Request was canceled',
+          code: 'REQUEST_CANCELED',
+          status: 0,
+          requestId,
+          details: {},
+          retryable: false,
+          action: 'none',
+          retryAfter: null,
+          isNetwork: false,
+          isTimeout: false,
+        });
+      } else if (!response) {
         // Network or timeout failure
         const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
         apiError = new ApiError({
@@ -237,18 +252,19 @@ export function setupApiClient() {
       }
 
       // Check for DB or Network disconnection
-      if (!config.__skipConnectionTracking) {
+      if (!config.__skipConnectionTracking && !isCanceled) {
         try {
-          const { markDisconnected } = useConnectionStatus();
-          if (apiError.isNetwork) {
-            markDisconnected('server', apiError.message);
-          } else if (
-            apiError.code === 'DB_UNAVAILABLE' ||
-            apiError.code === 'DB_DEADLOCK' ||
+          const { markDisconnected, reportNetworkFailure } = useConnectionStatus();
+          const dbDisconnected =
             (response?.status === 503 && response?.data?.data?.services?.database === 'disconnected') ||
-            (typeof apiError.message === 'string' && /SQLSTATE|database|Connection refused/i.test(apiError.message))
-          ) {
-            markDisconnected('database', apiError.message);
+            (apiError.code === 'DB_UNAVAILABLE' && response?.status === 503) ||
+            (typeof apiError.message === 'string' &&
+              /(?:SQLSTATE\[HY000\]\s*\[2002\]|SQLSTATE\[HY000\]:\s*General error:\s*2006|ECONNREFUSED|actively refused|No connection could be made)/i.test(apiError.message));
+
+          if (dbDisconnected) {
+            markDisconnected('database', apiError.message || 'Database connection is inactive.');
+          } else if (apiError.isNetwork) {
+            reportNetworkFailure(apiError.message);
           }
         } catch {
           // ignore connection status evaluation failures
@@ -256,7 +272,7 @@ export function setupApiClient() {
       }
 
       // Report 5xx, network failures, or unclassified SERVER_ERROR to client error ingestion
-      if (apiError.status >= 500 || apiError.isNetwork || apiError.code === 'SERVER_ERROR') {
+      if (!isCanceled && (apiError.status >= 500 || apiError.isNetwork || apiError.code === 'SERVER_ERROR')) {
         const apiRequest = {
           method: method.toUpperCase(),
           path: getRequestPath(config.url),

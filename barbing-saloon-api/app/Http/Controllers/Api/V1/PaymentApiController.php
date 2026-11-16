@@ -21,6 +21,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
 use App\Models\AuditLog;
 use App\Models\Barber;
+use App\Models\Branch;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\Service;
@@ -546,13 +547,19 @@ class PaymentApiController
         if (! $appointment) {
             $barber = $barberId ? Barber::find($barberId) : Barber::first();
             $service = $serviceId ? Service::find($serviceId) : Service::first();
+            $branchId = $barber?->branch_id
+                ?? Branch::query()->where('is_active', true)->value('id');
+
+            if (! $branchId) {
+                return ApiResponse::error('No active branch is configured.', [], 500, 'BRANCH_NOT_CONFIGURED');
+            }
 
             $price = (int) ($validated['amount'] ?? ($service ? $service->price : 30000));
             $bookingRef = 'CC-'.strtoupper(Str::random(8));
 
             $appointment = Appointment::create([
                 'booking_reference' => $bookingRef,
-                'branch_id' => 1,
+                'branch_id' => $branchId,
                 'customer_id' => $user ? $user->id : 1,
                 'barber_id' => $barber ? $barber->id : 1,
                 'service_id' => $service ? $service->id : 1,

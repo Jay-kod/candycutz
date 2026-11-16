@@ -1,4 +1,4 @@
-<template>
+REA<template>
   <AdminLayout>
     <div class="space-y-6 pb-12">
       <!-- 1. Header with Live Digital Clock, Badges, Search & Gateway Probe -->

@@ -19,14 +19,17 @@ class TestimonialResource extends JsonResource
         if ($this->client_avatar) {
             $avatarUrl = app(UserMediaUrl::class)->for($this->customer, $this->client_avatar);
             if (! $avatarUrl && ! str_starts_with(ltrim($this->client_avatar, '/'), 'user-media/')) {
-                if (str_starts_with($this->client_avatar, 'http')) {
+                if (str_starts_with($this->client_avatar, 'http') || str_starts_with($this->client_avatar, 'data:')) {
                     $avatarUrl = $this->client_avatar;
                 } else {
                     $normalized = ltrim($this->client_avatar, '/');
                     if (str_starts_with($normalized, 'storage/')) {
-                        $normalized = substr($normalized, strlen('storage/'));
+                        $avatarUrl = url($normalized);
+                    } elseif (str_starts_with($normalized, 'images/')) {
+                        $avatarUrl = url($normalized);
+                    } else {
+                        $avatarUrl = url('storage/'.$normalized);
                     }
-                    $avatarUrl = url('storage/'.$normalized);
                 }
             }
         } elseif ($this->customer?->avatar) {

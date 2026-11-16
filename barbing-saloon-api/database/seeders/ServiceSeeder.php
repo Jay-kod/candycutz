@@ -44,7 +44,7 @@ class ServiceSeeder extends Seeder
                     'price' => $service['price'],
                     'duration_minutes' => $service['duration_minutes'],
                     'category_id' => $categoryId,
-                    'image' => null,
+                    'image' => 'images/services/service-1.png',
                     'is_active' => true,
                     'display_order' => $index,
                 ]

@@ -32,7 +32,7 @@
         <div class="bg-[var(--color-bg-secondary)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
           <div class="flex flex-col sm:flex-row items-center gap-6">
             <div class="h-24 w-24 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]">
-              <img v-if="service.image" :src="service.image" :alt="service.name" class="h-full w-full object-cover" />
+              <img v-if="service.image" :src="getStorageUrl(service.image)" :alt="service.name" class="h-full w-full object-cover" />
               <div v-else class="h-full w-full bg-[var(--color-bg-tertiary)] flex items-center justify-center">
                 <ScissorsIcon class="w-8 h-8 text-[var(--color-accent)]/60" />
               </div>

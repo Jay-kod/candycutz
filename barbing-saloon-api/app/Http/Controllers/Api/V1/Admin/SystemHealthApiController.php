@@ -69,7 +69,7 @@ class SystemHealthApiController
         // Quick DB ping
         $dbOk = true;
         try {
-            DB::connection()->getPdo();
+            DB::selectOne('SELECT 1');
         } catch (Throwable) {
             $dbOk = false;
         }

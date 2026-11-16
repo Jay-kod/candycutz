@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { DEFAULT_CONTACT_CONTENT, PLATFORMS_LIST } from './contactConstants';
 
 export function useContactCms() {
@@ -204,6 +206,10 @@ export function useContactCms() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Social links and contact content updated successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
 
       const data = response.data?.data;
       if (data) {

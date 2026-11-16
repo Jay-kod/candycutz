@@ -8,7 +8,7 @@
     <div class="flex items-start justify-between gap-3 mb-4 relative z-10">
       <div class="flex items-center gap-3.5 min-w-0">
         <div class="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-admin/25 to-admin/10 border border-admin/30 flex items-center justify-center text-admin font-display text-xl font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] group-hover:scale-105 transition-transform">
-          <img v-if="barber.avatar || barber.avatar_url" :src="barber.avatar || barber.avatar_url" :alt="barber.name" class="h-full w-full object-cover" />
+          <img v-if="barber.avatar || barber.avatar_url" :src="getStorageUrl(barber.avatar || barber.avatar_url)" :alt="barber.name" class="h-full w-full object-cover" />
           <span v-else>{{ initials(barber.name) }}</span>
           <div 
             class="absolute -top-1 -right-1 h-3 w-3 rounded-full border-2 border-theme-surface"
@@ -112,6 +112,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { 
   EnvelopeIcon, 
   SparklesIcon, 

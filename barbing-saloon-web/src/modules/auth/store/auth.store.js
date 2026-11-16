@@ -50,6 +50,11 @@ export const useAuthStore = defineStore('auth', {
 
     setToken(token) {
       this.token = token;
+      try {
+        resetNotifications();
+      } catch (e) {
+        // Safe fallback in SSR or unmounted environments
+      }
       if (typeof localStorage === 'undefined') return;
 
       if (token) {

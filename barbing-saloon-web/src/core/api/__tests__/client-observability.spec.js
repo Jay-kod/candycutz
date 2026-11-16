@@ -127,4 +127,23 @@ describe('API client error telemetry', () => {
       status: 401,
     });
   });
+
+  it('handles canceled requests cleanly without flagging network errors', async () => {
+    await import('../client');
+
+    const canceledError = {
+      code: 'ERR_CANCELED',
+      message: 'canceled',
+      config: {
+        method: 'get',
+        url: '/v1/catalogue/services',
+        headers: {},
+      },
+    };
+
+    await expect(apiMocks.responseErrorHandler(canceledError)).rejects.toMatchObject({
+      code: 'REQUEST_CANCELED',
+      isNetwork: false,
+    });
+  });
 });

@@ -10,6 +10,7 @@ use App\Domain\Payment\DataObjects\GatewayResult;
 use App\Domain\Payment\DataObjects\WebhookEvent;
 use App\Domain\Payment\Exceptions\PaymentException;
 use App\Models\Payment;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -24,8 +25,12 @@ class PaystackGateway implements PaymentGateway
 
     public function __construct()
     {
-        $this->secretKey = config('services.paystack.secret_key') ?: config('payments.gateways.paystack.secret_key', '');
-        $this->publicKey = config('services.paystack.public_key') ?: config('payments.gateways.paystack.public_key', '');
+        $this->secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value')
+            ?: config('services.paystack.secret_key')
+            ?: config('payments.gateways.paystack.secret_key', '');
+        $this->publicKey = Setting::query()->where('key', 'paystack_public_key')->value('value')
+            ?: config('services.paystack.public_key')
+            ?: config('payments.gateways.paystack.public_key', '');
         $this->baseUrl = config('services.paystack.base_url') ?: config('payments.gateways.paystack.base_url', 'https://api.paystack.co');
     }
 

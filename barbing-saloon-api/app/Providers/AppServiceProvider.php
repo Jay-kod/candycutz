@@ -63,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
                 : Limit::perMinute(60)->by((string) $request->ip());
         });
 
+        RateLimiter::for('health-check', function (Request $request) {
+            return Limit::perMinute(300)->by((string) $request->ip());
+        });
+
         RateLimiter::for('auth-sensitive', function (Request $request) {
             $identity = (string) ($request->input('identity') ?? $request->input('email') ?? $request->input('username') ?? $request->ip());
 

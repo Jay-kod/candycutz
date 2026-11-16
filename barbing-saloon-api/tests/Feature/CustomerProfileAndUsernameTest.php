@@ -170,3 +170,46 @@ it('allows username change after 60 days have passed', function () {
     $user->refresh();
     expect($user->username)->toBe('updatedhandle');
 });
+
+it('removes customer avatar when remove_avatar is true on profile update', function () {
+    $user = User::factory()->customer()->create([
+        'avatar' => "user-media/999/avatar/existing.webp",
+    ]);
+
+    $response = $this->actingAs($user)->postJson('/api/v1/customer/profile', [
+        'name' => $user->name,
+        'email' => $user->email,
+        'remove_avatar' => true,
+    ]);
+
+    $response->assertStatus(200);
+    expect($user->fresh()->avatar)->toBeNull();
+    expect($response->json('data.avatar'))->toBeNull();
+    expect($response->json('data.avatar_url'))->toBeNull();
+});
+
+it('uploads and deletes avatar via dedicated avatar endpoints', function () {
+    Storage::fake('local');
+    Storage::fake('public');
+
+    $user = User::factory()->customer()->create();
+    $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
+    $avatar = UploadedFile::fake()->createWithContent('new-avatar.jpg', $jpegBytes);
+
+    $uploadRes = $this->actingAs($user)->post('/api/v1/customer/avatar', [
+        'avatar' => $avatar,
+    ]);
+
+    $uploadRes->assertOk();
+    $uploadRes->assertJsonPath('success', true);
+    expect($user->fresh()->avatar)->toStartWith("user-media/{$user->id}/");
+    expect($uploadRes->json('data.avatar'))->toContain('signature=');
+    expect($uploadRes->json('data.avatar_url'))->toContain('signature=');
+
+    $deleteRes = $this->actingAs($user)->deleteJson('/api/v1/customer/avatar');
+    $deleteRes->assertOk();
+    $deleteRes->assertJsonPath('success', true);
+    expect($user->fresh()->avatar)->toBeNull();
+    expect($deleteRes->json('data.avatar'))->toBeNull();
+    expect($deleteRes->json('data.avatar_url'))->toBeNull();
+});

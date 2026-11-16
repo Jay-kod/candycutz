@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Content\Services;
 
+use App\Domain\Shared\Services\CatalogueCache;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 
@@ -101,5 +102,21 @@ class SettingsService
 
             return $merged;
         });
+    }
+
+    /**
+     * Clear all cached settings across all layers and groups.
+     */
+    public function clearCache(): void
+    {
+        Cache::forget('settings.all');
+        Cache::forget('settings.public');
+        Cache::forget('system_settings');
+
+        foreach (self::PUBLIC_GROUPS as $group) {
+            Cache::forget("settings.group.{$group}");
+        }
+
+        CatalogueCache::bust('settings');
     }
 }

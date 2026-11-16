@@ -1,7 +1,9 @@
 import { ref, computed, onBeforeUnmount } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl as resolveStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useAboutCms() {
   const toast = useToast();
@@ -145,6 +147,10 @@ export function useAboutCms() {
       
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('About page content saved successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
       
       const updatedData = response.data?.data;
       if (updatedData) {

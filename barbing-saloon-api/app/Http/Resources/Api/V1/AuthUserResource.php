@@ -17,6 +17,10 @@ class AuthUserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $mediaUrl = app(UserMediaUrl::class);
+        $avatarUrl = $mediaUrl->for($this->resource, $this->avatar);
+        $coverImageUrl = $mediaUrl->for($this->resource, $this->cover_image);
+
         $data = [
             'id' => $this->id,
             'name' => $this->name,
@@ -24,8 +28,10 @@ class AuthUserResource extends JsonResource
             'username' => $this->username ?? strtolower(explode('@', $this->email)[0]),
             'email' => $this->email,
             'role' => $this->role->value ?? $this->role,
-            'avatar' => app(UserMediaUrl::class)->for($this->resource, $this->avatar),
-            'cover_image' => app(UserMediaUrl::class)->for($this->resource, $this->cover_image),
+            'avatar' => $avatarUrl,
+            'avatar_url' => $avatarUrl,
+            'cover_image' => $coverImageUrl,
+            'cover_image_url' => $coverImageUrl,
             'phone' => $this->phone,
             'status' => $this->status ?? 'active',
             'is_active' => (bool) $this->is_active,

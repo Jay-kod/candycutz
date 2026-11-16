@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Content\Actions;
 
+use App\Domain\Content\Services\SettingsService;
 use App\Events\SettingsChanged;
 use App\Models\Setting;
 
@@ -52,5 +53,7 @@ class UpdateSettings
                 SettingsChanged::dispatch($key, $oldValue, $newValue, auth()->user());
             }
         }
+
+        app(SettingsService::class)->clearCache();
     }
 }

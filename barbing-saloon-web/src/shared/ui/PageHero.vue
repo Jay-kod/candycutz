@@ -38,10 +38,12 @@ const props = defineProps({
   loadSettings: { type: Boolean, default: true },
 });
 
+const publicStore = getActivePinia() ? usePublicContentStore() : null;
+
 const resolveInitialSettings = () => {
-  if (getActivePinia()) {
+  if (publicStore) {
     try {
-      return usePublicContentStore().settings || {};
+      return publicStore.settings || {};
     } catch {
       return {};
     }
@@ -92,8 +94,13 @@ const overlayBackground = computed(() => {
 onMounted(async () => {
   if (!props.loadSettings) return;
   try {
-    const data = await publicStore.getSettings();
-    if (data) settings.value = data;
+    if (publicStore) {
+      const data = await publicStore.getSettings();
+      if (data) settings.value = data;
+    } else {
+      const res = await publicApi.settings();
+      if (res.data?.data) settings.value = res.data.data;
+    }
   } catch (error) {
     console.error(`Failed to load ${props.pageKey} hero settings:`, error);
   }

@@ -15,7 +15,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 border-b border-slate-200 dark:border-white/[0.06]">
         <div class="relative group cursor-pointer shrink-0" @click="$refs.fileInput.click()">
           <div class="h-24 w-24 rounded-2xl border-2 border-gold/30 bg-slate-100 dark:bg-[#0B0F13] overflow-hidden flex items-center justify-center group-hover:border-gold transition-colors">
-            <img v-if="form.profile_image" :src="form.profile_image" class="h-full w-full object-cover" alt="Barber Portrait" />
+            <img v-if="form.profile_image" :src="form.profile_image" @error="form.profile_image = null" class="h-full w-full object-cover" alt="Barber Portrait" />
             <UserIcon v-else class="h-10 w-10 text-slate-500" />
             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
               <CameraIcon class="h-6 w-6 text-white" />
@@ -99,6 +99,7 @@
           <img
             v-if="form.cover_image"
             :src="form.cover_image"
+            @error="form.cover_image = null"
             alt="Profile Cover Banner"
             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             data-test="cover-image-preview"

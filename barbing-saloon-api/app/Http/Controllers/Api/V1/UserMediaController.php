@@ -19,36 +19,42 @@ class UserMediaController
         };
         $path = "user-media/{$user->id}/{$type}/{$filename}";
         $storedValue = ltrim(str_replace('storage/', '', (string) $user->{$field}), '/');
-        if ($storedValue !== $path) {
+
+        $isThumbnail = str_starts_with($filename, 'thumb_');
+        $baseFilename = $isThumbnail ? substr($filename, 6) : $filename;
+        $baseStoredPath = "user-media/{$user->id}/{$type}/{$baseFilename}";
+
+        if ($storedValue !== $path && $storedValue !== $baseStoredPath) {
             abort(404);
         }
 
-        if (Storage::disk('local')->exists($path)) {
-            return Storage::disk('local')->response($path, null, [
-                'Cache-Control' => 'private, no-store',
-                'X-Content-Type-Options' => 'nosniff',
-            ]);
-        }
+        $headers = [
+            'Cache-Control' => 'public, max-age=604800, immutable',
+            'X-Content-Type-Options' => 'nosniff',
+        ];
 
-        if (file_exists(storage_path('app/'.$path))) {
-            return response()->file(storage_path('app/'.$path), [
-                'Cache-Control' => 'private, no-store',
-                'X-Content-Type-Options' => 'nosniff',
-            ]);
-        }
+        $pathsToTry = $isThumbnail ? [$path, $baseStoredPath] : [$path];
 
-        if (Storage::disk('public')->exists($path)) {
-            return Storage::disk('public')->response($path, null, [
-                'Cache-Control' => 'private, no-store',
-                'X-Content-Type-Options' => 'nosniff',
-            ]);
-        }
+        foreach ($pathsToTry as $candidatePath) {
+            if (Storage::disk('local')->exists($candidatePath)) {
+                return Storage::disk('local')->response($candidatePath, null, $headers);
+            }
 
-        if (file_exists(public_path('storage/'.$path))) {
-            return response()->file(public_path('storage/'.$path), [
-                'Cache-Control' => 'private, no-store',
-                'X-Content-Type-Options' => 'nosniff',
-            ]);
+            if (file_exists(storage_path('app/private/'.$candidatePath))) {
+                return response()->file(storage_path('app/private/'.$candidatePath), $headers);
+            }
+
+            if (file_exists(storage_path('app/'.$candidatePath))) {
+                return response()->file(storage_path('app/'.$candidatePath), $headers);
+            }
+
+            if (Storage::disk('public')->exists($candidatePath)) {
+                return Storage::disk('public')->response($candidatePath, null, $headers);
+            }
+
+            if (file_exists(public_path('storage/'.$candidatePath))) {
+                return response()->file(public_path('storage/'.$candidatePath), $headers);
+            }
         }
 
         abort(404);

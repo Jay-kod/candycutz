@@ -20,14 +20,17 @@ class GalleryResource extends JsonResource
         $barberUser = $barber?->user;
         $imageUrl = null;
         if ($this->image_path) {
-            if (str_starts_with($this->image_path, 'http')) {
+            if (str_starts_with($this->image_path, 'http') || str_starts_with($this->image_path, 'data:')) {
                 $imageUrl = $this->image_path;
             } else {
                 $normalized = ltrim($this->image_path, '/');
                 if (str_starts_with($normalized, 'storage/')) {
-                    $normalized = substr($normalized, strlen('storage/'));
+                    $imageUrl = url($normalized);
+                } elseif (str_starts_with($normalized, 'images/')) {
+                    $imageUrl = url($normalized);
+                } else {
+                    $imageUrl = url('storage/'.$normalized);
                 }
-                $imageUrl = url('storage/'.$normalized);
             }
         }
 

@@ -31,6 +31,14 @@ export const usePublicContentStore = defineStore('publicContent', {
 
   actions: {
     /**
+     * Clear settings cache immediately to force a fresh fetch from the server.
+     */
+    clearSettingsCache() {
+      this.settings = null;
+      this.settingsLastFetched = 0;
+    },
+
+    /**
      * Stale-While-Revalidate public settings loader.
      * Returns cached data immediately if available; revalidates in background if stale.
      */

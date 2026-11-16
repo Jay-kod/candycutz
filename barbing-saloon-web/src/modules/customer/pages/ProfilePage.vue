@@ -9,7 +9,7 @@
             <!-- Avatar in Header -->
             <div class="relative group cursor-pointer shrink-0" @click="$refs.avatarInput.click()">
               <div class="h-20 w-20 md:h-24 md:w-24 rounded-2xl border-2 border-[var(--color-accent)]/40 overflow-hidden shadow-lg transition-all group-hover:border-[var(--color-accent)] bg-slate-100 dark:bg-black/40">
-                <img v-if="avatarPreview" :src="avatarPreview" alt="Avatar" class="h-full w-full object-cover" />
+                <img v-if="avatarPreview" :src="avatarPreview" @error="avatarPreview = null" alt="Avatar" class="h-full w-full object-cover" />
                 <div v-else class="h-full w-full bg-[var(--color-accent)]/10 flex items-center justify-center">
                   <span class="text-2xl font-display font-bold text-[var(--color-accent)]">{{ initials }}</span>
                 </div>
@@ -48,7 +48,7 @@
 
           <!-- Avatar Preview Row -->
           <div v-if="avatarPreview" class="mt-5 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.03] p-3.5 flex items-center gap-4">
-            <img :src="avatarPreview" alt="Profile picture" class="h-12 w-12 rounded-xl object-cover border border-[var(--color-accent)]/30" />
+            <img :src="avatarPreview" @error="avatarPreview = null" alt="Profile picture" class="h-12 w-12 rounded-xl object-cover border border-[var(--color-accent)]/30" />
             <div class="flex-1 min-w-0">
               <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ form.name || form.username || 'Custom Avatar' }}</p>
               <p class="text-[11px] text-[var(--color-text-secondary)]">Click avatar to select replacement</p>
@@ -159,6 +159,7 @@ const history = ref({});
 const originalProfile = ref({});
 const avatarPreview = ref(null);
 const avatarInput = ref(null);
+const removeAvatarRequested = ref(false);
 
 const initials = computed(() => {
   const name = form.name || form.username || form.email || '?';
@@ -198,6 +199,7 @@ function handleFile(event) {
     return;
   }
 
+  removeAvatarRequested.value = false;
   form.avatar = file;
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -209,6 +211,7 @@ function handleFile(event) {
 function removeAvatar() {
   form.avatar = null;
   avatarPreview.value = null;
+  removeAvatarRequested.value = true;
   if (avatarInput.value) avatarInput.value.value = '';
 }
 
@@ -221,16 +224,17 @@ async function submit() {
   payload.append('email', form.email || '');
   payload.append('bio', form.bio || '');
 
-  if (form.avatar) {
+  if (removeAvatarRequested.value) {
+    payload.append('remove_avatar', '1');
+  } else if (form.avatar) {
     payload.append('avatar', form.avatar);
   }
 
   try {
-    const response = await client.post('/customer/profile', payload, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await client.post('/customer/profile', payload);
     status.value = response.data?.message || 'Profile updated successfully!';
     toast.success('Profile updated');
+    removeAvatarRequested.value = false;
     await loadProfile();
     await authStore.fetchUser();
   } catch (error) {
@@ -252,8 +256,9 @@ async function loadProfile() {
     form.bio = profile.bio || '';
     history.value = response.data?.data?.history || {};
 
-    if (profile.avatar) {
-      avatarPreview.value = getStorageUrl(profile.avatar);
+    const avatarUrl = profile.avatar_url || profile.avatar;
+    if (avatarUrl) {
+      avatarPreview.value = getStorageUrl(avatarUrl);
     } else {
       avatarPreview.value = null;
     }

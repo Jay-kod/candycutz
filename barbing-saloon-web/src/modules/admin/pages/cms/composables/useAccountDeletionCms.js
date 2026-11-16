@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { DEFAULT_ACCOUNT_DELETION_CONTENT } from './accountDeletionConstants';
 
 export function useAccountDeletionCms() {
@@ -142,6 +144,10 @@ export function useAccountDeletionCms() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Account deletion content saved successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
 
       const data = response.data?.data;
       if (data) {

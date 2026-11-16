@@ -244,4 +244,78 @@ class BookingApprovalNotificationTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_payment_notifications_are_strictly_isolated_to_payer_and_barber(): void
+    {
+        // Notification for Customer A's payment
+        Notification::create([
+            'sender_id' => $this->admin->id,
+            'recipient_type' => 'customer',
+            'recipient_id' => $this->customerA->id,
+            'type' => 'payment_verified',
+            'title' => 'Payment Confirmed ✅',
+            'message' => 'Your payment of 5000 has been verified.',
+            'related_entity_id' => $this->appointment->id,
+            'is_read' => false,
+        ]);
+
+        // Customer A sees their payment notification
+        $resA = $this->actingAs($this->customerA)->getJson('/api/v1/notifications');
+        $resA->assertOk();
+        $this->assertCount(1, $resA->json('data'));
+        $this->assertEquals('payment_verified', $resA->json('data.0.type'));
+
+        // Customer B must NOT see Customer A's payment notification
+        $resB = $this->actingAs($this->customerB)->getJson('/api/v1/notifications');
+        $resB->assertOk();
+        $this->assertCount(0, $resB->json('data'));
+    }
+
+    public function test_security_and_account_notifications_do_not_leak_across_users(): void
+    {
+        // Security notification for Customer A
+        Notification::create([
+            'sender_id' => $this->admin->id,
+            'recipient_type' => 'customer',
+            'recipient_id' => $this->customerA->id,
+            'type' => 'password_changed',
+            'title' => 'Security Alert: Password Changed',
+            'message' => 'Your account password was recently updated.',
+            'is_read' => false,
+        ]);
+
+        // Customer A sees it
+        $resA = $this->actingAs($this->customerA)->getJson('/api/v1/notifications');
+        $resA->assertOk();
+        $this->assertCount(1, $resA->json('data'));
+        $this->assertEquals('password_changed', $resA->json('data.0.type'));
+
+        // Customer B sees 0
+        $resB = $this->actingAs($this->customerB)->getJson('/api/v1/notifications');
+        $resB->assertOk();
+        $this->assertCount(0, $resB->json('data'));
+    }
+
+    public function test_non_whitelist_broadcast_notifications_never_leak_to_customers(): void
+    {
+        // Stray notification with null recipient_id and non-whitelist type
+        Notification::create([
+            'sender_id' => $this->admin->id,
+            'recipient_type' => 'all_customers',
+            'recipient_id' => null,
+            'type' => 'internal_audit_log',
+            'title' => 'Internal Server Metric',
+            'message' => 'Confidential diagnostic metrics',
+            'is_read' => false,
+        ]);
+
+        // Customer A and B MUST NOT receive internal_audit_log
+        $resA = $this->actingAs($this->customerA)->getJson('/api/v1/notifications');
+        $resA->assertOk();
+        $this->assertCount(0, $resA->json('data'));
+
+        $resB = $this->actingAs($this->customerB)->getJson('/api/v1/notifications');
+        $resB->assertOk();
+        $this->assertCount(0, $resB->json('data'));
+    }
 }

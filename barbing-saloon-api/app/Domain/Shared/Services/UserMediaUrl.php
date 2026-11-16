@@ -29,11 +29,14 @@ class UserMediaUrl
             $relativePath = substr($normalizedPath, strlen($prefix));
             $parts = explode('/', $relativePath, 2);
             if (count($parts) === 2 && in_array($parts[0], ['avatar', 'cover'], true)) {
-                return URL::temporarySignedRoute(
+                $relativeSigned = URL::temporarySignedRoute(
                     'user-media.show',
-                    now()->addMinutes(30),
-                    ['user' => $user->id, 'type' => $parts[0], 'filename' => basename($parts[1])]
+                    now()->addDays(7),
+                    ['user' => $user->id, 'type' => $parts[0], 'filename' => basename($parts[1])],
+                    absolute: false
                 );
+
+                return url($relativeSigned);
             }
         }
 

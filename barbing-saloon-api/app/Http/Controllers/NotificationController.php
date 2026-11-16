@@ -14,6 +14,31 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController
 {
     /**
+     * Whitelist of event types permitted for general public / store broadcast.
+     * Every other notification type across the entire platform is strictly private
+     * and requires direct recipient matching (recipient_id === $user->id).
+     */
+    public const CUSTOMER_BROADCAST_TYPES = [
+        'system_update',
+        'system_announcement',
+        'announcement',
+        'broadcast',
+        'promotion',
+        'promotional',
+    ];
+
+    /**
+     * Whitelist of event types permitted for general staff broadcast.
+     */
+    public const BARBER_BROADCAST_TYPES = [
+        'system_update',
+        'system_announcement',
+        'announcement',
+        'broadcast',
+        'staff_announcement',
+    ];
+
+    /**
      * Helper to safely extract role as a string
      */
     private function getUserRoleString(User $user): string
@@ -27,41 +52,47 @@ class NotificationController
 
     /**
      * Build an authoritative query scoped strictly to the authenticated user.
-     * Prevents broadcast leakage of private appointment/payment lifecycle events
-     * to unrelated customers, and eliminates IDOR vulnerability in read/delete actions.
+     * Enforces privacy-by-default across ALL notifications in the entire system:
+     * - Every customer and barber receives ONLY direct personal notifications
+     *   targeted explicitly to their user ID (recipient_id === $user->id).
+     * - Broadcast notifications (recipient_id IS NULL) are ONLY visible if the
+     *   notification is explicitly typed as a public announcement / system broadcast.
+     * - Operational shop alerts (recipient_type IN ('all_admins', 'admin')) are
+     *   strictly restricted to administrators.
      */
     private function getScopedQuery(User $user): \Illuminate\Database\Eloquent\Builder
     {
         $role = $this->getUserRoleString($user);
         $isAdmin = in_array($role, ['admin', 'super_admin'], true);
 
-        // Broadcast types permitted for this user's role
-        $broadcastRecipients = match ($role) {
-            'admin', 'super_admin' => ['all', 'all_admins', 'admin'],
-            'barber' => ['all', 'all_barbers'],
-            default => ['all', 'all_customers'],
-        };
-
         return Notification::query()
-            ->where(function ($q) use ($user, $isAdmin, $broadcastRecipients) {
+            ->where(function ($q) use ($user, $role, $isAdmin) {
                 // 1. Direct personal notifications explicitly targeted to this user ID
+                // (Applies to all notification types across the entire system: bookings, payments,
+                // reviews, accounts, passwords, security, receipts, walk-ins, refunds, etc.)
                 $q->where('recipient_id', $user->id);
 
                 // 2. Broadcast notifications (recipient_id IS NULL)
                 if ($isAdmin) {
-                    // Admins see shop alert broadcasts (all_admins) and system announcements
-                    $q->orWhere(function ($sub) use ($broadcastRecipients) {
+                    // Admins see operational shop broadcasts and system announcements
+                    $q->orWhere(function ($sub) {
                         $sub->whereNull('recipient_id')
-                            ->whereIn('recipient_type', $broadcastRecipients);
+                            ->whereIn('recipient_type', ['all', 'all_admins', 'admin']);
+                    });
+                } elseif ($role === 'barber') {
+                    // Barbers ONLY see explicit staff broadcasts or general announcements
+                    $q->orWhere(function ($sub) {
+                        $sub->whereNull('recipient_id')
+                            ->whereIn('recipient_type', ['all', 'all_barbers'])
+                            ->whereIn('type', self::BARBER_BROADCAST_TYPES);
                     });
                 } else {
-                    // Customers and Barbers can ONLY see general system broadcasts, NEVER appointment or payment updates
-                    $q->orWhere(function ($sub) use ($broadcastRecipients) {
+                    // Customers ONLY see explicit public store announcements / system updates
+                    // NEVER any user-specific or operational notification
+                    $q->orWhere(function ($sub) {
                         $sub->whereNull('recipient_id')
-                            ->whereIn('recipient_type', $broadcastRecipients)
-                            ->where('type', 'not like', 'booking_%')
-                            ->where('type', 'not like', 'payment_%')
-                            ->whereNotIn('type', ['booking', 'payment']);
+                            ->whereIn('recipient_type', ['all', 'all_customers'])
+                            ->whereIn('type', self::CUSTOMER_BROADCAST_TYPES);
                     });
                 }
             });
@@ -152,19 +183,24 @@ class NotificationController
         $recipientId = $validated['recipient_id'] ?? null;
         $recipientType = $validated['recipient_type'] ?? 'all_customers';
 
-        // Authorization: Only admins and barbers can create broadcast notifications
-        if ($recipientId === null && ! in_array($role, ['admin', 'super_admin', 'barber'], true)) {
+        // Authorization: Only admins can create broadcast notifications
+        if ($recipientId === null && ! in_array($role, ['admin', 'super_admin'], true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized to send broadcast notifications',
             ], 403);
         }
 
+        $type = $validated['type'] ?? 'system_update';
+        if ($recipientId === null && ! in_array($type, self::CUSTOMER_BROADCAST_TYPES, true)) {
+            $type = 'system_update';
+        }
+
         $notification = Notification::create([
             'sender_id' => $user->id,
             'recipient_type' => $recipientType,
             'recipient_id' => $recipientId,
-            'type' => $validated['type'] ?? 'system_update',
+            'type' => $type,
             'title' => $validated['title'],
             'message' => $validated['message'],
             'related_entity_id' => $validated['related_entity_id'] ?? null,

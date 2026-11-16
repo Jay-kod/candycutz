@@ -5,7 +5,7 @@
       <div class="relative flex items-center justify-center shrink-0">
         <div :class="['h-11 w-11 rounded-2xl p-[1px] bg-gradient-to-br flex items-center justify-center group-hover:scale-105 transition-transform duration-300', portalConfig.rimGradient]">
           <div class="h-full w-full rounded-[15px] bg-[var(--color-bg-secondary)] dark:bg-[#121824] flex items-center justify-center overflow-hidden">
-            <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-6 w-6 object-contain" />
+            <img :src="getStorageUrl('/images/logo-icon.png')" :alt="`${brandName} logo`" class="h-6 w-6 object-contain" />
           </div>
         </div>
       </div>
@@ -44,6 +44,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';

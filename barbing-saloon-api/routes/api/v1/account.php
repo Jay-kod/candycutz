@@ -19,7 +19,7 @@ Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController
     ->whereNumber('user')
     ->where('type', 'avatar|cover')
     ->where('filename', '[A-Za-z0-9_.-]+')
-    ->middleware('signed')
+    ->middleware('signed:relative')
     ->name('user-media.show');
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -32,9 +32,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('check.role:customer')->post('/customer/feedback', [FeedbackSubmissionApiController::class, 'store']);
 
     Route::get('/account/profile', [AccountApiController::class, 'profile']);
-    Route::post('/account/profile', [AccountApiController::class, 'updateProfile']);
+    Route::match(['post', 'put', 'patch'], '/account/profile', [AccountApiController::class, 'updateProfile']);
     Route::get('/customer/profile', [AccountApiController::class, 'profile']);
-    Route::post('/customer/profile', [AccountApiController::class, 'updateProfile']);
+    Route::match(['post', 'put', 'patch'], '/customer/profile', [AccountApiController::class, 'updateProfile']);
+    Route::post('/account/avatar', [AccountApiController::class, 'uploadAvatar']);
+    Route::post('/customer/avatar', [AccountApiController::class, 'uploadAvatar']);
+    Route::delete('/account/avatar', [AccountApiController::class, 'deleteAvatar']);
+    Route::delete('/customer/avatar', [AccountApiController::class, 'deleteAvatar']);
 
     Route::get('/account/analytics', [AccountApiController::class, 'analytics']);
     Route::get('/customer/analytics', [AccountApiController::class, 'analytics']);

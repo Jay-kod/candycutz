@@ -108,20 +108,28 @@ class BarberApiController
             'specialties.*' => 'string|max:50',
             'experience_years' => 'sometimes|integer|min:0|max:80',
             'instagram_url' => 'sometimes|string|nullable',
-            'avatar' => 'sometimes|image|max:5120',
-            'cover_image' => 'sometimes|image|max:5120',
+            'avatar' => 'sometimes|nullable|image|max:5120',
+            'cover_image' => 'sometimes|nullable|image|max:5120',
+            'remove_avatar' => 'sometimes|nullable|boolean',
+            'remove_cover_image' => 'sometimes|nullable|boolean',
             'bank_name' => 'sometimes|string|nullable|max:100',
             'account_name' => 'sometimes|string|nullable|max:100',
             'account_number' => 'sometimes|string|nullable|max:30',
         ]);
 
-        if ($request->hasFile('avatar')) {
+        if ($request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true') {
+            $data['avatar'] = null;
+        } elseif ($request->hasFile('avatar')) {
             $data['avatar'] = $imageUpload->execute($request->file('avatar'), 'user-media/'.$user->id.'/avatar', 'local');
         }
 
-        if ($request->hasFile('cover_image')) {
+        if ($request->boolean('remove_cover_image') || $request->input('remove_cover_image') === '1' || $request->input('remove_cover_image') === 'true') {
+            $data['cover_image'] = null;
+        } elseif ($request->hasFile('cover_image')) {
             $data['cover_image'] = $imageUpload->execute($request->file('cover_image'), 'user-media/'.$user->id.'/cover', 'local');
         }
+
+        unset($data['remove_avatar'], $data['remove_cover_image']);
 
         $action->execute($user, $data);
 

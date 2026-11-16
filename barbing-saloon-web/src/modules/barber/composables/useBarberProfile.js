@@ -144,8 +144,9 @@ export function useBarberProfile() {
       const updatedBarber = res.data?.data?.barber || {};
       const updatedUser = res.data?.data?.user || {};
 
-      if (updatedUser.avatar_url || updatedBarber.avatar_url) {
-        form.profile_image = updatedUser.avatar_url || updatedBarber.avatar_url;
+      const updatedAvatar = updatedUser.avatar_url || updatedBarber.avatar_url || updatedUser.avatar || updatedBarber.avatar;
+      if (updatedAvatar) {
+        form.profile_image = updatedAvatar.startsWith('http') ? updatedAvatar : getStorageUrl(updatedAvatar);
       }
 
       if (updatedUser.cover_image_url || updatedBarber.cover_image_url || updatedUser.cover_image || updatedBarber.cover_image) {

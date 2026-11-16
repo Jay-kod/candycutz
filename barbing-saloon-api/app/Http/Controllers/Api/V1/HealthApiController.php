@@ -15,7 +15,7 @@ class HealthApiController
     {
         $dbStatus = 'disconnected';
         try {
-            DB::connection()->getPdo();
+            DB::selectOne('SELECT 1');
             $dbStatus = 'connected';
         } catch (Throwable) {
             $dbStatus = 'disconnected';

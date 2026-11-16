@@ -103,7 +103,7 @@ class SecureImageUpload
         $path = trim($directory, '/').'/'.$filename;
         Storage::disk($disk)->putFileAs(trim($directory, '/'), $file, $filename);
 
-        if (! app()->runningUnitTests() && $isReadable) {
+        if (! app()->runningUnitTests() && $canReadContents) {
             $publicStoragePath = public_path('storage/'.$path);
             if (! file_exists($publicStoragePath)) {
                 @mkdir(dirname($publicStoragePath), 0755, true);

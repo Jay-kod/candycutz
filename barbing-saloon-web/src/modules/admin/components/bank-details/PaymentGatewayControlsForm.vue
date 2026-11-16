@@ -193,11 +193,168 @@
         </button>
       </div>
     </div>
+
+    <!-- Paystack Gateway Integration & Connection Testing Card -->
+    <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 sm:p-8 shadow-xl space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-white/[0.08]">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <BoltIcon class="h-5 w-5 text-emerald-500" />
+            Paystack Integration & Connection
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-[var(--color-text-secondary)] mt-0.5">
+            Link your Paystack API keys to connect the payment gateway and verify your account credentials.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border',
+              paystackStatus.connected
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+            ]"
+          >
+            <span class="h-2 w-2 rounded-full" :class="paystackStatus.connected ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+            {{ paystackStatus.connected ? (paystackStatus.mode?.toUpperCase() + ' MODE CONNECTED') : (paystackStatus.is_secret_set ? 'KEYS LINKED • UNTESTED' : 'NOT LINKED') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Paystack Keys Inputs -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Public Key -->
+        <div class="space-y-2">
+          <label class="block text-xs uppercase tracking-wider font-bold text-slate-700 dark:text-slate-300">
+            Paystack Public Key
+          </label>
+          <input
+            v-model="paystackForm.public_key"
+            type="text"
+            placeholder="pk_test_... or pk_live_..."
+            class="w-full rounded-2xl border border-slate-200 dark:border-white/[0.1] bg-slate-50 dark:bg-black/40 px-4 py-3 text-xs font-mono text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500"
+          />
+          <p class="text-[11px] text-slate-500 dark:text-zinc-400">
+            Client-facing key for Paystack checkout and mobile integration.
+          </p>
+        </div>
+
+        <!-- Secret Key -->
+        <div class="space-y-2">
+          <label class="block text-xs uppercase tracking-wider font-bold text-slate-700 dark:text-slate-300">
+            Paystack Secret Key
+          </label>
+          <div class="relative">
+            <input
+              v-model="paystackForm.secret_key"
+              :type="showSecretKey ? 'text' : 'password'"
+              :placeholder="paystackStatus.masked_secret_key || 'sk_test_... or sk_live_...'"
+              class="w-full rounded-2xl border border-slate-200 dark:border-white/[0.1] bg-slate-50 dark:bg-black/40 px-4 py-3 pr-14 text-xs font-mono text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500"
+            />
+            <button
+              type="button"
+              @click="showSecretKey = !showSecretKey"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs cursor-pointer font-medium"
+            >
+              {{ showSecretKey ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-zinc-400">
+            Secret token used server-side for signature validation, transactions, and refunds.
+          </p>
+        </div>
+      </div>
+
+      <!-- Webhook URL Display & Paystack Dashboard Link -->
+      <div class="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Paystack Webhook URL:</span>
+            <p class="text-[11px] text-slate-500 dark:text-zinc-400">Paste this URL into your Paystack Dashboard &rarr; Settings &rarr; Preferences / API Keys & Webhooks</p>
+          </div>
+          <a
+            href="https://dashboard.paystack.com/#/settings/developer"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:underline font-semibold"
+          >
+            Open Paystack Dashboard &rarr;
+          </a>
+        </div>
+        <div class="flex items-center gap-2">
+          <input
+            :value="paystackStatus.webhook_url || defaultWebhookUrl"
+            readonly
+            class="flex-1 rounded-xl bg-white dark:bg-black/60 border border-slate-200 dark:border-white/[0.08] px-3 py-2 text-xs font-mono text-slate-600 dark:text-zinc-300"
+          />
+          <button
+            type="button"
+            @click="copyWebhook"
+            class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-xs font-bold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
+          >
+            {{ webhookCopied ? 'Copied!' : 'Copy URL' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Connection Result Notification -->
+      <div
+        v-if="testResult"
+        :class="[
+          'p-3.5 rounded-2xl border text-xs flex items-center justify-between gap-3 transition-all',
+          testResult.success
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+            : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+        ]"
+      >
+        <div class="flex items-center gap-2">
+          <CheckCircleIcon v-if="testResult.success" class="h-4 w-4 shrink-0 text-emerald-400" />
+          <XCircleIcon v-else class="h-4 w-4 shrink-0 text-rose-400" />
+          <span class="font-medium">{{ testResult.message }}</span>
+        </div>
+        <span
+          v-if="testResult.mode"
+          class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-black/40 border border-current shrink-0"
+        >
+          {{ testResult.mode }} MODE
+        </span>
+      </div>
+
+      <!-- Footer Buttons for Paystack -->
+      <div class="pt-4 border-t border-slate-100 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+        <!-- Test Connection Button -->
+        <button
+          type="button"
+          :disabled="testingConnection"
+          @click="testConnection"
+          class="flex items-center gap-2 rounded-xl bg-slate-800 dark:bg-white/[0.06] hover:bg-slate-700 dark:hover:bg-white/[0.1] border border-slate-600 dark:border-white/10 px-4 py-2.5 text-xs font-bold text-white transition-all disabled:opacity-50 cursor-pointer"
+        >
+          <span v-if="testingConnection" class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+          <BoltIcon v-else class="h-4 w-4 text-emerald-400" />
+          <span>{{ testingConnection ? 'Testing Connection...' : 'Test Paystack Connection' }}</span>
+        </button>
+
+        <!-- Save Keys Button -->
+        <button
+          type="button"
+          :disabled="savingPaystack"
+          @click="savePaystackKeys"
+          class="flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+        >
+          <span v-if="savingPaystack" class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+          <CheckCircleIcon v-else class="h-4 w-4" />
+          <span>{{ savingPaystack ? 'Saving Keys...' : 'Save Paystack Keys' }}</span>
+        </button>
+      </div>
+    </div>
   </form>
 </template>
 
 <script setup>
-import { AdjustmentsHorizontalIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { ref, reactive, onMounted } from 'vue';
+import { AdjustmentsHorizontalIcon, CheckCircleIcon, BoltIcon, XCircleIcon } from '@heroicons/vue/24/outline';
+import { client } from '@/shared/api/client';
+import { useToast } from '@/core/composables/useToast';
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -205,6 +362,8 @@ const props = defineProps({
 });
 
 defineEmits(['save']);
+
+const toast = useToast();
 
 const allChannels = [
   { id: 'bank_transfer', label: 'Bank Transfer' },
@@ -228,4 +387,108 @@ function formatCountdownDisplay(mins) {
   const m = Number(mins) || 120;
   return `${m - 1}:21`;
 }
+
+// Paystack Integration State
+const showSecretKey = ref(false);
+const testingConnection = ref(false);
+const savingPaystack = ref(false);
+const webhookCopied = ref(false);
+const defaultWebhookUrl = ref(
+  typeof window !== 'undefined'
+    ? `${window.location.origin}/api/v1/payments/webhook`
+    : 'https://api.candycutz.com/api/v1/payments/webhook'
+);
+
+const paystackForm = reactive({
+  public_key: '',
+  secret_key: ''
+});
+
+const paystackStatus = reactive({
+  connected: false,
+  mode: '',
+  is_secret_set: false,
+  masked_secret_key: '',
+  webhook_url: ''
+});
+
+const testResult = ref(null);
+
+async function loadPaystackSettings() {
+  try {
+    const res = await client.get('/admin/paystack/settings');
+    const data = res.data?.data || res.data || {};
+    if (data.public_key) paystackForm.public_key = data.public_key;
+    paystackStatus.is_secret_set = Boolean(data.is_secret_set);
+    paystackStatus.masked_secret_key = data.masked_secret_key || '';
+    if (data.webhook_url) paystackStatus.webhook_url = data.webhook_url;
+  } catch {
+    // Graceful fallback for test environments or offline
+  }
+}
+
+async function copyWebhook() {
+  const url = paystackStatus.webhook_url || defaultWebhookUrl.value;
+  try {
+    await navigator.clipboard.writeText(url);
+    webhookCopied.value = true;
+    toast.success('Webhook URL copied to clipboard!');
+    setTimeout(() => { webhookCopied.value = false; }, 2500);
+  } catch {
+    toast.error('Failed to copy webhook URL');
+  }
+}
+
+async function savePaystackKeys() {
+  savingPaystack.value = true;
+  try {
+    await client.post('/admin/paystack/settings', {
+      public_key: paystackForm.public_key.trim(),
+      secret_key: paystackForm.secret_key.trim()
+    });
+    toast.success('Paystack API keys saved successfully!');
+    paystackForm.secret_key = '';
+    await loadPaystackSettings();
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Failed to save Paystack settings';
+    toast.error(msg);
+  } finally {
+    savingPaystack.value = false;
+  }
+}
+
+async function testConnection() {
+  testingConnection.value = true;
+  testResult.value = null;
+
+  try {
+    const res = await client.post('/admin/paystack/test-connection', {
+      secret_key: paystackForm.secret_key.trim() || undefined
+    });
+    const data = res.data?.data || res.data || {};
+    testResult.value = {
+      success: true,
+      message: data.message || 'Connection verified successfully!',
+      mode: data.mode || (paystackForm.public_key.startsWith('pk_live_') ? 'live' : 'test')
+    };
+    paystackStatus.connected = true;
+    paystackStatus.mode = testResult.value.mode;
+    toast.success(testResult.value.message);
+  } catch (err) {
+    const msg = err.response?.data?.message || err.message || 'Paystack connection failed';
+    testResult.value = {
+      success: false,
+      message: msg,
+      mode: null
+    };
+    paystackStatus.connected = false;
+    toast.error(msg);
+  } finally {
+    testingConnection.value = false;
+  }
+}
+
+onMounted(() => {
+  loadPaystackSettings();
+});
 </script>

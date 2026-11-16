@@ -1,8 +1,10 @@
 import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl as resolveStorageUrl } from '@/core/utils/url';
 import { DEFAULT_OVERLAY_PRESETS } from '@/core/utils/heroOverlay';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useCmsSettings() {
   const toast = useToast();
@@ -236,6 +238,10 @@ export function useCmsSettings() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Settings updated successfully');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
       
       const updatedData = response.data.data;
       if (updatedData) {

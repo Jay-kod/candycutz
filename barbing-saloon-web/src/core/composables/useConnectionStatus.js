@@ -55,6 +55,14 @@ export function useConnectionStatus() {
     }
   }
 
+  function reportNetworkFailure(customMessage = null) {
+    if (connectionState.value === 'disconnected') {
+      return;
+    }
+    // Verify connection via health probe before alarming user with a false disconnection alert
+    checkHealth();
+  }
+
   function markConnected(customMessage = null) {
     if (connectionState.value === 'disconnected') {
       stopProbe();
@@ -88,7 +96,7 @@ export function useConnectionStatus() {
 
     try {
       const response = await axios.get(`${API_V1_BASE_URL}/health`, {
-        timeout: 5000,
+        timeout: 8000,
         headers: {
           Accept: 'application/json',
           'X-Client': 'web',
@@ -116,8 +124,10 @@ export function useConnectionStatus() {
       } else if (response) {
         const isDbErr =
           response.data?.error?.code === 'DB_UNAVAILABLE' ||
-          response.data?.error?.code === 'DB_DEADLOCK' ||
-          /database|SQLSTATE|Connection refused/i.test(response.data?.message || '');
+          (response.status === 503 && response.data?.data?.services?.database === 'disconnected') ||
+          /(?:SQLSTATE\[HY000\]\s*\[2002\]|SQLSTATE\[HY000\]:\s*General error:\s*2006|ECONNREFUSED|actively refused|No connection could be made)/i.test(
+            response.data?.error?.message || response.data?.message || ''
+          );
         if (isDbErr) {
           markDisconnected('database', response.data?.error?.message || response.data?.message || 'Database unavailable.');
         } else {
@@ -174,6 +184,7 @@ export function useConnectionStatus() {
     isRecovered,
     isBannerVisible,
     markDisconnected,
+    reportNetworkFailure,
     markConnected,
     checkHealth,
     retry,

@@ -42,6 +42,7 @@ use App\Models\Setting;
 use App\Models\WorkingHour;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class AdminApiController
 {
@@ -444,5 +445,86 @@ class AdminApiController
             'ussd_code_template' => $validated['ussd_code_template'] ?? '*737*2*{amount}*{account_number}#',
             'auto_confirm' => array_key_exists('auto_confirm', $validated) ? (bool) $validated['auto_confirm'] : true,
         ], 'Bank account details saved to database successfully');
+    }
+
+    public function getPaystackSettings(): JsonResponse
+    {
+        $publicKey = Setting::query()->where('key', 'paystack_public_key')->value('value') ?? config('services.paystack.public_key', '');
+        $secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value') ?? config('services.paystack.secret_key', '');
+
+        $maskedSecret = '';
+        if (!empty($secretKey)) {
+            $len = strlen($secretKey);
+            $maskedSecret = $len > 10 ? substr($secretKey, 0, 7) . '...' . substr($secretKey, -4) : '********';
+        }
+
+        $appUrl = rtrim(config('app.url') ?? 'http://localhost:8000', '/');
+        $webhookUrl = $appUrl . '/api/v1/payments/webhook';
+
+        return ApiResponse::success([
+            'public_key' => $publicKey,
+            'is_secret_set' => !empty($secretKey),
+            'masked_secret_key' => $maskedSecret,
+            'webhook_url' => $webhookUrl,
+            'is_live' => str_starts_with((string) $publicKey, 'pk_live_'),
+        ], 'Paystack settings retrieved');
+    }
+
+    public function updatePaystackSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'public_key' => ['nullable', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if (array_key_exists('public_key', $validated) && $validated['public_key'] !== null) {
+            Setting::updateOrCreate(
+                ['key' => 'paystack_public_key'],
+                ['value' => trim($validated['public_key']), 'group' => 'payment']
+            );
+        }
+
+        if (!empty($validated['secret_key'])) {
+            Setting::updateOrCreate(
+                ['key' => 'paystack_secret_key'],
+                ['value' => trim($validated['secret_key']), 'group' => 'payment']
+            );
+        }
+
+        return ApiResponse::success(null, 'Paystack settings updated successfully');
+    }
+
+    public function testPaystackConnection(Request $request): JsonResponse
+    {
+        $secretKey = $request->input('secret_key');
+        if (empty($secretKey)) {
+            $secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value') ?? config('services.paystack.secret_key');
+        }
+
+        if (empty($secretKey)) {
+            return ApiResponse::error('Paystack Secret Key is not configured. Please enter or save your secret key first.', 422);
+        }
+
+        try {
+            $response = Http::withToken($secretKey)
+                ->timeout(10)
+                ->get('https://api.paystack.co/integration/payment_session_timeout');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $isLive = str_starts_with($secretKey, 'sk_live_');
+                return ApiResponse::success([
+                    'connected' => true,
+                    'mode' => $isLive ? 'live' : 'test',
+                    'message' => 'Paystack connection verified successfully in ' . ($isLive ? 'LIVE' : 'TEST') . ' mode.',
+                    'details' => $data['data'] ?? null,
+                ], 'Paystack connection successful');
+            }
+
+            $errorMessage = $response->json('message') ?? 'Invalid API key or unauthorized';
+            return ApiResponse::error('Paystack connection failed: ' . $errorMessage, 400);
+        } catch (\Throwable $e) {
+            return ApiResponse::error('Failed to reach Paystack API: ' . $e->getMessage(), 500);
+        }
     }
 }

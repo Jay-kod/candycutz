@@ -11,8 +11,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')
     ->middleware(['api.gate', 'throttle:api', 'security.headers'])
     ->group(function () {
-        Route::get('/health', [HealthApiController::class, 'health']);
-        Route::get('/health/ready', [SystemHealthApiController::class, 'healthDetail']);
+        Route::get('/health', [HealthApiController::class, 'health'])
+            ->withoutMiddleware(['throttle:api'])
+            ->middleware('throttle:health-check');
+        Route::get('/health/ready', [SystemHealthApiController::class, 'healthDetail'])
+            ->withoutMiddleware(['throttle:api'])
+            ->middleware('throttle:health-check');
         Route::post('/system/client-errors', [ClientErrorApiController::class, 'store'])->middleware('throttle:30,1');
 
         require base_path('routes/api/v1/auth.php');

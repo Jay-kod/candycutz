@@ -22,6 +22,15 @@ function resolveApiRoot() {
   return 'http://localhost:8000';
 }
 
+function resolveStaticAssetUrl(path) {
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  if (typeof window !== 'undefined' && window.location.pathname.includes('/1/candycutz/')) {
+    const distPrefix = '/1/candycutz/barbing-saloon-web/dist';
+    return `${distPrefix}${clean}`;
+  }
+  return clean;
+}
+
 // Extract host origin root
 export const API_ROOT = resolveApiRoot();
 
@@ -47,12 +56,20 @@ export function getStorageUrl(path, fallback = '') {
     path = path.replace('/storage/images/', '/images/');
   }
 
+  // Check if it is an absolute URL pointing to static frontend /images/
+  if (typeof path === 'string') {
+    const staticImgMatch = path.match(/^(?:https?:)?\/\/[^/]+(\/images\/[^?#]*)([?#].*)?$/i);
+    if (staticImgMatch) {
+      return resolveStaticAssetUrl(staticImgMatch[1] + (staticImgMatch[2] || ''));
+    }
+  }
+
   // Keep backend media on the current API origin. This handles API responses
-  // generated from APP_URL when the frontend is opened on another local host.
+  // generated from APP_URL when the frontend is opened on another local host or subfolder.
   if (/^(https?:|\/\/|data:)/i.test(path)) {
     if (!/^data:/i.test(path)) {
       const backendMedia = path.match(
-        /^(?:https?:)?\/\/[^/]+(\/(?:storage|api\/v1\/private-media)\/[^?#]*)([?#].*)?$/i
+        /^(?:https?:)?\/\/[^/]+.*?(\/(?:storage|api\/v1\/private-media)\/[^?#]*)([?#].*)?$/i
       );
       if (backendMedia) {
         return `${API_ROOT}${backendMedia[1]}${backendMedia[2] || ''}`;
@@ -61,9 +78,15 @@ export function getStorageUrl(path, fallback = '') {
     return path;
   }
 
+  // Handle private media relative paths
+  if (typeof path === 'string' && (path.startsWith('/api/v1/private-media/') || path.startsWith('api/v1/private-media/'))) {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_ROOT}${cleanPath}`;
+  }
+
   // If already starts with /images/ or images/ (static frontend asset in public/images)
   if (path.startsWith('/images/') || path.startsWith('images/')) {
-    return path.startsWith('/') ? path : `/${path}`;
+    return resolveStaticAssetUrl(path);
   }
 
   // If already starts with /storage/ or storage/
@@ -85,11 +108,20 @@ export function getStorageUrl(path, fallback = '') {
 export function getThumbnailUrl(path, fallback = '') {
   if (!path) return fallback;
   const fullUrl = getStorageUrl(path, fallback);
+
+  // Do not rewrite signed private media URLs into thumbnails by changing the filename in the path,
+  // because altering the signed path will invalidate the cryptographic HMAC signature.
+  if (typeof fullUrl === 'string' && fullUrl.includes('/api/v1/private-media/')) {
+    return fullUrl;
+  }
+
   if (typeof path === 'string' && path.includes('.webp') && !path.includes('thumb_')) {
-    const parts = fullUrl.split('/');
+    const [baseUrl, query] = fullUrl.split('?');
+    const parts = baseUrl.split('/');
     const filename = parts.pop();
     parts.push(`thumb_${filename}`);
-    return parts.join('/');
+    const thumbBase = parts.join('/');
+    return query ? `${thumbBase}?${query}` : thumbBase;
   }
   return fullUrl;
 }

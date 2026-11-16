@@ -2,6 +2,7 @@ import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
+import { getStorageUrl } from '@/core/utils/url';
 
 export function useServiceForm() {
   const route = useRoute();
@@ -96,9 +97,9 @@ export function useServiceForm() {
             is_available: service.is_active !== undefined ? Boolean(service.is_active) : true
           };
           
-          if (service.image || service.image_url) images.value.url1 = service.image_url || service.image;
-          if (service.image2) images.value.url2 = service.image2;
-          if (service.image3) images.value.url3 = service.image3;
+          if (service.image || service.image_url) images.value.url1 = getStorageUrl(service.image_url || service.image);
+          if (service.image2) images.value.url2 = getStorageUrl(service.image2);
+          if (service.image3) images.value.url3 = getStorageUrl(service.image3);
         } else {
           toast.error('Service not found');
           router.push(`/${portal.value}/services`);

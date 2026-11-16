@@ -56,7 +56,7 @@ class GetDashboardStats
         $dbLatencyMs = 0;
         try {
             $start = microtime(true);
-            DB::connection()->getPdo();
+            DB::selectOne('SELECT 1');
             $dbLatencyMs = max((int) round((microtime(true) - $start) * 1000), 1);
             $dbStatus = 'connected';
         } catch (Throwable) {

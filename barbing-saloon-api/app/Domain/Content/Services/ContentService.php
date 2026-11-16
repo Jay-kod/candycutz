@@ -152,13 +152,29 @@ class ContentService
      */
     protected function blogData(BlogPost $post): array
     {
+        $featuredImage = null;
+        if ($post->featured_image) {
+            if (str_starts_with($post->featured_image, 'http') || str_starts_with($post->featured_image, 'data:')) {
+                $featuredImage = $post->featured_image;
+            } else {
+                $normalized = ltrim($post->featured_image, '/');
+                if (str_starts_with($normalized, 'storage/')) {
+                    $featuredImage = url($normalized);
+                } elseif (str_starts_with($normalized, 'images/')) {
+                    $featuredImage = url($normalized);
+                } else {
+                    $featuredImage = url('storage/'.$normalized);
+                }
+            }
+        }
+
         return [
             'id' => $post->id,
             'title' => $post->title,
             'slug' => $post->slug,
             'excerpt' => $post->excerpt,
             'content' => $post->body,
-            'featured_image' => $post->featured_image ? (str_starts_with($post->featured_image, 'http') ? $post->featured_image : url('storage/'.ltrim(str_replace('storage/', '', $post->featured_image), '/'))) : null,
+            'featured_image' => $featuredImage,
             'status' => $post->status,
             'is_published' => $post->status === 'published',
             'created_at' => $post->created_at,

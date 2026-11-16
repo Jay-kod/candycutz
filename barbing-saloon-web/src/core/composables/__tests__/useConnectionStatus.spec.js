@@ -136,5 +136,28 @@ describe('useConnectionStatus Composable', () => {
     expect(isDisconnected.value).toBe(true);
     expect(disconnectType.value).toBe('server');
   });
+
+  it('verifies connection via health check on reportNetworkFailure and remains connected if healthy', async () => {
+    const { isConnected, isDisconnected, reportNetworkFailure } = useConnectionStatus();
+
+    axios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        success: true,
+        data: {
+          status: 'healthy',
+          services: { database: 'connected' },
+        },
+      },
+    });
+
+    reportNetworkFailure('Transient network timeout');
+
+    // Wait a tick for async checkHealth to complete
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(isConnected.value).toBe(true);
+    expect(isDisconnected.value).toBe(false);
+  });
 });
 

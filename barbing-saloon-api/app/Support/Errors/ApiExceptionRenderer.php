@@ -156,7 +156,16 @@ class ApiExceptionRenderer
 
             $msg = $e->getMessage();
 
-            if (in_array($state, ['2002', '2006', 'HY000'], true) || str_contains($msg, 'Connection refused') || str_contains($msg, 'actively refused') || str_contains($msg, 'No connection could be made')) {
+            $isConnectionFailure = in_array((string) $sqlCode, ['2002', '2003', '2006', '2013'], true)
+                || in_array($state, ['2002', '2006'], true)
+                || str_contains($msg, 'Connection refused')
+                || str_contains($msg, 'actively refused')
+                || str_contains($msg, 'No connection could be made')
+                || str_contains($msg, 'server has gone away')
+                || str_contains($msg, 'Lost connection')
+                || str_contains($msg, 'Access denied for user');
+
+            if ($isConnectionFailure) {
                 $code = ErrorCode::DB_UNAVAILABLE;
             } elseif (in_array((string) $sqlCode, ['1213', '40001'], true) || in_array($state, ['40001'], true)) {
                 $code = ErrorCode::DB_DEADLOCK;
@@ -165,7 +174,7 @@ class ApiExceptionRenderer
             } elseif (in_array((string) $sqlCode, ['1054', '1146'], true) || in_array($state, ['42S22', '42S02'], true)) {
                 $code = ErrorCode::SCHEMA_DRIFT;
             } else {
-                $code = ErrorCode::DB_UNAVAILABLE;
+                $code = ErrorCode::SERVER_ERROR;
             }
 
             return ApiResponse::error(

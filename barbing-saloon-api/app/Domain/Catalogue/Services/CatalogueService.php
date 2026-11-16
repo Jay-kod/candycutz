@@ -161,14 +161,17 @@ class CatalogueService
     {
         $imageUrl = null;
         if ($service->image) {
-            if (str_starts_with($service->image, 'http')) {
+            if (str_starts_with($service->image, 'http') || str_starts_with($service->image, 'data:')) {
                 $imageUrl = $service->image;
             } else {
                 $normalized = ltrim($service->image, '/');
                 if (str_starts_with($normalized, 'storage/')) {
-                    $normalized = substr($normalized, strlen('storage/'));
+                    $imageUrl = url($normalized);
+                } elseif (str_starts_with($normalized, 'images/')) {
+                    $imageUrl = url($normalized);
+                } else {
+                    $imageUrl = url('storage/'.$normalized);
                 }
-                $imageUrl = url('storage/'.$normalized);
             }
         }
 

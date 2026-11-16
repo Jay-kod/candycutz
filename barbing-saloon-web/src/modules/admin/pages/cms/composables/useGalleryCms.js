@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useGalleryCms() {
   const toast = useToast();
@@ -139,6 +141,10 @@ export function useGalleryCms() {
 
       const response = await api.post('/v1/admin/settings', formData);
       toast.success('Gallery page content saved successfully!');
+
+      if (getActivePinia()) {
+        usePublicContentStore().clearSettingsCache();
+      }
 
       const data = response.data?.data;
       if (data) {

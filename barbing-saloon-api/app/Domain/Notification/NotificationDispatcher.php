@@ -680,8 +680,9 @@ class NotificationDispatcher
         try {
             $roles = match ($recipientType) {
                 'all_admins', 'admin' => ['admin', 'super_admin'],
-                'all_barbers', 'barber' => ['barber'],
-                'all_customers', 'customer' => ['customer'],
+                'all_barbers' => ['barber'],
+                'all_customers' => ['customer'],
+                'all' => ['customer', 'barber', 'admin', 'super_admin'],
                 default => null,
             };
 
