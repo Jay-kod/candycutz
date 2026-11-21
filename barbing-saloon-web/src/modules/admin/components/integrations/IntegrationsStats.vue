@@ -48,7 +48,7 @@
         >
           {{ stats.mailConfigured ? 'Connected' : 'Missing' }}
         </span>
-        <span class="text-xs text-white/40">Brevo SMTP</span>
+        <span class="text-xs text-white/40">Resend API</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
         <span 

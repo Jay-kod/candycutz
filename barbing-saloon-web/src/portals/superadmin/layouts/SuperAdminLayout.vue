@@ -65,7 +65,7 @@ const navItems = [
   { name: 'Feature Flags', to: '/superadmin/feature-flags', icon: FlagIcon },
   { name: 'Working Hours', to: '/superadmin/working-hours', icon: ClockIcon },
   { name: 'Integrations', to: '/superadmin/integrations', icon: KeyIcon },
-  { name: 'Brevo Email Setup', to: '/superadmin/brevo', icon: EnvelopeIcon, badge: 'SMTP' },
+  { name: 'Resend Email Setup', to: '/superadmin/resend', icon: EnvelopeIcon, badge: 'API' },
   { name: 'API Directory', to: '/superadmin/api', icon: CodeBracketIcon },
   { name: 'System Logs', to: '/superadmin/system-logs', icon: ClipboardDocumentListIcon },
   { name: 'Verifications', to: '/superadmin/verifications', icon: ShieldCheckIcon },

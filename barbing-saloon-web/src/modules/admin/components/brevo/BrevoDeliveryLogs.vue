@@ -7,8 +7,8 @@
           <QueueListIcon class="h-5 w-5" />
         </div>
         <div>
-          <h2 class="font-display text-sm font-bold text-slate-900 dark:text-white">Brevo Transactional Email Audit</h2>
-          <p class="text-xs text-slate-500 dark:text-white/50">Recent outbound emails dispatched via the Brevo SMTP &amp; API engine.</p>
+          <h2 class="font-display text-sm font-bold text-slate-900 dark:text-white">Resend Transactional Email Audit</h2>
+          <p class="text-xs text-slate-500 dark:text-white/50">Recent outbound emails dispatched via the Resend API engine.</p>
         </div>
       </div>
 
@@ -20,7 +20,7 @@
         >
           <option value="all">All Delivery Statuses</option>
           <option value="delivered">Delivered Only</option>
-          <option value="accepted">Accepted by Brevo</option>
+          <option value="accepted">Accepted by Resend</option>
           <option value="pending">Pending Queue</option>
           <option value="failed">Failed Only</option>
         </select>

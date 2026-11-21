@@ -23,28 +23,28 @@
           {{ isConfigured ? 'Connected & Verified' : 'Action Required' }}
         </p>
         <p class="text-[11px] text-slate-500 dark:text-white/40 mt-1">
-          {{ isConfigured ? 'SMTP credentials loaded and ready.' : 'Provide SMTP key and sender email.' }}
+          {{ isConfigured ? 'Resend API key configured and ready.' : 'Provide Resend API key and verified sender.' }}
         </p>
       </div>
     </div>
 
-    <!-- Card 2: Active Server & Port -->
+    <!-- Card 2: Transport & API Provider -->
     <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-5 shadow-lg group hover:border-[var(--color-accent)]/40 transition-all duration-300">
       <div class="flex items-center justify-between">
         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30">
           <ServerStackIcon class="h-5 w-5" />
         </span>
         <span class="text-[10px] font-mono font-bold text-blue-400 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-          Port {{ hostPort }}
+          Resend API
         </span>
       </div>
       <div class="mt-4">
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50">SMTP Relay Endpoint</p>
-        <p class="text-lg font-mono font-bold text-slate-900 dark:text-white mt-0.5 truncate" :title="hostName">
-          {{ hostName || 'smtp-relay.brevo.com' }}
+        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50">Transport Provider</p>
+        <p class="text-lg font-mono font-bold text-slate-900 dark:text-white mt-0.5 truncate">
+          Resend PHP SDK
         </p>
         <p class="text-[11px] text-slate-500 dark:text-white/40 mt-1">
-          TLS / STARTTLS encryption enabled
+          HTTPS REST API with rate limit safety
         </p>
       </div>
     </div>

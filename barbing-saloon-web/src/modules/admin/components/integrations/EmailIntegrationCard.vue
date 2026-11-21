@@ -9,7 +9,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="font-display text-lg font-bold text-white tracking-tight">Email Notifications</h2>
-            <span class="text-[10px] font-mono font-bold text-admin px-2 py-0.5 rounded bg-admin/10 border border-admin/20">Brevo SMTP</span>
+            <span class="text-[10px] font-mono font-bold text-admin px-2 py-0.5 rounded bg-admin/10 border border-admin/20">Resend API</span>
           </div>
           <p class="text-xs text-white/50 mt-0.5">Drives customer signup, booking receipts, and password-reset emails.</p>
         </div>
@@ -18,10 +18,10 @@
       <!-- Status Pill & Link -->
       <div class="flex items-center gap-2 shrink-0">
         <router-link
-          to="/admin/brevo"
+          to="/admin/resend"
           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-admin hover:text-white bg-admin/10 hover:bg-admin/20 border border-admin/30 transition-colors"
         >
-          <span>Dedicated Brevo Console</span>
+          <span>Dedicated Resend Console</span>
           <ArrowTopRightOnSquareIcon class="h-3 w-3" />
         </router-link>
         <span 
@@ -39,45 +39,10 @@
     <!-- Body Settings -->
     <div class="p-6 sm:p-8 space-y-6">
       <div class="grid md:grid-cols-2 gap-5">
-        <!-- SMTP Host -->
-        <div class="space-y-1.5">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-white/50">SMTP Host</label>
-          <input 
-            v-model="form.mail_host" 
-            type="text" 
-            class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/25 focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 outline-none transition-all font-mono" 
-            placeholder="smtp-relay.brevo.com" 
-          />
-        </div>
-
-        <!-- SMTP Port -->
-        <div class="space-y-1.5">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-white/50">SMTP Port</label>
-          <input 
-            v-model="form.mail_port" 
-            type="text" 
-            class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/25 focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 outline-none transition-all font-mono" 
-            placeholder="587" 
-          />
-        </div>
-
-        <!-- SMTP Username / Login -->
-        <div class="space-y-1.5">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-white/50">SMTP Login / Username</label>
-          <input 
-            v-model="form.mail_username" 
-            autocomplete="username" 
-            type="text" 
-            class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/25 focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 outline-none transition-all font-mono" 
-            placeholder="your Brevo SMTP login" 
-          />
-          <p class="text-[11px] text-white/40">Use the SMTP login displayed in Brevo, often ending in <code>@smtp-brevo.com</code>.</p>
-        </div>
-
-        <!-- SMTP Password / Key -->
-        <div class="space-y-1.5">
+        <!-- Resend API Key -->
+        <div class="space-y-1.5 md:col-span-2">
           <div class="flex items-center justify-between">
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-white/50">SMTP Master Key / Password</label>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-white/50">Resend API Key</label>
             <button 
               type="button" 
               @click="$emit('togglePassword')"
@@ -87,13 +52,13 @@
             </button>
           </div>
           <input 
-            v-model="form.mail_password" 
+            v-model="form.resend_api_key" 
             :type="showPassword ? 'text' : 'password'" 
-            autocomplete="new-password" 
+            autocomplete="off" 
             class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/25 focus:border-admin/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 outline-none transition-all font-mono" 
-            placeholder="your Brevo generated SMTP key" 
+            placeholder="re_123456789_abcdefghijklmnopqrstuvwxyz" 
           />
-          <p class="text-[11px] text-white/40">Generated from Brevo SMTP &amp; API → SMTP → Keys. Do not use personal account password.</p>
+          <p class="text-[11px] text-white/40">From Resend Dashboard → API Keys. Key starts with <code>re_</code>.</p>
         </div>
 
         <!-- From Email -->

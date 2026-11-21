@@ -11,31 +11,31 @@
             :class="isConfigured ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"
           ></span>
           <p class="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-accent)]">
-            {{ isConfigured ? 'Brevo Gateway Active' : 'Brevo Setup Required' }}
+            {{ isConfigured ? 'Resend Gateway Active' : 'Resend Setup Required' }}
           </p>
           <span class="text-[10px] font-mono font-bold text-[var(--color-accent)] px-2 py-0.5 rounded bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20">
-            Transactional SMTP &amp; API
+            Transactional Email API
           </span>
         </div>
         <h1 class="font-display text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm">
-          Brevo <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] via-amber-500 to-amber-600 dark:via-amber-300 dark:to-[var(--color-accent)]">Email Gateway</span>
+          Resend <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] via-amber-500 to-amber-600 dark:via-amber-300 dark:to-[var(--color-accent)]">Email Gateway</span>
         </h1>
         <p class="mt-2 text-xs lg:text-sm text-slate-600 dark:text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
-          Configure and monitor Brevo transactional email delivery for booking confirmations, receipt notifications, password resets, and admin dispatch.
+          Configure and monitor Resend transactional email delivery for booking confirmations, receipt notifications, password resets, and admin dispatch.
         </p>
       </div>
 
       <!-- Action buttons -->
       <div class="flex flex-wrap items-center gap-3 shrink-0">
         <a
-          href="https://app.brevo.com/settings/keys/smtp"
+          href="https://resend.com/api-keys"
           target="_blank"
           rel="noopener noreferrer"
           class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.04] px-4 py-3 text-xs font-semibold text-slate-700 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-          title="Open Brevo SMTP & API Keys dashboard in a new tab"
+          title="Open Resend API Keys dashboard in a new tab"
         >
           <ArrowTopRightOnSquareIcon class="h-4 w-4 text-[var(--color-accent)]" />
-          <span>Brevo Console</span>
+          <span>Resend Console</span>
         </a>
 
         <button

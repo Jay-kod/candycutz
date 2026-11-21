@@ -86,7 +86,7 @@
               <option value="all">All Channels</option>
               <option value="in_app">In-App DB</option>
               <option value="push">Expo Push</option>
-              <option value="email">Brevo Email</option>
+              <option value="email">Resend Email</option>
             </select>
 
             <select
@@ -151,7 +151,7 @@
                         'bg-blue-500/10 text-blue-500 border border-blue-500/20': d.channel === 'email',
                       }"
                     >
-                      {{ d.channel === 'in_app' ? 'In-App DB' : d.channel === 'push' ? 'Expo Push' : 'Brevo Email' }}
+                      {{ d.channel === 'in_app' ? 'In-App DB' : d.channel === 'push' ? 'Expo Push' : 'Resend Email' }}
                     </span>
                   </td>
                   <td class="px-4 py-3 truncate max-w-[200px]" :title="d.recipient_email || d.recipient_token || 'In-App Feed'">
@@ -217,7 +217,7 @@
           <div class="lg:col-span-7 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
             <div>
               <h2 class="text-xl font-display text-[var(--color-text-primary)]">Compose Broadcast Campaign</h2>
-              <p class="text-xs text-[var(--color-text-secondary)] mt-1">Dispatch announcements simultaneously across In-App feeds, mobile push, and Brevo emails.</p>
+              <p class="text-xs text-[var(--color-text-secondary)] mt-1">Dispatch announcements simultaneously across In-App feeds, mobile push, and Resend emails.</p>
             </div>
 
             <form @submit.prevent="handleSendBroadcast" class="space-y-4">
@@ -258,7 +258,7 @@
                   </label>
                   <label class="flex items-center gap-2 p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)]/50 cursor-pointer text-xs font-medium text-[var(--color-text-primary)]">
                     <input type="checkbox" value="email" v-model="broadcastForm.channels" class="rounded text-blue-500" />
-                    <span>Brevo Email</span>
+                    <span>Resend Email</span>
                   </label>
                 </div>
               </div>

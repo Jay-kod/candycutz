@@ -11,8 +11,8 @@ describe('admin routes', () => {
     expect(adminRoutes.some(route => route.path === '/admin/service-categories' && route.meta.roles.includes('admin'))).toBe(true);
   });
 
-  it('exposes brevo setup page to admins', () => {
-    expect(adminRoutes.some(route => route.path === '/admin/brevo' && route.meta.roles.includes('admin'))).toBe(true);
+  it('exposes resend setup page to admins', () => {
+    expect(adminRoutes.some(route => route.path === '/admin/resend' && route.meta.roles.includes('admin'))).toBe(true);
   });
 
   it('exposes category requests to barbers', () => {

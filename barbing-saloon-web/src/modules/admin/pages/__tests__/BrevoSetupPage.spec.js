@@ -13,7 +13,7 @@ const toastMock = vi.hoisted(() => ({
 }));
 
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ path: '/admin/brevo' })
+  useRoute: () => ({ path: '/admin/resend' })
 }));
 
 vi.mock('@/portals/admin/layouts/AdminLayout.vue', () => ({
@@ -45,7 +45,7 @@ describe('BrevoSetupPage.vue', () => {
               mail_port: '587',
               mail_username: 'test-user@smtp-brevo.com',
               mail_password: '••••••••1234',
-              brevo_api_key: '••••••••5678',
+              resend_api_key: '••••••••5678',
               mail_from: 'noreply@candycutz.com',
               mail_from_name: 'CandyCutz'
             }
@@ -96,10 +96,9 @@ describe('BrevoSetupPage.vue', () => {
     const wrapper = mount(BrevoSetupPage);
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Brevo Email Gateway');
-    expect(wrapper.text()).toContain('Brevo Gateway Active');
+    expect(wrapper.text()).toContain('Resend Email Gateway');
+    expect(wrapper.text()).toContain('Resend Gateway Active');
     expect(wrapper.text()).toContain('Connected & Verified');
-    expect(wrapper.text()).toContain('smtp-relay.brevo.com');
     expect(wrapper.text()).toContain('noreply@candycutz.com');
   });
 
@@ -107,8 +106,8 @@ describe('BrevoSetupPage.vue', () => {
     const wrapper = mount(BrevoSetupPage);
     await flushPromises();
 
-    // Default tab is Credentials & SMTP
-    expect(wrapper.text()).toContain('Brevo SMTP Credentials');
+    // Default tab is Credentials & Settings
+    expect(wrapper.text()).toContain('Resend API Credentials');
 
     // Click Step-by-Step Setup Guide tab button
     const guideBtn = wrapper.findAll('button').find(b => b.text().includes('Step-by-Step Setup Guide'));
@@ -116,9 +115,9 @@ describe('BrevoSetupPage.vue', () => {
     await guideBtn.trigger('click');
     await flushPromises();
 
-    expect(wrapper.text()).toContain('How to Set Up Brevo Transactional Email');
-    expect(wrapper.text()).toContain('Create or Log In to Your Brevo Account');
-    expect(wrapper.text()).toContain('Verify Your Sender Email');
+    expect(wrapper.text()).toContain('How to Set Up Resend Transactional Email');
+    expect(wrapper.text()).toContain('Create or Log In to Your Resend Account');
+    expect(wrapper.text()).toContain('Add & Verify Your Sending Domain');
 
     // Click Email Deliveries & Audit tab button
     const deliveriesBtn = wrapper.findAll('button').find(b => b.text().includes('Email Deliveries & Audit'));
@@ -126,7 +125,7 @@ describe('BrevoSetupPage.vue', () => {
     await deliveriesBtn.trigger('click');
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Brevo Transactional Email Audit');
+    expect(wrapper.text()).toContain('Resend Transactional Email Audit');
     expect(wrapper.text()).toContain('Booking Confirmed #BK-100');
     expect(wrapper.text()).toContain('client@example.com');
   });
@@ -142,13 +141,11 @@ describe('BrevoSetupPage.vue', () => {
 
     expect(clientMock.post).toHaveBeenCalledWith('/admin/settings', expect.objectContaining({
       settings: expect.objectContaining({
-        mail_host: 'smtp-relay.brevo.com',
-        mail_port: '587',
-        mail_username: 'test-user@smtp-brevo.com',
+        resend_api_key: '••••••••5678',
         mail_from: 'noreply@candycutz.com'
       })
     }));
-    expect(toastMock.success).toHaveBeenCalledWith('Brevo configuration saved successfully');
+    expect(toastMock.success).toHaveBeenCalledWith('Resend configuration saved successfully');
   });
 
   it('dispatches test email via POST /admin/test-email', async () => {
@@ -169,6 +166,6 @@ describe('BrevoSetupPage.vue', () => {
       to: 'verifier@candycutz.com'
     });
     expect(toastMock.success).toHaveBeenCalledWith('Test email dispatched to verifier@candycutz.com!');
-    expect(wrapper.text()).toContain('Dispatch Succeeded!');
+    expect(wrapper.text()).toContain('Delivery Confirmed via Resend');
   });
 });

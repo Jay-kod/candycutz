@@ -1,6 +1,6 @@
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-    <!-- Left Column: Primary Credentials & SMTP Configuration Form (7 cols) -->
+    <!-- Left Column: Primary Credentials & Configuration Form (7 cols) -->
     <div class="lg:col-span-7 space-y-6">
       <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] overflow-hidden shadow-2xl">
         <!-- Form Header -->
@@ -10,8 +10,8 @@
               <KeyIcon class="h-5 w-5" />
             </div>
             <div>
-              <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Brevo SMTP Credentials</h2>
-              <p class="text-xs text-slate-500 dark:text-white/50">Enter the relay credentials from your Brevo account dashboard.</p>
+              <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Resend API Credentials</h2>
+              <p class="text-xs text-slate-500 dark:text-white/50">Enter your Resend API Key and verified sender details.</p>
             </div>
           </div>
           <button
@@ -26,115 +26,11 @@
         <!-- Form Body -->
         <div class="p-6 sm:p-8 space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <!-- SMTP Host -->
-            <div class="space-y-1.5 sm:col-span-2">
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                SMTP Relay Host <span class="text-rose-500">*</span>
-              </label>
-              <div class="relative">
-                <input
-                  v-model="form.mail_host"
-                  type="text"
-                  required
-                  class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all font-mono"
-                  placeholder="smtp-relay.brevo.com"
-                />
-              </div>
-              <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Default Brevo relay: <code>smtp-relay.brevo.com</code>
-              </p>
-            </div>
-
-            <!-- SMTP Port -->
-            <div class="space-y-1.5">
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                Port <span class="text-rose-500">*</span>
-              </label>
-              <div class="flex items-center gap-2">
-                <input
-                  v-model="form.mail_port"
-                  type="text"
-                  required
-                  class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all font-mono"
-                  placeholder="587"
-                />
-                <button
-                  type="button"
-                  @click="form.mail_port = '587'"
-                  class="px-2.5 py-3 rounded-xl border text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer"
-                  :class="form.mail_port === '587'
-                    ? 'bg-[var(--color-accent)]/15 text-[var(--color-accent)] border-[var(--color-accent)]/40'
-                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-white/60 border-slate-200 dark:border-white/10'"
-                >
-                  587 (TLS)
-                </button>
-                <button
-                  type="button"
-                  @click="form.mail_port = '465'"
-                  class="px-2.5 py-3 rounded-xl border text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer"
-                  :class="form.mail_port === '465'
-                    ? 'bg-[var(--color-accent)]/15 text-[var(--color-accent)] border-[var(--color-accent)]/40'
-                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-white/60 border-slate-200 dark:border-white/10'"
-                >
-                  465 (SSL)
-                </button>
-              </div>
-            </div>
-
-            <!-- SMTP Login / Username -->
-            <div class="space-y-1.5">
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                SMTP Login / Username <span class="text-rose-500">*</span>
-              </label>
-              <input
-                v-model="form.mail_username"
-                type="text"
-                autocomplete="username"
-                required
-                class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all font-mono"
-                placeholder="e.g. 7f9b8c001@smtp-brevo.com"
-              />
-              <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Found on Brevo under SMTP &amp; API → SMTP.
-              </p>
-            </div>
-
-            <!-- SMTP Master Key / Password -->
+            <!-- Resend API Key -->
             <div class="space-y-1.5 sm:col-span-2">
               <div class="flex items-center justify-between">
                 <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                  SMTP Key / Password <span class="text-rose-500">*</span>
-                </label>
-                <div class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    @click="showSmtpKey = !showSmtpKey"
-                    class="text-[11px] text-[var(--color-accent)] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    <EyeIcon v-if="!showSmtpKey" class="h-3.5 w-3.5" />
-                    <EyeSlashIcon v-else class="h-3.5 w-3.5" />
-                    <span>{{ showSmtpKey ? 'Hide Key' : 'Reveal Key' }}</span>
-                  </button>
-                </div>
-              </div>
-              <input
-                v-model="form.mail_password"
-                :type="showSmtpKey ? 'text' : 'password'"
-                autocomplete="new-password"
-                required
-                class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all font-mono"
-                placeholder="xsmtpsib-..."
-              />
-              <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Generated via Brevo SMTP &amp; API → SMTP → Generate a new SMTP key. Never use your main account password.
-              </p>
-            </div>
-
-            <!-- Optional Brevo REST API Key -->
-            <div class="space-y-1.5 sm:col-span-2">
-              <div class="flex items-center justify-between">
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                  Brevo v3 REST API Key <span class="text-slate-400 dark:text-white/40 font-normal">(Optional)</span>
+                  Resend API Key <span class="text-rose-500">*</span>
                 </label>
                 <button
                   type="button"
@@ -143,23 +39,24 @@
                 >
                   <EyeIcon v-if="!showApiKey" class="h-3.5 w-3.5" />
                   <EyeSlashIcon v-else class="h-3.5 w-3.5" />
-                  <span>{{ showApiKey ? 'Hide' : 'Reveal' }}</span>
+                  <span>{{ showApiKey ? 'Hide Key' : 'Reveal Key' }}</span>
                 </button>
               </div>
               <input
-                v-model="form.brevo_api_key"
+                v-model="form.resend_api_key"
                 :type="showApiKey ? 'text' : 'password'"
                 autocomplete="off"
+                required
                 class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all font-mono"
-                placeholder="xkeysib-..."
+                placeholder="re_123456789_abcdefghijklmnopqrstuvwxyz"
               />
               <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Enables high-throughput HTTP REST API fallback if SMTP port 587 is firewalled on your host.
+                Created in Resend Dashboard → API Keys (starts with <code>re_</code>).
               </p>
             </div>
 
             <!-- From Sender Email -->
-            <div class="space-y-1.5">
+            <div class="space-y-1.5 sm:col-span-2">
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
                 From Sender Email <span class="text-rose-500">*</span>
               </label>
@@ -168,15 +65,15 @@
                 type="email"
                 required
                 class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all"
-                placeholder="no-reply@candycutz.com"
+                placeholder="no-reply@mail.candycutz.com"
               />
               <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Must be an authenticated sender address inside your Brevo Senders console.
+                Must match an authenticated domain configured in your Resend Domains console.
               </p>
             </div>
 
             <!-- From Sender Name -->
-            <div class="space-y-1.5">
+            <div class="space-y-1.5 sm:col-span-2">
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
                 From Sender Name
               </label>
@@ -187,8 +84,49 @@
                 placeholder="CandyCutz"
               />
               <p class="text-[11px] text-slate-500 dark:text-white/40">
-                The friendly display name shown in client inboxes.
+                The friendly display name shown in customer inboxes.
               </p>
+            </div>
+          </div>
+
+          <!-- Optional SMTP Settings Toggle -->
+          <div class="pt-4 border-t border-slate-200 dark:border-white/[0.06]">
+            <button
+              type="button"
+              @click="showSmtpAdvanced = !showSmtpAdvanced"
+              class="text-xs font-semibold text-[var(--color-accent)] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>{{ showSmtpAdvanced ? 'Hide SMTP Relay Fallback Settings' : 'Configure SMTP Relay Fallback (Optional)' }}</span>
+            </button>
+
+            <div v-if="showSmtpAdvanced" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1 sm:col-span-2">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">SMTP Host</label>
+                <input
+                  v-model="form.mail_host"
+                  type="text"
+                  class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-xs font-mono"
+                  placeholder="smtp.resend.com"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">Port</label>
+                <input
+                  v-model="form.mail_port"
+                  type="text"
+                  class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-xs font-mono"
+                  placeholder="587"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">Login</label>
+                <input
+                  v-model="form.mail_username"
+                  type="text"
+                  class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-xs font-mono"
+                  placeholder="resend"
+                />
+              </div>
             </div>
           </div>
 
@@ -224,7 +162,7 @@
             </div>
             <div>
               <h3 class="font-display text-sm font-bold text-slate-900 dark:text-white">Live Connection Test</h3>
-              <p class="text-[11px] text-slate-500 dark:text-white/50">Verify end-to-end SMTP dispatch right now.</p>
+              <p class="text-[11px] text-slate-500 dark:text-white/50">Verify end-to-end dispatch via Resend.</p>
             </div>
           </div>
           <span
@@ -238,7 +176,7 @@
         </div>
 
         <p class="text-xs text-slate-600 dark:text-white/70 leading-relaxed">
-          Send an immediate verification email to any inbox to confirm that Brevo accepts your credentials and routes messages cleanly.
+          Send an immediate verification email to any inbox to confirm that Resend accepts your API key and routes messages cleanly.
         </p>
 
         <div class="space-y-2">
@@ -276,52 +214,35 @@
             : 'bg-rose-500/10 border-rose-500/30 text-rose-400'"
         >
           <div class="flex items-center gap-2 font-bold">
-            <CheckCircleIcon v-if="testResult.success" class="h-4 w-4 shrink-0 text-emerald-400" />
-            <XCircleIcon v-else class="h-4 w-4 shrink-0 text-rose-400" />
-            <span>{{ testResult.success ? 'Dispatch Succeeded!' : 'Connection Error' }}</span>
+            <CheckCircleIcon v-if="testResult.success" class="h-4 w-4 text-emerald-400 shrink-0" />
+            <XCircleIcon v-else class="h-4 w-4 text-rose-400 shrink-0" />
+            <span>{{ testResult.success ? 'Delivery Confirmed via Resend' : 'Delivery Failed' }}</span>
           </div>
-          <p class="text-[11px] leading-relaxed opacity-90 pl-6">
+          <p class="text-[11px] text-slate-600 dark:text-white/70 pl-6">
             {{ testResult.message }}
           </p>
-          <div v-if="testResult.timestamp" class="text-[10px] text-white/40 pl-6 pt-1 font-mono">
-            Tested at: {{ testResult.timestamp }}
-          </div>
+          <p v-if="testResult.data?.sent_to" class="text-[10px] text-slate-500 dark:text-white/50 pl-6">
+            Recipient: {{ testResult.data.sent_to }}
+          </p>
         </div>
       </div>
 
-      <!-- Quick Setup Checklist Card -->
-      <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 sm:p-7 shadow-2xl space-y-4">
-        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
-          <SparklesIcon class="h-4 w-4" />
-          <span>Brevo Setup Checklist</span>
+      <!-- Quick Checklist Card -->
+      <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 sm:p-7 shadow-xl space-y-4">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-white">
+          <SparklesIcon class="h-4 w-4 text-[var(--color-accent)]" />
+          <span>Resend Pre-Flight Checklist</span>
         </div>
+
         <ul class="space-y-3 text-xs text-slate-600 dark:text-white/70">
           <li class="flex items-start gap-2.5">
             <span
               class="h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold"
-              :class="form.mail_host ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500'"
+              :class="form.resend_api_key ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500'"
             >
               ✓
             </span>
-            <span>Relay Host set to <code>smtp-relay.brevo.com</code></span>
-          </li>
-          <li class="flex items-start gap-2.5">
-            <span
-              class="h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold"
-              :class="form.mail_username ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500'"
-            >
-              ✓
-            </span>
-            <span>SMTP Login entered from Brevo Keys page</span>
-          </li>
-          <li class="flex items-start gap-2.5">
-            <span
-              class="h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold"
-              :class="form.mail_password ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500'"
-            >
-              ✓
-            </span>
-            <span>Generated SMTP Master Key (starts with <code>xsmtpsib-</code>)</span>
+            <span>Resend API Key set (starts with <code>re_</code>)</span>
           </li>
           <li class="flex items-start gap-2.5">
             <span
@@ -330,18 +251,27 @@
             >
               ✓
             </span>
-            <span>Sender email verified in Brevo Senders console</span>
+            <span>Sender email verified in Resend Domains console</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span
+              class="h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold"
+              :class="form.mail_from_name ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500'"
+            >
+              ✓
+            </span>
+            <span>Display name configured for customer receipts</span>
           </li>
         </ul>
 
         <div class="pt-3 border-t border-slate-200 dark:border-white/[0.06]">
           <a
-            href="https://app.brevo.com/settings/keys/smtp"
+            href="https://resend.com/api-keys"
             target="_blank"
             rel="noopener noreferrer"
             class="text-xs text-[var(--color-accent)] hover:underline inline-flex items-center gap-1 font-semibold"
           >
-            <span>Open Brevo SMTP &amp; API Keys Console</span>
+            <span>Open Resend API Keys Console</span>
             <ArrowTopRightOnSquareIcon class="h-3.5 w-3.5" />
           </a>
         </div>
@@ -390,13 +320,14 @@ const props = defineProps({
 
 const emit = defineEmits(['save', 'test-dispatch']);
 
-const showSmtpKey = ref(false);
 const showApiKey = ref(false);
+const showSmtpAdvanced = ref(false);
 const recipientEmail = ref('');
 
 function fillDefaults() {
-  props.form.mail_host = 'smtp-relay.brevo.com';
-  props.form.mail_port = '587';
+  if (!props.form.mail_from) {
+    props.form.mail_from = 'no-reply@mail.candycutz.com';
+  }
   if (!props.form.mail_from_name) {
     props.form.mail_from_name = 'CandyCutz';
   }

@@ -80,9 +80,10 @@ const testing = ref(false);
 const loadingDeliveries = ref(false);
 
 const form = reactive({
-  mail_host: 'smtp-relay.brevo.com',
+  resend_api_key: '',
+  mail_host: 'smtp.resend.com',
   mail_port: '587',
-  mail_username: '',
+  mail_username: 'resend',
   mail_password: '',
   brevo_api_key: '',
   mail_from: '',
@@ -98,10 +99,7 @@ const emailStats = reactive({
 
 const isConfigured = computed(() => {
   return Boolean(
-    form.mail_host?.trim() &&
-    form.mail_port?.toString().trim() &&
-    form.mail_username?.trim() &&
-    form.mail_password?.trim() &&
+    (form.resend_api_key?.trim() || form.mail_password?.trim() || form.mail_host?.trim()) &&
     form.mail_from?.trim()
   );
 });
@@ -111,15 +109,16 @@ async function loadSettings() {
   try {
     const res = await client.get('/admin/settings');
     const data = res.data?.data || res.data || {};
-    form.mail_host = data.mail_host || 'smtp-relay.brevo.com';
+    form.resend_api_key = data.resend_api_key || '';
+    form.mail_host = data.mail_host || 'smtp.resend.com';
     form.mail_port = String(data.mail_port || '587');
-    form.mail_username = data.mail_username || '';
+    form.mail_username = data.mail_username || 'resend';
     form.mail_password = data.mail_password || '';
     form.brevo_api_key = data.brevo_api_key || '';
-    form.mail_from = data.mail_from || '';
+    form.mail_from = data.mail_from || data.mail_from_address || '';
     form.mail_from_name = data.mail_from_name || 'CandyCutz';
   } catch (error) {
-    console.error('[BrevoSetup] Failed to load settings:', error);
+    console.error('[ResendSetup] Failed to load settings:', error);
     toast.error('Failed to load email settings from server');
   } finally {
     loading.value = false;
@@ -175,6 +174,7 @@ async function saveSettings() {
   try {
     await client.post('/admin/settings', {
       settings: {
+        resend_api_key: form.resend_api_key,
         mail_host: form.mail_host,
         mail_port: form.mail_port,
         mail_username: form.mail_username,
@@ -184,9 +184,9 @@ async function saveSettings() {
         mail_from_name: form.mail_from_name
       }
     });
-    toast.success('Brevo configuration saved successfully');
+    toast.success('Resend configuration saved successfully');
   } catch (error) {
-    console.error('[BrevoSetup] Failed to save settings:', error);
+    console.error('[ResendSetup] Failed to save settings:', error);
     const msg = error?.response?.data?.error || error?.response?.data?.message || 'Failed to save settings';
     toast.error(msg);
   } finally {
@@ -246,7 +246,7 @@ async function refreshAll() {
     loadDeliveries(),
     loadAnalytics()
   ]);
-  toast.success('Brevo status refreshed');
+  toast.success('Resend status refreshed');
 }
 
 onMounted(() => {
