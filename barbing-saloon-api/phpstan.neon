@@ -1,5 +1,6 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
 
 parameters:
     level: 6
@@ -7,3 +8,4 @@ parameters:
         - app
     tmpDir: storage/phpstan
     treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false

@@ -32,7 +32,7 @@ class NotificationDispatcher
     /**
      * Resolve valid customer user ID from appointment relation or client email fallback.
      */
-    private static function resolveCustomerId(Appointment $appointment): ?int
+    protected static function resolveCustomerId(Appointment $appointment): ?int
     {
         if ($appointment->customer_id) {
             return (int) $appointment->customer_id;
@@ -51,7 +51,7 @@ class NotificationDispatcher
     /**
      * Resolve valid barber user ID from barber relation or barber_id model lookup.
      */
-    private static function resolveBarberUserId(Appointment $appointment): ?int
+    protected static function resolveBarberUserId(Appointment $appointment): ?int
     {
         if ($appointment->barber?->user_id) {
             return (int) $appointment->barber->user_id;
