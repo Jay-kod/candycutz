@@ -57,9 +57,18 @@
 
             <!-- From Sender Email -->
             <div class="space-y-1.5 sm:col-span-2">
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
-                From Sender Email <span class="text-rose-500">*</span>
-              </label>
+              <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-white/60">
+                  From Sender Email <span class="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  @click="form.mail_from = 'onboarding@resend.dev'"
+                  class="text-[10px] font-semibold text-[var(--color-accent)] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  Use Test Sender (onboarding@resend.dev)
+                </button>
+              </div>
               <input
                 v-model="form.mail_from"
                 type="email"
@@ -67,8 +76,11 @@
                 class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-white/[0.06] focus:ring-2 focus:ring-[var(--color-accent)]/15 outline-none transition-all"
                 placeholder="no-reply@mail.candycutz.com"
               />
-              <p class="text-[11px] text-slate-500 dark:text-white/40">
-                Must match an authenticated domain configured in your Resend Domains console.
+              <div v-if="isPublicWebmailDomain(form.mail_from)" class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 dark:text-amber-400 text-[11px] leading-relaxed">
+                ⚠️ Resend rejects public email addresses (@gmail.com, @yahoo.com, etc.). To test without a custom domain, click above to use <code>onboarding@resend.dev</code> (delivers to your Resend account email). For customer deliveries, verify your custom domain in Resend.
+              </div>
+              <p v-else class="text-[11px] text-slate-500 dark:text-white/40">
+                Must match an authenticated domain configured in your Resend Domains console, or <code>onboarding@resend.dev</code> for testing.
               </p>
             </div>
 
@@ -338,5 +350,18 @@ function handleTestDispatch() {
     return;
   }
   emit('test-dispatch', recipientEmail.value.trim());
+}
+
+function isPublicWebmailDomain(email) {
+  if (!email || typeof email !== 'string') return false;
+  const lower = email.toLowerCase().trim();
+  return (
+    lower.endsWith('@gmail.com') ||
+    lower.endsWith('@yahoo.com') ||
+    lower.endsWith('@outlook.com') ||
+    lower.endsWith('@hotmail.com') ||
+    lower.endsWith('@icloud.com') ||
+    lower.endsWith('@aol.com')
+  );
 }
 </script>

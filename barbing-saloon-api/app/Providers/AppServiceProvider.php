@@ -100,5 +100,40 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Model::preventLazyLoading(false);
+
+        $this->configureMailFromSettings();
+    }
+
+    /**
+     * Dynamically hydrate mail and Resend configuration from database settings.
+     */
+    private function configureMailFromSettings(): void
+    {
+        if ($this->app->runningUnitTests()) {
+            return;
+        }
+
+        try {
+            $settings = Setting::query()
+                ->whereIn('key', ['resend_api_key', 'mail_from', 'mail_from_name'])
+                ->pluck('value', 'key');
+
+            if (! empty($settings['resend_api_key'])) {
+                config(['services.resend.key' => (string) $settings['resend_api_key']]);
+                if (config('mail.default') === 'log' || empty(config('mail.default'))) {
+                    config(['mail.default' => 'resend']);
+                }
+            }
+
+            if (! empty($settings['mail_from'])) {
+                config(['mail.from.address' => (string) $settings['mail_from']]);
+            }
+
+            if (! empty($settings['mail_from_name'])) {
+                config(['mail.from.name' => (string) $settings['mail_from_name']]);
+            }
+        } catch (\Throwable) {
+            // Keep resilient if database connection is not ready or settings table is absent
+        }
     }
 }

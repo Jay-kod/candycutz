@@ -370,6 +370,25 @@ class AdminApiController
             ]);
         }
 
+        // Dynamically ensure Resend credentials from settings take effect for this dispatch
+        $resendKey = Setting::where('key', 'resend_api_key')->value('value') ?: config('services.resend.key');
+        if (! empty($resendKey)) {
+            config(['services.resend.key' => (string) $resendKey]);
+            if (! app()->runningUnitTests()) {
+                config(['mail.default' => 'resend']);
+            }
+        }
+
+        $mailFrom = Setting::where('key', 'mail_from')->value('value');
+        if (! empty($mailFrom) && ! app()->runningUnitTests()) {
+            config(['mail.from.address' => (string) $mailFrom]);
+        }
+
+        $mailFromName = Setting::where('key', 'mail_from_name')->value('value');
+        if (! empty($mailFromName) && ! app()->runningUnitTests()) {
+            config(['mail.from.name' => (string) $mailFromName]);
+        }
+
         try {
             Mail::html(
                 '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #222; border-radius: 12px; background: #0c0e12; color: #f1f5f9;">
@@ -415,9 +434,12 @@ class AdminApiController
                 ]);
             }
 
+            $rawMsg = $exception->getMessage();
+            $userMessage = $rawMsg ?: 'Unable to send test email. Please check your Resend API key and verified sending domain in your Resend dashboard.';
+
             return ApiResponse::error(
-                'Unable to send test email. Please check your Resend API key and verified sending domain in your Resend dashboard.',
-                [],
+                $userMessage,
+                ['error_details' => $rawMsg],
                 422,
                 'EMAIL_FAILED'
             );
