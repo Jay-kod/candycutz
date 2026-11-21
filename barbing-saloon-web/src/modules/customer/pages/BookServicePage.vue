@@ -155,7 +155,7 @@ import {
   ClockIcon, 
   CurrencyDollarIcon 
 } from '@heroicons/vue/24/outline'
-import { getStorageUrl as getFullImageUrl } from '@/core/utils/url'
+import { getStorageUrl, getStorageUrl as getFullImageUrl } from '@/core/utils/url'
 
 const route = useRoute()
 const router = useRouter()

@@ -373,9 +373,16 @@ class AdminApiController
         // Dynamically ensure Resend credentials from settings take effect for this dispatch
         $resendKey = Setting::where('key', 'resend_api_key')->value('value') ?: config('services.resend.key');
         if (! empty($resendKey)) {
-            config(['services.resend.key' => (string) $resendKey]);
+            $apiKey = (string) $resendKey;
+            config([
+                'services.resend.key' => $apiKey,
+                'mail.mailers.resend.key' => $apiKey,
+            ]);
             if (! app()->runningUnitTests()) {
                 config(['mail.default' => 'resend']);
+                if (app()->bound('mail.manager')) {
+                    Mail::purge('resend');
+                }
             }
         }
 

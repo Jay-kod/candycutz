@@ -24,7 +24,7 @@ use Illuminate\Support\Str;
 
 /**
  * Central notification dispatcher — creates canonical in-app notification records
- * and coordinates channel deliveries (In-App DB, Expo Push, Brevo Email, SSE stream)
+ * and coordinates channel deliveries (In-App DB, Expo Push, Resend Email, SSE stream)
  * for all key business domain events across Customer, Barber, and Admin roles.
  */
 class NotificationDispatcher

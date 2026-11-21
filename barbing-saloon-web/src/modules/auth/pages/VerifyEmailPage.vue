@@ -105,7 +105,7 @@ async function checkRouteParams() {
   if (id && hash) {
     verifying.value = true;
     try {
-      const res = await client.get(`/auth/email/verify/${id}/${hash}`);
+      const res = await client.get(`/auth/email/verify/${id}/${hash}`, { params: route.query });
       if (res.data?.success !== false) {
         verified.value = true;
         if (authStore.user) {

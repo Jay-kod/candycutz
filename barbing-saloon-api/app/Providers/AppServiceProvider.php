@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Gate;
@@ -107,11 +108,15 @@ class AppServiceProvider extends ServiceProvider
 
         VerifyEmail::toMailUsing(function ($notifiable, string $url) {
             $cacheKey = "email_verification_otp:{$notifiable->id}";
-            $otp = Cache::get($cacheKey);
+            $cachedData = Cache::get($cacheKey);
+            $otp = is_array($cachedData) ? ($cachedData['code'] ?? null) : $cachedData;
 
             if (! $otp || ! is_string($otp) || strlen($otp) !== 6) {
                 $otp = sprintf('%06d', random_int(100000, 999999));
-                Cache::put($cacheKey, $otp, now()->addMinutes(15));
+                Cache::put($cacheKey, [
+                    'code' => $otp,
+                    'email' => $notifiable->email,
+                ], now()->addMinutes(15));
             }
 
             $name = $notifiable->name ?? 'Valued Client';
@@ -176,9 +181,16 @@ class AppServiceProvider extends ServiceProvider
                 ->pluck('value', 'key');
 
             if (! empty($settings['resend_api_key'])) {
-                config(['services.resend.key' => (string) $settings['resend_api_key']]);
-                if (config('mail.default') === 'log' || empty(config('mail.default'))) {
+                $apiKey = (string) $settings['resend_api_key'];
+                config([
+                    'services.resend.key' => $apiKey,
+                    'mail.mailers.resend.key' => $apiKey,
+                ]);
+                if (config('mail.default') === 'log' || config('mail.default') === 'smtp' || empty(config('mail.default'))) {
                     config(['mail.default' => 'resend']);
+                }
+                if ($this->app->bound('mail.manager')) {
+                    Mail::purge('resend');
                 }
             }
 

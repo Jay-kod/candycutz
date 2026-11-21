@@ -19,7 +19,7 @@ export default [
 	{ path: '/admin/blog/:id/edit', name: 'admin-blog-edit', component: () => import('../../modules/admin/pages/BlogEditorPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/working-hours', name: 'admin-working-hours', component: () => import('../../modules/admin/pages/WorkingHoursPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/integrations', name: 'admin-integrations', component: () => import('../../modules/admin/pages/IntegrationsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
-	{ path: '/admin/resend', name: 'admin-resend', component: () => import('../../modules/admin/pages/BrevoSetupPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/resend', name: 'admin-resend', component: () => import('../../modules/admin/pages/ResendSetupPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/brevo', redirect: '/admin/resend' },
 	{ path: '/admin/email', redirect: '/admin/resend' },
 	{ path: '/admin/api', name: 'admin-api', component: () => import('../../modules/admin/pages/ApiReferencePage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },

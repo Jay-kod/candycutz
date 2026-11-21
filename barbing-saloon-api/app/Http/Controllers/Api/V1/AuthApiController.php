@@ -196,7 +196,10 @@ class AuthApiController
         // Pre-generate and store OTP in cache so it is immediately available
         $cacheKey = "email_verification_otp:{$user->id}";
         $otp = sprintf('%06d', random_int(100000, 999999));
-        Cache::put($cacheKey, $otp, now()->addMinutes(15));
+        Cache::put($cacheKey, [
+            'code' => $otp,
+            'email' => $user->email,
+        ], now()->addMinutes(15));
 
         $user->sendEmailVerificationNotification();
 
@@ -226,9 +229,16 @@ class AuthApiController
         }
 
         $cacheKey = "email_verification_otp:{$user->id}";
-        $cachedOtp = Cache::get($cacheKey);
+        $cachedData = Cache::get($cacheKey);
 
-        if (! $cachedOtp || ! hash_equals((string) $cachedOtp, trim((string) $validated['code']))) {
+        $cachedCode = is_array($cachedData) ? ($cachedData['code'] ?? null) : $cachedData;
+        $cachedEmail = is_array($cachedData) ? ($cachedData['email'] ?? null) : null;
+
+        if (
+            ! $cachedCode
+            || ! hash_equals((string) $cachedCode, trim((string) $validated['code']))
+            || ($cachedEmail !== null && strtolower((string) $cachedEmail) !== strtolower((string) $user->email))
+        ) {
             return ApiResponse::error(
                 'Invalid or expired verification code. Please check your code or request a new one.',
                 [],

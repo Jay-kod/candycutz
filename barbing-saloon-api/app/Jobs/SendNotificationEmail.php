@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\NotificationDelivery;
+use App\Models\Setting;
 use App\Support\Errors\ErrorReporter;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -32,6 +33,21 @@ class SendNotificationEmail implements ShouldQueue
 
     public function handle(): void
     {
+        $resendKey = Setting::where('key', 'resend_api_key')->value('value');
+        if (! empty($resendKey)) {
+            $apiKey = (string) $resendKey;
+            config([
+                'services.resend.key' => $apiKey,
+                'mail.mailers.resend.key' => $apiKey,
+            ]);
+            if (! app()->runningUnitTests()) {
+                config(['mail.default' => 'resend']);
+                if (app()->bound('mail.manager')) {
+                    Mail::purge('resend');
+                }
+            }
+        }
+
         $delivery = NotificationDelivery::find($this->deliveryId);
 
         if ($delivery) {

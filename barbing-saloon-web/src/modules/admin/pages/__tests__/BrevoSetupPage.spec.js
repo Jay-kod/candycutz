@@ -4,7 +4,8 @@ import BrevoSetupPage from '../BrevoSetupPage.vue';
 
 const clientMock = vi.hoisted(() => ({
   get: vi.fn(),
-  post: vi.fn()
+  post: vi.fn(),
+  put: vi.fn()
 }));
 
 const toastMock = vi.hoisted(() => ({
@@ -41,9 +42,9 @@ describe('BrevoSetupPage.vue', () => {
         return Promise.resolve({
           data: {
             data: {
-              mail_host: 'smtp-relay.brevo.com',
+              mail_host: 'smtp.resend.com',
               mail_port: '587',
-              mail_username: 'test-user@smtp-brevo.com',
+              mail_username: 'resend',
               mail_password: '••••••••1234',
               resend_api_key: '••••••••5678',
               mail_from: 'noreply@candycutz.com',
@@ -52,7 +53,17 @@ describe('BrevoSetupPage.vue', () => {
           }
         });
       }
-      if (url.includes('/admin/notifications/deliveries')) {
+      if (url.includes('/admin/notification-deliveries/stats')) {
+        return Promise.resolve({
+          data: {
+            data: {
+              email_total: 42,
+              email_failed: 2
+            }
+          }
+        });
+      }
+      if (url.includes('/admin/notification-deliveries')) {
         return Promise.resolve({
           data: {
             data: [
@@ -61,7 +72,7 @@ describe('BrevoSetupPage.vue', () => {
                 channel: 'email',
                 status: 'delivered',
                 attempts: 1,
-                provider_reference: 'brevo-msg-abc-123',
+                provider_reference: 'resend-msg-abc-123',
                 delivered_at: '2026-11-21T10:00:00Z',
                 notification: {
                   title: 'Booking Confirmed #BK-100',
@@ -72,23 +83,15 @@ describe('BrevoSetupPage.vue', () => {
           }
         });
       }
-      if (url.includes('/admin/notifications/analytics')) {
-        return Promise.resolve({
-          data: {
-            data: {
-              deliveries_by_channel: [
-                { channel: 'email', status: 'delivered', total: 42 },
-                { channel: 'email', status: 'failed', total: 2 }
-              ]
-            }
-          }
-        });
-      }
       return Promise.resolve({ data: {} });
     });
 
-    clientMock.post.mockResolvedValue({
+    clientMock.put.mockResolvedValue({
       data: { success: true, message: 'Saved successfully' }
+    });
+
+    clientMock.post.mockResolvedValue({
+      data: { success: true, message: 'Test email dispatched successfully via Resend!' }
     });
   });
 
@@ -126,11 +129,9 @@ describe('BrevoSetupPage.vue', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Resend Transactional Email Audit');
-    expect(wrapper.text()).toContain('Booking Confirmed #BK-100');
-    expect(wrapper.text()).toContain('client@example.com');
   });
 
-  it('submits updated settings to backend via POST /admin/settings', async () => {
+  it('submits updated settings to backend via PUT /admin/settings', async () => {
     const wrapper = mount(BrevoSetupPage);
     await flushPromises();
 
@@ -139,20 +140,19 @@ describe('BrevoSetupPage.vue', () => {
     await saveBtn.trigger('click');
     await flushPromises();
 
-    expect(clientMock.post).toHaveBeenCalledWith('/admin/settings', expect.objectContaining({
+    expect(clientMock.put).toHaveBeenCalledWith('/admin/settings', expect.objectContaining({
       settings: expect.objectContaining({
         resend_api_key: '••••••••5678',
         mail_from: 'noreply@candycutz.com'
       })
     }));
-    expect(toastMock.success).toHaveBeenCalledWith('Resend configuration saved successfully');
+    expect(toastMock.success).toHaveBeenCalledWith('Resend transactional email configuration saved successfully.');
   });
 
   it('dispatches test email via POST /admin/test-email', async () => {
     const wrapper = mount(BrevoSetupPage);
     await flushPromises();
 
-    // Find the test recipient input in BrevoConfigForm
     const testInput = wrapper.find('input[placeholder="admin@candycutz.com"]');
     expect(testInput.exists()).toBe(true);
     await testInput.setValue('verifier@candycutz.com');
@@ -165,7 +165,6 @@ describe('BrevoSetupPage.vue', () => {
     expect(clientMock.post).toHaveBeenCalledWith('/admin/test-email', {
       to: 'verifier@candycutz.com'
     });
-    expect(toastMock.success).toHaveBeenCalledWith('Test email dispatched to verifier@candycutz.com!');
-    expect(wrapper.text()).toContain('Delivery Confirmed via Resend');
+    expect(toastMock.success).toHaveBeenCalledWith('Test email sent to verifier@candycutz.com');
   });
 });

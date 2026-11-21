@@ -125,9 +125,9 @@
             </span>
             <span
               v-else-if="day.isSunday"
-              class="text-[7.5px] font-bold uppercase tracking-wider px-0.5 mb-0.5 text-[var(--color-text-muted)] leading-none"
+              class="text-[7px] font-bold uppercase tracking-wider px-0.5 mb-0.5 text-rose-500/80 leading-none"
             >
-              Sun
+              Closed
             </span>
             <span
               v-else
@@ -262,7 +262,7 @@
           v-for="slot in filteredSlots"
           :key="slot"
           type="button"
-          @click="$emit('update:appointmentTime', slot)"
+          @click="selectSlot(slot)"
           class="group relative flex items-center justify-between px-2.5 py-2 min-h-[38px] sm:min-h-[36px] rounded-lg border text-[11px] font-medium transition-all duration-150 cursor-pointer"
           :class="appointmentTime === slot
             ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-xs ring-1 ring-[var(--color-accent)]/40 font-semibold z-10'
@@ -315,7 +315,7 @@
           No Available Slots on This Date
         </h4>
         <p class="text-[10px] text-[var(--color-text-secondary)] max-w-xs mx-auto">
-          All appointment times for this day may have been booked, or the barber is off-duty.
+          {{ selectedDayMeta?.isSunday ? 'CandyCutz is closed on Sundays so our master barbers can recharge. Please select any Monday through Saturday.' : 'All appointment times for this day may have been booked, or the barber is off-duty.' }}
         </p>
         <div class="pt-1 flex items-center justify-center">
           <button
@@ -443,8 +443,11 @@ function selectNextAvailableDay() {
   }
 }
 
+function selectSlot(slot) {
+  emit('update:appointmentTime', slot)
+}
+
 function selectDate(dateStr) {
-  if (props.appointmentDate === dateStr) return
   emit('update:appointmentDate', dateStr)
   emit('dateChange', dateStr)
 }
