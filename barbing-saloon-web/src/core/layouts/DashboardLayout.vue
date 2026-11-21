@@ -32,6 +32,7 @@
         :user-avatar-url="userAvatarUrl"
         :user-initials="userInitials"
         :user-name="authStore.user?.name || 'User'"
+        :profile-route="profileRoute"
         @toggle-mobile="isMobileSidebarOpen = true"
         @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />

@@ -37,16 +37,19 @@ Breakpoints are defined in [`tailwind.config.js`](file:///c:/xampp/htdocs/l/m/ca
 CandyCutz utilizes CSS `clamp()` to scale typography smoothly across screen widths:
 
 ```css
-/* Display Headlines (Hero) */
-font-size: clamp(1.45rem, 8vw, 3.5rem);
-line-height: 1.1;
+/* Display Headlines (Hero) - Fluid across Mobile to 4K */
+font-size: clamp(1.45rem, 8vw, 3.25rem); /* Mobile <= 640px */
+font-size: clamp(1.85rem, 5.5vw, 3.5rem); /* Tablet 641px - 1023px */
+font-size: clamp(2rem, 5.2vw, 4.65rem); /* Desktop & Large >= 1024px */
+line-height: 1.08;
 
 /* Section Headings (H2) */
 font-size: clamp(1.5rem, 4vw, 2.75rem);
 line-height: 1.2;
 
 /* Subtitles / Lead Paragraphs */
-font-size: clamp(0.9rem, 1.7vw, 1.05rem);
+font-size: clamp(1.1rem, 1.6vw, 1.35rem); /* Desktop */
+font-size: 0.95rem; /* Mobile */
 line-height: 1.6;
 
 /* Body Text */
@@ -54,10 +57,12 @@ font-size: clamp(0.875rem, 1.2vw, 1rem);
 line-height: 1.55;
 
 /* Action Buttons */
-font-size: clamp(0.75rem, 3.2vw, 0.875rem);
+font-size: clamp(0.75rem, 3.2vw, 0.85rem); /* Mobile <= 480px */
+font-size: 0.925rem; /* Tablet */
+font-size: 1rem; /* Desktop min-height: 52px */
 
 /* Captions / Meta Info */
-font-size: clamp(0.72rem, 1vw, 0.8rem);
+font-size: clamp(0.8rem, 1.2vw, 1.05rem);
 ```
 
 ---

@@ -13,15 +13,15 @@ export function usePaymentCheckout() {
   const success = ref(false);
   const selectedChannel = ref('bank_transfer');
 
-  const gatewayTitle = ref('MTN FlyX Registration • CandyCutz');
+  const gatewayTitle = ref('CandyCutz • Secure Payment');
   const noticeText = ref('Before transferring, make sure the account name shown by your bank matches the one provided below.');
   const enabledChannels = ref(['bank_transfer', 'ussd', 'bank_account', 'nqr', 'card']);
   const ussdCodeTemplate = ref('*737*2*{amount}*{account_number}#');
 
   const bankDetails = ref({
-    bank_name: 'Sterling Bank',
-    account_name: 'NextGen PG',
-    account_number: '5261935770',
+    bank_name: 'Guaranty Trust Bank (GTB)',
+    account_name: 'Candy Cutz Saloon',
+    account_number: '0123456789',
     currency: 'NGN'
   });
 
@@ -93,9 +93,9 @@ export function usePaymentCheckout() {
       
       if (data.bank_details) {
         bankDetails.value = {
-          bank_name: data.bank_details.bank_name || 'Sterling Bank',
-          account_name: data.bank_details.account_name || 'NextGen PG',
-          account_number: data.bank_details.account_number || '5261935770',
+          bank_name: data.bank_details.bank_name || 'Guaranty Trust Bank (GTB)',
+          account_name: data.bank_details.account_name || 'Candy Cutz Saloon',
+          account_number: data.bank_details.account_number || '0123456789',
           currency: data.bank_details.currency || 'NGN'
         };
       }

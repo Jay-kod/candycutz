@@ -320,10 +320,11 @@
         <div class="pt-1 flex items-center justify-center">
           <button
             type="button"
-            @click="selectRelativeDay(1)"
-            class="inline-flex items-center gap-1 rounded bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-accent-foreground)] shadow-xs hover:bg-[var(--color-accent-hover)] transition-all cursor-pointer"
+            @click="selectNextAvailableDay"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-accent)] px-3.5 py-2 text-xs font-bold text-[var(--color-accent-foreground)] shadow-xs hover:bg-[var(--color-accent-hover)] active:scale-95 transition-all cursor-pointer"
           >
-            <SparklesIcon class="w-3 h-3" /> Check Tomorrow
+            <SparklesIcon class="w-3.5 h-3.5" />
+            <span>Check Next Open Day ({{ nextAvailableDay?.weekdayShort || 'Next Day' }})</span>
           </button>
         </div>
       </div>
@@ -430,10 +431,22 @@ const isWeekendSelected = computed(() => {
   return found && (found.isSunday || found.weekdayShort === 'Sat')
 })
 
+const nextAvailableDay = computed(() => {
+  const currentIndex = daysList.value.findIndex((d) => d.dateStr === props.appointmentDate)
+  const remaining = daysList.value.slice(currentIndex >= 0 ? currentIndex + 1 : 1)
+  return remaining.find((d) => !d.isSunday) || remaining[0] || null
+})
+
+function selectNextAvailableDay() {
+  if (nextAvailableDay.value) {
+    selectDate(nextAvailableDay.value.dateStr)
+  }
+}
+
 function selectDate(dateStr) {
   if (props.appointmentDate === dateStr) return
   emit('update:appointmentDate', dateStr)
-  emit('dateChange')
+  emit('dateChange', dateStr)
 }
 
 function selectRelativeDay(offsetDays) {

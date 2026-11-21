@@ -406,16 +406,17 @@ class PaymentApiController
         // Central Salon Bank & Checkout Settings from DB
         $dbBankName = Setting::query()->where('key', 'bank_name')->value('value')
             ?: Setting::query()->where('key', 'manual_transfer_bank')->value('value')
-            ?: 'Sterling Bank';
+            ?: config('payments.gateways.manual.default_bank_name')
+            ?: 'Guaranty Trust Bank (GTB)';
         $dbAccountName = Setting::query()->where('key', 'account_name')->value('value')
             ?: Setting::query()->where('key', 'manual_transfer_account_name')->value('value')
-            ?: 'NextGen PG';
+            ?: 'Candy Cutz Saloon';
         $dbAccountNumber = Setting::query()->where('key', 'account_number')->value('value')
             ?: Setting::query()->where('key', 'manual_transfer_account_number')->value('value')
-            ?: '5261935770';
+            ?: '0123456789';
 
         $gatewayTitle = Setting::query()->where('key', 'payment_gateway_title')->value('value')
-            ?: 'MTN FlyX Registration • CandyCutz';
+            ?: 'CandyCutz • Secure Payment';
         $expiryMinutes = (int) (Setting::query()->where('key', 'payment_expiry_minutes')->value('value') ?: 120);
         $noticeText = Setting::query()->where('key', 'payment_notice_text')->value('value')
             ?: 'Before transferring, make sure the account name shown by your bank matches the one provided below.';

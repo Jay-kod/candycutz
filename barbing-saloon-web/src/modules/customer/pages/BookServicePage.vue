@@ -181,7 +181,8 @@ const selectedBarberName = computed(() => {
 })
 
 function selectBarber(id) {
-  form.barber_id = id
+  form.barber_id = Number(id)
+  form.appointment_time = ''
   if (form.appointment_date) {
     loadSlots()
   }
@@ -203,7 +204,7 @@ async function loadData() {
       client.get(`/services/${serviceId}`).catch(async () => {
         const fallback = await client.get('/services')
         const list = fallback.data?.data || fallback.data || []
-        return { data: { data: list.find(s => String(s.id) === String(serviceId)) } }
+        return { data: { data: list.find(s => String(s.id) === String(serviceId) || s.slug === String(serviceId)) } }
       }),
       client.get('/barbers'),
     ])
@@ -218,30 +219,32 @@ async function loadData() {
     }
     
     service.value = foundService
+    form.service_id = Number(foundService.id)
     
-    // Auto-select preferred barber
+    // Auto-select preferred barber from active list
     if (route.query.barber_id && barbers.value.some(b => String(b.id) === String(route.query.barber_id))) {
       form.barber_id = Number(route.query.barber_id)
-    } else if (foundService.barber_id) {
-      form.barber_id = foundService.barber_id
+    } else if (foundService.barber_id && barbers.value.some(b => Number(b.id) === Number(foundService.barber_id))) {
+      form.barber_id = Number(foundService.barber_id)
     } else if (barbers.value.length > 0) {
       const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0]
-      form.barber_id = preferred.id
+      form.barber_id = Number(preferred.id)
     }
 
-    // Auto-select initial appointment date (tomorrow if evening, else today)
+    // Auto-select initial appointment date (next open business day, skipping past hours & closed Sundays)
     if (!form.appointment_date) {
       const now = new Date()
+      const targetDate = new Date(now)
       if (now.getHours() >= 18) {
-        const tomorrow = new Date(now)
-        tomorrow.setDate(now.getDate() + 1)
-        const y = tomorrow.getFullYear()
-        const m = String(tomorrow.getMonth() + 1).padStart(2, '0')
-        const d = String(tomorrow.getDate()).padStart(2, '0')
-        form.appointment_date = `${y}-${m}-${d}`
-      } else {
-        form.appointment_date = todayStr
+        targetDate.setDate(targetDate.getDate() + 1)
       }
+      if (targetDate.getDay() === 0) {
+        targetDate.setDate(targetDate.getDate() + 1)
+      }
+      const y = targetDate.getFullYear()
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0')
+      const d = String(targetDate.getDate()).padStart(2, '0')
+      form.appointment_date = `${y}-${m}-${d}`
     }
 
     if (form.barber_id && form.service_id && form.appointment_date) {
@@ -263,11 +266,13 @@ async function refreshData() {
   }, 400)
 }
 
-async function loadSlots() {
-  if (!form.barber_id || !form.service_id || !form.appointment_date) {
+async function loadSlots(customDate) {
+  const dateToUse = (typeof customDate === 'string' && customDate) ? customDate : form.appointment_date
+  if (!form.barber_id || !form.service_id || !dateToUse) {
     slots.value = []
     return
   }
+  form.appointment_date = dateToUse
 
   loadingSlots.value = true
   try {
@@ -275,7 +280,7 @@ async function loadSlots() {
       params: {
         barber_id: form.barber_id,
         service_id: form.service_id,
-        date: form.appointment_date,
+        date: dateToUse,
       }
     })
     slots.value = response.data?.data || response.data || []

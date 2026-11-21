@@ -72,7 +72,7 @@
           </p>
 
           <!-- Bottom: Author Avatar, Name & Role -->
-          <div class="testimonial-author truncate text-sm sm:text-base font-semibold text-[var(--color-text-primary)] tracking-tight">
+          <div class="flex items-center gap-3 mt-auto pt-2">
             <img
               v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
               :src="getStorageUrl(testimonial.client_avatar)"
@@ -89,7 +89,7 @@
               {{ getInitials(testimonial.client_name) }}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-neutral-900 dark:text-white tracking-tight">
+              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-[var(--color-text-primary)] tracking-tight">
                 {{ testimonial.client_name || 'CandyCutz client' }}
               </p>
               <p class="testimonial-role truncate text-xs text-[var(--color-text-muted)] mt-0.5">
