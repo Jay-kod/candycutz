@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Domain\Notification\NotificationDispatcher;
-use App\Domain\Notification\Services\BrevoApiClient;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\DeviceToken;
@@ -15,6 +14,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\UserNotificationPreference;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -248,13 +248,7 @@ class UnifiedNotificationEngineTest extends TestCase
 
     public function test_admin_can_send_test_email_and_track_delivery(): void
     {
-        $mockBrevo = \Mockery::mock(BrevoApiClient::class);
-        $mockBrevo->shouldReceive('send')->once()->with(
-            'tester@candycutz.com',
-            \Mockery::type('string'),
-            \Mockery::type('string')
-        );
-        $this->app->instance(BrevoApiClient::class, $mockBrevo);
+        Mail::fake();
 
         $response = $this->actingAs($this->admin)
             ->postJson('/api/v1/admin/test-email', [
@@ -270,7 +264,7 @@ class UnifiedNotificationEngineTest extends TestCase
 
         expect($delivery)->not->toBeNull();
         expect($delivery->status)->toBe('delivered');
-        expect($delivery->provider_reference)->toStartWith('brevo-test-');
+        expect($delivery->provider_reference)->toStartWith('resend-test-');
     }
 
     public function test_admin_can_dispatch_broadcast_campaign(): void

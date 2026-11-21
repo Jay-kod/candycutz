@@ -54,7 +54,16 @@ class RequestPasswordReset
                         ");
                 });
             } catch (Exception $e) {
-                Log::warning("Password reset email dispatch failed for {$user->email}: ".$e->getMessage());
+                Log::error("Password reset email dispatch failed for {$user->email}: ".$e->getMessage(), [
+                    'recipient' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+
+                try {
+                    app(\App\Support\Errors\ErrorReporter::class)->report($e);
+                } catch (\Throwable) {
+                    // Ignore reporting failures
+                }
             }
 
             $this->logAction('auth.forgot_password', $user, [], ['email' => $user->email]);

@@ -29,7 +29,7 @@ flowchart LR
     DB[(MySQL 8)]
     Redis[(Redis 7)]
     Worker[Queue worker + scheduler]
-    External[Stripe, Brevo, Expo Push,\nGoogle, Apple]
+    External[Stripe, Resend, Expo Push,\nGoogle, Apple]
 
     Web --> API
     Mobile --> API
@@ -136,7 +136,7 @@ Login issues client-scoped tokens; standard login must not delete all of a user'
 | Client state | TanStack Query for server state, Zustand for lightweight client state |
 | Data | MySQL 8.0, Redis 7.2, InnoDB transactions |
 | Payments | Stripe PaymentIntents and signed webhooks |
-| Notifications | Brevo transactional email, Expo Push Notifications |
+| Notifications | Resend transactional email, Expo Push Notifications |
 | Authentication integrations | Laravel Sanctum, Google OAuth/JWKS, Apple identity keys |
 | Infrastructure | Nginx, PHP-FPM, Docker Compose, queue worker, scheduler |
 
@@ -326,7 +326,7 @@ Never commit real credentials. Use environment variables for:
 - MySQL and Redis connection details
 - Sanctum stateful domains and CORS origins
 - Stripe publishable key, secret, and webhook secret
-- Brevo SMTP/API credentials
+- Resend API key and sending domain addresses (`MAIL_MAILER=resend`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`)
 - Expo push credentials
 - Google and Apple identity-provider settings
 - Production media storage credentials

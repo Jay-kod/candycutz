@@ -24,7 +24,6 @@ use App\Domain\Identity\Actions\UpdateCustomer;
 use App\Domain\Identity\Actions\UpdateCustomerStatus;
 use App\Domain\Identity\Actions\UpdateHoliday;
 use App\Domain\Identity\Actions\UpdateWorkingHour;
-use App\Domain\Notification\Services\BrevoApiClient;
 use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\System\Actions\GetDashboardStats;
 use App\Domain\System\Actions\GetReportHistory;
@@ -42,9 +41,13 @@ use App\Models\Notification;
 use App\Models\NotificationDelivery;
 use App\Models\Setting;
 use App\Models\WorkingHour;
+use App\Support\Errors\ErrorReporter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AdminApiController
 {
@@ -322,9 +325,23 @@ class AdminApiController
         return ApiResponse::success($action->execute($request->query('range', '7d')), 'Analytics loaded');
     }
 
-    public function testEmail(Request $request, BrevoApiClient $brevo): JsonResponse
+    public function testEmail(Request $request): JsonResponse
     {
         $to = (string) $request->validate(['to' => ['required', 'email']])['to'];
+
+        // Guard against rapid duplicate test dispatches (respect Resend rate limits)
+        $throttleKey = 'admin-test-email:'.($request->user()?->id ?? $request->ip());
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Email test rate limit reached. Please wait {$seconds} seconds before testing again.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
 
         $admin = $request->user();
         $notification = null;
@@ -332,9 +349,9 @@ class AdminApiController
             $notification = Notification::create([
                 'recipient_id' => $admin->id,
                 'recipient_type' => 'user',
-                'type' => 'brevo_connection_test',
+                'type' => 'resend_connection_test',
                 'category' => 'account',
-                'title' => 'Brevo Connection Test',
+                'title' => 'Resend Connection Test',
                 'message' => "Test email dispatched to {$to}",
                 'data' => ['test_recipient' => $to],
                 'is_read' => true,
@@ -354,25 +371,56 @@ class AdminApiController
         }
 
         try {
-            $brevo->send($to, 'CandyCutz Brevo connection test', '<p>Your CandyCutz Brevo connection is working.</p>');
+            Mail::html(
+                '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #222; border-radius: 12px; background: #0c0e12; color: #f1f5f9;">
+                    <div style="margin-bottom: 20px;">
+                        <span style="font-weight: 800; font-size: 20px; color: #ff6700; letter-spacing: -0.5px;">CandyCutz</span>
+                        <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-left: 8px; letter-spacing: 1px;">Luxury Grooming</span>
+                    </div>
+                    <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">Resend Connection Test</h2>
+                    <p style="font-size: 15px; color: #cbd5e1; line-height: 1.6;">Your CandyCutz Resend transactional email integration is working cleanly and reliably.</p>
+                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
+                    <p style="font-size: 11px; color: #64748b; margin: 0;">Dispatched via Laravel Mail Resend Transport.</p>
+                </div>',
+                function ($message) use ($to) {
+                    $message->to($to)
+                        ->subject('CandyCutz — Resend Connection Test');
+                }
+            );
 
             if ($delivery) {
                 $delivery->update([
                     'status' => 'delivered',
                     'delivered_at' => now(),
-                    'provider_reference' => 'brevo-test-'.uniqid(),
+                    'provider_reference' => 'resend-test-'.uniqid(),
                 ]);
             }
         } catch (\Throwable $exception) {
+            Log::error('Resend test email failed', [
+                'recipient' => $to,
+                'error' => $exception->getMessage(),
+            ]);
+
+            try {
+                app(ErrorReporter::class)->report($exception);
+            } catch (\Throwable) {
+                // Safeguard against error reporter failures
+            }
+
             if ($delivery) {
                 $delivery->update([
                     'status' => 'failed',
-                    'failure_code' => 'BREVO_EMAIL_FAILED',
+                    'failure_code' => 'EMAIL_FAILED',
                     'failure_reason' => $exception->getMessage(),
                 ]);
             }
 
-            return ApiResponse::error($exception->getMessage(), [], 422, 'BREVO_EMAIL_FAILED');
+            return ApiResponse::error(
+                'Unable to send test email. Please check your Resend API key and verified sending domain in your Resend dashboard.',
+                [],
+                422,
+                'EMAIL_FAILED'
+            );
         }
 
         return ApiResponse::success([

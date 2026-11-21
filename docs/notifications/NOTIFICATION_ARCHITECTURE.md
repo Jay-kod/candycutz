@@ -33,8 +33,8 @@ The CandyCutz Unified Notification Engine is an authoritative, multi-channel not
               |                        |                        |
               v                        v                        v
 +--------------------------+ +--------------------+ +--------------------------+
-|  In-App DB Channel       | |  Expo Push Channel | |  Brevo Email Channel     |
-|  - Direct user receipts  | |  - Batched (100)   | |  - Queued SendBrevoEmail |
+|  In-App DB Channel       | |  Expo Push Channel | |  Resend Email Channel    |
+|  - Direct user receipts  | |  - Batched (100)   | |  - Queued SendNotification|
 |  - Status: delivered     | |  - SendExpoPush    | |  - 3 retries, backoff    |
 |  - SSE stream real-time  | |  - Quiet hours     | |  - Status: delivered/fail|
 +--------------------------+ +--------------------+ +--------------------------+
@@ -58,7 +58,7 @@ The CandyCutz Unified Notification Engine is an authoritative, multi-channel not
 Each delivery channel operates in strict isolation:
 - **In-App:** Written synchronously to the primary MySQL database. Immediate authoritative record.
 - **Expo Push:** Handled via queued `SendExpoPush` job. Bounced tokens (`DeviceNotRegistered`) automatically revoke the device token without interrupting user notifications.
-- **Brevo Email:** Queued via `SendBrevoEmail` job with exponential backoff (15s, 60s, 300s). External SMTP latency or rate limits never delay HTTP API responses or prevent in-app notification creation.
+- **Resend Email:** Queued via `SendNotificationEmail` job with exponential backoff (15s, 60s, 300s). Dispatched via Laravel Mail Resend transport using global `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME`. External API latency or rate limits never delay HTTP API responses or prevent in-app notification creation. Failures are reported with context into the error-logging system.
 - **SSE Stream:** Authenticated real-time delivery with reconnect cursors (`Last-Event-ID`). When dropped by network, client falls back smoothly to reference-counted adaptive polling.
 
 ---

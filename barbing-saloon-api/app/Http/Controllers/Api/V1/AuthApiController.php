@@ -22,6 +22,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
 
 class AuthApiController
@@ -90,7 +91,22 @@ class AuthApiController
             'email' => ['required', 'email'],
         ]);
 
-        $action->execute((string) $request->input('email'));
+        $email = (string) $request->input('email');
+        $throttleKey = 'forgot-password:'.strtolower($email).'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Too many password reset attempts. Please try again in {$seconds} seconds.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        $action->execute($email);
 
         return ApiResponse::success(
             null,

@@ -80,7 +80,7 @@ class Setting extends Model
             return 'seo';
         }
 
-        if ($key === 'brevo_api_key' || str_starts_with($key, 'mail_')) {
+        if ($key === 'brevo_api_key' || $key === 'resend_api_key' || str_starts_with($key, 'mail_')) {
             return 'notifications';
         }
 

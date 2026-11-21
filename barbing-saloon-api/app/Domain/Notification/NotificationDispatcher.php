@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Notification;
 
-use App\Domain\Notification\Channels\BrevoEmailChannel;
+use App\Domain\Notification\Channels\EmailNotificationChannel;
 use App\Domain\Notification\Channels\InAppNotificationChannel;
 use App\Domain\Notification\Channels\PushNotificationChannel;
 use App\Jobs\SendExpoPush;
@@ -1261,7 +1261,7 @@ class NotificationDispatcher
         }
 
         if (in_array('email', $channels, true)) {
-            app(BrevoEmailChannel::class)->send($recipient, $notification, $deliveryContext);
+            app(EmailNotificationChannel::class)->send($recipient, $notification, $deliveryContext);
         }
 
         return $notification;

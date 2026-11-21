@@ -4,11 +4,13 @@ namespace App\Jobs;
 
 use App\Mail\BookingConfirmation;
 use App\Models\Appointment;
+use App\Support\Errors\ErrorReporter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendBookingConfirmation implements ShouldQueue
@@ -24,7 +26,29 @@ class SendBookingConfirmation implements ShouldQueue
 
     public function handle(): void
     {
-        Mail::to($this->appointment->customer->email)
-            ->send(new BookingConfirmation($this->appointment));
+        $email = $this->appointment->customer?->email;
+        if (! $email) {
+            return;
+        }
+
+        try {
+            Mail::to($email)
+                ->send(new BookingConfirmation($this->appointment));
+        } catch (\Throwable $e) {
+            Log::error('Failed sending booking confirmation email', [
+                'recipient' => $email,
+                'mailable' => BookingConfirmation::class,
+                'appointment_id' => $this->appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            try {
+                app(ErrorReporter::class)->report($e);
+            } catch (\Throwable) {
+                // Safeguard against reporter failure
+            }
+
+            throw $e;
+        }
     }
 }

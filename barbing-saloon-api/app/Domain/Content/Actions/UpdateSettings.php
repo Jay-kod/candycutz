@@ -22,7 +22,7 @@ class UpdateSettings
                 $settingKey = (string) $setting['key'];
                 $newValue = $setting['value'] ?? null;
 
-                if (in_array($settingKey, ['brevo_api_key', 'mail_password'], true) && is_string($newValue) && str_starts_with($newValue, '••••••••')) {
+                if (in_array($settingKey, ['resend_api_key', 'brevo_api_key', 'mail_password'], true) && is_string($newValue) && str_starts_with($newValue, '••••••••')) {
                     continue;
                 }
 
@@ -39,7 +39,7 @@ class UpdateSettings
 
                 SettingsChanged::dispatch($settingKey, $oldValue, $newValue, auth()->user());
             } elseif (is_string($key)) {
-                if (in_array($key, ['brevo_api_key', 'mail_password'], true) && is_string($setting) && str_starts_with($setting, '••••••••')) {
+                if (in_array($key, ['resend_api_key', 'brevo_api_key', 'mail_password'], true) && is_string($setting) && str_starts_with($setting, '••••••••')) {
                     continue;
                 }
 
