@@ -99,6 +99,23 @@ describe('useNotifications composable', () => {
     expect(api.delete).toHaveBeenCalledWith('/v1/notifications/401')
   })
 
+  it('optimistically clears all notifications and calls DELETE /v1/notifications', async () => {
+    api.delete.mockResolvedValueOnce({ data: { success: true } })
+
+    const { notifications, unreadCount, clearAll } = useNotifications()
+    notifications.value = [
+      { id: 451, title: 'Test 1', is_read: false },
+      { id: 452, title: 'Test 2', is_read: true },
+    ]
+    unreadCount.value = 1
+
+    await clearAll()
+
+    expect(notifications.value).toHaveLength(0)
+    expect(unreadCount.value).toBe(0)
+    expect(api.delete).toHaveBeenCalledWith('/v1/notifications')
+  })
+
   it('resets notifications state upon resetNotifications call', () => {
     const { notifications, unreadCount, resetNotifications } = useNotifications()
     notifications.value = [

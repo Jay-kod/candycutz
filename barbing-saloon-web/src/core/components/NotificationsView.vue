@@ -59,6 +59,18 @@
           <CheckCircleIcon class="w-5 h-5" />
           Mark all read
         </button>
+
+        <!-- Clear All -->
+        <button 
+          v-if="notifications.length > 0" 
+          @click="handleClearAll" 
+          :disabled="isClearing"
+          class="flex items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 px-4 py-3 text-sm font-bold transition-all active:scale-[0.98] shrink-0 disabled:opacity-50"
+          title="Clear all notifications"
+        >
+          <TrashIcon class="w-5 h-5" />
+          <span class="hidden sm:inline">{{ isClearing ? 'Clearing...' : 'Clear all' }}</span>
+        </button>
       </div>
     </div>
 
@@ -148,7 +160,8 @@ import {
   Cog6ToothIcon,
   FunnelIcon,
   XMarkIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  TrashIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../modules/auth/store/auth.store'
 import { useNotifications } from '@/core/composables/useNotifications'
@@ -169,9 +182,24 @@ const {
   markAsRead,
   markAllRead,
   deleteNotification,
+  clearAll,
   startPolling,
   stopPolling,
 } = useNotifications()
+
+const isClearing = ref(false)
+
+async function handleClearAll() {
+  if (typeof window !== 'undefined' && !window.confirm('Clear all notifications? This action cannot be undone.')) {
+    return
+  }
+  isClearing.value = true
+  try {
+    await clearAll()
+  } finally {
+    isClearing.value = false
+  }
+}
 
 const activeTimeFilter = ref('all')
 const activeTypeFilter = ref('all')

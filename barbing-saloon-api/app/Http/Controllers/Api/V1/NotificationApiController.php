@@ -420,6 +420,88 @@ class NotificationApiController
     }
 
     /**
+     * Clear all notifications for the authenticated user.
+     * Admins can optionally pass ?scope=all to wipe all system notification records.
+     */
+    public function clearAll(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            return ApiResponse::error('Unauthenticated', [], 401, 'UNAUTHENTICATED');
+        }
+
+        $role = $this->getUserRoleString($user);
+        $isAdmin = in_array($role, ['admin', 'super_admin'], true);
+
+        if ($request->query('scope') === 'all' && $isAdmin) {
+            DB::transaction(function () {
+                NotificationDelivery::query()->delete();
+                NotificationRead::query()->delete();
+                Notification::query()->delete();
+            });
+
+            return ApiResponse::success(null, 'All system notifications cleared successfully');
+        }
+
+        DB::transaction(function () use ($user, $role, $isAdmin) {
+            // Delete personal notifications
+            Notification::where('recipient_id', $user->id)->delete();
+
+            // Mark unread broadcasts as read for this user so they don't reappear
+            $broadcastQuery = Notification::query()->whereNull('recipient_id');
+
+            if ($isAdmin) {
+                $broadcastQuery->whereIn('recipient_type', ['all', 'all_admins', 'admin']);
+            } elseif ($role === 'barber') {
+                $broadcastQuery->whereIn('recipient_type', ['all', 'all_barbers'])
+                    ->whereIn('type', self::BARBER_BROADCAST_TYPES);
+            } else {
+                $broadcastQuery->whereIn('recipient_type', ['all', 'all_customers'])
+                    ->whereIn('type', self::CUSTOMER_BROADCAST_TYPES);
+            }
+
+            $broadcastIds = $broadcastQuery->pluck('id');
+            $now = now();
+            $reads = [];
+            foreach ($broadcastIds as $bId) {
+                $reads[] = [
+                    'notification_id' => $bId,
+                    'user_id' => $user->id,
+                    'read_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+            if (! empty($reads)) {
+                NotificationRead::insertOrIgnore($reads);
+            }
+        });
+
+        return ApiResponse::success(null, 'All notifications cleared successfully');
+    }
+
+    /**
+     * Admin bulk clear of all system notification records and delivery logs.
+     */
+    public function adminClearAll(): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (! $user || ! in_array($this->getUserRoleString($user), ['admin', 'super_admin'], true)) {
+            return ApiResponse::error('Unauthorized', [], 403, 'UNAUTHORIZED');
+        }
+
+        DB::transaction(function () {
+            NotificationDelivery::query()->delete();
+            NotificationRead::query()->delete();
+            Notification::query()->delete();
+        });
+
+        return ApiResponse::success(null, 'All system notification records cleared successfully');
+    }
+
+    /**
      * Get user notification preferences.
      */
     public function getNotificationSettings(): JsonResponse

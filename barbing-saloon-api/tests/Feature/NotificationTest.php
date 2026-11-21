@@ -290,3 +290,45 @@ it('dispatches notifications on feedback submission', function () {
         'related_entity_id' => $feedback->id,
     ]);
 });
+
+it('allows user to clear all personal notifications via DELETE /notifications', function () {
+    $user = User::factory()->create(['role' => 'customer']);
+    $other = User::factory()->create(['role' => 'customer']);
+
+    Notification::factory()->count(3)->create(['recipient_id' => $user->id]);
+    Notification::factory()->count(2)->create(['recipient_id' => $other->id]);
+
+    $this->actingAs($user)
+        ->deleteJson('/api/v1/notifications')
+        ->assertOk()
+        ->assertJsonPath('success', true);
+
+    expect(Notification::where('recipient_id', $user->id)->count())->toBe(0);
+    expect(Notification::where('recipient_id', $other->id)->count())->toBe(2);
+});
+
+it('allows admin to purge all system notifications via DELETE /admin/notifications/clear-all', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $customer = User::factory()->create(['role' => 'customer']);
+
+    Notification::factory()->count(4)->create(['recipient_id' => $customer->id]);
+
+    $this->actingAs($admin)
+        ->deleteJson('/api/v1/admin/notifications/clear-all')
+        ->assertOk()
+        ->assertJsonPath('success', true);
+
+    expect(Notification::count())->toBe(0);
+});
+
+it('clears all notifications via artisan notifications:clear command', function () {
+    $user = User::factory()->create(['role' => 'customer']);
+    Notification::factory()->count(5)->create(['recipient_id' => $user->id]);
+
+    expect(Notification::count())->toBe(5);
+
+    $this->artisan('notifications:clear', ['--force' => true])
+        ->assertSuccessful();
+
+    expect(Notification::count())->toBe(0);
+});

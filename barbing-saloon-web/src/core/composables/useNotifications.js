@@ -14,6 +14,7 @@ let isInitialized = false
 let currentIntervalMs = 15000
 let visibilityListenerAttached = false
 let sseAbortController = null
+let sseReconnectTimer = null
 let lastSeenSseId = 0
 
 function handleVisibilityChange() {
@@ -24,9 +25,12 @@ function handleVisibilityChange() {
       pollTimer = null
     }
   } else {
-    if (subscriberCount > 0 && !pollTimer) {
+    if (subscriberCount > 0) {
       useNotifications().fetchUnreadCount()
-      pollTimer = setInterval(() => useNotifications().fetchUnreadCount(), currentIntervalMs)
+      if (!pollTimer) {
+        pollTimer = setInterval(() => useNotifications().fetchUnreadCount(), currentIntervalMs)
+      }
+      useNotifications().connectStream()
     }
   }
 }
@@ -105,6 +109,10 @@ export function resetNotifications() {
   if (sseAbortController) {
     sseAbortController.abort()
     sseAbortController = null
+  }
+  if (sseReconnectTimer) {
+    clearTimeout(sseReconnectTimer)
+    sseReconnectTimer = null
   }
   if (visibilityListenerAttached && typeof document !== 'undefined') {
     document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -230,6 +238,21 @@ export function useNotifications() {
     }
   }
 
+  /**
+   * Instant optimistic update when clearing all notifications
+   */
+  const clearAll = async () => {
+    try {
+      notifications.value = []
+      unreadCount.value = 0
+      knownNotificationIds.clear()
+      await api.delete('/v1/notifications')
+    } catch (err) {
+      console.error('Failed to clear all notifications:', err)
+      await fetchNotifications({ silent: true })
+    }
+  }
+
   const requestBrowserPermission = async () => {
     if (typeof window === 'undefined' || !('Notification' in window)) return false
     if (Notification.permission === 'granted') return true
@@ -330,6 +353,16 @@ export function useNotifications() {
           // SSE stream dropped or unsupported, fallback polling remains active
         }
       })
+      .finally(() => {
+        if (subscriberCount > 0 && !signal.aborted) {
+          if (sseReconnectTimer) clearTimeout(sseReconnectTimer)
+          sseReconnectTimer = setTimeout(() => {
+            if (subscriberCount > 0 && !signal.aborted) {
+              connectStream()
+            }
+          }, 2000)
+        }
+      })
   }
 
   /**
@@ -360,6 +393,10 @@ export function useNotifications() {
         sseAbortController.abort()
         sseAbortController = null
       }
+      if (sseReconnectTimer) {
+        clearTimeout(sseReconnectTimer)
+        sseReconnectTimer = null
+      }
       if (visibilityListenerAttached && typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibilityChange)
         visibilityListenerAttached = false
@@ -377,6 +414,7 @@ export function useNotifications() {
     markAsRead,
     markAllRead,
     deleteNotification,
+    clearAll,
     requestBrowserPermission,
     playChime,
     startPolling,

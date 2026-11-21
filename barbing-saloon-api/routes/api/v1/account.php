@@ -163,6 +163,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications', [NotificationApiController::class, 'store']);
     Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllRead']);
     Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead'])->whereNumber('id');
+    Route::delete('/notifications', [NotificationApiController::class, 'clearAll']);
     Route::delete('/notifications/{id}', [NotificationApiController::class, 'destroy'])->whereNumber('id');
     Route::get('/notification-settings', [NotificationApiController::class, 'getNotificationSettings']);
     Route::post('/notification-settings', [NotificationApiController::class, 'updateNotificationSettings']);

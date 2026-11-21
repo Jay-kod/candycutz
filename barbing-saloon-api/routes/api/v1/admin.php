@@ -151,6 +151,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminBroadcasts']);
     Route::post('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminStoreBroadcast']);
     Route::get('/admin/notifications/analytics', [NotificationApiController::class, 'adminAnalytics']);
+    Route::delete('/admin/notifications/clear-all', [NotificationApiController::class, 'adminClearAll']);
 });
 
 Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {
