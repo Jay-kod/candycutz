@@ -4,6 +4,7 @@ export default [
 	{ path: '/barber/appointments', name: 'barber-appointments', component: () => import('@/features/appointments/pages/BarberAppointmentsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/walk-in', name: 'barber-walk-in', component: () => import('../../modules/barber/pages/WalkInPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/profile', name: 'barber-profile', component: () => import('../../modules/barber/pages/ProfilePage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
+	{ path: '/barber/verify-email', name: 'barber-verify-email', component: () => import('../../modules/barber/pages/VerifyEmailPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/payments', name: 'barber-payments', component: () => import('../../modules/barber/pages/PaymentVerificationPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/bank-details', name: 'barber-bank-details', component: () => import('../../modules/barber/pages/BarberBankDetailsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },
 	{ path: '/barber/payments/:id/receipt', name: 'barber-receipt-details', component: () => import('../../modules/barber/pages/ReceiptDetailsPage.vue'), meta: { requiresAuth: true, roles: ['barber'] } },

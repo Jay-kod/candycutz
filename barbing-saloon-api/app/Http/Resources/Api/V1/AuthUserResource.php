@@ -35,6 +35,10 @@ class AuthUserResource extends JsonResource
             'phone' => $this->phone,
             'status' => $this->status ?? 'active',
             'is_active' => (bool) $this->is_active,
+            'email_verified_at' => $this->email_verified_at instanceof \Carbon\CarbonInterface
+                ? $this->email_verified_at->toIso8601String()
+                : ($this->email_verified_at ? (string) $this->email_verified_at : null),
+            'is_email_verified' => $this->hasVerifiedEmail(),
         ];
 
         if ($this->barber) {

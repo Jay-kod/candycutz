@@ -3,6 +3,8 @@ export default [
   { path: '/customer/dashboard/bookings', name: 'customer-bookings', component: () => import('../../modules/customer/pages/BookingsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/my-codes', name: 'customer-my-codes', component: () => import('../../modules/customer/pages/MyCodesPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/profile', name: 'customer-profile', component: () => import('../../modules/customer/pages/ProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/verify-email', name: 'customer-verify-email', component: () => import('../../modules/customer/pages/VerifyEmailPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/verify-email', redirect: '/customer/dashboard/verify-email' },
   { path: '/customer/dashboard/reviews', name: 'customer-reviews', component: () => import('../../modules/customer/pages/ReviewsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/feedback', name: 'customer-feedback', component: () => import('../../modules/customer/pages/FeedbackPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/barbers', name: 'customer-barbers', component: () => import('../../modules/customer/pages/BarbersPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
@@ -27,4 +29,8 @@ export default [
   { path: '/customer/barbers', redirect: '/customer/dashboard/barbers' },
   { path: '/customer/barber', redirect: '/customer/dashboard/barbers' },
   { path: '/customer/barber/:id', redirect: to => `/customer/dashboard/barber/${to.params.id}` },
+  { path: '/customer/services', redirect: '/customer/dashboard/services' },
+  { path: '/customer/services/:id', redirect: to => `/customer/dashboard/services/${to.params.id}` },
+  { path: '/customer/book/:serviceId', redirect: to => `/customer/dashboard/book/${to.params.serviceId}` },
+  { path: '/book/:serviceId', redirect: to => `/customer/dashboard/book/${to.params.serviceId}` },
 ];

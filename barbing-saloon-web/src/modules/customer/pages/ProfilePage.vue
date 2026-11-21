@@ -78,7 +78,24 @@
               <input v-model="form.name" placeholder="Not set" class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40" />
             </div>
             <div class="space-y-1.5">
-              <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Email Address</label>
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Email Address</label>
+                <span
+                  v-if="isEmailVerified"
+                  class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"
+                >
+                  <CheckCircleIcon class="w-3 h-3" />
+                  <span>Verified &amp; Protected</span>
+                </span>
+                <router-link
+                  v-else
+                  to="/customer/dashboard/verify-email"
+                  class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                >
+                  <ClockIcon class="w-3 h-3" />
+                  <span>Unverified — Verify Now</span>
+                </router-link>
+              </div>
               <input v-model="form.email" type="email" placeholder="Not set" :disabled="!canChangeEmail" class="w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none transition-colors focus:border-[var(--color-accent)] focus:bg-white dark:focus:bg-black/40 disabled:opacity-50 disabled:cursor-not-allowed" />
               <p v-if="!canChangeEmail" class="text-[10px] text-amber-500 dark:text-amber-400">Email address can only be changed once every 30 days.</p>
             </div>
@@ -102,9 +119,31 @@
           <p v-if="status" class="mt-3 text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 py-2 rounded-lg border border-emerald-500/20">{{ status }}</p>
         </form>
 
-        <!-- Recent Activity Feed -->
-        <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl flex flex-col justify-between">
+        <!-- Right Column: Verification & Activity Feed -->
+        <div class="space-y-6">
+          <EmailVerificationCard :email="form.email" />
+
+          <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl flex flex-col justify-between">
           <div>
+            <div class="mb-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.03] p-4">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Display &amp; System</h3>
+              <p class="mt-1 text-[11px] text-[var(--color-text-secondary)]">Personal dashboard preferences</p>
+              <div class="mt-4 flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-semibold text-slate-900 dark:text-white">Theme</p>
+                  <p class="mt-0.5 text-[10px] text-[var(--color-text-secondary)]">{{ isDark ? 'Dark appearance' : 'Light appearance' }}</p>
+                </div>
+                <ThemeToggleSwitch />
+              </div>
+              <div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-200/80 dark:border-white/[0.06] pt-4">
+                <div>
+                  <p class="text-xs font-semibold text-slate-900 dark:text-white">System status</p>
+                  <p class="mt-0.5 text-[10px] text-[var(--color-text-secondary)]">Database connection</p>
+                </div>
+                <DatabaseStatusBadge />
+              </div>
+            </div>
+
             <h2 class="font-display text-xl text-slate-900 dark:text-white pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center gap-2">
               <ClockIcon class="w-5 h-5 text-[var(--color-accent)]" />
               Recent <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-amber-200">Activity</span>
@@ -132,6 +171,7 @@
           </div>
         </div>
       </div>
+      </div>
     </section>
   </CustomerLayout>
 </template>
@@ -143,15 +183,21 @@ import { client } from '@/shared/api/client';
 import { useToast } from '../../../core/composables/useToast';
 import { useAuthStore } from '../../auth/store/auth.store';
 import { getStorageUrl } from '@/core/utils/url';
+import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
+import DatabaseStatusBadge from '@/core/components/DatabaseStatusBadge.vue';
+import EmailVerificationCard from '@/shared/components/EmailVerificationCard.vue';
+import { useTheme } from '@/core/composables/useTheme';
 import { 
   UserCircleIcon, 
   CameraIcon, 
   PencilSquareIcon, 
-  ClockIcon 
+  ClockIcon,
+  CheckCircleIcon
 } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const authStore = useAuthStore();
+const { isDark } = useTheme();
 const form = reactive({ name: '', username: '', email: '', phone: '', bio: '', avatar: null });
 const status = ref('');
 const saving = ref(false);
@@ -160,6 +206,10 @@ const originalProfile = ref({});
 const avatarPreview = ref(null);
 const avatarInput = ref(null);
 const removeAvatarRequested = ref(false);
+
+const isEmailVerified = computed(() => {
+  return !!authStore.user?.is_email_verified || !!authStore.user?.email_verified_at;
+});
 
 const initials = computed(() => {
   const name = form.name || form.username || form.email || '?';

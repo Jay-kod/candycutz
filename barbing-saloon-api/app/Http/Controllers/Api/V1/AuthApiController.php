@@ -20,7 +20,9 @@ use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
@@ -134,11 +136,17 @@ class AuthApiController
         }
     }
 
-    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse
+    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse|RedirectResponse
     {
         $user = User::findOrFail($id);
         if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
-            return ApiResponse::error('Invalid email verification link.', [], 403, 'EMAIL_VERIFICATION_INVALID');
+            if ($request->wantsJson()) {
+                return ApiResponse::error('Invalid email verification link.', [], 403, 'EMAIL_VERIFICATION_INVALID');
+            }
+
+            $frontendUrl = (string) config('app.frontend_url', 'http://localhost:5173');
+
+            return redirect()->away(rtrim($frontendUrl, '/').'/verify-email?status=invalid');
         }
 
         if (! $user->hasVerifiedEmail()) {
@@ -146,19 +154,115 @@ class AuthApiController
             event(new Verified($user));
         }
 
-        return ApiResponse::success(null, 'Email address verified successfully.');
+        if ($request->wantsJson()) {
+            return ApiResponse::success([
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address verified successfully.');
+        }
+
+        $frontendUrl = (string) config('app.frontend_url', 'http://localhost:5173');
+
+        return redirect()->away(rtrim($frontendUrl, '/').'/verify-email?status=success&email='.urlencode($user->email));
     }
 
     public function sendVerificationNotification(Request $request): JsonResponse
     {
         $user = $request->user();
         if ($user->hasVerifiedEmail()) {
-            return ApiResponse::success(null, 'Email address is already verified.');
+            return ApiResponse::success([
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address is already verified.');
         }
+
+        $throttleKey = "email-verification-notification:{$user->id}";
+        if (RateLimiter::tooManyAttempts($throttleKey, 1)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Please wait {$seconds} seconds before requesting another verification code.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        // Pre-generate and store OTP in cache so it is immediately available
+        $cacheKey = "email_verification_otp:{$user->id}";
+        $otp = sprintf('%06d', random_int(100000, 999999));
+        Cache::put($cacheKey, $otp, now()->addMinutes(15));
 
         $user->sendEmailVerificationNotification();
 
-        return ApiResponse::success(null, 'Email verification link sent.');
+        return ApiResponse::success([
+            'email' => $user->email,
+            'is_email_verified' => false,
+            'expires_in' => 900,
+            'cooldown' => 60,
+        ], 'Email verification link and 6-digit code sent successfully.');
+    }
+
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            return ApiResponse::success([
+                'user' => new AuthUserResource($user),
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address is already verified.');
+        }
+
+        $cacheKey = "email_verification_otp:{$user->id}";
+        $cachedOtp = Cache::get($cacheKey);
+
+        if (! $cachedOtp || ! hash_equals((string) $cachedOtp, trim((string) $validated['code']))) {
+            return ApiResponse::error(
+                'Invalid or expired verification code. Please check your code or request a new one.',
+                [],
+                422,
+                'INVALID_VERIFICATION_CODE'
+            );
+        }
+
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+        Cache::forget($cacheKey);
+
+        $fresh = $user->fresh();
+
+        return ApiResponse::success([
+            'user' => new AuthUserResource($fresh),
+            'is_email_verified' => true,
+            'email_verified_at' => $fresh->email_verified_at instanceof \Carbon\CarbonInterface
+                ? $fresh->email_verified_at->toIso8601String()
+                : ($fresh->email_verified_at ? (string) $fresh->email_verified_at : null),
+        ], 'Email address verified successfully. Your account is secured and verified.');
+    }
+
+    public function emailStatus(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return ApiResponse::success([
+            'email' => $user->email,
+            'is_email_verified' => $user->hasVerifiedEmail(),
+            'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                ? $user->email_verified_at->toIso8601String()
+                : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+        ], 'Email verification status retrieved');
     }
 
     public function changePassword(Request $request, ChangePassword $action): JsonResponse

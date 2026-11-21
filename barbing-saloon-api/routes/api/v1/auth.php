@@ -18,8 +18,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthApiController::class, 'logout']);
     Route::post('/auth/logout-all', [AuthApiController::class, 'logoutAll']);
     Route::post('/auth/change-password', [AuthApiController::class, 'changePassword']);
+    Route::get('/auth/email/status', [AuthApiController::class, 'emailStatus']);
     Route::post('/auth/email/verification-notification', [AuthApiController::class, 'sendVerificationNotification'])
         ->middleware('throttle:auth-sensitive');
+    Route::post('/auth/email/verify-code', [AuthApiController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1');
     Route::get('/auth/sessions', [AuthApiController::class, 'sessions']);
     Route::delete('/auth/sessions/{id}', [AuthApiController::class, 'revokeSession']);
     Route::get('/auth/me', [AuthApiController::class, 'me']);

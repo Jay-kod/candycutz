@@ -27,10 +27,14 @@ use App\Policies\ServiceCategoryRequestPolicy;
 use App\Policies\ServicePolicy;
 use App\Policies\SettingPolicy;
 use App\Policies\TestimonialPolicy;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -100,6 +104,59 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Model::preventLazyLoading(false);
+
+        VerifyEmail::toMailUsing(function ($notifiable, string $url) {
+            $cacheKey = "email_verification_otp:{$notifiable->id}";
+            $otp = Cache::get($cacheKey);
+
+            if (! $otp || ! is_string($otp) || strlen($otp) !== 6) {
+                $otp = sprintf('%06d', random_int(100000, 999999));
+                Cache::put($cacheKey, $otp, now()->addMinutes(15));
+            }
+
+            $name = $notifiable->name ?? 'Valued Client';
+
+            $htmlContent = '
+            <div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid #222; border-radius: 16px; background: #0c0e12; color: #f1f5f9;">
+                <div style="margin-bottom: 24px; border-bottom: 1px solid #1e293b; padding-bottom: 20px;">
+                    <span style="font-weight: 900; font-size: 24px; color: #ff6700; letter-spacing: -0.5px;">CandyCutz</span>
+                    <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-left: 10px; letter-spacing: 1.5px; font-weight: 600;">Luxury Grooming</span>
+                </div>
+
+                <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 12px;">Verify Your Email Address</h2>
+
+                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 24px;">
+                    Hello ' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . ',<br><br>
+                    Please verify your email address to secure your CandyCutz account. Once verified, this email is permanently bound to your account, protected against unauthorized duplicate registrations, and will receive all official appointment confirmations, receipts, and schedule updates.
+                </p>
+
+                <div style="text-align: center; margin: 32px 0; background: #161a22; border: 1px solid #2d3748; border-radius: 12px; padding: 24px 16px;">
+                    <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; margin: 0 0 10px 0; font-weight: 600;">Your 6-Digit Verification Code</p>
+                    <div style="display: inline-block; font-family: monospace, \'Courier New\', Courier; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #ff6700; text-shadow: 0 0 15px rgba(255,103,0,0.3);">' . $otp . '</div>
+                    <p style="font-size: 11px; color: #64748b; margin: 10px 0 0 0;">Valid for 15 minutes</p>
+                </div>
+
+                <p style="font-size: 13px; color: #94a3b8; line-height: 1.6; text-align: center; margin-bottom: 20px;">
+                    Alternatively, you can verify your account instantly by clicking the button below:
+                </p>
+
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" style="display: inline-block; background: linear-gradient(135deg, #ff6700 0%, #ea580c 100%); color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 14px rgba(255, 103, 0, 0.35);">
+                        Verify Email Address
+                    </a>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #1e293b; margin: 28px 0;" />
+
+                <p style="font-size: 11px; color: #64748b; line-height: 1.5; margin: 0;">
+                    If you did not create or update an account with CandyCutz, no further action is required and you may safely disregard this message.
+                </p>
+            </div>';
+
+            return (new MailMessage)
+                ->subject('CandyCutz — Verify Your Email Address (' . $otp . ')')
+                ->line(new HtmlString($htmlContent));
+        });
 
         $this->configureMailFromSettings();
     }
