@@ -1,0 +1,488 @@
+<template>
+  <div class="login-page min-h-[99vh] min-h-[99dvh] lg:h-[99vh] lg:h-[99dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text">
+    
+    <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
+    <div class="login-brand-panel hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
+      <!-- Background Effects -->
+      <div class="absolute inset-0 bg-theme-bg z-0"></div>
+      <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent z-0"></div>
+      <div class="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent z-0"></div>
+      
+      <!-- Decorative Lines -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-theme-border/20 to-transparent z-0"></div>
+      <div class="absolute top-16 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-theme-border/20 to-transparent z-0"></div>
+      
+      <!-- Content -->
+      <div class="relative z-10">
+        <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
+        </a>
+      </div>
+      
+      <div class="relative z-10 max-w-lg">
+        <div class="w-12 h-1 bg-gold mb-8 mx-auto"></div>
+        <h2 class="font-display text-5xl text-theme-text leading-tight mb-6">
+          Your style,<br />our expertise.
+        </h2>
+        <p class="text-lg text-theme-muted font-light leading-relaxed">
+          Sign in to book appointments, manage your wishlist, and experience the premium standard of grooming at {{ brandName }}.
+        </p>
+      </div>
+      
+      <div class="relative z-10">
+        <p class="text-xs uppercase tracking-[0.3em] text-theme-muted font-semibold">
+          &copy; {{ new Date().getFullYear() }} <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />. All rights reserved.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Section: Login Form -->
+    <div class="login-panel w-full lg:w-1/2 flex flex-col items-center justify-center px-4 py-4 xs:px-6 sm:px-10 sm:py-6 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border">
+      
+      <!-- Mobile Logo -->
+      <div class="login-mobile-logo mb-4 lg:hidden flex justify-center w-full">
+        <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
+          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
+        </a>
+      </div>
+
+      <div class="login-card w-full max-w-sm">
+        <div class="login-intro mb-4 sm:mb-6">
+          <div class="text-center">
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-gold mb-2">Customer Portal</h1>
+          </div>
+          <p class="text-theme-muted text-xs sm:text-sm mb-3">Please enter your credentials to access your dashboard.</p>
+          
+          <div class="login-demo-credentials bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-theme-text font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
+                Demo Accounts
+              </span>
+              <button 
+                type="button" 
+                @click="fillActiveDemo" 
+                class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
+                Fill Demo
+              </button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1 p-1 bg-theme-bg/60 rounded border border-theme-border/50 mb-2.5">
+              <button 
+                v-for="item in demoAccountList" 
+                :key="item.role"
+                type="button"
+                @click="selectDemoRole(item.role)"
+                :class="[
+                  'px-1.5 py-1 text-[11px] font-medium rounded transition-colors text-center truncate cursor-pointer',
+                  activeDemoRole === item.role 
+                    ? 'bg-gold text-obsidian font-bold shadow-sm' 
+                    : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
+                ]">
+                {{ item.label }}
+              </button>
+            </div>
+
+            <div class="space-y-0.5 font-mono text-[11px]">
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Email:</span> {{ currentDemo.email }}</p>
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Password:</span> {{ currentDemo.password }}</p>
+            </div>
+
+            <div v-if="currentDemo.portalPath !== '/login'" class="mt-2 pt-1.5 border-t border-theme-border/40 text-[10px] text-theme-muted flex items-center justify-between">
+              <span>Dedicated portal:</span>
+              <RouterLink :to="currentDemo.portalPath" class="text-gold hover:underline font-semibold">
+                Go to {{ currentDemo.portalName }} &rarr;
+              </RouterLink>
+            </div>
+          </div>
+
+          <div class="login-social mb-4">
+            <SocialAuthButtons />
+          </div>
+        </div>
+
+        <form class="login-form space-y-3" @submit.prevent="submitForm">
+          <!-- General Error -->
+          <div v-if="generalError" class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-400 font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            <span>{{ generalError }}</span>
+          </div>
+          
+          <!-- Email Input -->
+          <div class="relative group">
+            <label for="email" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Email or Username</label>
+            <input 
+              v-model="email" 
+              id="email"
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+              placeholder="you@example.com or username" 
+              type="text" 
+            />
+            <p v-if="errors.email" class="mt-2 text-xs text-red-400 font-medium">{{ errors.email }}</p>
+          </div>
+          
+          <!-- Password Input -->
+          <div class="relative group">
+            <label for="password" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Password</label>
+            <div class="relative">
+              <input 
+                v-model="password" 
+                id="password"
+                class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="Enter your password" 
+              />
+              <button 
+                type="button" 
+                @click="showPassword = !showPassword" 
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral hover:text-gold transition-colors p-1">
+                <!-- Eye Open -->
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <!-- Eye Closed -->
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+            <p v-if="errors.password" class="mt-2 text-xs text-red-400 font-medium">{{ errors.password }}</p>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="flex items-center justify-between mt-2">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <div class="relative flex items-center justify-center w-4 h-4 rounded border border-theme-border bg-theme-bg group-hover:border-gold-dark transition-colors">
+                <input type="checkbox" v-model="rememberMe" class="peer sr-only" />
+                <svg class="w-3 h-3 text-gold opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span class="text-xs text-theme-muted group-hover:text-gold-dark transition-colors">Remember me</span>
+            </label>
+            <RouterLink to="/forgot-password" class="text-xs font-semibold text-gold hover:text-gold-dark transition-colors">
+              Forgot password?
+            </RouterLink>
+          </div>
+          
+          <div class="login-actions space-y-3 mt-4">
+            <!-- Submit Button -->
+            <button 
+              :disabled="loading" 
+              class="relative w-full overflow-hidden rounded-lg bg-gold px-4 py-3 text-sm font-bold text-obsidian tracking-wide transition-all duration-300 hover:bg-gold-dark hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-70 disabled:cursor-not-allowed group">
+              <span class="relative z-10 flex items-center justify-center gap-2">
+                <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-obsidian" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ loading ? 'Authenticating...' : 'Sign In' }}
+              </span>
+            </button>
+
+          </div>
+        </form>
+
+        <!-- Register Link -->
+        <div class="login-register-link mt-5 text-center text-sm text-theme-muted">
+          Don't have an account yet? 
+          <RouterLink to="/customer/register" class="font-bold text-gold hover:text-gold-dark transition-colors ml-1">
+            Create an account
+          </RouterLink>
+        </div>
+
+        <!-- Staff Portals -->
+        <div class="login-staff-links mt-4 border-t border-theme-border pt-3 flex flex-col md:flex-row justify-center gap-4 text-xs text-theme-muted">
+          <RouterLink to="/barber/login" class="hover:text-gold transition-colors">Barber Portal</RouterLink>
+          <span class="hidden md:inline text-theme-border">•</span>
+          <RouterLink to="/admin/login" class="hover:text-gold transition-colors">Admin Portal</RouterLink>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, reactive, ref } from 'vue';
+import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
+import { useRouter } from 'vue-router';
+import { object, string } from 'yup';
+import { useAuth } from '../composables/useAuth';
+import SocialAuthButtons from '../components/SocialAuthButtons.vue';
+
+const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart } = useBrandIdentity();
+
+const router = useRouter();
+const { login, redirectAfterLogin } = useAuth();
+
+const email = ref('');
+const password = ref('');
+const showPassword = ref(false);
+const rememberMe = ref(false);
+const loading = ref(false);
+const generalError = ref('');
+const errors = reactive({
+  email: '',
+  password: '',
+});
+
+const schema = object({
+  email: string().required('Email or username is required'),
+  password: string().required('Password is required'),
+});
+
+const demoAccounts = {
+  customer: {
+    role: 'customer',
+    label: 'Customer',
+    email: 'kefas@customer.com',
+    password: 'customer123',
+    portalPath: '/login',
+    portalName: 'Customer Portal',
+  },
+  barber: {
+    role: 'barber',
+    label: 'Barber',
+    email: 'obo@barber.com',
+    password: 'barber123',
+    portalPath: '/barber/login',
+    portalName: 'Barber Portal',
+  },
+  admin: {
+    role: 'admin',
+    label: 'Admin',
+    email: 'webadmin@candycutz.com',
+    password: 'admin123',
+    portalPath: '/admin/login',
+    portalName: 'Admin Portal',
+  },
+  superadmin: {
+    role: 'superadmin',
+    label: 'Super Admin',
+    email: 'superadmin@candycutz.com',
+    password: 'superadmin123',
+    portalPath: '/admin/login',
+    portalName: 'Super Admin Portal',
+  },
+};
+
+const demoAccountList = Object.values(demoAccounts);
+const activeDemoRole = ref('customer');
+const currentDemo = computed(() => demoAccounts[activeDemoRole.value] || demoAccounts.customer);
+
+const fillActiveDemo = () => {
+  const account = demoAccounts[activeDemoRole.value] || demoAccounts.customer;
+  email.value = account.email;
+  password.value = account.password;
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+};
+
+const selectDemoRole = (role) => {
+  activeDemoRole.value = role;
+  fillActiveDemo();
+};
+
+const quickFillCustomer = () => {
+  activeDemoRole.value = 'customer';
+  fillActiveDemo();
+};
+
+async function submitForm() {
+  loading.value = true;
+  generalError.value = '';
+  errors.email = '';
+  errors.password = '';
+
+  try {
+    await schema.validate({ email: email.value, password: password.value }, { abortEarly: false });
+    await login({ email: email.value, password: password.value });
+    await router.push(redirectAfterLogin('/customer/dashboard'));
+  } catch (error) {
+    if (error.inner) {
+      error.inner.forEach((item) => {
+        errors[item.path] = item.message;
+      });
+      loading.value = false;
+      return;
+    }
+
+    if (error?.details?.field_errors) {
+      Object.entries(error.details.field_errors).forEach(([field, msgs]) => {
+        if (errors[field] !== undefined) {
+          errors[field] = Array.isArray(msgs) ? msgs[0] : msgs;
+        }
+      });
+    }
+
+    generalError.value =
+      error?.message ||
+      error?.response?.data?.message ||
+      'Credentials not correct, either the password or the email.';
+  } finally {
+    loading.value = false;
+  }
+}
+</script>
+
+<style scoped>
+.login-page {
+  height: 99vh;
+  height: 99dvh;
+  min-height: 99vh;
+  min-height: 99dvh;
+  overflow: hidden;
+}
+
+.login-panel {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (max-height: 760px) {
+  .login-page {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow-y: auto;
+  }
+
+  .login-panel {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow: visible;
+    padding: 0.75rem 1rem;
+  }
+
+  .login-mobile-logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .login-mobile-logo img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .login-card {
+    max-width: 24rem;
+  }
+
+  .login-intro {
+    margin-bottom: 0.75rem;
+  }
+
+  .login-intro h1 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .login-intro p {
+    margin-bottom: 0;
+  }
+
+  .login-social,
+  .login-staff-links {
+    display: none;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .login-form > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .login-form label {
+    margin-bottom: 0.125rem;
+  }
+
+  .login-form input:not([type="checkbox"]) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .login-actions {
+    margin-top: 0.25rem;
+  }
+
+  .login-actions > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem;
+  }
+
+  .login-register-link {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .login-mobile-logo {
+    display: none;
+  }
+
+  .login-intro h1 {
+    font-size: 1.25rem;
+  }
+
+  .login-form {
+    gap: 0.375rem;
+  }
+
+  .login-form input:not([type="checkbox"]) {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  .login-actions button {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .login-register-link {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 700px) and (max-height: 500px) {
+  .login-panel {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+
+  .login-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    column-gap: 2rem;
+    max-width: 50rem;
+  }
+
+  .login-intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .login-form {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .login-register-link {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+</style>

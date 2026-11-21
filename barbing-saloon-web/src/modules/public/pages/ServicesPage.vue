@@ -1,0 +1,201 @@
+<template>
+  <PublicLayout>
+    <PageHero
+      page-key="services"
+      eyebrow="Grooming Menu"
+      fallback-title="Our Premium Services"
+      fallback-subtitle="Explore our full range of grooming services designed to keep you looking sharp and feeling confident."
+      title-setting-key="services_title"
+      subtitle-setting-key="services_subtitle"
+    />
+    <section class="mx-auto max-w-7xl px-4 md:px-6 pt-12 pb-24 text-[var(--color-text-primary)] min-h-[50vh]">
+
+      <!-- Categories Filter Tabs -->
+      <div data-reveal class="flex items-center justify-center flex-wrap gap-2.5 sm:gap-3 mb-12">
+        <button
+          type="button"
+          @click="selectedCategory = 'All'"
+          class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 border"
+          :class="selectedCategory === 'All'
+            ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-lg shadow-[var(--color-shadow)] scale-105'
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'"
+        >
+          All ({{ services.length }})
+        </button>
+        <button
+          v-for="cat in categories"
+          :key="cat"
+          type="button"
+          @click="selectedCategory = cat"
+          class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 border"
+          :class="selectedCategory === cat
+            ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-lg shadow-[var(--color-shadow)] scale-105'
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'"
+        >
+          {{ cat }}
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-5 space-y-4 animate-pulse"
+        >
+          <div class="h-8 w-2/3 rounded-lg bg-[var(--color-border-subtle)]"></div>
+          <div class="h-4 w-1/3 rounded bg-[var(--color-border-subtle)]"></div>
+          <div class="mt-auto space-y-3 pt-56">
+            <div class="h-7 w-3/4 rounded-lg bg-[var(--color-border-subtle)]"></div>
+            <div class="h-4 w-full rounded bg-[var(--color-border-subtle)]"></div>
+            <div class="h-4 w-4/5 rounded bg-[var(--color-border-subtle)]"></div>
+            <div class="pt-4 flex justify-between items-center border-t border-[var(--color-border-subtle)]">
+              <div class="h-6 w-20 rounded bg-[var(--color-border-subtle)]"></div>
+              <div class="h-10 w-28 rounded-xl bg-[var(--color-border-subtle)]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Grid -->
+      <div v-else-if="filteredServices.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        <article
+          v-for="service in filteredServices"
+          :key="service.id"
+          data-reveal
+          class="group relative isolate aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-accent)] hover:shadow-2xl hover:shadow-[var(--color-shadow)]"
+        >
+          <img
+            v-if="service.image || service.image_url"
+            :src="getImageUrl(service.image || service.image_url)"
+            :alt="service.name"
+            loading="lazy"
+            decoding="async"
+            class="absolute inset-0 -z-20 h-full w-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105"
+          />
+          <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-[var(--color-bg-tertiary)]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-28 h-28 text-[var(--color-accent)]/20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887m8.416-2.224l-1.536.887M9.384 14.863l-1.536.887m8.416 2.224l-1.536-.887M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+            </svg>
+          </div>
+
+          <div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/60 via-transparent via-35% to-black/80"></div>
+          <div class="absolute inset-3 -z-10 rounded-[1.35rem] border border-[var(--color-border)]/50"></div>
+
+          <div class="flex h-full flex-col justify-between px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4">
+            <div class="flex items-start justify-between gap-2.5">
+              <div>
+                <p class="text-[8px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]/80">CandyCutz Service</p>
+                <span class="mt-1.5 inline-flex rounded-full border border-[var(--color-accent)]/40 bg-[var(--color-bg-primary)]/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-[var(--color-accent)] backdrop-blur">
+                  {{ service.category?.name || service.category || 'Barbering' }}
+                </span>
+              </div>
+              <div class="flex flex-col items-end gap-1.5">
+                <span v-if="service.is_home_service_eligible" class="rounded-full border border-emerald-300/40 bg-emerald-950/60 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider text-emerald-200 backdrop-blur">
+                  Home service
+                </span>
+                <span class="flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-primary)]/80 px-2 py-0.5 text-[9px] font-semibold text-[var(--color-text-primary)] backdrop-blur">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-2.5 w-2.5 text-[var(--color-accent)]">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ service.duration_minutes || 30 }} min
+                </span>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-primary)]/90 p-2.5 shadow-2xl backdrop-blur-sm sm:p-3.5">
+              <h2 class="font-display text-lg font-bold leading-tight text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
+                {{ service.name }}
+              </h2>
+              <p class="mt-1 text-[11px] leading-relaxed text-[var(--color-text-secondary)] line-clamp-2">
+                {{ service.description || 'Premium grooming treatment tailored with precision and style.' }}
+              </p>
+              <div class="mt-2.5 flex items-end justify-between gap-2 border-t border-[var(--color-border)] pt-2">
+                <div>
+                  <span class="block text-[7px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Price</span>
+                  <span class="font-display text-base font-bold text-[var(--color-accent)]">{{ formatNairaAmount(service.price) }}</span>
+                </div>
+                <RouterLink
+                  :to="`/customer/dashboard/book/${service.id}`"
+                  class="inline-flex min-h-[28px] shrink-0 items-center justify-center gap-1 rounded-md bg-[var(--color-accent)] px-2 py-1.5 text-[8px] font-bold text-[var(--color-accent-foreground)] shadow-lg transition-all duration-200 hover:scale-[1.01] hover:bg-[var(--color-accent-hover)] hover:shadow-[var(--color-shadow)]"
+                >
+                  Book Cut
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-2.5 w-2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </RouterLink>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="text-center py-20 rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-14 h-14 mx-auto text-[var(--color-text-muted)] mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+        <h3 class="text-xl font-display text-[var(--color-text-primary)] font-bold">No services found</h3>
+        <p class="text-sm text-[var(--color-text-secondary)] mt-2">There are currently no services listed under {{ selectedCategory }}.</p>
+        <button
+          type="button"
+          @click="selectedCategory = 'All'"
+          class="mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--color-accent)] bg-[var(--color-accent)]/10 px-6 py-2.5 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)] transition-colors"
+        >
+          View All Services
+        </button>
+      </div>
+    </section>
+  </PublicLayout>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
+import PublicLayout from '../../../core/layouts/PublicLayout.vue';
+import PageHero from '@/shared/ui/PageHero.vue';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
+import { useScrollReveal } from '../../../core/composables/useScrollReveal';
+import { formatNairaAmount } from '../../../core/utils';
+import { getStorageUrl as getImageUrl } from '@/core/utils/url';
+
+const { init: initScrollReveal } = useScrollReveal();
+const publicStore = usePublicContentStore();
+
+const services = ref(publicStore.services || []);
+const selectedCategory = ref('All');
+const isLoading = ref(publicStore.services.length === 0);
+
+const categories = computed(() => {
+  const cats = services.value
+    .map(s => s.category?.name || s.category_name || (typeof s.category === 'string' ? s.category : null))
+    .filter(Boolean);
+  return [...new Set(cats)].sort();
+});
+
+const filteredServices = computed(() => {
+  if (selectedCategory.value === 'All') return services.value;
+  return services.value.filter(s => {
+    const cat = s.category?.name || s.category_name || (typeof s.category === 'string' ? s.category : '');
+    return cat === selectedCategory.value;
+  });
+});
+
+const fetchContent = async () => {
+  try {
+    const data = await publicStore.getServices();
+    if (data) services.value = data;
+  } catch (error) {
+    console.error('Failed to load services page data:', error);
+  } finally {
+    isLoading.value = false;
+    setTimeout(() => {
+      initScrollReveal();
+    }, 100);
+  }
+};
+
+onMounted(() => {
+  fetchContent();
+});
+</script>

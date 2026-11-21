@@ -1,0 +1,17 @@
+<?php
+
+return [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) config('cors.allowed_origins_env', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000')))
+    ))),
+    'allowed_origins_patterns' => env('APP_ENV') === 'local'
+        ? ['#^https?://([a-z0-9\-]+\.)?ngrok-free\.(dev|app)$#']
+        : [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => ['X-Request-ID', 'X-Request-Id'],
+    'max_age' => 86400,
+    'supports_credentials' => true,
+];

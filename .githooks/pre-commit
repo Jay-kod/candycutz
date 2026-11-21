@@ -1,0 +1,11 @@
+#!/bin/sh
+# CandyCutz Pre-Commit Hook: Continuous Responsiveness Enforcement
+
+echo "🔍 [CandyCutz] Running static responsiveness audit..."
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$REPO_ROOT/barbing-saloon-web" || exit 1
+
+node scripts/audit-responsiveness.mjs || {
+  echo "❌ [CandyCutz] Responsiveness audit failed! Please fix anti-responsive patterns before committing."
+  exit 1
+}

@@ -1,0 +1,168 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Domain\Identity\Services\CustomerService;
+use App\Domain\Identity\Services\UsernameIdentityService;
+use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\UserMediaUrl;
+use App\Http\Resources\UserProfileResource;
+use App\Http\Responses\ApiResponse;
+use App\Models\Appointment;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class AccountApiController
+{
+    public function __construct(
+        protected CustomerService $customerService
+    ) {}
+
+    public function dashboard(Request $request): JsonResponse
+    {
+        return ApiResponse::success($this->customerService->dashboard($request->user()), 'Customer dashboard loaded');
+    }
+
+    public function profile(Request $request): JsonResponse
+    {
+        return ApiResponse::success([
+            'profile' => new UserProfileResource($request->user()->loadCount(['appointments', 'testimonials'])),
+            'history' => $this->customerService->profile($request->user()),
+        ], 'Profile loaded');
+    }
+
+    public function updateProfile(Request $request, UsernameIdentityService $usernameService): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'bio' => ['nullable', 'string', 'max:1000'],
+            'username' => ['nullable', 'string', 'min:3', 'max:30'],
+            'avatar' => ['nullable', 'image', 'max:5120'],
+            'remove_avatar' => ['nullable', 'boolean'],
+        ]);
+
+        $removeAvatar = $request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true';
+        if ($removeAvatar) {
+            $validated['avatar'] = null;
+        } elseif ($request->hasFile('avatar')) {
+            $validated['avatar'] = (new SecureImageUpload)->execute(
+                $request->file('avatar'),
+                'user-media/'.$user->id.'/avatar',
+                'local'
+            );
+        } else {
+            unset($validated['avatar']);
+        }
+        unset($validated['remove_avatar']);
+
+        // Handle username update through domain service with cooldown enforcement
+        if (! empty($validated['username']) && strtolower(trim($validated['username'])) !== strtolower((string) $user->username)) {
+            try {
+                $usernameService->updateUsername($user, $validated['username']);
+            } catch (\Exception $e) {
+                throw ValidationException::withMessages([
+                    'username' => [$e->getMessage()],
+                ]);
+            }
+        }
+        unset($validated['username']);
+
+        $validated['real_name'] = $validated['name'];
+
+        $user->update($validated);
+
+        return ApiResponse::success(new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
+    }
+
+    public function analytics(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $totalSpent = Appointment::query()
+            ->where('customer_id', $user->id)
+            ->where('status', AppointmentStatus::completed->value)
+            ->sum('total_price');
+
+        $monthExpr = match (DB::getDriverName()) {
+            'pgsql' => "TRIM(TO_CHAR(appointment_date, 'Month'))",
+            'sqlite' => "strftime('%m', appointment_date)",
+            default => 'MONTHNAME(appointment_date)',
+        };
+
+        $monthlyBookings = Appointment::query()
+            ->where('customer_id', $user->id)
+            ->where('appointment_date', '>=', now()->subMonths(6)->startOfMonth())
+            ->selectRaw("{$monthExpr} as month, COUNT(*) as bookings, SUM(total_price) as spent")
+            ->groupBy(DB::raw($monthExpr))
+            ->get();
+
+        return ApiResponse::success([
+            'total_spent' => (float) $totalSpent,
+            'monthly' => $monthlyBookings,
+        ], 'Analytics loaded');
+    }
+
+    public function myCodes(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $codes = Appointment::query()
+            ->with(['service', 'barber.user'])
+            ->where('customer_id', $user->id)
+            ->latest('appointment_date')
+            ->latest('appointment_time')
+            ->get()
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'appointment_date' => $a->appointment_date,
+                'appointment_time' => $a->appointment_time,
+                'status' => $a->status->value ?? $a->status,
+                'verification_code' => $a->verification_code,
+                'service_name' => $a->service?->name,
+                'service_image' => $a->service?->image,
+                'barber_name' => $a->barber?->user?->name,
+                'barber_avatar' => app(UserMediaUrl::class)->for($a->barber?->user, $a->barber?->user?->avatar),
+            ]);
+
+        return ApiResponse::success($codes, 'My verification codes loaded');
+    }
+
+    public function uploadAvatar(Request $request, SecureImageUpload $imageUpload): JsonResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:5120'],
+        ]);
+
+        $user = $request->user();
+        $path = $imageUpload->execute(
+            $request->file('avatar'),
+            'user-media/'.$user->id.'/avatar',
+            'local'
+        );
+
+        $user->update(['avatar' => $path]);
+
+        return ApiResponse::success(
+            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            'Avatar uploaded successfully'
+        );
+    }
+
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update(['avatar' => null]);
+
+        return ApiResponse::success(
+            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            'Avatar removed successfully'
+        );
+    }
+}

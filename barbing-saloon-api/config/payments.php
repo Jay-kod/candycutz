@@ -1,0 +1,37 @@
+<?php
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Payment Gateway
+    |--------------------------------------------------------------------------
+    |
+    | Supported options: "paystack", "manual_transfer", "stripe"
+    |
+    */
+    'default' => env('PAYMENT_GATEWAY', 'paystack'),
+    'fake' => env('PAYSTACK_FAKE', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Gateways configuration
+    |--------------------------------------------------------------------------
+    */
+    'gateways' => [
+        'paystack' => [
+            'public_key' => env('PAYSTACK_PUBLIC_KEY', ''),
+            'secret_key' => env('PAYSTACK_SECRET_KEY', ''),
+            'base_url' => 'https://api.paystack.co',
+            'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/api/v1/payments/webhook'),
+        ],
+        'manual_transfer' => [
+            'default_bank_name' => env('MANUAL_TRANSFER_BANK'),
+            'default_account_name' => env('MANUAL_TRANSFER_ACCOUNT_NAME'),
+            'default_account_number' => env('MANUAL_TRANSFER_ACCOUNT_NUMBER'),
+        ],
+        'stripe' => [
+            'secret_key' => env('STRIPE_SECRET_KEY', ''),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET', ''),
+        ],
+    ],
+];

@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Requests\Api\V1\SuperAdmin;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateSettingsRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'settings' => ['nullable', 'array'],
+            'settings.*' => ['nullable'],
+            'settings.cta_title' => ['sometimes', 'nullable', 'string', 'max:140'],
+            'settings.cta_title_part_one' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'settings.cta_title_part_two' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'settings.cta_title_color_order' => ['sometimes', 'nullable', 'in:first-white,first-gold'],
+            'settings.cta_subtitle' => ['sometimes', 'nullable', 'string', 'max:240'],
+            'settings.cta_caption' => ['sometimes', 'nullable', 'string', 'max:240'],
+            'settings.testimonials_flow_speed' => ['sometimes', 'nullable'],
+            'settings.testimonials_flow_direction' => ['sometimes', 'nullable', 'in:left,right'],
+            'settings.brand_name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'settings.site_name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'settings.brand_name_part_one' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'settings.brand_name_part_two' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'settings.brand_name_separator' => ['sometimes', 'nullable', 'in:none,space'],
+            'settings.brand_gold_part' => ['sometimes', 'nullable', 'in:first,second'],
+            'settings.brand_tagline' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'settings.site_description' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'page_hero_page' => ['nullable', 'required_with:page_hero_image', 'in:home,about,services,gallery,contact,privacy,terms,legal,security,cookies,account_deletion'],
+            'page_hero_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'about_teaser_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'about_shop_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'splash_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'onboarding_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'login_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'favicon' => ['nullable', 'image', 'mimes:jpeg,png,webp,ico', 'max:5120'],
+        ];
+    }
+}

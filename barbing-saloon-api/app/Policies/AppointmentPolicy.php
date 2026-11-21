@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Appointment;
+use App\Models\User;
+
+class AppointmentPolicy
+{
+    public function before(User $user, string $ability): ?bool
+    {
+        if (in_array($user->role->value ?? $user->role, ['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return null;
+    }
+
+    public function view(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id || $appointment->barber?->user_id === $user->id;
+    }
+
+    public function update(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id;
+    }
+
+    public function cancel(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id || $appointment->barber?->user_id === $user->id;
+    }
+
+    public function manageForBarber(User $user, Appointment $appointment): bool
+    {
+        return $appointment->barber?->user_id === $user->id;
+    }
+
+    public function complete(User $user, Appointment $appointment): bool
+    {
+        return $appointment->barber?->user_id === $user->id;
+    }
+
+    public function markNoShow(User $user, Appointment $appointment): bool
+    {
+        return $appointment->barber?->user_id === $user->id;
+    }
+
+    public function verifyPayment(User $user, Appointment $appointment): bool
+    {
+        return $appointment->barber?->user_id === $user->id;
+    }
+
+    public function pay(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id;
+    }
+}

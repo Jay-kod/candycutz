@@ -1,0 +1,55 @@
+<template>
+  <DashboardLayout
+    portalName="Customer"
+    homeRoute="/customer/dashboard"
+    profileRoute="/customer/dashboard/profile"
+    :navItems="navItems"
+    :mobileTabs="mobileTabs"
+    theme="customer"
+  >
+    <slot />
+  </DashboardLayout>
+</template>
+
+<script setup>
+import DashboardLayout from '../../../core/layouts/DashboardLayout.vue';
+import {
+  HomeIcon,
+  CalendarDaysIcon,
+  StarIcon,
+  HeartIcon,
+  ScissorsIcon,
+  UserGroupIcon,
+  PhotoIcon,
+  BookOpenIcon,
+  BellAlertIcon,
+  ChartBarIcon,
+  QrCodeIcon,
+  ChatBubbleLeftRightIcon,
+  UserCircleIcon
+} from '@heroicons/vue/24/outline';
+
+const navItems = [
+  { name: 'Dashboard', to: '/customer/dashboard', icon: HomeIcon },
+  { name: 'Browse Services', to: '/customer/dashboard/services', icon: ScissorsIcon },
+  { name: 'Our Barbers', to: '/customer/dashboard/barbers', icon: UserGroupIcon },
+  { name: 'My Bookings', to: '/customer/dashboard/bookings', icon: CalendarDaysIcon },
+  { name: 'My Codes', to: '/customer/dashboard/my-codes', icon: QrCodeIcon },
+  { name: 'Reviews', to: '/customer/dashboard/reviews', icon: StarIcon },
+  { name: 'Feedback & Suggestions', to: '/customer/dashboard/feedback', icon: ChatBubbleLeftRightIcon },
+  { name: 'Wishlist', to: '/customer/dashboard/wishlist', icon: HeartIcon },
+  { name: 'Gallery', to: '/customer/dashboard/gallery', icon: PhotoIcon },
+  { name: 'Blog', to: '/customer/dashboard/blog', icon: BookOpenIcon },
+
+  { name: 'Notifications', to: '/customer/dashboard/notifications', icon: BellAlertIcon },
+  { name: 'Analytics', to: '/customer/dashboard/analytics', icon: ChartBarIcon },
+  { name: 'Reports', to: '/customer/dashboard/reports', icon: ChartBarIcon },
+];
+
+const mobileTabs = [
+  { name: 'Dashboard', to: '/customer/dashboard', icon: HomeIcon },
+  { name: 'Services', to: '/customer/dashboard/services', icon: ScissorsIcon },
+  { name: 'Bookings', to: '/customer/dashboard/bookings', icon: CalendarDaysIcon },
+  { name: 'Profile', to: '/customer/dashboard/profile', icon: UserCircleIcon },
+];
+</script>

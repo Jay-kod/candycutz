@@ -1,0 +1,312 @@
+<template>
+  <div class="space-y-8 pb-12">
+    <header class="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-admin">Website content</p>
+        <h1 class="mt-2 text-3xl font-bold text-theme-text">Homepage CTA</h1>
+        <p class="mt-2 max-w-2xl text-sm text-ivory/60">
+          Edit the homepage headline, supporting lines, headline color, and booking button.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-admin px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-admin-light disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="loading || saving"
+        @click="save"
+      >
+        <span
+          v-if="saving"
+          class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+          aria-hidden="true"
+        ></span>
+        <CheckIcon v-else class="h-4 w-4" />
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </header>
+
+    <div v-if="loading" class="flex justify-center rounded-xl border border-white/10 bg-black/20 py-16">
+      <span class="h-8 w-8 animate-spin rounded-full border-2 border-admin/30 border-t-admin" aria-label="Loading CTA settings"></span>
+    </div>
+
+    <template v-else>
+      <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+        <form class="space-y-5 rounded-xl border border-white/10 bg-black/20 p-5 sm:p-7" @submit.prevent="save">
+          <div>
+            <label for="cta-title-part-one" class="mb-2 block text-sm font-semibold text-theme-text">Headline phrase one</label>
+            <input
+              id="cta-title-part-one"
+              v-model.trim="settings.cta_title_part_one"
+              maxlength="60"
+              required
+              type="text"
+              class="cta-input"
+              placeholder="Fresh Cut."
+            />
+          </div>
+
+          <div>
+            <label for="cta-title-part-two" class="mb-2 block text-sm font-semibold text-theme-text">Headline phrase two</label>
+            <input
+              id="cta-title-part-two"
+              v-model.trim="settings.cta_title_part_two"
+              maxlength="60"
+              required
+              type="text"
+              class="cta-input"
+              placeholder="Zero Stress."
+            />
+          </div>
+
+          <div>
+            <label for="cta-title-color-order" class="mb-2 block text-sm font-semibold text-theme-text">Headline color order</label>
+            <select id="cta-title-color-order" v-model="settings.cta_title_color_order" class="cta-input">
+              <option value="first-white">Phrase one white, phrase two gold</option>
+              <option value="first-gold">Phrase one gold, phrase two white</option>
+            </select>
+            <p class="mt-2 text-xs text-ivory/50">The full headline stays on one line; the second phrase uses the opposite color.</p>
+          </div>
+
+          <div>
+            <label for="cta-subtitle" class="mb-2 block text-sm font-semibold text-theme-text">Supporting line</label>
+            <textarea
+              id="cta-subtitle"
+              v-model="settings.cta_subtitle"
+              maxlength="240"
+              required
+              rows="2"
+              class="cta-input resize-y"
+              placeholder="Pick your barber, choose your style, lock your time."
+            ></textarea>
+          </div>
+
+          <div>
+            <label for="cta-caption" class="mb-2 block text-sm font-semibold text-theme-text">Smaller supporting text</label>
+            <textarea
+              id="cta-caption"
+              v-model="settings.cta_caption"
+              maxlength="240"
+              rows="2"
+              class="cta-input resize-y"
+              placeholder="Expert barbers. Fresh fades. A better kind of barbershop experience."
+            ></textarea>
+            <p class="mt-2 text-xs text-ivory/50">This appears below the supporting line and above the booking button.</p>
+          </div>
+
+                    <div>
+            <div class="mb-2 flex items-center justify-between">
+              <label for="cta-overlay-color" class="block text-sm font-semibold text-theme-text">Overlay color tone</label>
+              <span class="inline-flex items-center gap-1.5 rounded bg-white/[0.05] px-2 py-0.5 text-xs font-mono font-bold text-white">
+                <span class="h-2 w-2 rounded-full border border-white/30" :style="{ backgroundColor: settings.hero_overlay_color || '#D4AF37' }"></span>
+                <span>{{ settings.hero_overlay_color || '#D4AF37' }}</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input
+                id="cta-overlay-color"
+                v-model="settings.hero_overlay_color"
+                type="color"
+                class="h-8 w-10 cursor-pointer rounded border border-white/20 bg-transparent p-0"
+              />
+              <input
+                v-model="settings.hero_overlay_color"
+                type="text"
+                maxlength="7"
+                placeholder="#D4AF37"
+                class="cta-input uppercase font-mono text-xs w-28"
+              />
+              <button
+                type="button"
+                @click="settings.hero_overlay_color = '#D4AF37'"
+                class="text-xs text-admin hover:underline font-mono"
+              >
+                Reset Gold
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-2 flex items-center justify-between">
+              <label for="cta-overlay-opacity" class="block text-sm font-semibold text-theme-text">Gold overlay opacity</label>
+              <span class="rounded bg-admin/15 px-2 py-0.5 text-xs font-mono font-bold text-admin">{{ settings.hero_overlay_opacity }}%</span>
+            </div>
+            <input
+              id="cta-overlay-opacity"
+              v-model.number="settings.hero_overlay_opacity"
+              type="range"
+              min="0"
+              max="100"
+              class="w-full accent-[#FF6700] cursor-pointer"
+            />
+            <p class="mt-2 text-xs text-ivory/50">Controls the intensity of the luxury gold gradient overlay across the homepage hero photography.</p>
+          </div>
+
+          <div class="grid gap-5">
+            <div>
+              <label for="cta-primary" class="mb-2 block text-sm font-semibold text-theme-text">Booking button</label>
+              <input
+                id="cta-primary"
+                v-model="settings.cta_primary_text"
+                maxlength="40"
+                required
+                type="text"
+                class="cta-input"
+              />
+              <p class="mt-2 text-xs text-ivory/50">Links to the customer sign-in and booking flow.</p>
+            </div>
+
+          </div>
+        </form>
+
+        <div class="min-w-0">
+          <p class="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-ivory/50">Live preview</p>
+          <BarberCta
+            :title="settings.cta_title"
+            :title-part-one="settings.cta_title_part_one"
+            :title-part-two="settings.cta_title_part_two"
+            :title-color-order="settings.cta_title_color_order"
+            :subtitle="settings.cta_subtitle"
+            :caption="settings.cta_caption"
+            :primary-text="settings.cta_primary_text"
+            :background-image="settings.hero_image ? getStorageUrl(settings.hero_image) : ''"
+            :image-opacity="settings.hero_image_opacity"
+            compact
+          />
+          <p class="mt-3 text-xs text-ivory/50">Preview the colored single-sentence headline and supporting text hierarchy.</p>
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-admin px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-admin-light disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="saving"
+          @click="save"
+        >
+          <span
+            v-if="saving"
+            class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+            aria-hidden="true"
+          ></span>
+          <CheckIcon v-else class="h-4 w-4" />
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </template>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, reactive, ref } from 'vue';
+import { CheckIcon } from '@heroicons/vue/24/outline';
+import api from '@/shared/api/client';
+import { useToast } from '@/core/composables/useToast';
+import BarberCta from '@/shared/ui/BarberCta.vue';
+import { getStorageUrl } from '@/core/utils/url';
+
+const toast = useToast();
+const loading = ref(true);
+const saving = ref(false);
+const settings = reactive({
+  cta_title: 'Fresh Cut. Zero Stress.',
+  cta_title_part_one: 'Fresh Cut.',
+  cta_title_part_two: 'Zero Stress.',
+  cta_title_color_order: 'first-white',
+  cta_subtitle: 'Pick your barber, choose your style, lock your time.',
+  cta_caption: 'Expert barbers. Fresh fades. A better kind of barbershop experience.',
+  cta_primary_text: 'Book your cut',
+  hero_image: null,
+  hero_image_opacity: 22
+});
+
+const loadSettings = async () => {
+  loading.value = true;
+  try {
+    const response = await api.get('/v1/admin/settings');
+    const data = response.data.data || {};
+    settings.cta_title = data.cta_title || data.hero_title || settings.cta_title;
+    const titleParts = splitHeadline(settings.cta_title);
+    settings.cta_title_part_one = data.cta_title_part_one ?? titleParts[0];
+    settings.cta_title_part_two = data.cta_title_part_two ?? titleParts[1];
+    settings.cta_title_color_order = data.cta_title_color_order === 'first-gold'
+      ? 'first-gold'
+      : 'first-white';
+    settings.cta_subtitle = data.cta_subtitle || data.hero_subtitle || settings.cta_subtitle;
+    settings.cta_caption = data.cta_caption ?? settings.cta_caption;
+    settings.cta_primary_text = data.cta_primary_text || data.hero_btn1_text || settings.cta_primary_text;
+    settings.hero_image = data.hero_image || null;
+    settings.hero_image_opacity = data.hero_image_opacity ?? data.hero_opacity ?? 22;
+    settings.hero_overlay_opacity = Number(data.hero_overlay_opacity ?? data.page_hero_home_overlay_opacity ?? 45);
+    settings.hero_overlay_color = data.hero_overlay_color || data.page_hero_home_overlay_color || '#D4AF37';
+  } catch (error) {
+    console.error('Failed to load homepage CTA settings:', error);
+    toast.error('Could not load homepage CTA settings');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const save = async () => {
+  if (
+    !settings.cta_title_part_one.trim() ||
+    !settings.cta_title_part_two.trim() ||
+    !settings.cta_subtitle.trim() ||
+    !settings.cta_primary_text.trim()
+  ) {
+    toast.error('Both headline phrases, the supporting line, and booking button label are required');
+    return;
+  }
+
+  saving.value = true;
+  try {
+    settings.cta_title = `${settings.cta_title_part_one.trim()} ${settings.cta_title_part_two.trim()}`;
+    const formData = new FormData();
+    Object.entries(settings).forEach(([key, value]) => {
+      formData.append(`settings[${key}]`, value);
+    });
+    formData.append('settings[page_hero_home_overlay_opacity]', String(settings.hero_overlay_opacity));
+    formData.append('settings[page_hero_home_overlay_color]', settings.hero_overlay_color);
+    await api.post('/v1/admin/settings', formData);
+    toast.success('Homepage CTA updated');
+  } catch (error) {
+    console.error('Failed to save homepage CTA settings:', error);
+    toast.error('Could not save homepage CTA settings');
+  } finally {
+    saving.value = false;
+  }
+};
+
+onMounted(loadSettings);
+
+const splitHeadline = (title) => {
+  const normalizedTitle = String(title || '').replace(/\s*\n\s*/g, ' ').trim();
+  const sentenceBreak = normalizedTitle.match(/^(.+?[.!?])\s+(.+)$/);
+  if (sentenceBreak) return [sentenceBreak[1], sentenceBreak[2]];
+
+  const words = normalizedTitle.split(/\s+/);
+  if (words.length < 2) return [normalizedTitle, ''];
+  const midpoint = Math.ceil(words.length / 2);
+  return [words.slice(0, midpoint).join(' '), words.slice(midpoint).join(' ')];
+};
+</script>
+
+<style scoped>
+.cta-input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.75rem 0.875rem;
+  color: #f5f5f5;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.cta-input:focus {
+  border-color: #ff6700;
+  box-shadow: 0 0 0 2px rgba(255, 103, 0, 0.18);
+}
+
+.cta-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+</style>

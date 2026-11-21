@@ -1,0 +1,224 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Http\Resources\BlogPostResource;
+use App\Http\Responses\ApiResponse;
+use App\Models\BlogPost;
+use App\Models\BlogReaction;
+use App\Support\HtmlContentSanitizer;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+
+class BlogApiController
+{
+    use AuthorizesRequests;
+
+    public function __construct(
+        protected HtmlContentSanitizer $htmlContentSanitizer
+    ) {}
+
+    public function index(Request $request): JsonResponse
+    {
+        $query = BlogPost::query()->with(['author', 'reactions']);
+
+        $user = $request->user();
+        $userRole = $user?->role instanceof UserRole
+            ? $user->role->value
+            : (string) ($user?->role ?? '');
+
+        if ($userRole === 'barber') {
+            $query->where('author_id', $user->id);
+            if ($request->has('status') && $request->query('status') !== 'all') {
+                $query->where('status', $request->query('status'));
+            }
+        } elseif (! in_array($userRole, ['admin', 'super_admin'])) {
+            $query->where('status', 'published');
+        } elseif ($request->has('status') && $request->query('status') !== 'all') {
+            $query->where('status', $request->query('status'));
+        }
+
+        $posts = $query->orderByDesc('created_at')->paginate(15);
+
+        return ApiResponse::success(BlogPostResource::collection($posts), 'Blog posts retrieved successfully');
+    }
+
+    public function show(Request $request, string $slug): JsonResponse
+    {
+        $query = BlogPost::query()->with(['author', 'reactions']);
+        if (is_numeric($slug)) {
+            $query->where('id', (int) $slug);
+        } else {
+            $query->where('slug', $slug);
+        }
+
+        $post = $query->first();
+
+        if (! $post) {
+            return ApiResponse::error('Blog post not found.', [], 404, 'RESOURCE_NOT_FOUND');
+        }
+
+        if (! Gate::forUser($request->user())->allows('view', $post)) {
+            return ApiResponse::error('Blog post not found.', [], 404, 'RESOURCE_NOT_FOUND');
+        }
+
+        return ApiResponse::success(new BlogPostResource($post), 'Blog post retrieved');
+    }
+
+    public function react(Request $request, int $id): JsonResponse
+    {
+        $post = BlogPost::findOrFail($id);
+        $user = $request->user();
+        if (! $user) {
+            return ApiResponse::error('Unauthorized', [], 401);
+        }
+
+        $type = $request->input('reaction_type') ?? $request->input('type') ?? 'love';
+        BlogReaction::updateOrCreate(
+            ['post_id' => $post->id, 'customer_id' => $user->id],
+            ['reaction_type' => $type]
+        );
+
+        return ApiResponse::success(['status' => $type], 'Reaction saved');
+    }
+
+    public function removeReaction(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if ($user) {
+            BlogReaction::where('post_id', $id)->where('customer_id', $user->id)->delete();
+        }
+
+        return ApiResponse::success(null, 'Reaction removed');
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $this->authorize('create', BlogPost::class);
+
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'excerpt' => 'nullable|string',
+            'body' => 'nullable|string',
+            'content' => 'nullable|string',
+            'author_display' => 'nullable|string|max:255',
+            'featured_image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:draft,published',
+            'is_published' => 'nullable',
+        ]);
+
+        $body = $this->htmlContentSanitizer->sanitize($validated['content'] ?? $validated['body'] ?? '');
+        $status = 'draft';
+        if (! empty($validated['status'])) {
+            $status = $validated['status'];
+        } elseif ($request->boolean('is_published') || $request->input('is_published') == '1') {
+            $status = 'published';
+        }
+
+        $post = BlogPost::create([
+            'author_id' => $user->id,
+            'title' => $validated['title'],
+            'excerpt' => $validated['excerpt'] ?? Str::limit(strip_tags($body), 150),
+            'body' => $body,
+            'author_display' => $validated['author_display'] ?? null,
+            'slug' => Str::slug($validated['title']).'-'.time(),
+            'status' => $status,
+            'published_at' => $status === 'published' ? now() : null,
+        ]);
+
+        $imageFile = $request->file('featured_image') ?? $request->file('image');
+        if ($imageFile) {
+            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/blog');
+            $post->update(['featured_image' => '/storage/'.$path]);
+        }
+
+        CatalogueCache::bust('blog');
+
+        return ApiResponse::success(new BlogPostResource($post), 'Blog post created', 201);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $post = BlogPost::findOrFail($id);
+        $this->authorize('update', $post);
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'excerpt' => 'nullable|string',
+            'body' => 'sometimes|string',
+            'content' => 'sometimes|string',
+            'author_display' => 'nullable|string|max:255',
+            'featured_image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:draft,published',
+            'is_published' => 'nullable',
+        ]);
+
+        if (isset($validated['title'])) {
+            $post->title = $validated['title'];
+            $post->slug = Str::slug($validated['title']).'-'.time();
+        }
+        if (isset($validated['content'])) {
+            $post->body = $this->htmlContentSanitizer->sanitize($validated['content']);
+        } elseif (isset($validated['body'])) {
+            $post->body = $this->htmlContentSanitizer->sanitize($validated['body']);
+        }
+        if (array_key_exists('excerpt', $validated)) {
+            $post->excerpt = $validated['excerpt'] ?? Str::limit(strip_tags($post->body), 150);
+        }
+        if (array_key_exists('author_display', $validated)) {
+            $post->author_display = $validated['author_display'];
+        }
+
+        if (isset($validated['status'])) {
+            $nextStatus = $validated['status'];
+            if ($post->getRawOriginal('status') !== $nextStatus) {
+                $post->published_at = $nextStatus === 'published' ? now() : null;
+            }
+            $post->status = $nextStatus;
+        } elseif ($request->has('is_published')) {
+            $nextStatus = ($request->boolean('is_published') || $request->input('is_published') == '1')
+                ? 'published'
+                : 'draft';
+            if ($post->getRawOriginal('status') !== $nextStatus) {
+                $post->published_at = $nextStatus === 'published' ? now() : null;
+            }
+            $post->status = $nextStatus;
+        }
+
+        $imageFile = $request->file('featured_image') ?? $request->file('image');
+        if ($imageFile) {
+            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/blog');
+            $post->featured_image = '/storage/'.$path;
+        }
+
+        $post->save();
+
+        CatalogueCache::bust('blog');
+
+        return ApiResponse::success(new BlogPostResource($post->refresh()), 'Blog post updated');
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $post = BlogPost::findOrFail($id);
+        $this->authorize('delete', $post);
+
+        $post->delete();
+
+        CatalogueCache::bust('blog');
+
+        return ApiResponse::success(null, 'Blog post deleted');
+    }
+}

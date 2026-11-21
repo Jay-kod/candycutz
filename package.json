@@ -1,0 +1,17 @@
+{
+  "name": "candycutz-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "cd barbing-saloon-api && php -S 127.0.0.1:8000 -t public public/index.php",
+    "dev:web": "cd barbing-saloon-web && npm run dev",
+    "dev:ngrok": "start cmd /k \"npm run dev:api\" && start cmd /k \"cd barbing-saloon-web && npm run dev -- --mode ngrok\"",
+    "dev": "start cmd /k \"npm run dev:api\" && start cmd /k \"npm run dev:web\"",
+    "prepare": "git config core.hooksPath .githooks 2>nul || true",
+    "audit:responsive": "cd barbing-saloon-web && npm run audit:responsive",
+    "test:responsive": "cd barbing-saloon-web && npm run test:responsive"
+  },
+  "dependencies": {
+    "playwright": "^1.61.0"
+  }
+}

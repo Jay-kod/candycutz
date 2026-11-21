@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+*/node_modules/
+vendor/
+*/vendor/
+composer.phar
+*/composer.phar
+
+# Generated and ad hoc SQL outside the database source tree
+*.sql
+!barbing-saloon-api/database/**/*.sql
+
+# Environment files
+.env
+.env.*
+.env.docker
+!.env.example
+!.env.*.example
+!.env.testing
+!barbing-saloon-api/.env.testing
+
+# Logs and runtime caches
+*.log
+storage/logs/
+*.sqlite
+.phpunit.result.cache
+barbing-saloon-api/storage/phpstan/
+barbing-saloon-api/storage/phpstan-no-baseline/
+barbing-saloon-api/routes_list.txt
+
+# Laravel storage framework
+barbing-saloon-api/storage/framework/cache/*
+barbing-saloon-api/storage/framework/sessions/*
+barbing-saloon-api/storage/framework/views/*
+barbing-saloon-api/storage/framework/testing/*
+barbing-saloon-api/storage/app/public/*
+barbing-saloon-api/storage/app/backups/*
+!barbing-saloon-api/storage/framework/cache/.gitkeep
+!barbing-saloon-api/storage/framework/sessions/.gitkeep
+!barbing-saloon-api/storage/framework/views/.gitkeep
+!barbing-saloon-api/storage/framework/testing/.gitkeep
+!barbing-saloon-api/storage/app/public/.gitkeep
+!barbing-saloon-api/storage/app/backups/.gitkeep
+
+# Local API build output and uploaded user data
+barbing-saloon-api/public/assets/
+barbing-saloon-api/public/storage/uploads/
+barbing-saloon-api/public/storage/user-media/
+barbing-saloon-api/storage/app/private/
+
+# Expo & Mobile
+.expo/
+*/.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Windows launcher scripts (hardcoded paths, not portable)
+*.bat
+*.ps1
+!upload-to-github.bat
+!auto-upload.bat
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.agents/
+*/.agents/
+skills-lock.json
+*/skills-lock.json
+components.json
+*/components.json

@@ -1,0 +1,182 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Domain\Content\Actions\ApproveTestimonial;
+use App\Domain\Content\Actions\DeleteTestimonial;
+use App\Domain\Content\Actions\FeatureTestimonial;
+use App\Domain\Content\Actions\GetBarberReviews;
+use App\Domain\Notification\NotificationDispatcher;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Events\ReviewSubmitted;
+use App\Http\Resources\TestimonialResource;
+use App\Http\Responses\ApiResponse;
+use App\Models\Testimonial;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class TestimonialApiController
+{
+    use AuthorizesRequests;
+
+    public function index(Request $request): JsonResponse
+    {
+        return $this->testimonialList($request, false);
+    }
+
+    public function adminIndex(Request $request): JsonResponse
+    {
+        return $this->testimonialList($request, true);
+    }
+
+    private function testimonialList(Request $request, bool $includeUnapproved): JsonResponse
+    {
+        $query = Testimonial::query()->with(['customer', 'service', 'barber.user']);
+
+        if (! $includeUnapproved) {
+            $query->where('is_approved', true)->where('is_featured', true);
+        }
+
+        if ($request->has('service_id') && is_numeric($request->service_id)) {
+            $query->where('service_id', (int) $request->service_id);
+        }
+
+        if ($request->has('barber_id') && is_numeric($request->barber_id)) {
+            $query->where('barber_id', (int) $request->barber_id);
+        }
+
+        if ($request->boolean('featured')) {
+            $query->where('is_featured', true);
+        }
+
+        $testimonials = $query->orderByDesc('created_at')->paginate(20);
+
+        return ApiResponse::success(TestimonialResource::collection($testimonials), 'Testimonials retrieved successfully');
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'required_without:comment|string|nullable',
+            'comment' => 'nullable|string',
+            'service_id' => 'nullable|integer',
+            'barber_id' => 'nullable|integer',
+        ]);
+
+        $testimonial = Testimonial::create([
+            'customer_id' => $user->id,
+            'client_name' => $user->name,
+            'client_avatar' => $user->avatar,
+            'rating' => $validated['rating'],
+            'review' => $validated['review'] ?? $validated['comment'] ?? '',
+            'service_id' => $validated['service_id'] ?? null,
+            'barber_id' => $validated['barber_id'] ?? null,
+            'is_approved' => false,
+            'is_featured' => false,
+        ]);
+
+        ReviewSubmitted::dispatch($testimonial);
+
+        return ApiResponse::success(new TestimonialResource($testimonial), 'Review submitted successfully. Awaiting approval.', 201);
+    }
+
+    public function customerReviews(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $testimonials = Testimonial::query()
+            ->with(['service', 'barber.user'])
+            ->where('customer_id', $user->id)
+            ->latest()
+            ->get();
+
+        return ApiResponse::success(TestimonialResource::collection($testimonials), 'Customer reviews loaded');
+    }
+
+    public function barberReviews(Request $request, GetBarberReviews $action): JsonResponse
+    {
+        $user = $request->user();
+        $barber = $user->barber;
+
+        if (! $barber) {
+            return ApiResponse::error('Authenticated user is not an active barber.', [], 403, 'FORBIDDEN_ROLE');
+        }
+
+        $reviews = $action->execute($barber, $request);
+
+        return ApiResponse::success(
+            TestimonialResource::collection($reviews),
+            'Barber reviews loaded successfully'
+        );
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
+
+        $validated = $request->validate([
+            'rating' => 'sometimes|integer|min:1|max:5',
+            'comment' => 'sometimes|string',
+        ]);
+
+        $testimonial->update($validated);
+        CatalogueCache::bust('testimonials');
+
+        return ApiResponse::success(new TestimonialResource($testimonial->refresh()), 'Testimonial updated');
+    }
+
+    public function approve(Request $request, int $id, ApproveTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
+        $validated = $request->validate([
+            'is_approved' => 'required|boolean',
+        ]);
+
+        $result = $action->execute($testimonial, $validated['is_approved']);
+        CatalogueCache::bust('testimonials');
+
+        if ($result->is_approved) {
+            NotificationDispatcher::reviewApproved($result);
+        }
+
+        $message = $result->is_approved ? 'Testimonial approved' : 'Testimonial unapproved';
+
+        return ApiResponse::success(new TestimonialResource($result), $message);
+    }
+
+    public function feature(Request $request, int $id, FeatureTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('update', $testimonial);
+        $validated = $request->validate([
+            'is_featured' => 'required|boolean',
+        ]);
+
+        $result = $action->execute($testimonial, $validated['is_featured']);
+        CatalogueCache::bust('testimonials');
+
+        $message = $result->is_featured
+            ? 'Testimonial is visible on the website'
+            : 'Testimonial is hidden from the website';
+
+        return ApiResponse::success(new TestimonialResource($result), $message);
+    }
+
+    public function destroy(int $id, DeleteTestimonial $action): JsonResponse
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $this->authorize('delete', $testimonial);
+
+        $action->execute($testimonial);
+        CatalogueCache::bust('testimonials');
+
+        return ApiResponse::success(null, 'Testimonial deleted');
+    }
+}

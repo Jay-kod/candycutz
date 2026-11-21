@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Identity\Actions;
+
+use App\Domain\Identity\Services\ApiTokenIssuer;
+use App\Domain\Identity\Services\UsernameIdentityService;
+use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\UserRegistered;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use RuntimeException;
+
+class RegisterCustomer
+{
+    use HasAuditLog;
+
+    public function __construct(
+        protected UsernameIdentityService $usernameService,
+        protected ApiTokenIssuer $tokenIssuer
+    ) {}
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user: User, token: string}
+     */
+    public function execute(array $data): array
+    {
+        $name = trim($data['name']);
+
+        if (! empty($data['username'])) {
+            $username = strtolower(trim($data['username']));
+            if (User::whereRaw('LOWER(username) = ?', [$username])->exists()) {
+                throw new RuntimeException('This username is already taken. Please choose another.');
+            }
+        } else {
+            $username = $this->usernameService->generateUniqueUsername($name);
+        }
+
+        $user = new User([
+            'name' => $name,
+            'real_name' => $name,
+            'username' => $username,
+            'email' => strtolower(trim($data['email'])),
+            'phone' => trim($data['phone']),
+            'password' => Hash::make($data['password']),
+            'last_username_change_at' => now(),
+        ]);
+        $user->role = UserRole::customer;
+        $user->is_active = true;
+        $user->status = 'active';
+        $user->save();
+        $user->sendEmailVerificationNotification();
+
+        $tokenName = $data['device_name'] ?? 'web-client';
+        $token = $this->tokenIssuer->issue($user, $tokenName)->plainTextToken;
+
+        $this->logAction('auth.register', $user, [], [
+            'email' => $user->email,
+            'username' => $user->username,
+            'role' => $user->role->value ?? $user->role,
+        ]);
+
+        UserRegistered::dispatch($user);
+
+        return [
+            'user' => $user->loadMissing('barber'),
+            'token' => $token,
+        ];
+    }
+}

@@ -1,0 +1,327 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Domain\Catalogue\Actions\CreateServiceCategory;
+use App\Domain\Catalogue\Actions\DeleteServiceCategory;
+use App\Domain\Catalogue\Actions\UpdateServiceCategory;
+use App\Domain\Catalogue\DataObjects\ServiceData;
+use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\CatalogueCache;
+use App\Http\Requests\Api\V1\Admin\StoreServiceCategoryRequest;
+use App\Http\Requests\Api\V1\Admin\UpdateServiceCategoryRequest;
+use App\Http\Requests\StoreServiceRequest;
+use App\Http\Requests\UpdateServiceRequest;
+use App\Http\Resources\ServiceResource;
+use App\Http\Responses\ApiResponse;
+use App\Models\BarberService;
+use App\Models\Service;
+use App\Models\ServiceCategory;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class ServiceApiController
+{
+    use AuthorizesRequests;
+
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user('sanctum');
+        $role = $user ? ($user->role->value ?? $user->role) : null;
+
+        $query = Service::query()->with(['category', 'barber.user']);
+
+        if ($role === 'barber') {
+            $barberId = $user->barber?->id;
+            if ($request->boolean('my_services_only')) {
+                $query->where('barber_id', $barberId);
+            } else {
+                $query->where(function ($q) use ($barberId) {
+                    $q->where(function ($q2) {
+                        $q2->where('approval_status', 'approved')->where('is_active', true);
+                    });
+                    if ($barberId) {
+                        $q->orWhere('barber_id', $barberId);
+                    }
+                });
+            }
+        } elseif (in_array($role, ['admin', 'super_admin'])) {
+            if ($request->has('approval_status') && $request->approval_status !== 'all') {
+                $query->where('approval_status', $request->approval_status);
+            }
+            if ($request->has('is_active')) {
+                $query->where('is_active', $request->boolean('is_active'));
+            }
+        } else {
+            // Public / Customer: strictly approved and active only!
+            $query->where('approval_status', 'approved')
+                ->where('is_active', true);
+        }
+
+        if ($request->has('category_id') && is_numeric($request->category_id)) {
+            $query->where('category_id', (int) $request->category_id);
+        }
+
+        if ($request->has('type')) {
+            if ($request->type === 'home_service') {
+                $query->where('home_service_allowed', true);
+            }
+        }
+
+        $bypassCache = $request->header('Cache-Control') === 'no-cache'
+            || $request->header('Pragma') === 'no-cache'
+            || $request->boolean('fresh');
+
+        if ((! $role || $role === 'customer') && ! $bypassCache) {
+            $cacheKey = 'query:'.md5(json_encode($request->all()));
+            $services = CatalogueCache::remember('services', $cacheKey, function () use ($query) {
+                return $query->orderBy('display_order')->orderBy('name')->get();
+            });
+        } else {
+            $services = $query->orderBy('display_order')->orderBy('name')->get();
+        }
+
+        $data = ServiceResource::collection($services);
+
+        return ApiResponse::success($data, 'Services retrieved successfully');
+    }
+
+    public function show(string $idOrSlug): JsonResponse
+    {
+        $service = is_numeric($idOrSlug)
+            ? Service::query()->with(['category', 'barber.user'])->find((int) $idOrSlug)
+            : Service::query()->with(['category', 'barber.user'])->where('slug', $idOrSlug)->first();
+
+        if (! $service) {
+            return ApiResponse::error("Service '{$idOrSlug}' not found.", [], 404, 'RESOURCE_NOT_FOUND');
+        }
+
+        return ApiResponse::success(new ServiceResource($service), 'Service details retrieved');
+    }
+
+    public function categories(): JsonResponse
+    {
+        $data = CatalogueCache::remember('categories', 'public_list', function () {
+            $categories = ServiceCategory::query()
+                ->withCount(['services' => fn ($q) => $q->where('approval_status', 'approved')->where('is_active', true)])
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
+
+            return $categories->map(fn (ServiceCategory $cat) => [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'slug' => $cat->slug ?? Str::slug($cat->name),
+                'icon' => $cat->icon,
+                'display_order' => $cat->display_order,
+                'services_count' => $cat->services_count ?? 0,
+            ])->all();
+        });
+
+        return ApiResponse::success($data, 'Service categories retrieved');
+    }
+
+    public function store(StoreServiceRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $isBarber = ($user->role->value ?? $user->role) === 'barber';
+
+        $data = ServiceData::fromRequest($request)->toArray();
+        unset($data['image_url']);
+
+        if ($isBarber) {
+            $barber = $user->barber;
+            $data['barber_id'] = $barber?->id;
+            $data['approval_status'] = 'pending';
+            $data['is_active'] = false;
+        } else {
+            $data['approval_status'] = 'approved';
+            $data['is_active'] = $request->boolean('is_active', true);
+        }
+
+        $data['description'] = $data['description'] ?? '';
+        $data['slug'] = Str::slug($data['name']).'-'.time();
+
+        $service = Service::create($data);
+
+        $uploader = new SecureImageUpload;
+        $imageUpdates = [];
+
+        $imageFile1 = $request->file('image') ?? $request->file('image1');
+        if ($imageFile1) {
+            $path1 = $uploader->execute($imageFile1, 'uploads/services');
+            $imageUpdates['image'] = '/storage/'.$path1;
+        }
+
+        $imageFile2 = $request->file('image2');
+        if ($imageFile2) {
+            $path2 = $uploader->execute($imageFile2, 'uploads/services');
+            $imageUpdates['image2'] = '/storage/'.$path2;
+        }
+
+        $imageFile3 = $request->file('image3');
+        if ($imageFile3) {
+            $path3 = $uploader->execute($imageFile3, 'uploads/services');
+            $imageUpdates['image3'] = '/storage/'.$path3;
+        }
+
+        if (! empty($imageUpdates)) {
+            $service->update($imageUpdates);
+        }
+
+        $message = $isBarber
+            ? 'Service submitted successfully and is pending admin approval.'
+            : 'Service created successfully.';
+
+        CatalogueCache::bust('services');
+
+        return ApiResponse::success(new ServiceResource($service->load(['category', 'barber.user'])), $message, 201);
+    }
+
+    public function update(UpdateServiceRequest $request, int $id): JsonResponse
+    {
+        $service = Service::findOrFail($id);
+
+        $validated = $request->validated();
+        if (isset($validated['is_active'])) {
+            $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        unset(
+            $validated['image'],
+            $validated['image1'],
+            $validated['image2'],
+            $validated['image3'],
+            $validated['remove_image1'],
+            $validated['remove_image2'],
+            $validated['remove_image3']
+        );
+
+        $service->update($validated);
+
+        $uploader = new SecureImageUpload;
+        $imageUpdates = [];
+
+        $imageFile1 = $request->file('image') ?? $request->file('image1');
+        if ($imageFile1) {
+            $path1 = $uploader->execute($imageFile1, 'uploads/services');
+            $imageUpdates['image'] = '/storage/'.$path1;
+        } elseif ($request->boolean('remove_image1')) {
+            $imageUpdates['image'] = null;
+        }
+
+        $imageFile2 = $request->file('image2');
+        if ($imageFile2) {
+            $path2 = $uploader->execute($imageFile2, 'uploads/services');
+            $imageUpdates['image2'] = '/storage/'.$path2;
+        } elseif ($request->boolean('remove_image2')) {
+            $imageUpdates['image2'] = null;
+        }
+
+        $imageFile3 = $request->file('image3');
+        if ($imageFile3) {
+            $path3 = $uploader->execute($imageFile3, 'uploads/services');
+            $imageUpdates['image3'] = '/storage/'.$path3;
+        } elseif ($request->boolean('remove_image3')) {
+            $imageUpdates['image3'] = null;
+        }
+
+        if (! empty($imageUpdates)) {
+            $service->update($imageUpdates);
+        }
+
+        CatalogueCache::bust('services');
+
+        return ApiResponse::success(new ServiceResource($service->refresh()), 'Service updated');
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $service = Service::findOrFail($id);
+        $this->authorize('delete', $service);
+        $service->delete();
+
+        CatalogueCache::bust('services');
+
+        return ApiResponse::success(null, 'Service deleted');
+    }
+
+    public function storeCategory(StoreServiceCategoryRequest $request, CreateServiceCategory $action): JsonResponse
+    {
+        $this->authorize('create', ServiceCategory::class);
+
+        $category = $action->execute($request->validated());
+        CatalogueCache::bust('categories');
+
+        return ApiResponse::success($category, 'Service category created', 201);
+    }
+
+    public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action): JsonResponse
+    {
+        $this->authorize('update', $serviceCategory);
+
+        $category = $action->execute($serviceCategory, $request->validated());
+        CatalogueCache::bust('categories');
+
+        return ApiResponse::success($category, 'Service category updated');
+    }
+
+    public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action): JsonResponse
+    {
+        $this->authorize('delete', $serviceCategory);
+        $action->execute($serviceCategory);
+
+        CatalogueCache::bust('categories');
+
+        return ApiResponse::success(null, 'Service category deleted');
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (! in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
+            return ApiResponse::error('Unauthorized', [], 403);
+        }
+
+        $service = Service::findOrFail($id);
+        $service->update([
+            'approval_status' => 'approved',
+            'is_active' => true,
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        if ($service->barber_id) {
+            BarberService::firstOrCreate(
+                ['barber_id' => $service->barber_id, 'service_id' => $service->id],
+                ['is_offered' => true]
+            );
+        }
+
+        CatalogueCache::bust('services');
+
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service approved successfully');
+    }
+
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (! in_array($user->role->value ?? $user->role, ['admin', 'super_admin'])) {
+            return ApiResponse::error('Unauthorized', [], 403);
+        }
+
+        $service = Service::findOrFail($id);
+        $service->update([
+            'approval_status' => 'rejected',
+            'is_active' => false,
+        ]);
+
+        CatalogueCache::bust('services');
+
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), 'Service rejected');
+    }
+}

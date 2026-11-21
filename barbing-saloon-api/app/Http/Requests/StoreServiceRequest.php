@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\Service;
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreServiceRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', Service::class);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:5|max:480',
+            'category_id' => 'required|integer|exists:service_categories,id',
+            'image' => 'nullable|image|max:5120',
+            'image1' => 'nullable|image|max:5120',
+            'image2' => 'nullable|image|max:5120',
+            'image3' => 'nullable|image|max:5120',
+            'remove_image1' => 'nullable',
+            'remove_image2' => 'nullable',
+            'remove_image3' => 'nullable',
+            'is_active' => 'nullable|boolean',
+        ];
+    }
+}

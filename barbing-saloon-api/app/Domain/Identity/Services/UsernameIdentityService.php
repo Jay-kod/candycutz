@@ -1,0 +1,104 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Identity\Services;
+
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+
+class UsernameIdentityService
+{
+    /**
+     * @var array<int, string>
+     */
+    protected array $reservedUsernames = [
+        'admin',
+        'superadmin',
+        'candycutz',
+        'support',
+        'root',
+        'barber',
+        'keffi',
+        'billing',
+        'help',
+        'manager',
+        'owner',
+        'official',
+        'staff',
+    ];
+
+    /**
+     * Validate and assign/update a user's @username.
+     */
+    public function updateUsername(User $user, string $newUsername, bool $isSuperAdminOverride = false): User
+    {
+        $normalized = strtolower(trim($newUsername));
+
+        // 1. Format check: 3-30 chars, letters, numbers, underscore, hyphen
+        if (! preg_match('/^[a-z0-9_-]{3,30}$/', $normalized)) {
+            throw new Exception('Username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens.');
+        }
+
+        // 2. Reserved handle check
+        if (in_array($normalized, $this->reservedUsernames, true)) {
+            throw new Exception('This username is reserved by the CandyCutz system.');
+        }
+
+        // 3. Uniqueness check (excluding current user)
+        $exists = User::whereRaw('LOWER(username) = ?', [$normalized])
+            ->where('id', '!=', $user->id)
+            ->exists();
+
+        if ($exists) {
+            throw new Exception('This username is already taken. Please choose another.');
+        }
+
+        // 4. Cooldown enforcement: 30 days for barbers, 60 days for customers (unless bypassed by Super Admin)
+        if (! $isSuperAdminOverride && $user->last_username_change_at) {
+            $daysSinceChange = Carbon::parse($user->last_username_change_at)->diffInDays(now());
+            $roleValue = $user->role->value ?? $user->role;
+            $cooldownDays = ($roleValue === 'barber') ? 30 : 60;
+            if ($daysSinceChange < $cooldownDays) {
+                $daysRemaining = (int) ceil($cooldownDays - $daysSinceChange);
+                throw new Exception("Username can only be changed once every {$cooldownDays} days. {$daysRemaining} days remaining.");
+            }
+        }
+
+        // 5. Apply update
+        $user->username = $normalized;
+        if ($user->status === 'username_pending') {
+            $user->status = 'active';
+        }
+        $user->last_username_change_at = now();
+        $user->save();
+
+        return $user;
+    }
+
+    /**
+     * Generate a unique, compliant @username from a name or email string.
+     */
+    public function generateUniqueUsername(string $base): string
+    {
+        $clean = preg_replace('/[^a-z0-9]/', '', strtolower($base));
+        if (strlen($clean) < 3) {
+            $clean = 'vip'.str_pad($clean, 3, '0');
+        }
+        $clean = substr($clean, 0, 18);
+
+        $candidate = $clean;
+        $counter = 1;
+        while (User::whereRaw('LOWER(username) = ?', [$candidate])->exists() || in_array($candidate, $this->reservedUsernames, true)) {
+            $candidate = $clean.'_'.rand(100, 999);
+            $counter++;
+            if ($counter > 20) {
+                $candidate = $clean.'_'.substr(uniqid(), -5);
+                break;
+            }
+        }
+
+        return $candidate;
+    }
+}

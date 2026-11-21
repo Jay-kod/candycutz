@@ -1,0 +1,729 @@
+<template>
+  <div class="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] flex flex-col transition-colors duration-300">
+    <header class="public-header">
+      <div class="public-nav-shell" :class="{ 'public-nav-shell--scrolled': y > 20 || route.path !== '/' }">
+        <RouterLink to="/" class="public-brand" :aria-label="`${brandName} home`">
+          <img :src="logoUrl" alt="" class="public-brand__mark" />
+          <BrandWordmark class="public-brand__name" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
+        </RouterLink>
+
+        <nav class="public-nav-links" aria-label="Main navigation">
+          <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-nav-link">Home</RouterLink>
+          <RouterLink to="/about" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
+          <RouterLink to="/services" @mouseenter="prefetchServices" @focus="prefetchServices" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
+          <RouterLink to="/gallery" @mouseenter="prefetchGallery" @focus="prefetchGallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
+          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
+        </nav>
+
+        <div class="public-nav-actions flex items-center">
+          <ThemeToggleSwitch />
+          <RouterLink to="/customer/register" class="public-signup">Sign Up</RouterLink>
+        </div>
+
+        <button
+          type="button"
+          class="public-menu-toggle"
+          :aria-expanded="mobileMenuOpen"
+          aria-controls="public-mobile-menu"
+          :aria-label="mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+          @click="mobileMenuOpen = !mobileMenuOpen"
+        >
+          <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+
+        <nav
+          id="public-mobile-menu"
+          v-show="mobileMenuOpen"
+          class="public-mobile-menu"
+          aria-label="Mobile navigation"
+        >
+          <div class="public-mobile-menu__header">
+            <span class="public-mobile-menu__name">{{ brandName }}</span>
+            <button
+              type="button"
+              class="public-mobile-menu__close"
+              aria-label="Close navigation menu"
+              @click="mobileMenuOpen = false"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+          <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Home</RouterLink>
+          <RouterLink to="/about" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">About</RouterLink>
+          <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
+          <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
+          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
+          <div class="py-2 px-3 flex items-center justify-between border-y border-[var(--color-border-subtle)] my-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Theme</span>
+            <ThemeToggleSwitch />
+          </div>
+          <RouterLink to="/customer/register" class="public-mobile-signup" @click="mobileMenuOpen = false">Sign Up</RouterLink>
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-grow"><slot /></main>
+
+    <!-- Redesigned Footer (Modern SaaS Structure with Real Website Content) -->
+    <footer class="public-footer border-t border-[var(--color-border)] bg-[var(--color-bg-primary)] pt-16 pb-12 text-[var(--color-text-secondary)] transition-colors duration-300">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
+        <div class="grid grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.9fr)] gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
+          <!-- Section 1: Brand & Shop Identity -->
+          <div class="col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
+            <RouterLink to="/" class="public-footer__brand inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-[var(--color-text-primary)] font-display group">
+              <img :src="logoUrl" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
+              <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
+            </RouterLink>
+            <p class="public-footer__text max-w-sm text-xs leading-relaxed text-[var(--color-text-secondary)] sm:text-[13px]">
+              {{ brandTagline }}
+            </p>
+
+            <div class="public-footer__text space-y-3 pt-1 text-xs text-[var(--color-text-secondary)]">
+              <div v-if="shopAddress" class="flex items-start gap-2">
+                <MapPinIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0 mt-0.5" />
+                <span class="leading-snug">{{ shopAddress }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <ClockIcon class="h-4 w-4 text-[var(--color-accent)] shrink-0" />
+                <span class="whitespace-pre-line leading-snug">{{ contactHours }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Explore -->
+          <div class="md:col-span-1 md:pl-6 lg:pl-8">
+            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-[var(--color-text-primary)] mb-3">Explore</h3>
+            <ul class="public-footer__links flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
+              <li><RouterLink to="/" class="hover:text-[var(--color-accent)] transition-colors">Home</RouterLink></li>
+              <li><RouterLink to="/services" class="hover:text-[var(--color-accent)] transition-colors">Services</RouterLink></li>
+              <li><RouterLink to="/gallery" class="hover:text-[var(--color-accent)] transition-colors">Gallery</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">About Us</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Contact Shop</RouterLink></li>
+            </ul>
+          </div>
+
+          <!-- Section 3: Legal & Policies -->
+          <div class="md:col-span-1">
+            <h3 class="public-footer__heading text-sm font-semibold tracking-tight text-[var(--color-text-primary)] mb-3">Legal & Policies</h3>
+            <ul class="public-footer__links flex flex-col items-start space-y-2.5 text-left text-xs sm:text-sm">
+              <li><RouterLink to="/privacy" class="hover:text-[var(--color-accent)] transition-colors">Privacy Policy</RouterLink></li>
+              <li><RouterLink to="/terms" class="hover:text-[var(--color-accent)] transition-colors">Terms of Service</RouterLink></li>
+              <li><RouterLink to="/account-deletion" class="hover:text-[var(--color-accent)] transition-colors">Account Deletion</RouterLink></li>
+              <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">Hygiene Standards</RouterLink></li>
+              <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Support Desk</RouterLink></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Horizontal Divider with Centered Social Icons Embedded in the Line -->
+        <div class="relative flex items-center my-10">
+          <div class="public-footer__divider flex-grow border-t border-[var(--color-border-subtle)]"></div>
+          <div v-if="activeFooterSocials.length > 0" class="public-footer__socials flex items-center gap-4 px-4 sm:px-6 text-[var(--color-text-muted)]">
+            <a
+              v-for="item in activeFooterSocials"
+              :key="item.key"
+              :href="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-[var(--color-accent)] transition-colors duration-200"
+              :aria-label="item.label"
+            >
+              <SocialIcon :name="item.key" class="h-4 w-4" />
+            </a>
+          </div>
+          <div class="public-footer__divider flex-grow border-t border-[var(--color-border-subtle)]"></div>
+        </div>
+
+        <!-- Centered Legal Links Separated by Pipes (Exact reference design) -->
+        <div class="public-footer__legal mt-8 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-[var(--color-text-muted)]">
+          <RouterLink to="/legal" class="hover:text-[var(--color-accent)] transition-colors">Legal Stuff</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/privacy" class="hover:text-[var(--color-accent)] transition-colors">Privacy Policy</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/security" class="hover:text-[var(--color-accent)] transition-colors">Security</RouterLink>
+          <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
+          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors">Manage Cookies</RouterLink>
+        </div>
+
+        <!-- Copyright Line -->
+        <p class="footer-copyright mt-4 text-center text-xs text-[var(--color-text-muted)]">
+          Copyright &copy; {{ new Date().getFullYear() }}
+          <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />,
+          Inc.
+        </p>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import { useWindowScroll } from '@vueuse/core';
+import { publicApi } from '@/shared/api/old_publicApi';
+import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
+import SocialIcon from '@/components/SocialIcon.vue';
+import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
+import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
+import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
+import { getActivePinia } from 'pinia';
+
+const getStore = () => (getActivePinia() ? usePublicContentStore() : null);
+
+const prefetchServices = () => {
+  const store = getStore();
+  if (store) {
+    store.getServices();
+    store.getCategories();
+  }
+};
+
+const prefetchAbout = () => {
+  const store = getStore();
+  if (store) {
+    store.getSettings();
+    store.getTestimonials();
+  }
+};
+
+const prefetchGallery = () => {
+  const store = getStore();
+  if (store) {
+    store.getSettings();
+  }
+};
+
+const route = useRoute();
+const { y } = useWindowScroll();
+
+const mobileMenuOpen = ref(false);
+watch(mobileMenuOpen, (isOpen) => {
+  document.documentElement.classList.toggle('public-mobile-menu-open', isOpen);
+});
+watch(() => route.fullPath, () => {
+  mobileMenuOpen.value = false;
+});
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' && mobileMenuOpen.value) {
+    mobileMenuOpen.value = false;
+  }
+};
+
+const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
+const logoUrl = ref('/images/logo-icon.png');
+const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
+const shopPhone = ref('+234 812 345 6789');
+const shopEmail = ref('info@candycutz.com');
+const contactHours = ref('Mon - Sat: 9:00 AM - 8:00 PM\nSun: Closed');
+
+const socialSettings = ref({
+  whatsapp: '',
+  instagram: '',
+  facebook: '',
+  twitter: '',
+  tiktok: '',
+  youtube: '',
+  linkedin: '',
+  show_footer_whatsapp: true,
+  show_footer_instagram: true,
+  show_footer_facebook: true,
+  show_footer_twitter: true,
+  show_footer_tiktok: true,
+  show_footer_youtube: true,
+  show_footer_linkedin: true,
+});
+
+const formatWhatsAppUrl = (val) => {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  const digits = trimmed.replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : '';
+};
+
+const parseBool = (val, defaultVal = true) => {
+  if (val === undefined || val === null || val === '') return defaultVal;
+  return val === true || val === 'true' || val === 1 || val === '1';
+};
+
+const activeFooterSocials = computed(() => {
+  const s = socialSettings.value;
+  const list = [];
+  if (s.whatsapp && s.show_footer_whatsapp) {
+    list.push({ key: 'whatsapp', label: 'WhatsApp', url: formatWhatsAppUrl(s.whatsapp) });
+  }
+  if (s.instagram && s.show_footer_instagram) {
+    list.push({ key: 'instagram', label: 'Instagram', url: s.instagram });
+  }
+  if (s.facebook && s.show_footer_facebook) {
+    list.push({ key: 'facebook', label: 'Facebook', url: s.facebook });
+  }
+  if (s.twitter && s.show_footer_twitter) {
+    list.push({ key: 'twitter', label: 'X (formerly Twitter)', url: s.twitter });
+  }
+  if (s.tiktok && s.show_footer_tiktok) {
+    list.push({ key: 'tiktok', label: 'TikTok', url: s.tiktok });
+  }
+  if (s.youtube && s.show_footer_youtube) {
+    list.push({ key: 'youtube', label: 'YouTube', url: s.youtube });
+  }
+  if (s.linkedin && s.show_footer_linkedin) {
+    list.push({ key: 'linkedin', label: 'LinkedIn', url: s.linkedin });
+  }
+  return list;
+});
+
+
+const fetchSettings = async () => {
+  try {
+    const response = await publicApi.settings();
+    const settings = response.data?.data || {};
+
+    applyBrandSettings({
+      ...settings,
+      brand_tagline: settings.brand_tagline || settings.site_description || settings.meta_description || settings.about_teaser_text,
+    });
+    if (settings.logo) {
+      logoUrl.value = getStorageUrl(settings.logo, '/images/logo-icon.png');
+    }
+    if (settings.address || settings.contact_address) {
+      shopAddress.value = settings.address || settings.contact_address;
+    }
+    if (settings.contact_hours !== undefined && settings.contact_hours !== null) {
+      contactHours.value = settings.contact_hours;
+    }
+    if (settings.phone || settings.contact_phone) {
+      shopPhone.value = settings.phone || settings.contact_phone;
+    }
+    if (settings.email || settings.contact_email) {
+      shopEmail.value = settings.email || settings.contact_email;
+    }
+
+    const platforms = ['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
+    platforms.forEach((p) => {
+      const val = settings[`social_${p}`] || settings[p] || settings.social?.[p] || '';
+      socialSettings.value[p] = val ? String(val).trim() : '';
+
+      const footerKey = `social_show_footer_${p}`;
+      socialSettings.value[`show_footer_${p}`] = parseBool(
+        settings[footerKey] ?? settings.social?.[footerKey],
+        true
+      );
+    });
+  } catch (error) {
+    console.error('Failed to load settings in footer:', error);
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
+  fetchSettings();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+  document.documentElement.classList.remove('public-mobile-menu-open');
+});
+</script>
+
+<style scoped>
+.public-header {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 0.5rem;
+  pointer-events: none;
+}
+
+.public-nav-shell {
+  position: relative;
+  display: grid;
+  width: min(100%, 56rem);
+  min-height: 48px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.25rem auto 0;
+  pointer-events: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 0.35rem 0.5rem 0.35rem 0.85rem;
+  background: var(--color-bg-secondary);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--color-text-primary);
+  box-shadow: 0 8px 32px var(--color-shadow);
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
+}
+
+.public-nav-shell--scrolled {
+  border-color: var(--color-accent);
+  background: var(--color-bg-secondary);
+  box-shadow: 0 12px 36px var(--color-shadow), 0 0 16px rgba(255, 153, 0, 0.15);
+}
+
+.public-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  transition: color 200ms ease;
+  text-decoration: none;
+}
+
+.public-brand__name {
+  color: inherit;
+}
+
+.footer-copyright {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 0.25rem;
+  text-align: center;
+}
+
+.public-brand__mark {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.public-nav-links,
+.public-nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.public-theme-toggle {
+  min-height: 38px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  background: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.public-theme-toggle:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
+  background: rgba(255, 153, 0, 0.08);
+}
+
+.public-nav-links {
+  justify-content: center;
+  gap: clamp(0.6rem, 1.8vw, 1.5rem);
+}
+
+.public-nav-link,
+.public-login {
+  position: relative;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: 0.825rem;
+  font-weight: 550;
+  text-decoration: none;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.public-nav-link:hover,
+.public-login:hover {
+  color: var(--color-accent-hover);
+}
+
+.public-nav-link--active {
+  color: var(--color-accent) !important;
+  font-weight: 650;
+}
+
+.public-nav-link--active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(255, 153, 0, 0.6);
+}
+
+.public-nav-actions {
+  justify-content: flex-end;
+  gap: 0.9rem;
+}
+
+.public-signup,
+.public-mobile-signup {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-accent);
+  border-radius: 9px;
+  padding: 0.38rem 0.95rem;
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent));
+  color: var(--color-accent-foreground);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(255, 153, 0, 0.28);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.public-signup:hover,
+.public-mobile-signup:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 18px rgba(255, 153, 0, 0.45);
+}
+
+.public-signup:active,
+.public-mobile-signup:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.public-menu-toggle,
+.public-mobile-menu {
+  display: none;
+}
+
+:global(#features),
+:global(#services) {
+  scroll-margin-top: 5rem;
+}
+
+:global(html.public-mobile-menu-open) {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .public-header {
+    padding-top: max(0.55rem, env(safe-area-inset-top, 0px));
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+    padding-bottom: 0.55rem;
+  }
+
+  .public-nav-shell {
+    margin: 0.5rem auto 0;
+    min-height: 48px;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+    padding: 0.3rem 0.4rem 0.3rem 0.6rem;
+  }
+
+  .public-brand {
+    font-size: 0.9rem;
+  }
+
+  .public-nav-links,
+  .public-nav-actions {
+    display: none;
+  }
+
+  .public-mobile-theme {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .public-menu-toggle {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-border-subtle);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .public-menu-toggle:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .public-menu-toggle svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .public-mobile-menu {
+    position: fixed;
+    z-index: 20;
+    top: 0;
+    right: 0;
+    width: min(82vw, 320px);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    border-right: 0;
+    border-radius: 16px 0 0 16px;
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent);
+    backdrop-filter: blur(28px) saturate(135%);
+    -webkit-backdrop-filter: blur(28px) saturate(135%);
+    box-shadow: 0 16px 36px var(--color-shadow), 0 0 20px rgba(255, 153, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    animation: public-mobile-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .public-mobile-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .public-mobile-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin-bottom: 0.5rem;
+    padding: 0 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .public-mobile-menu__name {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+  }
+
+  .public-mobile-menu__close {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .public-mobile-menu__close:hover {
+    border-color: var(--color-accent);
+    background: rgba(255, 153, 0, 0.1);
+    color: var(--color-accent);
+  }
+
+  .public-mobile-menu__close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @keyframes public-mobile-menu-in {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .public-mobile-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    color: var(--color-text-secondary);
+    font-size: 0.925rem;
+    font-weight: 550;
+    text-decoration: none;
+    transition: all 150ms ease;
+  }
+
+  .public-mobile-link:hover {
+    background: rgba(255, 153, 0, 0.1);
+    color: var(--color-accent-hover);
+  }
+
+  .public-mobile-link.public-nav-link--active {
+    background: rgba(255, 153, 0, 0.15);
+    color: var(--color-accent);
+    font-weight: 650;
+    border-left: 2px solid var(--color-accent);
+  }
+
+  .public-mobile-signup {
+    min-height: 44px;
+    margin-top: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-nav-shell,
+  .public-nav-link,
+  .public-login,
+  .public-signup,
+  .public-mobile-signup,
+  .public-mobile-menu,
+  .public-mobile-menu__close {
+    transition: none;
+    animation: none;
+  }
+}
+</style>

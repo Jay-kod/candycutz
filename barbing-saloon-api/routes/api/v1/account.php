@@ -1,0 +1,173 @@
+<?php
+
+use App\Http\Controllers\Api\V1\AccountApiController;
+use App\Http\Controllers\Api\V1\AdminApiController;
+use App\Http\Controllers\Api\V1\AppointmentApiController;
+use App\Http\Controllers\Api\V1\BarberApiController;
+use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
+use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\NotificationApiController;
+use App\Http\Controllers\Api\V1\PaymentApiController;
+use App\Http\Controllers\Api\V1\ServiceApiController;
+use App\Http\Controllers\Api\V1\TestimonialApiController;
+use App\Http\Controllers\Api\V1\UserMediaController;
+use App\Http\Controllers\Api\V1\WishlistApiController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController::class, 'show'])
+    ->whereNumber('user')
+    ->where('type', 'avatar|cover')
+    ->where('filename', '[A-Za-z0-9_.-]+')
+    ->middleware('signed:relative')
+    ->name('user-media.show');
+
+Route::middleware('auth:sanctum')->group(function () {
+    // -------------------------------------------------------------------------
+    // Customer Portal Routes (/api/v1/customer/* and /api/v1/account/*)
+    // -------------------------------------------------------------------------
+    Route::get('/account/dashboard', [AccountApiController::class, 'dashboard']);
+    Route::get('/customer/dashboard', [AccountApiController::class, 'dashboard']);
+
+    Route::middleware('check.role:customer')->post('/customer/feedback', [FeedbackSubmissionApiController::class, 'store']);
+
+    Route::get('/account/profile', [AccountApiController::class, 'profile']);
+    Route::match(['post', 'put', 'patch'], '/account/profile', [AccountApiController::class, 'updateProfile']);
+    Route::get('/customer/profile', [AccountApiController::class, 'profile']);
+    Route::match(['post', 'put', 'patch'], '/customer/profile', [AccountApiController::class, 'updateProfile']);
+    Route::post('/account/avatar', [AccountApiController::class, 'uploadAvatar']);
+    Route::post('/customer/avatar', [AccountApiController::class, 'uploadAvatar']);
+    Route::delete('/account/avatar', [AccountApiController::class, 'deleteAvatar']);
+    Route::delete('/customer/avatar', [AccountApiController::class, 'deleteAvatar']);
+
+    Route::get('/account/analytics', [AccountApiController::class, 'analytics']);
+    Route::get('/customer/analytics', [AccountApiController::class, 'analytics']);
+
+    Route::get('/account/my-codes', [AccountApiController::class, 'myCodes']);
+    Route::get('/customer/my-codes', [AccountApiController::class, 'myCodes']);
+
+    // Customer Bookings
+    Route::get('/customer/bookings', [AppointmentApiController::class, 'index']);
+    Route::post('/customer/bookings', [AppointmentApiController::class, 'store']);
+    Route::get('/customer/appointments', [AppointmentApiController::class, 'index']);
+    Route::get('/customer/bookings/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
+    Route::patch('/customer/bookings/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::patch('/customer/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::delete('/customer/bookings/{id}', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+
+    // Customer Reviews / Testimonials
+    Route::get('/customer/reviews', [TestimonialApiController::class, 'customerReviews']);
+    Route::post('/customer/testimonials', [TestimonialApiController::class, 'store']);
+
+    // Customer Wishlist
+    Route::get('/wishlist', [WishlistApiController::class, 'index']);
+    Route::post('/wishlist', [WishlistApiController::class, 'store']);
+    Route::delete('/wishlist/remove', [WishlistApiController::class, 'destroyByType']);
+    Route::delete('/wishlist/{id}', [WishlistApiController::class, 'destroy'])->whereNumber('id');
+    Route::get('/customer/wishlist', [WishlistApiController::class, 'index']);
+    Route::post('/customer/wishlist', [WishlistApiController::class, 'store']);
+    Route::delete('/customer/wishlist/item', [WishlistApiController::class, 'destroyByType']);
+    Route::delete('/customer/wishlist/{id}', [WishlistApiController::class, 'destroy'])->whereNumber('id');
+
+    // Customer Checkout & Receipts
+    Route::post('/customer/checkout', [PaymentApiController::class, 'checkout']);
+    Route::get('/customer/checkout/{id}/payment-details', [PaymentApiController::class, 'paymentDetails'])->whereNumber('id');
+    Route::post('/customer/checkout/{id}/receipt', [PaymentApiController::class, 'uploadReceipt'])->whereNumber('id');
+
+    // Customer Blog Interactions
+    Route::post('/customer/blog/{id}/react', [BlogApiController::class, 'react'])->whereNumber('id');
+    Route::delete('/customer/blog/{id}/react', [BlogApiController::class, 'removeReaction'])->whereNumber('id');
+
+    // Customer Notifications
+    Route::get('/customer/notifications', [NotificationApiController::class, 'index']);
+    Route::post('/customer/notification-settings', [NotificationApiController::class, 'updateNotificationSettings']);
+
+    // -------------------------------------------------------------------------
+    // Barber Portal Routes (/api/v1/barber/* and /api/v1/barbers/*)
+    // -------------------------------------------------------------------------
+    Route::get('/barbers/dashboard', [BarberApiController::class, 'dashboard']);
+    Route::get('/barber/dashboard', [BarberApiController::class, 'dashboard']);
+
+    Route::get('/barbers/analytics', [BarberApiController::class, 'analytics']);
+    Route::get('/barber/analytics', [BarberApiController::class, 'analytics']);
+
+    Route::get('/barbers/account', [BarberApiController::class, 'account']);
+    Route::get('/barber/account', [BarberApiController::class, 'account']);
+    Route::get('/barbers/bank-details', [AdminApiController::class, 'bankDetails']);
+    Route::get('/barber/bank-details', [AdminApiController::class, 'bankDetails']);
+    Route::post('/barbers/account', [BarberApiController::class, 'updateAccount']);
+    Route::post('/barber/account', [BarberApiController::class, 'updateAccount']);
+    Route::put('/barbers/account', [BarberApiController::class, 'updateAccount']);
+    Route::patch('/barbers/account', [BarberApiController::class, 'updateAccount']);
+    Route::patch('/barber/account', [BarberApiController::class, 'updateAccount']);
+    Route::put('/barber/account', [BarberApiController::class, 'updateAccount']);
+    Route::patch('/barbers/account/username', [BarberApiController::class, 'updateUsername']);
+
+    Route::get('/barbers/schedule', [BarberApiController::class, 'schedule']);
+    Route::get('/barber/schedule', [BarberApiController::class, 'schedule']);
+    Route::put('/barbers/schedule', [BarberApiController::class, 'updateSchedule']);
+    Route::put('/barber/schedule', [BarberApiController::class, 'updateSchedule']);
+
+    Route::get('/barbers/blocked-periods', [BarberApiController::class, 'blockedPeriods']);
+    Route::post('/barbers/blocked-periods', [BarberApiController::class, 'storeBlockedPeriod']);
+    Route::delete('/barbers/blocked-periods/{id}', [BarberApiController::class, 'deleteBlockedPeriod'])->whereNumber('id');
+
+    Route::patch('/barber/my-status', [BarberApiController::class, 'updateMyStatus']);
+    Route::patch('/barbers/chair-status', [BarberApiController::class, 'updateChairStatus']);
+
+    // Barber Appointments & Bookings
+    Route::get('/barber/appointments', [AppointmentApiController::class, 'index']);
+    Route::get('/barber/bookings', [AppointmentApiController::class, 'index']);
+    Route::patch('/barber/appointments/{id}/complete', [AppointmentApiController::class, 'complete'])->whereNumber('id');
+    Route::patch('/barber/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
+    Route::patch('/barber/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
+    Route::patch('/barber/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::middleware('check.role:barber,admin,super_admin')
+        ->post('/barber/appointments/walk-in', [AppointmentApiController::class, 'storeWalkIn']);
+    Route::post('/barber/bookings/{id}/verify-payment', [PaymentApiController::class, 'verifyPayment'])->whereNumber('id');
+
+    // Barber Notifications
+    Route::get('/barber/notifications', [NotificationApiController::class, 'index']);
+    Route::post('/barber/notifications', [NotificationApiController::class, 'store']);
+
+    // Barber Reviews / Testimonials
+    Route::get('/barber/reviews', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barbers/reviews', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barber/testimonials', [TestimonialApiController::class, 'barberReviews']);
+    Route::get('/barbers/testimonials', [TestimonialApiController::class, 'barberReviews']);
+
+    // Barber Services
+    Route::get('/barber/services', [ServiceApiController::class, 'index']);
+    Route::post('/barber/services', [ServiceApiController::class, 'store']);
+    Route::put('/barber/services/{id}', [ServiceApiController::class, 'update'])->whereNumber('id');
+    Route::delete('/barber/services/{id}', [ServiceApiController::class, 'destroy'])->whereNumber('id');
+
+    // Barber Gallery
+    Route::get('/barber/gallery', [GalleryApiController::class, 'index']);
+    Route::post('/barber/gallery', [GalleryApiController::class, 'store']);
+    Route::post('/barber/gallery/{id}', [GalleryApiController::class, 'update'])->whereNumber('id');
+    Route::delete('/barber/gallery/{id}', [GalleryApiController::class, 'destroy'])->whereNumber('id');
+
+    // Barber Blog
+    Route::get('/barber/blog', [BlogApiController::class, 'index']);
+    Route::post('/barber/blog', [BlogApiController::class, 'store']);
+    Route::post('/barber/blog/{id}', [BlogApiController::class, 'update'])->whereNumber('id');
+    Route::delete('/barber/blog/{id}', [BlogApiController::class, 'destroy'])->whereNumber('id');
+
+    // -------------------------------------------------------------------------
+    // General Notifications
+    // -------------------------------------------------------------------------
+    Route::get('/notifications', [NotificationApiController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationApiController::class, 'unreadCount']);
+    Route::get('/notifications/stream', [NotificationApiController::class, 'stream']);
+    Route::post('/notifications', [NotificationApiController::class, 'store']);
+    Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllRead']);
+    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead'])->whereNumber('id');
+    Route::delete('/notifications/{id}', [NotificationApiController::class, 'destroy'])->whereNumber('id');
+    Route::get('/notification-settings', [NotificationApiController::class, 'getNotificationSettings']);
+    Route::post('/notification-settings', [NotificationApiController::class, 'updateNotificationSettings']);
+    Route::get('/notification-preferences', [NotificationApiController::class, 'getNotificationPreferences']);
+    Route::match(['put', 'post'], '/notification-preferences', [NotificationApiController::class, 'updateNotificationPreferences']);
+    Route::post('/notifications/device-token', [NotificationApiController::class, 'registerDeviceToken']);
+    Route::delete('/notifications/device-token', [NotificationApiController::class, 'deleteDeviceToken']);
+});

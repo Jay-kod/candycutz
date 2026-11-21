@@ -1,0 +1,118 @@
+/**
+ * Authoritative URL & Asset Resolution Utility for CandyCutz Web.
+ * Guarantees zero path collisions, prevents double /api/v1 prefixes,
+ * and robustly resolves local and production backend URLs.
+ */
+
+const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').trim().replace(/\/+$/, '');
+
+function resolveApiRoot() {
+  if (rawApiUrl.startsWith('http://') || rawApiUrl.startsWith('https://')) {
+    return rawApiUrl.replace(/\/(api\/v1|api|v1)$/i, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  return 'http://localhost:8080';
+}
+
+function resolveStaticAssetUrl(path) {
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
+// Extract host origin root
+export const API_ROOT = resolveApiRoot();
+
+// Canonical API endpoints
+export const API_BASE_URL = `${API_ROOT}/api`;
+export const API_V1_BASE_URL = `${API_ROOT}/api/v1`;
+export const STORAGE_BASE_URL = `${API_ROOT}/storage`;
+
+/**
+ * Resolves an image or media path to an absolute, accessible URL.
+ * 
+ * @param {string|null|undefined} path Relative or absolute media path
+ * @param {string} [fallback=''] Optional fallback if path is empty
+ * @returns {string} Fully qualified media URL
+ */
+export function getStorageUrl(path, fallback = '') {
+  if (!path) {
+    return fallback;
+  }
+
+  // Normalize erroneous /storage/images/ paths (e.g. from legacy seeds or resource serializers)
+  if (typeof path === 'string' && path.includes('/storage/images/')) {
+    path = path.replace('/storage/images/', '/images/');
+  }
+
+  // Check if it is an absolute URL pointing to static frontend /images/
+  if (typeof path === 'string') {
+    const staticImgMatch = path.match(/^(?:https?:)?\/\/[^/]+(\/images\/[^?#]*)([?#].*)?$/i);
+    if (staticImgMatch) {
+      return resolveStaticAssetUrl(staticImgMatch[1] + (staticImgMatch[2] || ''));
+    }
+  }
+
+  // Keep backend media on the current API origin. This handles API responses
+  // generated from APP_URL when the frontend is opened on another local host or subfolder.
+  if (/^(https?:|\/\/|data:)/i.test(path)) {
+    if (!/^data:/i.test(path)) {
+      const backendMedia = path.match(
+        /^(?:https?:)?\/\/[^/]+.*?(\/(?:storage|api\/v1\/private-media)\/[^?#]*)([?#].*)?$/i
+      );
+      if (backendMedia) {
+        return `${API_ROOT}${backendMedia[1]}${backendMedia[2] || ''}`;
+      }
+    }
+    return path;
+  }
+
+  // Handle private media relative paths
+  if (typeof path === 'string' && (path.startsWith('/api/v1/private-media/') || path.startsWith('api/v1/private-media/'))) {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_ROOT}${cleanPath}`;
+  }
+
+  // If already starts with /images/ or images/ (static frontend asset in public/images)
+  if (path.startsWith('/images/') || path.startsWith('images/')) {
+    return resolveStaticAssetUrl(path);
+  }
+
+  // If already starts with /storage/ or storage/
+  if (path.startsWith('/storage/')) {
+    return `${API_ROOT}${path}`;
+  }
+  if (path.startsWith('storage/')) {
+    return `${API_ROOT}/${path}`;
+  }
+
+  const cleanPath = path.replace(/^\/+/, '');
+  return `${STORAGE_BASE_URL}/${cleanPath}`;
+}
+
+/**
+ * Resolves a thumbnail variant URL for grid cards and previews.
+ * Attempts to load thumb_{basename}.webp if path is a storage upload, falling back to full image.
+ */
+export function getThumbnailUrl(path, fallback = '') {
+  if (!path) return fallback;
+  const fullUrl = getStorageUrl(path, fallback);
+
+  // Do not rewrite signed private media URLs into thumbnails by changing the filename in the path,
+  // because altering the signed path will invalidate the cryptographic HMAC signature.
+  if (typeof fullUrl === 'string' && fullUrl.includes('/api/v1/private-media/')) {
+    return fullUrl;
+  }
+
+  if (typeof path === 'string' && path.includes('.webp') && !path.includes('thumb_')) {
+    const [baseUrl, query] = fullUrl.split('?');
+    const parts = baseUrl.split('/');
+    const filename = parts.pop();
+    parts.push(`thumb_${filename}`);
+    const thumbBase = parts.join('/');
+    return query ? `${thumbBase}?${query}` : thumbBase;
+  }
+  return fullUrl;
+}

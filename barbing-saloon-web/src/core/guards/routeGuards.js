@@ -1,0 +1,60 @@
+import { useAuthStore } from '../../modules/auth/store/auth.store';
+import { syncThemeForRoute } from '../composables/useTheme';
+
+function matchesRole(routeRoles, userRole) {
+  if (!routeRoles || routeRoles.length === 0) {
+    return true;
+  }
+
+  if (userRole === 'super_admin' && (routeRoles.includes('admin') || routeRoles.includes('super_admin'))) {
+    return true;
+  }
+
+  return routeRoles.includes(userRole);
+}
+
+export function registerRouteGuards(router) {
+  router.beforeEach(async (to) => {
+    syncThemeForRoute(to);
+    const auth = useAuthStore();
+    const routeRoles = to.meta.roles || [];
+    const requiresAuth = Boolean(to.meta.requiresAuth);
+    const isPublic = Boolean(to.meta.public);
+
+    // Public routes mount immediately without waiting for auth resolution
+    if (isPublic) {
+      return true;
+    }
+
+    if (requiresAuth) {
+      // Resolve the saved session before deciding whether to redirect to login.
+      if (auth.status === 'booting') {
+        await auth.bootstrap();
+      }
+
+      if (!auth.isAuthenticated) {
+        auth.setIntendedRoute(to.fullPath);
+        if (to.path.startsWith('/superadmin')) {
+          return '/superadmin/login';
+        }
+        if (routeRoles.includes('admin') || routeRoles.includes('super_admin')) {
+          return '/admin/login';
+        }
+        if (routeRoles.includes('barber')) {
+          return '/barber/login';
+        }
+        return '/customer/login';
+      }
+    }
+
+    if (routeRoles.length > 0) {
+      const currentRole = auth.user?.role?.value ?? auth.user?.role;
+
+      if (!matchesRole(routeRoles, currentRole)) {
+        return '/403';
+      }
+    }
+
+    return true;
+  });
+}

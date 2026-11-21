@@ -1,0 +1,452 @@
+<template>
+  <Teleport to="body">
+    <Transition name="fade">
+      <div
+        v-if="isOpen"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 select-none"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="title"
+        @keydown.esc="isProcessing ? null : (isResolved ? closeImmediately() : cancel())"
+      >
+        <!-- Backdrop with obsidian blur -->
+        <div
+          class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+          @click="isProcessing ? null : (isResolved ? closeImmediately() : cancel())"
+        ></div>
+
+        <!-- Modal Panel -->
+        <Transition name="scale">
+          <div
+            v-if="isOpen"
+            class="relative w-full max-w-[390px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#141418] p-6 text-center shadow-2xl shadow-slate-900/10 dark:shadow-black/80 transition-all max-sm:fixed max-sm:bottom-0 max-sm:inset-x-0 max-sm:rounded-b-none max-sm:rounded-t-[28px] max-sm:pb-safe"
+            @click.stop
+          >
+            <!-- iOS Mobile Grabber Handle -->
+            <div class="sm:hidden w-9 h-1 bg-theme-muted/30 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
+
+            <!-- Top luminous accent rim -->
+            <div
+              class="absolute top-0 left-1/4 right-1/4 h-[2px] rounded-full blur-[0.5px] transition-all duration-300"
+              :class="isResolved ? resTheme.topRim : theme.topRim"
+            ></div>
+
+            <!-- ===================== STATE 3: RESOLVED FEEDBACK ===================== -->
+            <div v-if="isResolved" class="py-2 animate-scale-pop">
+              <!-- Ambient Glow Halo & Animated Resolution Icon Badge -->
+              <div class="mx-auto mb-4 flex items-center justify-center">
+                <div
+                  class="flex h-16 w-16 items-center justify-center rounded-2xl border transition-all duration-300"
+                  :class="[resTheme.haloBg, resTheme.ringBorder]"
+                >
+                  <!-- Deleted / Cancelled Animated Trash Icon -->
+                  <svg
+                    v-if="resolutionType === 'deleted' || resolutionType === 'cancelled'"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2.2"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-red-400 animate-trash-wobble"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                    />
+                  </svg>
+
+                  <!-- Saved / Confirmed Animated Checkmark Icon -->
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2.4"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-emerald-400"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="animate-checkmark"
+                      d="M4.5 12.75l6 6 9-13.5"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Title & Message -->
+              <h3 class="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+                {{ resTheme.title }}
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-gray-400 leading-relaxed mb-4 px-2">
+                {{ resTheme.message }}
+              </p>
+
+              <!-- Resolution Badge Indicator -->
+              <div class="flex justify-center">
+                <span
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wider border shadow-sm"
+                  :class="resTheme.badgeBg"
+                >
+                  {{ resTheme.badgeText }}
+                </span>
+              </div>
+            </div>
+
+            <!-- ===================== STATE 1 & 2: PROMPT & EXECUTING ===================== -->
+            <div v-else>
+              <!-- Ambient Glow Halo & Icon Badge -->
+              <div class="mx-auto mb-4 flex items-center justify-center">
+                <div
+                  class="flex h-16 w-16 items-center justify-center rounded-2xl border transition-transform duration-300 hover:scale-105"
+                  :class="[theme.haloBg, theme.ringBorder]"
+                >
+                  <!-- Danger Icon -->
+                  <svg
+                    v-if="variant === 'danger'"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-red-400"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    />
+                  </svg>
+
+                  <!-- Warning Icon -->
+                  <svg
+                    v-else-if="variant === 'warning'"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-amber-400"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                    />
+                  </svg>
+
+                  <!-- Info Icon -->
+                  <svg
+                    v-else-if="variant === 'info'"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-blue-400"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                    />
+                  </svg>
+
+                  <!-- Primary / Action Icon -->
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-8 w-8 text-amber-300"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Title & Message -->
+              <h3 class="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+                {{ title }}
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-gray-400 leading-relaxed mb-6 px-2">
+                {{ message }}
+              </p>
+
+              <!-- Action Buttons -->
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-gray-300 transition-all hover:bg-slate-200 dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-white/20 disabled:opacity-50"
+                  :disabled="isProcessing"
+                  @click="cancel"
+                >
+                  {{ cancelButtonText }}
+                </button>
+                <button
+                  type="button"
+                  class="w-full rounded-xl px-4 py-2.5 text-sm font-bold shadow-lg transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#141418] disabled:opacity-50 flex items-center justify-center gap-2"
+                  :class="theme.confirmBtn"
+                  :disabled="isProcessing"
+                  @click="agree"
+                >
+                  <svg
+                    v-if="isProcessing"
+                    class="animate-spin h-4 w-4 text-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>{{ confirmButtonText }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<script setup>
+import { computed, onMounted, onUnmounted } from 'vue';
+import { useConfirm } from '../composables/useConfirm';
+
+const {
+  isOpen,
+  title,
+  message,
+  confirmButtonText,
+  cancelButtonText,
+  variant,
+  isResolved,
+  isProcessing,
+  resolutionType,
+  resolutionTitle,
+  resolutionMessage,
+  resolutionBadgeText,
+  agree,
+  cancel,
+  closeImmediately,
+} = useConfirm();
+
+const theme = computed(() => {
+  switch (variant.value) {
+    case 'danger':
+      return {
+        topRim: 'bg-red-500/60 shadow-[0_0_12px_rgba(239,68,68,0.5)]',
+        haloBg: 'bg-red-500/10 shadow-[0_0_24px_rgba(239,68,68,0.15)]',
+        ringBorder: 'border-red-500/30',
+        confirmBtn:
+          'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-red-500/25 hover:from-red-500 hover:to-red-400 focus:ring-red-500',
+      };
+    case 'warning':
+      return {
+        topRim: 'bg-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.5)]',
+        haloBg: 'bg-amber-500/10 shadow-[0_0_24px_rgba(245,158,11,0.15)]',
+        ringBorder: 'border-amber-500/30',
+        confirmBtn:
+          'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-amber-500/25 hover:from-amber-500 hover:to-amber-400 focus:ring-amber-500',
+      };
+    case 'info':
+      return {
+        topRim: 'bg-blue-500/60 shadow-[0_0_12px_rgba(59,130,246,0.5)]',
+        haloBg: 'bg-blue-500/10 shadow-[0_0_24px_rgba(59,130,246,0.15)]',
+        ringBorder: 'border-blue-500/30',
+        confirmBtn:
+          'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-500/25 hover:from-blue-500 hover:to-blue-400 focus:ring-blue-500',
+      };
+    case 'primary':
+    default:
+      return {
+        topRim: 'bg-[#E5BA73]/70 shadow-[0_0_12px_rgba(229,186,115,0.5)]',
+        haloBg: 'bg-[#E5BA73]/10 shadow-[0_0_24px_rgba(212,175,55,0.15)]',
+        ringBorder: 'border-[#E5BA73]/30',
+        confirmBtn:
+          'bg-gradient-to-r from-[#FDE68A] via-[#E5BA73] to-[#D4AF37] text-black shadow-[#D4AF37]/25 hover:brightness-105 focus:ring-[#D4AF37]',
+      };
+  }
+});
+
+const resTheme = computed(() => {
+  switch (resolutionType.value) {
+    case 'deleted':
+      return {
+        topRim: 'bg-red-500/70 shadow-[0_0_16px_rgba(239,68,68,0.6)]',
+        haloBg: 'bg-red-500/15 shadow-[0_0_30px_rgba(239,68,68,0.25)]',
+        ringBorder: 'border-red-500/40',
+        badgeBg: 'bg-red-500/15 border-red-500/30 text-red-400',
+        badgeText: resolutionBadgeText.value || 'DELETED',
+        title: resolutionTitle.value || 'Deleted Successfully',
+        message: resolutionMessage.value || 'The item has been permanently removed.',
+      };
+    case 'cancelled':
+      return {
+        topRim: 'bg-red-500/70 shadow-[0_0_16px_rgba(239,68,68,0.6)]',
+        haloBg: 'bg-red-500/15 shadow-[0_0_30px_rgba(239,68,68,0.25)]',
+        ringBorder: 'border-red-500/40',
+        badgeBg: 'bg-red-500/15 border-red-500/30 text-red-400',
+        badgeText: resolutionBadgeText.value || 'CANCELLED',
+        title: resolutionTitle.value || 'Appointment Cancelled',
+        message: resolutionMessage.value || 'The slot has been freed and schedule updated.',
+      };
+    case 'confirmed':
+      return {
+        topRim: 'bg-[#E5BA73]/80 shadow-[0_0_16px_rgba(229,186,115,0.6)]',
+        haloBg: 'bg-[#E5BA73]/15 shadow-[0_0_30px_rgba(212,175,55,0.25)]',
+        ringBorder: 'border-[#E5BA73]/40',
+        badgeBg: 'bg-[#E5BA73]/15 border-[#E5BA73]/30 text-[#E5BA73]',
+        badgeText: resolutionBadgeText.value || 'CONFIRMED',
+        title: resolutionTitle.value || 'Appointment Confirmed',
+        message: resolutionMessage.value || 'Notifications dispatched and client scheduled.',
+      };
+    case 'saved':
+    default:
+      return {
+        topRim: 'bg-emerald-500/70 shadow-[0_0_16px_rgba(34,197,94,0.6)]',
+        haloBg: 'bg-emerald-500/15 shadow-[0_0_30px_rgba(34,197,94,0.25)]',
+        ringBorder: 'border-emerald-500/40',
+        badgeBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+        badgeText: resolutionBadgeText.value || 'SAVED',
+        title: resolutionTitle.value || 'Saved Successfully',
+        message: resolutionMessage.value || 'Your changes have been saved.',
+      };
+  }
+});
+
+const handleKeyDown = (e) => {
+  if (!isOpen.value || isProcessing.value) return;
+  if (e.key === 'Escape') {
+    if (isResolved.value) {
+      closeImmediately();
+    } else {
+      cancel();
+    }
+  } else if (e.key === 'Enter') {
+    if (isResolved.value) {
+      closeImmediately();
+    } else {
+      agree();
+    }
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+</script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.scale-enter-active {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scale-leave-active {
+  transition: all 0.18s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.scale-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+}
+
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(4px);
+}
+
+@keyframes scale-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-pop {
+  animation: scale-pop 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes trash-wobble {
+  0% {
+    transform: rotate(0deg) scale(0.7);
+    opacity: 0;
+  }
+  30% {
+    transform: rotate(-12deg) scale(1.15);
+  }
+  60% {
+    transform: rotate(10deg) scale(1.02);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-trash-wobble {
+  animation: trash-wobble 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 40;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-checkmark {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: checkmark-draw 0.45s ease-out 0.05s forwards;
+}
+</style>

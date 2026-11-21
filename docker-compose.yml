@@ -1,0 +1,238 @@
+# ==============================================================================
+# Candycutz — Turnkey Single-VPS Production Docker Compose Topology
+# Orchestrates Nginx, Laravel 12 (PHP-FPM 8.5), Queue Worker, Scheduler,
+# MySQL 8.0, and Redis 7.2 over the internal bridge network candycutz-net.
+# ==============================================================================
+
+services:
+  # ──────────────────────────────────────────────────────────────────────────
+  # 1. Nginx Reverse Proxy & Static Web Asset Server (Sole Public Ingress)
+  # ──────────────────────────────────────────────────────────────────────────
+  nginx:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/nginx/Dockerfile
+    container_name: candycutz-nginx
+    restart: unless-stopped
+    ports:
+      # Bind plaintext HTTP to loopback; a host-level TLS proxy must serve public traffic.
+      - "127.0.0.1:${HTTP_PORT:-8000}:80"
+    volumes:
+      - ./infrastructure/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./barbing-saloon-web/dist:/var/www/web/dist:ro
+      - app-storage:/var/www/html/storage:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health-nginx || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 2. Application Server: Laravel 12 (PHP-FPM 8.5 with OPcache)
+  # ──────────────────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/php/Dockerfile
+    container_name: candycutz-app
+    restart: unless-stopped
+    command: >
+      sh -c "php artisan migrate --force && exec php-fpm"
+    volumes:
+      - app-storage:/var/www/html/storage
+      - ./barbing-saloon-api:/var/www/html
+    environment:
+      APP_NAME: "${APP_NAME:-CandyCutz Luxury Grooming}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_KEY: "${APP_KEY:-}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-https://candycutz.com}"
+      DB_CONNECTION: mysql
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
+      DB_USERNAME: "${DB_USERNAME:-candycutz}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SANCTUM_STATEFUL_DOMAINS: "${SANCTUM_STATEFUL_DOMAINS:-candycutz.com,admin.candycutz.com,localhost}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php -r \"exit(extension_loaded('pdo_mysql') && is_dir('vendor') ? 0 : 1);\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 3. Asynchronous Queue Worker (Emails, Reminders, Push Notifications)
+  # ──────────────────────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/php/Dockerfile
+    container_name: candycutz-worker
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work", "redis", "--queue=default,emails,push", "--tries=3", "--timeout=90"]
+    volumes:
+      - app-storage:/var/www/html/storage
+      - ./barbing-saloon-api:/var/www/html
+    environment:
+      APP_NAME: "${APP_NAME:-CandyCutz Luxury Grooming}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_KEY: "${APP_KEY:-}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-https://candycutz.com}"
+      DB_CONNECTION: mysql
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
+      DB_USERNAME: "${DB_USERNAME:-candycutz}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      app:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 4. Background Task Scheduler (Appointment Reminders, Auto-Cancellations)
+  # ──────────────────────────────────────────────────────────────────────────
+  scheduler:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/php/Dockerfile
+    container_name: candycutz-scheduler
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    volumes:
+      - app-storage:/var/www/html/storage
+      - ./barbing-saloon-api:/var/www/html
+    environment:
+      APP_NAME: "${APP_NAME:-CandyCutz Luxury Grooming}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_KEY: "${APP_KEY:-}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-https://candycutz.com}"
+      DB_CONNECTION: mysql
+      DB_HOST: "${DB_HOST:-host.docker.internal}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_DATABASE: "${DB_DATABASE:-candycutz_db}"
+      DB_USERNAME: "${DB_USERNAME:-candycutz}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 5. Primary Transactional Database (Optional Containerized MySQL)
+  # Activated only via --profile container-db. Default is host XAMPP MySQL.
+  # ──────────────────────────────────────────────────────────────────────────
+  db:
+    profiles: ["container-db"]
+    image: mysql:8.0
+    container_name: candycutz-db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-secret}"
+      MYSQL_DATABASE: "${DB_DATABASE:-candycutz_db}"
+      MYSQL_USER: "${DB_USERNAME:-candycutz}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./infrastructure/docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD:-secret} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 6. In-Memory Store: Redis 7.2 (Cache, Sessions & Queue Messages)
+  # ──────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: candycutz-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - candycutz-net
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 7. Web Frontend Development Server (Vue 3 / Vite with HMR on port 5173)
+  # ──────────────────────────────────────────────────────────────────────────
+  web:
+    build:
+      context: ./barbing-saloon-web
+      dockerfile: Dockerfile
+    image: candycutz-web:latest
+    container_name: candycutz-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./barbing-saloon-web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=/api
+      - BACKEND_URL=http://nginx:80
+    depends_on:
+      nginx:
+        condition: service_healthy
+    networks:
+      - candycutz-net
+
+volumes:
+  db-data:
+    driver: local
+  redis-data:
+    driver: local
+  app-storage:
+    driver: local
+
+networks:
+  candycutz-net:
+    driver: bridge

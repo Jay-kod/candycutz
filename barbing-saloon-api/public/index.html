@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" data-theme="light" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAF9F6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CandyCutz" />
+    <link rel="apple-touch-icon" href="/images/logo-icon.png" />
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('theme') || localStorage.getItem('vueuse-color-scheme');
+          var root = document.documentElement;
+          var isDark = false;
+
+          if (stored === 'dark') {
+            isDark = true;
+          } else if (stored === 'light') {
+            isDark = false;
+          } else {
+            // Default of the website is light mode
+            isDark = false;
+          }
+
+          if (isDark) {
+            root.setAttribute('data-theme', 'dark');
+            root.classList.add('dark');
+            root.classList.remove('light');
+          } else {
+            root.setAttribute('data-theme', 'light');
+            root.classList.add('light');
+            root.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+    <title>CandyCutz</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <script type="module" crossorigin src="/assets/index-BVTA235R.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-vue-B7_Gk-Q8.js">
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-CNOWq4Kh.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-utils-BM_tu4vD.js">
+    <link rel="modulepreload" crossorigin href="/assets/client-Cjpk5FKN.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DZgZc5Px.css">
+  </head>
+  <body class="min-h-screen">
+    <div id="app"></div>
+  </body>
+</html>

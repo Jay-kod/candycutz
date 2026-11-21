@@ -1,0 +1,182 @@
+<?php
+
+use App\Http\Controllers\Api\V1\Admin\AnimationApiController;
+use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
+use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
+use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
+use App\Http\Controllers\Api\V1\AdminApiController;
+use App\Http\Controllers\Api\V1\AdminPaymentApiController;
+use App\Http\Controllers\Api\V1\AppointmentApiController;
+use App\Http\Controllers\Api\V1\BarberApiController;
+use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\FeatureFlagApiController;
+use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
+use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\GateApiController;
+use App\Http\Controllers\Api\V1\NotificationApiController;
+use App\Http\Controllers\Api\V1\SuperAdminApiController;
+use App\Http\Controllers\Api\V1\TestimonialApiController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminApiController::class, 'dashboard']);
+    Route::get('/admin/gate/metrics', [GateApiController::class, 'metrics']);
+    Route::get('/admin/gate/logs', [GateApiController::class, 'logs']);
+    Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
+    Route::get('/admin/settings', [AdminApiController::class, 'settings']);
+    Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
+    Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
+    Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
+    Route::get('/admin/paystack/settings', [AdminApiController::class, 'getPaystackSettings']);
+    Route::post('/admin/paystack/settings', [AdminApiController::class, 'updatePaystackSettings']);
+    Route::post('/admin/paystack/test-connection', [AdminApiController::class, 'testPaystackConnection']);
+    Route::get('/admin/animations', [AnimationApiController::class, 'index']);
+    Route::post('/admin/animations', [AnimationApiController::class, 'update']);
+    Route::post('/admin/animations/reset', [AnimationApiController::class, 'reset']);
+    Route::post('/admin/test-email', [AdminApiController::class, 'testEmail']);
+    Route::get('/admin/logs', [AdminApiController::class, 'logs']);
+    Route::get('/admin/verifications/stats', [AdminApiController::class, 'verificationStats']);
+    Route::get('/admin/verifications', [AdminApiController::class, 'verifications']);
+    Route::patch('/admin/verifications/{id}/verify', [AdminApiController::class, 'verifyAppointment']);
+    Route::get('/admin/reports', [AdminApiController::class, 'reports']);
+    Route::get('/admin/reports/history', [AdminApiController::class, 'reportHistory']);
+    Route::post('/admin/reports/log', [AdminApiController::class, 'logReportExport']);
+    Route::get('/admin/feedback', [FeedbackSubmissionApiController::class, 'index']);
+    Route::patch('/admin/feedback/{submission}', [FeedbackSubmissionApiController::class, 'update'])->whereNumber('submission');
+    Route::get('/admin/analytics', [AdminApiController::class, 'analytics']);
+    Route::get('/admin/customers', [AdminApiController::class, 'customers']);
+    Route::post('/admin/customers', [AdminApiController::class, 'storeCustomer']);
+    Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile'])->whereNumber('id');
+    Route::match(['put', 'patch'], '/admin/customers/{id}', [AdminApiController::class, 'updateCustomer'])->whereNumber('id');
+    Route::patch('/admin/customers/{id}/status', [AdminApiController::class, 'updateCustomerStatus'])->whereNumber('id');
+    Route::post('/admin/customers/{id}/reset-password', [AdminApiController::class, 'resetCustomerPassword'])->whereNumber('id');
+    Route::delete('/admin/customers/{id}', [AdminApiController::class, 'deleteCustomer'])->whereNumber('id');
+    Route::get('/admin/working-hours', [AdminApiController::class, 'workingHours']);
+    Route::put('/admin/working-hours/{barberId}', [AdminApiController::class, 'updateBarberWorkingHours']);
+    Route::post('/admin/working-hours', [AdminApiController::class, 'storeWorkingHour']);
+    Route::match(['put', 'patch'], '/admin/working-hours/{workingHour}', [AdminApiController::class, 'updateWorkingHour']);
+    Route::delete('/admin/working-hours/{workingHour}', [AdminApiController::class, 'deleteWorkingHour']);
+    Route::get('/admin/holidays', [AdminApiController::class, 'holidays']);
+    Route::post('/admin/holidays', [AdminApiController::class, 'storeHoliday']);
+    Route::match(['put', 'patch'], '/admin/holidays/{holiday}', [AdminApiController::class, 'updateHoliday']);
+    Route::delete('/admin/holidays/{holiday}', [AdminApiController::class, 'deleteHoliday']);
+
+    // Admin Appointments Management
+    Route::get('/admin/appointments', [AppointmentApiController::class, 'index']);
+    Route::post('/admin/appointments', [AppointmentApiController::class, 'store']);
+    Route::post('/admin/appointments/walk-in', [AppointmentApiController::class, 'storeWalkIn']);
+    Route::get('/admin/appointments/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
+    Route::match(['post', 'patch'], '/admin/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::patch('/admin/appointments/{id}/status', [AppointmentApiController::class, 'updateStatus'])->whereNumber('id');
+    Route::patch('/admin/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
+    Route::patch('/admin/appointments/{id}/force-approve', [AppointmentApiController::class, 'forceApprove'])->whereNumber('id');
+
+    // Admin Barber Management
+    Route::get('/admin/barbers', [BarberApiController::class, 'index']);
+    Route::post('/admin/barbers', [BarberApiController::class, 'store']);
+    Route::get('/admin/barbers/{id}', [BarberApiController::class, 'show'])->whereNumber('id');
+    Route::put('/admin/barbers/{id}', [BarberApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/admin/barbers/{id}/status', [BarberApiController::class, 'updateStatus'])->whereNumber('id');
+    Route::delete('/admin/barbers/{id}', [BarberApiController::class, 'destroy'])->whereNumber('id');
+
+    // Admin Gallery Management
+    Route::get('/admin/gallery', [GalleryApiController::class, 'index']);
+    Route::post('/admin/gallery', [GalleryApiController::class, 'store']);
+    Route::match(['post', 'put'], '/admin/gallery/{id}', [GalleryApiController::class, 'update'])->whereNumber('id');
+    Route::delete('/admin/gallery/{id}', [GalleryApiController::class, 'destroy'])->whereNumber('id');
+
+    // Admin Testimonials Management
+    Route::get('/admin/testimonials', [TestimonialApiController::class, 'adminIndex']);
+    Route::match(['post', 'put'], '/admin/testimonials/{id}', [TestimonialApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/admin/testimonials/{id}/approve', [TestimonialApiController::class, 'approve'])->whereNumber('id');
+    Route::patch('/admin/testimonials/{id}/feature', [TestimonialApiController::class, 'feature'])->whereNumber('id');
+    Route::delete('/admin/testimonials/{id}', [TestimonialApiController::class, 'destroy'])->whereNumber('id');
+
+    // Admin Blog Management
+    Route::get('/admin/blog', [BlogApiController::class, 'index']);
+    Route::post('/admin/blog', [BlogApiController::class, 'store']);
+    Route::match(['post', 'put'], '/admin/blog/{id}', [BlogApiController::class, 'update'])->whereNumber('id');
+    Route::delete('/admin/blog/{id}', [BlogApiController::class, 'destroy'])->whereNumber('id');
+
+    // Admin Mobile App Management & Telemetry
+    Route::get('/admin/app/overview', [AppManagementApiController::class, 'overview']);
+    Route::get('/admin/app/versions', [AppManagementApiController::class, 'versions']);
+    Route::post('/admin/app/versions', [AppManagementApiController::class, 'storeVersion']);
+    Route::get('/admin/app/sessions', [AppManagementApiController::class, 'sessions']);
+    Route::delete('/admin/app/sessions/{id}', [AppManagementApiController::class, 'revokeSession'])->whereNumber('id');
+    Route::delete('/admin/app/sessions/user/{userId}', [AppManagementApiController::class, 'revokeUserSessions'])->whereNumber('userId');
+    Route::get('/admin/app/push-health', [AppManagementApiController::class, 'pushHealth']);
+    Route::post('/admin/app/push-test', [AppManagementApiController::class, 'pushTest']);
+    Route::get('/admin/app/crashes', [AppManagementApiController::class, 'crashes']);
+    Route::patch('/admin/app/crashes/{id}/resolve', [AppManagementApiController::class, 'resolveCrash'])->whereNumber('id');
+    Route::post('/admin/app/maintenance', [AppManagementApiController::class, 'toggleMaintenance']);
+
+    // Admin Feature Flags Management
+    Route::get('/admin/feature-flags', [FeatureFlagApiController::class, 'index']);
+    Route::post('/admin/feature-flags', [FeatureFlagApiController::class, 'store']);
+    Route::put('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/admin/feature-flags/{id}/toggle', [FeatureFlagApiController::class, 'toggle'])->whereNumber('id');
+    Route::delete('/admin/feature-flags/{id}', [FeatureFlagApiController::class, 'destroy'])->whereNumber('id');
+
+    // System Health, Diagnostics & Observability
+    Route::get('/admin/system/overview', [SystemHealthApiController::class, 'overview']);
+    Route::get('/admin/system/health/detail', [SystemHealthApiController::class, 'healthDetail']);
+    Route::post('/admin/system/health/test', [SystemHealthApiController::class, 'runSelfTest']);
+    Route::get('/admin/system/errors', [SystemHealthApiController::class, 'errors']);
+    Route::get('/admin/system/errors/{id}', [SystemHealthApiController::class, 'showError'])->whereNumber('id');
+    Route::patch('/admin/system/errors/{id}', [SystemHealthApiController::class, 'updateError'])->whereNumber('id');
+    Route::get('/admin/system/trace/{requestId}', [SystemHealthApiController::class, 'trace']);
+
+    // System Backups & Recovery
+    Route::get('/admin/system/backups', [SystemBackupApiController::class, 'index']);
+    Route::post('/admin/system/backups', [SystemBackupApiController::class, 'create']);
+    Route::post('/admin/system/backups/restore', [SystemBackupApiController::class, 'restore']);
+    Route::post('/admin/system/backups/upload', [SystemBackupApiController::class, 'upload']);
+    Route::get('/admin/system/backups/{filename}/download', [SystemBackupApiController::class, 'download']);
+    Route::delete('/admin/system/backups/{filename}', [SystemBackupApiController::class, 'destroy']);
+
+    // Admin Payments & Webhook Events
+    Route::get('/admin/payments', [AdminPaymentApiController::class, 'index']);
+    Route::get('/admin/payments/{id}', [AdminPaymentApiController::class, 'show'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/verify', [AdminPaymentApiController::class, 'verifyPayment'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reassign-barber', [AdminPaymentApiController::class, 'reassignBarber'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reject', [AdminPaymentApiController::class, 'rejectPayment'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/reverify', [AdminPaymentApiController::class, 'reverify'])->whereNumber('id');
+    Route::post('/admin/payments/{id}/refund', [AdminPaymentApiController::class, 'refund'])->whereNumber('id');
+    Route::get('/admin/webhook-events', [AdminPaymentApiController::class, 'webhookEvents']);
+    Route::post('/admin/webhook-events/{id}/replay', [AdminPaymentApiController::class, 'replayWebhookEvent'])->whereNumber('id');
+
+    // Admin Notifications & Delivery Tracking
+    Route::get('/admin/notifications/deliveries', [NotificationApiController::class, 'adminDeliveries']);
+    Route::get('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminBroadcasts']);
+    Route::post('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminStoreBroadcast']);
+    Route::get('/admin/notifications/analytics', [NotificationApiController::class, 'adminAnalytics']);
+});
+
+Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {
+    // With hyphen
+    Route::get('/super-admin/dashboard', [SuperAdminApiController::class, 'dashboard']);
+    Route::get('/super-admin/users', [SuperAdminApiController::class, 'users']);
+    Route::post('/super-admin/users', [SuperAdminApiController::class, 'storeUser']);
+    Route::patch('/super-admin/users/{user}', [SuperAdminApiController::class, 'updateUser']);
+    Route::patch('/super-admin/users/{user}/activate', [SuperAdminApiController::class, 'activateUser']);
+    Route::patch('/super-admin/users/{user}/deactivate', [SuperAdminApiController::class, 'deactivateUser']);
+    Route::post('/super-admin/users/{user}/reset-password', [SuperAdminApiController::class, 'resetPassword']);
+    Route::delete('/super-admin/users/{user}', [SuperAdminApiController::class, 'deleteUser']);
+    Route::get('/super-admin/settings', [SuperAdminApiController::class, 'settings']);
+    Route::post('/super-admin/settings', [SuperAdminApiController::class, 'updateSettings']);
+    Route::get('/super-admin/audit-logs', [SuperAdminApiController::class, 'auditLogs']);
+
+    // Without hyphen (direct match for /superadmin/* routes)
+    Route::get('/superadmin/dashboard', [SuperAdminApiController::class, 'dashboard']);
+    Route::get('/superadmin/users', [SuperAdminApiController::class, 'users']);
+    Route::post('/superadmin/users', [SuperAdminApiController::class, 'storeUser']);
+    Route::patch('/superadmin/users/{user}', [SuperAdminApiController::class, 'updateUser']);
+    Route::patch('/superadmin/users/{user}/activate', [SuperAdminApiController::class, 'activateUser']);
+    Route::patch('/superadmin/users/{user}/deactivate', [SuperAdminApiController::class, 'deactivateUser']);
+    Route::post('/superadmin/users/{user}/reset-password', [SuperAdminApiController::class, 'resetPassword']);
+    Route::delete('/superadmin/users/{user}', [SuperAdminApiController::class, 'deleteUser']);
+    Route::get('/superadmin/settings', [SuperAdminApiController::class, 'settings']);
+    Route::post('/superadmin/settings', [SuperAdminApiController::class, 'updateSettings']);
+    Route::get('/superadmin/audit-logs', [SuperAdminApiController::class, 'auditLogs']);
+});
