@@ -22,6 +22,7 @@ class GetAuditLogs
                     'audit_logs.module',
                     'audit_logs.target_type',
                     'audit_logs.target_id',
+                    'audit_logs.target_id as entity_id',
                     'audit_logs.user_role',
                     'audit_logs.old_value',
                     'audit_logs.new_value',
