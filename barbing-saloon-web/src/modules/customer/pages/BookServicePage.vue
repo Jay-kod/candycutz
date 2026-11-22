@@ -19,6 +19,23 @@
       <!-- Active Draft Reservation Alert -->
       <DraftBookingBanner />
 
+      <!-- Restored Session Notification Banner -->
+      <transition name="fade-slide">
+        <div v-if="isHydrated" class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs sm:text-sm mb-6 shadow-md">
+          <div class="flex items-center gap-2.5">
+            <SparklesIcon class="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Restored your saved booking selections from your session.</span>
+          </div>
+          <button
+            type="button"
+            @click="clearBookingSession(); isHydrated = false"
+            class="text-xs text-white/50 hover:text-white font-medium underline cursor-pointer ml-3 shrink-0"
+          >
+            Clear
+          </button>
+        </div>
+      </transition>
+
       <!-- Loading State -->
       <div v-if="loadingService" class="flex justify-center py-20">
         <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-accent)] border-t-transparent shadow-[0_0_15px_rgba(255,153,0,0.5)]"></div>
@@ -141,12 +158,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { formatNairaAmount } from '@/core/utils'
 import { useRoute, useRouter } from 'vue-router'
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
 import client from '@/shared/api/client'
 import { useToast } from '../../../core/composables/useToast'
+import { useBookingSessionHydration } from '../composables/useBookingSessionHydration'
+import { useConnectionStatus } from '@/core/composables/useConnectionStatus'
 import BookingBarberSelect from '../components/booking/BookingBarberSelect.vue'
 import BookingTimeSlotPicker from '../components/booking/BookingTimeSlotPicker.vue'
 import BookingSummaryStep from '../components/booking/BookingSummaryStep.vue'
@@ -176,6 +195,16 @@ const loadingService = ref(true)
 const loadingSlots = ref(false)
 const isSubmitting = ref(false)
 const isRefreshing = ref(false)
+
+const { isHydrated, hydrate, clear: clearBookingSession } = useBookingSessionHydration(serviceId, form)
+const { isRecovered } = useConnectionStatus()
+
+// When connection recovers from a drop, re-check available slots
+watch(isRecovered, (recovered) => {
+  if (recovered && form.barber_id && form.service_id && form.appointment_date) {
+    loadSlots()
+  }
+})
 
 const todayStr = new Date().toISOString().split('T')[0]
 
@@ -224,18 +253,23 @@ async function loadData() {
     
     service.value = foundService
     form.service_id = Number(foundService.id)
+
+    // Hydrate any previously saved in-flight session
+    hydrate()
     
-    // Auto-select preferred barber from active list
-    if (route.query.barber_id && barbers.value.some(b => String(b.id) === String(route.query.barber_id))) {
-      form.barber_id = Number(route.query.barber_id)
-    } else if (foundService.barber_id && barbers.value.some(b => Number(b.id) === Number(foundService.barber_id))) {
-      form.barber_id = Number(foundService.barber_id)
-    } else if (barbers.value.length > 0) {
-      const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0]
-      form.barber_id = Number(preferred.id)
+    // Auto-select preferred barber from active list if not already hydrated
+    if (!form.barber_id) {
+      if (route.query.barber_id && barbers.value.some(b => String(b.id) === String(route.query.barber_id))) {
+        form.barber_id = Number(route.query.barber_id)
+      } else if (foundService.barber_id && barbers.value.some(b => Number(b.id) === Number(foundService.barber_id))) {
+        form.barber_id = Number(foundService.barber_id)
+      } else if (barbers.value.length > 0) {
+        const preferred = barbers.value.find(b => b.id === 4) || barbers.value[0]
+        form.barber_id = Number(preferred.id)
+      }
     }
 
-    // Auto-select initial appointment date (next open business day, skipping past hours & closed Sundays)
+    // Auto-select initial appointment date if not already hydrated
     if (!form.appointment_date) {
       const now = new Date()
       const targetDate = new Date(now)
@@ -320,6 +354,7 @@ async function submit() {
     }
     const data = res.data?.data || res.data || {}
     const apptId = data.id || data.appointment?.id
+    clearBookingSession()
     toast.success('Draft reservation created! Complete payment to confirm your seat.')
     if (apptId) {
       router.push(`/customer/dashboard/payment/${apptId}`)

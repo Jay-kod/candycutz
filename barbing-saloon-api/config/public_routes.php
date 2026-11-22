@@ -70,6 +70,7 @@ return [
         'api/v1/payments/return',
         'api/v1/payments/checkout-data',
         'api/v1/payments/confirm-transfer',
+        'api/v1/payments/receipts/signed/{appointmentId}',
         'pay/return',
 
         // Infrastructure & Web root

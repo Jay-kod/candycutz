@@ -18,7 +18,8 @@ class DatabaseBackupCommand extends Command
      */
     protected $signature = 'db:backup 
                             {--filename= : Custom filename for the backup}
-                            {--directory= : Custom storage directory}';
+                            {--directory= : Custom storage directory}
+                            {--encrypt : Encrypt the backup snapshot at rest using AES-256-CBC}';
 
     /**
      * The console command description.
@@ -35,7 +36,7 @@ class DatabaseBackupCommand extends Command
         $connection = config('database.default');
         $this->info("Initiating database backup for connection [{$connection}]...");
 
-        $dir = $this->option('directory') ?: storage_path('app/backups');
+        $dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) ($this->option('directory') ?: storage_path('app/backups')));
         if (! is_dir($dir)) {
             if (! mkdir($dir, 0755, true) && ! is_dir($dir)) {
                 $this->error("Backup directory could not be created: {$dir}");
@@ -61,14 +62,22 @@ class DatabaseBackupCommand extends Command
 
         $timestamp = date('Y-m-d_His');
         $ext = $connection === 'sqlite' ? 'sqlite' : 'sql';
-        $filename = $this->option('filename') ?: "candycutz_backup_{$timestamp}.{$ext}";
-        if (basename($filename) !== $filename || ! preg_match('/\.(sql|sqlite)$/i', $filename)) {
-            $this->error('Backup filename must be a plain .sql or .sqlite filename.');
+        $shouldEncrypt = (bool) $this->option('encrypt');
+        $defaultFilename = "candycutz_backup_{$timestamp}.{$ext}".($shouldEncrypt ? '.enc' : '');
+        $filename = $this->option('filename') ?: $defaultFilename;
+
+        if (basename($filename) !== $filename || ! preg_match('/\.(sql|sqlite|enc)$/i', $filename)) {
+            $this->error('Backup filename must be a plain .sql, .sqlite, or .enc filename.');
 
             return self::FAILURE;
         }
 
-        $destination = $dir.DIRECTORY_SEPARATOR.$filename;
+        if (str_ends_with(strtolower($filename), '.enc')) {
+            $shouldEncrypt = true;
+        }
+
+        $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $dir.DIRECTORY_SEPARATOR.$filename);
+        $dumpTarget = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $shouldEncrypt ? $destination.'.tmp_dump' : $destination);
 
         try {
             if (file_exists($destination)) {
@@ -82,16 +91,17 @@ class DatabaseBackupCommand extends Command
                 if ($dbPath === ':memory:') {
                     // Memory database snapshot: export to file
                     $pdo = DB::connection('sqlite')->getPdo();
-                    $fileDb = new \PDO("sqlite:{$destination}");
+                    $fileDb = new \PDO("sqlite:{$dumpTarget}");
                     // Export schema and data
                     $this->exportSqliteDatabase($pdo, $fileDb);
+                    unset($fileDb);
                 } else {
                     if (! file_exists($dbPath)) {
                         $this->error("SQLite database file not found at: {$dbPath}");
 
                         return self::FAILURE;
                     }
-                    if (! copy($dbPath, $destination)) {
+                    if (! copy($dbPath, $dumpTarget)) {
                         $this->error("SQLite database copy failed for: {$dbPath}");
 
                         return self::FAILURE;
@@ -127,7 +137,7 @@ class DatabaseBackupCommand extends Command
                     '--events',
                     '--hex-blob',
                     '--default-character-set=utf8mb4',
-                    '--result-file='.$destination,
+                    '--result-file='.$dumpTarget,
                     (string) $database,
                 ]);
                 $process->setTimeout(null);
@@ -143,22 +153,37 @@ class DatabaseBackupCommand extends Command
                 return self::FAILURE;
             }
 
-            if (! file_exists($destination) || filesize($destination) === 0) {
-                $this->error("Backup failed: target file {$destination} is empty or missing.");
+            clearstatcache(true, $dumpTarget);
+            if (! file_exists($dumpTarget) || filesize($dumpTarget) === 0) {
+                $this->error("Backup failed: target file {$dumpTarget} is empty or missing.");
 
                 return self::FAILURE;
             }
+
+            if ($shouldEncrypt) {
+                $encryptionService = app(\App\Domain\Shared\Services\BackupEncryptionService::class);
+                $encryptionService->encryptFile($dumpTarget, $destination);
+                @unlink($dumpTarget);
+            }
+
+            @chmod($destination, 0600);
 
             $sizeKb = round(filesize($destination) / 1024, 2);
             $this->info('Backup successfully generated!');
             $this->line("Path: <comment>{$destination}</comment>");
             $this->line("Size: <comment>{$sizeKb} KB</comment>");
             $this->line("Timestamp: <comment>{$timestamp}</comment>");
+            if ($shouldEncrypt) {
+                $this->line('Encryption: <comment>AES-256-CBC (HMAC-SHA256 authenticated)</comment>');
+            }
 
             return self::SUCCESS;
         } catch (Throwable $e) {
+            if (isset($dumpTarget) && file_exists($dumpTarget)) {
+                @unlink($dumpTarget);
+            }
             if (file_exists($destination)) {
-                unlink($destination);
+                @unlink($destination);
             }
 
             $this->error('Backup encountered an error: '.$e->getMessage());

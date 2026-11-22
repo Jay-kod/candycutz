@@ -35,12 +35,14 @@ barbing-saloon-api/storage/framework/views/*
 barbing-saloon-api/storage/framework/testing/*
 barbing-saloon-api/storage/app/public/*
 barbing-saloon-api/storage/app/backups/*
+barbing-saloon-api/storage/app/receipts/*
 !barbing-saloon-api/storage/framework/cache/.gitkeep
 !barbing-saloon-api/storage/framework/sessions/.gitkeep
 !barbing-saloon-api/storage/framework/views/.gitkeep
 !barbing-saloon-api/storage/framework/testing/.gitkeep
 !barbing-saloon-api/storage/app/public/.gitkeep
 !barbing-saloon-api/storage/app/backups/.gitkeep
+!barbing-saloon-api/storage/app/receipts/.gitkeep
 
 # Local API build output and uploaded user data
 barbing-saloon-api/public/assets/
