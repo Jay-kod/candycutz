@@ -31,6 +31,8 @@ class Setting extends Model
             }
             \Illuminate\Support\Facades\Cache::forget('settings.public');
             \Illuminate\Support\Facades\Cache::forget('settings.all');
+            \Illuminate\Support\Facades\Cache::forget('paystack_gateway_credentials');
+            \Illuminate\Support\Facades\Cache::forget("setting.{$setting->key}");
         });
 
         static::deleted(function (self $setting) {
@@ -39,6 +41,8 @@ class Setting extends Model
             }
             \Illuminate\Support\Facades\Cache::forget('settings.public');
             \Illuminate\Support\Facades\Cache::forget('settings.all');
+            \Illuminate\Support\Facades\Cache::forget('paystack_gateway_credentials');
+            \Illuminate\Support\Facades\Cache::forget("setting.{$setting->key}");
         });
     }
 
@@ -64,7 +68,7 @@ class Setting extends Model
             return 'contact';
         }
 
-        if (str_starts_with($key, 'bank_') || str_starts_with($key, 'manual_transfer_') || in_array($key, ['bank_name', 'account_name', 'account_number'], true)) {
+        if (str_starts_with($key, 'bank_') || str_starts_with($key, 'manual_transfer_') || str_starts_with($key, 'paystack_') || str_starts_with($key, 'payment_') || in_array($key, ['bank_name', 'account_name', 'account_number'], true)) {
             return 'payment';
         }
 

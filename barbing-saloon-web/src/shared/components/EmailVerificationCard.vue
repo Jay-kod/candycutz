@@ -120,6 +120,15 @@
             />
             <button
               type="button"
+              @click="pasteFromClipboard"
+              class="px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-white font-semibold text-xs border border-slate-200 dark:border-white/[0.1] transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
+              title="Paste 6-digit code from clipboard"
+            >
+              <ClipboardDocumentIcon class="w-4 h-4 text-slate-500 dark:text-white/60" />
+              <span class="hidden sm:inline">Paste</span>
+            </button>
+            <button
+              type="button"
               @click="verifyCode"
               :disabled="verifying || verificationCode.length !== 6"
               class="px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all disabled:opacity-40 cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
@@ -164,7 +173,8 @@ import {
   CheckIcon,
   ClockIcon,
   PaperAirplaneIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/vue/24/outline';
 import { client } from '@/shared/api/client';
 import { useAuthStore } from '@/modules/auth/store/auth.store';
@@ -242,6 +252,23 @@ async function sendVerificationCode() {
     toast.error(msg);
   } finally {
     sending.value = false;
+  }
+}
+
+async function pasteFromClipboard() {
+  try {
+    if (navigator?.clipboard?.readText) {
+      const text = await navigator.clipboard.readText();
+      const cleaned = (text || '').trim().replace(/\D/g, '').slice(0, 6);
+      if (cleaned) {
+        verificationCode.value = cleaned;
+        if (cleaned.length === 6 && !verifying.value) {
+          verifyCode();
+        }
+      }
+    }
+  } catch (err) {
+    // Clipboard permission denied or unsupported
   }
 }
 

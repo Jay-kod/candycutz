@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Booking\Actions\CreateBooking;
+use App\Domain\Booking\Actions\CreateDraftBooking;
 use App\Domain\Booking\Actions\CreateWalkInAppointment;
+use App\Domain\Booking\Actions\DiscardDraftBooking;
 use App\Domain\Booking\Actions\GetAppointments;
+use App\Domain\Booking\Actions\ResumeDraftBooking;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
 use App\Domain\Shared\Enums\AppointmentSource;
@@ -188,5 +191,59 @@ class AppointmentApiController
         $this->bookingService->transitionStatus($appointment, AppointmentStatus::confirmed->value, $request->user(), $reason);
 
         return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment force-approved successfully.');
+    }
+
+    public function drafts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $drafts = Appointment::where('customer_id', $user->id)
+            ->where('status', AppointmentStatus::draft->value)
+            ->with(['service.category', 'barber.user', 'serviceZone'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return ApiResponse::success(AppointmentResource::collection($drafts), 'Draft bookings retrieved successfully.');
+    }
+
+    public function storeDraft(StoreAppointmentRequest $request, CreateDraftBooking $action): JsonResponse
+    {
+        $sourceInput = $request->input('source');
+        $source = match ($sourceInput) {
+            'app' => AppointmentSource::app,
+            'walk_in' => AppointmentSource::walk_in,
+            'web' => AppointmentSource::web,
+            default => ($request->header('X-Client-Type') === 'mobile' || $request->hasHeader('X-App-Version'))
+                ? AppointmentSource::app
+                : AppointmentSource::web,
+        };
+
+        $draft = $action->execute(
+            $request->user(),
+            BookingData::fromRequest($request),
+            $source
+        );
+
+        return ApiResponse::success(new AppointmentResource($draft), 'Draft booking created with 15-minute slot hold.', 201);
+    }
+
+    public function resumeDraft(Request $request, int $id, ResumeDraftBooking $action): JsonResponse
+    {
+        $appointment = Appointment::with(['service.category', 'barber.user', 'serviceZone'])->findOrFail($id);
+        $this->authorize('resume', $appointment);
+
+        $resumed = $action->execute($appointment, $request->user());
+
+        return ApiResponse::success(new AppointmentResource($resumed), 'Draft booking resumed. Slot hold renewed for 15 minutes.');
+    }
+
+    public function discardDraft(Request $request, int $id, DiscardDraftBooking $action): JsonResponse
+    {
+        $appointment = Appointment::findOrFail($id);
+        $this->authorize('discard', $appointment);
+
+        $reason = $request->input('reason', 'Discarded by customer');
+        $discarded = $action->execute($appointment, $request->user(), $reason);
+
+        return ApiResponse::success(new AppointmentResource($discarded), 'Draft booking discarded. Slot released immediately.');
     }
 }

@@ -15,6 +15,8 @@ export default [
   { path: '/customer/dashboard/book/:serviceId', name: 'customer-book-service', component: () => import('../../modules/customer/pages/BookServicePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/payment', name: 'customer-payment', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/payment/:appointmentId', name: 'customer-payment-appointment', component: () => import('@/features/payment/pages/PaymentModalPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/payment/callback', name: 'customer-payment-callback', component: () => import('@/features/payment/pages/PaymentCallbackPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/payment/callback', redirect: to => ({ path: '/customer/dashboard/payment/callback', query: to.query }) },
   { path: '/customer/dashboard/wishlist', name: 'customer-wishlist', component: () => import('../../modules/customer/pages/WishlistPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/gallery', name: 'customer-gallery', component: () => import('../../modules/customer/pages/GalleryPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/blog', name: 'customer-blog', component: () => import('../../modules/customer/pages/BlogPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },

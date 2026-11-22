@@ -133,4 +133,32 @@ describe('EmailVerificationCard.vue', () => {
     expect(toastMock.success).toHaveBeenCalledWith('Email address verified successfully.');
     expect(authStore.user.is_email_verified).toBe(true);
   });
+
+  it('renders paste button and populates input from clipboard', async () => {
+    const authStore = useAuthStore();
+    authStore.user = { id: 1, email: 'client@example.com', is_email_verified: false };
+
+    Object.assign(navigator, {
+      clipboard: {
+        readText: vi.fn().mockResolvedValue(' 987654 ')
+      }
+    });
+
+    const wrapper = mount(EmailVerificationCard, {
+      global: { plugins: [pinia] }
+    });
+    await flushPromises();
+
+    // Trigger send code to reveal OTP input
+    await wrapper.find('button').trigger('click');
+    await flushPromises();
+
+    const pasteBtn = wrapper.findAll('button').find(b => b.text().includes('Paste'));
+    expect(pasteBtn).toBeDefined();
+    await pasteBtn.trigger('click');
+    await flushPromises();
+
+    expect(clientMock.post).toHaveBeenCalledWith('/auth/email/verify-code', { code: '987654' });
+    expect(authStore.user.is_email_verified).toBe(true);
+  });
 });

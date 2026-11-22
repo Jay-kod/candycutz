@@ -40,7 +40,19 @@
         <ResendGuide />
       </div>
 
-      <!-- Tab 3: Recent Email Deliveries & Audit Log -->
+      <!-- Tab 3: Interactive Email Templates Studio -->
+      <div v-else-if="currentTab === 'templates'">
+        <EmailStudioCard
+          :form="form"
+          :is-configured="isConfigured"
+          :saving="saving"
+          :testing="testing"
+          @save="saveSettings"
+          @test-dispatch="sendTestEmail"
+        />
+      </div>
+
+      <!-- Tab 4: Recent Email Deliveries & Audit Log -->
       <div v-else-if="currentTab === 'deliveries'">
         <ResendDeliveryLogs
           :deliveries="deliveries"
@@ -65,6 +77,7 @@ import ResendStats from '../components/resend/ResendStats.vue';
 import ResendConfigForm from '../components/resend/ResendConfigForm.vue';
 import ResendGuide from '../components/resend/ResendGuide.vue';
 import ResendDeliveryLogs from '../components/resend/ResendDeliveryLogs.vue';
+import EmailStudioCard from '../components/resend/EmailStudioCard.vue';
 
 const route = useRoute();
 const toast = useToast();
@@ -87,7 +100,16 @@ const form = reactive({
   mail_password: '',
   brevo_api_key: '',
   mail_from: '',
-  mail_from_name: 'CandyCutz'
+  mail_from_name: 'CandyCutz',
+  mail_confirmed_subject: '',
+  mail_reminder_subject: '',
+  mail_receipt_subject: '',
+  mail_cancellation_subject: '',
+  mail_custom_note: '',
+  mail_show_maps: true,
+  mail_show_calendar: true,
+  mail_show_whatsapp: true,
+  mail_show_qr: true
 });
 
 const testResult = ref(null);
@@ -118,6 +140,15 @@ async function loadSettings() {
     form.brevo_api_key = data.brevo_api_key || '';
     form.mail_from = data.mail_from || 'no-reply@mail.candycutz.com';
     form.mail_from_name = data.mail_from_name || 'CandyCutz';
+    form.mail_confirmed_subject = data.mail_confirmed_subject || '';
+    form.mail_reminder_subject = data.mail_reminder_subject || '';
+    form.mail_receipt_subject = data.mail_receipt_subject || '';
+    form.mail_cancellation_subject = data.mail_cancellation_subject || '';
+    form.mail_custom_note = data.mail_custom_note || '';
+    if (data.mail_show_maps !== undefined) form.mail_show_maps = data.mail_show_maps === '1' || data.mail_show_maps === true;
+    if (data.mail_show_calendar !== undefined) form.mail_show_calendar = data.mail_show_calendar === '1' || data.mail_show_calendar === true;
+    if (data.mail_show_whatsapp !== undefined) form.mail_show_whatsapp = data.mail_show_whatsapp === '1' || data.mail_show_whatsapp === true;
+    if (data.mail_show_qr !== undefined) form.mail_show_qr = data.mail_show_qr === '1' || data.mail_show_qr === true;
   } catch (error) {
     console.error('[ResendSetup] Failed to load settings:', error);
     toast.error('Failed to load email gateway settings from database.');
@@ -158,7 +189,16 @@ async function saveSettings() {
         mail_password: form.mail_password || form.resend_api_key,
         brevo_api_key: form.brevo_api_key,
         mail_from: form.mail_from,
-        mail_from_name: form.mail_from_name
+        mail_from_name: form.mail_from_name,
+        mail_confirmed_subject: form.mail_confirmed_subject,
+        mail_reminder_subject: form.mail_reminder_subject,
+        mail_receipt_subject: form.mail_receipt_subject,
+        mail_cancellation_subject: form.mail_cancellation_subject,
+        mail_custom_note: form.mail_custom_note,
+        mail_show_maps: form.mail_show_maps ? '1' : '0',
+        mail_show_calendar: form.mail_show_calendar ? '1' : '0',
+        mail_show_whatsapp: form.mail_show_whatsapp ? '1' : '0',
+        mail_show_qr: form.mail_show_qr ? '1' : '0'
       }
     });
 
@@ -214,6 +254,9 @@ function refreshAll() {
 }
 
 onMounted(() => {
+  if (route.query?.tab && ['config', 'templates', 'guide', 'deliveries'].includes(route.query.tab)) {
+    currentTab.value = route.query.tab;
+  }
   loadSettings();
   loadDeliveries();
 });

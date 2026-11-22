@@ -4,6 +4,9 @@
       <!-- Welcome Header -->
       <CustomerWelcomeHeader />
 
+      <!-- Active Draft Reservation Banner -->
+      <DraftBookingBanner @discarded="loadDashboard" @resumed="loadDashboard" />
+
       <!-- Skeleton Loading State -->
       <div v-if="loading" class="space-y-6">
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -59,6 +62,7 @@ import CustomerWelcomeHeader from '../components/dashboard/CustomerWelcomeHeader
 import CustomerUpcomingBookings from '../components/dashboard/CustomerUpcomingBookings.vue';
 import CustomerQuickLinks from '../components/dashboard/CustomerQuickLinks.vue';
 import CustomerRecentNotifications from '../components/dashboard/CustomerRecentNotifications.vue';
+import DraftBookingBanner from '../components/booking/DraftBookingBanner.vue';
 import { 
   CalendarIcon, 
   ClockIcon, 

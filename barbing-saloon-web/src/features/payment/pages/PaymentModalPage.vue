@@ -45,7 +45,7 @@
           :formatted-amount="formattedAmount"
           :appointment="appointment"
           :appointment-id="appointmentId"
-          @close="cancelTransaction"
+          @close="promptExit"
           @copy="copyToClipboard"
         />
 
@@ -86,7 +86,34 @@
             </div>
 
             <!-- Right Column (7 cols on desktop): Transfer Details or Other Channel Details -->
-            <div class="md:col-span-7">
+            <div class="md:col-span-7 space-y-4">
+              <!-- Hold Expired Alert Banner -->
+              <div
+                v-if="isHoldExpired && !success"
+                class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/5"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-xs font-bold text-amber-300">15-Minute Slot Hold Expired</p>
+                    <p class="text-[11px] text-white/60">Renew hold to keep your slot reserved, or return to choose a new time.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  @click="renewHold"
+                  :disabled="renewingHold"
+                  class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  <span v-if="renewingHold">Renewing...</span>
+                  <span v-else>Renew Hold</span>
+                </button>
+              </div>
+
               <!-- Bank Transfer Card -->
               <PaymentTransferCard
                 v-if="selectedChannel === 'bank_transfer'"
@@ -99,7 +126,7 @@
                 :reference="reference"
                 @copy="copyToClipboard"
                 @confirm="submitPayment"
-                @cancel="cancelTransaction"
+                @cancel="promptExit"
               />
 
               <!-- Other Channel Card (USSD, Bank Account, NQR, Card) -->
@@ -110,18 +137,70 @@
                 :submitting="submitting"
                 @copy="copyToClipboard"
                 @confirm="submitPayment"
-                @cancel="cancelTransaction"
+                @cancel="promptExit"
               />
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Exit / Save Draft Confirmation Modal -->
+      <transition name="fade">
+        <div
+          v-if="showExitPrompt"
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        >
+          <div class="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[#12161F] p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">Exit Checkout?</h3>
+                <p class="text-[11px] text-white/50">Your seat reservation is currently active.</p>
+              </div>
+            </div>
+
+            <p class="text-xs text-white/70 leading-relaxed">
+              You can save this booking as a draft to complete payment within 15 minutes, or discard it to immediately free up the slot for others.
+            </p>
+
+            <div class="space-y-2 pt-2">
+              <button
+                type="button"
+                @click="saveAsDraftAndExit"
+                class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Save as Draft & Exit</span>
+              </button>
+
+              <button
+                type="button"
+                @click="discardDraftAndExit"
+                class="w-full py-2.5 px-4 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Discard Booking (Free up slot)</span>
+              </button>
+
+              <button
+                type="button"
+                @click="showExitPrompt = false"
+                class="w-full py-2 px-4 rounded-xl border border-white/[0.08] hover:bg-white/[0.04] text-white/60 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+              >
+                Continue Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePaymentCheckout } from '../composables/usePaymentCheckout';
 import PaymentHeader from '../components/PaymentHeader.vue';
@@ -132,6 +211,11 @@ import PaymentOtherChannels from '../components/PaymentOtherChannels.vue';
 import PaymentSuccessReceipt from '../components/PaymentSuccessReceipt.vue';
 
 const route = useRoute();
+const showExitPrompt = ref(false);
+
+const promptExit = () => {
+  showExitPrompt.value = true;
+};
 
 const {
   loading,
@@ -152,9 +236,14 @@ const {
   reference,
   transactionCode,
   formattedTimeRemaining,
+  isHoldExpired,
+  renewingHold,
+  renewHold,
   copyToClipboard,
   submitPayment,
   cancelTransaction,
+  saveAsDraftAndExit,
+  discardDraftAndExit,
 } = usePaymentCheckout();
 
 const appointmentId = computed(() => {

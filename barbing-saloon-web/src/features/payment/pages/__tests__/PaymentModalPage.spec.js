@@ -71,4 +71,21 @@ describe('PaymentModalPage Component', () => {
     expect(wrapper.text()).toContain('Payment Confirmed & Saved');
     expect(wrapper.text()).toContain('Adeola Vance');
   });
+
+  it('opens exit prompt modal when close or cancel is triggered and offers save draft options', async () => {
+    const wrapper = mount(PaymentModalPage);
+    await flushPromises();
+
+    // Trigger cancel from the transfer card
+    const cancelButton = wrapper.findAll('button').find(b => b.text().includes('Cancel Transaction'));
+    expect(cancelButton).toBeDefined();
+    await cancelButton.trigger('click');
+    await flushPromises();
+
+    // Verify Exit Prompt Modal is shown
+    expect(wrapper.text()).toContain('Exit Checkout?');
+    expect(wrapper.text()).toContain('Save as Draft & Exit');
+    expect(wrapper.text()).toContain('Discard Booking (Free up slot)');
+    expect(wrapper.text()).toContain('Continue Payment');
+  });
 });

@@ -16,6 +16,9 @@
         </div>
       </section>
 
+      <!-- Active Draft Reservation Alert -->
+      <DraftBookingBanner />
+
       <!-- Loading State -->
       <div v-if="loadingService" class="flex justify-center py-20">
         <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-accent)] border-t-transparent shadow-[0_0_15px_rgba(255,153,0,0.5)]"></div>
@@ -147,6 +150,7 @@ import { useToast } from '../../../core/composables/useToast'
 import BookingBarberSelect from '../components/booking/BookingBarberSelect.vue'
 import BookingTimeSlotPicker from '../components/booking/BookingTimeSlotPicker.vue'
 import BookingSummaryStep from '../components/booking/BookingSummaryStep.vue'
+import DraftBookingBanner from '../components/booking/DraftBookingBanner.vue'
 import { 
   ArrowLeftIcon, 
   ArrowPathIcon,
@@ -296,6 +300,7 @@ async function loadSlots(customDate) {
 }
 
 async function submit() {
+  if (isSubmitting.value) return
   if (!form.barber_id) { toast.warning('Please select a master barber'); return }
   if (!form.service_id) { toast.warning('Please select a service'); return }
   if (!form.appointment_date) { toast.warning('Please select a date'); return }
@@ -303,10 +308,19 @@ async function submit() {
   
   isSubmitting.value = true
   try {
-    const res = await client.post('/customer/bookings', form)
+    let res
+    try {
+      res = await client.post('/appointments/draft', form)
+    } catch (apiErr) {
+      if (apiErr.response?.status === 404) {
+        res = await client.post('/customer/bookings/draft', form)
+      } else {
+        throw apiErr
+      }
+    }
     const data = res.data?.data || res.data || {}
     const apptId = data.id || data.appointment?.id
-    toast.success('Booking created! Please complete payment.')
+    toast.success('Draft reservation created! Complete payment to confirm your seat.')
     if (apptId) {
       router.push(`/customer/dashboard/payment/${apptId}`)
     } else {

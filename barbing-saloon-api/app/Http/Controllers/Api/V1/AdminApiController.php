@@ -586,12 +586,16 @@ class AdminApiController
         $appUrl = rtrim(config('app.url') ?? 'http://localhost:8000', '/');
         $webhookUrl = $appUrl . '/api/v1/payments/webhook';
 
+        $defaultGateway = Setting::query()->where('key', 'payment_default_gateway')->value('value')
+            ?: config('payments.default', 'paystack');
+
         return ApiResponse::success([
             'public_key' => $publicKey,
             'is_secret_set' => !empty($secretKey),
             'masked_secret_key' => $maskedSecret,
             'webhook_url' => $webhookUrl,
             'is_live' => str_starts_with((string) $publicKey, 'pk_live_'),
+            'default_gateway' => $defaultGateway,
         ], 'Paystack settings retrieved');
     }
 
@@ -600,6 +604,7 @@ class AdminApiController
         $validated = $request->validate([
             'public_key' => ['nullable', 'string', 'max:255'],
             'secret_key' => ['nullable', 'string', 'max:255'],
+            'default_gateway' => ['nullable', 'string', 'in:paystack,manual_transfer'],
         ]);
 
         if (array_key_exists('public_key', $validated) && $validated['public_key'] !== null) {
@@ -615,6 +620,15 @@ class AdminApiController
                 ['value' => trim($validated['secret_key']), 'group' => 'payment']
             );
         }
+
+        if (!empty($validated['default_gateway'])) {
+            Setting::updateOrCreate(
+                ['key' => 'payment_default_gateway'],
+                ['value' => trim($validated['default_gateway']), 'group' => 'payment']
+            );
+        }
+
+        \Illuminate\Support\Facades\Cache::forget('paystack_gateway_credentials');
 
         return ApiResponse::success(null, 'Paystack settings updated successfully');
     }
@@ -638,11 +652,24 @@ class AdminApiController
             if ($response->successful()) {
                 $data = $response->json();
                 $isLive = str_starts_with($secretKey, 'sk_live_');
+
+                // Try to get balance info if available
+                $balanceInfo = null;
+                try {
+                    $balRes = Http::withToken($secretKey)->timeout(5)->get('https://api.paystack.co/balance');
+                    if ($balRes->successful()) {
+                        $balanceInfo = $balRes->json('data');
+                    }
+                } catch (\Throwable) {
+                    // Non-critical if balance read fails
+                }
+
                 return ApiResponse::success([
                     'connected' => true,
                     'mode' => $isLive ? 'live' : 'test',
                     'message' => 'Paystack connection verified successfully in ' . ($isLive ? 'LIVE' : 'TEST') . ' mode.',
                     'details' => $data['data'] ?? null,
+                    'balance' => $balanceInfo,
                 ], 'Paystack connection successful');
             }
 

@@ -28,9 +28,9 @@ Route::get('/blog', [BlogApiController::class, 'index']);
 Route::get('/blog/{slug}', [BlogApiController::class, 'show']);
 Route::get('/working-hours', [PublicApiController::class, 'workingHours']);
 Route::get('/available-slots', [PublicApiController::class, 'availableSlots']);
-Route::post('/contact', [PublicApiController::class, 'contact']);
+Route::post('/contact', [PublicApiController::class, 'contact'])->middleware('throttle:5,1');
 Route::get('/feature-flags', [FeatureFlagApiController::class, 'publicIndex']);
-Route::post('/app/crashes', [AppTelemetryApiController::class, 'reportCrash']);
+Route::post('/app/crashes', [AppTelemetryApiController::class, 'reportCrash'])->middleware('throttle:30,1');
 
 // Public Aliases (/api/v1/public/*) for seamless backward compatibility
 Route::prefix('public')->group(function () {

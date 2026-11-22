@@ -26,6 +26,7 @@ export default [
 	{ path: '/admin/analytics', name: 'admin-analytics', component: () => import('@/features/analytics/pages/AdminAnalyticsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/settings', name: 'admin-settings', component: () => import('../../modules/admin/pages/SettingsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/bank-details', name: 'admin-bank-details', component: () => import('../../modules/admin/pages/BankDetailsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/payments', redirect: '/admin/bank-details?tab=gateway' },
 	{ path: '/admin/brand-identity', name: 'admin-brand-identity', component: () => import('../../modules/admin/pages/cms/BrandIdentityPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/reports', name: 'admin-reports', component: () => import('@/features/analytics/pages/AdminReportsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{

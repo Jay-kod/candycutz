@@ -95,6 +95,12 @@ const handleFileChange = (e) => {
     error.value = 'Please select a valid image (JPG, PNG) or PDF.'
     return
   }
+
+  // Validate size (max 10MB)
+  if (selected.size > 10 * 1024 * 1024) {
+    error.value = 'Receipt file size must be less than 10MB.'
+    return
+  }
   
   error.value = ''
   file.value = selected

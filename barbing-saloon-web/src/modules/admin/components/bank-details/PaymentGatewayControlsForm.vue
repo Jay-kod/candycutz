@@ -265,6 +265,54 @@
         </div>
       </div>
 
+      <!-- Default Gateway Switcher -->
+      <div class="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
+        <label class="block text-xs uppercase tracking-wider font-bold text-slate-700 dark:text-slate-300">
+          Default Active Checkout Gateway
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label
+            :class="[
+              'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+              paystackForm.default_gateway === 'paystack'
+                ? 'border-emerald-500 bg-emerald-500/10 text-slate-900 dark:text-white font-bold ring-1 ring-emerald-500/30'
+                : 'border-slate-200 dark:border-white/10 bg-white dark:bg-black/40 text-slate-500 dark:text-zinc-400'
+            ]"
+          >
+            <input
+              type="radio"
+              value="paystack"
+              v-model="paystackForm.default_gateway"
+              class="accent-emerald-500"
+            />
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">Paystack (Recommended)</div>
+              <div class="text-[10px] text-slate-500 dark:text-zinc-400 font-normal">Direct card, USSD, Apple Pay & automated virtual bank transfer</div>
+            </div>
+          </label>
+
+          <label
+            :class="[
+              'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+              paystackForm.default_gateway === 'manual_transfer'
+                ? 'border-amber-500 bg-amber-500/10 text-slate-900 dark:text-white font-bold ring-1 ring-amber-500/30'
+                : 'border-slate-200 dark:border-white/10 bg-white dark:bg-black/40 text-slate-500 dark:text-zinc-400'
+            ]"
+          >
+            <input
+              type="radio"
+              value="manual_transfer"
+              v-model="paystackForm.default_gateway"
+              class="accent-amber-500"
+            />
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">Manual Bank Transfer</div>
+              <div class="text-[10px] text-slate-500 dark:text-zinc-400 font-normal">Customer sends to your salon account and uploads receipt</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <!-- Webhook URL Display & Paystack Dashboard Link -->
       <div class="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -401,7 +449,8 @@ const defaultWebhookUrl = ref(
 
 const paystackForm = reactive({
   public_key: '',
-  secret_key: ''
+  secret_key: '',
+  default_gateway: 'paystack'
 });
 
 const paystackStatus = reactive({
@@ -419,9 +468,13 @@ async function loadPaystackSettings() {
     const res = await client.get('/admin/paystack/settings');
     const data = res.data?.data || res.data || {};
     if (data.public_key) paystackForm.public_key = data.public_key;
+    if (data.default_gateway) paystackForm.default_gateway = data.default_gateway;
     paystackStatus.is_secret_set = Boolean(data.is_secret_set);
     paystackStatus.masked_secret_key = data.masked_secret_key || '';
     if (data.webhook_url) paystackStatus.webhook_url = data.webhook_url;
+    if (data.is_secret_set) {
+      paystackStatus.mode = data.is_live ? 'live' : 'test';
+    }
   } catch {
     // Graceful fallback for test environments or offline
   }
@@ -444,9 +497,10 @@ async function savePaystackKeys() {
   try {
     await client.post('/admin/paystack/settings', {
       public_key: paystackForm.public_key.trim(),
-      secret_key: paystackForm.secret_key.trim()
+      secret_key: paystackForm.secret_key.trim(),
+      default_gateway: paystackForm.default_gateway
     });
-    toast.success('Paystack API keys saved successfully!');
+    toast.success('Paystack API keys & gateway settings saved successfully!');
     paystackForm.secret_key = '';
     await loadPaystackSettings();
   } catch (err) {

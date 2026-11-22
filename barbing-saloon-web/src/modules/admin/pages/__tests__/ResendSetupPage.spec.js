@@ -122,6 +122,16 @@ describe('ResendSetupPage.vue', () => {
     expect(wrapper.text()).toContain('Create or Log In to Your Resend Account');
     expect(wrapper.text()).toContain('Add & Verify Your Sending Domain');
 
+    // Click Email Templates & Studio tab button
+    const templatesBtn = wrapper.findAll('button').find(b => b.text().includes('Email Templates & Studio'));
+    expect(templatesBtn).toBeDefined();
+    await templatesBtn.trigger('click');
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Live Customer View');
+    expect(wrapper.text()).toContain('Select Template To Edit');
+    expect(wrapper.text()).toContain('C A N D Y C U T Z');
+
     // Click Email Deliveries & Audit tab button
     const deliveriesBtn = wrapper.findAll('button').find(b => b.text().includes('Email Deliveries & Audit'));
     expect(deliveriesBtn).toBeDefined();

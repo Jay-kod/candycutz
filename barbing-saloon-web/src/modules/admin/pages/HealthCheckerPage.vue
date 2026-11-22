@@ -3,6 +3,7 @@ import AdminLayout from '@/portals/admin/layouts/AdminLayout.vue'
 import { useAdminHealthChecker } from '../composables/useAdminHealthChecker'
 import HealthHeader from '../components/health-checker/HealthHeader.vue'
 import HealthKPICards from '../components/health-checker/HealthKPICards.vue'
+import HealthIncidentVault from '../components/health-checker/HealthIncidentVault.vue'
 import HealthComponentCards from '../components/health-checker/HealthComponentCards.vue'
 import HealthErrorGroups from '../components/health-checker/HealthErrorGroups.vue'
 import HealthSelfTestPanel from '../components/health-checker/HealthSelfTestPanel.vue'
@@ -10,6 +11,11 @@ import HealthCheckerSkeleton from '../components/health-checker/HealthCheckerSke
 
 const {
   overview,
+  healthDetail,
+  failedJobs,
+  failedJobsLoading,
+  retryingJobId,
+  dismissingJobId,
   overviewLoading,
   detailLoading,
   selfTestRunning,
@@ -25,6 +31,9 @@ const {
   formatTime,
   overviewCards,
   healthCards,
+  retryJob,
+  dismissJob,
+  resetBreaker,
 } = useAdminHealthChecker()
 </script>
 
@@ -59,6 +68,18 @@ const {
           :status-color="statusColor"
           :status-bg="statusBg"
           :status-icon="statusIcon"
+        />
+
+        <!-- Dead-Letter Incident Vault & Circuit Breaker Remediation -->
+        <HealthIncidentVault
+          :failed-jobs="failedJobs"
+          :circuit-breakers="healthDetail?.checks?.circuit_breakers || {}"
+          :loading="failedJobsLoading"
+          :retrying-job-id="retryingJobId"
+          :dismissing-job-id="dismissingJobId"
+          @retry-job="retryJob"
+          @dismiss-job="dismissJob"
+          @reset-breaker="resetBreaker"
         />
 
         <!-- Top Active Error Signatures (if any) -->

@@ -18,10 +18,17 @@
       <!-- Status Pill & Link -->
       <div class="flex items-center gap-2 shrink-0">
         <router-link
+          to="/admin/resend?tab=templates"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+        >
+          <span>Email Template Studio</span>
+          <ArrowTopRightOnSquareIcon class="h-3 w-3" />
+        </router-link>
+        <router-link
           to="/admin/resend"
           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-admin hover:text-white bg-admin/10 hover:bg-admin/20 border border-admin/30 transition-colors"
         >
-          <span>Dedicated Resend Console</span>
+          <span>Dedicated Console</span>
           <ArrowTopRightOnSquareIcon class="h-3 w-3" />
         </router-link>
         <span 

@@ -137,7 +137,12 @@ class AppServiceProvider extends ServiceProvider
 
                 <div style="text-align: center; margin: 32px 0; background: #161a22; border: 1px solid #2d3748; border-radius: 12px; padding: 24px 16px;">
                     <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; margin: 0 0 10px 0; font-weight: 600;">Your 6-Digit Verification Code</p>
-                    <div style="display: inline-block; font-family: monospace, \'Courier New\', Courier; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #ff6700; text-shadow: 0 0 15px rgba(255,103,0,0.3);">' . $otp . '</div>
+                    <div style="display: inline-block; font-family: monospace, \'Courier New\', Courier; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #ff6700; text-shadow: 0 0 15px rgba(255,103,0,0.3); -webkit-user-select: all; user-select: all;">' . htmlspecialchars((string) $otp, ENT_QUOTES, 'UTF-8') . '</div>
+                    <div style="margin-top: 14px;">
+                        <span style="display: inline-block; font-size: 11px; color: #ff6700; background: rgba(255,103,0,0.12); border: 1px solid rgba(255,103,0,0.3); border-radius: 8px; padding: 6px 14px; font-weight: 700; -webkit-user-select: all; user-select: all;">
+                            📋 Tap / Double-Click to Copy: ' . htmlspecialchars((string) $otp, ENT_QUOTES, 'UTF-8') . '
+                        </span>
+                    </div>
                     <p style="font-size: 11px; color: #64748b; margin: 10px 0 0 0;">Valid for 15 minutes</p>
                 </div>
 

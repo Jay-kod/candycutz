@@ -28,9 +28,9 @@ class UploadReceipt
             ]);
         }
 
-        if ($file->getSize() > 5120 * 1024) {
+        if ($file->getSize() > 10240 * 1024) {
             throw ValidationException::withMessages([
-                'receipt' => ['Receipt may not be greater than 5MB.'],
+                'receipt' => ['Receipt may not be greater than 10MB.'],
             ]);
         }
 
@@ -58,6 +58,25 @@ class UploadReceipt
             ManualTransferState::receipt_uploaded,
             ['receipt_path' => $path, 'actor_id' => $appointment->customer_id]
         );
+
+        // If appointment was in draft state, transition to pending awaiting verification
+        $statusVal = $appointment->status instanceof \BackedEnum ? $appointment->status->value : (string) $appointment->status;
+        if ($statusVal === 'draft') {
+            $appointment->update([
+                'status' => 'pending',
+                'draft_expires_at' => null,
+            ]);
+            try {
+                \App\Models\AppointmentStatusHistory::create([
+                    'appointment_id' => $appointment->id,
+                    'previous_status' => 'draft',
+                    'new_status' => 'pending',
+                    'changed_by_user_id' => $appointment->customer_id,
+                    'reason' => 'Bank transfer receipt uploaded; awaiting cashier verification.',
+                    'created_at' => now(),
+                ]);
+            } catch (\Throwable) {}
+        }
 
         return $this->stateMachine->transition(
             $payment,

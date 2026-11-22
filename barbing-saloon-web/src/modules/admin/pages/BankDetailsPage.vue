@@ -70,7 +70,7 @@ const layoutComponent = computed(() => {
   return route.path.startsWith('/superadmin') ? SuperAdminLayout : AdminLayout;
 });
 
-const currentTab = ref('account');
+const currentTab = ref(route.query.tab || 'account');
 const loading = ref(false);
 const saving = ref(false);
 

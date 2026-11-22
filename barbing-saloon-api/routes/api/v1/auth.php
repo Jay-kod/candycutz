@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('throttle:auth-sensitive')->group(function () {
     Route::post('/auth/login', [AuthApiController::class, 'login']);
     Route::post('/auth/register', [AuthApiController::class, 'register']);
+    Route::post('/auth/social-login', [AuthApiController::class, 'socialLogin']);
     Route::post('/auth/forgot-password', [AuthApiController::class, 'forgotPassword']);
     Route::post('/auth/reset-password', [AuthApiController::class, 'resetPassword']);
 });
-Route::post('/auth/social-login', [AuthApiController::class, 'socialLogin']);
 Route::get('/auth/email/verify/{id}/{hash}', [AuthApiController::class, 'verifyEmail'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');

@@ -6,7 +6,8 @@ use App\Http\Controllers\Api\V1\ReceiptApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/payments/return', [PaymentApiController::class, 'returnUrl']);
-Route::post('/payments/webhook', [PaymentWebhookApiController::class, 'handle']);
+Route::post('/payments/webhook', [PaymentWebhookApiController::class, 'handle'])
+    ->withoutMiddleware(['throttle:api']);
 Route::get('/payments/checkout-data', [PaymentApiController::class, 'checkoutData']);
 Route::post('/payments/confirm-transfer', [PaymentApiController::class, 'confirmTransfer']);
 

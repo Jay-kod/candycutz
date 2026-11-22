@@ -72,7 +72,7 @@ class AvailabilityEngine
 
         // 6. Fetch all conflicting active appointments for this barber on this date
         $existingAppointments = Appointment::where('barber_id', $barberId)
-            ->where('appointment_date', $date->toDateString())
+            ->whereDate('appointment_date', $date->toDateString())
             ->whereNotIn('status', ['cancelled'])
             ->get(['appointment_time', 'end_time', 'appointment_type']);
 

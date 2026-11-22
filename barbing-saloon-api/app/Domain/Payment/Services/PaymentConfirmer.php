@@ -13,6 +13,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -36,11 +37,13 @@ class PaymentConfirmer
         try {
             return DB::transaction(function () use ($reference, $source, $payload) {
                 /** @var Payment|null $payment */
-                $payment = Payment::where('reference', $reference)
-                    ->orWhere('transaction_ref', $reference)
-                    ->orWhere('gateway_reference', $reference)
-                    ->lockForUpdate()
-                    ->first();
+                $payment = Payment::where(function ($q) use ($reference) {
+                    $q->where('reference', $reference)
+                        ->orWhere('transaction_ref', $reference)
+                        ->orWhere('gateway_reference', $reference);
+                })
+                ->lockForUpdate()
+                ->first();
 
                 if (! $payment) {
                     Log::error("PaymentConfirmer: Payment not found for reference [{$reference}]");
@@ -58,7 +61,7 @@ class PaymentConfirmer
                     return $payment;
                 }
 
-                $appointment = $payment->appointment;
+                $appointment = Appointment::whereKey($payment->appointment_id)->lockForUpdate()->first();
                 if (! $appointment) {
                     Log::error("PaymentConfirmer: Appointment missing for payment [{$reference}]");
                     throw PaymentException::invalidState("Appointment missing for payment [{$reference}]");
@@ -103,22 +106,74 @@ class PaymentConfirmer
 
                 // Update Appointment
                 $oldAppointmentStatus = $appointment->status;
+                $oldStatusValue = $oldAppointmentStatus instanceof AppointmentStatus
+                    ? $oldAppointmentStatus->value
+                    : (string) $oldAppointmentStatus;
+
                 $appointmentUpdate = [
                     'payment_status' => AppointmentPaymentStatus::paid,
                     'deposit_paid' => true,
                 ];
 
-                if ($oldAppointmentStatus === AppointmentStatus::pending) {
+                $shouldSendConfirmationEmail = false;
+
+                if (in_array($oldStatusValue, ['pending', 'draft'], true)) {
                     $appointmentUpdate['status'] = AppointmentStatus::confirmed;
+                    $appointmentUpdate['draft_expires_at'] = null;
+                    $shouldSendConfirmationEmail = true;
+                } elseif ($oldStatusValue === 'cancelled' && str_contains(strtolower((string) $appointment->cancellation_reason), 'expire')) {
+                    // Late payment arrived after draft hold expired. Check if slot is still free.
+                    $barberId = $appointment->barber_id;
+                    $date = Carbon::parse($appointment->appointment_date)->toDateString();
+                    $startTime = substr(trim((string) $appointment->appointment_time), 0, 5);
+                    $endTime = $appointment->end_time
+                        ? substr(trim((string) $appointment->end_time), 0, 5)
+                        : Carbon::parse("{$date} {$startTime}")->addMinutes($appointment->total_duration_minutes ?: 30)->format('H:i');
+
+                    $slotTaken = false;
+                    if ($barberId) {
+                        $slotTaken = Appointment::where('barber_id', $barberId)
+                            ->where('id', '!=', $appointment->id)
+                            ->where('appointment_date', $date)
+                            ->whereNotIn('status', [AppointmentStatus::cancelled->value, 'cancelled'])
+                            ->where(function ($q) {
+                                $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                    ->orWhere(function ($draftQuery) {
+                                        $draftQuery->whereIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                            ->where(function ($tq) {
+                                                $tq->whereNull('draft_expires_at')
+                                                    ->orWhere('draft_expires_at', '>', now());
+                                            });
+                                    });
+                            })
+                            ->where(function ($query) use ($startTime, $endTime) {
+                                $query->where('appointment_time', '<', $endTime)
+                                    ->where(function ($q) use ($startTime) {
+                                        $q->where('end_time', '>', $startTime)
+                                            ->orWhereNull('end_time');
+                                    });
+                            })
+                            ->exists();
+                    }
+
+                    if (! $slotTaken) {
+                        $appointmentUpdate['status'] = AppointmentStatus::confirmed;
+                        $appointmentUpdate['draft_expires_at'] = null;
+                        $appointmentUpdate['cancellation_reason'] = null;
+                        $shouldSendConfirmationEmail = true;
+                    } else {
+                        $appointmentUpdate['notes'] = trim(($appointment->notes ?? '')."\n[CRITICAL: Payment received after draft hold expired, but slot was re-booked. Staff must re-assign.]");
+                        Log::alert("PaymentConfirmer: Payment received for expired draft appointment #{$appointment->id}, but slot ({$date} {$startTime}) was already taken.");
+                    }
                 }
 
                 $appointment->update($appointmentUpdate);
 
-                if ($oldAppointmentStatus === AppointmentStatus::pending) {
+                if ($shouldSendConfirmationEmail) {
                     try {
                         AppointmentStatusHistory::create([
                             'appointment_id' => $appointment->id,
-                            'previous_status' => AppointmentStatus::pending->value,
+                            'previous_status' => $oldStatusValue,
                             'new_status' => AppointmentStatus::confirmed->value,
                             'changed_by_user_id' => $payment->customer_id,
                             'reason' => "Payment confirmed via {$source} ({$payment->provider})",
@@ -126,6 +181,13 @@ class PaymentConfirmer
                         ]);
                     } catch (\Throwable $e) {
                         Log::warning("PaymentConfirmer: Could not record status history: {$e->getMessage()}");
+                    }
+
+                    // Dispatch luxury booking confirmation email upon payment completion
+                    try {
+                        \App\Jobs\SendBookingConfirmation::dispatch($appointment);
+                    } catch (\Throwable $e) {
+                        Log::warning("PaymentConfirmer: Could not dispatch SendBookingConfirmation: {$e->getMessage()}");
                     }
                 }
 

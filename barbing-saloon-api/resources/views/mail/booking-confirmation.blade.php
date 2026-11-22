@@ -1,53 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: Inter, -apple-system, sans-serif; color: #333; background-color: #f9f9f9; }
-        .email-container { max-width: 600px; margin: 0 auto; background-color: #fff; border: 1px solid #ddd; }
-        .header { background-color: #0D0D0D; color: #C9A84C; padding: 20px; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .content { padding: 30px; }
-        .content h2 { color: #0D0D0D; margin-top: 0; }
-        .appointment-details { background-color: #f5f5f5; padding: 20px; border-left: 4px solid #C9A84C; margin: 20px 0; }
-        .detail-row { margin: 10px 0; }
-        .detail-label { font-weight: bold; color: #0D0D0D; }
-        .button { display: inline-block; background-color: #C9A84C; color: #0D0D0D; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; font-weight: bold; }
-        .footer { background-color: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; }
-    </style>
-</head>
-<body>
-    <div class="email-container">
-        <div class="header">
-            <h1>CandyCutz</h1>
-            <p>Premium Barbing Saloon</p>
-        </div>
-        <div class="content">
-            <h2>Booking Confirmed! ✓</h2>
-            <p>Hi {{ $customerName }},</p>
-            <p>Your booking at CandyCutz has been confirmed. We're excited to see you!</p>
-            
-            <div class="appointment-details">
-                <div class="detail-row">
-                    <span class="detail-label">Date & Time:</span> {{ $appointmentDate }} at {{ $appointmentTime }}
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Service:</span> {{ $serviceName }}
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Barber:</span> {{ $barberName }}
-                </div>
-            </div>
-            
-            <p>Please arrive 5 minutes early to check in. If you need to reschedule, visit your dashboard to manage your booking.</p>
-            
-            <a href="#" class="button">View Your Booking</a>
-        </div>
-        <div class="footer">
-            <p>&copy; {{ date('Y') }} CandyCutz. All rights reserved.</p>
-            <p>Questions? Contact us at support@candycutz.local</p>
-        </div>
+@extends('mail.layouts.candycutz-luxury')
+
+@section('title', 'Booking Confirmed — CandyCutz')
+
+@section('content')
+    @php
+        $cName = $customerName ?? $customer_name ?? 'Valued Customer';
+        $ref = $booking_reference ?? ($appointment->booking_reference ?? 'N/A');
+        $date = $appointmentDate ?? $appointment_date ?? 'Scheduled Date';
+        $time = $appointmentTime ?? $start_time ?? 'Scheduled Time';
+        $service = $serviceName ?? $appointment_type ?? 'Grooming Service';
+        $barber = $barberName ?? $barber_name ?? 'Master Stylist';
+        $total = isset($grand_total) ? $grand_total : (isset($appointment->grand_total) ? number_format((float)$appointment->grand_total, 2) : null);
+    @endphp
+
+    <div class="summary-pill">✓ Appointment Confirmed</div>
+    <h2 class="headline">Hello {{ $cName }},</h2>
+    <p class="body-text">
+        Your booking has been secured. Your master stylist is scheduled and ready to provide an exceptional grooming experience at CandyCutz.
+    </p>
+
+    <div class="details-box">
+        <table class="details-table" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td class="lbl" align="left">Booking Reference</td>
+                <td class="val" align="right" style="letter-spacing: 1px; color: #D4AF37; font-family: monospace;">{{ $ref }}</td>
+            </tr>
+            <tr>
+                <td class="lbl" align="left">Date &amp; Time</td>
+                <td class="val" align="right">{{ $date }} at {{ $time }}</td>
+            </tr>
+            <tr>
+                <td class="lbl" align="left">Service</td>
+                <td class="val" align="right">{{ $service }}</td>
+            </tr>
+            <tr>
+                <td class="lbl" align="left">Stylist / Barber</td>
+                <td class="val" align="right">{{ $barber }}</td>
+            </tr>
+            @if($total)
+                <tr>
+                    <td class="total-lbl" align="left">Total Payable</td>
+                    <td class="total-val" align="right">&#8358;{{ $total }}</td>
+                </tr>
+            @endif
+        </table>
     </div>
-</body>
-</html>
+
+    <div class="location-box">
+        <span class="location-title">Physical Saloon Location:</span>
+        Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa State, Nigeria.<br>
+        <a href="https://maps.app.goo.gl/RtpPCeBRobajKmwS7" target="_blank" style="color: #D4AF37; text-decoration: underline; display: inline-block; margin-top: 6px;">Open in Google Maps &rarr;</a>
+    </div>
+
+    <p class="body-text" style="font-size: 12px; margin-top: 16px; color: #9CA3AF;">
+        Please arrive 5 minutes early to check in. If you need to make changes, visit your dashboard or contact our concierge.
+    </p>
+
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="{{ config('app.url') }}/dashboard" class="btn-gold">View in Dashboard</a>
+    </div>
+@endsection

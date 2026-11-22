@@ -235,10 +235,11 @@ class PaymentApiController
 
         if ($reference) {
             /** @var Payment|null $payment */
-            $payment = Payment::where('reference', $reference)
-                ->orWhere('transaction_ref', $reference)
-                ->orWhere('gateway_reference', $reference)
-                ->first();
+            $payment = Payment::where(function ($q) use ($reference) {
+                $q->where('reference', $reference)
+                    ->orWhere('transaction_ref', $reference)
+                    ->orWhere('gateway_reference', $reference);
+            })->first();
 
             // Accelerator: on-demand verification if still pending/initiated
             if ($payment && ! $payment->status->isSuccess()) {
@@ -261,22 +262,24 @@ class PaymentApiController
                 return redirect()->away("candycutz://payment/callback?reference={$reference}&status={$status}");
             }
 
-            $frontendUrl = rtrim((string) config('app.frontend_url'), '/');
+            $frontendUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://localhost:5173')), '/');
 
-            return redirect()->away("{$frontendUrl}/payment/callback?reference={$reference}&status={$status}");
+            return redirect()->away("{$frontendUrl}/customer/dashboard/payment/callback?reference={$reference}&status={$status}");
         }
 
-        return redirect()->away(config('app.frontend_url'));
+        return redirect()->away(config('app.frontend_url') ?: 'http://localhost:5173');
     }
 
     public function customerPaymentStatus(Request $request, string $reference): JsonResponse
     {
         $user = $request->user();
         /** @var Payment $payment */
-        $payment = Payment::with(['appointment', 'customer'])
-            ->where('reference', $reference)
-            ->orWhere('transaction_ref', $reference)
-            ->orWhere('gateway_reference', $reference)
+        $payment = Payment::with(['appointment.service', 'appointment.barber.user', 'appointment.customer', 'customer'])
+            ->where(function ($q) use ($reference) {
+                $q->where('reference', $reference)
+                    ->orWhere('transaction_ref', $reference)
+                    ->orWhere('gateway_reference', $reference);
+            })
             ->firstOrFail();
 
         $role = $user->role instanceof \BackedEnum ? $user->role->value : $user->role;
@@ -308,12 +311,26 @@ class PaymentApiController
             'currency' => $payment->currency,
             'provider' => $payment->provider,
             'paid_at' => $payment->paid_at?->toIso8601String(),
-            'appointment' => [
-                'id' => $payment->appointment_id,
-                'status' => $payment->appointment?->status->value ?? $payment->appointment?->status,
-                'payment_status' => $payment->appointment?->payment_status->value ?? $payment->appointment?->payment_status,
-                'deposit_paid' => (bool) $payment->appointment?->deposit_paid,
-            ],
+            'appointment' => $payment->appointment ? [
+                'id' => $payment->appointment->id,
+                'booking_reference' => $payment->appointment->booking_reference,
+                'status' => $payment->appointment->status instanceof \BackedEnum ? $payment->appointment->status->value : (string) $payment->appointment->status,
+                'payment_status' => $payment->appointment->payment_status instanceof \BackedEnum ? $payment->appointment->payment_status->value : (string) $payment->appointment->payment_status,
+                'deposit_paid' => (bool) $payment->appointment->deposit_paid,
+                'appointment_date' => $payment->appointment->appointment_date ? (is_string($payment->appointment->appointment_date) ? $payment->appointment->appointment_date : $payment->appointment->appointment_date->format('Y-m-d')) : null,
+                'appointment_time' => $payment->appointment->appointment_time,
+                'total_price' => (float) ($payment->appointment->grand_total ?: $payment->appointment->total_price ?: ($payment->amount_minor ? $payment->amount_minor / 100 : $payment->amount)),
+                'service' => $payment->appointment->service ? [
+                    'id' => $payment->appointment->service->id,
+                    'name' => $payment->appointment->service->name,
+                    'price' => (float) $payment->appointment->service->price,
+                ] : null,
+                'barber' => $payment->appointment->barber ? [
+                    'id' => $payment->appointment->barber->id,
+                    'name' => $payment->appointment->barber->user?->name ?? 'Master Barber',
+                    'chair_number' => 1,
+                ] : null,
+            ] : null,
         ], 'Payment status fetched');
     }
 
@@ -505,6 +522,13 @@ class PaymentApiController
             'barbers' => $barbers,
             'services' => $services,
             'appointment' => $appointmentData,
+            'paystack' => [
+                'public_key' => Setting::query()->where('key', 'paystack_public_key')->value('value')
+                    ?: config('services.paystack.public_key')
+                    ?: config('payments.gateways.paystack.public_key', ''),
+                'default_gateway' => Setting::query()->where('key', 'payment_default_gateway')->value('value')
+                    ?: config('payments.default', 'paystack'),
+            ],
         ], 'Payment checkout data retrieved successfully.');
     }
 

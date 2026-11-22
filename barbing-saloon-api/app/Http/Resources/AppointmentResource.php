@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Domain\Shared\Enums\AppointmentSource;
+use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
 use App\Models\Setting;
@@ -90,6 +91,11 @@ class AppointmentResource extends JsonResource
             'source' => $sourceVal,
             'source_label' => $sourceLabel,
             'status' => $statusVal,
+            'is_draft' => ($statusVal === 'draft' || $this->status === AppointmentStatus::draft),
+            'is_draft_expired' => ($this->draft_expires_at && $this->draft_expires_at->isPast()),
+            'draft_expires_at' => $this->draft_expires_at?->toIso8601String(),
+            'draft_step' => $this->draft_step,
+            'draft_time_remaining_seconds' => ($this->draft_expires_at && $this->draft_expires_at->isFuture()) ? (int) now()->diffInSeconds($this->draft_expires_at, false) : 0,
             'verification_code' => $this->verification_code,
             'payment_status' => $paymentStatus,
             'deposit_paid' => (bool) $this->deposit_paid,

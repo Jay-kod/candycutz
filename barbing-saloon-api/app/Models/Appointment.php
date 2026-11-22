@@ -57,6 +57,8 @@ class Appointment extends Model
         'payment_status',
         'amount_due_minor',
         'payment_due_at',
+        'draft_expires_at',
+        'draft_step',
     ];
 
     protected $casts = [
@@ -74,7 +76,23 @@ class Appointment extends Model
         'payment_status' => AppointmentPaymentStatus::class,
         'amount_due_minor' => 'integer',
         'payment_due_at' => 'datetime',
+        'draft_expires_at' => 'datetime',
     ];
+
+    public function setAppointmentDateAttribute($value): void
+    {
+        $this->attributes['appointment_date'] = $value ? \Carbon\Carbon::parse($value)->toDateString() : null;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === AppointmentStatus::draft || (is_string($this->status) && $this->status === 'draft');
+    }
+
+    public function isDraftExpired(): bool
+    {
+        return $this->draft_expires_at !== null && $this->draft_expires_at->isPast();
+    }
 
     /**
      * @return BelongsTo<Branch, $this>

@@ -30,6 +30,9 @@
         </div>
       </div>
 
+      <!-- Active Draft Reservation Banner -->
+      <DraftBookingBanner @discarded="loadBookings" @resumed="loadBookings" />
+
       <!-- Filters & Active Tabs -->
       <div class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/[0.08] pb-4">
@@ -84,13 +87,15 @@
                 <span 
                   class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5"
                   :class="{
+                    'bg-amber-500/15 text-amber-500 dark:text-amber-300 border-amber-500/40': booking.status === 'draft',
                     'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30': booking.status === 'confirmed',
                     'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30': booking.status === 'pending',
                     'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30': booking.status === 'completed',
                     'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30': booking.status === 'cancelled',
                   }"
                 >
-                  {{ booking.status }}
+                  <span v-if="booking.status === 'draft'" class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                  {{ booking.status === 'draft' ? 'Draft • Unpaid' : booking.status }}
                 </span>
                 
                 <button 
@@ -191,8 +196,28 @@
             </div>
 
             <!-- Actions Footer -->
-            <div v-if="['pending', 'confirmed'].includes(booking.status)" class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col gap-2.5">
-              <template v-if="booking.status === 'pending'">
+            <div v-if="['draft', 'pending', 'confirmed'].includes(booking.status)" class="mt-6 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col gap-2.5">
+              <!-- Draft Unpaid Action Group -->
+              <template v-if="booking.status === 'draft'">
+                <div class="space-y-2">
+                  <RouterLink 
+                    :to="`/customer/dashboard/payment/${booking.id}`"
+                    class="w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 py-2.5 text-xs font-bold text-slate-950 transition-all flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 active:scale-95" 
+                  >
+                    <CreditCardIcon class="h-4 w-4" /> Complete Payment ({{ formatNairaAmount(booking.grand_total || booking.service?.price || 0) }})
+                  </RouterLink>
+                  <button 
+                    type="button"
+                    class="w-full rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 py-2 text-xs font-semibold text-red-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer" 
+                    @click="discardDraft(booking.id)"
+                  >
+                    <TrashIcon class="h-4 w-4" /> Discard Draft (Release Slot)
+                  </button>
+                </div>
+              </template>
+
+              <!-- Pending Verification Action Group -->
+              <template v-else-if="booking.status === 'pending'">
                 <div v-if="!booking.payment_status || booking.payment_status === 'pending' || booking.payment_status === 'unpaid'" class="space-y-2">
                   <RouterLink 
                     :to="`/customer/dashboard/payment/${booking.id}`"
@@ -248,6 +273,7 @@ import { onMounted, reactive, ref, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue';
 import ReceiptUploader from '../../../core/components/ReceiptUploader.vue';
+import DraftBookingBanner from '../components/booking/DraftBookingBanner.vue';
 import { client } from '@/shared/api/client';
 import { useToast } from '../../../core/composables/useToast';
 import { useConfirm } from '../../../core/composables/useConfirm';
@@ -275,6 +301,7 @@ const filters = computed(() => {
   const all = bookings.value.data || bookings.value || [];
   return [
     { label: 'All', value: 'all', count: all.length },
+    { label: 'Drafts', value: 'draft', count: all.filter(b => b.status === 'draft').length },
     { label: 'Pending', value: 'pending', count: all.filter(b => b.status === 'pending').length },
     { label: 'Confirmed', value: 'confirmed', count: all.filter(b => b.status === 'confirmed').length },
     { label: 'Cancelled', value: 'cancelled', count: all.filter(b => b.status === 'cancelled').length },
@@ -332,6 +359,25 @@ async function deleteBooking(id) {
     await loadBookings();
   } catch (err) {
     toast.error('Failed to delete booking');
+  }
+}
+
+async function discardDraft(id) {
+  const ok = await confirm({
+    title: 'Discard Draft Booking',
+    message: 'Are you sure you want to discard this draft? Your reserved chair slot will be released immediately.',
+    confirmText: 'Discard Draft'
+  });
+  if (!ok) return;
+
+  try {
+    await client.delete(`/customer/drafts/${id}`).catch(() => {
+      return client.delete(`/appointments/drafts/${id}`);
+    });
+    toast.success('Draft booking discarded. Slot released.');
+    await loadBookings();
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to discard draft');
   }
 }
 

@@ -126,6 +126,10 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/system/errors/{id}', [SystemHealthApiController::class, 'showError'])->whereNumber('id');
     Route::patch('/admin/system/errors/{id}', [SystemHealthApiController::class, 'updateError'])->whereNumber('id');
     Route::get('/admin/system/trace/{requestId}', [SystemHealthApiController::class, 'trace']);
+    Route::get('/admin/system/failed-jobs', [SystemHealthApiController::class, 'failedJobs']);
+    Route::post('/admin/system/failed-jobs/{id}/retry', [SystemHealthApiController::class, 'retryFailedJob'])->whereNumber('id');
+    Route::delete('/admin/system/failed-jobs/{id}', [SystemHealthApiController::class, 'forgetFailedJob'])->whereNumber('id');
+    Route::post('/admin/system/circuit-breakers/{service}/reset', [SystemHealthApiController::class, 'resetCircuitBreaker']);
 
     // System Backups & Recovery
     Route::get('/admin/system/backups', [SystemBackupApiController::class, 'index']);

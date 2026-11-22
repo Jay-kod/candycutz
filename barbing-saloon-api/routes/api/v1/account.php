@@ -47,6 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/my-codes', [AccountApiController::class, 'myCodes']);
 
     // Customer Bookings
+    Route::get('/customer/drafts', [AppointmentApiController::class, 'drafts']);
+    Route::get('/customer/bookings/drafts', [AppointmentApiController::class, 'drafts']);
+    Route::post('/customer/bookings/draft', [AppointmentApiController::class, 'storeDraft']);
+    Route::post('/customer/drafts/{id}/resume', [AppointmentApiController::class, 'resumeDraft'])->whereNumber('id');
+    Route::post('/customer/bookings/{id}/resume', [AppointmentApiController::class, 'resumeDraft'])->whereNumber('id');
+    Route::delete('/customer/drafts/{id}', [AppointmentApiController::class, 'discardDraft'])->whereNumber('id');
+    Route::delete('/customer/bookings/{id}/draft', [AppointmentApiController::class, 'discardDraft'])->whereNumber('id');
     Route::get('/customer/bookings', [AppointmentApiController::class, 'index']);
     Route::post('/customer/bookings', [AppointmentApiController::class, 'store']);
     Route::get('/customer/appointments', [AppointmentApiController::class, 'index']);

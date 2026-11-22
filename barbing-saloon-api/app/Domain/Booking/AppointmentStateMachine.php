@@ -27,6 +27,7 @@ class AppointmentStateMachine
      * @var array<string, string[]>
      */
     private const TRANSITIONS = [
+        'draft' => ['confirmed', 'pending', 'cancelled'],
         'pending' => ['confirmed', 'cancelled'],
         'confirmed' => ['checked_in', 'no_show', 'cancelled'],
         'checked_in' => ['in_progress', 'cancelled'],
@@ -43,6 +44,10 @@ class AppointmentStateMachine
      * @var array<string, string[]>
      */
     private const ROLE_PERMISSIONS = [
+        // draft transitions
+        'draft→confirmed' => ['customer', 'barber', 'admin', 'super_admin'],
+        'draft→pending' => ['customer', 'barber', 'admin', 'super_admin'],
+        'draft→cancelled' => ['customer', 'barber', 'admin', 'super_admin'],
         // customer can only cancel their own pending/confirmed bookings
         'pending→cancelled' => ['customer', 'barber', 'admin', 'super_admin'],
         'pending→confirmed' => ['barber', 'admin', 'super_admin'],

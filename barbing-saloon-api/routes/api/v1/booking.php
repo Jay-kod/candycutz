@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/availability', [AvailabilityApiController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    // Draft Booking Lifecycle
+    Route::get('/appointments/drafts', [AppointmentApiController::class, 'drafts']);
+    Route::post('/appointments/draft', [AppointmentApiController::class, 'storeDraft']);
+    Route::post('/appointments/drafts/{id}/resume', [AppointmentApiController::class, 'resumeDraft'])->whereNumber('id');
+    Route::delete('/appointments/drafts/{id}', [AppointmentApiController::class, 'discardDraft'])->whereNumber('id');
+
     Route::get('/appointments', [AppointmentApiController::class, 'index']);
     Route::post('/appointments', [AppointmentApiController::class, 'store']);
     Route::middleware('check.role:barber,admin,super_admin')

@@ -97,7 +97,8 @@ import {
   ArrowTopRightOnSquareIcon,
   KeyIcon,
   AcademicCapIcon,
-  QueueListIcon
+  QueueListIcon,
+  PaintBrushIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -123,6 +124,7 @@ defineEmits(['refresh', 'save', 'update:currentTab']);
 
 const tabs = [
   { id: 'config', label: 'Credentials & SMTP', icon: KeyIcon },
+  { id: 'templates', label: 'Email Templates & Studio', icon: PaintBrushIcon, badge: 'Studio' },
   { id: 'guide', label: 'Step-by-Step Setup Guide', icon: AcademicCapIcon, badge: '5 Steps' },
   { id: 'deliveries', label: 'Email Deliveries & Audit', icon: QueueListIcon, badge: 'Live' }
 ];

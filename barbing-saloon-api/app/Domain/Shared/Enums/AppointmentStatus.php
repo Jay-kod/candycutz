@@ -4,6 +4,7 @@ namespace App\Domain\Shared\Enums;
 
 enum AppointmentStatus: string
 {
+    case draft = 'draft';
     case pending = 'pending';
     case confirmed = 'confirmed';
     case checked_in = 'checked_in';
@@ -19,6 +20,7 @@ enum AppointmentStatus: string
     public static function activeStatuses(): array
     {
         return [
+            self::draft,
             self::pending,
             self::confirmed,
             self::checked_in,
