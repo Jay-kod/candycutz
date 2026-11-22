@@ -8,16 +8,28 @@
       />
 
       <!-- Loading State -->
-      <div v-if="loading" class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        <div
-          v-for="i in 5"
-          :key="i"
-          class="h-28 rounded-2xl animate-pulse bg-[var(--color-bg-secondary)] border border-[var(--color-border)]"
-        ></div>
+      <div v-if="loading" class="space-y-6">
+        <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div
+            v-for="i in 6"
+            :key="'subsystem-skel-' + i"
+            class="h-24 rounded-2xl animate-pulse bg-[var(--color-bg-secondary)] border border-[var(--color-border)]"
+          ></div>
+        </div>
+        <div class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div
+            v-for="i in 5"
+            :key="'kpi-skel-' + i"
+            class="h-28 rounded-2xl animate-pulse bg-[var(--color-bg-secondary)] border border-[var(--color-border)]"
+          ></div>
+        </div>
       </div>
 
       <!-- Populated Dashboard -->
       <template v-else>
+        <!-- Telemetry & Circuit Breakers Cockpit Strip -->
+        <SuperAdminSubsystemStrip :subsystems="dashboard.subsystems" />
+
         <!-- Executive KPI Cards -->
         <div class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard
@@ -27,7 +39,7 @@
             :value="card.value"
             :subtitle="card.sub"
             :icon="card.icon"
-            variant="super_admin"
+            variant="rose"
           />
         </div>
 
@@ -60,6 +72,7 @@ import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue'
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import StatCard from '@/shared/ui/StatCard.vue';
 import SuperAdminCommandBanner from '../components/SuperAdminCommandBanner.vue';
+import SuperAdminSubsystemStrip from '../components/SuperAdminSubsystemStrip.vue';
 import SuperAdminRoleDistribution from '../components/SuperAdminRoleDistribution.vue';
 import SuperAdminQuickActions from '../components/SuperAdminQuickActions.vue';
 import SuperAdminAuditTable from '../components/SuperAdminAuditTable.vue';
