@@ -77,12 +77,20 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('auth-sensitive', function (Request $request) {
             $identity = (string) ($request->input('identity') ?? $request->input('email') ?? $request->input('username') ?? $request->ip());
 
-            return Limit::perMinute(10)
-                ->by($identity.'|'.$request->ip())
-                ->response(function (Request $request, array $headers) {
-                    return ApiResponse::error('Too many requests. Please wait a moment before trying again.', [], 429, 'RATE_LIMIT_EXCEEDED')
-                        ->withHeaders($headers);
-                });
+            return [
+                Limit::perMinute(10)
+                    ->by($identity.'|'.$request->ip())
+                    ->response(function (Request $request, array $headers) {
+                        return ApiResponse::error('Too many requests. Please wait a moment before trying again.', [], 429, 'RATE_LIMIT_EXCEEDED')
+                            ->withHeaders($headers);
+                    }),
+                Limit::perMinute(30)
+                    ->by('auth-ip:'.$request->ip())
+                    ->response(function (Request $request, array $headers) {
+                        return ApiResponse::error('Too many authentication attempts from this IP address. Please wait a moment before trying again.', [], 429, 'RATE_LIMIT_EXCEEDED')
+                            ->withHeaders($headers);
+                    }),
+            ];
         });
 
         Gate::define('manage-users', static fn (User $user): bool => ($user->role->value ?? $user->role) === 'super_admin');

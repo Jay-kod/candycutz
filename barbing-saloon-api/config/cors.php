@@ -11,7 +11,15 @@ return [
         ? ['#^https?://([a-z0-9\-]+\.)?ngrok-free\.(dev|app)$#']
         : [],
     'allowed_headers' => ['*'],
-    'exposed_headers' => ['X-Request-ID', 'X-Request-Id'],
+    'exposed_headers' => [
+        'X-Request-ID',
+        'X-Request-Id',
+        'X-Gate-Status',
+        'X-Response-Time',
+        'X-Query-Count',
+        'X-Query-Warning',
+        'X-Backup-Encrypted',
+    ],
     'max_age' => 86400,
     'supports_credentials' => true,
 ];

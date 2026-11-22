@@ -20,6 +20,9 @@ class SecurityHeaders
             'Permissions-Policy' => 'camera=(), microphone=(), geolocation=()',
             'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
             'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+            'Cross-Origin-Opener-Policy' => 'same-origin',
+            'Cross-Origin-Resource-Policy' => 'cross-origin',
+            'X-Permitted-Cross-Domain-Policies' => 'none',
         ];
 
         foreach ($headers as $key => $value) {

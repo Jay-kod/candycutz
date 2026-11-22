@@ -96,6 +96,7 @@ class SystemHealthApiController
                 'backups_count' => count($backupFiles),
                 'latest_backup_time' => $latestBackupTime,
                 'active_sessions_count' => $activeSessionsCount,
+                'security_probes_blocked' => (int) Cache::get('security_probes_blocked_total', 0),
             ],
             'top_errors' => $topErrors,
             'server_time' => $now->toIso8601String(),

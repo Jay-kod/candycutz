@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ApiGateMiddleware;
+use App\Http\Middleware\BlockMaliciousIngress;
 use App\Http\Middleware\CheckAppVersion;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ClientGateMiddleware;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->prepend(BlockMaliciousIngress::class);
         $middleware->redirectGuestsTo(function (Request $request) {
             return $request->is('api/*') ? '/api/v1/auth/login' : '/login';
         });
@@ -45,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'idempotent' => IdempotencyMiddleware::class,
             'client.gate' => ClientGateMiddleware::class,
             'feature' => FeatureGateMiddleware::class,
+            'ingress.shield' => BlockMaliciousIngress::class,
         ]);
 
         $middleware->api(prepend: [
