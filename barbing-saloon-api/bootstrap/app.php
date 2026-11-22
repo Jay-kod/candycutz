@@ -11,6 +11,7 @@ use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\LogApiRequest;
 use App\Http\Middleware\RequestContextMiddleware;
+use App\Http\Middleware\SanitizeInputStrings;
 use App\Http\Middleware\SecurityHeaders;
 use App\Support\Errors\ApiExceptionRenderer;
 use App\Support\Errors\ErrorReporter;
@@ -48,11 +49,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'client.gate' => ClientGateMiddleware::class,
             'feature' => FeatureGateMiddleware::class,
             'ingress.shield' => BlockMaliciousIngress::class,
+            'sanitize.strings' => SanitizeInputStrings::class,
         ]);
 
         $middleware->api(prepend: [
             RequestContextMiddleware::class,
             ClientGateMiddleware::class,
+            SanitizeInputStrings::class,
         ]);
 
         $middleware->api(append: [
