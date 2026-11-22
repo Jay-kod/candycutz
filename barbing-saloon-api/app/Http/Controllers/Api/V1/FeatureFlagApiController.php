@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Shared\Services\AuditLogger;
 use App\Http\Responses\ApiResponse;
 use App\Models\FeatureFlag;
 use Illuminate\Http\JsonResponse;
@@ -72,6 +73,8 @@ class FeatureFlagApiController
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
+        AuditLogger::log('feature_flag_created', 'FeatureFlag', $flag, [], ['key' => $flag->key, 'is_active' => $flag->is_active]);
+
         return ApiResponse::success($flag, 'Feature flag created successfully.', 201);
     }
 
@@ -101,6 +104,8 @@ class FeatureFlagApiController
             'is_active' => $validated['is_active'] ?? $flag->is_active,
         ]);
 
+        AuditLogger::log('feature_flag_updated', 'FeatureFlag', $flag, [], ['key' => $flag->key, 'is_active' => $flag->is_active]);
+
         return ApiResponse::success($flag, 'Feature flag updated successfully.');
     }
 
@@ -110,8 +115,11 @@ class FeatureFlagApiController
     public function toggle(int $id): JsonResponse
     {
         $flag = FeatureFlag::findOrFail($id);
+        $oldState = (bool) $flag->is_active;
         $flag->is_active = ! $flag->is_active;
         $flag->save();
+
+        AuditLogger::log('feature_flag_toggled', 'FeatureFlag', $flag, ['is_active' => $oldState], ['is_active' => (bool) $flag->is_active]);
 
         return ApiResponse::success($flag, "Feature flag {$flag->key} is now ".($flag->is_active ? 'active' : 'inactive').'.');
     }
@@ -122,7 +130,10 @@ class FeatureFlagApiController
     public function destroy(int $id): JsonResponse
     {
         $flag = FeatureFlag::findOrFail($id);
+        $key = $flag->key;
         $flag->delete();
+
+        AuditLogger::log('feature_flag_deleted', 'FeatureFlag', null, [], ['key' => $key], 'FeatureFlag', $id);
 
         return ApiResponse::success(null, 'Feature flag deleted successfully.');
     }

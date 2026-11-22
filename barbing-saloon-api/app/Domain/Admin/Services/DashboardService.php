@@ -30,8 +30,26 @@ class DashboardService
     /**
      * @return LengthAwarePaginator<int, AuditLog>
      */
-    public function auditLogs(): LengthAwarePaginator
+    public function auditLogs(?string $module = null, ?string $search = null): LengthAwarePaginator
     {
-        return AuditLog::with('user')->latest()->paginate(20);
+        $query = AuditLog::with('user')->latest();
+
+        if ($module && $module !== 'all') {
+            $query->where('module', $module);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('module', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query->paginate(request()->integer('per_page', 20));
     }
 }

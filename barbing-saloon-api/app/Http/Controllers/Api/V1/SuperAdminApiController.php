@@ -7,6 +7,7 @@ use App\Domain\Content\Actions\UpdateSettings;
 use App\Domain\Content\Services\SettingsService;
 use App\Domain\Identity\Actions\ManageUsers;
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Http\Requests\Api\V1\SuperAdmin\StoreUserRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
@@ -35,22 +36,34 @@ class SuperAdminApiController
 
     public function storeUser(StoreUserRequest $request, ManageUsers $manageUsers): JsonResponse
     {
-        return ApiResponse::success(new UserResource($manageUsers->storeUser($request->validated())), 'User created', 201);
+        $user = $manageUsers->storeUser($request->validated());
+        AuditLogger::log('user_created', 'SuperAdmin', $user, [], ['email' => $user->email, 'role' => $user->role instanceof \BackedEnum ? $user->role->value : (string) $user->role]);
+
+        return ApiResponse::success(new UserResource($user), 'User created', 201);
     }
 
     public function updateUser(UpdateUserRequest $request, User $user, ManageUsers $manageUsers): JsonResponse
     {
-        return ApiResponse::success(new UserResource($manageUsers->updateUser($user, $request->validated())), 'User updated');
+        $updated = $manageUsers->updateUser($user, $request->validated());
+        AuditLogger::log('user_updated', 'SuperAdmin', $updated, [], $request->validated());
+
+        return ApiResponse::success(new UserResource($updated), 'User updated');
     }
 
     public function activateUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
-        return ApiResponse::success(new UserResource($manageUsers->activateUser($user)), 'User activated');
+        $activated = $manageUsers->activateUser($user);
+        AuditLogger::log('user_activated', 'SuperAdmin', $activated);
+
+        return ApiResponse::success(new UserResource($activated), 'User activated');
     }
 
     public function deactivateUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
-        return ApiResponse::success(new UserResource($manageUsers->deactivateUser($user)), 'User deactivated');
+        $deactivated = $manageUsers->deactivateUser($user);
+        AuditLogger::log('user_deactivated', 'SuperAdmin', $deactivated);
+
+        return ApiResponse::success(new UserResource($deactivated), 'User deactivated');
     }
 
     public function resetPassword(User $user, Request $request, ManageUsers $manageUsers): JsonResponse
@@ -59,12 +72,17 @@ class SuperAdminApiController
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        return ApiResponse::success(new UserResource($manageUsers->adminResetPassword($user, $validated['password'])), 'User password reset successfully');
+        $reset = $manageUsers->adminResetPassword($user, $validated['password']);
+        AuditLogger::log('password_reset', 'SuperAdmin', $user);
+
+        return ApiResponse::success(new UserResource($reset), 'User password reset successfully');
     }
 
     public function deleteUser(User $user, ManageUsers $manageUsers): JsonResponse
     {
+        $userId = $user->id;
         $manageUsers->deleteUser($user);
+        AuditLogger::log('user_deleted', 'SuperAdmin', null, [], [], 'User', $userId);
 
         return ApiResponse::success(null, 'User deleted');
     }
@@ -167,12 +185,18 @@ class SuperAdminApiController
         }
 
         $action->execute(['settings' => $settings]);
+        AuditLogger::log('settings_updated', 'SuperAdmin', null, [], ['keys' => array_keys($settings)]);
 
         return ApiResponse::success($settingsService->settings(), 'Settings updated');
     }
 
-    public function auditLogs(DashboardService $dashboardService): JsonResponse
+    public function auditLogs(Request $request, DashboardService $dashboardService): JsonResponse
     {
-        return ApiResponse::paginated($dashboardService->auditLogs(), 'Audit logs loaded');
+        $logs = $dashboardService->auditLogs(
+            $request->query('module'),
+            $request->query('search')
+        );
+
+        return ApiResponse::paginated($logs, 'Audit logs loaded');
     }
 }

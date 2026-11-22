@@ -8,6 +8,7 @@ use App\Domain\Identity\Actions\AuthenticateUser;
 use App\Domain\Identity\Actions\ChangePassword;
 use App\Domain\Identity\Actions\ManageUserTokens;
 use App\Domain\Identity\Actions\RegisterCustomer;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Identity\Actions\RequestPasswordReset;
 use App\Domain\Identity\Actions\ResetPassword;
 use App\Domain\Identity\Actions\SocialLogin;
@@ -315,13 +316,16 @@ class AuthApiController
     public function revokeSession(Request $request, int|string $id, ManageUserTokens $action): JsonResponse
     {
         $action->revokeSession($request->user(), $id);
+        AuditLogger::log('session_revoked', 'Auth', $request->user(), [], ['token_id' => $id]);
 
         return ApiResponse::success(null, 'Session revoked successfully');
     }
 
     public function revokeOtherSessions(Request $request, ManageUserTokens $action): JsonResponse
     {
-        $count = $action->revokeOtherSessions($request->user());
+        $user = $request->user();
+        $count = $action->revokeOtherSessions($user);
+        AuditLogger::log('sessions_revoked_others', 'Auth', $user, [], ['revoked_count' => $count]);
 
         return ApiResponse::success([
             'revoked_count' => $count,

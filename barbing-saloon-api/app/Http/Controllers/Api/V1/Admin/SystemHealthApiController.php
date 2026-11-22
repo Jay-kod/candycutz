@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Shared\Services\CircuitBreakerService;
 use App\Http\Responses\ApiResponse;
 use App\Models\ApiRequestLog;
@@ -589,6 +590,8 @@ class SystemHealthApiController
             // In testing or sync driver, retry call may return exit code
         }
 
+        AuditLogger::log('failed_job_retried', 'SystemHealth', null, [], ['job_id' => $id]);
+
         return ApiResponse::success([
             'id' => $id,
             'retried' => true,
@@ -612,6 +615,7 @@ class SystemHealthApiController
         }
 
         DB::table('failed_jobs')->where('id', $id)->delete();
+        AuditLogger::log('failed_job_dismissed', 'SystemHealth', null, [], ['job_id' => $id]);
 
         return ApiResponse::success([
             'id' => $id,
@@ -622,6 +626,7 @@ class SystemHealthApiController
     public function resetCircuitBreaker(Request $request, string $service): JsonResponse
     {
         $this->circuitBreaker->reset($service);
+        AuditLogger::log('circuit_breaker_reset', 'SystemHealth', null, [], ['service' => $service]);
 
         return ApiResponse::success([
             'service' => $service,

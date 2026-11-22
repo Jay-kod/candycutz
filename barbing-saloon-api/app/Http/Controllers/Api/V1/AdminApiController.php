@@ -14,6 +14,7 @@ use App\Domain\Identity\Actions\DeleteCustomer;
 use App\Domain\Identity\Actions\DeleteHoliday;
 use App\Domain\Identity\Actions\DeleteWorkingHour;
 use App\Domain\Identity\Actions\GetAuditLogs;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Identity\Actions\GetCustomerProfile;
 use App\Domain\Identity\Actions\GetCustomers;
 use App\Domain\Identity\Actions\GetHolidays;
@@ -281,7 +282,10 @@ class AdminApiController
             'status' => ['sometimes', 'string', 'in:active,suspended,deactivated'],
         ]);
 
-        return ApiResponse::success($action->execute($id, $validated), 'Customer status updated successfully');
+        $result = $action->execute($id, $validated);
+        AuditLogger::log('customer_status_updated', 'CustomerManagement', null, [], $validated, 'User', $id);
+
+        return ApiResponse::success($result, 'Customer status updated successfully');
     }
 
     public function resetCustomerPassword(Request $request, int $id, ResetCustomerPassword $action): JsonResponse
@@ -290,12 +294,16 @@ class AdminApiController
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        return ApiResponse::success($action->execute($id, $validated['password']), 'Customer password reset successfully');
+        $result = $action->execute($id, $validated['password']);
+        AuditLogger::log('customer_password_reset', 'CustomerManagement', null, [], [], 'User', $id);
+
+        return ApiResponse::success($result, 'Customer password reset successfully');
     }
 
     public function deleteCustomer(int $id, DeleteCustomer $action): JsonResponse
     {
         $action->execute($id);
+        AuditLogger::log('customer_deleted', 'CustomerManagement', null, [], [], 'User', $id);
 
         return ApiResponse::success(null, 'Customer deleted successfully');
     }

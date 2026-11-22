@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Shared\Services\BackupEncryptionService;
 use App\Http\Responses\ApiResponse;
 use Carbon\Carbon;
@@ -133,12 +134,19 @@ class SystemBackupApiController
                 return ApiResponse::error('Database backup failed: '.$message, [], 500, 'BACKUP_FAILED');
             }
 
+            $isEncrypted = $this->encryptionService->isEncrypted($destination);
+            AuditLogger::log('backup_created', 'SystemBackup', null, [], [
+                'filename' => $filename,
+                'is_encrypted' => $isEncrypted,
+                'size_bytes' => File::size($destination),
+            ]);
+
             return ApiResponse::success([
                 'filename' => $filename,
                 'size_bytes' => File::size($destination),
                 'size_formatted' => $this->formatBytes(File::size($destination)),
                 'created_at' => Carbon::createFromTimestamp(File::lastModified($destination))->toIso8601String(),
-                'is_encrypted' => $this->encryptionService->isEncrypted($destination),
+                'is_encrypted' => $isEncrypted,
                 'output' => trim($output),
             ], 'Database snapshot generated successfully');
         } catch (Throwable $e) {
@@ -229,6 +237,11 @@ class SystemBackupApiController
         $isEncrypted = $this->encryptionService->isEncrypted($filePath);
         $wantsDecrypted = $request->boolean('decrypt');
 
+        AuditLogger::log('backup_downloaded', 'SystemBackup', null, [], [
+            'filename' => $safeFilename,
+            'decrypted' => (bool) ($isEncrypted && $wantsDecrypted),
+        ]);
+
         if ($isEncrypted && $wantsDecrypted) {
             $decryptedFilename = preg_replace('/\.enc$/i', '', $safeFilename);
             $tempDecrypted = $dir.DIRECTORY_SEPARATOR.'tmp_dec_'.uniqid().'_'.$decryptedFilename;
@@ -281,6 +294,7 @@ class SystemBackupApiController
         }
 
         File::delete($filePath);
+        AuditLogger::log('backup_deleted', 'SystemBackup', null, [], ['filename' => $safeFilename]);
 
         return ApiResponse::success([
             'deleted_file' => $safeFilename,

@@ -19,10 +19,17 @@ class GetAuditLogs
                 ->select(
                     'audit_logs.id',
                     'audit_logs.action',
+                    'audit_logs.module',
+                    'audit_logs.target_type',
+                    'audit_logs.target_id',
+                    'audit_logs.user_role',
+                    'audit_logs.old_value',
+                    'audit_logs.new_value',
                     DB::raw("COALESCE(audit_logs.target_type, audit_logs.module, 'system') as entity_type"),
                     'audit_logs.ip_address',
                     'audit_logs.created_at',
-                    'users.name as user_name'
+                    'users.name as user_name',
+                    'users.email as user_email'
                 )
                 ->latest('audit_logs.id')
                 ->limit(100)
