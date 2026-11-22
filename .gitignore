@@ -41,6 +41,7 @@ barbing-saloon-api/storage/app/receipts/*
 !barbing-saloon-api/storage/framework/views/.gitkeep
 !barbing-saloon-api/storage/framework/testing/.gitkeep
 !barbing-saloon-api/storage/app/public/.gitkeep
+!barbing-saloon-api/storage/app/public/.htaccess
 !barbing-saloon-api/storage/app/backups/.gitkeep
 !barbing-saloon-api/storage/app/receipts/.gitkeep
 

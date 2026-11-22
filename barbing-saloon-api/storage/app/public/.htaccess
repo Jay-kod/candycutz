@@ -1,0 +1,29 @@
+# Candycutz Storage Directory - Execution Quarantine
+# Prevent execution of any scripts in the public storage directory
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|phar|sh|pl|py|cgi|asp|aspx|exe|dll|rb|bat|cmd)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|phar|sh|pl|py|cgi|asp|aspx|exe|dll|rb|bat|cmd)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Turn off script execution engines
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Prevent directory listing and CGI execution
+Options -Indexes -ExecCGI
