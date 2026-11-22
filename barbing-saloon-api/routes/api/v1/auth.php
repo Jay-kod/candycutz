@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/email/verify-code', [AuthApiController::class, 'verifyOtp'])
         ->middleware('throttle:10,1');
     Route::get('/auth/sessions', [AuthApiController::class, 'sessions']);
+    Route::post('/auth/sessions/revoke-others', [AuthApiController::class, 'revokeOtherSessions']);
     Route::delete('/auth/sessions/{id}', [AuthApiController::class, 'revokeSession']);
     Route::get('/auth/me', [AuthApiController::class, 'me']);
 });

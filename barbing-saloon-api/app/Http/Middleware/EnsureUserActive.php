@@ -36,10 +36,8 @@ class EnsureUserActive
         }
 
         if (! ($user->is_active ?? false) || in_array($user->status ?? '', ['deactivated', 'suspended'], true)) {
-            // Revoke the current token immediately so it cannot be reused
-            if ($currentToken && method_exists($currentToken, 'delete')) {
-                $currentToken->delete();
-            }
+            // Revoke all tokens across all devices immediately for this suspended account
+            $user->tokens()->delete();
 
             return ApiResponse::error(
                 'Your account is currently inactive or suspended. Please contact support.',

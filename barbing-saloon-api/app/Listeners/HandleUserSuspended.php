@@ -24,6 +24,9 @@ class HandleUserSuspended implements ShouldQueue
         $actorName = $event->actor->name ?? 'System';
         $reason = $event->reason ?? 'No reason provided';
 
+        // Invalidate all active Sanctum tokens across all devices
+        $user->tokens()->delete();
+
         Log::warning("User suspended: {$user->email} by {$actorName}. Reason: {$reason}", [
             'user_id' => $user->id,
             'actor_id' => $event->actor?->id,

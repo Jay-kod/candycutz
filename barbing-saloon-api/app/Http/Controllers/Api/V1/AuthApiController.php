@@ -319,6 +319,15 @@ class AuthApiController
         return ApiResponse::success(null, 'Session revoked successfully');
     }
 
+    public function revokeOtherSessions(Request $request, ManageUserTokens $action): JsonResponse
+    {
+        $count = $action->revokeOtherSessions($request->user());
+
+        return ApiResponse::success([
+            'revoked_count' => $count,
+        ], 'All other active sessions have been revoked successfully');
+    }
+
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();

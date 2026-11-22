@@ -68,4 +68,32 @@ describe('HealthIncidentVault.vue', () => {
     expect(wrapper.emitted('reset-breaker')).toBeTruthy()
     expect(wrapper.emitted('reset-breaker')[0]).toEqual(['resend'])
   })
+
+  it('renders database fallback incidents with error details and copy action', async () => {
+    const fallbackIncidents = [
+      {
+        timestamp: '2026-11-22T02:55:28Z',
+        error_code: 'SCHEMA_DRIFT',
+        message: "SQLSTATE[42S22]: Column not found: 1054 Unknown column 'draft_expires_at'",
+        sql: 'select * from appointments where draft_expires_at is null',
+        route_uri: 'api/v1/available-slots',
+        is_connection_failure: false,
+      },
+    ]
+
+    const wrapper = mount(HealthIncidentVault, {
+      props: {
+        failedJobs: [],
+        fallbackIncidents,
+      },
+    })
+
+    expect(wrapper.text()).toContain('Database Disconnects & Disk Fallback Log')
+    expect(wrapper.text()).toContain('SCHEMA_DRIFT')
+    expect(wrapper.text()).toContain('draft_expires_at')
+    expect(wrapper.text()).toContain('Route: api/v1/available-slots')
+
+    const copyBtn = wrapper.findAll('button').find((b) => b.text().includes('Copy Error'))
+    expect(copyBtn).toBeDefined()
+  })
 })

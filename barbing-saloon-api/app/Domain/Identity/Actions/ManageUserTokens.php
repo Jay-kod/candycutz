@@ -31,7 +31,8 @@ class ManageUserTokens
      */
     public function listSessions(User $user): array
     {
-        $currentTokenId = $user->currentAccessToken()?->id;
+        $token = $user->currentAccessToken();
+        $currentTokenId = ($token instanceof \Laravel\Sanctum\PersonalAccessToken) ? $token->id : null;
 
         return $user->tokens()
             ->orderByDesc('last_used_at')
@@ -61,5 +62,21 @@ class ManageUserTokens
         }
 
         return $deleted > 0;
+    }
+
+    public function revokeOtherSessions(User $user): int
+    {
+        $token = $user->currentAccessToken();
+        $currentTokenId = ($token instanceof \Laravel\Sanctum\PersonalAccessToken) ? $token->id : null;
+        $deleted = $user->tokens()
+            ->when($currentTokenId, fn ($q) => $q->where('id', '!=', $currentTokenId))
+            ->delete();
+
+        $this->logAction('auth.revoke_other_sessions', $user, [], [
+            'email' => $user->email,
+            'revoked_count' => $deleted,
+        ]);
+
+        return $deleted;
     }
 }

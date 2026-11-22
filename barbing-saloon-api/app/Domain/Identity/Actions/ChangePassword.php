@@ -27,6 +27,15 @@ class ChangePassword
             'password' => Hash::make($data['new_password']),
         ]);
 
+        // Terminate all other active device tokens immediately upon password change
+        $token = $user->currentAccessToken();
+        $currentTokenId = ($token instanceof \Laravel\Sanctum\PersonalAccessToken) ? $token->id : null;
+        if ($currentTokenId) {
+            $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+        } elseif (! ($token instanceof \Laravel\Sanctum\TransientToken)) {
+            $user->tokens()->delete();
+        }
+
         $this->logAction('auth.change_password', $user, [], ['email' => $user->email]);
 
         PasswordChanged::dispatch($user);

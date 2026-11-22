@@ -74,6 +74,7 @@ const {
         <HealthIncidentVault
           :failed-jobs="failedJobs"
           :circuit-breakers="healthDetail?.checks?.circuit_breakers || {}"
+          :fallback-incidents="healthDetail?.checks?.database?.fallback_incidents || []"
           :loading="failedJobsLoading"
           :retrying-job-id="retryingJobId"
           :dismissing-job-id="dismissingJobId"

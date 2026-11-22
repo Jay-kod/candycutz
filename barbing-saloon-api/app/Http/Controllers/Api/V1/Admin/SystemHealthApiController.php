@@ -9,6 +9,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\ApiRequestLog;
 use App\Models\ErrorEvent;
 use App\Models\ErrorGroup;
+use App\Support\Errors\ErrorReporter;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
 use Illuminate\Http\JsonResponse;
@@ -135,6 +136,9 @@ class SystemHealthApiController
             $dbError = $e->getMessage();
         }
 
+        $fallbackIncidents = ErrorReporter::getRecentFallbackIncidents(15);
+        $recentDisconnects = count(array_filter($fallbackIncidents, fn ($i) => ! empty($i['is_connection_failure'])));
+
         $checks['database'] = [
             'status' => $dbStatus,
             'latency_ms' => $dbLatency,
@@ -143,6 +147,8 @@ class SystemHealthApiController
             'database_name' => $databaseName,
             'tables_count' => $tableCount,
             'error' => $dbError,
+            'fallback_incidents' => $fallbackIncidents,
+            'recent_disconnects_count' => $recentDisconnects,
         ];
 
         // 2. Cache Diagnostic
@@ -278,18 +284,37 @@ class SystemHealthApiController
                 $connection = DB::connection();
                 $connection->selectOne('SELECT 1 as ping');
                 $ms = round((microtime(true) - $t0) * 1000, 2);
+
+                // Verify critical table integrity
+                $requiredTables = ['appointments', 'users', 'services', 'payments', 'webhook_events'];
+                $missingTables = [];
+                foreach ($requiredTables as $tbl) {
+                    if (! Schema::hasTable($tbl)) {
+                        $missingTables[] = $tbl;
+                    }
+                }
+
+                // Check draft reservation schema column
+                $hasDraftColumn = Schema::hasTable('appointments') && Schema::hasColumn('appointments', 'draft_expires_at');
+
+                $schemaOk = empty($missingTables) && $hasDraftColumn;
+                $detailsMsg = $schemaOk
+                    ? 'The active application database responded successfully and schema integrity is fully verified.'
+                    : 'Database responded but schema drift was detected! Missing: ' . implode(', ', array_merge($missingTables, $hasDraftColumn ? [] : ['appointments.draft_expires_at']));
+
                 $results['database'] = [
-                    'passed' => true,
+                    'passed' => $schemaOk,
                     'latency_ms' => $ms,
                     'connection' => $connection->getName(),
                     'database_name' => $this->getActiveDatabaseName($connection),
-                    'message' => 'The active application database responded successfully to a read-only diagnostic query.',
+                    'schema_integrity' => $schemaOk,
+                    'message' => $detailsMsg,
                 ];
             } catch (Throwable $e) {
                 $results['database'] = [
                     'passed' => false,
                     'error' => $e->getMessage(),
-                    'message' => 'Database connection failed.',
+                    'message' => 'Database connection failed: ' . $e->getMessage(),
                 ];
             }
         }
