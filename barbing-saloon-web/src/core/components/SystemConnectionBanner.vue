@@ -52,6 +52,12 @@
                 >
                   (Start MySQL in XAMPP Control Panel)
                 </span>
+                <span
+                  v-else-if="isDisconnected && disconnectType === 'server'"
+                  class="hidden md:inline ml-2 text-[11px] opacity-75 font-mono"
+                >
+                  (Start API backend: npm run dev:api on port 8000)
+                </span>
               </div>
             </div>
 

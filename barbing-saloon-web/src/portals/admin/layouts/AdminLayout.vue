@@ -43,6 +43,7 @@ import {
   BuildingStorefrontIcon,
   BuildingLibraryIcon,
   TagIcon,
+  IdentificationIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -83,6 +84,7 @@ const navItems = [
   { name: 'Feature Flags', to: '/admin/feature-flags', icon: FlagIcon },
   { name: 'Working Hours', to: '/admin/working-hours', icon: ClockIcon },
   { name: 'Integrations', to: '/admin/integrations', icon: KeyIcon },
+  { name: 'Google Authentication', to: '/admin/google-auth', icon: IdentificationIcon },
   { name: 'Resend Email Setup', to: '/admin/resend', icon: EnvelopeIcon, badge: 'API' },
   { name: 'API Directory', to: '/admin/api', icon: CodeBracketIcon },
   { name: 'Analytics', to: '/admin/analytics', icon: PresentationChartLineIcon },

@@ -404,23 +404,27 @@ class AdminApiController
             config(['mail.from.name' => (string) $mailFromName]);
         }
 
+        $fromAddress = (string) (config('mail.from.address') ?: 'onboarding@resend.dev');
+        $fromName = (string) (config('mail.from.name') ?: 'CandyCutz Luxury Grooming');
+        if (in_array(strtolower($fromName), ['candycutz', 'candycutz project', 'laravel'], true)) {
+            $fromName = 'CandyCutz Luxury Grooming';
+        }
+
+        $viewData = [
+            'recipient' => $to,
+            'fromAddress' => $fromAddress,
+            'fromName' => $fromName,
+            'dispatchedAt' => now()->format('M d, Y • g:i A T'),
+            'environment' => app()->environment(),
+            'adminUrl' => rtrim((string) config('app.frontend_url', config('app.url', 'http://localhost:5173')), '/').'/admin/integrations/resend',
+        ];
+
         try {
-            Mail::html(
-                '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #222; border-radius: 12px; background: #0c0e12; color: #f1f5f9;">
-                    <div style="margin-bottom: 20px;">
-                        <span style="font-weight: 800; font-size: 20px; color: #ff6700; letter-spacing: -0.5px;">CandyCutz</span>
-                        <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-left: 8px; letter-spacing: 1px;">Luxury Grooming</span>
-                    </div>
-                    <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">Resend Connection Test</h2>
-                    <p style="font-size: 15px; color: #cbd5e1; line-height: 1.6;">Your CandyCutz Resend transactional email integration is working cleanly and reliably.</p>
-                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
-                    <p style="font-size: 11px; color: #64748b; margin: 0;">Dispatched via Laravel Mail Resend Transport.</p>
-                </div>',
-                function ($message) use ($to) {
-                    $message->to($to)
-                        ->subject('CandyCutz — Resend Connection Test');
-                }
-            );
+            Mail::send('mail.connection-test', $viewData, function ($message) use ($to, $fromAddress, $fromName) {
+                $message->to($to)
+                    ->from($fromAddress, $fromName)
+                    ->subject('CandyCutz — Resend Connection Test');
+            });
 
             if ($delivery) {
                 $delivery->update([
@@ -639,6 +643,72 @@ class AdminApiController
         \Illuminate\Support\Facades\Cache::forget('paystack_gateway_credentials');
 
         return ApiResponse::success(null, 'Paystack settings updated successfully');
+    }
+
+    public function testGoogleAuthConnection(Request $request): JsonResponse
+    {
+        $clientId = trim((string) ($request->input('client_id')
+            ?: Setting::query()->where('key', 'google_client_id')->value('value')
+            ?: config('services.google.client_id', '')));
+
+        if ($clientId === '') {
+            return ApiResponse::error(
+                'Google Client ID is not configured. Save the Web Client ID before testing.',
+                [],
+                422
+            );
+        }
+
+        if (! str_ends_with($clientId, '.apps.googleusercontent.com')) {
+            return ApiResponse::error(
+                'The saved value is not a valid Google OAuth Web Client ID.',
+                [],
+                422
+            );
+        }
+
+        try {
+            $response = Http::timeout(10)->get(
+                'https://accounts.google.com/.well-known/openid-configuration'
+            );
+
+            if (! $response->successful()) {
+                return ApiResponse::error(
+                    'Google could not be reached for the connection test.',
+                    ['http_status' => $response->status()],
+                    502
+                );
+            }
+
+            $discovery = $response->json();
+            if (! is_array($discovery)
+                || ($discovery['issuer'] ?? null) !== 'https://accounts.google.com'
+                || empty($discovery['jwks_uri'])
+                || empty($discovery['authorization_endpoint'])
+                || empty($discovery['token_endpoint'])
+            ) {
+                return ApiResponse::error(
+                    'Google returned an incomplete OAuth discovery configuration.',
+                    [],
+                    502
+                );
+            }
+
+            return ApiResponse::success([
+                'connected' => true,
+                'client_id' => $clientId,
+                'issuer' => $discovery['issuer'],
+                'authorization_endpoint' => $discovery['authorization_endpoint'],
+                'token_endpoint' => $discovery['token_endpoint'],
+                'message' => 'Google OAuth configuration and Google service reachability verified.',
+            ], 'Google connection successful');
+        } catch (\Throwable $e) {
+            return ApiResponse::error(
+                'Failed to reach Google OAuth services: '.$e->getMessage(),
+                [],
+                500
+            );
+        }
     }
 
     public function testPaystackConnection(Request $request): JsonResponse

@@ -150,7 +150,7 @@
           <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
           <RouterLink to="/security" class="hover:text-[var(--color-accent)] transition-colors">Security</RouterLink>
           <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
-          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors">Manage Cookies</RouterLink>
+          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors" @click.prevent="openCookieModal">Manage Cookies</RouterLink>
         </div>
 
         <!-- Copyright Line -->
@@ -173,6 +173,7 @@ import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
 import SocialIcon from '@/components/SocialIcon.vue';
 import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
+import { useCookieConsent } from '@/shared/composables/useCookieConsent';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { getStorageUrl } from '@/core/utils/url';
 import { usePublicContentStore } from '@/core/stores/publicContent.store';
@@ -221,6 +222,7 @@ const onKeydown = (e) => {
 };
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
+const { openModal: openCookieModal } = useCookieConsent();
 const logoUrl = ref('/images/logo-icon.png');
 const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
 const shopPhone = ref('+234 812 345 6789');

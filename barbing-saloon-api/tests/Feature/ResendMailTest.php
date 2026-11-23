@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Domain\Identity\Actions\SocialLogin;
+use App\Domain\Identity\Services\ApiTokenIssuer;
+use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Notification\Channels\EmailNotificationChannel;
 use App\Jobs\SendAdminNotification;
 use App\Jobs\SendBookingCancellation;
@@ -11,11 +14,13 @@ use App\Jobs\SendBookingConfirmation;
 use App\Jobs\SendBookingReminder;
 use App\Jobs\SendBookingThankYou;
 use App\Jobs\SendNotificationEmail;
+use App\Mail\AdminNewUserNotification;
 use App\Mail\AdminNotification;
 use App\Mail\BookingCancellation;
 use App\Mail\BookingConfirmation;
 use App\Mail\BookingReminder;
 use App\Mail\BookingThankYou;
+use App\Mail\WelcomeCustomer;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Notification;
@@ -217,6 +222,25 @@ class ResendMailTest extends TestCase
         expect($delivery->provider_reference)->toStartWith('resend-test-');
     }
 
+    public function test_admin_test_email_renders_luxury_template_with_preheader_and_diagnostics(): void
+    {
+        $html = view('mail.connection-test', [
+            'recipient' => 'test-recipient@candycutz.test',
+            'fromAddress' => 'onboarding@resend.dev',
+            'fromName' => 'CandyCutz Luxury Grooming',
+            'dispatchedAt' => 'Nov 22, 2026 • 6:40 AM CET',
+            'environment' => 'testing',
+            'adminUrl' => 'http://localhost:5173/admin/integrations/resend',
+        ])->render();
+
+        expect($html)->toContain('CANDYCUTZ');
+        expect($html)->toContain('Luxury Grooming &amp; Barbing Saloon');
+        expect($html)->toContain('Resend Connected &amp; Verified');
+        expect($html)->toContain('test-recipient@candycutz.test');
+        expect($html)->toContain('onboarding@resend.dev');
+        expect($html)->toContain('Keffi');
+    }
+
     public function test_admin_test_email_is_rate_limited(): void
     {
         Mail::fake();
@@ -299,5 +323,73 @@ class ResendMailTest extends TestCase
         // Immediate duplicate dispatch within rate limit window is suppressed
         $channel->send($this->customer, $notification);
         Queue::assertPushed(SendNotificationEmail::class, 1);
+    }
+
+    public function test_new_google_registration_dispatches_welcome_email_and_alerts_admin(): void
+    {
+        Mail::fake();
+
+        $action = new class(app(UsernameIdentityService::class), app(ApiTokenIssuer::class)) extends SocialLogin {
+            protected function verifyAndDecodeIdToken(string $provider, string $idToken): array
+            {
+                return [
+                    'sub' => 'google-new-user-12345',
+                    'email' => 'new-google-user@candycutz.test',
+                    'email_verified' => true,
+                    'name' => 'Michael VIP',
+                    'picture' => 'https://example.com/avatar.jpg',
+                ];
+            }
+        };
+
+        $result = $action->execute([
+            'provider' => 'google',
+            'id_token' => 'mock-valid-google-id-token',
+        ]);
+
+        $createdUser = $result['user'];
+        expect($createdUser->email)->toBe('new-google-user@candycutz.test');
+
+        // Assert customer welcome email queued
+        Mail::assertQueued(WelcomeCustomer::class, function (WelcomeCustomer $mail) use ($createdUser) {
+            return $mail->hasTo($createdUser->email)
+                && $mail->hasSubject('Welcome to CandyCutz Luxury Grooming 💈');
+        });
+
+        // Assert admin alert email queued
+        Mail::assertQueued(AdminNewUserNotification::class, function (AdminNewUserNotification $mail) use ($createdUser) {
+            return $mail->hasTo($this->admin->email)
+                && str_contains($mail->envelope()->subject, 'CandyCutz Admin Alert: New User Registration');
+        });
+
+        // Assert in-app notifications persisted
+        expect(Notification::where('type', 'account_created')->where('recipient_id', $createdUser->id)->exists())->toBeTrue();
+        expect(Notification::where('type', 'user_registered_admin')->where('recipient_type', 'all_admins')->exists())->toBeTrue();
+    }
+
+    public function test_welcome_and_admin_new_user_templates_render_cleanly(): void
+    {
+        $welcomeHtml = view('mail.welcome-customer', [
+            'user' => $this->customer,
+            'userName' => 'John Customer',
+            'dashboardUrl' => 'http://localhost:5173/customer/dashboard',
+            'servicesUrl' => 'http://localhost:5173/services',
+        ])->render();
+
+        expect($welcomeHtml)->toContain('Welcome to CandyCutz, John Customer');
+        expect($welcomeHtml)->toContain('Master Stylists');
+        expect($welcomeHtml)->toContain('Keffi');
+
+        $adminHtml = view('mail.admin-new-user', [
+            'user' => $this->customer,
+            'provider' => 'google',
+            'providerLabel' => 'Google OAuth',
+            'registeredAt' => 'Nov 22, 2026 • 7:15 AM CET',
+            'adminUrl' => 'http://localhost:5173/admin/customers',
+        ])->render();
+
+        expect($adminHtml)->toContain('New Customer Joined CandyCutz');
+        expect($adminHtml)->toContain('Google OAuth');
+        expect($adminHtml)->toContain($this->customer->email);
     }
 }

@@ -15,6 +15,10 @@ describe('admin routes', () => {
     expect(adminRoutes.some(route => route.path === '/admin/resend' && route.meta.roles.includes('admin'))).toBe(true);
   });
 
+  it('exposes Google authentication setup to admins', () => {
+    expect(adminRoutes.some(route => route.path === '/admin/google-auth' && route.meta.roles.includes('admin'))).toBe(true);
+  });
+
   it('exposes category requests to barbers', () => {
     expect(barberRoutes.some(route => route.path === '/barber/service-categories' && route.meta.roles.includes('barber'))).toBe(true);
   });

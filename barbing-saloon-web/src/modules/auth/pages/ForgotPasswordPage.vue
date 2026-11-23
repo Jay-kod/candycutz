@@ -8,7 +8,7 @@
 
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -34,7 +34,7 @@
       <!-- Mobile Logo -->
       <div class="mb-6 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>

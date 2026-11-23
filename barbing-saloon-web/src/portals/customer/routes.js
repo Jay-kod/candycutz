@@ -28,6 +28,7 @@ export default [
   { path: '/customer/dashboard/reports', name: 'customer-reports', component: () => import('../../modules/customer/pages/ReportsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
 
   // Direct redirects for /customer/barbers, /customer/barber
+  { path: '/customer/profile', redirect: '/customer/dashboard/profile' },
   { path: '/customer/barbers', redirect: '/customer/dashboard/barbers' },
   { path: '/customer/barber', redirect: '/customer/dashboard/barbers' },
   { path: '/customer/barber/:id', redirect: to => `/customer/dashboard/barber/${to.params.id}` },

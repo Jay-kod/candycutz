@@ -24,22 +24,41 @@ export function useSocialAuth() {
   const appleConfigured = computed(() => appleClientId.value !== '');
 
   function loadScript(src, onLoad) {
-    if (document.querySelector(`script[data-candycutz-src="${src}"]`)) {
-      return;
+    const existing = document.querySelector(`script[data-candycutz-src="${src}"]`);
+    if (existing) {
+      if (existing.dataset.candycutzLoaded !== 'true' && existing.dataset.candycutzFailed === 'true') {
+        existing.remove();
+      } else {
+        existing.addEventListener('load', onLoad, { once: true });
+        existing.addEventListener('error', () => {
+          existing.dataset.candycutzFailed = 'true';
+        }, { once: true });
+        if (win.google?.accounts?.id && src === GOOGLE_SCRIPT) {
+          existing.dataset.candycutzLoaded = 'true';
+          onLoad();
+        }
+        return;
+      }
     }
     const script = document.createElement('script');
     script.src = src;
     script.async = true;
     script.dataset.candycutzSrc = src;
-    script.onload = onLoad;
+    script.onload = () => {
+      script.dataset.candycutzLoaded = 'true';
+      onLoad();
+    };
+    script.onerror = () => {
+      script.dataset.candycutzFailed = 'true';
+    };
     document.head.appendChild(script);
   }
 
   function loadConfig() {
-    return publicApi.settings().then((res) => {
-      const s = res.data.data || {};
-      googleClientId.value = s.google_client_id || '';
-      appleClientId.value = s.apple_client_id || '';
+    const loadOnce = () => publicApi.settings().then((res) => {
+      const s = res.data?.data || res.data || {};
+      googleClientId.value = String(s.google_client_id || s.social?.google_client_id || '').trim();
+      appleClientId.value = String(s.apple_client_id || s.social?.apple_client_id || '').trim();
       if (googleClientId.value) {
         loadScript(GOOGLE_SCRIPT, () => {
           googleScriptLoaded.value = true;
@@ -50,8 +69,15 @@ export function useSocialAuth() {
           appleScriptLoaded.value = true;
         });
       }
-    }).catch(() => {
-      // Graceful fallback if settings endpoint fails or times out
+    });
+
+    return loadOnce().catch(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        await loadOnce();
+      } catch {
+        // Settings remain unconfigured until the next page load or retry.
+      }
     });
   }
 
@@ -65,11 +91,30 @@ export function useSocialAuth() {
         resolve(false);
         return;
       }
-      loadScript(GOOGLE_SCRIPT, () => resolve(Boolean(win.google?.accounts?.id)));
+      let settled = false;
+      const finish = (ready) => {
+        if (settled) return;
+        settled = true;
+        resolve(ready);
+      };
+      loadScript(GOOGLE_SCRIPT, () => finish(Boolean(win.google?.accounts?.id)));
+      const deadline = setInterval(() => {
+        if (win.google?.accounts?.id) {
+          clearInterval(deadline);
+          finish(true);
+        }
+      }, 100);
+      setTimeout(() => {
+        clearInterval(deadline);
+        finish(Boolean(win.google?.accounts?.id));
+      }, 10000);
     });
   }
 
   async function googleSignIn() {
+    if (!googleClientId.value) {
+      await loadConfig();
+    }
     if (!googleClientId.value) {
       handleUnconfigured('Google');
       return;
@@ -98,6 +143,42 @@ export function useSocialAuth() {
     } catch (error) {
       socialError.value = 'Could not start Google sign-in. Please try again.';
       socialBusy.value = false;
+    }
+  }
+
+  async function renderGoogleButton(container) {
+    if (!container) return;
+    if (!googleClientId.value) {
+      await loadConfig();
+    }
+    if (!googleClientId.value) {
+      handleUnconfigured('Google');
+      return;
+    }
+    const ready = await ensureGoogleReady();
+    if (!ready) {
+      socialError.value = 'Could not load Google Sign-In. Please try again.';
+      return;
+    }
+
+    try {
+      container.replaceChildren();
+      win.google.accounts.id.initialize({
+        client_id: googleClientId.value,
+        callback: (response) => handleCredential(response.credential, 'google'),
+        ux_mode: 'popup',
+        auto_select: false,
+      });
+      win.google.accounts.id.renderButton(container, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        shape: 'pill',
+        text: 'continue_with',
+        width: Math.min(Math.max(container.offsetWidth || 260, 180), 400),
+      });
+    } catch (error) {
+      socialError.value = 'Could not start Google sign-in. Please try again.';
     }
   }
 
@@ -200,6 +281,7 @@ export function useSocialAuth() {
     socialBusy,
     socialError,
     googleSignIn,
+    renderGoogleButton,
     handleUnconfigured,
     appleSignIn,
     loadConfig,

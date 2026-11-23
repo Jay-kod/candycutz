@@ -15,7 +15,7 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -43,7 +43,7 @@
       <!-- Mobile Logo -->
       <div class="mb-4 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -131,11 +131,14 @@
                 class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-admin focus:ring-1 focus:ring-admin transition-all duration-300 outline-none" 
                 :type="showPassword ? 'text' : 'password'" 
                 placeholder="Enter your password" 
+                autocomplete="current-password"
               />
               <button 
                 type="button" 
                 @click="showPassword = !showPassword" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral hover:text-admin transition-colors p-1">
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-muted hover:text-admin focus:text-admin active:text-admin transition-colors p-2.5 rounded-md flex items-center justify-center touch-manipulation focus:outline-none">
                 <!-- Eye Open -->
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -278,11 +281,6 @@ const fillActiveDemo = () => {
 
 const selectDemoRole = (role) => {
   activeDemoRole.value = role;
-  fillActiveDemo();
-};
-
-const quickFillAdmin = () => {
-  activeDemoRole.value = isSuperAdminPortal.value ? 'superadmin' : 'admin';
   fillActiveDemo();
 };
 

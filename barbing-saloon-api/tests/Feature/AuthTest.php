@@ -8,6 +8,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -20,6 +21,32 @@ it('characterises POST /auth/login', function () {
 it('characterises POST /auth/register', function () {
     $response = $this->postJson('/api/v1/auth/register', []);
     $response->assertStatus(422);
+});
+
+it('tests the configured Google OAuth connection', function () {
+    Http::fake([
+        'https://accounts.google.com/.well-known/openid-configuration' => Http::response([
+            'issuer' => 'https://accounts.google.com',
+            'authorization_endpoint' => 'https://accounts.google.com/o/oauth2/v2/auth',
+            'token_endpoint' => 'https://oauth2.googleapis.com/token',
+            'jwks_uri' => 'https://www.googleapis.com/oauth2/v3/certs',
+        ], 200),
+    ]);
+
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->postJson('/api/v1/admin/google-auth/test', [
+            'client_id' => '123456789-example.apps.googleusercontent.com',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.connected', true);
+
+    $this->actingAs($admin)
+        ->postJson('/api/v1/admin/google-auth/test', [
+            'client_id' => 'not-a-google-client-id',
+        ])
+        ->assertStatus(422);
 });
 
 it('characterises POST /auth/social-login', function () {

@@ -573,10 +573,33 @@ class PaymentApiController
             $barber = $barberId ? Barber::find($barberId) : Barber::first();
             $service = $serviceId ? Service::find($serviceId) : Service::first();
             $branchId = $barber?->branch_id
-                ?? Branch::query()->where('is_active', true)->value('id');
+                ?? Branch::query()->where('is_active', true)->value('id')
+                ?? Branch::query()->value('id');
 
             if (! $branchId) {
-                return ApiResponse::error('No active branch is configured.', [], 500, 'BRANCH_NOT_CONFIGURED');
+                $business = Business::query()->first() ?? Business::create([
+                    'name' => 'CandyCutz Grooming Lounge',
+                    'legal_name' => 'CandyCutz Grooming Ltd.',
+                    'phone' => '+234 810 000 0000',
+                    'email' => 'concierge@candycutz.com',
+                    'logo' => '/images/logo.png',
+                ]);
+
+                $branch = Branch::firstOrCreate(
+                    ['slug' => 'keffi-central'],
+                    [
+                        'business_id' => $business->id,
+                        'name' => 'Keffi Main Hub',
+                        'address' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',
+                        'latitude' => 8.8486,
+                        'longitude' => 7.8736,
+                        'phone' => '+234 810 000 0000',
+                        'email' => 'keffi@candycutz.com',
+                        'is_active' => true,
+                    ]
+                );
+
+                $branchId = $branch->id;
             }
 
             $price = (int) ($validated['amount'] ?? ($service ? $service->price : 30000));

@@ -4,7 +4,7 @@
  * and robustly resolves local and production backend URLs.
  */
 
-const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').trim().replace(/\/+$/, '');
+const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').trim().replace(/\/+$/, '');
 
 function resolveApiRoot() {
   if (rawApiUrl.startsWith('http://') || rawApiUrl.startsWith('https://')) {
@@ -15,7 +15,7 @@ function resolveApiRoot() {
     return window.location.origin;
   }
 
-  return 'http://localhost:8080';
+  return 'http://localhost:8000';
 }
 
 function resolveStaticAssetUrl(path) {

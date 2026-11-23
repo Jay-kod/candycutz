@@ -8,6 +8,8 @@ use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\UserRegistered;
+use App\Models\Setting;
 use App\Models\User;
 use Exception;
 use Illuminate\Auth\Events\Verified;
@@ -104,6 +106,10 @@ class SocialLogin
             $user->sendEmailVerificationNotification();
         }
 
+        if ($createdUser) {
+            UserRegistered::dispatch($user, $provider);
+        }
+
         if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
             throw new RuntimeException('Your account is currently inactive or suspended.');
         }
@@ -131,10 +137,24 @@ class SocialLogin
      */
     private function allowedGoogleClientIds(): array
     {
-        return array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) config('services.google.client_ids', config('services.google.client_id', '')))
-        )));
+        $configured = [
+            (string) config('services.google.client_ids', ''),
+            (string) config('services.google.client_id', ''),
+            (string) (Setting::where('key', 'google_client_ids')->value('value') ?? ''),
+            (string) (Setting::where('key', 'google_client_id')->value('value') ?? ''),
+        ];
+
+        $ids = [];
+        foreach ($configured as $value) {
+            foreach (explode(',', $value) as $id) {
+                $id = trim($id);
+                if ($id !== '') {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     /**

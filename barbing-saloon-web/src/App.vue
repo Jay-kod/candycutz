@@ -6,6 +6,8 @@
     <ConfirmModal />
     <ToastNotification />
     <BackToTop />
+    <CookieConsentBanner />
+    <CookiePreferencesModal />
   </div>
 </template>
 
@@ -16,6 +18,8 @@ import SystemConnectionBanner from './core/components/SystemConnectionBanner.vue
 import ToastNotification from './core/components/ToastNotification.vue';
 import BackToTop from './core/components/BackToTop.vue';
 import NavigationProgressBar from './core/components/NavigationProgressBar.vue';
+import CookieConsentBanner from '@/shared/components/CookieConsentBanner.vue';
+import CookiePreferencesModal from '@/shared/components/CookiePreferencesModal.vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import { useConnectionStatus } from '@/core/composables/useConnectionStatus';
 

@@ -122,6 +122,7 @@
         <!-- Right Column: Verification & Activity Feed -->
         <div class="space-y-6">
           <EmailVerificationCard :email="form.email" />
+          <UserProfileCookiePreferencesCard />
 
           <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] p-6 lg:p-8 shadow-xl flex flex-col justify-between">
           <div>
@@ -186,6 +187,7 @@ import { getStorageUrl } from '@/core/utils/url';
 import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
 import DatabaseStatusBadge from '@/core/components/DatabaseStatusBadge.vue';
 import EmailVerificationCard from '@/shared/components/EmailVerificationCard.vue';
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue';
 import { useTheme } from '@/core/composables/useTheme';
 import { 
   UserCircleIcon, 

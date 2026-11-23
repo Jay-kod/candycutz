@@ -52,6 +52,7 @@
             background-color: #121217;
             border-radius: 16px;
             border: 1px solid #272732;
+            border-top: 3px solid #D4AF37;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         }
@@ -224,6 +225,12 @@
     </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0A0A0C; color: #E5E7EB;">
+    @hasSection('preheader')
+        <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: #0A0A0C; opacity: 0;">
+            @yield('preheader')
+            &#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;&nbsp;&#8203;&zwnj;
+        </div>
+    @endif
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="wrapper" style="background-color: #0A0A0C; width: 100%;">
         <tr>
             <td align="center" style="padding: 30px 10px;">
@@ -232,7 +239,7 @@
                 <tr>
                 <td align="center" valign="top" width="600">
                 <![endif]-->
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="main-card" style="max-width: 600px; background-color: #121217; border-radius: 16px; border: 1px solid #272732; overflow: hidden;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="main-card" style="max-width: 600px; background-color: #121217; border-radius: 16px; border: 1px solid #272732; border-top: 3px solid #D4AF37; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);">
                     <tr>
                         <td class="header" style="background-color: #16161F; padding: 32px 24px 22px; text-align: center; border-bottom: 1px solid #272732;">
                             <h1 class="gold-brand" style="color: #D4AF37; font-size: 24px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; margin: 0;">CANDYCUTZ</h1>

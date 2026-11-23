@@ -346,7 +346,7 @@ async function submit() {
     try {
       res = await client.post('/appointments/draft', form)
     } catch (apiErr) {
-      if (apiErr.response?.status === 404) {
+      if (apiErr.status === 404 || apiErr.response?.status === 404) {
         res = await client.post('/customer/bookings/draft', form)
       } else {
         throw apiErr
@@ -362,7 +362,13 @@ async function submit() {
       router.push('/customer/dashboard/bookings')
     }
   } catch (err) {
-    toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to create booking')
+    const errorMsg =
+      err.response?.data?.error?.message ||
+      err.response?.data?.message ||
+      (typeof err.response?.data?.error === 'string' ? err.response?.data?.error : null) ||
+      err.message ||
+      'Failed to create booking'
+    toast.error(errorMsg)
   } finally {
     isSubmitting.value = false
   }

@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
+    Route::post('/admin/google-auth/test', [AdminApiController::class, 'testGoogleAuthConnection']);
     Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
     Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
     Route::get('/admin/paystack/settings', [AdminApiController::class, 'getPaystackSettings']);

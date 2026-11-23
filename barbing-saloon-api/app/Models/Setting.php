@@ -80,6 +80,10 @@ class Setting extends Model
             return 'social';
         }
 
+        if (in_array($key, ['google_client_id', 'google_client_ids', 'apple_client_id'], true)) {
+            return 'social';
+        }
+
         if (str_starts_with($key, 'meta_') || str_starts_with($key, 'seo_')) {
             return 'seo';
         }

@@ -48,24 +48,12 @@ class EmailNotificationChannel implements NotificationChannel
                 'attempts' => 0,
             ]);
 
-            $html = sprintf(
-                '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #222; border-radius: 12px; background: #0c0e12; color: #f1f5f9;">
-                    <div style="margin-bottom: 20px;">
-                        <span style="font-weight: 800; font-size: 20px; color: #ff6700; letter-spacing: -0.5px;">CandyCutz</span>
-                        <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-left: 8px; letter-spacing: 1px;">Luxury Grooming</span>
-                    </div>
-                    <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">%s</h2>
-                    <p style="font-size: 15px; color: #cbd5e1; line-height: 1.6;">%s</p>
-                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
-                    <p style="font-size: 11px; color: #64748b; line-height: 1.5; margin: 0;">
-                        CandyCutz Luxury Grooming · Keffi, Nasarawa State, Nigeria<br />
-                        This email was sent to %s.
-                    </p>
-                </div>',
-                htmlspecialchars($notification->title, ENT_QUOTES, 'UTF-8'),
-                nl2br(htmlspecialchars($notification->message, ENT_QUOTES, 'UTF-8')),
-                htmlspecialchars($recipient->email, ENT_QUOTES, 'UTF-8')
-            );
+            $html = view('mail.general-notification', [
+                'recipient' => $recipient,
+                'notification' => $notification,
+                'title' => $notification->title,
+                'message' => $notification->message,
+            ])->render();
 
             SendNotificationEmail::dispatch(
                 deliveryId: $delivery->id,

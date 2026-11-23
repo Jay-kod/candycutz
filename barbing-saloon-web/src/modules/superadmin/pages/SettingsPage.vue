@@ -61,6 +61,9 @@
             </article>
           </div>
         </div>
+
+        <!-- SuperAdmin Personal Device Privacy & Cookie Preferences -->
+        <UserProfileCookiePreferencesCard />
       </div>
     </section>
   </component>
@@ -76,6 +79,7 @@ import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import { useToast } from '@/core/composables/useToast';
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue';
 
 const route = useRoute();
 const toast = useToast();

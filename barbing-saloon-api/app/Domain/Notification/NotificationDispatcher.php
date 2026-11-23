@@ -929,6 +929,35 @@ class NotificationDispatcher
     }
 
     /**
+     * New user registered — notify all administrators.
+     */
+    public static function newUserRegisteredAdmin(User $user, string $provider = 'email'): void
+    {
+        $providerName = match (strtolower($provider)) {
+            'google' => 'Google OAuth',
+            'admin' => 'Admin Direct',
+            default => 'Email Registration',
+        };
+
+        static::createBroadcast(
+            type: 'user_registered_admin',
+            title: 'New Client Registration 👤',
+            message: "A new client, {$user->name} ({$user->email}), has registered via {$providerName}.",
+            recipientType: 'all_admins',
+            category: 'account',
+            data: [
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'provider' => $provider,
+            ],
+            actionUrl: '/admin/customers',
+            idempotencyKey: hash('sha256', "user_registered_admin:{$user->id}"),
+            channels: ['in_app', 'push']
+        );
+    }
+
+    /**
      * Password changed — mandatory security notification.
      */
     public static function passwordChanged(User $user): void

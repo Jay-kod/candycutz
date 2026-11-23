@@ -25,6 +25,8 @@
               @toggle="toggleSpecialty"
               @add="addSpecialty"
             />
+
+            <UserProfileCookiePreferencesCard />
           </div>
         </form>
       </template>
@@ -35,6 +37,7 @@
 <script setup>
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import EmailVerificationCard from '@/shared/components/EmailVerificationCard.vue';
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue';
 import { useBarberProfile } from '../composables/useBarberProfile';
 import ProfileHeader from '../components/profile/ProfileHeader.vue';
 import ProfilePersonalCard from '../components/profile/ProfilePersonalCard.vue';

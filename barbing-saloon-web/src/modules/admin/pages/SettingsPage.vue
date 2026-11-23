@@ -5,6 +5,7 @@ import SettingsHeader from '../components/settings/SettingsHeader.vue'
 import SettingsTabs from '../components/settings/SettingsTabs.vue'
 import SettingsGroupCard from '../components/settings/SettingsGroupCard.vue'
 import SettingsSkeleton from '../components/settings/SettingsSkeleton.vue'
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue'
 
 const {
   rawSettings,
@@ -55,6 +56,9 @@ const {
           :search-query="searchQuery"
           :raw-settings="rawSettings"
         />
+
+        <!-- Administrator Device Privacy & Cookie Preferences -->
+        <UserProfileCookiePreferencesCard />
       </template>
     </div>
   </AdminLayout>

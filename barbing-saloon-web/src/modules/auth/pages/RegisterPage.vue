@@ -15,7 +15,7 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -43,7 +43,7 @@
       <!-- Mobile Logo -->
       <div class="mb-6 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -105,26 +105,82 @@
           <!-- Password -->
           <div class="relative group">
             <label for="reg-password" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Password</label>
-            <input 
-              v-model="password" 
-              id="reg-password"
-              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
-              type="password" 
-              placeholder="Minimum 8 characters" 
-            />
+            <div class="relative">
+              <input 
+                v-model="password" 
+                id="reg-password"
+                class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="Minimum 8 characters" 
+                autocomplete="new-password"
+              />
+              <button 
+                type="button" 
+                @click="showPassword = !showPassword" 
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-muted hover:text-gold focus:text-gold active:text-gold transition-colors p-2.5 rounded-md flex items-center justify-center touch-manipulation focus:outline-none">
+                <!-- Eye Open -->
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <!-- Eye Closed -->
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+            <!-- Password Strength Meter -->
+            <PasswordStrengthMeter :password="password" />
             <p v-if="errors.password" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.password }}</p>
           </div>
 
           <!-- Confirm Password -->
           <div class="relative group">
             <label for="reg-password-confirm" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Confirm Password</label>
-            <input 
-              v-model="passwordConfirmation" 
-              id="reg-password-confirm"
-              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
-              type="password" 
-              placeholder="Re-enter your password" 
-            />
+            <div class="relative">
+              <input 
+                v-model="passwordConfirmation" 
+                id="reg-password-confirm"
+                class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
+                :type="showConfirmPassword ? 'text' : 'password'" 
+                placeholder="Re-enter your password" 
+                autocomplete="new-password"
+              />
+              <button 
+                type="button" 
+                @click="showConfirmPassword = !showConfirmPassword" 
+                :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                :title="showConfirmPassword ? 'Hide password' : 'Show password'"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-muted hover:text-gold focus:text-gold active:text-gold transition-colors p-2.5 rounded-md flex items-center justify-center touch-manipulation focus:outline-none">
+                <!-- Eye Open -->
+                <svg v-if="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <!-- Eye Closed -->
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+            <!-- Live match indicator -->
+            <div v-if="passwordConfirmation" class="mt-1 flex items-center gap-1.5 text-xs font-medium">
+              <span v-if="password === passwordConfirmation" class="text-emerald-400 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Passwords match
+              </span>
+              <span v-else class="text-red-400 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Passwords do not match
+              </span>
+            </div>
+            <p v-if="errors.passwordConfirmation" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.passwordConfirmation }}</p>
           </div>
 
           <!-- Submit Button -->
@@ -143,7 +199,7 @@
           </div>
         </form>
 
-        <SocialAuthButtons label="or sign up with" />
+        <SocialAuthButtons label="or sign up with" button-text="Sign up with Google" />
 
         <p class="mt-6 text-center text-xs text-theme-muted">
           Already have an account?
@@ -158,6 +214,7 @@
 import { reactive, ref } from 'vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
+import PasswordStrengthMeter from '@/shared/ui/PasswordStrengthMeter.vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 import { useAuth } from '../composables/useAuth';
@@ -173,12 +230,15 @@ const phone = ref('');
 const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const loading = ref(false);
 const errors = reactive({
   name: '',
   phone: '',
   email: '',
   password: '',
+  passwordConfirmation: '',
 });
 const generalError = ref('');
 
@@ -192,7 +252,17 @@ const schema = object({
 async function submitForm() {
   loading.value = true;
   generalError.value = '';
-  Object.keys(errors).forEach((key) => delete errors[key]);
+  errors.name = '';
+  errors.phone = '';
+  errors.email = '';
+  errors.password = '';
+  errors.passwordConfirmation = '';
+
+  if (password.value !== passwordConfirmation.value) {
+    errors.passwordConfirmation = 'Passwords do not match';
+    loading.value = false;
+    return;
+  }
 
   try {
     await schema.validate({

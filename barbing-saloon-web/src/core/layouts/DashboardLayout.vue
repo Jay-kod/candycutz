@@ -160,7 +160,7 @@ const groupedNavItems = computed(() => {
       'Account Deletion Page'
     ],
     'Content & Catalog': ['Services', 'Service Categories', 'Gallery', 'Testimonials', 'Feedback Inbox', 'Blog'],
-    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Verifications', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore', 'Notifications'],
+    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'Google Authentication', 'API Directory', 'Verifications', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore', 'Notifications'],
   };
 
   const superAdminSections = {
