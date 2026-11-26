@@ -29,6 +29,7 @@ class DomainEventsAndCatalogueCacheTest extends TestCase
             'password' => 'secret1234',
             'password_confirmation' => 'secret1234',
             'phone' => '08012345678',
+            'terms_accepted' => true,
         ]);
 
         $response->assertStatus(201);

@@ -8,4 +8,6 @@ export const authApi = {
   socialLogin: (data) => client.post('/auth/social-login', data),
   forgotPassword: (email) => client.post('/auth/forgot-password', { email }),
   resetPassword: (data) => client.post('/auth/reset-password', data),
+  consentStatus: () => client.get('/account/consents/status'),
+  acceptConsent: (data) => client.post('/account/consents/accept', data),
 };

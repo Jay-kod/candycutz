@@ -104,6 +104,13 @@ router.afterEach((to) => {
 // Mount the app immediately so public marketing and catalogue routes render with zero delay
 app.mount('#app');
 
+// Register service worker for instant Back/Refresh media and catalogue caching
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && !import.meta.env.VITEST) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 // Boot auth asynchronously in the background
 const auth = useAuthStore();
 auth.bootstrap();

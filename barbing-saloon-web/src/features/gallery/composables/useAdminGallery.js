@@ -1,18 +1,29 @@
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onUnmounted } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { compressImageFile } from '@/shared/utils/compressImage';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useAdminGallery() {
   const toast = useToast();
   const { confirm } = useConfirm();
+  const publicStore = usePublicContentStore();
 
   const loading = ref(true);
   const saving = ref(false);
   const isRefreshing = ref(false);
   const gallery = ref([]);
   const barbers = ref([]);
+  let optimizeRefreshTimer = null;
+
+  onUnmounted(() => {
+    if (optimizeRefreshTimer) {
+      window.clearTimeout(optimizeRefreshTimer);
+      optimizeRefreshTimer = null;
+    }
+  });
 
   // Filters & Search
   const search = ref('');
@@ -204,20 +215,44 @@ export function useAdminGallery() {
       formData.append('image_url', uploadForm.image_url);
     }
     if (selectedFile.value) {
-      formData.append('image', selectedFile.value);
+      const prepared = await compressImageFile(selectedFile.value, { maxDimension: 1920, quality: 0.85 });
+      formData.append('image', prepared);
     }
 
     try {
+      let savedItem = null;
       if (editingId.value) {
         formData.append('_method', 'PUT');
-        await api.post(`/gallery/${editingId.value}`, formData);
-        toast.success('Masterpiece updated successfully');
+        const res = await api.post(`/gallery/${editingId.value}`, formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Uploaded — backend engine is optimizing to WebP.'
+            : 'Masterpiece updated & WebP ready!'
+        );
       } else {
-        await api.post('/gallery', formData);
-        toast.success('Masterpiece added to global gallery');
+        const res = await api.post('/gallery', formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Added to gallery — backend engine is optimizing to WebP.'
+            : 'Masterpiece added & WebP ready!'
+        );
       }
+      publicStore.invalidate('gallery');
       showUploadForm.value = false;
       await fetchGallery(true);
+
+      if (savedItem?.is_optimizing && typeof window !== 'undefined') {
+        if (optimizeRefreshTimer) {
+          window.clearTimeout(optimizeRefreshTimer);
+        }
+        optimizeRefreshTimer = window.setTimeout(async () => {
+          optimizeRefreshTimer = null;
+          await fetchGallery(true);
+          publicStore.invalidate('gallery');
+        }, 2500);
+      }
       return true;
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.response?.data?.message || (editingId.value ? 'Failed to update image' : 'Failed to upload image');

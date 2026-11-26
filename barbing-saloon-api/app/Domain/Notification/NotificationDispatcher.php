@@ -1356,6 +1356,43 @@ class NotificationDispatcher
         }
     }
 
+    /**
+     * Background image WebP optimization finished — push real-time feedback to uploader.
+     */
+    public static function mediaOptimized(
+        int $userId,
+        string $entity,
+        int $entityId,
+        int $originalBytes,
+        int $webpBytes,
+        string $newPath,
+    ): void {
+        $origKb = max(1, (int) round($originalBytes / 1024));
+        $webpKb = max(1, (int) round($webpBytes / 1024));
+        $savedPercent = $originalBytes > 0 ? max(0, (int) round((1 - ($webpBytes / $originalBytes)) * 100)) : 0;
+
+        static::dispatchNotification(
+            recipientId: $userId,
+            type: 'media_optimized',
+            title: 'Image Optimized to WebP ⚡',
+            message: "Your uploaded image is now WebP-ready ({$origKb}KB → {$webpKb}KB, saved {$savedPercent}%).",
+            relatedEntityId: $entityId,
+            recipientType: 'customer',
+            category: 'system',
+            data: [
+                'entity' => $entity,
+                'entity_id' => $entityId,
+                'original_kb' => $origKb,
+                'optimized_kb' => $webpKb,
+                'saved_percent' => $savedPercent,
+                'path' => $newPath,
+            ],
+            priority: 'normal',
+            idempotencyKey: hash('sha256', "media_optimized:{$userId}:{$entity}:{$entityId}:{$newPath}"),
+            channels: ['in_app']
+        );
+    }
+
     // ─── Account & Security Events ───────────────────────────────
 
     /**

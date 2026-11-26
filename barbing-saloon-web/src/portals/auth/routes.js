@@ -4,6 +4,7 @@ export default [
 	{ path: '/customer/register', name: 'register', component: () => import('../../modules/auth/pages/RegisterPage.vue'), meta: { public: true } },
 	{ path: '/forgot-password', name: 'forgot-password', component: () => import('../../modules/auth/pages/ForgotPasswordPage.vue'), meta: { public: true } },
 	{ path: '/reset-password', name: 'reset-password', component: () => import('../../modules/auth/pages/ResetPasswordPage.vue'), meta: { public: true } },
+	{ path: '/consent', name: 'consent', component: () => import('../../modules/auth/pages/ConsentPage.vue'), meta: { requiresAuth: true, skipConsent: true } },
 	{ path: '/verify-email', name: 'verify-email', component: () => import('../../modules/auth/pages/VerifyEmailPage.vue'), meta: { public: true } },
 	{ path: '/admin/login', name: 'admin-login', component: () => import('../../modules/auth/pages/AdminLoginPage.vue'), meta: { public: true } },
 	{ path: '/superadmin/login', name: 'superadmin-login', component: () => import('../../modules/auth/pages/AdminLoginPage.vue'), meta: { public: true } },

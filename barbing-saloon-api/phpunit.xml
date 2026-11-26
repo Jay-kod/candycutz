@@ -27,5 +27,6 @@
         <env name="MAIL_MAILER" value="array" force="true"/>
         <env name="QUEUE_CONNECTION" value="sync" force="true"/>
         <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="CONSENT_ENFORCE" value="false" force="true"/>
     </php>
 </phpunit>

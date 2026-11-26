@@ -11,7 +11,7 @@
     <!-- Content Section -->
     <section class="bg-theme-surface py-20">
       <div class="mx-auto max-w-3xl px-6 text-theme-text leading-relaxed prose dark:prose-invert prose-gold">
-        <p class="mb-10 text-sm text-theme-muted">Last updated: {{ currentDate }}</p>
+        <p v-if="termsVersion" class="mb-10 text-sm text-theme-muted">Version: {{ termsVersion }}</p>
         <div v-for="(section, index) in pageSections" :key="index" data-reveal :data-reveal-delay="100 + (index * 50)">
           <h2 class="font-display text-3xl text-gold mb-6">{{ section.heading }}</h2>
           <p class="mb-8 whitespace-pre-wrap">{{ section.body }}</p>
@@ -30,7 +30,7 @@ import { publicApi } from '@/shared/api/old_publicApi';
 
 const { init: initScrollReveal } = useScrollReveal();
 
-const currentDate = new Date().toLocaleDateString();
+const termsVersion = ref('');
 const pageSections = ref([
   {
     heading: '1. Agreement to Terms',
@@ -59,6 +59,9 @@ const fetchSettings = async () => {
     const response = await publicApi.settings();
     const settings = response.data.data;
     if (settings) {
+      if (settings.terms_version) {
+        termsVersion.value = settings.terms_version;
+      }
       if (settings.terms_sections) {
         try {
           const parsed = typeof settings.terms_sections === 'string'

@@ -43,6 +43,8 @@ export const adminApi = {
   deleteBarber: (id) => client.delete(`/admin/barbers/${id}`),
   logs: () => client.get('/admin/logs'),
   customers: () => client.get('/admin/customers'),
+  consentReport: (params = {}) => client.get('/admin/consents', { params }),
+  exportConsentReport: (params = {}) => client.get('/admin/consents/export', { params, responseType: 'blob' }),
   customerProfile: (id) => client.get(`/admin/customers/${id}`),
   createCustomer: (data) => client.post('/admin/customers', data),
   updateCustomer: (id, data) => client.put(`/admin/customers/${id}`, data),

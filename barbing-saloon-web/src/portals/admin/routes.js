@@ -9,6 +9,7 @@ export default [
 	{ path: '/admin/barbers/new', name: 'admin-barber-new', component: () => import('@/features/barbers/pages/BarberFormPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/barbers/:id/edit', name: 'admin-barber-edit', component: () => import('@/features/barbers/pages/BarberFormPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/customers', name: 'admin-customers', component: () => import('@/features/customers/pages/CustomersPage.vue'), meta: { requiresAuth: true, roles: ['admin'], title: 'Customers' } },
+	{ path: '/admin/consents', name: 'admin-consents', component: () => import('@/features/consent/pages/AdminConsentReportPage.vue'), meta: { requiresAuth: true, roles: ['admin'], title: 'Consent Log' } },
 	{ path: '/admin/services', name: 'admin-services', component: () => import('../../modules/admin/pages/ServicesPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/service-categories', name: 'admin-service-categories', component: () => import('@/features/services/pages/AdminServiceCategoriesPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/services/new', name: 'admin-service-new', component: () => import('@/features/services/pages/ServiceFormPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },

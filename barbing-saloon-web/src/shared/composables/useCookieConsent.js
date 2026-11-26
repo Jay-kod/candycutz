@@ -1,8 +1,53 @@
 import { ref, reactive, computed } from 'vue';
+import client from '@/shared/api/client';
 
 export const STORAGE_KEY = 'candycutz_cookie_preferences';
+export const GUEST_CONSENT_ID_KEY = 'candycutz_consent_id';
 export const CONSENT_EVENT = 'candycutz:consent-updated';
 export const OPEN_MODAL_EVENT = 'candycutz:open-cookie-preferences';
+
+/**
+ * Stable anonymous identifier so guest cookie decisions can be audited
+ * server-side and later linked to an account.
+ */
+const getGuestConsentId = () => {
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+
+  try {
+    const existing = window.localStorage.getItem(GUEST_CONSENT_ID_KEY);
+    if (existing) return existing;
+
+    const generated =
+      typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+            const random = (Math.random() * 16) | 0;
+            const value = char === 'x' ? random : (random & 0x3) | 0x8;
+            return value.toString(16);
+          });
+
+    window.localStorage.setItem(GUEST_CONSENT_ID_KEY, generated);
+    return generated;
+  } catch {
+    return null;
+  }
+};
+
+const syncConsentToServer = (payload) => {
+  const consentId = getGuestConsentId();
+
+  client
+    .post('/consents/cookies', {
+      consent_id: consentId,
+      necessary: true,
+      preferences: payload.preferences,
+      analytics: payload.analytics,
+      marketing: payload.marketing,
+    })
+    .catch(() => {
+      // The local decision still stands; the server copy is retried on the next save.
+    });
+};
 
 export const COOKIE_CATEGORIES = [
   {
@@ -122,6 +167,7 @@ const persistConsent = (prefs) => {
   isBannerVisible.value = false;
   isModalOpen.value = false;
 
+  syncConsentToServer(payload);
   emitConsentChange(payload);
   return payload;
 };

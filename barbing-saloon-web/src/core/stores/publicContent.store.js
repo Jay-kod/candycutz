@@ -2,50 +2,85 @@ import { defineStore } from 'pinia';
 import { publicApi } from '@/shared/api/old_publicApi';
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes memory cache
+const SWR_STORAGE_KEY = 'candycutz_public_swr_v1';
+
+function readPersistedSwr() {
+  if (typeof window === 'undefined' || !window.sessionStorage) return {};
+  try {
+    const raw = window.sessionStorage.getItem(SWR_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePersistedSwr(state) {
+  if (typeof window === 'undefined' || !window.sessionStorage) return;
+  try {
+    window.sessionStorage.setItem(
+      SWR_STORAGE_KEY,
+      JSON.stringify({
+        settings: state.settings,
+        settingsLastFetched: state.settingsLastFetched,
+        services: state.services,
+        servicesLastFetched: state.servicesLastFetched,
+        categories: state.categories,
+        categoriesLastFetched: state.categoriesLastFetched,
+        testimonials: state.testimonials,
+        testimonialsLastFetched: state.testimonialsLastFetched,
+        gallery: state.gallery,
+        galleryLastFetched: state.galleryLastFetched,
+      })
+    );
+  } catch {
+    // Ignore storage quota errors cleanly
+  }
+}
 
 export const usePublicContentStore = defineStore('publicContent', {
-  state: () => ({
-    settings: null,
-    settingsLastFetched: 0,
-    settingsLoading: false,
+  state: () => {
+    const cached = readPersistedSwr();
+    return {
+      settings: cached.settings || null,
+      settingsLastFetched: cached.settingsLastFetched || 0,
+      settingsLoading: false,
 
-    services: [],
-    servicesLastFetched: 0,
-    servicesLoading: false,
+      services: Array.isArray(cached.services) ? cached.services : [],
+      servicesLastFetched: cached.servicesLastFetched || 0,
+      servicesLoading: false,
 
-    categories: [],
-    categoriesLastFetched: 0,
-    categoriesLoading: false,
+      categories: Array.isArray(cached.categories) ? cached.categories : [],
+      categoriesLastFetched: cached.categoriesLastFetched || 0,
+      categoriesLoading: false,
 
-    testimonials: [],
-    testimonialsLastFetched: 0,
-    testimonialsLoading: false,
-  }),
+      testimonials: Array.isArray(cached.testimonials) ? cached.testimonials : [],
+      testimonialsLastFetched: cached.testimonialsLastFetched || 0,
+      testimonialsLoading: false,
+
+      gallery: Array.isArray(cached.gallery) ? cached.gallery : [],
+      galleryLastFetched: cached.galleryLastFetched || 0,
+      galleryLoading: false,
+    };
+  },
 
   getters: {
     isSettingsFresh: (state) => Date.now() - state.settingsLastFetched < DEFAULT_TTL_MS,
     isServicesFresh: (state) => Date.now() - state.servicesLastFetched < DEFAULT_TTL_MS,
     isCategoriesFresh: (state) => Date.now() - state.categoriesLastFetched < DEFAULT_TTL_MS,
     isTestimonialsFresh: (state) => Date.now() - state.testimonialsLastFetched < DEFAULT_TTL_MS,
+    isGalleryFresh: (state) => Date.now() - state.galleryLastFetched < DEFAULT_TTL_MS,
   },
 
   actions: {
-    /**
-     * Clear settings cache immediately to force a fresh fetch from the server.
-     */
     clearSettingsCache() {
       this.settings = null;
       this.settingsLastFetched = 0;
+      writePersistedSwr(this);
     },
 
-    /**
-     * Stale-While-Revalidate public settings loader.
-     * Returns cached data immediately if available; revalidates in background if stale.
-     */
     async getSettings(force = false) {
       if (this.settings && !force) {
         if (!this.isSettingsFresh && !this.settingsLoading) {
-          // Stale-While-Revalidate: re-fetch in background without blocking UI
           this.revalidateSettings();
         }
         return this.settings;
@@ -61,6 +96,7 @@ export const usePublicContentStore = defineStore('publicContent', {
         const response = await publicApi.settings();
         this.settings = response.data?.data || {};
         this.settingsLastFetched = Date.now();
+        writePersistedSwr(this);
       } catch (err) {
         console.error('[PublicContentStore] Failed to fetch settings:', err);
       } finally {
@@ -69,9 +105,6 @@ export const usePublicContentStore = defineStore('publicContent', {
       return this.settings;
     },
 
-    /**
-     * Stale-While-Revalidate services list.
-     */
     async getServices(force = false) {
       if (this.services.length > 0 && !force) {
         if (!this.isServicesFresh && !this.servicesLoading) {
@@ -91,6 +124,7 @@ export const usePublicContentStore = defineStore('publicContent', {
         const items = response.data?.data || response.data || [];
         this.services = Array.isArray(items) ? items : [];
         this.servicesLastFetched = Date.now();
+        writePersistedSwr(this);
       } catch (err) {
         console.error('[PublicContentStore] Failed to fetch services:', err);
       } finally {
@@ -99,9 +133,6 @@ export const usePublicContentStore = defineStore('publicContent', {
       return this.services;
     },
 
-    /**
-     * Stale-While-Revalidate service categories list.
-     */
     async getCategories(force = false) {
       if (this.categories.length > 0 && !force) {
         if (!this.isCategoriesFresh && !this.categoriesLoading) {
@@ -121,6 +152,7 @@ export const usePublicContentStore = defineStore('publicContent', {
         const items = response.data?.data || response.data || [];
         this.categories = Array.isArray(items) ? items : [];
         this.categoriesLastFetched = Date.now();
+        writePersistedSwr(this);
       } catch (err) {
         console.error('[PublicContentStore] Failed to fetch categories:', err);
       } finally {
@@ -129,9 +161,6 @@ export const usePublicContentStore = defineStore('publicContent', {
       return this.categories;
     },
 
-    /**
-     * Stale-While-Revalidate testimonials list.
-     */
     async getTestimonials(force = false) {
       if (this.testimonials.length > 0 && !force) {
         if (!this.isTestimonialsFresh && !this.testimonialsLoading) {
@@ -159,6 +188,7 @@ export const usePublicContentStore = defineStore('publicContent', {
               client_avatar: item.client_avatar || item.avatar_url || null,
             }));
           this.testimonialsLastFetched = Date.now();
+          writePersistedSwr(this);
         }
       } catch (err) {
         console.error('[PublicContentStore] Failed to fetch testimonials:', err);
@@ -168,9 +198,34 @@ export const usePublicContentStore = defineStore('publicContent', {
       return this.testimonials;
     },
 
-    /**
-     * Invalidate cached keys explicitly
-     */
+    async getGallery(force = false) {
+      if (this.gallery.length > 0 && !force) {
+        if (!this.isGalleryFresh && !this.galleryLoading) {
+          this.revalidateGallery();
+        }
+        return this.gallery;
+      }
+
+      return this.revalidateGallery();
+    },
+
+    async revalidateGallery() {
+      if (this.galleryLoading) return this.gallery;
+      this.galleryLoading = true;
+      try {
+        const response = await publicApi.gallery();
+        const items = response.data?.data?.items || response.data?.data || response.data || [];
+        this.gallery = Array.isArray(items) ? items : [];
+        this.galleryLastFetched = Date.now();
+        writePersistedSwr(this);
+      } catch (err) {
+        console.error('[PublicContentStore] Failed to fetch gallery:', err);
+      } finally {
+        this.galleryLoading = false;
+      }
+      return this.gallery;
+    },
+
     invalidate(key = 'all') {
       if (key === 'all' || key === 'settings') {
         this.settingsLastFetched = 0;
@@ -184,6 +239,10 @@ export const usePublicContentStore = defineStore('publicContent', {
       if (key === 'all' || key === 'testimonials') {
         this.testimonialsLastFetched = 0;
       }
+      if (key === 'all' || key === 'gallery') {
+        this.galleryLastFetched = 0;
+      }
+      writePersistedSwr(this);
     },
   },
 });

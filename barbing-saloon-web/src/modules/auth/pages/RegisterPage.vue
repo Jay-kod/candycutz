@@ -183,6 +183,25 @@
             <p v-if="errors.passwordConfirmation" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.passwordConfirmation }}</p>
           </div>
 
+          <!-- Terms & Privacy Consent -->
+          <div class="rounded-lg border border-graphite bg-theme-surface/60 p-3">
+            <label for="reg-terms" class="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                id="reg-terms"
+                v-model="termsAccepted"
+                type="checkbox"
+                class="mt-0.5 h-4 w-4 shrink-0 rounded border-graphite bg-theme-surface text-gold accent-gold focus:ring-gold"
+              />
+              <span class="text-xs leading-relaxed text-theme-muted">
+                I have read and agree to the
+                <a href="/terms" target="_blank" rel="noopener" class="font-semibold text-gold hover:text-gold-dark underline underline-offset-2">Terms of Service</a>
+                and
+                <a href="/privacy" target="_blank" rel="noopener" class="font-semibold text-gold hover:text-gold-dark underline underline-offset-2">Privacy Policy</a>.
+              </span>
+            </label>
+            <p v-if="termsError" class="mt-2 text-xs text-red-400 font-medium">{{ termsError }}</p>
+          </div>
+
           <!-- Submit Button -->
           <div class="pt-2">
             <button 
@@ -232,6 +251,8 @@ const password = ref('');
 const passwordConfirmation = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const termsAccepted = ref(false);
+const termsError = ref('');
 const loading = ref(false);
 const errors = reactive({
   name: '',
@@ -252,6 +273,7 @@ const schema = object({
 async function submitForm() {
   loading.value = true;
   generalError.value = '';
+  termsError.value = '';
   errors.name = '';
   errors.phone = '';
   errors.email = '';
@@ -260,6 +282,12 @@ async function submitForm() {
 
   if (password.value !== passwordConfirmation.value) {
     errors.passwordConfirmation = 'Passwords do not match';
+    loading.value = false;
+    return;
+  }
+
+  if (!termsAccepted.value) {
+    termsError.value = 'You must accept the Terms of Service and Privacy Policy to create an account.';
     loading.value = false;
     return;
   }
@@ -278,6 +306,7 @@ async function submitForm() {
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
+      terms_accepted: true,
     });
 
     await router.push(redirectAfterLogin());

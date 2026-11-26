@@ -12,6 +12,7 @@ return [
         'api/v1/health',
         'api/v1/health/ready',
         'api/v1/system/client-errors',
+        'api/v1/consents/cookies',
 
         // Authentication Entrypoints
         'api/v1/auth/login',

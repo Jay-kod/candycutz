@@ -402,6 +402,7 @@ it('sends an email verification notification after customer registration', funct
         'phone' => '+2348012345678',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
+        'terms_accepted' => true,
     ]);
 
     $response->assertCreated();

@@ -48,9 +48,10 @@
       </div>
 
       <!-- Real Gallery Masonry -->
-      <div v-else-if="filteredGallery.length > 0" class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+      <div v-else-if="visibleGallery.length > 0" class="space-y-8">
+        <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
         <article
-          v-for="(item, index) in filteredGallery"
+          v-for="(item, index) in visibleGallery"
           :key="item.id"
           @click="openLightbox(index)"
           data-reveal
@@ -61,9 +62,12 @@
             :style="{ aspectRatio: index % 3 === 0 ? '3/4' : (index % 2 === 0 ? '4/5' : '4/3') }"
           >
             <img
-              v-if="item.image_path || item.image_url"
-              :src="getImageUrl(item.image_path || item.image_url)"
+              v-if="resolveGallerySrc(item)"
+              :src="resolveGallerySrc(item)"
               :alt="item.title"
+              loading="lazy"
+              decoding="async"
+              @error="onImgError(item)"
               class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95"></div>
@@ -102,6 +106,18 @@
             </button>
           </div>
         </article>
+        </div>
+
+        <div ref="loadMoreSentinel" class="flex flex-col items-center gap-3 pt-2">
+          <button
+            v-if="hasMoreGallery"
+            type="button"
+            class="rounded-full border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-6 py-2.5 text-xs font-bold text-[var(--color-text-primary)] hover:border-[var(--color-accent)] transition-colors"
+            @click="showMoreWorks"
+          >
+            Load More Works ({{ filteredGallery.length - visibleGallery.length }} remaining)
+          </button>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -199,18 +215,38 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, onActivated, onDeactivated, nextTick } from 'vue';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import PageHero from '@/shared/ui/PageHero.vue';
-import { publicApi } from '@/shared/api/old_publicApi';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 
 const { init: initScrollReveal } = useScrollReveal();
+const publicStore = usePublicContentStore();
 
-const gallery = ref([]);
+const gallery = computed(() => publicStore.gallery || []);
+const failedThumbs = ref({});
 const selectedCategory = ref('All');
-const isLoading = ref(true);
+const isLoading = ref(publicStore.gallery.length === 0);
+const visibleLimit = ref(9);
+const loadMoreSentinel = ref(null);
+let sentinelObserver = null;
+
+const resolveGallerySrc = (item) => {
+  const thumb = item?.thumbnail_url;
+  const full = item?.image_url || item?.image_path;
+  if (thumb && !failedThumbs.value[item.id] && thumb !== full) {
+    return getImageUrl(thumb);
+  }
+  return full ? getImageUrl(full) : '';
+};
+
+const onImgError = (item) => {
+  if (item?.id && item?.thumbnail_url && !failedThumbs.value[item.id]) {
+    failedThumbs.value = { ...failedThumbs.value, [item.id]: true };
+  }
+};
 
 const isLightboxOpen = ref(false);
 const currentIdx = ref(0);
@@ -229,6 +265,18 @@ const categories = computed(() => {
 const filteredGallery = computed(() => {
   if (selectedCategory.value === 'All') return gallery.value;
   return gallery.value.filter(g => g.category === selectedCategory.value);
+});
+
+const visibleGallery = computed(() => filteredGallery.value.slice(0, visibleLimit.value));
+const hasMoreGallery = computed(() => visibleLimit.value < filteredGallery.value.length);
+
+const showMoreWorks = () => {
+  visibleLimit.value = Math.min(filteredGallery.value.length, visibleLimit.value + 9);
+  nextTick(() => initScrollReveal());
+};
+
+watch(selectedCategory, () => {
+  visibleLimit.value = 9;
 });
 
 const openLightbox = (index) => {
@@ -251,21 +299,47 @@ const nextImage = () => {
   if (currentIdx.value < filteredGallery.value.length - 1) currentIdx.value++;
 };
 
+const setupProgressiveObserver = () => {
+  if (typeof IntersectionObserver === 'undefined' || !loadMoreSentinel.value) return;
+  sentinelObserver?.disconnect();
+  sentinelObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && hasMoreGallery.value) {
+        showMoreWorks();
+      }
+    },
+    { rootMargin: '240px' }
+  );
+  sentinelObserver.observe(loadMoreSentinel.value);
+};
+
 const fetchContent = async () => {
   try {
-    const galleryRes = await publicApi.gallery().catch(() => ({ data: { data: [] } }));
-    gallery.value = galleryRes.data?.data || [];
+    await publicStore.getGallery();
   } catch (error) {
     console.error('Failed to load gallery data:', error);
   } finally {
     isLoading.value = false;
-    setTimeout(() => {
+    nextTick(() => {
       initScrollReveal();
-    }, 100);
+      setupProgressiveObserver();
+    });
   }
 };
 
 onMounted(() => {
   fetchContent();
+});
+
+onActivated(() => {
+  fetchContent();
+});
+
+onDeactivated(() => {
+  sentinelObserver?.disconnect();
+});
+
+onUnmounted(() => {
+  sentinelObserver?.disconnect();
 });
 </script>

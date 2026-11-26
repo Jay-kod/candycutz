@@ -13,6 +13,7 @@ use App\Http\Requests\Api\V1\SuperAdmin\UpdateSettingsRequest;
 use App\Http\Requests\Api\V1\SuperAdmin\UpdateUserRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,89 +103,59 @@ class SuperAdminApiController
             }
         }
 
-        if ($request->hasFile('hero_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('hero_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'hero_image',
-                'value' => '/storage/'.$path,
-                'group' => 'hero',
-            ];
+        $uploader = new SecureImageUpload;
+        $deferredSettings = [];
+
+        $imageFieldMap = [
+            'hero_image' => ['key' => 'hero_image', 'group' => 'hero'],
+            'about_teaser_image' => ['key' => 'about_teaser_image', 'group' => 'about'],
+            'about_shop_image' => ['key' => 'about_shop_image', 'group' => 'about'],
+            'splash_image' => ['key' => 'splash_background_image', 'group' => 'mobile'],
+            'onboarding_image' => ['key' => 'onboarding_background_image', 'group' => 'mobile'],
+            'login_image' => ['key' => 'login_background_image', 'group' => 'mobile'],
+            'logo' => ['key' => 'logo', 'group' => 'general'],
+            'favicon' => ['key' => 'favicon', 'group' => 'general'],
+        ];
+
+        foreach ($imageFieldMap as $field => $meta) {
+            if ($request->hasFile($field)) {
+                $rawPath = $uploader->storeFast($request->file($field), 'uploads/settings');
+                $settings[] = [
+                    'key' => $meta['key'],
+                    'value' => '/storage/'.$rawPath,
+                    'group' => $meta['group'],
+                ];
+                $deferredSettings[$meta['key']] = $rawPath;
+            }
         }
 
         if ($request->hasFile('page_hero_image')) {
             $page = $request->validated('page_hero_page');
-            $path = (new SecureImageUpload)->execute($request->file('page_hero_image'), 'uploads/settings');
+            $rawPath = $uploader->storeFast($request->file('page_hero_image'), 'uploads/settings');
+            $settingKey = $page === 'home' ? 'hero_image' : "page_hero_{$page}_image";
             $settings[] = [
-                'key' => $page === 'home' ? 'hero_image' : "page_hero_{$page}_image",
-                'value' => '/storage/'.$path,
+                'key' => $settingKey,
+                'value' => '/storage/'.$rawPath,
                 'group' => 'hero',
             ];
-        }
-
-        if ($request->hasFile('about_teaser_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'about_teaser_image',
-                'value' => '/storage/'.$path,
-                'group' => 'about',
-            ];
-        }
-
-        if ($request->hasFile('about_shop_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('about_shop_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'about_shop_image',
-                'value' => '/storage/'.$path,
-                'group' => 'about',
-            ];
-        }
-
-        if ($request->hasFile('splash_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('splash_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'splash_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('onboarding_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('onboarding_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'onboarding_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('login_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('login_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'login_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('logo')) {
-            $path = (new SecureImageUpload)->execute($request->file('logo'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'logo',
-                'value' => '/storage/'.$path,
-                'group' => 'general',
-            ];
-        }
-
-        if ($request->hasFile('favicon')) {
-            $path = (new SecureImageUpload)->execute($request->file('favicon'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'favicon',
-                'value' => '/storage/'.$path,
-                'group' => 'general',
-            ];
+            $deferredSettings[$settingKey] = $rawPath;
         }
 
         $action->execute(['settings' => $settings]);
+
+        foreach ($deferredSettings as $settingKey => $rawPath) {
+            $uploader->dispatchOptimization(
+                rawPath: $rawPath,
+                disk: 'public',
+                modelClass: Setting::class,
+                modelKey: 0,
+                attribute: 'value',
+                prefixStorage: true,
+                actorUserId: $request->user()?->id,
+                cacheEntity: 'settings',
+                settingKey: $settingKey,
+            );
+        }
         AuditLogger::log('settings_updated', 'SuperAdmin', null, [], ['keys' => array_keys($settings)]);
 
         return ApiResponse::success($settingsService->settings(), 'Settings updated');

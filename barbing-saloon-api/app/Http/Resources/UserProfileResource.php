@@ -27,6 +27,7 @@ class UserProfileResource extends JsonResource
 
         $data['avatar'] = $avatarUrl;
         $data['avatar_url'] = $avatarUrl;
+        $data['avatar_thumb_url'] = $mediaUrl->thumbnailFor($this->resource, $this->avatar);
         $data['cover_image'] = $coverImageUrl;
         $data['cover_image_url'] = $coverImageUrl;
         $data['no_show_count'] = (int) ($this->no_show_count ?? 0);

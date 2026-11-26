@@ -7,6 +7,7 @@ namespace App\Domain\Payment\Actions;
 use App\Domain\Notification\NotificationDispatcher;
 use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Payment\Services\RefundPolicyEngine;
+use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Domain\Shared\Services\AuditLogger;
 use App\Models\Appointment;
 use App\Models\RefundRequest;
@@ -134,6 +135,21 @@ class RequestRefund
             }
 
             return null;
+        }
+
+        if ($evidencePath !== null && in_array(strtolower(pathinfo($evidencePath, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp'], true)) {
+            app(SecureImageUpload::class)->dispatchOptimization(
+                rawPath: $evidencePath,
+                disk: 'local',
+                modelClass: RefundRequest::class,
+                modelKey: $refundRequest->id,
+                attribute: 'supporting_evidence',
+                prefixStorage: false,
+                actorUserId: $refundRequest->customer_id,
+                maxDim: 1600,
+                quality: 90,
+                generateThumbnail: false,
+            );
         }
 
         if ($requiresApproval) {

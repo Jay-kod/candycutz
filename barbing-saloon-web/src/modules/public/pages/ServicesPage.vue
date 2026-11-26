@@ -66,11 +66,12 @@
           class="group relative isolate aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-accent)] hover:shadow-2xl hover:shadow-[var(--color-shadow)]"
         >
           <img
-            v-if="service.image || service.image_url"
-            :src="getImageUrl(service.image || service.image_url)"
+            v-if="resolveServiceSrc(service)"
+            :src="resolveServiceSrc(service)"
             :alt="service.name"
             loading="lazy"
             decoding="async"
+            @error="onServiceImgError(service)"
             class="absolute inset-0 -z-20 h-full w-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105"
           />
           <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-[var(--color-bg-tertiary)]">
@@ -150,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import PageHero from '@/shared/ui/PageHero.vue';
@@ -162,9 +163,25 @@ import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 const { init: initScrollReveal } = useScrollReveal();
 const publicStore = usePublicContentStore();
 
-const services = ref(publicStore.services || []);
+const services = computed(() => publicStore.services || []);
+const failedThumbs = ref({});
 const selectedCategory = ref('All');
 const isLoading = ref(publicStore.services.length === 0);
+
+const resolveServiceSrc = (service) => {
+  const thumb = service?.thumbnail_url;
+  const full = service?.image || service?.image_url;
+  if (thumb && !failedThumbs.value[service.id] && thumb !== full) {
+    return getImageUrl(thumb);
+  }
+  return full ? getImageUrl(full) : '';
+};
+
+const onServiceImgError = (service) => {
+  if (service?.id && service?.thumbnail_url && !failedThumbs.value[service.id]) {
+    failedThumbs.value = { ...failedThumbs.value, [service.id]: true };
+  }
+};
 
 const categories = computed(() => {
   const cats = services.value
@@ -183,8 +200,7 @@ const filteredServices = computed(() => {
 
 const fetchContent = async () => {
   try {
-    const data = await publicStore.getServices();
-    if (data) services.value = data;
+    await publicStore.getServices();
   } catch (error) {
     console.error('Failed to load services page data:', error);
   } finally {
@@ -196,6 +212,10 @@ const fetchContent = async () => {
 };
 
 onMounted(() => {
+  fetchContent();
+});
+
+onActivated(() => {
   fetchContent();
 });
 </script>

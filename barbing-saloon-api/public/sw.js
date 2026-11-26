@@ -1,9 +1,34 @@
-const CACHE_NAME_STATIC = 'candycutz-static-v1';
-const CACHE_NAME_API = 'candycutz-api-v1';
+const CACHE_NAME_STATIC = 'candycutz-static-v3';
+const CACHE_NAME_API = 'candycutz-api-v3';
+const CACHE_NAME_MEDIA = 'candycutz-media-v3';
+const MAX_MEDIA_ENTRIES = 120;
+
+const VALID_CACHES = [CACHE_NAME_STATIC, CACHE_NAME_API, CACHE_NAME_MEDIA];
+
+async function trimMediaCache(cache) {
+  const keys = await cache.keys();
+  if (keys.length <= MAX_MEDIA_ENTRIES) return;
+  const excess = keys.length - MAX_MEDIA_ENTRIES;
+  await Promise.all(keys.slice(0, excess).map((key) => cache.delete(key)));
+}
 
 const PUBLIC_API_PATTERNS = [
-  /\/api\/(v1\/)?(services|barbers|categories|gallery|testimonials|blog|settings|working-hours)/i,
+  /\/api\/(v1\/)?(services|barbers|service-categories|categories|gallery|testimonials|blog|settings|working-hours|shop\/location)/i,
 ];
+
+function isCacheableMedia(url) {
+  const path = url.pathname.toLowerCase();
+  if (
+    path.startsWith('/storage/') ||
+    path.startsWith('/uploads/') ||
+    path.startsWith('/images/') ||
+    path.startsWith('/api/v1/private-media/')
+  ) {
+    return true;
+  }
+
+  return /\.(webp|avif|png|jpe?g|gif|svg|ico)$/i.test(path);
+}
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -11,30 +36,31 @@ self.addEventListener('install', () => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME_STATIC && key !== CACHE_NAME_API) {
-            return caches.delete(key);
-          }
-        })
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (!VALID_CACHES.includes(key)) {
+              return caches.delete(key);
+            }
+          })
+        )
       )
-    ).then(() => self.clients.claim())
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
-  const url = new URL(request.url);
-
-  // Only handle GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // 1. Public Catalogue & Marketing API Requests: Stale-While-Revalidate
-  const isPublicApi = PUBLIC_API_PATTERNS.some((pattern) => pattern.test(url.pathname));
-  if (isPublicApi) {
+  const url = new URL(request.url);
+
+  // 1. Public Catalogue & Location APIs: Stale-While-Revalidate for instant Back/Refresh
+  if (PUBLIC_API_PATTERNS.some((pattern) => pattern.test(url.pathname))) {
     event.respondWith(
       caches.open(CACHE_NAME_API).then(async (cache) => {
         const cachedResponse = await cache.match(request);
@@ -46,18 +72,7 @@ self.addEventListener('fetch', (event) => {
             }
             return networkResponse;
           })
-          .catch(() => {
-            // Return cached response with stale header if network failed
-            if (cachedResponse) {
-              const headers = new Headers(cachedResponse.headers);
-              headers.set('X-Cache-Stale', '1');
-              return new Response(cachedResponse.body, {
-                status: cachedResponse.status,
-                statusText: cachedResponse.statusText,
-                headers,
-              });
-            }
-          });
+          .catch(() => cachedResponse);
 
         return cachedResponse || fetchPromise;
       })
@@ -65,27 +80,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Navigation / Page Requests: Network first, cache fallback
-  if (request.mode === 'navigate') {
+  // 2. Uploaded & Static Media (.webp, thumbnails, signed avatars, /storage/): Cache-First
+  if (isCacheableMedia(url)) {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(CACHE_NAME_STATIC);
+      caches.open(CACHE_NAME_MEDIA).then(async (cache) => {
         const cached = await cache.match(request);
-        return cached || cache.match('/index.html');
+        if (cached) {
+          return cached;
+        }
+
+        try {
+          const response = await fetch(request);
+          if (response && response.ok && response.status === 200 && response.type !== 'error') {
+            await cache.put(request, response.clone());
+            trimMediaCache(cache).catch(() => {});
+          }
+          return response;
+        } catch {
+          return cached || Response.error();
+        }
       })
     );
     return;
   }
 
-  // 3. Static assets: Cache-first with network fallback
+  // 3. Static JS/CSS/Fonts: Cache-First
   if (
     url.pathname.startsWith('/assets/') ||
-    url.pathname.endsWith('.js') ||
-    url.pathname.endsWith('.css') ||
-    url.pathname.endsWith('.png') ||
-    url.pathname.endsWith('.jpg') ||
-    url.pathname.endsWith('.svg') ||
-    url.pathname.endsWith('.woff2')
+    /\.(js|css|woff2?)$/i.test(url.pathname)
   ) {
     event.respondWith(
       caches.open(CACHE_NAME_STATIC).then(async (cache) => {
@@ -94,13 +116,24 @@ self.addEventListener('fetch', (event) => {
 
         try {
           const response = await fetch(request);
-          if (response && response.status === 200) {
-            cache.put(request, response.clone());
+          if (response && response.ok && response.status === 200 && response.type !== 'error') {
+            await cache.put(request, response.clone());
           }
           return response;
-        } catch (e) {
-          return cached;
+        } catch {
+          return cached || Response.error();
         }
+      })
+    );
+    return;
+  }
+
+  // 4. Page Navigation: Network-first with offline fallback
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cache = await caches.open(CACHE_NAME_STATIC);
+        return (await cache.match(request)) || cache.match('/index.html');
       })
     );
   }

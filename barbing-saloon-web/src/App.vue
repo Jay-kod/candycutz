@@ -2,7 +2,11 @@
   <div class="min-h-[100dvh] w-full bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans">
     <NavigationProgressBar />
     <SystemConnectionBanner />
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <KeepAlive :include="['HomePage', 'ServicesPage', 'GalleryPage', 'AboutPage', 'ContactPage', 'DirectMeToShopPage']">
+        <component :is="Component" />
+      </KeepAlive>
+    </router-view>
     <ConfirmModal />
     <ToastNotification />
     <BackToTop />

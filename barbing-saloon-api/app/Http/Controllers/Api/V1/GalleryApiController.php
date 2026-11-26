@@ -20,27 +20,60 @@ class GalleryApiController
 
     public function index(Request $request): JsonResponse
     {
-        $query = Gallery::query()
-            ->with(['barber.user'])
-            ->where('deleted_at', null);
+        $category = $request->has('category') && $request->category !== 'all' ? (string) $request->category : 'all';
+        $barberId = $request->has('barber_id') && is_numeric($request->barber_id) ? (int) $request->barber_id : 0;
+        $featured = $request->boolean('featured') ? 1 : 0;
+        $perPage = $request->filled('per_page') ? min(100, max(1, $request->integer('per_page'))) : 0;
+        $page = $request->integer('page', 1);
 
-        if ($request->has('category') && $request->category !== 'all') {
-            $query->where('category', $request->category);
+        $cacheKey = "list:cat={$category}:barber={$barberId}:feat={$featured}:pp={$perPage}:p={$page}";
+
+        $payload = CatalogueCache::remember('gallery', $cacheKey, function () use ($category, $barberId, $featured, $perPage): array {
+            $query = Gallery::query()
+                ->with(['barber.user'])
+                ->whereNull('deleted_at');
+
+            if ($category !== 'all') {
+                $query->where('category', $category);
+            }
+            if ($barberId > 0) {
+                $query->where('barber_id', $barberId);
+            }
+            if ($featured === 1) {
+                $query->where('is_featured', true);
+            }
+
+            $ordered = $query->orderBy('display_order')->orderByDesc('created_at');
+
+            if ($perPage > 0) {
+                $paginator = $ordered->paginate($perPage);
+
+                return [
+                    'paginated' => true,
+                    'items' => GalleryResource::collection($paginator->items())->resolve(),
+                    'meta' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'total' => $paginator->total(),
+                    ],
+                ];
+            }
+
+            return [
+                'paginated' => false,
+                'items' => GalleryResource::collection($ordered->get())->resolve(),
+            ];
+        });
+
+        if (! empty($payload['paginated'])) {
+            return ApiResponse::success([
+                'items' => $payload['items'],
+                'meta' => $payload['meta'],
+            ], 'Gallery retrieved successfully');
         }
 
-        if ($request->has('barber_id') && is_numeric($request->barber_id)) {
-            $query->where('barber_id', (int) $request->barber_id);
-        }
-
-        if ($request->boolean('featured')) {
-            $query->where('is_featured', true);
-        }
-
-        $gallery = $query->orderBy('display_order')->orderByDesc('created_at')->get();
-
-        $data = GalleryResource::collection($gallery);
-
-        return ApiResponse::success($data, 'Gallery retrieved successfully');
+        return ApiResponse::success($payload['items'], 'Gallery retrieved successfully');
     }
 
     public function show(int $id): JsonResponse
@@ -75,7 +108,8 @@ class GalleryApiController
             $category = 'haircut';
         }
 
-        $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/gallery');
+        $uploader = new SecureImageUpload;
+        $path = $uploader->storeFast($request->file('image'), 'uploads/gallery');
 
         $gallery = Gallery::create([
             'barber_id' => $barberId,
@@ -85,9 +119,20 @@ class GalleryApiController
             'image_path' => '/storage/'.$path,
         ]);
 
+        $uploader->dispatchOptimization(
+            rawPath: $path,
+            disk: 'public',
+            modelClass: Gallery::class,
+            modelKey: $gallery->id,
+            attribute: 'image_path',
+            prefixStorage: true,
+            actorUserId: $user?->id,
+            cacheEntity: 'gallery',
+        );
+
         CatalogueCache::bust('gallery');
 
-        return ApiResponse::success(new GalleryResource($gallery->load('barber.user')), 'Gallery item created', 201);
+        return ApiResponse::success(new GalleryResource($gallery->refresh()->load('barber.user')), 'Gallery item created', 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -130,18 +175,33 @@ class GalleryApiController
             $item->barber_id = $validated['barber_id'] ? (int) $validated['barber_id'] : null;
         }
 
+        $uploadedPath = null;
         if ($request->hasFile('image')) {
-            $path = (new SecureImageUpload)->execute($request->file('image'), 'uploads/gallery');
-            $item->image_path = '/storage/'.$path;
+            $uploader = new SecureImageUpload;
+            $uploadedPath = $uploader->storeFast($request->file('image'), 'uploads/gallery');
+            $item->image_path = '/storage/'.$uploadedPath;
         } elseif (! empty($validated['image_url']) && empty($item->image_path)) {
             $item->image_path = $validated['image_url'];
         }
 
         $item->save();
 
+        if ($uploadedPath !== null) {
+            (new SecureImageUpload)->dispatchOptimization(
+                rawPath: $uploadedPath,
+                disk: 'public',
+                modelClass: Gallery::class,
+                modelKey: $item->id,
+                attribute: 'image_path',
+                prefixStorage: true,
+                actorUserId: $request->user()?->id,
+                cacheEntity: 'gallery',
+            );
+        }
+
         CatalogueCache::bust('gallery');
 
-        return ApiResponse::success(new GalleryResource($item->load('barber.user')), 'Gallery item updated');
+        return ApiResponse::success(new GalleryResource($item->refresh()->load('barber.user')), 'Gallery item updated');
     }
 
     public function destroy(Request $request, int $id): JsonResponse

@@ -168,6 +168,56 @@
             </div>
           </div>
 
+          <!-- Consent & Legal Evidence -->
+          <div class="rounded-2xl border border-theme-border bg-theme-surface-subtle p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-xs font-bold text-theme-text uppercase tracking-wider flex items-center gap-2">
+                <ShieldCheckIcon class="h-4 w-4 text-admin" />
+                <span>Consent &amp; Legal</span>
+              </h4>
+              <span
+                class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                :class="profileData.consent_status?.terms_accepted
+                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                  : 'text-amber-500 bg-amber-500/10 border-amber-500/20'"
+              >
+                {{ profileData.consent_status?.terms_accepted ? 'Terms accepted' : 'Terms pending' }}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <div class="rounded-lg border border-theme-border bg-theme-surface px-3 py-2">
+                <p class="text-[9px] uppercase tracking-wider text-theme-text-muted font-bold">Current version</p>
+                <p class="mt-1 font-mono text-theme-text">{{ profileData.consent_status?.terms_version || '—' }}</p>
+              </div>
+              <div class="rounded-lg border border-theme-border bg-theme-surface px-3 py-2">
+                <p class="text-[9px] uppercase tracking-wider text-theme-text-muted font-bold">Accepted at</p>
+                <p class="mt-1 text-theme-text">{{ profileData.consent_status?.terms_accepted_at ? formatDate(profileData.consent_status.terms_accepted_at) : '—' }}</p>
+              </div>
+              <div class="rounded-lg border border-theme-border bg-theme-surface px-3 py-2">
+                <p class="text-[9px] uppercase tracking-wider text-theme-text-muted font-bold">Accepted version</p>
+                <p class="mt-1 font-mono text-theme-text">{{ profileData.consent_status?.terms_accepted_version || '—' }}</p>
+              </div>
+            </div>
+
+            <div v-if="profileData.consents?.length" class="space-y-1.5">
+              <p class="text-[9px] uppercase tracking-wider text-theme-text-muted font-bold">Acceptance history</p>
+              <div
+                v-for="(consent, index) in profileData.consents"
+                :key="`${consent.type}-${consent.version}-${index}`"
+                class="flex items-center justify-between gap-2 rounded-lg border border-theme-border/70 bg-theme-surface px-3 py-1.5 text-[11px]"
+              >
+                <span class="font-semibold text-theme-text capitalize">{{ consent.type }}</span>
+                <span class="font-mono text-theme-text-muted">v{{ consent.version }}</span>
+                <span class="text-theme-text-muted">{{ formatDate(consent.accepted_at) }}</span>
+                <span class="text-theme-text-muted">{{ consent.source }}</span>
+              </div>
+            </div>
+            <p v-else class="text-[11px] text-amber-500">
+              No acceptance recorded. This customer will be asked to accept on their next sign-in.
+            </p>
+          </div>
+
           <!-- Booking History Timeline -->
           <div class="space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-theme-border">
@@ -238,6 +288,7 @@ import {
   KeyIcon,
   NoSymbolIcon,
   CheckCircleIcon,
+  ShieldCheckIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
 

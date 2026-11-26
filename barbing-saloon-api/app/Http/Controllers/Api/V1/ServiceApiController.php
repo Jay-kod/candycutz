@@ -150,27 +150,43 @@ class ServiceApiController
 
         $uploader = new SecureImageUpload;
         $imageUpdates = [];
+        $deferred = [];
 
         $imageFile1 = $request->file('image') ?? $request->file('image1');
         if ($imageFile1) {
-            $path1 = $uploader->execute($imageFile1, 'uploads/services');
+            $path1 = $uploader->storeFast($imageFile1, 'uploads/services');
             $imageUpdates['image'] = '/storage/'.$path1;
+            $deferred['image'] = $path1;
         }
 
         $imageFile2 = $request->file('image2');
         if ($imageFile2) {
-            $path2 = $uploader->execute($imageFile2, 'uploads/services');
+            $path2 = $uploader->storeFast($imageFile2, 'uploads/services');
             $imageUpdates['image2'] = '/storage/'.$path2;
+            $deferred['image2'] = $path2;
         }
 
         $imageFile3 = $request->file('image3');
         if ($imageFile3) {
-            $path3 = $uploader->execute($imageFile3, 'uploads/services');
+            $path3 = $uploader->storeFast($imageFile3, 'uploads/services');
             $imageUpdates['image3'] = '/storage/'.$path3;
+            $deferred['image3'] = $path3;
         }
 
         if (! empty($imageUpdates)) {
             $service->update($imageUpdates);
+            foreach ($deferred as $attr => $rawPath) {
+                $uploader->dispatchOptimization(
+                    rawPath: $rawPath,
+                    disk: 'public',
+                    modelClass: Service::class,
+                    modelKey: $service->id,
+                    attribute: $attr,
+                    prefixStorage: true,
+                    actorUserId: $user->id,
+                    cacheEntity: 'services',
+                );
+            }
         }
 
         $message = $isBarber
@@ -179,7 +195,7 @@ class ServiceApiController
 
         CatalogueCache::bust('services');
 
-        return ApiResponse::success(new ServiceResource($service->load(['category', 'barber.user'])), $message, 201);
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), $message, 201);
     }
 
     public function update(UpdateServiceRequest $request, int $id): JsonResponse
@@ -205,33 +221,49 @@ class ServiceApiController
 
         $uploader = new SecureImageUpload;
         $imageUpdates = [];
+        $deferred = [];
 
         $imageFile1 = $request->file('image') ?? $request->file('image1');
         if ($imageFile1) {
-            $path1 = $uploader->execute($imageFile1, 'uploads/services');
+            $path1 = $uploader->storeFast($imageFile1, 'uploads/services');
             $imageUpdates['image'] = '/storage/'.$path1;
+            $deferred['image'] = $path1;
         } elseif ($request->boolean('remove_image1')) {
             $imageUpdates['image'] = null;
         }
 
         $imageFile2 = $request->file('image2');
         if ($imageFile2) {
-            $path2 = $uploader->execute($imageFile2, 'uploads/services');
+            $path2 = $uploader->storeFast($imageFile2, 'uploads/services');
             $imageUpdates['image2'] = '/storage/'.$path2;
+            $deferred['image2'] = $path2;
         } elseif ($request->boolean('remove_image2')) {
             $imageUpdates['image2'] = null;
         }
 
         $imageFile3 = $request->file('image3');
         if ($imageFile3) {
-            $path3 = $uploader->execute($imageFile3, 'uploads/services');
+            $path3 = $uploader->storeFast($imageFile3, 'uploads/services');
             $imageUpdates['image3'] = '/storage/'.$path3;
+            $deferred['image3'] = $path3;
         } elseif ($request->boolean('remove_image3')) {
             $imageUpdates['image3'] = null;
         }
 
         if (! empty($imageUpdates)) {
             $service->update($imageUpdates);
+            foreach ($deferred as $attr => $rawPath) {
+                $uploader->dispatchOptimization(
+                    rawPath: $rawPath,
+                    disk: 'public',
+                    modelClass: Service::class,
+                    modelKey: $service->id,
+                    attribute: $attr,
+                    prefixStorage: true,
+                    actorUserId: $request->user()?->id,
+                    cacheEntity: 'services',
+                );
+            }
         }
 
         CatalogueCache::bust('services');

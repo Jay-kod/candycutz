@@ -6,7 +6,9 @@ namespace App\Domain\Payment\Actions;
 
 use App\Domain\Payment\Enums\ManualTransferState;
 use App\Domain\Payment\Services\ManualTransferStateMachine;
+use App\Domain\Shared\Actions\SecureImageUpload;
 use App\Models\Appointment;
+use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
@@ -21,10 +23,10 @@ class UploadReceipt
     public function execute(Appointment $appointment, UploadedFile $file): Payment
     {
         // 1. Validate file manually (if not done in FormRequest)
-        $allowedMimes = ['image/jpeg', 'image/png', 'application/pdf'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
         if (! in_array($file->getMimeType(), $allowedMimes)) {
             throw ValidationException::withMessages([
-                'receipt' => ['Receipt must be a JPG, PNG, or PDF.'],
+                'receipt' => ['Receipt must be a JPG, PNG, WEBP, or PDF.'],
             ]);
         }
 
@@ -59,6 +61,21 @@ class UploadReceipt
             ['receipt_path' => $path, 'actor_id' => $appointment->customer_id]
         );
 
+        if (is_string($path) && in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'webp'], true)) {
+            app(SecureImageUpload::class)->dispatchOptimization(
+                rawPath: $path,
+                disk: 'local',
+                modelClass: Payment::class,
+                modelKey: $payment->id,
+                attribute: 'receipt_url',
+                prefixStorage: false,
+                actorUserId: $appointment->customer_id,
+                maxDim: 1600,
+                quality: 90,
+                generateThumbnail: false,
+            );
+        }
+
         // If appointment was in draft state, transition to pending awaiting verification
         $statusVal = $appointment->status instanceof \BackedEnum ? $appointment->status->value : (string) $appointment->status;
         if ($statusVal === 'draft') {
@@ -67,7 +84,7 @@ class UploadReceipt
                 'draft_expires_at' => null,
             ]);
             try {
-                \App\Models\AppointmentStatusHistory::create([
+                AppointmentStatusHistory::create([
                     'appointment_id' => $appointment->id,
                     'previous_status' => 'draft',
                     'new_status' => 'pending',
@@ -75,7 +92,8 @@ class UploadReceipt
                     'reason' => 'Bank transfer receipt uploaded; awaiting cashier verification.',
                     'created_at' => now(),
                 ]);
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
         }
 
         return $this->stateMachine->transition(

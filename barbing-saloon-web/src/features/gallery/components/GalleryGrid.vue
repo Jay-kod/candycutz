@@ -20,12 +20,21 @@
         class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 transition-all"
         :class="colorTheme === 'gold' ? 'hover:border-gold/20 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]' : 'hover:border-admin/30 hover:shadow-[0_0_30px_rgba(255,103,0,0.08)]'"
       >
-        <div class="aspect-square overflow-hidden">
+        <div class="aspect-square overflow-hidden relative">
           <img
-            :src="getImageUrl(item.image_path || item.image_url)"
+            :src="resolveSrc(item)"
             :alt="item.title"
+            loading="lazy"
+            decoding="async"
+            @error="onImgError(item)"
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          <span
+            v-if="item.is_optimizing"
+            class="absolute top-2.5 left-2.5 z-10 rounded-full bg-amber-600/90 px-2.5 py-0.5 text-[10px] font-bold text-white shadow"
+          >
+            Optimizing WebP...
+          </span>
         </div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90 sm:opacity-0 transition-opacity duration-300 sm:group-hover:opacity-100"></div>
         <div class="absolute bottom-0 left-0 right-0 p-4 translate-y-0 opacity-100 sm:translate-y-4 sm:opacity-0 transition-all duration-300 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
@@ -66,9 +75,10 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { PhotoIcon, PencilSquareIcon, TrashIcon, ScissorsIcon } from '@heroicons/vue/24/outline';
 
-defineProps({
+const props = defineProps({
   loading: Boolean,
   gallery: Array,
   colorTheme: {
@@ -79,4 +89,21 @@ defineProps({
 });
 
 defineEmits(['edit', 'delete']);
+
+const failedThumbs = ref({});
+
+function resolveSrc(item) {
+  const thumb = item?.thumbnail_url;
+  const full = item?.image_url || item?.image_path;
+  if (thumb && !failedThumbs.value[item.id] && thumb !== full) {
+    return props.getImageUrl(thumb);
+  }
+  return full ? props.getImageUrl(full) : '';
+}
+
+function onImgError(item) {
+  if (item?.id && item?.thumbnail_url && !failedThumbs.value[item.id]) {
+    failedThumbs.value = { ...failedThumbs.value, [item.id]: true };
+  }
+}
 </script>

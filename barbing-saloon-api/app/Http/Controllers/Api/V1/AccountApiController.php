@@ -12,6 +12,7 @@ use App\Domain\Shared\Services\UserMediaUrl;
 use App\Http\Resources\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,14 +52,16 @@ class AccountApiController
         ]);
 
         $removeAvatar = $request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true';
+        $rawAvatarPath = null;
         if ($removeAvatar) {
             $validated['avatar'] = null;
         } elseif ($request->hasFile('avatar')) {
-            $validated['avatar'] = (new SecureImageUpload)->execute(
+            $rawAvatarPath = (new SecureImageUpload)->storeFast(
                 $request->file('avatar'),
                 'user-media/'.$user->id.'/avatar',
                 'local'
             );
+            $validated['avatar'] = $rawAvatarPath;
         } else {
             unset($validated['avatar']);
         }
@@ -80,7 +83,19 @@ class AccountApiController
 
         $user->update($validated);
 
-        return ApiResponse::success(new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
+        if ($rawAvatarPath !== null) {
+            (new SecureImageUpload)->dispatchOptimization(
+                rawPath: $rawAvatarPath,
+                disk: 'local',
+                modelClass: User::class,
+                modelKey: $user->id,
+                attribute: 'avatar',
+                prefixStorage: false,
+                actorUserId: $user->id,
+            );
+        }
+
+        return ApiResponse::success(new UserProfileResource($user->refresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
     }
 
     public function analytics(Request $request): JsonResponse
@@ -141,7 +156,7 @@ class AccountApiController
         ]);
 
         $user = $request->user();
-        $path = $imageUpload->execute(
+        $path = $imageUpload->storeFast(
             $request->file('avatar'),
             'user-media/'.$user->id.'/avatar',
             'local'
@@ -149,8 +164,18 @@ class AccountApiController
 
         $user->update(['avatar' => $path]);
 
+        $imageUpload->dispatchOptimization(
+            rawPath: $path,
+            disk: 'local',
+            modelClass: User::class,
+            modelKey: $user->id,
+            attribute: 'avatar',
+            prefixStorage: false,
+            actorUserId: $user->id,
+        );
+
         return ApiResponse::success(
-            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            new UserProfileResource($user->refresh()->loadCount(['appointments', 'testimonials'])),
             'Avatar uploaded successfully'
         );
     }

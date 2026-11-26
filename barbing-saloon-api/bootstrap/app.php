@@ -5,6 +5,7 @@ use App\Http\Middleware\BlockMaliciousIngress;
 use App\Http\Middleware\CheckAppVersion;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ClientGateMiddleware;
+use App\Http\Middleware\EnsureConsentAccepted;
 use App\Http\Middleware\EnsureUserActive;
 use App\Http\Middleware\FeatureGateMiddleware;
 use App\Http\Middleware\ForceHttps;
@@ -61,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             CheckAppVersion::class,
             EnsureUserActive::class,
+            EnsureConsentAccepted::class,
             IdempotencyMiddleware::class,
         ]);
     })

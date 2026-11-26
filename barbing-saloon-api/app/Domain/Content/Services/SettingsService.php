@@ -53,6 +53,10 @@ class SettingsService
 
             $merged = array_merge($flat, $grouped);
 
+            $merged['terms_version'] = $flat['terms_version'] ?? (string) config('consent.terms_version');
+            $merged['privacy_version'] = $flat['privacy_version'] ?? (string) config('consent.privacy_version');
+            $merged['cookie_policy_version'] = $flat['cookie_policy_version'] ?? (string) config('consent.cookie_policy_version');
+
             $googleEnabled = filter_var(
                 $merged['google_auth_enabled'] ?? true,
                 FILTER_VALIDATE_BOOLEAN
@@ -110,6 +114,10 @@ class SettingsService
             }
 
             $merged = array_merge($flat, $grouped);
+
+            $merged['terms_version'] = $flat['terms_version'] ?? (string) config('consent.terms_version');
+            $merged['privacy_version'] = $flat['privacy_version'] ?? (string) config('consent.privacy_version');
+            $merged['cookie_policy_version'] = $flat['cookie_policy_version'] ?? (string) config('consent.cookie_policy_version');
 
             /** @var AnimationSettingsService $animationService */
             $animationService = app(AnimationSettingsService::class);

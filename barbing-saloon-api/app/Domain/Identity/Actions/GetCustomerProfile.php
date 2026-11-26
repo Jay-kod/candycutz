@@ -2,6 +2,7 @@
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Identity\Services\ConsentService;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
@@ -56,6 +57,17 @@ class GetCustomerProfile
             'total_bookings' => $appointments->count(),
             'total_spent' => $totalSpent,
             'appointments' => $appointments,
+            'consents' => $customer->consents()
+                ->orderByDesc('accepted_at')
+                ->get()
+                ->map(fn ($consent) => [
+                    'type' => $consent->type,
+                    'version' => $consent->version,
+                    'accepted_at' => $consent->accepted_at?->toIso8601String(),
+                    'source' => $consent->source,
+                ])
+                ->values(),
+            'consent_status' => app(ConsentService::class)->statusFor($customer),
         ];
     }
 }

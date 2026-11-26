@@ -123,7 +123,7 @@ class PaymentApiController
         $appointment = Appointment::where('id', $appointmentId)->where('customer_id', $user->id)->firstOrFail();
 
         $request->validate([
-            'receipt' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120',
+            'receipt' => 'required|file|mimes:jpeg,jpg,png,webp,pdf|max:5120',
         ]);
 
         $file = $request->file('receipt');

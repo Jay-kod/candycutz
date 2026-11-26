@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\ConsentApiController;
 use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\NoShowApiController;
@@ -25,6 +26,9 @@ Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController
     ->name('user-media.show');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/account/consents/status', [ConsentApiController::class, 'status']);
+    Route::post('/account/consents/accept', [ConsentApiController::class, 'accept']);
+
     // -------------------------------------------------------------------------
     // Customer Portal Routes (/api/v1/customer/* and /api/v1/account/*)
     // -------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { CloudArrowUpIcon, DocumentTextIcon, XMarkIcon, CheckCircleIcon, ArrowPa
 import { customerApi } from '@/shared/api/old_customerApi';
 import { client } from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
+import { compressImageFile } from '@/shared/utils/compressImage';
 
 const toast = useToast();
 
@@ -90,9 +91,9 @@ const handleFileChange = (e) => {
   if (!selected) return
   
   // Validate type
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf']
   if (!allowedTypes.includes(selected.type)) {
-    error.value = 'Please select a valid image (JPG, PNG) or PDF.'
+    error.value = 'Please select a valid image (JPG, PNG, WEBP) or PDF.'
     return
   }
 
@@ -123,9 +124,10 @@ const uploadReceipt = async () => {
   
   isUploading.value = true
   error.value = ''
-  
+
+  const preparedFile = await compressImageFile(file.value, { maxDimension: 1600, quality: 0.9 })
   const formData = new FormData()
-  formData.append('receipt', file.value)
+  formData.append('receipt', preparedFile)
   
   try {
     const res = await customerApi.uploadReceipt(props.appointmentId, formData)

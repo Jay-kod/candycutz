@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Domain\Identity\Services\ConsentService;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -50,6 +51,10 @@ class AuthUserResource extends JsonResource
             $data['chair_status'] = $this->barber->chair_status ?? 'free';
             $data['rating'] = (float) ($this->barber->rating ?? 5.0);
         }
+
+        $consent = app(ConsentService::class)->statusFor($this->resource);
+        $data['consent_required'] = $consent['required'];
+        $data['consent'] = $consent;
 
         return $data;
     }

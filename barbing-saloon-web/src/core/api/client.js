@@ -267,6 +267,18 @@ export function setupApiClient() {
         });
       }
 
+      // The API refuses customer endpoints until the current terms are accepted.
+      // Let the route layer open the blocking consent screen without a reload.
+      if (apiError.code === 'CONSENT_REQUIRED' && typeof window !== 'undefined') {
+        try {
+          window.dispatchEvent(new CustomEvent('candycutz:consent-required', {
+            detail: { context: apiError.details?.context || {} },
+          }));
+        } catch {
+          // ignore environments without CustomEvent support
+        }
+      }
+
       // Check for DB or Network disconnection
       if (!config.__skipConnectionTracking && !isCanceled) {
         try {

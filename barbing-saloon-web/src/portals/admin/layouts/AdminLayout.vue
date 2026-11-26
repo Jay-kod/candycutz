@@ -57,6 +57,7 @@ const navItems = [
   { name: 'Refunds & Policy', to: '/admin/refunds', icon: ReceiptRefundIcon },
   { name: 'Bank & Payments', to: '/admin/bank-details', icon: BuildingLibraryIcon },
   { name: 'Customers', to: '/admin/customers', icon: UserGroupIcon },
+  { name: 'Consent Log', to: '/admin/consents', icon: ShieldCheckIcon },
   { name: 'Barbers', to: '/admin/barbers', icon: UsersIcon },
 
   // The Website (All Website CMS Pages)

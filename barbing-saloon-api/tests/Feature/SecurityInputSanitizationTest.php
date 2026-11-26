@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlogPost;
 use App\Models\FeedbackSubmission;
-use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\User;
 use App\Support\InputSanitizer;
@@ -102,6 +100,7 @@ it('preserves password integrity without altering special characters or hashes',
         'password' => $rawPassword,
         'password_confirmation' => $rawPassword,
         'role' => 'customer',
+        'terms_accepted' => true,
     ]);
 
     $registerRes->assertCreated();

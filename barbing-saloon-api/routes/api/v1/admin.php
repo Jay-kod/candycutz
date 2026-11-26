@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Admin\AnimationApiController;
 use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
+use App\Http\Controllers\Api\V1\Admin\ConsentAdminApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
@@ -49,6 +50,8 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::patch('/admin/feedback/{submission}', [FeedbackSubmissionApiController::class, 'update'])->whereNumber('submission');
     Route::get('/admin/analytics', [AdminApiController::class, 'analytics']);
     Route::get('/admin/customers', [AdminApiController::class, 'customers']);
+    Route::get('/admin/consents', [ConsentAdminApiController::class, 'index']);
+    Route::get('/admin/consents/export', [ConsentAdminApiController::class, 'export']);
     Route::post('/admin/customers', [AdminApiController::class, 'storeCustomer']);
     Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile'])->whereNumber('id');
     Route::match(['put', 'patch'], '/admin/customers/{id}', [AdminApiController::class, 'updateCustomer'])->whereNumber('id');
