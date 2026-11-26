@@ -1,13 +1,13 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import net from 'node:net';
+import http from 'node:http';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
-const apiDir = path.join(rootDir, 'barbing-saloon-api');
 const webDir = path.join(rootDir, 'barbing-saloon-web');
 
 console.log('========================================');
@@ -37,6 +37,33 @@ function checkPort(port, host = '127.0.0.1', timeout = 1000) {
     });
 
     socket.connect(port, host);
+  });
+}
+
+function checkApiHealth(timeout = 2500) {
+  return new Promise((resolve) => {
+    const request = http.get(
+      { hostname: '127.0.0.1', port: 8000, path: '/api/v1/health' },
+      (response) => {
+        let body = '';
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => {
+          body += chunk;
+          if (body.length > 8192) request.destroy();
+        });
+        response.on('end', () => {
+          try {
+            const health = JSON.parse(body);
+            resolve(response.statusCode === 200 && health.data?.services?.database === 'connected');
+          } catch {
+            resolve(false);
+          }
+        });
+      }
+    );
+
+    request.setTimeout(timeout, () => request.destroy());
+    request.on('error', () => resolve(false));
   });
 }
 
@@ -70,12 +97,13 @@ async function ensureMySQL() {
 
 // Managed Service Runner with Auto-Restart
 class ManagedService {
-  constructor({ name, command, args, cwd, color }) {
+  constructor({ name, command, args, cwd, color, restartOnSuccessfulExit = true }) {
     this.name = name;
     this.command = command;
     this.args = args;
     this.cwd = cwd;
     this.color = color;
+    this.restartOnSuccessfulExit = restartOnSuccessfulExit;
     this.process = null;
     this.shouldRestart = true;
   }
@@ -109,11 +137,13 @@ class ManagedService {
     });
 
     this.process.on('close', (code) => {
-      if (this.shouldRestart) {
+      if (this.shouldRestart && (code !== 0 || this.restartOnSuccessfulExit)) {
         console.warn(`${this.color}[${this.name}]${'\x1b[0m'} Service stopped (exit code ${code}). Auto-restarting in 2s...`);
         setTimeout(() => {
           if (this.shouldRestart) this.start();
         }, 2000);
+      } else if (this.shouldRestart) {
+        console.log(`${this.color}[${this.name}]${'\x1b[0m'} Existing service was reused; no duplicate will be started.`);
       }
     });
   }
@@ -133,13 +163,25 @@ class ManagedService {
 async function main() {
   await ensureMySQL();
 
-  const apiService = new ManagedService({
-    name: 'API',
-    command: 'php',
-    args: ['-S', '127.0.0.1:8000', '-t', 'public', 'public/index.php'],
-    cwd: apiDir,
-    color: '\x1b[36m', // Cyan
-  });
+  let apiService = null;
+  if (await checkPort(8000)) {
+    if (!(await checkApiHealth())) {
+      throw new Error(
+        'Port 8000 is occupied, but /api/v1/health is not healthy. Stop the stale API process before starting the development stack; refusing to create a duplicate.'
+      );
+    }
+    console.log('  [API] Healthy API already active on port 8000; reusing it.');
+  } else {
+    apiService = new ManagedService({
+      name: 'API',
+      command: 'node',
+      args: [path.join(rootDir, 'scripts', 'start-api.mjs')],
+      cwd: rootDir,
+      color: '\x1b[36m', // Cyan
+      restartOnSuccessfulExit: false,
+    });
+    apiService.start();
+  }
 
   const webService = new ManagedService({
     name: 'WEB',
@@ -149,18 +191,18 @@ async function main() {
     color: '\x1b[32m', // Green
   });
 
-  apiService.start();
   webService.start();
 
   console.log('\n  Services Active:');
   console.log('   - Web Frontend: http://localhost:5173');
   console.log('   - Backend API:  http://127.0.0.1:8000');
-  console.log('   - Auto-Restart: Active (keeps services running indefinitely)');
+  console.log(`   - API: ${apiService ? 'managed with automatic restart' : 'reusing existing healthy service'}`);
+  console.log('   - Auto-Restart: Active for runner-managed services');
   console.log('   - Press Ctrl+C to terminate all services.\n');
 
   function shutdown() {
     console.log('\n  Terminating services cleanly...');
-    apiService.stop();
+    apiService?.stop();
     webService.stop();
     process.exit(0);
   }

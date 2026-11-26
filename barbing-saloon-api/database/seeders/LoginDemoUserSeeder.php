@@ -61,6 +61,7 @@ class LoginDemoUserSeeder extends Seeder
                 $user->role = $account['role'];
                 $user->is_active = true;
                 $user->status = 'active';
+                $user->email_verified_at = now();
                 $user->save();
                 $user->tokens()->delete();
 

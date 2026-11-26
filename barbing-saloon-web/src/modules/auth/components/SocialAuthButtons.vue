@@ -14,8 +14,8 @@
       <span>{{ socialError }}</span>
     </p>
 
-    <!-- Google Sign-In Button -->
     <button
+      v-if="!googleButtonRendered"
       type="button"
       @click="googleSignIn"
       :disabled="socialBusy"
@@ -23,7 +23,6 @@
       :aria-label="socialBusy ? 'Connecting to Google...' : displayButtonText"
       class="group relative flex w-full min-h-[44px] items-center justify-center gap-3 rounded-lg border border-neutral-200/90 bg-white px-4 py-2.5 text-sm font-semibold text-obsidian shadow-sm transition-all duration-300 hover:border-gold/60 hover:bg-neutral-50 hover:shadow-[0_0_20px_rgba(212,175,55,0.22)] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-gold/50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer touch-manipulation select-none"
     >
-      <!-- Google 4-color SVG Logo -->
       <svg
         v-if="!socialBusy"
         viewBox="0 0 24 24"
@@ -35,8 +34,6 @@
         <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
         <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
       </svg>
-
-      <!-- Spinner when connecting -->
       <svg
         v-else
         class="h-5 w-5 animate-spin text-obsidian shrink-0"
@@ -48,16 +45,21 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-
       <span class="tracking-normal font-medium text-obsidian">
         {{ socialBusy ? 'Connecting to Google...' : displayButtonText }}
       </span>
     </button>
+    <div
+      v-show="googleButtonRendered"
+      ref="googleButtonContainer"
+      class="flex w-full min-h-[44px] items-center justify-center overflow-hidden rounded-lg"
+      data-testid="google-signin-container"
+    ></div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useSocialAuth } from '../composables/useSocialAuth';
 
 const props = defineProps({
@@ -71,8 +73,9 @@ const props = defineProps({
   },
 });
 
-const { socialBusy, socialError, googleSignIn } = useSocialAuth();
-
+const { socialBusy, socialError, googleSignIn, renderGoogleButton } = useSocialAuth();
+const googleButtonContainer = ref(null);
+const googleButtonRendered = ref(false);
 const displayButtonText = computed(() => {
   if (props.buttonText) {
     return props.buttonText;
@@ -81,5 +84,30 @@ const displayButtonText = computed(() => {
     return 'Sign up with Google';
   }
   return 'Continue with Google';
+});
+
+let checkTimer;
+onMounted(async () => {
+  await nextTick();
+  if (typeof renderGoogleButton !== 'function') {
+    return;
+  }
+  await renderGoogleButton(googleButtonContainer.value);
+
+  let elapsed = 0;
+  checkTimer = setInterval(() => {
+    elapsed += 500;
+    const renderedButton = googleButtonContainer.value?.querySelector('[role="button"], .nsm7Bb-HzV7m-LgbsSe');
+    if (renderedButton) {
+      googleButtonRendered.value = true;
+      clearInterval(checkTimer);
+    } else if (elapsed >= 8000) {
+      clearInterval(checkTimer);
+    }
+  }, 500);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(checkTimer);
 });
 </script>

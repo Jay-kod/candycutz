@@ -6,6 +6,8 @@ export default [
 
   // Platform Operations — reuse admin page components (backend already grants super_admin access)
   { path: '/superadmin/appointments', name: 'superadmin-appointments', component: () => import('@/features/appointments/pages/AdminAppointmentsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/no-shows', name: 'superadmin-no-shows', component: () => import('@/features/no-shows/pages/AdminNoShowsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
+  { path: '/superadmin/refunds', name: 'superadmin-refunds', component: () => import('@/features/refunds/pages/AdminRefundsPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/walk-in', name: 'superadmin-walk-in', component: () => import('../../modules/admin/pages/WalkInPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/customers', name: 'superadmin-customers', component: () => import('@/features/customers/pages/CustomersPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },
   { path: '/superadmin/barbers', name: 'superadmin-barbers', component: () => import('../../modules/admin/pages/BarbersPage.vue'), meta: { requiresAuth: true, roles: ['super_admin'] } },

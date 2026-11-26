@@ -49,7 +49,7 @@
             >
               {{ appointment.status }}
             </span>
-            <button v-if="appointment.status === 'confirmed'"
+            <button v-if="['confirmed', 'checked_in', 'in_progress'].includes(appointment.status)"
               @click="$emit('complete', appointment.id)"
               class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/20 hover:border-emerald-500"
             >
@@ -91,6 +91,7 @@ defineEmits(['complete', 'no-show']);
 function statusClass(status) {
   const s = (status || '').toLowerCase();
   if (s === 'confirmed' || s === 'completed') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+  if (s === 'checked_in' || s === 'in_progress') return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20';
   if (s === 'pending') return 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20';
   if (s === 'cancelled' || s === 'no_show') return 'bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20';
   return 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)] border border-[var(--color-border)]';

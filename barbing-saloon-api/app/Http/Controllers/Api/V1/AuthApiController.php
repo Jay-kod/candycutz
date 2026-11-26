@@ -8,17 +8,18 @@ use App\Domain\Identity\Actions\AuthenticateUser;
 use App\Domain\Identity\Actions\ChangePassword;
 use App\Domain\Identity\Actions\ManageUserTokens;
 use App\Domain\Identity\Actions\RegisterCustomer;
-use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Identity\Actions\RequestPasswordReset;
 use App\Domain\Identity\Actions\ResetPassword;
 use App\Domain\Identity\Actions\SocialLogin;
 use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
 use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\AuthUserResource;
 use App\Http\Resources\BarberResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -109,7 +110,16 @@ class AuthApiController
         }
         RateLimiter::hit($throttleKey, 60);
 
-        $action->execute($email);
+        try {
+            $action->execute($email);
+        } catch (RuntimeException $e) {
+            return ApiResponse::error(
+                $e->getMessage(),
+                ['email' => $email, 'email_verified' => false],
+                422,
+                'EMAIL_NOT_VERIFIED'
+            );
+        }
 
         return ApiResponse::success(
             null,
@@ -121,9 +131,16 @@ class AuthApiController
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
-            'token' => ['required', 'string'],
+            'token' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+
+        $tokenOrCode = trim((string) ($validated['token'] ?? $validated['code'] ?? ''));
+        if ($tokenOrCode === '') {
+            return ApiResponse::error('A password reset token or 6-digit OTP code is required.', [], 422, 'TOKEN_REQUIRED');
+        }
+        $validated['token'] = $tokenOrCode;
 
         try {
             $payload = $action->execute($validated);
@@ -158,7 +175,7 @@ class AuthApiController
         if ($request->wantsJson()) {
             return ApiResponse::success([
                 'is_email_verified' => true,
-                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
                     ? $user->email_verified_at->toIso8601String()
                     : ($user->email_verified_at ? (string) $user->email_verified_at : null),
             ], 'Email address verified successfully.');
@@ -175,7 +192,7 @@ class AuthApiController
         if ($user->hasVerifiedEmail()) {
             return ApiResponse::success([
                 'is_email_verified' => true,
-                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
                     ? $user->email_verified_at->toIso8601String()
                     : ($user->email_verified_at ? (string) $user->email_verified_at : null),
             ], 'Email address is already verified.');
@@ -223,7 +240,7 @@ class AuthApiController
             return ApiResponse::success([
                 'user' => new AuthUserResource($user),
                 'is_email_verified' => true,
-                'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
                     ? $user->email_verified_at->toIso8601String()
                     : ($user->email_verified_at ? (string) $user->email_verified_at : null),
             ], 'Email address is already verified.');
@@ -257,7 +274,7 @@ class AuthApiController
         return ApiResponse::success([
             'user' => new AuthUserResource($fresh),
             'is_email_verified' => true,
-            'email_verified_at' => $fresh->email_verified_at instanceof \Carbon\CarbonInterface
+            'email_verified_at' => $fresh->email_verified_at instanceof CarbonInterface
                 ? $fresh->email_verified_at->toIso8601String()
                 : ($fresh->email_verified_at ? (string) $fresh->email_verified_at : null),
         ], 'Email address verified successfully. Your account is secured and verified.');
@@ -270,7 +287,7 @@ class AuthApiController
         return ApiResponse::success([
             'email' => $user->email,
             'is_email_verified' => $user->hasVerifiedEmail(),
-            'email_verified_at' => $user->email_verified_at instanceof \Carbon\CarbonInterface
+            'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
                 ? $user->email_verified_at->toIso8601String()
                 : ($user->email_verified_at ? (string) $user->email_verified_at : null),
         ], 'Email verification status retrieved');

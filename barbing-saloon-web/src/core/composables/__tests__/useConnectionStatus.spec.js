@@ -78,6 +78,18 @@ describe('useConnectionStatus Composable', () => {
     expect(isMinimized.value).toBe(false);
   });
 
+  it('tracks and clears action failures independently from the health banner', () => {
+    const { hasActionFailure, recordActionFailure, clearActionFailure, isBannerVisible } = useConnectionStatus();
+
+    recordActionFailure();
+
+    expect(hasActionFailure.value).toBe(true);
+    expect(isBannerVisible.value).toBe(false);
+
+    clearActionFailure();
+    expect(hasActionFailure.value).toBe(false);
+  });
+
   it('successfully recovers when checkHealth returns healthy database', async () => {
     const { isDisconnected, markDisconnected, checkHealth } = useConnectionStatus();
 
@@ -138,7 +150,7 @@ describe('useConnectionStatus Composable', () => {
   });
 
   it('verifies connection via health check on reportNetworkFailure and remains connected if healthy', async () => {
-    const { isConnected, isDisconnected, reportNetworkFailure } = useConnectionStatus();
+    const { isConnected, isDisconnected, hasActionFailure, reportNetworkFailure } = useConnectionStatus();
 
     axios.get.mockResolvedValueOnce({
       status: 200,
@@ -158,6 +170,7 @@ describe('useConnectionStatus Composable', () => {
 
     expect(isConnected.value).toBe(true);
     expect(isDisconnected.value).toBe(false);
+    expect(hasActionFailure.value).toBe(false);
   });
 });
 

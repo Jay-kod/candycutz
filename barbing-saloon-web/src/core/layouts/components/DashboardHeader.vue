@@ -3,7 +3,7 @@
     class="flex h-14 sm:h-20 items-center justify-between border-b px-2 xs:px-3 sm:px-6 backdrop-blur-xl sticky top-0 z-30 shrink-0 transition-colors duration-300"
     :class="[themeClasses.headerBg || 'bg-[var(--color-bg-secondary)]/90', themeClasses.headerBorder || 'border-[var(--color-border)]']"
   >
-    <div class="flex items-center gap-1 xs:gap-2 sm:gap-4 min-w-0">
+    <div class="flex flex-1 items-center gap-1.5 xs:gap-2.5 sm:gap-4 min-w-0 pr-2">
       <!-- Mobile Hamburger -->
       <button
         @click="$emit('toggleMobile')"
@@ -24,7 +24,7 @@
       </button>
 
       <!-- Breadcrumb/Title -->
-      <h2 class="font-display text-xs xs:text-sm sm:text-xl truncate max-w-[70px] xs:max-w-[88px] sm:max-w-none" :class="themeClasses.headerTitle || 'text-[var(--color-text-primary)]'">
+      <h2 class="font-display text-sm xs:text-base sm:text-xl truncate" :class="themeClasses.headerTitle || 'text-[var(--color-text-primary)]'">
         {{ currentRouteName }}
       </h2>
     </div>

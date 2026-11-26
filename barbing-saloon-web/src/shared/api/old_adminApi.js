@@ -6,6 +6,8 @@ export const adminApi = {
   approveAppointment: (id) => client.patch(`/admin/appointments/${id}/approve`),
   forceApproveAppointment: (id) => client.patch(`/admin/appointments/${id}/force-approve`),
   cancelAppointment: (id) => client.patch(`/admin/appointments/${id}/cancel`),
+  markNoShowAppointment: (id, data = {}) => client.patch(`/admin/appointments/${id}/no-show`, data),
+  forfeitAppointmentDeposit: (id, reason = '') => client.post(`/admin/appointments/${id}/forfeit-deposit`, { reason }),
   createWalkIn: (data) => client.post('/admin/appointments/walk-in', data),
   services: () => client.get('/services'),
   createService: (data) => client.post('/services', data),

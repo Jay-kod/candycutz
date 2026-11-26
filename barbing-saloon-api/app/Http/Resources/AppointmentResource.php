@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Domain\Booking\Services\NoShowPolicyService;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Services\UserMediaUrl;
@@ -10,6 +11,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @mixin Appointment
@@ -34,12 +36,24 @@ class AppointmentResource extends JsonResource
         $bankAccounts = config('payments.gateways.manual.bank_accounts');
         $firstAccount = is_array($bankAccounts) ? collect($bankAccounts)->first() : null;
 
-        $dbBankName = Setting::query()->where('key', 'bank_name')->value('value')
-            ?: Setting::query()->where('key', 'manual_transfer_bank')->value('value');
-        $dbAccountName = Setting::query()->where('key', 'account_name')->value('value')
-            ?: Setting::query()->where('key', 'manual_transfer_account_name')->value('value');
-        $dbAccountNumber = Setting::query()->where('key', 'account_number')->value('value')
-            ?: Setting::query()->where('key', 'manual_transfer_account_number')->value('value');
+        /** @var array<string, mixed> $bankSettings */
+        $bankSettings = Cache::remember('appointment_resource:bank_settings', 300, function (): array {
+            return Setting::query()
+                ->whereIn('key', [
+                    'bank_name',
+                    'manual_transfer_bank',
+                    'account_name',
+                    'manual_transfer_account_name',
+                    'account_number',
+                    'manual_transfer_account_number',
+                ])
+                ->pluck('value', 'key')
+                ->all();
+        });
+
+        $dbBankName = ($bankSettings['bank_name'] ?? null) ?: ($bankSettings['manual_transfer_bank'] ?? null);
+        $dbAccountName = ($bankSettings['account_name'] ?? null) ?: ($bankSettings['manual_transfer_account_name'] ?? null);
+        $dbAccountNumber = ($bankSettings['account_number'] ?? null) ?: ($bankSettings['manual_transfer_account_number'] ?? null);
 
         $bankName = $dbBankName
             ?: ($barber?->bank_name
@@ -64,16 +78,30 @@ class AppointmentResource extends JsonResource
         ] : null;
 
         $payment = $this->relationLoaded('payment') ? $this->payment : $this->payment()->first();
+        $apptPayStatusVal = $this->payment_status instanceof \BackedEnum ? $this->payment_status->value : (string) ($this->payment_status ?? '');
+        $paymentModelStatus = $payment?->status instanceof \BackedEnum ? $payment->status->value : (string) ($payment->status ?? '');
+
         $paymentStatus = 'pending';
-        if ($this->deposit_paid || ($payment && in_array($payment->status?->value ?? $payment->status, ['verified', 'successful'], true))) {
+        if ($paymentModelStatus === 'refunded' || $apptPayStatusVal === 'refunded') {
+            $paymentStatus = 'refunded';
+        } elseif ($paymentModelStatus === 'partially_refunded') {
+            $paymentStatus = 'partially_refunded';
+        } elseif ($apptPayStatusVal === 'refund_pending') {
+            $paymentStatus = 'refund_pending';
+        } elseif ($this->deposit_paid || ($payment && in_array($paymentModelStatus, ['verified', 'successful'], true))) {
             $paymentStatus = 'paid';
-        } elseif ($payment && in_array($payment->status?->value ?? $payment->status, ['receipt_uploaded', 'under_review', 'awaiting_verification'], true)) {
+        } elseif ($payment && in_array($paymentModelStatus, ['receipt_uploaded', 'under_review', 'awaiting_verification'], true)) {
             $paymentStatus = 'awaiting_verification';
-        } elseif ($this->payment_status === 'unpaid') {
+        } elseif ($apptPayStatusVal === 'unpaid') {
             $paymentStatus = 'pending';
         }
 
         $receiptUrl = $payment?->receipt_url ? url('/api/v1/payments/appointments/'.$this->id.'/receipt') : null;
+        $noShowRecord = $this->relationLoaded('noShowRecord') ? $this->noShowRecord : null;
+        $latestRefund = $this->relationLoaded('latestRefundRequest') ? $this->latestRefundRequest : null;
+        $graceEligibility = $statusVal === AppointmentStatus::confirmed->value
+            ? app(NoShowPolicyService::class)->canCustomerExtend($this->resource)
+            : ['allowed' => false, 'reason' => null, 'remaining_extensions' => 0];
 
         return [
             'id' => $this->id,
@@ -154,6 +182,39 @@ class AppointmentResource extends JsonResource
                 'id' => $this->serviceZone->id,
                 'name' => $this->serviceZone->name,
                 'surcharge' => (float) ($this->serviceZone->base_travel_fee ?? 0),
+            ] : null,
+            'no_show_marked_at' => $this->no_show_marked_at?->toIso8601String(),
+            'no_show_auto' => (bool) $this->no_show_auto,
+            'no_show_warning_sent_at' => $this->no_show_warning_sent_at?->toIso8601String(),
+            'grace_extended_until' => $this->grace_extended_until?->toIso8601String(),
+            'grace_extension_count' => (int) ($this->grace_extension_count ?? 0),
+            'grace_extension_reason' => $this->grace_extension_reason,
+            'can_extend_grace' => (bool) $graceEligibility['allowed'],
+            'grace_ineligible_reason' => $graceEligibility['reason'],
+            'deposit_forfeited' => (bool) $this->deposit_forfeited,
+            'deposit_forfeited_at' => $this->deposit_forfeited_at?->toIso8601String(),
+            'no_show_record' => $noShowRecord ? [
+                'id' => $noShowRecord->id,
+                'reason' => $noShowRecord->reason,
+                'was_automatic' => (bool) $noShowRecord->was_automatic,
+                'deposit_forfeited' => (bool) $noShowRecord->deposit_forfeited,
+                'deposit_forfeited_amount' => round($noShowRecord->deposit_forfeited_minor / 100, 2),
+                'appealed' => (bool) $noShowRecord->appealed,
+                'appeal_reason' => $noShowRecord->appeal_reason,
+                'appeal_outcome' => $noShowRecord->appeal_outcome,
+                'resolution_note' => $noShowRecord->resolution_note,
+            ] : null,
+            'latest_refund_request' => $latestRefund ? [
+                'id' => $latestRefund->id,
+                'type' => $latestRefund->type,
+                'reason_category' => $latestRefund->reason_category,
+                'refund_amount_minor' => (int) $latestRefund->refund_amount_minor,
+                'refund_amount' => round($latestRefund->refund_amount_minor / 100, 2),
+                'refund_percentage' => (int) $latestRefund->refund_percentage,
+                'status' => $latestRefund->status,
+                'decision_note' => $latestRefund->decision_note,
+                'refunded_at' => $latestRefund->refunded_at?->toIso8601String(),
+                'created_at' => $latestRefund->created_at?->toIso8601String(),
             ] : null,
             'created_at' => $this->created_at?->toIso8601String(),
         ];

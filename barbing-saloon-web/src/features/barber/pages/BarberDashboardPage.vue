@@ -25,7 +25,7 @@
 
             <BarberTodayAppointments
               :appointments="dashboard.today_appointments"
-              @complete="completeAppointment"
+              @complete="promptComplete"
               @no-show="markNoShow"
             />
           </div>
@@ -60,6 +60,17 @@
         @reject="onPaymentVerified"
         portal="barber"
       />
+
+      <!-- Service Verification Modal -->
+      <ServiceVerificationModal
+        :open="Boolean(completingBooking)"
+        :booking="completingBooking"
+        :is-verifying="isVerifying"
+        :error-message="verificationError"
+        @close="closeCompleteModal"
+        @submit="submitComplete"
+        @clear-error="verificationError = ''"
+      />
     </section>
   </BarberLayout>
 </template>
@@ -68,6 +79,8 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
 import ReceiptViewer from '@/core/components/ReceiptViewer.vue';
+import ServiceVerificationModal from '@/features/appointments/components/ServiceVerificationModal.vue';
+import { extractVerificationError } from '@/features/appointments/utils/verificationCode';
 
 import BarberWelcomeBanner from '@/features/barber/components/dashboard/BarberWelcomeBanner.vue';
 import BarberKpiGrid from '@/features/barber/components/dashboard/BarberKpiGrid.vue';
@@ -97,6 +110,46 @@ const { showNotificationModal, sendingNotification, notificationForm, sendNotifi
   useBarberNotification();
 
 const selectedReceipt = ref(null);
+const completingBooking = ref(null);
+const isVerifying = ref(false);
+const verificationError = ref('');
+
+const promptComplete = async (id) => {
+  const list = dashboard.value.today_appointments || [];
+  const appointment = list.find((a) => a.id === id);
+  if (appointment && appointment.booking_type === 'walk_in') {
+    isVerifying.value = true;
+    try {
+      await completeAppointment(id, '');
+    } catch {
+      // Handled via toast
+    } finally {
+      isVerifying.value = false;
+    }
+    return;
+  }
+  verificationError.value = '';
+  completingBooking.value = appointment || { id };
+};
+
+const closeCompleteModal = () => {
+  completingBooking.value = null;
+  verificationError.value = '';
+};
+
+const submitComplete = async (code) => {
+  if (!completingBooking.value?.id) return;
+  verificationError.value = '';
+  isVerifying.value = true;
+  try {
+    await completeAppointment(completingBooking.value.id, code || '');
+    closeCompleteModal();
+  } catch (err) {
+    verificationError.value = extractVerificationError(err, 'Invalid verification code. Please try again.');
+  } finally {
+    isVerifying.value = false;
+  }
+};
 
 const currentTime = ref('');
 const currentDate = ref('');

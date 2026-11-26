@@ -29,6 +29,9 @@ class UserProfileResource extends JsonResource
         $data['avatar_url'] = $avatarUrl;
         $data['cover_image'] = $coverImageUrl;
         $data['cover_image_url'] = $coverImageUrl;
+        $data['no_show_count'] = (int) ($this->no_show_count ?? 0);
+        $data['last_no_show_at'] = $this->last_no_show_at?->toIso8601String();
+        $data['requires_deposit'] = (bool) ($this->requires_deposit ?? false);
 
         return $data;
     }

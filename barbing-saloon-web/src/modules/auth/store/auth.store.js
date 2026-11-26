@@ -44,6 +44,8 @@ export const useAuthStore = defineStore('auth', {
             is_email_verified: !!user.is_email_verified || !!user.email_verified_at,
             avatar: user.avatar_url || user.avatar || null,
             avatar_url: user.avatar_url || user.avatar || null,
+            no_show_count: Number(user.no_show_count || 0),
+            requires_deposit: Boolean(user.requires_deposit),
           };
           localStorage.setItem('candycutz_cached_user', JSON.stringify(minimal));
         } catch {

@@ -9,17 +9,19 @@ use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Payment\Enums\PaymentStatus;
 use App\Domain\Payment\Exceptions\PaymentException;
 use App\Domain\Payment\Services\PaymentConfirmer;
+use App\Domain\Payment\Services\PaymentService;
 use App\Domain\Payment\Services\PaymentStateMachine;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Events\PaymentConfirmed;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\AuditLog;
-use App\Models\Barber;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\WebhookEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdminPaymentApiController
@@ -27,8 +29,11 @@ class AdminPaymentApiController
     public function __construct(
         protected PaymentConfirmer $paymentConfirmer,
         protected PaymentStateMachine $stateMachine,
-        protected PaymentGateway $gateway
-    ) {}
+        protected PaymentGateway $gateway,
+        protected ?PaymentService $paymentService = null
+    ) {
+        $this->paymentService = $paymentService ?? app(PaymentService::class);
+    }
 
     public function index(Request $request): JsonResponse
     {
@@ -75,7 +80,8 @@ class AdminPaymentApiController
         }
 
         try {
-            $result = $this->gateway->verify($reference);
+            $gateway = $this->paymentService->resolveGateway($payment->provider ?: $payment->payment_method ?: 'paystack');
+            $result = $gateway->verify($reference);
             if ($result->isSuccessful()) {
                 $this->paymentConfirmer->confirm($reference, 'admin_reverify', $result->raw_payload);
                 $payment->refresh();
@@ -111,7 +117,8 @@ class AdminPaymentApiController
         $reason = (string) $request->input('reason', 'Customer refund requested by admin');
 
         try {
-            $refundResult = $this->gateway->refund($payment, $refundAmount, $reason);
+            $gateway = $this->paymentService->resolveGateway($payment->provider ?: $payment->payment_method ?: 'paystack');
+            $refundResult = $gateway->refund($payment, $refundAmount, $reason);
             if (! $refundResult->isSuccessful()) {
                 throw PaymentException::providerRejected(
                     $refundResult->raw_payload['message'] ?? 'Refund rejected by provider.'
@@ -214,56 +221,90 @@ class AdminPaymentApiController
 
     public function verifyPayment(Request $request, int $id): JsonResponse
     {
-        $payment = Payment::with(['appointment'])->findOrFail($id);
         $user = $request->user();
 
-        $payment->update([
-            'status' => PaymentStatus::successful->value,
-            'verified_at' => now(),
-            'verified_by_user_id' => $user?->id,
-            'gateway_response' => 'Payment manually verified and approved by admin',
-        ]);
+        /** @var array{payment: Payment, appointment: Appointment|null, was_already_successful: bool} $txResult */
+        $txResult = DB::transaction(function () use ($id, $user, $request) {
+            $payment = Payment::with(['appointment'])->lockForUpdate()->findOrFail($id);
 
-        if ($payment->appointment) {
-            $payment->appointment->update([
-                'status' => AppointmentStatus::confirmed->value,
-                'payment_status' => AppointmentPaymentStatus::paid,
-                'deposit_paid' => true,
+            $wasAlreadySuccessful = ($payment->status instanceof PaymentStatus ? $payment->status : PaymentStatus::tryFrom((string) $payment->status))?->isSuccess() ?? false;
+
+            if ($wasAlreadySuccessful) {
+                return [
+                    'payment' => $payment,
+                    'appointment' => $payment->appointment,
+                    'was_already_successful' => true,
+                ];
+            }
+
+            $payment->update([
+                'status' => PaymentStatus::successful->value,
+                'verified_at' => now(),
+                'verified_by_user_id' => $user?->id,
+                'gateway_response' => 'Payment manually verified and approved by admin',
             ]);
-        }
 
-        PaymentTransaction::firstOrCreate(
-            ['payment_id' => $payment->id, 'gateway_event_id' => 'admin_verify_'.$payment->id],
-            [
-                'transaction_type' => 'verification',
-                'gateway' => $payment->provider ?: 'manual_transfer',
-                'amount' => $payment->amount,
-                'amount_minor' => $payment->amount_minor ?: ($payment->amount * 100),
-                'raw_payload' => ['verified_by' => $user?->id, 'action' => 'admin_manual_verification'],
-                'status' => 'successful',
-                'created_at' => now(),
-            ]
-        );
+            if ($payment->appointment) {
+                $lockedAppointment = Appointment::whereKey($payment->appointment->id)->lockForUpdate()->first();
+                if ($lockedAppointment) {
+                    $lockedAppointment->update([
+                        'status' => AppointmentStatus::confirmed->value,
+                        'payment_status' => AppointmentPaymentStatus::paid,
+                        'deposit_paid' => true,
+                    ]);
+                }
+            }
 
-        try {
-            AuditLog::create([
-                'user_id' => $user?->id ?? 1,
-                'user_role' => $user && $user->role instanceof \BackedEnum ? $user->role->value : 'admin',
-                'action' => 'payment.verified',
-                'module' => 'Payment',
-                'target_type' => Payment::class,
-                'target_id' => $payment->id,
-                'new_value' => ['status' => 'successful', 'appointment_id' => $payment->appointment_id],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('Could not write audit log for payment verification: '.$e->getMessage());
+            PaymentTransaction::firstOrCreate(
+                ['payment_id' => $payment->id, 'gateway_event_id' => 'admin_verify_'.$payment->id],
+                [
+                    'transaction_type' => 'verification',
+                    'gateway' => $payment->provider ?: 'manual_transfer',
+                    'amount' => $payment->amount,
+                    'amount_minor' => $payment->amount_minor ?: ($payment->amount * 100),
+                    'raw_payload' => ['verified_by' => $user?->id, 'action' => 'admin_manual_verification'],
+                    'status' => 'successful',
+                    'created_at' => now(),
+                ]
+            );
+
+            try {
+                AuditLog::create([
+                    'user_id' => $user?->id ?? 1,
+                    'user_role' => $user && $user->role instanceof \BackedEnum ? $user->role->value : 'admin',
+                    'action' => 'payment.verified',
+                    'module' => 'Payment',
+                    'target_type' => Payment::class,
+                    'target_id' => $payment->id,
+                    'new_value' => ['status' => 'successful', 'appointment_id' => $payment->appointment_id],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Could not write audit log for payment verification: '.$e->getMessage());
+            }
+
+            return [
+                'payment' => $payment->fresh(),
+                'appointment' => $payment->appointment?->fresh(),
+                'was_already_successful' => false,
+            ];
+        }, 3);
+
+        $payment = $txResult['payment'];
+        $appointment = $txResult['appointment'];
+
+        if (! $txResult['was_already_successful'] && $appointment) {
+            try {
+                PaymentConfirmed::dispatch($payment, $appointment);
+            } catch (\Throwable $e) {
+                Log::warning('Could not dispatch PaymentConfirmed for admin verification: '.$e->getMessage());
+            }
         }
 
         return ApiResponse::success(
             $payment->load(['appointment.customer', 'appointment.barber.user', 'appointment.service']),
-            'Payment verified successfully.'
+            $txResult['was_already_successful'] ? 'Payment already verified.' : 'Payment verified successfully.'
         );
     }
 

@@ -19,9 +19,15 @@ const {
 
 const isOpen = ref(false)
 
-// Close when clicking outside
+// Close when clicking outside or pressing Escape
 const closeOnClickOutside = (e) => {
   if (isOpen.value && !e.target.closest('.notification-bell')) {
+    isOpen.value = false
+  }
+}
+
+const closeOnEscape = (e) => {
+  if (e.key === 'Escape' && isOpen.value) {
     isOpen.value = false
   }
 }
@@ -30,15 +36,42 @@ onMounted(() => {
   fetchNotifications()
   startPolling(30000)
   document.addEventListener('click', closeOnClickOutside)
+  document.addEventListener('keydown', closeOnEscape)
 })
 
 onUnmounted(() => {
   stopPolling()
   document.removeEventListener('click', closeOnClickOutside)
+  document.removeEventListener('keydown', closeOnEscape)
 })
 
 const toggleOpen = () => {
   isOpen.value = !isOpen.value
+}
+
+const resolveNotificationTarget = (notif) => {
+  const raw = notif?.action_url
+  if (typeof raw === 'string' && raw.startsWith('/')) {
+    if (raw.startsWith('/customer/bookings')) return '/customer/dashboard/bookings'
+    if (raw.startsWith('/customer/reviews')) return raw.replace('/customer/reviews', '/customer/dashboard/reviews')
+    if (raw.startsWith('/admin/appointments/')) return '/admin/appointments'
+    if (raw.startsWith('/admin/payments/')) return '/admin/appointments'
+    return raw
+  }
+
+  const path = route.path
+  if (path.startsWith('/admin')) return '/admin/appointments'
+  if (path.startsWith('/barber')) return '/barber/appointments'
+  return '/customer/dashboard/bookings'
+}
+
+const openNotification = async (notif) => {
+  await markAsRead(notif.id)
+  isOpen.value = false
+  const target = resolveNotificationTarget(notif)
+  if (target) {
+    router.push(target)
+  }
 }
 
 const viewAll = () => {
@@ -81,19 +114,31 @@ const viewAll = () => {
           <div v-for="notif in notifications" :key="notif.id" 
                class="p-4 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors cursor-pointer group flex items-start gap-3"
                :class="{ 'bg-[var(--color-bg-tertiary)]/50': !notif.is_read }"
-               @click="markAsRead(notif.id)">
+               @click="openNotification(notif)">
                
             <div class="mt-1 flex-shrink-0">
               <div class="h-2 w-2 rounded-full" :class="notif.is_read ? 'bg-transparent' : 'bg-[var(--color-accent)]'"></div>
             </div>
             
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
               <h4 class="text-sm font-semibold" :class="notif.is_read ? 'text-[var(--color-text-secondary)]' : 'text-[var(--color-text-primary)]'">{{ notif.title }}</h4>
               <p class="text-xs text-[var(--color-text-secondary)] mt-1 line-clamp-2">{{ notif.message }}</p>
-              <span class="text-[10px] text-[var(--color-text-muted)] mt-2 block">{{ new Date(notif.created_at).toLocaleString() }}</span>
+              <span
+                v-if="notif.data?.verification_code || notif.data?.booking_reference"
+                class="inline-block mt-1.5 rounded bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 font-mono text-[10px] font-bold text-amber-500"
+              >
+                {{ notif.data.verification_code || notif.data.booking_reference }}
+              </span>
+              <span class="text-[10px] text-[var(--color-text-muted)] mt-1.5 block">{{ new Date(notif.created_at).toLocaleString() }}</span>
             </div>
             
-            <button v-if="!notif.is_read" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-accent)] hover:text-[var(--color-accent-hover)]" title="Mark as read">
+            <button
+              v-if="!notif.is_read"
+              type="button"
+              @click.stop="markAsRead(notif.id)"
+              class="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] p-1 rounded"
+              title="Mark as read"
+            >
               <CheckIcon class="h-4 w-4" />
             </button>
           </div>

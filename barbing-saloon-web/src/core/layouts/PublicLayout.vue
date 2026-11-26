@@ -12,6 +12,7 @@
           <RouterLink to="/about" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
           <RouterLink to="/services" @mouseenter="prefetchServices" @focus="prefetchServices" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
           <RouterLink to="/gallery" @mouseenter="prefetchGallery" @focus="prefetchGallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
+          <RouterLink to="/directions" active-class="public-nav-link--active" class="public-nav-link">Directions</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
         </nav>
 
@@ -59,6 +60,7 @@
           <RouterLink to="/about" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">About</RouterLink>
           <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
           <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
+          <RouterLink to="/directions" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Directions</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
           <div class="py-2 px-3 flex items-center justify-between border-y border-[var(--color-border-subtle)] my-1">
             <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Theme</span>
@@ -106,6 +108,7 @@
               <li><RouterLink to="/services" class="hover:text-[var(--color-accent)] transition-colors">Services</RouterLink></li>
               <li><RouterLink to="/gallery" class="hover:text-[var(--color-accent)] transition-colors">Gallery</RouterLink></li>
               <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">About Us</RouterLink></li>
+              <li><RouterLink to="/directions" class="hover:text-[var(--color-accent)] transition-colors">Direct Me to Shop</RouterLink></li>
               <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Contact Shop</RouterLink></li>
             </ul>
           </div>
@@ -168,7 +171,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useWindowScroll } from '@vueuse/core';
-import { publicApi } from '@/shared/api/old_publicApi';
 import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
 import SocialIcon from '@/components/SocialIcon.vue';
 import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
@@ -289,8 +291,8 @@ const activeFooterSocials = computed(() => {
 
 const fetchSettings = async () => {
   try {
-    const response = await publicApi.settings();
-    const settings = response.data?.data || {};
+    const store = getStore();
+    const settings = store ? await store.getSettings() : {};
 
     applyBrandSettings({
       ...settings,

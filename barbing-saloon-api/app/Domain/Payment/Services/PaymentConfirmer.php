@@ -35,15 +35,16 @@ class PaymentConfirmer
     public function confirm(string $reference, string $source, array $payload = []): Payment
     {
         try {
-            return DB::transaction(function () use ($reference, $source, $payload) {
+            /** @var array{payment: Payment, appointment: Appointment|null, should_dispatch: bool} $txResult */
+            $txResult = DB::transaction(function () use ($reference, $source, $payload) {
                 /** @var Payment|null $payment */
                 $payment = Payment::where(function ($q) use ($reference) {
                     $q->where('reference', $reference)
                         ->orWhere('transaction_ref', $reference)
                         ->orWhere('gateway_reference', $reference);
                 })
-                ->lockForUpdate()
-                ->first();
+                    ->lockForUpdate()
+                    ->first();
 
                 if (! $payment) {
                     Log::error("PaymentConfirmer: Payment not found for reference [{$reference}]");
@@ -58,7 +59,11 @@ class PaymentConfirmer
                 if ($currentStatus->isSuccess()) {
                     Log::info("PaymentConfirmer: Payment [{$reference}] already in success state [{$currentStatus->value}]. Skipping duplicate confirmation.");
 
-                    return $payment;
+                    return [
+                        'payment' => $payment,
+                        'appointment' => null,
+                        'should_dispatch' => false,
+                    ];
                 }
 
                 $appointment = Appointment::whereKey($payment->appointment_id)->lockForUpdate()->first();
@@ -70,6 +75,14 @@ class PaymentConfirmer
                 // Verify amount & currency
                 $expectedKobo = $this->pricingService->amountDue($appointment);
                 $actualKobo = $payment->amount_minor ?: (int) $payment->amount;
+
+                // Normalize to kobo if stored in Naira (< 100,000 threshold)
+                if ($expectedKobo > 0 && $expectedKobo < 100000) {
+                    $expectedKobo = (int) round($expectedKobo * 100);
+                }
+                if ($actualKobo > 0 && $actualKobo < 100000) {
+                    $actualKobo = (int) round($actualKobo * 100);
+                }
 
                 // In payload from Paystack, amount might also be present in kobo
                 $payloadKobo = isset($payload['amount']) ? (int) $payload['amount'] : null;
@@ -135,7 +148,7 @@ class PaymentConfirmer
                         $slotTaken = Appointment::where('barber_id', $barberId)
                             ->where('id', '!=', $appointment->id)
                             ->where('appointment_date', $date)
-                            ->whereNotIn('status', [AppointmentStatus::cancelled->value, 'cancelled'])
+                            ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
                             ->where(function ($q) {
                                 $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
                                     ->orWhere(function ($draftQuery) {
@@ -182,13 +195,6 @@ class PaymentConfirmer
                     } catch (\Throwable $e) {
                         Log::warning("PaymentConfirmer: Could not record status history: {$e->getMessage()}");
                     }
-
-                    // Dispatch luxury booking confirmation email upon payment completion
-                    try {
-                        \App\Jobs\SendBookingConfirmation::dispatch($appointment);
-                    } catch (\Throwable $e) {
-                        Log::warning("PaymentConfirmer: Could not dispatch SendBookingConfirmation: {$e->getMessage()}");
-                    }
                 }
 
                 // Record transaction ledger entry idempotently
@@ -213,13 +219,24 @@ class PaymentConfirmer
                     ]);
                 }
 
-                // Dispatch domain event
-                PaymentConfirmed::dispatch($payment->fresh(), $appointment->fresh());
+                $confirmedPayment = $payment->fresh();
+                $confirmedAppointment = $appointment->fresh();
 
                 Log::info("PaymentConfirmer: Payment [{$reference}] confirmed successfully via [{$source}].");
 
-                return $payment->fresh();
+                return [
+                    'payment' => $confirmedPayment,
+                    'appointment' => $confirmedAppointment,
+                    'should_dispatch' => true,
+                ];
             });
+
+            // Dispatch after DB transaction commits so workers always read committed payment & appointment state
+            if ($txResult['should_dispatch'] && $txResult['appointment']) {
+                PaymentConfirmed::dispatch($txResult['payment'], $txResult['appointment']);
+            }
+
+            return $txResult['payment'];
         } catch (PaymentException $e) {
             if ($e->getErrorCode() === 'PAYMENT_AMOUNT_MISMATCH') {
                 Payment::where('reference', $reference)

@@ -9,12 +9,13 @@ use App\Domain\Payment\Actions\ConfirmPayment;
 use App\Domain\Payment\Actions\InitiateCheckout;
 use App\Domain\Payment\Actions\UploadReceipt;
 use App\Domain\Payment\Actions\VerifyReceipt;
-use App\Domain\Payment\Contracts\PaymentGateway;
 use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Payment\Enums\PaymentStatus;
 use App\Domain\Payment\Services\PaymentConfirmer;
+use App\Domain\Payment\Services\PaymentService;
 use App\Domain\Payment\Services\PricingService;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Events\PaymentConfirmed;
 use App\Http\Resources\Api\V1\PaymentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
@@ -22,6 +23,7 @@ use App\Models\AppointmentStatusHistory;
 use App\Models\AuditLog;
 use App\Models\Barber;
 use App\Models\Branch;
+use App\Models\Business;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\Service;
@@ -29,6 +31,7 @@ use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -168,6 +171,7 @@ class PaymentApiController
             if (in_array($appointment->status->value ?? $appointment->status, [AppointmentStatus::pending->value], true)) {
                 $appointment->update([
                     'status' => AppointmentStatus::confirmed->value,
+                    'payment_status' => AppointmentPaymentStatus::paid,
                     'deposit_paid' => true,
                 ]);
             }
@@ -212,15 +216,13 @@ class PaymentApiController
             Log::warning('Could not record audit log for payment verification: '.$e->getMessage());
         }
 
-        // Dispatch notification to customer
-        try {
-            if ($approve) {
-                app(NotificationDispatcher::class)->paymentVerified($appointment);
-            } else {
+        // Dispatch cancellation notification when rejected (approvals dispatch PaymentConfirmed in state machine)
+        if (! $approve) {
+            try {
                 app(NotificationDispatcher::class)->bookingCancelled($appointment, $user);
+            } catch (\Throwable $e) {
+                Log::warning('Could not dispatch payment verification notification: '.$e->getMessage());
             }
-        } catch (\Throwable $e) {
-            Log::warning('Could not dispatch payment verification notification: '.$e->getMessage());
         }
 
         return ApiResponse::success(
@@ -244,7 +246,8 @@ class PaymentApiController
             // Accelerator: on-demand verification if still pending/initiated
             if ($payment && ! $payment->status->isSuccess()) {
                 try {
-                    $gateway = app(PaymentGateway::class);
+                    $paymentService = app(PaymentService::class);
+                    $gateway = $paymentService->resolveGateway($payment->provider ?: $payment->payment_method ?: 'paystack');
                     $result = $gateway->verify($reference);
                     if ($result->isSuccessful()) {
                         app(PaymentConfirmer::class)->confirm($reference, 'return', $result->raw_payload);
@@ -262,7 +265,7 @@ class PaymentApiController
                 return redirect()->away("candycutz://payment/callback?reference={$reference}&status={$status}");
             }
 
-            $frontendUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://localhost:5173')), '/');
+            $frontendUrl = rtrim((string) config('app.frontend_url', 'http://localhost:5173'), '/');
 
             return redirect()->away("{$frontendUrl}/customer/dashboard/payment/callback?reference={$reference}&status={$status}");
         }
@@ -293,7 +296,8 @@ class PaymentApiController
         // On-demand verification accelerator if still pending/initiated
         if (! $payment->status->isSuccess() && ! in_array($payment->status->value, ['failed', 'rejected', 'refunded'], true)) {
             try {
-                $gateway = app(PaymentGateway::class);
+                $paymentService = app(PaymentService::class);
+                $gateway = $paymentService->resolveGateway($payment->provider ?: $payment->payment_method ?: 'paystack');
                 $result = $gateway->verify($reference);
                 if ($result->isSuccessful()) {
                     app(PaymentConfirmer::class)->confirm($reference, 'poll', $result->raw_payload);
@@ -310,24 +314,28 @@ class PaymentApiController
             'amount_minor' => $payment->amount_minor ?: $payment->amount,
             'currency' => $payment->currency,
             'provider' => $payment->provider,
+            'payment_method' => $payment->channel ?: $payment->payment_method ?: $payment->provider,
             'paid_at' => $payment->paid_at?->toIso8601String(),
             'appointment' => $payment->appointment ? [
                 'id' => $payment->appointment->id,
                 'booking_reference' => $payment->appointment->booking_reference,
+                'verification_code' => $payment->appointment->verification_code,
                 'status' => $payment->appointment->status instanceof \BackedEnum ? $payment->appointment->status->value : (string) $payment->appointment->status,
                 'payment_status' => $payment->appointment->payment_status instanceof \BackedEnum ? $payment->appointment->payment_status->value : (string) $payment->appointment->payment_status,
                 'deposit_paid' => (bool) $payment->appointment->deposit_paid,
                 'appointment_date' => $payment->appointment->appointment_date ? (is_string($payment->appointment->appointment_date) ? $payment->appointment->appointment_date : $payment->appointment->appointment_date->format('Y-m-d')) : null,
                 'appointment_time' => $payment->appointment->appointment_time,
+                'total_duration_minutes' => (int) ($payment->appointment->total_duration_minutes ?: $payment->appointment->service?->duration_minutes ?: 30),
                 'total_price' => (float) ($payment->appointment->grand_total ?: $payment->appointment->total_price ?: ($payment->amount_minor ? $payment->amount_minor / 100 : $payment->amount)),
                 'service' => $payment->appointment->service ? [
                     'id' => $payment->appointment->service->id,
                     'name' => $payment->appointment->service->name,
                     'price' => (float) $payment->appointment->service->price,
+                    'duration_minutes' => (int) ($payment->appointment->service->duration_minutes ?? 30),
                 ] : null,
                 'barber' => $payment->appointment->barber ? [
                     'id' => $payment->appointment->barber->id,
-                    'name' => $payment->appointment->barber->user?->name ?? 'Master Barber',
+                    'name' => $payment->appointment->barber->user->name ?? 'Master Barber',
                     'chair_number' => 1,
                 ] : null,
             ] : null,
@@ -336,10 +344,10 @@ class PaymentApiController
 
     public function collectPaymentAtVenue(Request $request, int $id): JsonResponse
     {
-        $appointment = Appointment::with(['barber', 'payment'])->findOrFail($id);
+        $preCheck = Appointment::with(['barber'])->findOrFail($id);
         $user = $request->user();
 
-        $isAssignedBarber = $appointment->barber?->user_id === $user->id;
+        $isAssignedBarber = $preCheck->barber?->user_id === $user->id;
         $role = $user->role instanceof \BackedEnum ? $user->role->value : $user->role;
         $isStaff = in_array($role, ['admin', 'super_admin'], true);
 
@@ -347,62 +355,84 @@ class PaymentApiController
             return ApiResponse::error('Unauthorized to collect payment for this appointment.', [], 403, 'FORBIDDEN');
         }
 
-        if ($appointment->payment_status === AppointmentPaymentStatus::paid) {
+        /** @var array{already_paid: bool, payment?: Payment, appointment?: Appointment, amount_due?: int} $txResult */
+        $txResult = DB::transaction(function () use ($id, $user) {
+            $appointment = Appointment::with(['barber', 'payment'])->lockForUpdate()->findOrFail($id);
+
+            if ($appointment->payment_status === AppointmentPaymentStatus::paid) {
+                return ['already_paid' => true];
+            }
+
+            $amountDue = $this->pricingService->amountDue($appointment);
+
+            $payment = $appointment->payment;
+            if (! $payment) {
+                $payment = Payment::create([
+                    'appointment_id' => $appointment->id,
+                    'customer_id' => $appointment->customer_id ?? 1,
+                    'amount' => $amountDue,
+                    'amount_minor' => $amountDue,
+                    'currency' => 'NGN',
+                    'status' => 'pending',
+                    'provider' => 'venue',
+                    'payment_method' => 'pay_at_venue',
+                    'reference' => 'VENUE-'.strtoupper(Str::random(10)),
+                    'paid_at' => now(),
+                ]);
+            }
+
+            $payment->update([
+                'status' => 'successful',
+                'amount_minor' => $amountDue,
+                'paid_at' => now(),
+                'payment_method' => 'pay_at_venue',
+                'provider' => 'venue',
+                'verified_at' => now(),
+                'verified_by_user_id' => $user->id,
+            ]);
+
+            $appointment->update([
+                'payment_status' => AppointmentPaymentStatus::paid,
+                'deposit_paid' => true,
+                'status' => AppointmentStatus::confirmed->value,
+            ]);
+
+            PaymentTransaction::firstOrCreate(
+                ['idempotency_key' => "venue:appointment:{$appointment->id}"],
+                [
+                    'payment_id' => $payment->id,
+                    'transaction_type' => 'capture',
+                    'gateway' => 'venue',
+                    'gateway_event_id' => "venue_cash_{$appointment->id}",
+                    'amount' => $amountDue,
+                    'amount_minor' => $amountDue,
+                    'status' => 'successful',
+                    'created_at' => now(),
+                ]
+            );
+
+            return [
+                'already_paid' => false,
+                'payment' => $payment->fresh(),
+                'appointment' => $appointment->fresh(),
+                'amount_due' => $amountDue,
+            ];
+        }, 3);
+
+        if ($txResult['already_paid']) {
             return ApiResponse::error('Appointment is already paid.', [], 409, 'PAYMENT_ALREADY_PAID');
         }
 
-        $amountDue = $this->pricingService->amountDue($appointment);
-
-        $payment = $appointment->payment;
-        if (! $payment) {
-            $payment = Payment::create([
-                'appointment_id' => $appointment->id,
-                'customer_id' => $appointment->customer_id ?? 1,
-                'amount' => $amountDue,
-                'amount_minor' => $amountDue,
-                'currency' => 'NGN',
-                'status' => 'pending',
-                'provider' => 'venue',
-                'payment_method' => 'pay_at_venue',
-                'reference' => 'VENUE-'.strtoupper(Str::random(10)),
-                'paid_at' => now(),
-            ]);
+        try {
+            PaymentConfirmed::dispatch($txResult['payment'], $txResult['appointment']);
+        } catch (\Throwable $e) {
+            Log::warning('Could not dispatch PaymentConfirmed for venue collection: '.$e->getMessage());
         }
 
-        $payment->update([
-            'status' => 'successful',
-            'amount_minor' => $amountDue,
-            'paid_at' => now(),
-            'payment_method' => 'pay_at_venue',
-            'provider' => 'venue',
-            'verified_at' => now(),
-            'verified_by_user_id' => $user->id,
-        ]);
-
-        $appointment->update([
-            'payment_status' => AppointmentPaymentStatus::paid,
-            'deposit_paid' => true,
-            'status' => AppointmentStatus::confirmed->value,
-        ]);
-
-        PaymentTransaction::firstOrCreate(
-            ['idempotency_key' => "venue:appointment:{$appointment->id}"],
-            [
-                'payment_id' => $payment->id,
-                'transaction_type' => 'capture',
-                'gateway' => 'venue',
-                'gateway_event_id' => "venue_cash_{$appointment->id}",
-                'amount' => $amountDue,
-                'amount_minor' => $amountDue,
-                'status' => 'successful',
-                'created_at' => now(),
-            ]
-        );
-
         return ApiResponse::success([
-            'appointment_id' => $appointment->id,
+            'appointment_id' => $txResult['appointment']->id,
             'payment_status' => 'paid',
-            'amount_collected' => $amountDue,
+            'amount_collected' => $txResult['amount_due'],
         ], 'Payment collected successfully at venue.');
     }
 
@@ -554,13 +584,6 @@ class PaymentApiController
         $paymentMethod = $validated['payment_method'] ?? 'bank_transfer';
         $providedRef = $validated['reference'] ?? null;
 
-        /** @var Appointment|null $appointment */
-        $appointment = null;
-
-        if ($appointmentId) {
-            $appointment = Appointment::with(['barber', 'service', 'customer', 'payment'])->find($appointmentId);
-        }
-
         $autoConfirm = filter_var(Setting::query()->where('key', 'payment_auto_confirm')->value('value') ?? true, FILTER_VALIDATE_BOOLEAN);
         $apptStatus = $autoConfirm ? AppointmentStatus::confirmed->value : AppointmentStatus::pending->value;
         $apptPaymentStatus = $autoConfirm ? AppointmentPaymentStatus::paid : AppointmentPaymentStatus::unpaid;
@@ -568,175 +591,233 @@ class PaymentApiController
         $paymentStatus = $autoConfirm ? PaymentStatus::successful->value : PaymentStatus::awaiting_verification->value;
         $gatewayMsg = $autoConfirm ? 'Successful bank transfer verified by customer' : 'Customer submitted transfer; awaiting admin verification';
 
-        // If no existing appointment, create or resolve appointment on the fly
-        if (! $appointment) {
-            $barber = $barberId ? Barber::find($barberId) : Barber::first();
-            $service = $serviceId ? Service::find($serviceId) : Service::first();
-            $branchId = $barber?->branch_id
-                ?? Branch::query()->where('is_active', true)->value('id')
-                ?? Branch::query()->value('id');
+        /** @var array{already_paid: bool, appointment: Appointment, payment: Payment, reference: string, effective_auto_confirm: bool} $txResult */
+        $txResult = DB::transaction(function () use (
+            $appointmentId,
+            $barberId,
+            $serviceId,
+            $paymentMethod,
+            $providedRef,
+            $validated,
+            $user,
+            $autoConfirm,
+            $apptStatus,
+            $apptPaymentStatus,
+            $apptDepositPaid,
+            $paymentStatus,
+            $gatewayMsg,
+            $request
+        ) {
+            /** @var Appointment|null $appointment */
+            $appointment = null;
 
-            if (! $branchId) {
-                $business = Business::query()->first() ?? Business::create([
-                    'name' => 'CandyCutz Grooming Lounge',
-                    'legal_name' => 'CandyCutz Grooming Ltd.',
-                    'phone' => '+234 810 000 0000',
-                    'email' => 'concierge@candycutz.com',
-                    'logo' => '/images/logo.png',
-                ]);
+            if ($appointmentId) {
+                $appointment = Appointment::with(['barber', 'service', 'customer', 'payment'])
+                    ->lockForUpdate()
+                    ->find($appointmentId);
 
-                $branch = Branch::firstOrCreate(
-                    ['slug' => 'keffi-central'],
-                    [
-                        'business_id' => $business->id,
-                        'name' => 'Keffi Main Hub',
-                        'address' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',
-                        'latitude' => 8.8486,
-                        'longitude' => 7.8736,
+                if ($appointment && $appointment->payment_status === AppointmentPaymentStatus::paid && $appointment->payment?->status?->isSuccess()) {
+                    $existingPayment = $appointment->payment;
+
+                    return [
+                        'already_paid' => true,
+                        'appointment' => $appointment,
+                        'payment' => $existingPayment,
+                        'reference' => (string) ($existingPayment->reference ?: $existingPayment->transaction_ref ?: $appointment->booking_reference),
+                        'effective_auto_confirm' => true,
+                    ];
+                }
+            }
+
+            // If no existing appointment, create or resolve appointment on the fly
+            if (! $appointment) {
+                $barber = $barberId ? Barber::find($barberId) : Barber::first();
+                $service = $serviceId ? Service::find($serviceId) : Service::first();
+                $branchId = $barber?->branch_id
+                    ?? Branch::query()->where('is_active', true)->value('id')
+                    ?? Branch::query()->value('id');
+
+                if (! $branchId) {
+                    $business = Business::query()->first() ?? Business::create([
+                        'name' => 'CandyCutz Grooming Lounge',
+                        'legal_name' => 'CandyCutz Grooming Ltd.',
                         'phone' => '+234 810 000 0000',
-                        'email' => 'keffi@candycutz.com',
-                        'is_active' => true,
-                    ]
-                );
+                        'email' => 'concierge@candycutz.com',
+                        'logo' => '/images/logo.png',
+                    ]);
 
-                $branchId = $branch->id;
+                    $branch = Branch::firstOrCreate(
+                        ['slug' => 'keffi-central'],
+                        [
+                            'business_id' => $business->id,
+                            'name' => 'Keffi Main Hub',
+                            'address' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',
+                            'latitude' => 8.8486,
+                            'longitude' => 7.8736,
+                            'phone' => '+234 810 000 0000',
+                            'email' => 'keffi@candycutz.com',
+                            'is_active' => true,
+                        ]
+                    );
+
+                    $branchId = $branch->id;
+                }
+
+                $price = (int) ($validated['amount'] ?? ($service ? $service->price : 30000));
+                $bookingRef = 'CC-'.strtoupper(Str::random(8));
+
+                $appointment = Appointment::create([
+                    'booking_reference' => $bookingRef,
+                    'branch_id' => $branchId,
+                    'customer_id' => $user ? $user->id : 1,
+                    'barber_id' => $barber ? $barber->id : 1,
+                    'service_id' => $service ? $service->id : 1,
+                    'appointment_type' => 'in_salon',
+                    'appointment_date' => now()->toDateString(),
+                    'appointment_time' => '10:00:00',
+                    'end_time' => '11:00:00',
+                    'total_amount' => $price,
+                    'grand_total' => $price,
+                    'total_price' => $price,
+                    'client_name' => $validated['customer_name'] ?? ($user ? $user->name : 'Walk-In Customer'),
+                    'client_email' => $validated['customer_email'] ?? ($user ? $user->email : 'customer@candycutz.com'),
+                    'client_phone' => $validated['customer_phone'] ?? '08012345678',
+                    'status' => $apptStatus,
+                    'payment_status' => $apptPaymentStatus,
+                    'deposit_paid' => $apptDepositPaid,
+                ]);
+            } else {
+                // Update selected barber if supplied
+                if ($barberId && $appointment->barber_id !== (int) $barberId) {
+                    $appointment->barber_id = (int) $barberId;
+                }
+
+                $appointment->update([
+                    'status' => $apptStatus,
+                    'payment_status' => $apptPaymentStatus,
+                    'deposit_paid' => $apptDepositPaid,
+                ]);
             }
 
-            $price = (int) ($validated['amount'] ?? ($service ? $service->price : 30000));
-            $bookingRef = 'CC-'.strtoupper(Str::random(8));
+            $amountKobo = (int) ($validated['amount'] ?? ($appointment->grand_total ?: ($appointment->service ? $appointment->service->price : 30000)));
+            $reference = $providedRef ?: ($appointment->booking_reference ?: 'PAY-'.strtoupper(Str::random(10)));
 
-            $appointment = Appointment::create([
-                'booking_reference' => $bookingRef,
-                'branch_id' => $branchId,
-                'customer_id' => $user ? $user->id : 1,
-                'barber_id' => $barber ? $barber->id : 1,
-                'service_id' => $service ? $service->id : 1,
-                'appointment_type' => 'in_salon',
-                'appointment_date' => now()->toDateString(),
-                'appointment_time' => '10:00:00',
-                'end_time' => '11:00:00',
-                'total_amount' => $price,
-                'grand_total' => $price,
-                'total_price' => $price,
-                'client_name' => $validated['customer_name'] ?? ($user ? $user->name : 'Walk-In Customer'),
-                'client_email' => $validated['customer_email'] ?? ($user ? $user->email : 'customer@candycutz.com'),
-                'client_phone' => $validated['customer_phone'] ?? '08012345678',
-                'status' => $apptStatus,
-                'payment_status' => $apptPaymentStatus,
-                'deposit_paid' => $apptDepositPaid,
-            ]);
-        } else {
-            // Update selected barber if supplied
-            if ($barberId && $appointment->barber_id !== (int) $barberId) {
-                $appointment->barber_id = (int) $barberId;
-            }
-
-            $appointment->update([
-                'status' => $apptStatus,
-                'payment_status' => $apptPaymentStatus,
-                'deposit_paid' => $apptDepositPaid,
-            ]);
-        }
-
-        $amountKobo = (int) ($validated['amount'] ?? ($appointment->grand_total ?: ($appointment->service ? $appointment->service->price : 30000)));
-        $reference = $providedRef ?: ($appointment->booking_reference ?: 'PAY-'.strtoupper(Str::random(10)));
-
-        /** @var Payment|null $payment */
-        $payment = $appointment->payment;
-        if (! $payment) {
-            $payment = Payment::create([
-                'appointment_id' => $appointment->id,
-                'customer_id' => $appointment->customer_id ?? ($user?->id ?? 1),
-                'amount' => $amountKobo,
-                'amount_minor' => $amountKobo * 100,
-                'currency' => 'NGN',
-                'status' => $paymentStatus,
-                'provider' => 'manual_transfer',
-                'payment_method' => $paymentMethod,
-                'channel' => $paymentMethod,
-                'reference' => $reference,
-                'transaction_ref' => $reference,
-                'paid_at' => now(),
-                'verified_at' => $autoConfirm ? now() : null,
-                'verified_by_user_id' => $autoConfirm ? $user?->id : null,
-                'gateway_response' => $gatewayMsg,
-            ]);
-        } else {
-            $payment->update([
-                'status' => $paymentStatus,
-                'amount' => $amountKobo,
-                'amount_minor' => $amountKobo * 100,
-                'payment_method' => $paymentMethod,
-                'channel' => $paymentMethod,
-                'reference' => $reference,
-                'transaction_ref' => $reference,
-                'paid_at' => now(),
-                'verified_at' => $autoConfirm ? now() : null,
-                'verified_by_user_id' => $autoConfirm ? $user?->id : null,
-                'gateway_response' => $gatewayMsg,
-            ]);
-        }
-
-        // Ledger transaction entry
-        PaymentTransaction::firstOrCreate(
-            ['idempotency_key' => "transfer:paid:{$appointment->id}:{$reference}"],
-            [
-                'payment_id' => $payment->id,
-                'transaction_type' => 'capture',
-                'gateway' => $paymentMethod,
-                'gateway_event_id' => "tx_{$reference}",
-                'amount' => $amountKobo,
-                'amount_minor' => $amountKobo * 100,
-                'status' => 'successful',
-                'created_at' => now(),
-            ]
-        );
-
-        // Status history for appointment
-        try {
-            AppointmentStatusHistory::create([
-                'appointment_id' => $appointment->id,
-                'previous_status' => 'pending',
-                'new_status' => AppointmentStatus::confirmed->value,
-                'changed_by_user_id' => $user?->id ?? $appointment->customer_id ?? 1,
-                'reason' => "Payment completed via {$paymentMethod} (Ref: {$reference})",
-                'created_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('Could not record status history: '.$e->getMessage());
-        }
-
-        // Audit log for admin/superadmin compliance
-        $auditUserId = $user ? $user->id : ($appointment->customer_id ?? 1);
-        $auditRole = $user ? ($user->role instanceof \BackedEnum ? $user->role->value : (string) $user->role) : 'customer';
-
-        try {
-            AuditLog::create([
-                'user_id' => $auditUserId,
-                'user_role' => $auditRole,
-                'action' => 'payment.transfer_completed',
-                'module' => 'Payment',
-                'target_type' => Appointment::class,
-                'target_id' => $appointment->id,
-                'new_value' => [
-                    'payment_id' => $payment->id,
-                    'barber_id' => $appointment->barber_id,
+            /** @var Payment|null $payment */
+            $payment = $appointment->payment;
+            if (! $payment) {
+                $payment = Payment::create([
+                    'appointment_id' => $appointment->id,
+                    'customer_id' => $appointment->customer_id ?? ($user?->id ?? 1),
                     'amount' => $amountKobo,
+                    'amount_minor' => $amountKobo * 100,
+                    'currency' => 'NGN',
+                    'status' => $paymentStatus,
+                    'provider' => 'manual_transfer',
                     'payment_method' => $paymentMethod,
+                    'channel' => $paymentMethod,
                     'reference' => $reference,
-                ],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('Could not record audit log: '.$e->getMessage());
-        }
+                    'transaction_ref' => $reference,
+                    'paid_at' => now(),
+                    'verified_at' => $autoConfirm ? now() : null,
+                    'verified_by_user_id' => $autoConfirm ? $user?->id : null,
+                    'gateway_response' => $gatewayMsg,
+                ]);
+            } else {
+                $payment->update([
+                    'status' => $paymentStatus,
+                    'amount' => $amountKobo,
+                    'amount_minor' => $amountKobo * 100,
+                    'payment_method' => $paymentMethod,
+                    'channel' => $paymentMethod,
+                    'reference' => $reference,
+                    'transaction_ref' => $reference,
+                    'paid_at' => now(),
+                    'verified_at' => $autoConfirm ? now() : null,
+                    'verified_by_user_id' => $autoConfirm ? $user?->id : null,
+                    'gateway_response' => $gatewayMsg,
+                ]);
+            }
 
-        // Dispatch notifications
-        try {
-            app(NotificationDispatcher::class)->paymentVerified($appointment);
-        } catch (\Throwable $e) {
-            Log::warning('Could not dispatch notification: '.$e->getMessage());
+            // Ledger transaction entry
+            PaymentTransaction::firstOrCreate(
+                ['idempotency_key' => "transfer:paid:{$appointment->id}:{$reference}"],
+                [
+                    'payment_id' => $payment->id,
+                    'transaction_type' => 'capture',
+                    'gateway' => $paymentMethod,
+                    'gateway_event_id' => "tx_{$reference}",
+                    'amount' => $amountKobo,
+                    'amount_minor' => $amountKobo * 100,
+                    'status' => 'successful',
+                    'created_at' => now(),
+                ]
+            );
+
+            // Status history for appointment
+            try {
+                AppointmentStatusHistory::create([
+                    'appointment_id' => $appointment->id,
+                    'previous_status' => 'pending',
+                    'new_status' => AppointmentStatus::confirmed->value,
+                    'changed_by_user_id' => $user?->id ?? $appointment->customer_id ?? 1,
+                    'reason' => "Payment completed via {$paymentMethod} (Ref: {$reference})",
+                    'created_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Could not record status history: '.$e->getMessage());
+            }
+
+            // Audit log for admin/superadmin compliance
+            $auditUserId = $user ? $user->id : ($appointment->customer_id ?? 1);
+            $auditRole = $user ? ($user->role instanceof \BackedEnum ? $user->role->value : (string) $user->role) : 'customer';
+
+            try {
+                AuditLog::create([
+                    'user_id' => $auditUserId,
+                    'user_role' => $auditRole,
+                    'action' => 'payment.transfer_completed',
+                    'module' => 'Payment',
+                    'target_type' => Appointment::class,
+                    'target_id' => $appointment->id,
+                    'new_value' => [
+                        'payment_id' => $payment->id,
+                        'barber_id' => $appointment->barber_id,
+                        'amount' => $amountKobo,
+                        'payment_method' => $paymentMethod,
+                        'reference' => $reference,
+                    ],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Could not record audit log: '.$e->getMessage());
+            }
+
+            return [
+                'already_paid' => false,
+                'appointment' => $appointment->fresh(),
+                'payment' => $payment->fresh(),
+                'reference' => $reference,
+                'effective_auto_confirm' => $autoConfirm,
+            ];
+        }, 3);
+
+        $appointment = $txResult['appointment'];
+        $payment = $txResult['payment'];
+        $reference = $txResult['reference'];
+        $effectiveAutoConfirm = $txResult['effective_auto_confirm'];
+
+        // Dispatch notifications & official booking/payment email receipt only on first confirmation
+        if (! $txResult['already_paid']) {
+            try {
+                if ($effectiveAutoConfirm) {
+                    PaymentConfirmed::dispatch($payment, $appointment);
+                } else {
+                    app(NotificationDispatcher::class)->paymentReceived($appointment);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Could not dispatch notification: '.$e->getMessage());
+            }
         }
 
         $appointment->load(['barber.user', 'service', 'customer']);
@@ -745,14 +826,24 @@ class PaymentApiController
         $bu = $b ? $b->user : null;
 
         return ApiResponse::success([
-            'payment' => new PaymentResource($payment->fresh()),
+            'payment' => new PaymentResource($payment),
             'appointment' => [
                 'id' => $appointment->id,
                 'booking_reference' => $appointment->booking_reference,
+                'verification_code' => $appointment->verification_code,
                 'status' => $appointment->status->value ?? (string) $appointment->status,
                 'payment_status' => $appointment->payment_status->value ?? (string) $appointment->payment_status,
                 'deposit_paid' => (bool) $appointment->deposit_paid,
                 'total_amount' => $appointment->total_amount,
+                'appointment_date' => $appointment->appointment_date?->format('Y-m-d'),
+                'appointment_time' => $appointment->appointment_time,
+                'total_duration_minutes' => (int) ($appointment->total_duration_minutes ?: $appointment->service?->duration_minutes ?: 30),
+                'service' => $appointment->service ? [
+                    'id' => $appointment->service->id,
+                    'name' => $appointment->service->name,
+                    'price' => (float) $appointment->service->price,
+                    'duration_minutes' => (int) ($appointment->service->duration_minutes ?? 30),
+                ] : null,
             ],
             'barber' => [
                 'id' => $b ? $b->id : null,
@@ -761,8 +852,11 @@ class PaymentApiController
                 'avatar' => $bu ? $bu->avatar : null,
             ],
             'reference' => $reference,
-            'payment_status' => 'paid',
-            'message' => 'Payment has been processed, saved to database, and confirmed for both Admin and Barber.',
-        ], 'Payment completed successfully.');
+            'payment_status' => $effectiveAutoConfirm ? 'paid' : 'awaiting_verification',
+            'paid_at' => $payment->paid_at?->toIso8601String(),
+            'message' => $effectiveAutoConfirm
+                ? 'Payment has been processed, saved to database, and confirmed for both Admin and Barber.'
+                : 'Transfer submitted and awaiting verification by CandyCutz staff.',
+        ], $effectiveAutoConfirm ? 'Payment completed successfully.' : 'Transfer recorded and awaiting verification.');
     }
 }

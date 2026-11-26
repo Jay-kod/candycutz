@@ -1,54 +1,59 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
+use App\Domain\Notification\Services\TransactionalMailRunner;
 use App\Mail\BookingThankYou;
 use App\Models\Appointment;
-use App\Support\Errors\ErrorReporter;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
-class SendBookingThankYou implements ShouldQueue
+class SendBookingThankYou implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
+    public int $uniqueFor = 300;
+
     public Appointment $appointment;
 
-    public function __construct(Appointment $appointment)
+    public ?int $notificationId;
+
+    public function __construct(Appointment $appointment, ?int $notificationId = null)
     {
         $this->appointment = $appointment;
+        $this->notificationId = $notificationId;
+    }
+
+    public function uniqueId(): string
+    {
+        return 'booking-thankyou:'.$this->appointment->id;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [15, 60, 180];
     }
 
     public function handle(): void
     {
-        $email = $this->appointment->customer?->email;
-        if (! $email) {
-            return;
-        }
-
-        try {
-            Mail::to($email)
-                ->send(new BookingThankYou($this->appointment));
-        } catch (\Throwable $e) {
-            Log::error('Failed sending booking thank-you email', [
-                'recipient' => $email,
-                'mailable' => BookingThankYou::class,
-                'appointment_id' => $this->appointment->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            try {
-                app(ErrorReporter::class)->report($e);
-            } catch (\Throwable) {
-                // Safeguard against reporter failure
-            }
-
-            throw $e;
-        }
+        app(TransactionalMailRunner::class)->send(
+            appointment: $this->appointment,
+            mailable: new BookingThankYou($this->appointment),
+            failureLabel: 'session completion email',
+            notificationId: $this->notificationId,
+            respectPreferences: true,
+            preferenceType: 'booking_completed'
+        );
     }
 }

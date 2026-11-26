@@ -17,7 +17,7 @@
               Service <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-amber-200">Passcodes</span>
           </h1>
           <p class="mt-2 text-sm text-[var(--color-text-secondary)] max-w-xl leading-relaxed">
-            Present these unique 6-digit verification codes to your barber upon haircut completion to authenticate your session.
+            Present these unique verification codes (e.g. CC-ESNNSR) to your barber upon haircut completion to authenticate your session.
           </p>
         </div>
 

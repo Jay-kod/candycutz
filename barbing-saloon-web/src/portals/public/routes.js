@@ -4,6 +4,7 @@ export default [
 	{ path: '/gallery', name: 'public-gallery', component: () => import('../../modules/public/pages/GalleryPage.vue'), meta: { public: true } },
 	{ path: '/about', name: 'public-about', component: () => import('../../modules/public/pages/AboutPage.vue'), meta: { public: true } },
 	{ path: '/contact', name: 'public-contact', component: () => import('../../modules/public/pages/ContactPage.vue'), meta: { public: true } },
+	{ path: '/directions', name: 'directions', component: () => import('@/features/directions/pages/DirectMeToShopPage.vue'), meta: { public: true } },
 	{ path: '/privacy', name: 'privacy', component: () => import('../../modules/public/pages/PrivacyPage.vue'), meta: { public: true } },
 	{ path: '/terms', name: 'terms', component: () => import('../../modules/public/pages/TermsPage.vue'), meta: { public: true } },
 	{

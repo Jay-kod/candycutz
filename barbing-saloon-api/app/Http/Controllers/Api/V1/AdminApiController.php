@@ -14,7 +14,6 @@ use App\Domain\Identity\Actions\DeleteCustomer;
 use App\Domain\Identity\Actions\DeleteHoliday;
 use App\Domain\Identity\Actions\DeleteWorkingHour;
 use App\Domain\Identity\Actions\GetAuditLogs;
-use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Identity\Actions\GetCustomerProfile;
 use App\Domain\Identity\Actions\GetCustomers;
 use App\Domain\Identity\Actions\GetHolidays;
@@ -25,7 +24,9 @@ use App\Domain\Identity\Actions\UpdateCustomer;
 use App\Domain\Identity\Actions\UpdateCustomerStatus;
 use App\Domain\Identity\Actions\UpdateHoliday;
 use App\Domain\Identity\Actions\UpdateWorkingHour;
+use App\Domain\Notification\Services\ResendMailConfigurator;
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\System\Actions\GetDashboardStats;
 use App\Domain\System\Actions\GetReportHistory;
 use App\Domain\System\Actions\GetReports;
@@ -41,10 +42,12 @@ use App\Models\Holiday;
 use App\Models\Notification;
 use App\Models\NotificationDelivery;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\WorkingHour;
 use App\Support\Errors\ErrorReporter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -188,6 +191,22 @@ class AdminApiController
 
         $action->execute(['settings' => $settings]);
 
+        if (is_array($settings)) {
+            $googleSettingKeys = array_values(array_filter(
+                array_keys($settings),
+                fn ($key): bool => is_string($key) && str_starts_with($key, 'google_')
+            ));
+            if ($googleSettingKeys !== []) {
+                AuditLogger::log(
+                    'google_auth_settings_updated',
+                    'GoogleAuthentication',
+                    null,
+                    [],
+                    ['keys' => $googleSettingKeys]
+                );
+            }
+        }
+
         return ApiResponse::success($getSettings->execute(), 'Settings updated');
     }
 
@@ -323,9 +342,9 @@ class AdminApiController
         return ApiResponse::success($action->execute(), 'Verification stats loaded');
     }
 
-    public function verifyAppointment(int $id, VerifyAppointment $action): JsonResponse
+    public function verifyAppointment(int $id, VerifyAppointment $action, Request $request): JsonResponse
     {
-        return ApiResponse::success(new AppointmentResource($action->execute($id)), 'Appointment verified');
+        return ApiResponse::success(new AppointmentResource($action->execute($id, $request->user())), 'Appointment verified');
     }
 
     public function analytics(Request $request, GetReports $action): JsonResponse
@@ -379,30 +398,7 @@ class AdminApiController
         }
 
         // Dynamically ensure Resend credentials from settings take effect for this dispatch
-        $resendKey = Setting::where('key', 'resend_api_key')->value('value') ?: config('services.resend.key');
-        if (! empty($resendKey)) {
-            $apiKey = (string) $resendKey;
-            config([
-                'services.resend.key' => $apiKey,
-                'mail.mailers.resend.key' => $apiKey,
-            ]);
-            if (! app()->runningUnitTests()) {
-                config(['mail.default' => 'resend']);
-                if (app()->bound('mail.manager')) {
-                    Mail::purge('resend');
-                }
-            }
-        }
-
-        $mailFrom = Setting::where('key', 'mail_from')->value('value');
-        if (! empty($mailFrom) && ! app()->runningUnitTests()) {
-            config(['mail.from.address' => (string) $mailFrom]);
-        }
-
-        $mailFromName = Setting::where('key', 'mail_from_name')->value('value');
-        if (! empty($mailFromName) && ! app()->runningUnitTests()) {
-            config(['mail.from.name' => (string) $mailFromName]);
-        }
+        ResendMailConfigurator::hydrate(true);
 
         $fromAddress = (string) (config('mail.from.address') ?: 'onboarding@resend.dev');
         $fromName = (string) (config('mail.from.name') ?: 'CandyCutz Luxury Grooming');
@@ -590,20 +586,20 @@ class AdminApiController
         $secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value') ?? config('services.paystack.secret_key', '');
 
         $maskedSecret = '';
-        if (!empty($secretKey)) {
+        if (! empty($secretKey)) {
             $len = strlen($secretKey);
-            $maskedSecret = $len > 10 ? substr($secretKey, 0, 7) . '...' . substr($secretKey, -4) : '********';
+            $maskedSecret = $len > 10 ? substr($secretKey, 0, 7).'...'.substr($secretKey, -4) : '********';
         }
 
         $appUrl = rtrim(config('app.url') ?? 'http://localhost:8000', '/');
-        $webhookUrl = $appUrl . '/api/v1/payments/webhook';
+        $webhookUrl = $appUrl.'/api/v1/payments/webhook';
 
         $defaultGateway = Setting::query()->where('key', 'payment_default_gateway')->value('value')
             ?: config('payments.default', 'paystack');
 
         return ApiResponse::success([
             'public_key' => $publicKey,
-            'is_secret_set' => !empty($secretKey),
+            'is_secret_set' => ! empty($secretKey),
             'masked_secret_key' => $maskedSecret,
             'webhook_url' => $webhookUrl,
             'is_live' => str_starts_with((string) $publicKey, 'pk_live_'),
@@ -626,27 +622,69 @@ class AdminApiController
             );
         }
 
-        if (!empty($validated['secret_key'])) {
+        if (! empty($validated['secret_key'])) {
             Setting::updateOrCreate(
                 ['key' => 'paystack_secret_key'],
                 ['value' => trim($validated['secret_key']), 'group' => 'payment']
             );
         }
 
-        if (!empty($validated['default_gateway'])) {
+        if (! empty($validated['default_gateway'])) {
             Setting::updateOrCreate(
                 ['key' => 'payment_default_gateway'],
                 ['value' => trim($validated['default_gateway']), 'group' => 'payment']
             );
         }
 
-        \Illuminate\Support\Facades\Cache::forget('paystack_gateway_credentials');
+        Cache::forget('paystack_gateway_credentials');
 
         return ApiResponse::success(null, 'Paystack settings updated successfully');
     }
 
+    public function unlinkGoogleAccount(int $id): JsonResponse
+    {
+        $user = User::query()->find($id);
+        if (! $user) {
+            return ApiResponse::error('Customer account not found.', [], 404);
+        }
+        if (strtolower((string) $user->auth_provider) !== 'google') {
+            return ApiResponse::error('This customer is not linked to Google.', [], 422);
+        }
+
+        $oldProvider = $user->auth_provider;
+        $user->update([
+            'auth_provider' => 'local',
+            'provider_id' => null,
+        ]);
+
+        AuditLogger::log(
+            'google_account_unlinked',
+            'GoogleAuthentication',
+            $user,
+            ['auth_provider' => $oldProvider, 'provider_id' => 'present'],
+            ['auth_provider' => 'local', 'provider_id' => null]
+        );
+
+        return ApiResponse::success([
+            'id' => $user->id,
+            'auth_provider' => 'local',
+        ], 'Google account link removed. Reset the local password before password login.');
+    }
+
     public function testGoogleAuthConnection(Request $request): JsonResponse
     {
+        $enabled = filter_var(
+            Setting::query()->where('key', 'google_auth_enabled')->value('value') ?? true,
+            FILTER_VALIDATE_BOOLEAN
+        );
+        if (! $enabled) {
+            return ApiResponse::error(
+                'Google sign-in is disabled. Enable it before testing the connection.',
+                ['enabled' => false],
+                422
+            );
+        }
+
         $clientId = trim((string) ($request->input('client_id')
             ?: Setting::query()->where('key', 'google_client_id')->value('value')
             ?: config('services.google.client_id', '')));
@@ -745,16 +783,17 @@ class AdminApiController
                 return ApiResponse::success([
                     'connected' => true,
                     'mode' => $isLive ? 'live' : 'test',
-                    'message' => 'Paystack connection verified successfully in ' . ($isLive ? 'LIVE' : 'TEST') . ' mode.',
+                    'message' => 'Paystack connection verified successfully in '.($isLive ? 'LIVE' : 'TEST').' mode.',
                     'details' => $data['data'] ?? null,
                     'balance' => $balanceInfo,
                 ], 'Paystack connection successful');
             }
 
             $errorMessage = $response->json('message') ?? 'Invalid API key or unauthorized';
-            return ApiResponse::error('Paystack connection failed: ' . $errorMessage, [], 400);
+
+            return ApiResponse::error('Paystack connection failed: '.$errorMessage, [], 400);
         } catch (\Throwable $e) {
-            return ApiResponse::error('Failed to reach Paystack API: ' . $e->getMessage(), [], 500);
+            return ApiResponse::error('Failed to reach Paystack API: '.$e->getMessage(), [], 500);
         }
     }
 }

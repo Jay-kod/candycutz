@@ -33,6 +33,8 @@ class GetCustomers
                     'id' => $u->id,
                     'name' => $u->name,
                     'email' => $u->email,
+                    'is_email_verified' => $u->hasVerifiedEmail(),
+                    'email_verified_at' => $u->email_verified_at?->toIso8601String(),
                     'phone' => $u->phone ?? 'N/A',
                     'is_active' => (bool) $u->is_active,
                     'status' => $u->status ?? ($u->is_active ? 'active' : 'suspended'),

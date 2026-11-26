@@ -3,9 +3,11 @@
 use App\Http\Controllers\Api\V1\PaymentApiController;
 use App\Http\Controllers\Api\V1\PaymentWebhookApiController;
 use App\Http\Controllers\Api\V1\ReceiptApiController;
+use App\Http\Controllers\Api\V1\RefundApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/payments/return', [PaymentApiController::class, 'returnUrl']);
+Route::get('/payments/webhook', [PaymentApiController::class, 'returnUrl']);
 Route::post('/payments/webhook', [PaymentWebhookApiController::class, 'handle'])
     ->withoutMiddleware(['throttle:api']);
 Route::get('/payments/checkout-data', [PaymentApiController::class, 'checkoutData']);
@@ -27,4 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Barber collect payment at venue
     Route::post('/barber/appointments/{id}/collect-payment', [PaymentApiController::class, 'collectPaymentAtVenue'])->whereNumber('id');
     Route::post('/barber/bookings/{id}/collect-payment', [PaymentApiController::class, 'collectPaymentAtVenue'])->whereNumber('id');
+
+    // Customer Refund Eligibility, Requests & Evidence
+    Route::get('/appointments/{id}/refund-eligibility', [RefundApiController::class, 'eligibility'])->whereNumber('id');
+    Route::get('/customer/refunds', [RefundApiController::class, 'myRefunds']);
+    Route::post('/refunds', [RefundApiController::class, 'store']);
+    Route::get('/refunds/{id}', [RefundApiController::class, 'show'])->whereNumber('id');
+    Route::get('/refunds/{id}/evidence', [RefundApiController::class, 'evidence'])->whereNumber('id');
 });

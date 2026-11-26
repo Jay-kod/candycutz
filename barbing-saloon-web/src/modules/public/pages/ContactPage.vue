@@ -18,6 +18,9 @@
             </div>
             <h3 class="text-sm font-bold uppercase tracking-widest text-[var(--color-accent)] mb-2">Location</h3>
             <p class="text-sm text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{{ contactAddress }}</p>
+            <RouterLink to="/directions" class="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-accent)] hover:underline">
+              Open Live Map &amp; Directions →
+            </RouterLink>
           </div>
 
           <!-- Hours Card -->

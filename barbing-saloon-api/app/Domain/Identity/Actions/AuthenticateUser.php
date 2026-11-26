@@ -8,6 +8,7 @@ use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
 use App\Support\Errors\AuthException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticateUser
@@ -36,38 +37,19 @@ class AuthenticateUser
             $phoneAlternatives[] = '+234'.substr($identifier, 1);
         }
 
-        $user = User::whereRaw('LOWER(email) = ?', [strtolower($identifier)])
-            ->orWhereRaw('LOWER(username) = ?', [$cleanUsername])
-            ->orWhereIn('phone', $phoneAlternatives)
+        $user = User::query()
+            ->where(function (Builder $query) use ($identifier, $cleanUsername, $phoneAlternatives): void {
+                $query->whereRaw('LOWER(email) = ?', [strtolower($identifier)]);
+
+                if ($cleanUsername !== '') {
+                    $query->orWhereRaw('LOWER(username) = ?', [$cleanUsername]);
+                }
+
+                $query->orWhereIn('phone', $phoneAlternatives);
+            })
             ->first();
 
-        if (! $user && app()->environment('local', 'testing') && strtolower($identifier) === 'obo@barber.com') {
-            $user = User::whereRaw('LOWER(email) = ?', ['obo@candycutz.com'])
-                ->orWhereRaw('LOWER(username) = ?', ['obo'])
-                ->orWhereRaw('LOWER(email) = ?', ['mark@barber.com'])
-                ->first();
-        }
-
         $isValidPassword = $user && Hash::check($password, $user->password);
-        if (! $isValidPassword && $user && app()->environment('local', 'testing')) {
-            $demoFallbackMap = [
-                'kefas@customer.com' => ['customer123', 'Piqa-toga-muxo-daye-13!'],
-                'customer@candycutz.com' => ['customer123'],
-                'jay@candycutz.com' => ['customer123'],
-                'mark@barber.com' => ['barber123', 'Bove-noro-fago-nofa-61!'],
-                'obo@barber.com' => ['barber123', 'Bove-noro-fago-nofa-61!'],
-                'obo@candycutz.com' => ['barber123'],
-                'marcus@candycutz.com' => ['barber123'],
-                'webadmin@candycutz.com' => ['admin123', 'Zemo-lefi-dewi-joma-03!'],
-                'admin@candycutz.com' => ['admin123'],
-                'websuperadmin@candycutz.com' => ['superadmin123'],
-                'superadmin@candycutz.com' => ['superadmin123', 'Zemo-lefi-dewi-joma-03!'],
-            ];
-            $emailKey = strtolower((string) $user->email);
-            if (isset($demoFallbackMap[$emailKey]) && in_array($password, $demoFallbackMap[$emailKey], true)) {
-                $isValidPassword = true;
-            }
-        }
 
         if (! $user || ! $isValidPassword) {
             $this->logFailure($identifier);

@@ -23,10 +23,15 @@ class UnifiedNotificationEngineTest extends TestCase
     use RefreshDatabase;
 
     private User $customer;
+
     private User $barberUser;
+
     private Barber $barber;
+
     private User $admin;
+
     private Service $service;
+
     private Appointment $appointment;
 
     protected function setUp(): void
@@ -354,5 +359,17 @@ class UnifiedNotificationEngineTest extends TestCase
 
         $response->assertOk();
         expect($response->headers->get('Content-Type'))->toContain('text/event-stream');
+        $content = $response->streamedContent();
+        expect(substr_count($content, ': ping'))->toBe(1);
+        expect($content)->toContain("id: 50\n");
+    }
+
+    public function test_short_poll_stream_preserves_zero_cursor(): void
+    {
+        $response = $this->actingAs($this->customer)
+            ->get('/api/v1/notifications/stream?last_event_id=0');
+
+        $response->assertOk();
+        expect($response->streamedContent())->toContain("id: 0\n");
     }
 }

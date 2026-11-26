@@ -2,54 +2,54 @@
   <transition name="fade-slide">
     <div
       v-if="currentDraft && !isDismissed"
-      class="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-r from-[#0E1217] via-[#161B22] to-[#0E1217] p-4 sm:p-5 shadow-xl shadow-amber-500/5 mb-6"
+      class="relative overflow-hidden rounded-xl md:rounded-2xl border border-[var(--color-accent)]/40 md:border-amber-500/30 bg-[var(--color-bg-secondary)] md:bg-gradient-to-r md:from-[#0E1217] md:via-[#161B22] md:to-[#0E1217] p-4 sm:p-5 shadow-none md:shadow-xl md:shadow-amber-500/5 mb-4 sm:mb-6"
     >
       <!-- Top Gold Ambient Highlight Line -->
-      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
+      <div class="hidden md:block absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
 
-      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="relative z-10 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 md:gap-4">
         <!-- Left: Info & Timer -->
-        <div class="flex items-start gap-3.5">
-          <div class="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+        <div class="flex items-start gap-3 sm:gap-3.5 min-w-0">
+          <div class="h-10 w-10 rounded-lg md:rounded-xl bg-[var(--color-accent)]/10 md:bg-amber-500/10 border border-[var(--color-accent)]/25 md:border-amber-500/20 flex items-center justify-center text-[var(--color-accent)] md:text-amber-400 shrink-0 mt-0.5">
             <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
 
-          <div class="space-y-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-                <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping"></span>
+          <div class="space-y-1 min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md md:rounded-full bg-[var(--color-accent)]/10 md:bg-amber-500/10 border border-[var(--color-accent)]/30 md:border-amber-500/30 text-[var(--color-accent)] md:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)] md:bg-amber-400 animate-ping"></span>
                 <span>Unfinished Booking</span>
               </span>
 
               <span
-                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-semibold"
-                :class="isExpired ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-black/40 text-amber-300 border border-white/[0.08]'"
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md md:rounded-full font-mono text-[11px] font-semibold tabular-nums"
+                :class="isExpired ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-[var(--color-bg-tertiary)] md:bg-black/40 text-[var(--color-accent)] md:text-amber-300 border border-[var(--color-border)] md:border-white/[0.08]'"
               >
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>{{ countdownText }}</span>
               </span>
             </div>
 
-            <p class="text-xs sm:text-sm font-semibold text-white">
+            <p class="text-sm font-semibold text-[var(--color-text-primary)] md:text-white text-left-forced break-words">
               {{ serviceName }} with {{ barberName }}
             </p>
-            <p class="text-[11px] text-white/50">
-              {{ appointmentDateText }} • Reference: <span class="font-mono text-amber-400/90">{{ currentDraft.booking_reference }}</span>
+            <p class="text-[11px] text-[var(--color-text-secondary)] md:text-white/50 text-left-forced tabular-nums break-words">
+              {{ appointmentDateText }} • Reference: <span class="font-mono text-[var(--color-accent)] md:text-amber-400/90">{{ currentDraft.booking_reference }}</span>
             </p>
           </div>
         </div>
 
         <!-- Right: Actions -->
-        <div class="flex items-center gap-2.5 w-full md:w-auto justify-end shrink-0 pt-1 md:pt-0">
+        <div class="flex flex-col xxs:flex-row sm:items-center gap-2 sm:gap-2.5 w-full md:w-auto md:justify-end shrink-0 pt-1 md:pt-0">
           <button
             type="button"
             @click="discard"
             :disabled="isDiscarding"
-            class="px-3 py-2 rounded-xl border border-white/[0.1] bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 text-white/60 hover:text-red-400 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+            class="flex-1 xxs:flex-1 md:flex-initial min-h-[44px] md:min-h-[38px] px-3.5 py-2 rounded-lg md:rounded-xl border border-[var(--color-border)] md:border-white/[0.1] bg-[var(--color-bg-tertiary)] md:bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 text-[var(--color-text-secondary)] md:text-white/60 hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 inline-flex items-center justify-center"
           >
             <span v-if="isDiscarding" class="inline-flex items-center gap-1.5">
               <span class="h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent"></span>
@@ -62,15 +62,15 @@
             type="button"
             @click="resume"
             :disabled="isResuming"
-            class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 text-xs font-bold shadow-lg shadow-amber-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+            class="flex-1 xxs:flex-1 md:flex-initial min-h-[44px] md:min-h-[38px] px-4 py-2 rounded-lg md:rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)] md:bg-gradient-to-r md:from-amber-500 md:to-amber-600 hover:brightness-110 md:text-slate-950 text-xs font-bold shadow-none md:shadow-lg md:shadow-amber-500/20 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 inline-flex items-center justify-center"
           >
             <span v-if="isResuming" class="inline-flex items-center gap-1.5">
-              <span class="h-3 w-3 animate-spin rounded-full border-2 border-slate-950 border-t-transparent"></span>
+              <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
               Resuming...
             </span>
             <span v-else class="inline-flex items-center gap-1.5">
               <span>Continue to Payment</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </span>

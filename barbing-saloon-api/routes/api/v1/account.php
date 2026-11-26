@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountApiController;
+use App\Http\Controllers\Api\V1\AddressApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
 use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\NoShowApiController;
 use App\Http\Controllers\Api\V1\NotificationApiController;
 use App\Http\Controllers\Api\V1\PaymentApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
@@ -46,6 +48,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/account/my-codes', [AccountApiController::class, 'myCodes']);
     Route::get('/customer/my-codes', [AccountApiController::class, 'myCodes']);
 
+    // Customer Saved Addresses
+    Route::get('/customer/addresses', [AddressApiController::class, 'index']);
+    Route::post('/customer/addresses', [AddressApiController::class, 'store']);
+    Route::put('/customer/addresses/{id}', [AddressApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/customer/addresses/{id}/default', [AddressApiController::class, 'setDefault'])->whereNumber('id');
+    Route::delete('/customer/addresses/{id}', [AddressApiController::class, 'destroy'])->whereNumber('id');
+    Route::get('/account/addresses', [AddressApiController::class, 'index']);
+    Route::post('/account/addresses', [AddressApiController::class, 'store']);
+
     // Customer Bookings
     Route::get('/customer/drafts', [AppointmentApiController::class, 'drafts']);
     Route::get('/customer/bookings/drafts', [AppointmentApiController::class, 'drafts']);
@@ -60,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/bookings/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
     Route::patch('/customer/bookings/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::patch('/customer/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::post('/customer/bookings/{id}/grace-extension', [NoShowApiController::class, 'extendGrace'])->whereNumber('id');
     Route::delete('/customer/bookings/{id}', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
 
     // Customer Reviews / Testimonials
@@ -127,6 +139,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/barber/bookings', [AppointmentApiController::class, 'index']);
     Route::patch('/barber/appointments/{id}/complete', [AppointmentApiController::class, 'complete'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
+    Route::post('/barber/appointments/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitDeposit'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::middleware('check.role:barber,admin,super_admin')

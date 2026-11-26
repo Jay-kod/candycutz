@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,13 +15,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
+ * @property Carbon $appointment_date
  * @property AppointmentStatus $status
+ * @property string|null $payment_method
  * @property AppointmentPaymentStatus $payment_status
  * @property bool $deposit_paid
  * @property-read User|null $customer
  * @property-read Barber|null $barber
  * @property-read Service|null $service
  * @property-read Payment|null $payment
+ * @property-read NoShowRecord|null $noShowRecord
  */
 class Appointment extends Model
 {
@@ -59,6 +63,17 @@ class Appointment extends Model
         'payment_due_at',
         'draft_expires_at',
         'draft_step',
+        'reminder_30m_sent_at',
+        'no_show_marked_at',
+        'no_show_marked_by',
+        'no_show_auto',
+        'no_show_warning_sent_at',
+        'grace_extended_until',
+        'grace_extension_count',
+        'grace_extension_reason',
+        'deposit_forfeited',
+        'deposit_forfeited_at',
+        'deposit_forfeited_by',
     ];
 
     protected $casts = [
@@ -77,11 +92,19 @@ class Appointment extends Model
         'amount_due_minor' => 'integer',
         'payment_due_at' => 'datetime',
         'draft_expires_at' => 'datetime',
+        'reminder_30m_sent_at' => 'datetime',
+        'no_show_marked_at' => 'datetime',
+        'no_show_auto' => 'boolean',
+        'no_show_warning_sent_at' => 'datetime',
+        'grace_extended_until' => 'datetime',
+        'grace_extension_count' => 'integer',
+        'deposit_forfeited' => 'boolean',
+        'deposit_forfeited_at' => 'datetime',
     ];
 
-    public function setAppointmentDateAttribute($value): void
+    public function setAppointmentDateAttribute(mixed $value): void
     {
-        $this->attributes['appointment_date'] = $value ? \Carbon\Carbon::parse($value)->toDateString() : null;
+        $this->attributes['appointment_date'] = $value ? Carbon::parse($value)->toDateString() : null;
     }
 
     public function isDraft(): bool
@@ -164,6 +187,30 @@ class Appointment extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    /**
+     * @return HasOne<NoShowRecord, $this>
+     */
+    public function noShowRecord(): HasOne
+    {
+        return $this->hasOne(NoShowRecord::class);
+    }
+
+    /**
+     * @return HasMany<RefundRequest, $this>
+     */
+    public function refundRequests(): HasMany
+    {
+        return $this->hasMany(RefundRequest::class);
+    }
+
+    /**
+     * @return HasOne<RefundRequest, $this>
+     */
+    public function latestRefundRequest(): HasOne
+    {
+        return $this->hasOne(RefundRequest::class)->latestOfMany();
     }
 
     public function getVerificationCodeAttribute(): string

@@ -50,13 +50,26 @@ class InAppNotificationChannel implements NotificationChannel
     public function isEnabledFor(User $recipient, string $type): bool
     {
         // Critical transaction/security types always bypass opt-outs
-        if (in_array($type, ['payment_failed', 'payment_verified', 'security_alert', 'password_changed', 'account_created'], true)) {
+        if (in_array($type, [
+            'payment_failed',
+            'payment_verified',
+            'security_alert',
+            'password_changed',
+            'account_created',
+            'booking_no_show_warning',
+            'booking_no_show',
+            'refund_initiated',
+            'refund_completed',
+            'refund_requested',
+            'refund_approved',
+            'refund_rejected',
+        ], true)) {
             return true;
         }
 
         $category = match (true) {
             str_starts_with($type, 'booking_') || str_starts_with($type, 'appointment_') => 'booking',
-            str_starts_with($type, 'payment_') => 'payment',
+            str_starts_with($type, 'payment_') || str_starts_with($type, 'refund_') => 'payment',
             str_starts_with($type, 'review_') => 'review',
             str_starts_with($type, 'category_') => 'service',
             str_starts_with($type, 'promotion') => 'promotion',

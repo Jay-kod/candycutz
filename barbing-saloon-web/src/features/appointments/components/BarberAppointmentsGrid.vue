@@ -78,6 +78,13 @@
           <span class="w-1.5 h-1.5 rounded-full bg-theme-text-muted/40"></span>
           Unpaid
         </span>
+
+        <span v-if="appointment.grace_extended_until" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-amber-500/30 bg-amber-500/10 text-amber-400">
+          Grace Extended
+        </span>
+        <span v-if="appointment.deposit_forfeited" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-red-500/30 bg-red-500/10 text-red-400">
+          Deposit Forfeited
+        </span>
       </div>
 
       <!-- Details Card -->
@@ -129,7 +136,7 @@
           </button>
         </template>
         
-        <template v-else-if="appointment.status === 'confirmed'">
+        <template v-else-if="['confirmed', 'checked_in', 'in_progress'].includes(appointment.status)">
           <button
             @click="$emit('promptComplete', appointment.id)"
             class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-gold py-2.5 text-xs font-bold uppercase tracking-widest text-obsidian hover:bg-gold-light hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all shadow-sm"
@@ -138,6 +145,7 @@
             Complete
           </button>
           <button
+            v-if="appointment.status === 'confirmed'"
             @click="$emit('markNoShow', appointment.id)"
             class="inline-flex justify-center items-center min-h-[44px] px-3 xs:px-4 rounded-xl border border-amber-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-amber-500 hover:bg-amber-500/10 hover:border-amber-500/50 transition-all"
             title="Mark as No Show"
@@ -145,12 +153,22 @@
             No Show
           </button>
           <button
+            v-if="appointment.status !== 'in_progress'"
             @click="$emit('cancel', appointment.id)"
             class="inline-flex justify-center items-center min-h-[44px] min-w-[44px] px-4 rounded-xl border border-red-500/20 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
             title="Cancel Appointment"
             aria-label="Cancel Appointment"
           >
             <XMarkIcon class="h-4 w-4" />
+          </button>
+        </template>
+
+        <template v-else-if="appointment.status === 'no_show' && appointment.deposit_paid && !appointment.deposit_forfeited">
+          <button
+            @click="$emit('forfeitDeposit', appointment.id)"
+            class="flex-1 inline-flex justify-center items-center min-h-[44px] gap-1.5 rounded-xl bg-red-500/15 border border-red-500/30 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+          >
+            Forfeit Deposit
           </button>
         </template>
       </div>
@@ -189,7 +207,7 @@ defineProps({
   }
 });
 
-defineEmits(['viewReceipt', 'approve', 'cancel', 'promptComplete', 'markNoShow']);
+defineEmits(['viewReceipt', 'approve', 'cancel', 'promptComplete', 'markNoShow', 'forfeitDeposit']);
 
 function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -217,6 +235,28 @@ const statusColors = {
     detailsCard: 'bg-blue-500/10 border-blue-500/15',
     icon: 'text-blue-600/80 dark:text-blue-400/70',
     timeText: 'text-blue-600 dark:text-blue-400',
+  },
+  checked_in: {
+    card: 'border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-cyan-400/35 hover:shadow-[0_20px_50px_rgba(6,182,212,0.12)]',
+    glow: 'bg-cyan-500/8 group-hover:bg-cyan-500/15',
+    accentLine: 'bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent',
+    avatar: 'bg-gradient-to-br from-cyan-500/25 to-cyan-600/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/25',
+    serviceText: 'text-cyan-600/90 dark:text-cyan-400/80',
+    badge: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/25 shadow-[0_0_10px_rgba(6,182,212,0.1)]',
+    detailsCard: 'bg-cyan-500/10 border-cyan-500/15',
+    icon: 'text-cyan-600/80 dark:text-cyan-400/70',
+    timeText: 'text-cyan-600 dark:text-cyan-400',
+  },
+  in_progress: {
+    card: 'border-purple-500/20 bg-gradient-to-br from-purple-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-purple-400/35 hover:shadow-[0_20px_50px_rgba(168,85,247,0.12)]',
+    glow: 'bg-purple-500/8 group-hover:bg-purple-500/15',
+    accentLine: 'bg-gradient-to-r from-transparent via-purple-400/60 to-transparent',
+    avatar: 'bg-gradient-to-br from-purple-500/25 to-purple-600/10 text-purple-600 dark:text-purple-400 border-purple-500/25',
+    serviceText: 'text-purple-600/90 dark:text-purple-400/80',
+    badge: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/25 shadow-[0_0_10px_rgba(168,85,247,0.1)]',
+    detailsCard: 'bg-purple-500/10 border-purple-500/15',
+    icon: 'text-purple-600/80 dark:text-purple-400/70',
+    timeText: 'text-purple-600 dark:text-purple-400',
   },
   completed: {
     card: 'border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.06] via-theme-surface/60 to-theme-surface/60 hover:border-emerald-400/35 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)]',

@@ -4,21 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Booking\Actions\CancelAppointment;
+use App\Domain\Booking\Actions\CompleteAppointment;
 use App\Domain\Booking\Actions\CreateBooking;
 use App\Domain\Booking\Actions\CreateDraftBooking;
 use App\Domain\Booking\Actions\CreateWalkInAppointment;
 use App\Domain\Booking\Actions\DiscardDraftBooking;
 use App\Domain\Booking\Actions\GetAppointments;
+use App\Domain\Booking\Actions\MarkNoShow;
 use App\Domain\Booking\Actions\ResumeDraftBooking;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\BookingService;
 use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Enums\UserRole;
+use App\Http\Requests\Booking\CancelAppointmentRequest;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\StoreWalkInRequest;
 use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Http\Resources\AppointmentResource;
+use App\Http\Resources\RefundRequestResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
@@ -67,26 +72,34 @@ class AppointmentApiController
         ], 200);
     }
 
-    public function complete(Request $request, int $id): JsonResponse
+    public function complete(Request $request, int $id, CompleteAppointment $action): JsonResponse
     {
         $appointment = Appointment::findOrFail($id);
         $this->authorize('complete', $appointment);
 
-        $reason = $request->input('reason', 'Completed by barber');
-        $this->bookingService->transitionStatus($appointment, AppointmentStatus::completed->value, $request->user(), $reason);
+        $action->execute(
+            $appointment,
+            $request->user(),
+            $request->input('verification_code'),
+            $request->input('reason', 'Completed by barber')
+        );
 
         return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment marked as completed.');
     }
 
-    public function noShow(Request $request, int $id): JsonResponse
+    public function noShow(Request $request, int $id, MarkNoShow $action): JsonResponse
     {
         $appointment = Appointment::findOrFail($id);
         $this->authorize('markNoShow', $appointment);
 
         $reason = $request->input('reason', 'Marked no-show by barber');
-        $this->bookingService->transitionStatus($appointment, AppointmentStatus::no_show->value, $request->user(), $reason);
+        $forfeitDeposit = $request->has('forfeit_deposit') ? $request->boolean('forfeit_deposit') : null;
+        $action->execute($appointment, $request->user(), $reason, false, $forfeitDeposit);
 
-        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment marked as no-show.');
+        return ApiResponse::success(
+            new AppointmentResource($appointment->fresh(['service.category', 'barber.user', 'serviceZone', 'payment', 'noShowRecord'])),
+            'Appointment marked as no-show.'
+        );
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -121,15 +134,25 @@ class AppointmentApiController
         return ApiResponse::success(new AppointmentResource($appointment), 'Appointment reserved successfully.', 201);
     }
 
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(CancelAppointmentRequest $request, int $id, CancelAppointment $cancelAppointment): JsonResponse
     {
         $appointment = Appointment::findOrFail($id);
         $this->authorize('cancel', $appointment);
 
-        $reason = $request->input('reason', 'Customer requested cancellation');
-        $this->bookingService->transitionStatus($appointment, AppointmentStatus::cancelled->value, $request->user(), $reason);
+        $result = $cancelAppointment->execute(
+            appointment: $appointment,
+            actor: $request->user(),
+            reason: (string) ($request->validated('reason') ?: 'Customer requested cancellation'),
+            reasonCategory: (string) ($request->validated('reason_category') ?: 'changed_mind'),
+            requestCompassionate: (bool) $request->boolean('request_compassionate', false),
+            evidence: $request->file('evidence'),
+        );
 
-        return ApiResponse::success(new AppointmentResource($appointment->load(['service.category', 'barber.user', 'serviceZone'])), 'Appointment cancelled successfully.');
+        $payload = (new AppointmentResource($result->appointment))->resolve($request);
+        $payload['refund_eligibility'] = $result->eligibility->toArray();
+        $payload['refund_request'] = $result->refundRequest ? (new RefundRequestResource($result->refundRequest))->resolve($request) : null;
+
+        return ApiResponse::success($payload, 'Appointment cancelled successfully.');
     }
 
     public function updateStatus(UpdateAppointmentStatusRequest $request, int $id): JsonResponse

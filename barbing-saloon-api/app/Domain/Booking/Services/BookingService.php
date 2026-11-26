@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\Services;
 
+use App\Domain\Booking\Actions\MarkNoShow;
 use App\Domain\Booking\AppointmentStateMachine;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Shared\Enums\AppointmentSource;
@@ -140,6 +141,15 @@ class BookingService
             }
 
             // 4. PESSIMISTIC ROW-LEVEL COLLISION LOCK (SELECT FOR UPDATE)
+            // Cancel any prior uncompleted drafts for this customer
+            Appointment::where('customer_id', $customer->id)
+                ->where('status', AppointmentStatus::draft->value)
+                ->update([
+                    'status' => AppointmentStatus::cancelled->value,
+                    'cancellation_reason' => 'Superseded by booking confirmation.',
+                    'draft_expires_at' => null,
+                ]);
+
             // Clean up any stale expired drafts for this barber and date before checking collisions or inserting
             Appointment::where('barber_id', $barber->id)
                 ->where('appointment_date', $date)
@@ -155,7 +165,7 @@ class BookingService
             // Checks for any overlapping appointment interval
             $conflict = Appointment::where('barber_id', $barber->id)
                 ->where('appointment_date', $date)
-                ->whereNotIn('status', [AppointmentStatus::cancelled->value, 'cancelled'])
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
                 ->where(function ($q) {
                     $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
                         ->orWhere(function ($draftQuery) {
@@ -258,7 +268,7 @@ class BookingService
             // Pessimistic check
             $conflict = Appointment::where('barber_id', $barber->id)
                 ->whereDate('appointment_date', $date)
-                ->whereNotIn('status', [AppointmentStatus::cancelled->value, 'cancelled'])
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
                 ->where(function ($q) {
                     $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
                         ->orWhere(function ($draftQuery) {
@@ -346,6 +356,7 @@ class BookingService
         $branchId = Branch::query()->where('is_active', true)->value('id');
         if ($branchId) {
             $barber->updateQuietly(['branch_id' => $branchId]);
+
             return (int) $branchId;
         }
 
@@ -356,6 +367,7 @@ class BookingService
                 $firstBranch->updateQuietly(['is_active' => true]);
             }
             $barber->updateQuietly(['branch_id' => $firstBranch->id]);
+
             return (int) $firstBranch->id;
         }
 
@@ -392,9 +404,6 @@ class BookingService
 
     /**
      * Create customer draft reservation with 15-minute slot hold.
-     *
-     * @throws BarberUnavailableException
-     * @throws BookingSlotUnavailableException
      */
     public function createDraftBooking(User $customer, BookingData $data, AppointmentSource $source = AppointmentSource::web): Appointment
     {
@@ -420,11 +429,6 @@ class BookingService
 
             $service = Service::findOrFail($data->serviceId);
             $services = collect([$service]);
-            if (! empty($data->additionalServiceIds)) {
-                $additional = Service::whereIn('id', $data->additionalServiceIds)->get();
-                $services = $services->merge($additional);
-            }
-
             $date = Carbon::parse($data->appointmentDate)->toDateString();
             $startTime = substr(trim((string) $data->appointmentTime), 0, 5);
             $totalDurationMinutes = (int) $services->sum(fn ($s) => $s->duration_minutes ?: 30);
@@ -485,7 +489,7 @@ class BookingService
             // 3. Pessimistic Row-Level Collision Lock (direct index on appointment_date)
             $conflict = Appointment::where('barber_id', $barber->id)
                 ->where('appointment_date', $date)
-                ->whereNotIn('status', [AppointmentStatus::cancelled->value, 'cancelled'])
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
                 ->where(function ($q) {
                     $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
                         ->orWhere(function ($draftQuery) {
@@ -523,7 +527,7 @@ class BookingService
                 $zoneId = $data->destinationAddress['service_zone_id'] ?? null;
                 $zone = $zoneId ? ServiceZone::find($zoneId) : ServiceZone::where('is_active', true)->first();
                 $zoneId = $zone?->id;
-                $travelFee = (int) ($zone?->base_travel_fee ?? 1500);
+                $travelFee = (int) ($zone->base_travel_fee ?? 1500);
             }
 
             $grandTotal = $totalAmount + $travelFee;
@@ -588,6 +592,12 @@ class BookingService
      */
     public function transitionStatus(Appointment $appointment, string $newStatus, User $actor, ?string $reason = null): Appointment
     {
+        if ($newStatus === AppointmentStatus::no_show->value) {
+            app(MarkNoShow::class)->execute($appointment, $actor, $reason, false);
+
+            return $appointment->fresh();
+        }
+
         $previousStatus = $appointment->status instanceof AppointmentStatus
             ? $appointment->status->value
             : (string) $appointment->status;

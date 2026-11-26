@@ -16,6 +16,10 @@ let visibilityListenerAttached = false
 let sseAbortController = null
 let sseReconnectTimer = null
 let lastSeenSseId = 0
+let hasSeenSseCursor = false
+let inFlightFetch = null
+let sseFailureCount = 0
+let sseAuthBlocked = false
 
 function handleVisibilityChange() {
   if (typeof document === 'undefined') return
@@ -102,6 +106,10 @@ export function resetNotifications() {
   knownNotificationIds.clear()
   isInitialized = false
   lastSeenSseId = 0
+  hasSeenSseCursor = false
+  inFlightFetch = null
+  sseFailureCount = 0
+  sseAuthBlocked = false
   if (pollTimer) {
     clearInterval(pollTimer)
     pollTimer = null
@@ -127,43 +135,52 @@ export function useNotifications() {
    * Supports silent background refresh to prevent UI flickering.
    */
   const fetchNotifications = async ({ silent = false } = {}) => {
-    try {
-      const token = localStorage.getItem('candycutz_auth_token') || localStorage.getItem('token')
-      if (!token) {
-        resetNotifications()
-        return
-      }
-
-      if (silent) {
-        isRefreshing.value = true
-      } else {
-        isLoading.value = true
-      }
-
-      const res = await api.get('/v1/notifications')
-      const list = res.data?.data || []
-      notifications.value = list
-      unreadCount.value = list.filter((n) => !n.is_read).length
-
-      // Detect new incoming unread notifications to trigger auditory chime and desktop notification
-      if (isInitialized) {
-        const newItems = list.filter((n) => !n.is_read && !knownNotificationIds.has(n.id))
-        if (newItems.length > 0) {
-          playChime()
-          const latest = newItems[0]
-          showDesktopNotification(latest.title, latest.message)
-        }
-      }
-
-      // Record known IDs
-      knownNotificationIds = new Set(list.map((n) => n.id))
-      isInitialized = true
-    } catch (err) {
-      console.error('Failed to fetch notifications:', err)
-    } finally {
-      isLoading.value = false
-      isRefreshing.value = false
+    if (inFlightFetch) {
+      return inFlightFetch
     }
+
+    inFlightFetch = (async () => {
+      try {
+        const token = localStorage.getItem('candycutz_auth_token') || localStorage.getItem('token')
+        if (!token) {
+          resetNotifications()
+          return
+        }
+
+        if (silent) {
+          isRefreshing.value = true
+        } else {
+          isLoading.value = true
+        }
+
+        const res = await api.get('/v1/notifications')
+        const list = res.data?.data || []
+        notifications.value = list
+        unreadCount.value = list.filter((n) => !n.is_read).length
+
+        // Detect new incoming unread notifications to trigger auditory chime and desktop notification
+        if (isInitialized) {
+          const newItems = list.filter((n) => !n.is_read && !knownNotificationIds.has(n.id))
+          if (newItems.length > 0) {
+            playChime()
+            const latest = newItems[0]
+            showDesktopNotification(latest.title, latest.message)
+          }
+        }
+
+        // Record known IDs
+        knownNotificationIds = new Set(list.map((n) => n.id))
+        isInitialized = true
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err)
+      } finally {
+        isLoading.value = false
+        isRefreshing.value = false
+        inFlightFetch = null
+      }
+    })()
+
+    return inFlightFetch
   }
 
   /**
@@ -192,15 +209,22 @@ export function useNotifications() {
    * Instant optimistic update when marking a single notification as read
    */
   const markAsRead = async (id) => {
+    const n = notifications.value.find((item) => item.id === id)
+    const wasUnread = Boolean(n && !n.is_read)
+    if (wasUnread) {
+      n.is_read = true
+      unreadCount.value = Math.max(0, unreadCount.value - 1)
+    }
     try {
-      const n = notifications.value.find((item) => item.id === id)
-      if (n && !n.is_read) {
-        n.is_read = true
-        unreadCount.value = Math.max(0, unreadCount.value - 1)
-      }
       await api.patch(`/v1/notifications/${id}/read`)
+      return true
     } catch (err) {
+      if (wasUnread && n) {
+        n.is_read = false
+        unreadCount.value += 1
+      }
       console.error('Failed to mark notification as read:', err)
+      return false
     }
   }
 
@@ -208,14 +232,28 @@ export function useNotifications() {
    * Instant optimistic update when marking all notifications as read
    */
   const markAllRead = async () => {
+    const previouslyUnreadIds = new Set(
+      notifications.value.filter((n) => !n.is_read).map((n) => n.id)
+    )
+    const previousUnreadCount = unreadCount.value
+
+    notifications.value.forEach((n) => {
+      n.is_read = true
+    })
+    unreadCount.value = 0
+
     try {
-      notifications.value.forEach((n) => {
-        n.is_read = true
-      })
-      unreadCount.value = 0
       await api.patch('/v1/notifications/read-all')
+      return true
     } catch (err) {
+      notifications.value.forEach((n) => {
+        if (previouslyUnreadIds.has(n.id)) {
+          n.is_read = false
+        }
+      })
+      unreadCount.value = previousUnreadCount
       console.error('Failed to mark all as read:', err)
+      return false
     }
   }
 
@@ -223,18 +261,29 @@ export function useNotifications() {
    * Instant optimistic update when deleting a notification
    */
   const deleteNotification = async (id) => {
+    const index = notifications.value.findIndex((n) => n.id === id)
+    const removedItem = index !== -1 ? notifications.value[index] : null
+    const wasUnread = Boolean(removedItem && !removedItem.is_read)
+
+    if (index !== -1) {
+      notifications.value.splice(index, 1)
+      if (wasUnread) {
+        unreadCount.value = Math.max(0, unreadCount.value - 1)
+      }
+    }
+
     try {
-      const index = notifications.value.findIndex((n) => n.id === id)
-      if (index !== -1) {
-        const wasUnread = !notifications.value[index].is_read
-        notifications.value.splice(index, 1)
+      await api.delete(`/v1/notifications/${id}`)
+      return true
+    } catch (err) {
+      if (removedItem && !notifications.value.some((n) => n.id === id)) {
+        notifications.value.splice(Math.min(index, notifications.value.length), 0, removedItem)
         if (wasUnread) {
-          unreadCount.value = Math.max(0, unreadCount.value - 1)
+          unreadCount.value += 1
         }
       }
-      await api.delete(`/v1/notifications/${id}`)
-    } catch (err) {
       console.error('Failed to delete notification:', err)
+      return false
     }
   }
 
@@ -247,9 +296,11 @@ export function useNotifications() {
       unreadCount.value = 0
       knownNotificationIds.clear()
       await api.delete('/v1/notifications')
+      return true
     } catch (err) {
       console.error('Failed to clear all notifications:', err)
       await fetchNotifications({ silent: true })
+      return false
     }
   }
 
@@ -279,7 +330,7 @@ export function useNotifications() {
     sseAbortController = new AbortController()
     const signal = sseAbortController.signal
 
-    const streamUrl = lastSeenSseId > 0
+    const streamUrl = hasSeenSseCursor
       ? `${API_V1_BASE_URL}/notifications/stream?last_event_id=${lastSeenSseId}`
       : `${API_V1_BASE_URL}/notifications/stream`
 
@@ -287,7 +338,7 @@ export function useNotifications() {
       Authorization: `Bearer ${token}`,
       Accept: 'text/event-stream',
     }
-    if (lastSeenSseId > 0) {
+    if (hasSeenSseCursor) {
       headers['Last-Event-ID'] = String(lastSeenSseId)
     }
 
@@ -296,8 +347,17 @@ export function useNotifications() {
       signal,
     })
       .then(async (response) => {
-        if (!response.ok || !response.body) return
+        if (response.status === 401 || response.status === 403) {
+          sseAuthBlocked = true
+          return
+        }
+        if (!response.ok || !response.body) {
+          sseFailureCount++
+          return
+        }
 
+        sseFailureCount = 0
+        sseAuthBlocked = false
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
@@ -315,7 +375,8 @@ export function useNotifications() {
             const idLine = block.split('\n').find((l) => l.startsWith('id: '))
             if (idLine) {
               const parsedId = parseInt(idLine.slice(4).trim(), 10)
-              if (!isNaN(parsedId)) {
+              if (!isNaN(parsedId) && parsedId >= 0) {
+                hasSeenSseCursor = true
                 lastSeenSseId = Math.max(lastSeenSseId, parsedId)
               }
             }
@@ -334,6 +395,7 @@ export function useNotifications() {
                         unreadCount.value++
                       }
                       if (item.id && typeof item.id === 'number') {
+                        hasSeenSseCursor = true
                         lastSeenSseId = Math.max(lastSeenSseId, item.id)
                       }
                       playChime()
@@ -350,17 +412,20 @@ export function useNotifications() {
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
-          // SSE stream dropped or unsupported, fallback polling remains active
+          sseFailureCount++
         }
       })
       .finally(() => {
-        if (subscriberCount > 0 && !signal.aborted) {
+        if (subscriberCount > 0 && !signal.aborted && !sseAuthBlocked) {
           if (sseReconnectTimer) clearTimeout(sseReconnectTimer)
+          const retryDelayMs = sseFailureCount > 0
+            ? Math.min(30000, 2000 * (2 ** Math.min(sseFailureCount, 4)))
+            : 2000
           sseReconnectTimer = setTimeout(() => {
-            if (subscriberCount > 0 && !signal.aborted) {
+            if (subscriberCount > 0 && !signal.aborted && !sseAuthBlocked) {
               connectStream()
             }
-          }, 2000)
+          }, retryDelayMs)
         }
       })
   }

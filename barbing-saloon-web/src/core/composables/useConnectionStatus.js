@@ -9,6 +9,7 @@ const errorMessage = ref('');
 const recoveryMessage = ref('');
 const isProbing = ref(false);
 const isMinimized = ref(false);
+const hasActionFailure = ref(false);
 const lastCheckedAt = ref(null);
 const latencyMs = ref(null);
 
@@ -55,12 +56,20 @@ export function useConnectionStatus() {
     }
   }
 
-  function reportNetworkFailure(customMessage = null) {
+  function reportNetworkFailure() {
     if (connectionState.value === 'disconnected') {
       return;
     }
     // Verify connection via health probe before alarming user with a false disconnection alert
     checkHealth();
+  }
+
+  function recordActionFailure() {
+    hasActionFailure.value = true;
+  }
+
+  function clearActionFailure() {
+    hasActionFailure.value = false;
   }
 
   function markConnected(customMessage = null) {
@@ -166,6 +175,7 @@ export function useConnectionStatus() {
     recoveryMessage.value = '';
     isProbing.value = false;
     isMinimized.value = false;
+    hasActionFailure.value = false;
     lastCheckedAt.value = null;
     latencyMs.value = null;
   }
@@ -177,6 +187,7 @@ export function useConnectionStatus() {
     recoveryMessage,
     isProbing,
     isMinimized,
+    hasActionFailure,
     lastCheckedAt,
     latencyMs,
     isConnected,
@@ -185,6 +196,8 @@ export function useConnectionStatus() {
     isBannerVisible,
     markDisconnected,
     reportNetworkFailure,
+    recordActionFailure,
+    clearActionFailure,
     markConnected,
     checkHealth,
     retry,

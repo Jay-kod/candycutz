@@ -25,6 +25,7 @@
       <div v-else-if="success" class="flex-1 overflow-y-auto p-4 sm:p-6 flex items-center justify-center custom-scrollbar">
         <PaymentSuccessReceipt
           :result="paymentResult"
+          :appointment="appointment"
           :formatted-amount="formattedAmount"
           :reference="reference"
           :selected-barber="selectedBarber"

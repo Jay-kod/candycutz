@@ -6,10 +6,16 @@ import { useConnectionStatus } from '../../composables/useConnectionStatus';
 
 vi.mock('axios');
 
+const authStoreState = vi.hoisted(() => ({ store: { isAdmin: true, isSuperAdmin: false } }));
+vi.mock('@/modules/auth/store/auth.store', () => ({
+  useAuthStore: () => authStoreState.store,
+}));
+
 describe('SystemConnectionBanner Component', () => {
   let wrapper = null;
 
   beforeEach(() => {
+    authStoreState.store = { isAdmin: true, isSuperAdmin: false };
     vi.clearAllMocks();
     useConnectionStatus().resetState();
   });
@@ -71,6 +77,24 @@ describe('SystemConnectionBanner Component', () => {
 
     expect(wrapper.text()).toContain('SERVER OFFLINE');
     expect(wrapper.text()).toContain('API gateway offline');
+  });
+
+  it.each(['customer', 'barber'])('hides technical diagnostics from %s users', (role) => {
+    authStoreState.store = { isAdmin: false, isSuperAdmin: false, role };
+    useConnectionStatus().markDisconnected('server', 'API gateway offline');
+
+    wrapper = mount(SystemConnectionBanner, {
+      global: {
+        stubs: {
+          teleport: true,
+          transition: false,
+        },
+      },
+    });
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('API gateway offline');
+    expect(wrapper.text()).not.toContain('SERVER OFFLINE');
   });
 
   it('triggers retry probe when retry button is clicked', async () => {

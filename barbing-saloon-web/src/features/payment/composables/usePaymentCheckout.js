@@ -209,18 +209,45 @@ export function usePaymentCheckout() {
       if (typeof window === 'undefined') return reject(new Error('Window unavailable'));
       if (window.PaystackPop) return resolve(window.PaystackPop);
 
+      let settled = false;
+      const timeoutId = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          reject(new Error('Paystack SDK load timed out'));
+        }
+      }, 15000);
+
+      const handleLoad = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        if (window.PaystackPop) {
+          resolve(window.PaystackPop);
+        } else {
+          reject(new Error('Paystack SDK loaded without PaystackPop'));
+        }
+      };
+
+      const handleError = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        reject(new Error('Failed to load Paystack SDK'));
+      };
+
       const existing = document.getElementById('paystack-inline-js');
       if (existing) {
-        existing.addEventListener('load', () => resolve(window.PaystackPop));
-        existing.addEventListener('error', () => reject(new Error('Failed to load Paystack SDK')));
+        existing.addEventListener('load', handleLoad, { once: true });
+        existing.addEventListener('error', handleError, { once: true });
         return;
       }
+
       const script = document.createElement('script');
       script.id = 'paystack-inline-js';
       script.src = 'https://js.paystack.co/v2/inline.js';
       script.async = true;
-      script.onload = () => resolve(window.PaystackPop);
-      script.onerror = () => reject(new Error('Failed to load Paystack SDK'));
+      script.addEventListener('load', handleLoad, { once: true });
+      script.addEventListener('error', handleError, { once: true });
       document.head.appendChild(script);
     });
   };
@@ -249,6 +276,7 @@ export function usePaymentCheckout() {
   const renewingHold = ref(false);
 
   const renewHold = async () => {
+    if (renewingHold.value) return false;
     const apptId = appointment.value?.id || route?.params?.appointmentId || route?.query?.appointment_id;
     if (!apptId) return false;
 
@@ -289,6 +317,7 @@ export function usePaymentCheckout() {
   };
 
   const payWithPaystack = async () => {
+    if (submitting.value || success.value) return;
     if (!appointment.value?.id) {
       toast.error('Missing appointment ID for Paystack checkout.');
       return;
@@ -342,6 +371,7 @@ export function usePaymentCheckout() {
   };
 
   const submitPayment = async () => {
+    if (submitting.value || success.value) return;
     if (selectedChannel.value === 'card' || selectedChannel.value === 'paystack') {
       return payWithPaystack();
     }

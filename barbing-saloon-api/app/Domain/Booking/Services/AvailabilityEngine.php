@@ -73,7 +73,17 @@ class AvailabilityEngine
         // 6. Fetch all conflicting active appointments for this barber on this date
         $existingAppointments = Appointment::where('barber_id', $barberId)
             ->whereDate('appointment_date', $date->toDateString())
-            ->whereNotIn('status', ['cancelled'])
+            ->whereNotIn('status', ['cancelled', 'no_show'])
+            ->where(function ($q) {
+                $q->whereNotIn('status', ['draft'])
+                    ->orWhere(function ($draftQuery) {
+                        $draftQuery->where('status', 'draft')
+                            ->where(function ($tq) {
+                                $tq->whereNull('draft_expires_at')
+                                    ->orWhere('draft_expires_at', '>', now());
+                            });
+                    });
+            })
             ->get(['appointment_time', 'end_time', 'appointment_type']);
 
         // 7. Fetch all blocked periods (lunch, prayer, personal leave)
@@ -91,23 +101,27 @@ class AvailabilityEngine
             $cursor->minute(30)->second(0);
         } elseif ($minute > 30) {
             $cursor->addHour()->minute(0)->second(0);
+        } else {
+            $cursor->second(0);
         }
 
         while ($cursor->copy()->addMinutes($effectiveDuration)->lte($windowEnd)) {
             $slotEnd = $cursor->copy()->addMinutes($effectiveDuration);
-            $candidateStartTime = $cursor->format('H:i:s');
-            $candidateEndTime = $slotEnd->format('H:i:s');
+            $candidateStartTime = $cursor->format('H:i');
+            $candidateEndTime = $slotEnd->format('H:i');
 
             $hasConflict = false;
 
             // Check overlap against existing appointments
             foreach ($existingAppointments as $app) {
-                $appStart = (string) $app->appointment_time;
-                $appEnd = (string) ($app->end_time ?: Carbon::parse($app->appointment_time)->addMinutes(30)->toTimeString());
+                $appStart = substr(trim((string) $app->appointment_time), 0, 5);
+                $appEnd = $app->end_time
+                    ? substr(trim((string) $app->end_time), 0, 5)
+                    : Carbon::parse($app->appointment_time)->addMinutes(30)->format('H:i');
 
                 // Home service travel buffer padding
                 if ($app->appointment_type === 'home_service') {
-                    $appEnd = Carbon::parse($appEnd)->addMinutes(30)->toTimeString();
+                    $appEnd = Carbon::parse("{$date->toDateString()} {$appEnd}")->addMinutes(30)->format('H:i');
                 }
 
                 if ($candidateStartTime < $appEnd && $candidateEndTime > $appStart) {
@@ -119,8 +133,8 @@ class AvailabilityEngine
             // Check overlap against blocked periods
             if (! $hasConflict) {
                 foreach ($blockedPeriods as $block) {
-                    $blockStart = Carbon::parse($block->start_datetime)->toTimeString();
-                    $blockEnd = Carbon::parse($block->end_datetime)->toTimeString();
+                    $blockStart = Carbon::parse($block->start_datetime)->format('H:i');
+                    $blockEnd = Carbon::parse($block->end_datetime)->format('H:i');
 
                     if ($candidateStartTime < $blockEnd && $candidateEndTime > $blockStart) {
                         $hasConflict = true;
@@ -130,7 +144,7 @@ class AvailabilityEngine
             }
 
             if (! $hasConflict) {
-                $availableSlots[] = $cursor->format('H:i');
+                $availableSlots[] = $candidateStartTime;
             }
 
             $cursor->addMinutes($slotStepMinutes);

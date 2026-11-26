@@ -18,6 +18,7 @@ class UserFactory extends Factory
             'real_name' => fake()->name(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
             'password' => 'password',
             'role' => UserRole::customer,
             'phone' => fake()->numerify('080########'),
@@ -25,6 +26,11 @@ class UserFactory extends Factory
             'is_active' => true,
             'notification_preferences' => [],
         ];
+    }
+
+    public function unverified(): static
+    {
+        return $this->state(['email_verified_at' => null]);
     }
 
     public function customer(): static

@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -35,10 +36,13 @@ class AuthUserResource extends JsonResource
             'phone' => $this->phone,
             'status' => $this->status ?? 'active',
             'is_active' => (bool) $this->is_active,
-            'email_verified_at' => $this->email_verified_at instanceof \Carbon\CarbonInterface
+            'email_verified_at' => $this->email_verified_at instanceof CarbonInterface
                 ? $this->email_verified_at->toIso8601String()
                 : ($this->email_verified_at ? (string) $this->email_verified_at : null),
             'is_email_verified' => $this->hasVerifiedEmail(),
+            'no_show_count' => (int) ($this->no_show_count ?? 0),
+            'last_no_show_at' => $this->last_no_show_at?->toIso8601String(),
+            'requires_deposit' => (bool) ($this->requires_deposit ?? false),
         ];
 
         if ($this->barber) {

@@ -66,6 +66,16 @@
                 >
                   <EnvelopeIcon class="h-3.5 w-3.5 text-theme-text-muted/60 shrink-0" />
                   <span class="truncate">{{ customer.email }}</span>
+                  <span
+                    v-if="customer.email_verified_at || customer.is_email_verified"
+                    class="text-[10px] text-emerald-500 font-bold"
+                    title="Verified Email"
+                  >✓</span>
+                  <span
+                    v-else
+                    class="text-[10px] text-amber-500 font-bold"
+                    title="Unverified Email (Admin Override Available)"
+                  >⚠️</span>
                 </a>
                 <span v-else class="text-xs text-theme-text-muted/60 flex items-center gap-1.5">
                   <EnvelopeIcon class="h-3.5 w-3.5 text-theme-text-muted/40 shrink-0" />

@@ -44,6 +44,9 @@ return [
         'api/v1/animations',
         'api/v1/contact',
         'api/v1/feature-flags',
+        'api/v1/shop/location',
+        'api/v1/shop/directions',
+        'api/v1/branches/{id}/location',
         'api/v1/app/crashes',
 
         // Public Namespaced Aliases (/api/v1/public/*)

@@ -76,7 +76,8 @@ import {
   CheckCircleIcon,
   BuildingLibraryIcon,
   AdjustmentsHorizontalIcon,
-  QueueListIcon
+  QueueListIcon,
+  BoltIcon
 } from '@heroicons/vue/24/outline';
 
 defineProps({
@@ -98,7 +99,8 @@ defineEmits(['refresh', 'save', 'update:currentTab']);
 
 const tabs = [
   { id: 'account', label: 'Bank Account & Payout', icon: BuildingLibraryIcon },
-  { id: 'gateway', label: 'Payment Page Controls', icon: AdjustmentsHorizontalIcon, badge: 'Live UI' },
+  { id: 'gateway', label: 'Checkout Controls', icon: AdjustmentsHorizontalIcon, badge: 'Live UI' },
+  { id: 'paystack', label: 'Paystack Connection', icon: BoltIcon, badge: 'Setup' },
   { id: 'transactions', label: 'Payments & Ledger', icon: QueueListIcon, badge: 'Admin Control' }
 ];
 </script>

@@ -23,6 +23,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $cover_image
  * @property string|null $status
  * @property UserRole $role
+ * @property int $no_show_count
+ * @property Carbon|null $last_no_show_at
+ * @property bool $requires_deposit
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Barber|null $barber
@@ -72,10 +75,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'role' => UserRole::class,
         'is_active' => 'boolean',
+        'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'last_username_change_at' => 'datetime',
         'deactivated_at' => 'datetime',
         'notification_preferences' => 'array',
+        'no_show_count' => 'integer',
+        'last_no_show_at' => 'datetime',
+        'requires_deposit' => 'boolean',
     ];
 
     /**
@@ -142,5 +149,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function channelPreferences(): HasMany
     {
         return $this->hasMany(UserNotificationPreference::class);
+    }
+
+    /**
+     * @return HasMany<NoShowRecord, $this>
+     */
+    public function noShowRecords(): HasMany
+    {
+        return $this->hasMany(NoShowRecord::class, 'customer_id');
+    }
+
+    /**
+     * @return HasMany<RefundRequest, $this>
+     */
+    public function refundRequests(): HasMany
+    {
+        return $this->hasMany(RefundRequest::class, 'customer_id');
     }
 }

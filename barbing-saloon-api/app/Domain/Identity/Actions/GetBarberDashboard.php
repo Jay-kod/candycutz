@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Barber;
@@ -24,16 +25,19 @@ class GetBarberDashboard
             ->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
-                'client_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
-                'customer_name' => $a->customer?->name ?? $a->client_name ?? 'Client',
+                'booking_reference' => $a->booking_reference,
+                'booking_type' => ($a->customer_id === null || $a->source === AppointmentSource::walk_in || str_contains((string) $a->client_name, 'Walk-In')) ? 'walk_in' : 'online',
+                'client_name' => $a->customer->name ?? $a->client_name ?? 'Client',
+                'customer_name' => $a->customer->name ?? $a->client_name ?? 'Client',
                 'appointment_time' => substr((string) $a->appointment_time, 0, 5),
-                'appointment_date' => $a->appointment_date,
+                'appointment_date' => $a->appointment_date?->toDateString() ?? $a->appointment_date,
                 'status' => $a->status->value ?? $a->status,
                 'verification_code' => $a->verification_code,
+                'service_name' => $a->service->name ?? 'General Service',
                 'service' => [
                     'id' => $a->service?->id,
-                    'name' => $a->service?->name ?? 'General Service',
-                    'price' => (float) ($a->service?->price ?? $a->total_price ?? 0),
+                    'name' => $a->service->name ?? 'General Service',
+                    'price' => (float) ($a->service->price ?? $a->total_price ?? 0),
                 ],
                 'price' => (float) ($a->total_price ?? $a->service->price ?? 0),
             ]);

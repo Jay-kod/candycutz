@@ -36,6 +36,8 @@
             @details="openDetails"
             @approve="approve"
             @cancel="cancel"
+            @mark-no-show="markNoShow"
+            @forfeit-deposit="forfeitDeposit"
             @view-receipt="viewReceipt"
             @reset-filters="resetFilters"
           />
@@ -49,6 +51,8 @@
             @approve="approve"
             @force-approve="forceApprove"
             @cancel="cancel"
+            @mark-no-show="markNoShow"
+            @forfeit-deposit="forfeitDeposit"
             @view-receipt="viewReceipt"
             @reset-filters="resetFilters"
           />
@@ -107,7 +111,7 @@ import { usePaymentSettings } from '@/features/appointments/composables/usePayme
 
 const toast = useToast();
 
-const { appointments, loading, isRefreshing, loadAppointments, approve, forceApprove, cancel } = useAppointments();
+const { appointments, loading, isRefreshing, loadAppointments, approve, forceApprove, cancel, markNoShow, forfeitDeposit } = useAppointments();
 const { showSettingsModal, savingSettings, settingsForm, loadSettings, saveSettings } = usePaymentSettings();
 
 const search = ref('');
@@ -127,6 +131,7 @@ const tabs = computed(() => {
     { label: 'Pending', value: 'pending', count: list.filter(a => a.status === 'pending').length },
     { label: 'Confirmed', value: 'confirmed', count: list.filter(a => a.status === 'confirmed').length },
     { label: 'Completed', value: 'completed', count: list.filter(a => a.status === 'completed').length },
+    { label: 'No-Show', value: 'no_show', count: list.filter(a => a.status === 'no_show').length },
     { label: 'Cancelled', value: 'cancelled', count: list.filter(a => a.status === 'cancelled').length },
     { label: 'Walk-In', value: 'walk_in', count: list.filter(a => a.booking_type === 'walk_in' || a.source === 'walk_in').length },
     { label: 'Online', value: 'online', count: list.filter(a => a.booking_type !== 'walk_in' && a.source !== 'walk_in').length }

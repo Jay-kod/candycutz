@@ -1,6 +1,8 @@
 export default [
 	{ path: '/admin/dashboard', name: 'admin-dashboard', component: () => import('../../modules/admin/pages/DashboardPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/appointments', name: 'admin-appointments', component: () => import('@/features/appointments/pages/AdminAppointmentsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/no-shows', name: 'admin-no-shows', component: () => import('@/features/no-shows/pages/AdminNoShowsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+	{ path: '/admin/refunds', name: 'admin-refunds', component: () => import('@/features/refunds/pages/AdminRefundsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/feature-flags', name: 'admin-feature-flags', component: () => import('../../modules/admin/pages/FeatureFlagsPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/walk-in', name: 'admin-walk-in', component: () => import('../../modules/admin/pages/WalkInPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
 	{ path: '/admin/barbers', name: 'admin-barbers', component: () => import('../../modules/admin/pages/BarbersPage.vue'), meta: { requiresAuth: true, roles: ['admin'] } },

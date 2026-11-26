@@ -45,6 +45,9 @@
         :class="mainBgClass"
       >
         <div class="mx-auto max-w-7xl min-h-full pb-28 sm:pb-20">
+          <ConnectionActionNotice
+            v-if="isEndUserPortal && hasActionFailure"
+          />
           <slot />
         </div>
       </main>
@@ -62,8 +65,10 @@ import { useTheme } from '@/core/composables/useTheme';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
+import { useConnectionStatus } from '@/core/composables/useConnectionStatus';
 import DashboardSidebar from './components/DashboardSidebar.vue';
 import DashboardHeader from './components/DashboardHeader.vue';
+import ConnectionActionNotice from '@/core/components/ConnectionActionNotice.vue';
 import IosTabBar from '@/shared/ui/ios/IosTabBar.vue';
 import { getStorageUrl } from '@/core/utils/url';
 import { getPortalThemeConfig } from './components/sidebar/portalTheme';
@@ -82,6 +87,8 @@ const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 const { confirm } = useConfirm();
+const { hasActionFailure } = useConnectionStatus();
+const isEndUserPortal = computed(() => authStore.isCustomer || authStore.isBarber);
 
 const isMobileSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);

@@ -33,6 +33,18 @@ export const KEY_METADATA = {
   max_days_ahead: { label: 'Maximum Advance Booking (Days)', placeholder: 'e.g. 30', type: 'number', category: 'booking' },
   slot_interval_minutes: { label: 'Appointment Slot Interval (Min)', placeholder: 'e.g. 30', type: 'number', category: 'booking' },
   cancellation_cutoff_hours: { label: 'Cancellation Window (Hours)', placeholder: 'e.g. 12', type: 'number', category: 'booking' },
+  no_show_delay_minutes: { label: 'No-Show Delay (Minutes)', placeholder: 'e.g. 15', type: 'number', category: 'booking' },
+  no_show_warning_lead_minutes: { label: 'No-Show Warning Lead Time (Minutes)', placeholder: 'e.g. 5', type: 'number', category: 'booking' },
+  no_show_grace_limit: { label: 'Allowed Grace Extensions', placeholder: 'e.g. 1', type: 'number', category: 'booking' },
+  no_show_grace_extension_minutes: { label: 'Grace Extension Minutes', placeholder: 'e.g. 15', type: 'number', category: 'booking' },
+  no_show_threshold: { label: 'No-Shows Before Deposit Required', placeholder: 'e.g. 2', type: 'number', category: 'booking' },
+  no_show_threshold_window_days: { label: 'No-Show Window (Days)', placeholder: 'e.g. 90', type: 'number', category: 'booking' },
+  refund_full_hours: { label: 'Full Refund Cutoff (Hours)', placeholder: 'e.g. 24', type: 'number', category: 'booking' },
+  refund_partial_hours: { label: 'Partial Refund Cutoff (Hours)', placeholder: 'e.g. 6', type: 'number', category: 'booking' },
+  refund_partial_percent: { label: 'Partial Refund Rate (%)', placeholder: 'e.g. 50', type: 'number', category: 'booking' },
+  refund_compassionate_enabled: { label: 'Enable Compassionate Refunds (1/0)', placeholder: '1', type: 'text', category: 'booking' },
+  refund_sla_hours: { label: 'Refund Review SLA (Hours)', placeholder: 'e.g. 48', type: 'number', category: 'booking' },
+  refund_require_evidence_for_compassionate: { label: 'Require Compassionate Evidence (1/0)', placeholder: '0', type: 'text', category: 'booking' },
 
   phone: { label: 'Direct Telephone Line', placeholder: 'e.g. +234 800 000 0000', type: 'text', category: 'contact' },
   email: { label: 'Official Support Email', placeholder: 'e.g. contact@candycutz.com', type: 'text', category: 'contact' },
@@ -74,7 +86,7 @@ export function useAdminSettings() {
   const inferCategory = (key) => {
     if (KEY_METADATA[key]?.category) return KEY_METADATA[key].category
     if (key.startsWith('bank_') || key.startsWith('account_') || key.startsWith('manual_transfer_') || key.includes('payment') || key.includes('transfer')) return 'payment'
-    if (key.startsWith('booking_') || key.includes('deposit') || key.includes('notice') || key.includes('slot')) return 'booking'
+    if (key.startsWith('booking_') || key.startsWith('no_show_') || key.startsWith('grace_') || key.startsWith('refund_') || key.includes('deposit') || key.includes('notice') || key.includes('slot')) return 'booking'
     if (key.startsWith('contact_') || ['phone', 'email', 'address', 'city', 'state', 'map_link', 'latitude', 'longitude'].includes(key)) return 'contact'
     if (key.startsWith('social_') || ['instagram', 'facebook', 'whatsapp', 'twitter', 'tiktok', 'youtube'].includes(key)) return 'social'
     if (key.startsWith('meta_') || key.startsWith('seo_')) return 'seo'

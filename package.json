@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev-runner.mjs",
-    "dev:api": "cd barbing-saloon-api && php -S 127.0.0.1:8000 -t public public/index.php",
+    "dev:api": "node scripts/start-api.mjs",
     "dev:web": "cd barbing-saloon-web && npm run dev",
     "dev:windows": "start cmd /k \"npm run dev:api\" && start cmd /k \"npm run dev:web\"",
     "prepare": "git config core.hooksPath .githooks 2>nul || true",

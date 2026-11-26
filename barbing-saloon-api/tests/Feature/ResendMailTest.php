@@ -38,9 +38,13 @@ class ResendMailTest extends TestCase
     use RefreshDatabase;
 
     private User $customer;
+
     private User $admin;
+
     private Barber $barber;
+
     private Service $service;
+
     private Appointment $appointment;
 
     protected function setUp(): void
@@ -173,7 +177,7 @@ class ResendMailTest extends TestCase
 
         Mail::assertQueued(BookingReminder::class, function (BookingReminder $mail) {
             return $mail->hasTo($this->customer->email)
-                && $mail->hasSubject('Reminder: Your CandyCutz Appointment is Tomorrow');
+                && $mail->hasSubject('Reminder: Your CandyCutz Appointment Starts in 30 Minutes (BK-TEST-1234)');
         });
     }
 
@@ -329,7 +333,8 @@ class ResendMailTest extends TestCase
     {
         Mail::fake();
 
-        $action = new class(app(UsernameIdentityService::class), app(ApiTokenIssuer::class)) extends SocialLogin {
+        $action = new class(app(UsernameIdentityService::class), app(ApiTokenIssuer::class)) extends SocialLogin
+        {
             protected function verifyAndDecodeIdToken(string $provider, string $idToken): array
             {
                 return [
@@ -357,7 +362,7 @@ class ResendMailTest extends TestCase
         });
 
         // Assert admin alert email queued
-        Mail::assertQueued(AdminNewUserNotification::class, function (AdminNewUserNotification $mail) use ($createdUser) {
+        Mail::assertQueued(AdminNewUserNotification::class, function (AdminNewUserNotification $mail) {
             return $mail->hasTo($this->admin->email)
                 && str_contains($mail->envelope()->subject, 'CandyCutz Admin Alert: New User Registration');
         });

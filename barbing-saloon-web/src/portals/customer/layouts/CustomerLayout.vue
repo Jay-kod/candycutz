@@ -25,6 +25,8 @@ import {
   BellAlertIcon,
   ChartBarIcon,
   QrCodeIcon,
+  ReceiptRefundIcon,
+  MapPinIcon,
   ChatBubbleLeftRightIcon,
   UserCircleIcon
 } from '@heroicons/vue/24/outline';
@@ -34,6 +36,8 @@ const navItems = [
   { name: 'Browse Services', to: '/customer/dashboard/services', icon: ScissorsIcon },
   { name: 'Our Barbers', to: '/customer/dashboard/barbers', icon: UserGroupIcon },
   { name: 'My Bookings', to: '/customer/dashboard/bookings', icon: CalendarDaysIcon },
+  { name: 'My Refunds', to: '/customer/dashboard/refunds', icon: ReceiptRefundIcon },
+  { name: 'Direct Me to Shop', to: '/customer/dashboard/directions', icon: MapPinIcon },
   { name: 'My Codes', to: '/customer/dashboard/my-codes', icon: QrCodeIcon },
   { name: 'Reviews', to: '/customer/dashboard/reviews', icon: StarIcon },
   { name: 'Feedback & Suggestions', to: '/customer/dashboard/feedback', icon: ChatBubbleLeftRightIcon },

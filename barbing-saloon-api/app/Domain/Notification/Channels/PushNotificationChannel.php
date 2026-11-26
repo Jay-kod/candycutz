@@ -80,7 +80,7 @@ class PushNotificationChannel implements NotificationChannel
     protected function isQuietHoursActive(User $recipient, Notification $notification): bool
     {
         // Urgent priority and critical security/payment alerts bypass quiet hours
-        if ($notification->priority === 'urgent' || in_array($notification->type, ['security_alert', 'payment_failed', 'password_changed'], true)) {
+        if ($notification->priority === 'urgent' || in_array($notification->type, ['security_alert', 'payment_failed', 'password_changed', 'booking_no_show_warning'], true)) {
             return false;
         }
 
@@ -117,13 +117,25 @@ class PushNotificationChannel implements NotificationChannel
     public function isEnabledFor(User $recipient, string $type): bool
     {
         // Critical transaction/security types always bypass opt-outs
-        if (in_array($type, ['payment_failed', 'payment_verified', 'security_alert', 'password_changed'], true)) {
+        if (in_array($type, [
+            'payment_failed',
+            'payment_verified',
+            'security_alert',
+            'password_changed',
+            'booking_no_show_warning',
+            'booking_no_show',
+            'refund_initiated',
+            'refund_completed',
+            'refund_requested',
+            'refund_approved',
+            'refund_rejected',
+        ], true)) {
             return true;
         }
 
         $category = match (true) {
             str_starts_with($type, 'booking_') || str_starts_with($type, 'appointment_') => 'booking',
-            str_starts_with($type, 'payment_') => 'payment',
+            str_starts_with($type, 'payment_') || str_starts_with($type, 'refund_') => 'payment',
             str_starts_with($type, 'review_') => 'review',
             str_starts_with($type, 'category_') => 'service',
             str_starts_with($type, 'promotion') => 'promotion',

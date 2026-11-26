@@ -55,6 +55,20 @@
                       {{ profileData.registered_via || 'Registration Form' }}
                     </span>
                     <span
+                      v-if="profileData.email_verified_at || profileData.is_email_verified"
+                      class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                      title="Email is verified"
+                    >
+                      ✓ Verified
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border-amber-500/20"
+                      title="Email is unverified (cannot receive self-service OTP)"
+                    >
+                      ⚠️ Unverified
+                    </span>
+                    <span
                       v-if="profileData.is_active === false || profileData.status === 'suspended'"
                       class="inline-flex rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-500 bg-red-500/10 border-red-500/20"
                     >

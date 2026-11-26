@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      v-if="isBannerVisible"
+      v-if="isDiagnosticVisible && isBannerVisible"
       class="fixed top-0 left-0 right-0 z-[9990] pointer-events-none select-none"
     >
       <!-- Expanded Top Alert Banner -->
@@ -142,6 +142,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useConnectionStatus } from '../composables/useConnectionStatus';
+import { useAuthStore } from '@/modules/auth/store/auth.store';
 import {
   CircleStackIcon,
   ServerStackIcon,
@@ -150,6 +151,9 @@ import {
   ChevronDownIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
+
+const authStore = useAuthStore();
+const isDiagnosticVisible = computed(() => authStore.isAdmin || authStore.isSuperAdmin);
 
 const {
   isBannerVisible,

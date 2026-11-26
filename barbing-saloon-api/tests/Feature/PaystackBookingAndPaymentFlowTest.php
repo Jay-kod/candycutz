@@ -5,18 +5,13 @@ declare(strict_types=1);
 use App\Domain\Booking\Actions\CreateBooking;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Booking\Services\AvailabilityEngine;
-use App\Domain\Booking\Services\BookingService;
-use App\Domain\Notification\NotificationDispatcher;
-use App\Domain\Payment\Services\PaymentConfirmer;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Enums\UserRole;
-use App\Events\PaymentConfirmed;
 use App\Exceptions\BookingSlotUnavailableException;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\Branch;
 use App\Models\Notification;
-use App\Models\NotificationBroadcast;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\Setting;
@@ -179,7 +174,7 @@ it('orchestrates end-to-end booking, paystack checkout, verification, notificati
         clientPhone: '08011223344'
     );
 
-    expect(fn() => $bookingAction->execute($customer2, $overlappingData))
+    expect(fn () => $bookingAction->execute($customer2, $overlappingData))
         ->toThrow(BookingSlotUnavailableException::class);
 
     // Verify slot is removed from availability engine
@@ -293,4 +288,165 @@ it('releases unpaid expired bookings and frees the reserved slot', function () {
     $staleAppointment->refresh();
     expect($staleAppointment->status->value)->toBe(AppointmentStatus::cancelled->value);
     expect($staleAppointment->cancellation_reason)->toContain('Payment window expired');
+});
+
+it('confirms paystack payment via webhook even when default salon gateway is manual_transfer', function () {
+    Config::set('payments.default', 'manual_transfer');
+    $secretKey = 'sk_test_mock_secret_key_999';
+
+    $customer = User::factory()->create(['role' => UserRole::customer]);
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $customer->id,
+        'status' => AppointmentStatus::pending->value,
+        'total_price' => 5000,
+        'grand_total' => 5000,
+    ]);
+
+    $payment = Payment::create([
+        'appointment_id' => $appointment->id,
+        'customer_id' => $customer->id,
+        'amount' => 5000,
+        'currency' => 'NGN',
+        'status' => 'pending',
+        'payment_method' => 'paystack',
+        'provider' => 'paystack',
+        'transaction_ref' => 'TXN_TEST_MANUAL_DEFAULT_01',
+        'gateway_reference' => 'PAYSTACK_REF_MANUAL_01',
+    ]);
+
+    $payload = [
+        'event' => 'charge.success',
+        'data' => [
+            'id' => 888777666,
+            'reference' => 'TXN_TEST_MANUAL_DEFAULT_01',
+            'amount' => 500000, // 500,000 kobo = 5,000 Naira
+            'gateway_response' => 'Successful',
+            'channel' => 'card',
+            'status' => 'success',
+            'metadata' => [
+                'appointment_id' => $appointment->id,
+                'customer_id' => $customer->id,
+            ],
+        ],
+    ];
+
+    $rawContent = json_encode($payload);
+    $signature = hash_hmac('sha512', $rawContent, $secretKey);
+
+    $response = $this->call(
+        'POST',
+        '/api/v1/payments/webhook',
+        [],
+        [],
+        [],
+        [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_X_PAYSTACK_SIGNATURE' => $signature,
+        ],
+        $rawContent
+    );
+
+    $response->assertStatus(200);
+    $response->assertJson([
+        'received' => true,
+        'event_id' => '888777666',
+        'type' => 'charge.success',
+    ]);
+
+    expect($payment->fresh()->status->value)->toBe('successful');
+    expect($appointment->fresh()->status->value)->toBe('confirmed');
+    expect((bool) $appointment->fresh()->deposit_paid)->toBeTrue();
+});
+
+it('verifies paystack payment on polling when default gateway is manual_transfer', function () {
+    Config::set('payments.default', 'manual_transfer');
+
+    $customer = User::factory()->create(['role' => UserRole::customer]);
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $customer->id,
+        'status' => AppointmentStatus::pending->value,
+        'total_price' => 5000,
+        'grand_total' => 5000,
+    ]);
+
+    $payment = Payment::create([
+        'appointment_id' => $appointment->id,
+        'customer_id' => $customer->id,
+        'amount' => 5000,
+        'currency' => 'NGN',
+        'status' => 'pending',
+        'payment_method' => 'paystack',
+        'provider' => 'paystack',
+        'reference' => 'CC-TEST-PAYSTACK-999',
+        'transaction_ref' => 'CC-TEST-PAYSTACK-999',
+    ]);
+
+    $response = $this->actingAs($customer)->getJson('/api/v1/customer/payments/CC-TEST-PAYSTACK-999');
+    $response->assertStatus(200);
+    $response->assertJson([
+        'success' => true,
+        'data' => [
+            'status' => 'successful',
+            'appointment' => [
+                'id' => $appointment->id,
+                'status' => 'confirmed',
+                'payment_status' => 'paid',
+                'deposit_paid' => true,
+            ],
+        ],
+    ]);
+
+    expect($payment->fresh()->status->value)->toBe('successful');
+    expect($appointment->fresh()->status->value)->toBe('confirmed');
+});
+
+it('ensures availability engine ignores expired drafts and prevents false adjacent slot collision', function () {
+    $branch = Branch::factory()->create(['is_active' => true]);
+    $barber = Barber::factory()->create(['branch_id' => $branch->id, 'status' => 'active', 'is_available' => true]);
+    $customer = User::factory()->create(['role' => UserRole::customer]);
+
+    // Working hours 08:00 to 19:00 on day of week
+    $targetDate = Carbon::parse('2026-12-01'); // Tuesday (dayOfWeek 2)
+    WorkingHour::updateOrCreate(
+        ['barber_id' => $barber->id, 'day_of_week' => $targetDate->dayOfWeek],
+        ['open_time' => '08:00:00', 'close_time' => '19:00:00', 'is_closed' => false]
+    );
+
+    // 1. Expired draft at 10:00 - 10:30
+    Appointment::factory()->create([
+        'branch_id' => $branch->id,
+        'barber_id' => $barber->id,
+        'customer_id' => $customer->id,
+        'status' => AppointmentStatus::draft->value,
+        'appointment_date' => $targetDate->toDateString(),
+        'appointment_time' => '10:00:00',
+        'end_time' => '10:30:00',
+        'draft_expires_at' => now()->subMinutes(15),
+    ]);
+
+    // 2. Active confirmed appointment at 11:00 - 11:30
+    Appointment::factory()->create([
+        'branch_id' => $branch->id,
+        'barber_id' => $barber->id,
+        'customer_id' => $customer->id,
+        'status' => AppointmentStatus::confirmed->value,
+        'appointment_date' => $targetDate->toDateString(),
+        'appointment_time' => '11:00:00',
+        'end_time' => '11:30:00',
+    ]);
+
+    $availabilityEngine = app(AvailabilityEngine::class);
+    $slots = $availabilityEngine->calculateAvailableSlots($targetDate, $barber->id, 30, false, $branch->id);
+
+    // Slot 10:00 must be available because the draft is expired
+    expect($slots)->toContain('10:00');
+
+    // Slot 10:30 must be available (adjacent to active 11:00 appointment) and not falsely collided
+    expect($slots)->toContain('10:30');
+
+    // Slot 11:00 must NOT be available because of active confirmed appointment
+    expect($slots)->not->toContain('11:00');
+
+    // Slot 11:30 must be available (immediately adjacent after 11:00-11:30)
+    expect($slots)->toContain('11:30');
 });

@@ -149,42 +149,43 @@ watch(previewUrl, (newUrl, oldUrl) => {
 </script>
 
 <template>
-  <div class="bg-[var(--color-bg-secondary)] backdrop-blur-xl border border-[var(--color-border)] rounded-3xl p-6">
-    <h3 class="text-xl font-bold text-[var(--color-text-primary)] mb-2">Upload Payment Receipt</h3>
-    <p class="text-[var(--color-text-secondary)] text-sm mb-6">Please upload a screenshot or PDF of your payment confirmation.</p>
+  <div class="bg-[var(--color-bg-secondary)] md:backdrop-blur-xl border border-[var(--color-border)] rounded-xl md:rounded-3xl p-4 sm:p-6">
+    <h3 class="text-lg sm:text-xl font-bold text-[var(--color-text-primary)] mb-1.5 text-left-forced">Upload Payment Receipt</h3>
+    <p class="text-[var(--color-text-secondary)] text-xs sm:text-sm mb-4 sm:mb-6 text-left-forced">Please upload a screenshot or PDF of your payment confirmation.</p>
     
-    <div v-if="error" class="bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 text-[var(--color-danger)] p-3 rounded-xl mb-6 text-sm">
+    <div v-if="error" class="bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 text-[var(--color-danger)] p-3 rounded-lg md:rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm text-left-forced">
       {{ error }}
     </div>
 
     <!-- Bank Details Card (Dynamic from Settings) -->
-    <div v-if="loadingSettings" class="mb-6 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-2xl p-5 text-center">
+    <div v-if="loadingSettings" class="mb-4 sm:mb-6 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-xl md:rounded-2xl p-4 sm:p-5 text-center">
       <ArrowPathIcon class="h-6 w-6 text-[var(--color-accent)] animate-spin mx-auto mb-2" />
-      <p class="text-[var(--color-text-muted)] text-sm">Loading payment details...</p>
+      <p class="text-[var(--color-text-muted)] text-xs sm:text-sm text-center">Loading payment details...</p>
     </div>
     
-    <div v-else-if="hasBankDetails()" class="mb-6 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-2xl p-5 relative overflow-hidden">
-      <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[var(--color-accent)]/10 blur-2xl pointer-events-none"></div>
-      <h4 class="text-xs uppercase tracking-widest text-[var(--color-accent)] mb-3 font-semibold">Transfer Payment To</h4>
+    <div v-else-if="hasBankDetails()" class="mb-4 sm:mb-6 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-xl md:rounded-2xl p-3.5 sm:p-5 relative overflow-hidden">
+      <div class="hidden md:block absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[var(--color-accent)]/10 blur-2xl pointer-events-none"></div>
+      <h4 class="text-xs uppercase tracking-widest text-[var(--color-accent)] mb-3 font-semibold text-left-forced">Transfer Payment To</h4>
       
-      <div class="space-y-3">
-        <div class="flex justify-between items-center border-b border-[var(--color-border)] pb-2">
-          <span class="text-[var(--color-text-secondary)] text-sm">Bank Name</span>
-          <span class="text-[var(--color-text-primary)] font-medium">{{ bankDetails.bank_name }}</span>
+      <div class="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
+        <div class="flex justify-between items-start gap-3 border-b border-[var(--color-border)] pb-2">
+          <span class="text-[var(--color-text-secondary)] shrink-0">Bank Name</span>
+          <span class="text-[var(--color-text-primary)] font-medium text-right min-w-0 break-words">{{ bankDetails.bank_name }}</span>
         </div>
-        <div class="flex justify-between items-center border-b border-[var(--color-border)] pb-2">
-          <span class="text-[var(--color-text-secondary)] text-sm">Account Name</span>
-          <span class="text-[var(--color-text-primary)] font-medium">{{ bankDetails.account_name }}</span>
+        <div class="flex justify-between items-start gap-3 border-b border-[var(--color-border)] pb-2">
+          <span class="text-[var(--color-text-secondary)] shrink-0">Account Name</span>
+          <span class="text-[var(--color-text-primary)] font-medium text-right min-w-0 break-words">{{ bankDetails.account_name }}</span>
         </div>
-        <div class="flex justify-between items-center bg-black/30 rounded-xl px-3 py-2 border border-white/[0.06]">
-          <span class="text-[var(--color-text-secondary)] text-sm">Account Number</span>
-          <div class="flex items-center gap-2">
-            <span class="text-[var(--color-accent)] font-mono text-base font-bold tracking-wider">{{ bankDetails.account_number }}</span>
+        <div class="flex flex-wrap justify-between items-center gap-2 bg-[var(--color-bg-primary)] md:bg-black/30 rounded-lg md:rounded-xl px-3 py-2 border border-[var(--color-border)] md:border-white/[0.06]">
+          <span class="text-[var(--color-text-secondary)] shrink-0">Account Number</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-[var(--color-accent)] font-mono text-sm sm:text-base font-bold tracking-wider tabular-nums select-all">{{ bankDetails.account_number }}</span>
             <button
               type="button"
               @click="copyAccountNumber(bankDetails.account_number)"
-              class="p-1 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/15 rounded-md transition-colors"
+              class="min-h-[36px] min-w-[36px] p-1.5 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/15 rounded-md transition-colors inline-flex items-center justify-center shrink-0"
               title="Copy Account Number"
+              aria-label="Copy Account Number"
             >
               <DocumentDuplicateIcon class="h-4 w-4" />
             </button>
@@ -193,36 +194,36 @@ watch(previewUrl, (newUrl, oldUrl) => {
       </div>
     </div>
 
-    <div v-else class="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 text-amber-500 text-sm text-center">
+    <div v-else class="mb-4 sm:mb-6 bg-amber-500/10 border border-amber-500/20 rounded-xl md:rounded-2xl p-4 sm:p-5 text-amber-600 dark:text-amber-400 text-xs sm:text-sm text-center">
       Payment account details have not been configured yet. Please contact the salon.
     </div>
 
     <!-- Upload Area -->
     <div v-if="!file" class="relative">
       <input type="file" @change="handleFileChange" accept="image/*,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-      <div class="border-2 border-dashed border-[var(--color-border)] rounded-2xl p-8 text-center flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/50 group hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-bg-tertiary)]/50 transition-all">
-        <div class="h-16 w-16 bg-[var(--color-bg-secondary)] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
-          <CloudArrowUpIcon class="h-8 w-8 text-[var(--color-accent)]" />
+      <div class="border-2 border-dashed border-[var(--color-border)] rounded-xl md:rounded-2xl p-5 sm:p-8 text-center flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/50 group hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-bg-tertiary)]/50 transition-all">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 bg-[var(--color-bg-secondary)] rounded-full flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-none sm:shadow-sm">
+          <CloudArrowUpIcon class="h-6 w-6 sm:h-8 sm:w-8 text-[var(--color-accent)]" />
         </div>
-        <p class="text-[var(--color-text-primary)] font-medium">Click to upload or drag and drop</p>
-        <p class="text-[var(--color-text-muted)] text-xs mt-2">PNG, JPG or PDF (max. 5MB)</p>
+        <p class="text-[var(--color-text-primary)] text-sm font-medium text-center">Click to upload or drag and drop</p>
+        <p class="text-[var(--color-text-muted)] text-xs mt-1.5 sm:mt-2 text-center">PNG, JPG or PDF (max. 5MB)</p>
       </div>
     </div>
     
     <!-- Preview Area -->
-    <div v-else class="space-y-6">
-      <div class="relative bg-[var(--color-bg-tertiary)] rounded-2xl p-4 border border-[var(--color-border)] flex items-center gap-4 overflow-hidden group">
-        <div class="h-16 w-16 bg-[var(--color-bg-secondary)] rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden border border-[var(--color-border)]">
+    <div v-else class="space-y-4 sm:space-y-6">
+      <div class="relative bg-[var(--color-bg-tertiary)] rounded-xl md:rounded-2xl p-3.5 sm:p-4 border border-[var(--color-border)] flex items-center gap-3 sm:gap-4 overflow-hidden group">
+        <div class="h-14 w-14 sm:h-16 sm:w-16 bg-[var(--color-bg-secondary)] rounded-lg md:rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden border border-[var(--color-border)]">
           <img v-if="previewUrl" :src="previewUrl" class="w-full h-full object-cover" />
-          <DocumentTextIcon v-else class="h-8 w-8 text-[var(--color-text-muted)]" />
+          <DocumentTextIcon v-else class="h-7 w-7 sm:h-8 sm:w-8 text-[var(--color-text-muted)]" />
         </div>
         
         <div class="flex-1 min-w-0">
-          <p class="text-[var(--color-text-primary)] text-sm font-medium truncate">{{ file.name }}</p>
-          <p class="text-[var(--color-text-muted)] text-xs mt-1">{{ (file.size / 1024 / 1024).toFixed(2) }} MB</p>
+          <p class="text-[var(--color-text-primary)] text-sm font-medium truncate text-left-forced">{{ file.name }}</p>
+          <p class="text-[var(--color-text-muted)] text-xs mt-1 tabular-nums text-left-forced">{{ (file.size / 1024 / 1024).toFixed(2) }} MB</p>
         </div>
         
-        <button @click="clearFile" :disabled="isUploading" class="p-2 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-danger)]/10 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] rounded-lg transition-colors z-20 border border-[var(--color-border)]">
+        <button @click="clearFile" :disabled="isUploading" type="button" aria-label="Remove selected file" class="min-h-[38px] min-w-[38px] p-2 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-danger)]/10 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] rounded-lg transition-colors z-20 border border-[var(--color-border)] inline-flex items-center justify-center shrink-0">
           <XMarkIcon class="h-4 w-4" />
         </button>
       </div>
@@ -230,8 +231,9 @@ watch(previewUrl, (newUrl, oldUrl) => {
       <button 
         @click="uploadReceipt" 
         :disabled="isUploading"
-        class="w-full relative overflow-hidden group bg-[var(--color-accent)] text-[var(--color-accent-foreground)] px-6 py-4 rounded-xl font-bold text-lg hover:bg-[var(--color-accent-hover)] transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed">
-        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+        type="button"
+        class="w-full min-h-[44px] relative overflow-hidden group bg-[var(--color-accent)] text-[var(--color-accent-foreground)] px-5 py-3 sm:py-4 rounded-lg md:rounded-xl font-bold text-sm sm:text-base md:text-lg hover:bg-[var(--color-accent-hover)] transition-all shadow-none md:shadow-md disabled:opacity-70 disabled:cursor-not-allowed">
+        <div class="hidden md:block absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
         <div class="relative flex items-center justify-center gap-2">
           <ArrowPathIcon v-if="isUploading" class="h-5 w-5 animate-spin" />
           <CheckCircleIcon v-else class="h-5 w-5" />

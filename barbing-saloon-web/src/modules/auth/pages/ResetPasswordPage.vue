@@ -49,6 +49,32 @@
           </div>
 
           <div class="relative group">
+            <label for="rp-email" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">Email Address</label>
+            <input
+              v-model="email"
+              id="rp-email"
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none"
+              placeholder="you@example.com"
+              type="email"
+              required
+            />
+            <p v-if="errors.email" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.email }}</p>
+          </div>
+
+          <div class="relative group">
+            <label for="rp-code" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">6-Digit Reset Code (OTP)</label>
+            <input
+              v-model="code"
+              id="rp-code"
+              class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 text-theme-text text-sm font-mono tracking-widest placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none"
+              placeholder="123456"
+              maxlength="64"
+              required
+            />
+            <p v-if="errors.code" class="mt-1.5 text-xs text-red-400 font-medium">{{ errors.code }}</p>
+          </div>
+
+          <div class="relative group">
             <label for="rp-password" class="block text-[10px] font-semibold uppercase tracking-wider text-gold mb-1.5">New Password</label>
             <div class="relative">
               <input
@@ -160,6 +186,8 @@ const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGol
 
 const route = useRoute();
 
+const email = ref((route.query.email || '').toString());
+const code = ref((route.query.code || route.query.token || '').toString());
 const password = ref('');
 const passwordConfirmation = ref('');
 const showPassword = ref(false);
@@ -168,11 +196,15 @@ const loading = ref(false);
 const message = ref('');
 const generalError = ref('');
 const errors = reactive({
+  email: '',
+  code: '',
   password: '',
   password_confirmation: '',
 });
 
 const schema = object({
+  email: string().required('Email address is required').email('Enter a valid email address'),
+  code: string().required('6-digit reset code or token is required'),
   password: string().required('Password is required').min(8, 'Password must be at least 8 characters'),
 });
 
@@ -180,6 +212,8 @@ async function submitForm() {
   loading.value = true;
   message.value = '';
   generalError.value = '';
+  errors.email = '';
+  errors.code = '';
   errors.password = '';
   errors.password_confirmation = '';
 
@@ -189,11 +223,20 @@ async function submitForm() {
     return;
   }
 
+  const cleanEmail = (email.value || '').trim().toLowerCase();
+  const cleanCode = (code.value || '').replace(/[\s-]/g, '').trim();
+
   try {
-    await schema.validate({ password: password.value }, { abortEarly: false });
+    await schema.validate({
+      email: cleanEmail,
+      code: cleanCode,
+      password: password.value,
+    }, { abortEarly: false });
+
     const response = await authApi.resetPassword({
-      email: route.query.email || '',
-      token: route.query.token || '',
+      email: cleanEmail,
+      token: cleanCode,
+      code: cleanCode,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
     });
@@ -204,7 +247,7 @@ async function submitForm() {
         errors[item.path] = item.message;
       });
     } else {
-      generalError.value = error?.response?.data?.error || 'Something went wrong. Please try again.';
+      generalError.value = error?.response?.data?.message || error?.response?.data?.error || 'Something went wrong. Please try again.';
     }
   } finally {
     loading.value = false;

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\PublicApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
 use App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController;
 use App\Http\Controllers\Api\V1\ServiceZoneApiController;
+use App\Http\Controllers\Api\V1\ShopLocationApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,9 @@ Route::get('/working-hours', [PublicApiController::class, 'workingHours']);
 Route::get('/available-slots', [PublicApiController::class, 'availableSlots']);
 Route::post('/contact', [PublicApiController::class, 'contact'])->middleware('throttle:5,1');
 Route::get('/feature-flags', [FeatureFlagApiController::class, 'publicIndex']);
+Route::get('/shop/location', [ShopLocationApiController::class, 'show']);
+Route::get('/shop/directions', [ShopLocationApiController::class, 'directions']);
+Route::get('/branches/{id}/location', [ShopLocationApiController::class, 'show'])->whereNumber('id');
 Route::post('/app/crashes', [AppTelemetryApiController::class, 'reportCrash'])->middleware('throttle:30,1');
 
 // Public Aliases (/api/v1/public/*) for seamless backward compatibility

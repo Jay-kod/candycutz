@@ -124,7 +124,8 @@ class NotificationApiController
             }
         }
 
-        $notifications = $query->orderBy('created_at', 'desc')->get();
+        $limit = min(max((int) $request->query('limit', 150), 1), 300);
+        $notifications = $query->orderBy('created_at', 'desc')->limit($limit)->get();
 
         return ApiResponse::success(NotificationResource::collection($notifications), 'Notifications retrieved');
     }
@@ -186,23 +187,29 @@ class NotificationApiController
         }
 
         $userId = $user->id;
-        $initialCursor = (int) ($request->header('Last-Event-ID') ?: $request->query('last_event_id', 0));
+        $rawCursor = $request->header('Last-Event-ID') ?? $request->query('last_event_id');
+        $parsedCursor = is_scalar($rawCursor)
+            ? filter_var((string) $rawCursor, FILTER_VALIDATE_INT)
+            : false;
+        $initialCursor = $parsedCursor !== false && $parsedCursor >= 0 ? $parsedCursor : null;
+        // The PHP built-in server is single-worker, so it cannot hold an SSE connection open.
+        $singlePoll = PHP_SAPI === 'cli-server' || app()->runningUnitTests();
 
-        $response = new StreamedResponse(function () use ($userId, $initialCursor) {
+        $response = new StreamedResponse(function () use ($userId, $initialCursor, $singlePoll) {
             $user = User::find($userId);
             if (! $user) {
                 return;
             }
 
-            if (ob_get_level() > 0) {
+            if (ob_get_level() > 0 && ! $singlePoll) {
                 ob_end_clean();
             }
 
-            $lastId = $initialCursor > 0 ? $initialCursor : ((int) (Notification::max('id') ?? 0));
+            $lastId = $initialCursor ?? ((int) (Notification::max('id') ?? 0));
             @set_time_limit(35);
             $startTime = time();
 
-            while (time() - $startTime < 25) {
+            while ($singlePoll || time() - $startTime < 25) {
                 if (connection_aborted()) {
                     break;
                 }
@@ -221,10 +228,16 @@ class NotificationApiController
                     echo "event: notification\n";
                     echo 'data: '.json_encode(NotificationResource::collection($newNotifications)->resolve())."\n\n";
                     flush();
+                } elseif ($singlePoll) {
+                    echo "id: {$lastId}\n";
                 }
 
                 echo ": ping\n\n";
                 flush();
+
+                if ($singlePoll) {
+                    break;
+                }
 
                 sleep(2);
             }

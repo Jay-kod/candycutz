@@ -167,14 +167,35 @@
                   >
                     <DocumentTextIcon class="h-4 w-4" />
                   </button>
-                  <button 
+                  <button
+                    v-if="appointment.status === 'confirmed'"
+                    @click="$emit('mark-no-show', appointment.id)"
+                    class="px-2.5 h-8 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-500 hover:bg-amber-500 hover:text-obsidian text-[11px] font-bold transition-all"
+                    title="Mark No-Show"
+                  >
+                    No-Show
+                  </button>
+                  <button
                     v-if="appointment.status === 'confirmed'" 
-                    @click="$emit('cancel', appointment.id)" 
-                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all" 
+                    @click="$emit('cancel', appointment.id)"
+                    class="flex items-center justify-center h-8 w-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all"
                     title="Cancel Booking"
                   >
                     <XMarkIcon class="h-4 w-4" />
                   </button>
+                </template>
+                <template v-else-if="appointment.status === 'no_show'">
+                  <button
+                    v-if="appointment.deposit_paid && !appointment.deposit_forfeited"
+                    @click="$emit('forfeit-deposit', appointment.id)"
+                    class="px-2.5 h-8 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white text-[11px] font-bold transition-all"
+                    title="Mark Deposit as Forfeited"
+                  >
+                    Forfeit Deposit
+                  </button>
+                  <span v-else-if="appointment.deposit_forfeited" class="px-2 py-1 rounded-lg bg-red-500/10 text-red-400 text-[10px] font-bold">
+                    Forfeited
+                  </span>
                 </template>
               </div>
             </td>
@@ -220,7 +241,7 @@ defineProps({
   currentFilter: String
 });
 
-defineEmits(['details', 'approve', 'force-approve', 'cancel', 'view-receipt', 'reset-filters']);
+defineEmits(['details', 'approve', 'force-approve', 'cancel', 'mark-no-show', 'forfeit-deposit', 'view-receipt', 'reset-filters']);
 
 function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

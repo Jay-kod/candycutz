@@ -13,7 +13,9 @@ use App\Http\Controllers\Api\V1\FeatureFlagApiController;
 use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\GateApiController;
+use App\Http\Controllers\Api\V1\NoShowApiController;
 use App\Http\Controllers\Api\V1\NotificationApiController;
+use App\Http\Controllers\Api\V1\RefundApiController;
 use App\Http\Controllers\Api\V1\SuperAdminApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +28,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
     Route::post('/admin/google-auth/test', [AdminApiController::class, 'testGoogleAuthConnection']);
+    Route::post('/admin/google-auth/users/{id}/unlink', [AdminApiController::class, 'unlinkGoogleAccount']);
     Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
     Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
     Route::get('/admin/paystack/settings', [AdminApiController::class, 'getPaystackSettings']);
@@ -69,8 +72,27 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/appointments/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
     Route::match(['post', 'patch'], '/admin/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/status', [AppointmentApiController::class, 'updateStatus'])->whereNumber('id');
+    Route::patch('/admin/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
+    Route::post('/admin/appointments/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitDeposit'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/force-approve', [AppointmentApiController::class, 'forceApprove'])->whereNumber('id');
+
+    // Admin No-Show Policy, Records, Appeals & Refund Initiation
+    Route::get('/admin/no-shows', [NoShowApiController::class, 'index']);
+    Route::get('/admin/no-shows/policy', [NoShowApiController::class, 'policy']);
+    Route::post('/admin/no-shows/policy', [NoShowApiController::class, 'updatePolicy']);
+    Route::post('/admin/no-shows/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitRecordDeposit'])->whereNumber('id');
+    Route::patch('/admin/no-shows/{id}/appeal', [NoShowApiController::class, 'resolveAppeal'])->whereNumber('id');
+    Route::post('/admin/no-shows/{id}/initiate-refund', [NoShowApiController::class, 'initiateRefund'])->whereNumber('id');
+    Route::get('/admin/customers/{customerId}/no-shows', [NoShowApiController::class, 'customerHistory'])->whereNumber('customerId');
+    Route::post('/admin/customers/{customerId}/reset-no-show-flag', [NoShowApiController::class, 'resetCustomerFlag'])->whereNumber('customerId');
+
+    // Admin Refunds & Refund Policy Management
+    Route::get('/admin/refunds', [RefundApiController::class, 'index']);
+    Route::get('/admin/refunds/policy', [RefundApiController::class, 'policy']);
+    Route::post('/admin/refunds/policy', [RefundApiController::class, 'updatePolicy']);
+    Route::post('/admin/refunds/{id}/decide', [RefundApiController::class, 'decide'])->whereNumber('id');
+    Route::post('/admin/refunds/{id}/complete-manual', [RefundApiController::class, 'completeManual'])->whereNumber('id');
 
     // Admin Barber Management
     Route::get('/admin/barbers', [BarberApiController::class, 'index']);

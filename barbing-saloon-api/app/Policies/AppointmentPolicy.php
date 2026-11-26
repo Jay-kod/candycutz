@@ -66,6 +66,11 @@ class AppointmentPolicy
         return $appointment->customer_id === $user->id;
     }
 
+    public function extendGrace(User $user, Appointment $appointment): bool
+    {
+        return $appointment->customer_id === $user->id;
+    }
+
     public function delete(User $user, Appointment $appointment): bool
     {
         return $appointment->customer_id === $user->id;

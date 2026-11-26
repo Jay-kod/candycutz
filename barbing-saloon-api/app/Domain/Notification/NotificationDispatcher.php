@@ -7,18 +7,22 @@ namespace App\Domain\Notification;
 use App\Domain\Notification\Channels\EmailNotificationChannel;
 use App\Domain\Notification\Channels\InAppNotificationChannel;
 use App\Domain\Notification\Channels\PushNotificationChannel;
+use App\Domain\Payment\Services\PricingService;
+use App\Domain\Shared\Services\SalonClock;
 use App\Jobs\SendExpoPush;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\DeviceToken;
 use App\Models\FeedbackSubmission;
+use App\Models\NoShowRecord;
 use App\Models\Notification;
 use App\Models\NotificationBroadcast;
 use App\Models\NotificationDelivery;
+use App\Models\RefundRequest;
 use App\Models\ServiceCategoryRequest;
 use App\Models\Testimonial;
 use App\Models\User;
-use App\Models\UserNotificationPreference;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -126,26 +130,32 @@ class NotificationDispatcher
         $customerId = static::resolveCustomerId($appointment);
         $barberUserId = static::resolveBarberUserId($appointment);
 
-        // 1. Notify customer (In-app + Push + Email)
+        // 1. Notify customer (In-app + Push; official email receipt is sent upon payment or pre-paid creation)
         if ($customerId) {
+            $title = $appointment->deposit_paid ? 'Booking Confirmed ✂️' : 'Booking Reserved ✂️';
+            $message = $appointment->deposit_paid
+                ? "Your appointment for {$serviceName} with {$barberName} on ".SalonClock::formatDate($appointment->appointment_date).' at '.SalonClock::formatTime($appointment->appointment_time)." is confirmed. Booking Code: {$appointment->verification_code}"
+                : "Your reservation for {$serviceName} with {$barberName} on ".SalonClock::formatDate($appointment->appointment_date).' at '.SalonClock::formatTime($appointment->appointment_time)." has been created. Ref: {$appointment->booking_reference}";
+
             static::dispatchNotification(
                 recipientId: $customerId,
                 type: 'booking_created',
-                title: 'Booking Confirmed ✂️',
-                message: "Your appointment for {$serviceName} with {$barberName} on {$appointment->appointment_date} at {$appointment->appointment_time} has been booked. Ref: {$appointment->booking_reference}",
+                title: $title,
+                message: $message,
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'booking',
                 data: [
                     'booking_reference' => $appointment->booking_reference,
+                    'verification_code' => $appointment->verification_code,
                     'service_name' => $serviceName,
                     'appointment_date' => $appointment->appointment_date,
                     'appointment_time' => $appointment->appointment_time,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'normal',
                 idempotencyKey: hash('sha256', "booking_created_customer:{$appointment->id}"),
-                channels: ['in_app', 'push', 'email']
+                channels: ['in_app', 'push']
             );
         }
 
@@ -187,7 +197,7 @@ class NotificationDispatcher
                 'customer_name' => $customerName,
                 'barber_name' => $barberName,
             ],
-            actionUrl: "/admin/appointments/{$appointment->id}",
+            actionUrl: '/admin/appointments',
             idempotencyKey: hash('sha256', "booking_created_admin:{$appointment->id}")
         );
     }
@@ -221,7 +231,7 @@ class NotificationDispatcher
                     'appointment_date' => $appointment->appointment_date,
                     'appointment_time' => $appointment->appointment_time,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'normal',
                 idempotencyKey: hash('sha256', "booking_approved_customer:{$appointment->id}"),
                 channels: ['in_app', 'push', 'email']
@@ -295,7 +305,7 @@ class NotificationDispatcher
                     'booking_reference' => $appointment->booking_reference,
                     'reason' => $reason,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'normal',
                 idempotencyKey: hash('sha256', "booking_cancelled_customer:{$appointment->id}"),
                 channels: ['in_app', 'push', 'email']
@@ -339,7 +349,7 @@ class NotificationDispatcher
     /**
      * Booking completed — notify customer, barber summary, and admins.
      */
-    public static function bookingCompleted(Appointment $appointment, ?User $actor = null): void
+    public static function bookingCompleted(Appointment $appointment, ?User $actor = null): ?Notification
     {
         $appointment->loadMissing(['service', 'barber.user', 'customer']);
 
@@ -349,25 +359,27 @@ class NotificationDispatcher
 
         $customerId = static::resolveCustomerId($appointment);
         $barberUserId = static::resolveBarberUserId($appointment);
+        $customerNotification = null;
 
-        // 1. Notify customer (In-app + Push + Email) with review invitation
+        // 1. Notify customer (In-app + Push; session completion email handled by SendBookingThankYou)
         if ($customerId) {
-            static::dispatchNotification(
+            $customerNotification = static::dispatchNotification(
                 recipientId: $customerId,
                 type: 'booking_completed',
                 title: 'Session Complete 💈',
-                message: "Your {$serviceName} session is complete! We hope you enjoyed it. Leave a review to share your experience.",
+                message: "Your {$serviceName} session ({$appointment->verification_code}) is complete! Leave a review to share your experience.",
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'booking',
                 data: [
                     'booking_reference' => $appointment->booking_reference,
+                    'verification_code' => $appointment->verification_code,
                     'barber_name' => $barberName,
                 ],
-                actionUrl: "/customer/reviews?appointment_id={$appointment->id}",
+                actionUrl: "/customer/dashboard/reviews?appointment_id={$appointment->id}",
                 priority: 'normal',
                 idempotencyKey: hash('sha256', "booking_completed_customer:{$appointment->id}"),
-                channels: ['in_app', 'push', 'email']
+                channels: ['in_app', 'push']
             );
         }
 
@@ -396,8 +408,11 @@ class NotificationDispatcher
             relatedEntityId: $appointment->id,
             senderId: $actor?->id,
             category: 'booking',
+            actionUrl: '/admin/appointments',
             idempotencyKey: hash('sha256', "booking_completed_admin:{$appointment->id}")
         );
+
+        return $customerNotification;
     }
 
     /**
@@ -416,16 +431,24 @@ class NotificationDispatcher
 
         // 1. Notify customer
         if ($customerId) {
+            $forfeitNote = $appointment->deposit_forfeited
+                ? ' Your paid deposit has been forfeited.'
+                : '';
+
             static::dispatchNotification(
                 recipientId: $customerId,
                 type: 'booking_no_show',
                 title: 'Missed Appointment ⚠️',
-                message: "You were marked as a no-show for your {$serviceName} appointment ({$appointment->booking_reference}). Please reschedule or contact us.",
+                message: "You were marked as a no-show for your {$serviceName} appointment ({$appointment->booking_reference}).{$forfeitNote} If you had an emergency, you may submit an appeal from your bookings page.",
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'booking',
-                actionUrl: "/customer/bookings/{$appointment->id}",
-                priority: 'normal',
+                data: [
+                    'booking_reference' => $appointment->booking_reference,
+                    'deposit_forfeited' => (bool) $appointment->deposit_forfeited,
+                ],
+                actionUrl: '/customer/dashboard/bookings',
+                priority: 'urgent',
                 idempotencyKey: hash('sha256', "booking_no_show_customer:{$appointment->id}"),
                 channels: ['in_app', 'push', 'email']
             );
@@ -437,10 +460,11 @@ class NotificationDispatcher
                 recipientId: $barberUserId,
                 type: 'booking_no_show',
                 title: 'No-Show Recorded ⚠️',
-                message: "Appointment {$appointment->booking_reference} for {$customerName} was recorded as a no-show.",
+                message: "Appointment {$appointment->booking_reference} for {$customerName} was recorded as a no-show. Your time slot is now open.",
                 relatedEntityId: $appointment->id,
                 recipientType: 'barber',
                 category: 'booking',
+                actionUrl: '/barber/appointments',
                 idempotencyKey: hash('sha256', "booking_no_show_barber:{$appointment->id}"),
                 channels: ['in_app', 'push']
             );
@@ -455,7 +479,234 @@ class NotificationDispatcher
             relatedEntityId: $appointment->id,
             senderId: $actor?->id,
             category: 'booking',
+            actionUrl: '/admin/no-shows',
             idempotencyKey: hash('sha256', "booking_no_show_admin:{$appointment->id}")
+        );
+    }
+
+    /**
+     * Pre-no-show urgent arrival warning — notifies customer in website/app (in_app + push).
+     * Branded warning email is dispatched by SendNoShowWarningEmail using the returned notification ID.
+     */
+    public static function noShowWarning(Appointment $appointment, int $minutesRemaining = 5, bool $canExtend = true): ?Notification
+    {
+        $appointment->loadMissing(['service', 'barber.user', 'customer']);
+
+        $serviceName = $appointment->service->name ?? 'your appointment';
+        $barberName = $appointment->barber?->user->name ?? 'your barber';
+        $customerId = static::resolveCustomerId($appointment);
+
+        if (! $customerId) {
+            return null;
+        }
+
+        $extensionCount = (int) ($appointment->grace_extension_count ?? 0);
+        $extendHint = $canExtend
+            ? ' Running late? Request a one-time grace extension in the app/website now.'
+            : ' Please check in immediately.';
+
+        return static::dispatchNotification(
+            recipientId: $customerId,
+            type: 'booking_no_show_warning',
+            title: "Arrival Warning: {$minutesRemaining}m Left ⚠️",
+            message: "Your {$serviceName} session with {$barberName} ({$appointment->booking_reference}) will be marked as a no-show in {$minutesRemaining} minute(s).{$extendHint}",
+            relatedEntityId: $appointment->id,
+            recipientType: 'customer',
+            category: 'booking',
+            data: [
+                'booking_reference' => $appointment->booking_reference,
+                'minutes_remaining' => $minutesRemaining,
+                'can_extend' => $canExtend,
+            ],
+            actionUrl: '/customer/dashboard/bookings',
+            priority: 'urgent',
+            idempotencyKey: hash('sha256', "no_show_warning:{$appointment->id}:ext{$extensionCount}"),
+            channels: ['in_app', 'push']
+        );
+    }
+
+    /**
+     * Deposit explicitly forfeited after a no-show — notify customer and admins.
+     */
+    public static function noShowDepositForfeited(Appointment $appointment, float $amountNaira, ?string $reason = null): void
+    {
+        $appointment->loadMissing(['customer']);
+        $customerId = static::resolveCustomerId($appointment);
+        $amountFormatted = number_format($amountNaira, 2);
+
+        if ($customerId) {
+            static::dispatchNotification(
+                recipientId: $customerId,
+                type: 'booking_no_show',
+                title: 'Deposit Forfeited ⚠️',
+                message: "Your deposit of ₦{$amountFormatted} for missed booking {$appointment->booking_reference} has been marked as forfeited per our no-show policy.".($reason ? " Note: {$reason}" : ''),
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+                category: 'payment',
+                data: [
+                    'booking_reference' => $appointment->booking_reference,
+                    'amount' => $amountFormatted,
+                ],
+                actionUrl: '/customer/dashboard/bookings',
+                priority: 'urgent',
+                idempotencyKey: hash('sha256', "no_show_deposit_forfeited_cust:{$appointment->id}"),
+                channels: ['in_app', 'push', 'email']
+            );
+        }
+
+        static::createBroadcast(
+            type: 'booking_no_show',
+            title: 'No-Show Deposit Forfeited 💰',
+            message: "Deposit of ₦{$amountFormatted} was marked forfeited for booking {$appointment->booking_reference}.",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            category: 'payment',
+            actionUrl: '/admin/no-shows',
+            idempotencyKey: hash('sha256', "no_show_deposit_forfeited_admin:{$appointment->id}")
+        );
+    }
+
+    /**
+     * Customer reached the configured no-show threshold — deposit now required.
+     */
+    public static function noShowThresholdReached(User $customer, int $count, int $threshold): void
+    {
+        static::dispatchNotification(
+            recipientId: $customer->id,
+            type: 'booking_no_show',
+            title: 'Deposit Required for Future Bookings ⚠️',
+            message: "You have recorded {$count} missed appointment(s) (policy threshold: {$threshold}). Future CandyCutz bookings will require an upfront deposit.",
+            recipientType: 'customer',
+            category: 'booking',
+            data: [
+                'no_show_count' => $count,
+                'threshold' => $threshold,
+            ],
+            actionUrl: '/customer/dashboard/bookings',
+            priority: 'urgent',
+            idempotencyKey: hash('sha256', "no_show_threshold:{$customer->id}:{$count}"),
+            channels: ['in_app', 'push', 'email']
+        );
+
+        static::createBroadcast(
+            type: 'booking_no_show',
+            title: 'Customer Reached No-Show Limit ⚠️',
+            message: "{$customer->name} reached {$count}/{$threshold} no-shows and now requires an upfront deposit.",
+            recipientType: 'all_admins',
+            relatedEntityId: $customer->id,
+            category: 'booking',
+            actionUrl: '/admin/no-shows',
+            idempotencyKey: hash('sha256', "no_show_threshold_admin:{$customer->id}:{$count}")
+        );
+    }
+
+    /**
+     * Customer requested a one-time grace period extension with a valid reason.
+     */
+    public static function gracePeriodRequested(Appointment $appointment, User $customer, string $reason, int $extensionMinutes): void
+    {
+        $appointment->loadMissing(['barber.user', 'service']);
+        $customerName = $customer->real_name ?? $customer->name ?? 'Customer';
+        $barberUserId = static::resolveBarberUserId($appointment);
+
+        static::dispatchNotification(
+            recipientId: $customer->id,
+            type: 'booking_grace_extended',
+            title: "Grace Period Extended (+{$extensionMinutes}m) ⏳",
+            message: "Your arrival window for {$appointment->booking_reference} has been extended by {$extensionMinutes} minutes. Please arrive promptly.",
+            relatedEntityId: $appointment->id,
+            recipientType: 'customer',
+            category: 'booking',
+            actionUrl: '/customer/dashboard/bookings',
+            priority: 'high',
+            idempotencyKey: hash('sha256', "grace_extended_cust:{$appointment->id}:{$appointment->grace_extension_count}"),
+            channels: ['in_app', 'push']
+        );
+
+        if ($barberUserId) {
+            static::dispatchNotification(
+                recipientId: $barberUserId,
+                type: 'booking_grace_extended',
+                title: "Client Running Late (+{$extensionMinutes}m) ⏳",
+                message: "{$customerName} extended booking {$appointment->booking_reference} by {$extensionMinutes} minutes. Reason: {$reason}",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+                category: 'booking',
+                actionUrl: '/barber/appointments',
+                priority: 'high',
+                idempotencyKey: hash('sha256', "grace_extended_barber:{$appointment->id}:{$appointment->grace_extension_count}"),
+                channels: ['in_app', 'push']
+            );
+        }
+
+        static::createBroadcast(
+            type: 'booking_grace_extended',
+            title: "Grace Period Extended (+{$extensionMinutes}m) ⏳",
+            message: "{$customerName} extended {$appointment->booking_reference} by {$extensionMinutes}m. Reason: {$reason}",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            senderId: $customer->id,
+            category: 'booking',
+            actionUrl: '/admin/appointments',
+            idempotencyKey: hash('sha256', "grace_extended_admin:{$appointment->id}:{$appointment->grace_extension_count}")
+        );
+    }
+
+    /**
+     * Customer appealed a no-show record — broadcast to admins.
+     */
+    public static function noShowAppealed(NoShowRecord $record, User $customer): void
+    {
+        $record->loadMissing('appointment');
+        $ref = $record->appointment->booking_reference ?? "#{$record->appointment_id}";
+
+        static::createBroadcast(
+            type: 'booking_no_show',
+            title: 'New No-Show Appeal Submitted 📩',
+            message: "{$customer->name} appealed no-show for booking {$ref}: \"{$record->appeal_reason}\"",
+            recipientType: 'all_admins',
+            relatedEntityId: $record->id,
+            senderId: $customer->id,
+            category: 'booking',
+            actionUrl: '/admin/no-shows',
+            priority: 'high',
+            idempotencyKey: hash('sha256', "no_show_appealed_admin:{$record->id}")
+        );
+    }
+
+    /**
+     * Admin resolved a customer's no-show appeal — notify customer.
+     */
+    public static function noShowAppealResolved(NoShowRecord $record): void
+    {
+        if (! $record->customer_id) {
+            return;
+        }
+
+        $record->loadMissing('appointment');
+        $ref = $record->appointment->booking_reference ?? "#{$record->appointment_id}";
+        $approved = $record->appeal_outcome === 'approved';
+        $title = $approved ? 'No-Show Appeal Approved ✅' : 'No-Show Appeal Declined';
+        $msg = $approved
+            ? "Your appeal for booking {$ref} was approved. Your no-show record has been cleared."
+            : "Your appeal for booking {$ref} was reviewed and declined.";
+
+        if ($record->resolution_note) {
+            $msg .= " Note: {$record->resolution_note}";
+        }
+
+        static::dispatchNotification(
+            recipientId: (int) $record->customer_id,
+            type: 'booking_no_show',
+            title: $title,
+            message: $msg,
+            relatedEntityId: $record->appointment_id,
+            recipientType: 'customer',
+            category: 'booking',
+            actionUrl: '/customer/dashboard/bookings',
+            priority: 'high',
+            idempotencyKey: hash('sha256', "no_show_appeal_resolved:{$record->id}:{$record->appeal_outcome}"),
+            channels: ['in_app', 'push', 'email']
         );
     }
 
@@ -574,36 +825,102 @@ class NotificationDispatcher
     }
 
     /**
-     * Booking reminder — notify customer ahead of scheduled session.
+     * Booking reminder — notify customer ahead of scheduled session (legacy hourly signature).
      */
     public static function bookingReminder(Appointment $appointment, int $hoursBefore = 2): void
+    {
+        static::bookingUpcomingReminder($appointment, max(1, $hoursBefore) * 60);
+    }
+
+    /**
+     * Pre-session reminder (30 minutes before appointment) — notifies Customer (in-app/web + push),
+     * Admins (in-website/in-app broadcast), and assigned Barber (in-app).
+     * Customer email delivery is coordinated by SendBookingReminder to use the luxury template.
+     */
+    public static function bookingUpcomingReminder(Appointment $appointment, int $minutesBefore = 30): ?Notification
     {
         $appointment->loadMissing(['service', 'barber.user', 'customer']);
 
         $serviceName = $appointment->service->name ?? 'your appointment';
         $barberName = $appointment->barber?->user->name ?? 'your barber';
+        $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'Customer';
+        $bookingCode = $appointment->verification_code;
+        $formattedTime = SalonClock::formatTime($appointment->appointment_time);
+        $leadLabel = $minutesBefore >= 60 && $minutesBefore % 60 === 0
+            ? ($minutesBefore / 60).'h Remaining'
+            : "Starts in {$minutesBefore} Minutes";
+
         $customerId = static::resolveCustomerId($appointment);
+        $barberUserId = static::resolveBarberUserId($appointment);
+        $customerNotification = null;
 
         if ($customerId) {
-            static::dispatchNotification(
+            $customerNotification = static::dispatchNotification(
                 recipientId: $customerId,
                 type: 'booking_reminder',
-                title: "Appointment Reminder: {$hoursBefore}h Remaining ⏰",
-                message: "Your {$serviceName} with {$barberName} is scheduled for today at {$appointment->appointment_time}. Ref: {$appointment->booking_reference}",
+                title: "Appointment Reminder: {$leadLabel} ⏰",
+                message: "Your {$serviceName} with {$barberName} begins at {$formattedTime}. Keep your Booking Code ready: {$bookingCode}",
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'booking',
                 data: [
                     'booking_reference' => $appointment->booking_reference,
+                    'verification_code' => $bookingCode,
+                    'appointment_date' => $appointment->appointment_date,
                     'appointment_time' => $appointment->appointment_time,
-                    'hours_before' => $hoursBefore,
+                    'minutes_before' => $minutesBefore,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
-                priority: 'normal',
-                idempotencyKey: hash('sha256', "booking_reminder:{$appointment->id}:{$hoursBefore}"),
-                channels: ['in_app', 'push', 'email']
+                actionUrl: '/customer/dashboard/bookings',
+                priority: 'high',
+                idempotencyKey: hash('sha256', "booking_reminder_{$minutesBefore}m_customer:{$appointment->id}"),
+                channels: ['in_app', 'push']
             );
         }
+
+        if ($barberUserId) {
+            static::dispatchNotification(
+                recipientId: $barberUserId,
+                type: 'booking_reminder',
+                title: "Upcoming Session in {$minutesBefore}m ⏰",
+                message: "{$customerName}'s {$serviceName} session starts at {$formattedTime}. Code: {$bookingCode}",
+                relatedEntityId: $appointment->id,
+                recipientType: 'barber',
+                category: 'booking',
+                data: [
+                    'booking_reference' => $appointment->booking_reference,
+                    'verification_code' => $bookingCode,
+                    'minutes_before' => $minutesBefore,
+                ],
+                actionUrl: '/barber/appointments',
+                priority: 'high',
+                idempotencyKey: hash('sha256', "booking_reminder_{$minutesBefore}m_barber:{$appointment->id}:{$barberUserId}"),
+                channels: ['in_app', 'push']
+            );
+        }
+
+        // Notify admins in-website / in-app only (no admin email)
+        static::createBroadcast(
+            type: 'booking_reminder',
+            title: "Upcoming Appointment in {$minutesBefore}m ⏰",
+            message: "{$customerName}'s {$serviceName} with {$barberName} starts at {$formattedTime} (Code: {$bookingCode}).",
+            recipientType: 'all_admins',
+            relatedEntityId: $appointment->id,
+            category: 'booking',
+            data: [
+                'booking_reference' => $appointment->booking_reference,
+                'verification_code' => $bookingCode,
+                'customer_name' => $customerName,
+                'barber_name' => $barberName,
+                'appointment_time' => $appointment->appointment_time,
+                'minutes_before' => $minutesBefore,
+            ],
+            actionUrl: '/admin/appointments',
+            priority: 'high',
+            idempotencyKey: hash('sha256', "booking_reminder_{$minutesBefore}m_admin:{$appointment->id}"),
+            channels: ['in_app', 'push']
+        );
+
+        return $customerNotification;
     }
 
     /**
@@ -643,7 +960,7 @@ class NotificationDispatcher
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'booking',
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 idempotencyKey: hash('sha256', "barber_assigned_cust:{$appointment->id}:{$barberUserId}"),
                 channels: ['in_app', 'push']
             );
@@ -675,7 +992,7 @@ class NotificationDispatcher
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'payment',
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 idempotencyKey: hash('sha256', "payment_received_cust:{$appointment->id}"),
                 channels: ['in_app', 'push']
             );
@@ -705,43 +1022,49 @@ class NotificationDispatcher
             recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
             category: 'payment',
-            actionUrl: "/admin/payments/{$appointment->id}",
+            actionUrl: '/admin/appointments',
             idempotencyKey: hash('sha256', "payment_received_admin:{$appointment->id}")
         );
     }
 
     /**
      * Payment verified / confirmed — notify customer, barber, and admin.
+     * Official luxury email receipt is sent via SendBookingConfirmation in HandlePaymentConfirmed.
      */
-    public static function paymentVerified(Appointment $appointment): void
+    public static function paymentVerified(Appointment $appointment): ?Notification
     {
-        $appointment->loadMissing(['barber.user', 'customer']);
+        $appointment->loadMissing(['barber.user', 'customer', 'payment']);
 
         $customerName = $appointment->customer->real_name ?? $appointment->customer->name ?? $appointment->client_name ?? 'A customer';
         $barberName = $appointment->barber?->user->name ?? 'Barber';
-        $amount = number_format((float) $appointment->grand_total, 2);
+        $pricing = app(PricingService::class);
+        $amount = $pricing->formatNaira($pricing->resolvedNairaAmount($appointment, $appointment->payment));
+        $bookingCode = $appointment->verification_code;
 
         $customerId = static::resolveCustomerId($appointment);
         $barberUserId = static::resolveBarberUserId($appointment);
+        $customerNotification = null;
 
-        // 1. Notify customer (In-app + Push + Email)
+        // 1. Notify customer (In-app + Push; official email receipt handled by SendBookingConfirmation)
         if ($customerId) {
-            static::dispatchNotification(
+            $customerNotification = static::dispatchNotification(
                 recipientId: $customerId,
                 type: 'payment_verified',
                 title: 'Payment Confirmed ✅',
-                message: "Your payment of ₦{$amount} for booking {$appointment->booking_reference} has been verified. Thank you!",
+                message: "Your payment of ₦{$amount} is verified! Booking Code: {$bookingCode}. Your receipt has been emailed to you.",
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'payment',
                 data: [
                     'booking_reference' => $appointment->booking_reference,
+                    'verification_code' => $bookingCode,
+                    'payment_reference' => $appointment->payment?->reference ?: $appointment->payment?->transaction_ref,
                     'amount' => $amount,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'normal',
                 idempotencyKey: hash('sha256', "payment_verified_cust:{$appointment->id}"),
-                channels: ['in_app', 'push', 'email']
+                channels: ['in_app', 'push']
             );
         }
 
@@ -769,8 +1092,11 @@ class NotificationDispatcher
             recipientType: 'all_admins',
             relatedEntityId: $appointment->id,
             category: 'payment',
+            actionUrl: '/admin/appointments',
             idempotencyKey: hash('sha256', "payment_verified_admin:{$appointment->id}")
         );
+
+        return $customerNotification;
     }
 
     /**
@@ -801,7 +1127,7 @@ class NotificationDispatcher
                     'booking_reference' => $appointment->booking_reference,
                     'reason' => $failureReason,
                 ],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'urgent',
                 idempotencyKey: hash('sha256', "payment_failed_cust:{$appointment->id}:".now()->toDateString()),
                 channels: ['in_app', 'push', 'email']
@@ -854,7 +1180,7 @@ class NotificationDispatcher
                 recipientType: 'customer',
                 category: 'payment',
                 data: ['amount' => $amountFormatted, 'reason' => $reason],
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'urgent',
                 idempotencyKey: hash('sha256', "refund_initiated_cust:{$appointment->id}"),
                 channels: ['in_app', 'push', 'email']
@@ -889,7 +1215,7 @@ class NotificationDispatcher
                 relatedEntityId: $appointment->id,
                 recipientType: 'customer',
                 category: 'payment',
-                actionUrl: "/customer/bookings/{$appointment->id}",
+                actionUrl: '/customer/dashboard/bookings',
                 priority: 'urgent',
                 idempotencyKey: hash('sha256', "refund_completed_cust:{$appointment->id}"),
                 channels: ['in_app', 'push', 'email']
@@ -905,6 +1231,129 @@ class NotificationDispatcher
             category: 'payment',
             idempotencyKey: hash('sha256', "refund_completed_admin:{$appointment->id}")
         );
+    }
+
+    /**
+     * Compassionate or dispute refund requested — notify customer (receipt) and admins for review.
+     */
+    public static function refundRequested(RefundRequest $refundRequest): void
+    {
+        $refundRequest->loadMissing(['appointment', 'customer']);
+        $appointment = $refundRequest->appointment;
+        if (! $appointment) {
+            return;
+        }
+
+        $amountFormatted = number_format($refundRequest->refund_amount_minor / 100, 2);
+        $customerId = (int) ($refundRequest->customer_id ?: static::resolveCustomerId($appointment));
+        $customerName = $refundRequest->customer->real_name ?? $refundRequest->customer->name ?? $appointment->client_name ?? 'A customer';
+
+        if ($customerId) {
+            static::dispatchNotification(
+                recipientId: $customerId,
+                type: 'refund_requested',
+                title: 'Refund Request Received 💳',
+                message: "Your refund request (₦{$amountFormatted}) for booking {$appointment->booking_reference} has been submitted for admin review.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+                category: 'payment',
+                data: [
+                    'refund_request_id' => $refundRequest->id,
+                    'booking_reference' => $appointment->booking_reference,
+                    'amount' => $amountFormatted,
+                    'reason_category' => $refundRequest->reason_category,
+                ],
+                actionUrl: '/customer/dashboard/refunds',
+                priority: 'normal',
+                idempotencyKey: hash('sha256', "refund_requested_cust:{$refundRequest->id}"),
+                channels: ['in_app', 'push', 'email']
+            );
+        }
+
+        static::createBroadcast(
+            type: 'refund_requested',
+            title: 'New Refund Request Awaiting Review 📋',
+            message: "{$customerName} requested a {$refundRequest->type} refund of ₦{$amountFormatted} for {$appointment->booking_reference} ({$refundRequest->reason_category}).",
+            recipientType: 'all_admins',
+            relatedEntityId: $refundRequest->id,
+            category: 'payment',
+            actionUrl: '/admin/refunds',
+            priority: 'high',
+            idempotencyKey: hash('sha256', "refund_requested_admin:{$refundRequest->id}")
+        );
+    }
+
+    /**
+     * Refund request approved by admin — notify customer.
+     */
+    public static function refundApproved(RefundRequest $refundRequest): void
+    {
+        $refundRequest->loadMissing('appointment');
+        $appointment = $refundRequest->appointment;
+        if (! $appointment) {
+            return;
+        }
+
+        $amountFormatted = number_format($refundRequest->refund_amount_minor / 100, 2);
+        $customerId = (int) ($refundRequest->customer_id ?: static::resolveCustomerId($appointment));
+
+        if ($customerId) {
+            static::dispatchNotification(
+                recipientId: $customerId,
+                type: 'refund_approved',
+                title: 'Refund Request Approved ✅',
+                message: "Your refund request of ₦{$amountFormatted} for booking {$appointment->booking_reference} has been approved and is being processed.",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+                category: 'payment',
+                data: [
+                    'refund_request_id' => $refundRequest->id,
+                    'booking_reference' => $appointment->booking_reference,
+                    'amount' => $amountFormatted,
+                    'decision_note' => $refundRequest->decision_note,
+                ],
+                actionUrl: '/customer/dashboard/refunds',
+                priority: 'urgent',
+                idempotencyKey: hash('sha256', "refund_approved_cust:{$refundRequest->id}"),
+                channels: ['in_app', 'push', 'email']
+            );
+        }
+    }
+
+    /**
+     * Refund request declined by admin — notify customer.
+     */
+    public static function refundRejected(RefundRequest $refundRequest): void
+    {
+        $refundRequest->loadMissing('appointment');
+        $appointment = $refundRequest->appointment;
+        if (! $appointment) {
+            return;
+        }
+
+        $customerId = (int) ($refundRequest->customer_id ?: static::resolveCustomerId($appointment));
+        $reasonSuffix = $refundRequest->decision_note ? " Note: {$refundRequest->decision_note}" : '';
+
+        if ($customerId) {
+            static::dispatchNotification(
+                recipientId: $customerId,
+                type: 'refund_rejected',
+                title: 'Refund Request Declined',
+                message: "Your refund request for booking {$appointment->booking_reference} was declined.{$reasonSuffix}",
+                relatedEntityId: $appointment->id,
+                recipientType: 'customer',
+                category: 'payment',
+                data: [
+                    'refund_request_id' => $refundRequest->id,
+                    'booking_reference' => $appointment->booking_reference,
+                    'decision_note' => $refundRequest->decision_note,
+                ],
+                actionUrl: '/customer/dashboard/refunds',
+                priority: 'normal',
+                idempotencyKey: hash('sha256', "refund_rejected_cust:{$refundRequest->id}"),
+                channels: ['in_app', 'push', 'email']
+            );
+        }
     }
 
     // ─── Account & Security Events ───────────────────────────────
@@ -1173,7 +1622,7 @@ class NotificationDispatcher
     public static function feedbackSubmitted(FeedbackSubmission $submission): void
     {
         $submission->loadMissing('user');
-        $submitterName = $submission->user?->name ?? 'A user';
+        $submitterName = $submission->user->name ?? 'A user';
         $category = ucfirst(str_replace('_', ' ', $submission->category));
 
         static::createBroadcast(
@@ -1263,7 +1712,7 @@ class NotificationDispatcher
                 'related_entity_id' => $relatedEntityId,
                 'is_read' => false,
             ]);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($idempotencyKey !== null && ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE'))) {
                 Log::info("NotificationDispatcher: concurrent idempotency catch for key {$idempotencyKey}; returning existing record.");
 
@@ -1381,7 +1830,7 @@ class NotificationDispatcher
                 'related_entity_id' => $relatedEntityId,
                 'is_read' => false,
             ]);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($idempotencyKey !== null && ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE'))) {
                 return Notification::where('idempotency_key', $idempotencyKey)->first();
             }

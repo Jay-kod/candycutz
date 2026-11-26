@@ -44,16 +44,24 @@
           <div class="text-center">
             <h1 class="font-display font-bold text-3xl sm:text-4xl text-gold mb-4">Forgot Password</h1>
           </div>
-          <p class="text-theme-muted text-xs sm:text-sm text-center">We'll email you a secure link to reset your password.</p>
+          <p class="text-theme-muted text-xs sm:text-sm text-center">
+            Enter your verified email address and we'll send a 6-digit OTP code to reset your password.
+          </p>
         </div>
 
         <form class="space-y-4" @submit.prevent="submitForm">
-          <div v-if="generalError" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-400 font-medium flex items-center gap-2">
-            <span>{{ generalError }}</span>
+          <div v-if="generalError" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-400 font-medium">
+            <p>{{ generalError }}</p>
           </div>
 
-          <div v-if="message" class="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-xs text-green-400 font-medium flex items-center gap-2">
-            <span>{{ message }}</span>
+          <div v-if="message" class="space-y-3 bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-xs text-green-400 font-medium">
+            <p>{{ message }}</p>
+            <RouterLink
+              :to="{ path: '/reset-password', query: { email } }"
+              class="inline-flex items-center gap-2 rounded-lg bg-gold text-obsidian px-3.5 py-2 font-bold text-xs hover:bg-gold-dark transition-all"
+            >
+              <span>Enter 6-Digit Reset Code &rarr;</span>
+            </RouterLink>
           </div>
 
           <div class="relative group">
@@ -76,7 +84,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
             </svg>
-            {{ loading ? 'Sending...' : 'Send Reset Link' }}
+            {{ loading ? 'Sending Code...' : 'Send 6-Digit OTP Code' }}
           </button>
         </form>
 
@@ -120,14 +128,14 @@ async function submitForm() {
   try {
     await schema.validate({ email: email.value }, { abortEarly: false });
     const response = await authApi.forgotPassword(email.value);
-    message.value = response.data.message || 'If an account exists for this email, a reset link has been sent.';
+    message.value = response.data.message || 'If a verified account exists for this email, a 6-digit password reset code has been sent.';
   } catch (error) {
     if (error.inner) {
       error.inner.forEach((item) => {
         errors[item.path] = item.message;
       });
     } else {
-      generalError.value = error?.response?.data?.error || 'Something went wrong. Please try again.';
+      generalError.value = error?.response?.data?.message || error?.response?.data?.error || 'Something went wrong. Please try again.';
     }
   } finally {
     loading.value = false;

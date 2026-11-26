@@ -44,6 +44,8 @@ import {
   BuildingLibraryIcon,
   TagIcon,
   IdentificationIcon,
+  ExclamationTriangleIcon,
+  ReceiptRefundIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -51,6 +53,8 @@ const navItems = [
   { name: 'Dashboard', to: '/admin/dashboard', icon: HomeIcon },
   { name: 'Walk-In', to: '/admin/walk-in', icon: UserPlusIcon },
   { name: 'Appointments', to: '/admin/appointments', icon: CalendarDaysIcon },
+  { name: 'No-Shows', to: '/admin/no-shows', icon: ExclamationTriangleIcon },
+  { name: 'Refunds & Policy', to: '/admin/refunds', icon: ReceiptRefundIcon },
   { name: 'Bank & Payments', to: '/admin/bank-details', icon: BuildingLibraryIcon },
   { name: 'Customers', to: '/admin/customers', icon: UserGroupIcon },
   { name: 'Barbers', to: '/admin/barbers', icon: UsersIcon },

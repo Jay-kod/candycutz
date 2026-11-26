@@ -36,57 +36,128 @@
 
           <!-- Form Body -->
           <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-            <!-- Account Info -->
-            <div class="rounded-xl border border-theme-border bg-theme-border/10 p-3 flex items-center gap-3">
-              <div class="h-8 w-8 rounded-lg bg-admin/20 text-admin flex items-center justify-center font-bold text-xs shrink-0">
-                {{ initials(customer?.name) }}
+            <!-- Account Info with Verification Status & Admin Override -->
+            <div class="rounded-xl border border-theme-border bg-theme-border/10 p-3.5 space-y-2">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-admin/20 text-admin flex items-center justify-center font-bold text-xs shrink-0">
+                  {{ initials(customer?.name) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-theme-text truncate">{{ customer?.name }}</p>
+                  <p class="text-[11px] font-mono text-theme-text-muted truncate">{{ customer?.email }}</p>
+                </div>
               </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-theme-text truncate">{{ customer?.name }}</p>
-                <p class="text-[11px] font-mono text-theme-text-muted truncate">{{ customer?.email }}</p>
+              <div class="pt-2 border-t border-theme-border/50 flex items-center justify-between gap-2 flex-wrap">
+                <span
+                  v-if="customer?.email_verified_at || customer?.is_email_verified"
+                  class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Verified Email
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                  Unverified Email (Admin Override)
+                </span>
+                <span class="text-[10px] text-theme-text-muted">
+                  Dashboard Override Active
+                </span>
               </div>
             </div>
 
-            <!-- Password Input with Generate Option -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
+            <!-- Password Input with Generate Options & Presets -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between mb-1">
                 <label class="text-xs font-semibold text-theme-text uppercase tracking-wider">
                   New Password <span class="text-admin">*</span>
                 </label>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    @click="generateSimplePassword"
+                    class="text-[11px] font-semibold text-amber-500 hover:text-amber-400 hover:underline flex items-center gap-1 transition-colors"
+                    title="Generate an easy-to-read memorable temporary password"
+                  >
+                    <BoltIcon class="h-3 w-3" />
+                    <span>Generate Simple</span>
+                  </button>
+                  <span class="text-theme-border">|</span>
+                  <button
+                    type="button"
+                    @click="generatePassword"
+                    class="text-[11px] font-semibold text-admin hover:underline flex items-center gap-1"
+                    title="Generate a complex 12-character random password"
+                  >
+                    <SparklesIcon class="h-3 w-3" />
+                    <span>Generate Strong</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] uppercase font-bold text-theme-text-muted mr-1">Quick Presets:</span>
                 <button
+                  v-for="preset in quickPresets"
+                  :key="preset"
                   type="button"
-                  @click="generatePassword"
-                  class="text-[11px] font-semibold text-admin hover:underline flex items-center gap-1"
+                  @click="applyPassword(preset, `Preset applied: ${preset}`)"
+                  class="rounded-lg border border-theme-border bg-theme-border/20 hover:bg-admin/15 hover:border-admin/40 hover:text-admin px-2 py-0.5 text-[11px] font-mono text-theme-text transition-all"
                 >
-                  <SparklesIcon class="h-3 w-3" />
-                  <span>Generate Strong</span>
+                  {{ preset }}
                 </button>
               </div>
+
               <div class="relative">
                 <input
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
                   required
                   minlength="8"
-                  placeholder="Minimum 8 characters"
-                  class="w-full rounded-xl border border-theme-border bg-theme-surface pl-4 pr-10 py-2.5 text-xs font-mono text-theme-text outline-none focus:border-admin/60 focus:ring-2 focus:ring-admin/20 transition-all"
+                  placeholder="Min. 8 characters (e.g. Candy1234)"
+                  class="w-full rounded-xl border border-theme-border bg-theme-surface pl-4 pr-16 py-2.5 text-xs font-mono text-theme-text outline-none focus:border-admin/60 focus:ring-2 focus:ring-admin/20 transition-all"
                 />
-                <button
-                  type="button"
-                  @click="showPassword = !showPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-muted hover:text-theme-text"
-                >
-                  <EyeSlashIcon v-if="showPassword" class="h-4 w-4" />
-                  <EyeIcon v-else class="h-4 w-4" />
-                </button>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-theme-text-muted">
+                  <button
+                    v-if="password"
+                    type="button"
+                    @click="copyPassword"
+                    title="Copy to clipboard"
+                    class="hover:text-theme-text p-0.5 rounded transition-colors"
+                  >
+                    <ClipboardDocumentCheckIcon v-if="copied" class="h-4 w-4 text-emerald-500" />
+                    <ClipboardDocumentIcon v-else class="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    @click="showPassword = !showPassword"
+                    class="hover:text-theme-text p-0.5 rounded transition-colors"
+                  >
+                    <EyeSlashIcon v-if="showPassword" class="h-4 w-4" />
+                    <EyeIcon v-else class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             <!-- Confirm Password -->
             <div>
-              <label class="block text-xs font-semibold text-theme-text uppercase tracking-wider mb-1.5">
-                Confirm Password <span class="text-admin">*</span>
-              </label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-theme-text uppercase tracking-wider">
+                  Confirm Password <span class="text-admin">*</span>
+                </label>
+                <button
+                  v-if="password && password !== confirmPassword"
+                  type="button"
+                  @click="confirmPassword = password"
+                  class="text-[11px] text-admin hover:underline font-semibold"
+                >
+                  Match New Password
+                </button>
+              </div>
               <input
                 v-model="confirmPassword"
                 :type="showPassword ? 'text' : 'password'"
@@ -99,6 +170,10 @@
                 Passwords do not match.
               </p>
             </div>
+
+            <p class="text-[11px] text-theme-text-muted">
+              Admins can assign any simple password (min. 8 characters, e.g. simple words or numbers). No symbols required.
+            </p>
 
             <!-- Warning Notice -->
             <div class="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-600 dark:text-amber-400">
@@ -133,7 +208,16 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { KeyIcon, XMarkIcon, SparklesIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import {
+  KeyIcon,
+  XMarkIcon,
+  SparklesIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  BoltIcon,
+  ClipboardDocumentIcon,
+  ClipboardDocumentCheckIcon
+} from '@heroicons/vue/24/outline';
 import { useToast } from '@/core/composables/useToast';
 
 const props = defineProps({
@@ -151,12 +235,30 @@ const toast = useToast();
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(true);
+const copied = ref(false);
+
+const quickPresets = computed(() => {
+  const presets = ['Candy1234', 'Welcome123'];
+  const rawName = props.customer?.name?.trim();
+  if (rawName) {
+    const firstName = rawName.split(' ')[0].replace(/[^a-zA-Z]/g, '');
+    if (firstName.length >= 3) {
+      const capName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+      const customPreset = `${capName}1234`;
+      if (!presets.includes(customPreset)) {
+        presets.unshift(customPreset);
+      }
+    }
+  }
+  return presets;
+});
 
 watch(() => props.isOpen, (open) => {
   if (open) {
     password.value = '';
     confirmPassword.value = '';
     showPassword.value = true;
+    copied.value = false;
   }
 });
 
@@ -168,22 +270,72 @@ function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
 
+function applyPassword(val, successMessage) {
+  password.value = val;
+  confirmPassword.value = val;
+  showPassword.value = true;
+  copyToClipboard(val);
+  if (successMessage) {
+    toast.success(successMessage);
+  }
+}
+
+function generateSimplePassword() {
+  const words = ['Candy', 'Fresh', 'Clean', 'Sharp', 'Style', 'Smart'];
+  const word = words[Math.floor(Math.random() * words.length)];
+  const num = Math.floor(1000 + Math.random() * 9000);
+  const simplePass = `${word}${num}`;
+  applyPassword(simplePass, `Simple password generated & copied: ${simplePass}`);
+}
+
 function generatePassword() {
   const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*';
   let pass = '';
   for (let i = 0; i < 12; i++) {
     pass += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  password.value = pass;
-  confirmPassword.value = pass;
-  showPassword.value = true;
-  navigator.clipboard?.writeText(pass);
-  toast.success('Generated and copied password to clipboard');
+  applyPassword(pass, 'Generated strong password & copied to clipboard');
+}
+
+function copyToClipboard(text) {
+  if (!text) return;
+  if (navigator?.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+  copied.value = true;
+  setTimeout(() => {
+    copied.value = false;
+  }, 2000);
+}
+
+function fallbackCopy(text) {
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  } catch {
+    // Fallback best effort
+  }
+}
+
+function copyPassword() {
+  if (!password.value) return;
+  copyToClipboard(password.value);
+  toast.success('Password copied to clipboard');
 }
 
 function handleSubmit() {
-  if (password.value !== confirmPassword.value) return;
-  emit('save', password.value);
+  const trimmed = password.value.trim();
+  if (!trimmed || trimmed.length < 8 || trimmed !== confirmPassword.value.trim()) return;
+  emit('save', trimmed);
 }
 </script>
 

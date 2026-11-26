@@ -1,6 +1,8 @@
 export default [
   { path: '/customer/dashboard', name: 'customer-dashboard', component: () => import('../../modules/customer/pages/DashboardPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/bookings', name: 'customer-bookings', component: () => import('../../modules/customer/pages/BookingsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/refunds', name: 'customer-refunds', component: () => import('@/features/refunds/pages/CustomerRefundsPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
+  { path: '/customer/dashboard/directions', name: 'customer-directions', component: () => import('@/features/directions/pages/DirectMeToShopPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/my-codes', name: 'customer-my-codes', component: () => import('../../modules/customer/pages/MyCodesPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/profile', name: 'customer-profile', component: () => import('../../modules/customer/pages/ProfilePage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
   { path: '/customer/dashboard/verify-email', name: 'customer-verify-email', component: () => import('../../modules/customer/pages/VerifyEmailPage.vue'), meta: { requiresAuth: true, roles: ['customer'] } },
