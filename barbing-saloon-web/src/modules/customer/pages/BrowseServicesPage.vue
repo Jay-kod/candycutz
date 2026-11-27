@@ -17,6 +17,7 @@
         :categories="availableCategories"
         :active-category="activeCategory"
         @category-change="changeCategory"
+        @search="executeSearch"
       />
 
       <!-- 3. Zero-CLS Skeleton Loader -->
@@ -58,6 +59,7 @@ const {
   filteredServices,
   loadData,
   changeCategory,
+  executeSearch,
   resetFilters,
   toggleWishlist
 } = useCustomerBrowseServices();

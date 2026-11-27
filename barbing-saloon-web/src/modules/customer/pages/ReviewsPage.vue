@@ -216,7 +216,7 @@ async function submit() {
   submitting.value = true
   status.value = ''
   try {
-    await client.post('/customer/reviews', {
+    await client.post('/customer/testimonials', {
       barber_id: form.barber_id,
       service_id: form.service_id,
       rating: form.rating,
@@ -230,7 +230,7 @@ async function submit() {
     form.rating = 5
     await loadReviews()
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to submit review')
+    toast.error(err?.message || err?.response?.data?.message || 'Failed to submit review')
   } finally {
     submitting.value = false
   }

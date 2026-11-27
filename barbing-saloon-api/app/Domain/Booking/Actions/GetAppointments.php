@@ -16,7 +16,7 @@ class GetAppointments
     public function execute(User $user, ?string $status = null, int $perPage = 15, ?AppointmentSource $source = null): LengthAwarePaginator
     {
         $role = $user->role->value ?? $user->role;
-        $query = Appointment::query()->with(['service.category', 'barber.user', 'serviceZone', 'customer', 'payment']);
+        $query = Appointment::query()->with(['service.category', 'barber.user', 'serviceZone', 'customer', 'payment', 'noShowRecord', 'latestRefundRequest']);
 
         if ($role === 'barber' && $user->barber) {
             $query->where('barber_id', $user->barber->id);

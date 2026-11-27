@@ -25,6 +25,8 @@ class Service extends Model
         'price',
         'duration_minutes',
         'image',
+        'image2',
+        'image3',
         'home_service_allowed',
         'is_available',
         'is_active',

@@ -164,7 +164,7 @@ import {
   BanknotesIcon,
 } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   paymentsList: {
     type: Array,
     default: () => [],

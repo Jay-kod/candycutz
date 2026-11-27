@@ -8,9 +8,13 @@ use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\UserRegistered;
+use App\Models\Setting;
 use App\Models\User;
 use Exception;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -40,60 +44,142 @@ class SocialLogin
             throw new RuntimeException('Social ID token is required.');
         }
 
+        if ($provider === 'google') {
+            $enabled = filter_var(
+                Setting::where('key', 'google_auth_enabled')->value('value') ?? true,
+                FILTER_VALIDATE_BOOLEAN
+            );
+            if (! $enabled) {
+                throw new RuntimeException('Google sign-in is currently disabled. Please use password login.');
+            }
+        }
+
         $claims = $this->verifyAndDecodeIdToken($provider, $idToken);
 
         $providerId = (string) ($claims['sub'] ?? '');
         $email = strtolower(trim((string) ($claims['email'] ?? '')));
         $providerVerifiedEmail = filter_var($claims['email_verified'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $name = trim((string) ($data['user_data']['name'] ?? $claims['name'] ?? 'VIP Customer'));
-        $avatar = $claims['picture'] ?? null;
+        $givenName = trim((string) ($claims['given_name'] ?? ''));
+        $familyName = trim((string) ($claims['family_name'] ?? ''));
+        $fallbackName = trim($givenName.' '.$familyName);
+        $name = trim((string) (
+            $data['user_data']['name']
+            ?? $claims['name']
+            ?? ''
+        ));
+        if ($name === '') {
+            $name = $fallbackName !== '' ? $fallbackName : 'VIP Customer';
+        }
+        $avatar = trim((string) ($claims['picture'] ?? ''));
+        $phone = trim((string) ($claims['phone_number'] ?? ''));
 
         if (empty($providerId)) {
             throw new RuntimeException('Invalid token: missing subject identifier.');
         }
 
-        $user = User::where('auth_provider', $provider)
-            ->where('provider_id', $providerId)
-            ->first();
-
-        if (! $user && ! empty($email)) {
-            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
-            if ($user) {
-                $user->update([
-                    'auth_provider' => $provider,
-                    'provider_id' => $providerId,
-                    'avatar' => $user->avatar ?: $avatar,
-                ]);
-            }
-        }
-
         $createdUser = false;
-        if (! $user) {
-            $baseForUsername = ! empty($email) ? explode('@', $email)[0] : $name;
-            $username = $this->usernameService->generateUniqueUsername($baseForUsername);
+        try {
+            $user = DB::transaction(function () use (
+                $provider,
+                $providerId,
+                $email,
+                $providerVerifiedEmail,
+                $name,
+                $avatar,
+                $phone,
+                &$createdUser
+            ): User {
+                $user = User::where('provider_id', $providerId)
+                    ->when($provider, fn ($query) => $query->where('auth_provider', $provider))
+                    ->lockForUpdate()
+                    ->first();
 
-            $user = new User([
-                'name' => $name,
-                'real_name' => $name,
-                'username' => $username,
-                'email' => ! empty($email) ? $email : "{$username}@social.candycutz.com",
-                'phone' => '',
-                'password' => Hash::make(Str::random(32)),
-                'avatar' => $avatar,
-                'auth_provider' => $provider,
-                'provider_id' => $providerId,
-                'last_username_change_at' => now(),
-            ]);
-            $user->role = UserRole::customer;
-            $user->is_active = true;
-            $user->status = 'active';
-            $user->save();
-            $createdUser = true;
+                if (! $user && $email !== '') {
+                    $emailUser = User::query()
+                        ->whereRaw('LOWER(email) = ?', [$email])
+                        ->lockForUpdate()
+                        ->first();
 
-            $this->logAction('auth.social_register', $user, [], [
-                'provider' => $provider,
-                'email' => $user->email,
-            ]);
+                    if ($emailUser) {
+                        if (! $providerVerifiedEmail) {
+                            throw new RuntimeException(
+                                'This email belongs to an existing account. Sign in with your password or use a Google account with a verified email.'
+                            );
+                        }
+
+                        $user = $emailUser;
+                    }
+                }
+
+                if (! $user) {
+                    $baseForUsername = $email !== '' ? explode('@', $email)[0] : $name;
+                    $username = $this->usernameService->generateUniqueUsername($baseForUsername);
+
+                    $user = new User([
+                        'name' => $name,
+                        'real_name' => $name,
+                        'username' => $username,
+                        'email' => $email !== '' ? $email : "{$username}@social.candycutz.com",
+                        'phone' => $phone,
+                        'password' => Hash::make(Str::random(32)),
+                        'avatar' => $avatar !== '' ? $avatar : null,
+                        'auth_provider' => $provider,
+                        'provider_id' => $providerId,
+                        'last_username_change_at' => now(),
+                    ]);
+                    $user->role = UserRole::customer;
+                    $user->is_active = true;
+                    $user->status = 'active';
+                    $user->save();
+                    $createdUser = true;
+
+                    $this->logAction('auth.social_register', $user, [], [
+                        'provider' => $provider,
+                        'email' => $user->email,
+                    ]);
+                } else {
+                    $updates = [
+                        'auth_provider' => $provider,
+                        'provider_id' => $providerId,
+                    ];
+
+                    if ($name !== 'VIP Customer') {
+                        $updates['name'] = $name;
+                        $updates['real_name'] = $name;
+                    }
+                    if ($avatar !== '') {
+                        $updates['avatar'] = $avatar;
+                    }
+                    if ($phone !== '' && empty($user->phone)) {
+                        $updates['phone'] = $phone;
+                    }
+
+                    $user->update($updates);
+                }
+
+                return $user;
+            });
+        } catch (QueryException $exception) {
+            $message = strtolower($exception->getMessage());
+            $isUniqueViolation = str_contains($message, 'duplicate entry')
+                || str_contains($message, 'unique constraint')
+                || str_contains($message, '1062');
+
+            if (! $isUniqueViolation) {
+                throw $exception;
+            }
+
+            $user = $email !== ''
+                ? User::whereRaw('LOWER(email) = ?', [$email])->first()
+                : null;
+            $user ??= User::where('auth_provider', $provider)
+                ->where('provider_id', $providerId)
+                ->first();
+
+            if (! $user) {
+                throw $exception;
+            }
+            $createdUser = false;
         }
 
         if ($providerVerifiedEmail && $email !== '' && strcasecmp($user->email, $email) === 0 && ! $user->hasVerifiedEmail()) {
@@ -102,6 +188,10 @@ class SocialLogin
             event(new Verified($user));
         } elseif ($createdUser && $email !== '') {
             $user->sendEmailVerificationNotification();
+        }
+
+        if ($createdUser) {
+            UserRegistered::dispatch($user, $provider);
         }
 
         if (! $user->is_active || in_array($user->status, ['deactivated', 'suspended'], true)) {
@@ -131,10 +221,24 @@ class SocialLogin
      */
     private function allowedGoogleClientIds(): array
     {
-        return array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) config('services.google.client_ids', config('services.google.client_id', '')))
-        )));
+        $configured = [
+            (string) config('services.google.client_ids', ''),
+            (string) config('services.google.client_id', ''),
+            (string) (Setting::where('key', 'google_client_ids')->value('value') ?? ''),
+            (string) (Setting::where('key', 'google_client_id')->value('value') ?? ''),
+        ];
+
+        $ids = [];
+        foreach ($configured as $value) {
+            foreach (explode(',', $value) as $id) {
+                $id = trim($id);
+                if ($id !== '') {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     /**

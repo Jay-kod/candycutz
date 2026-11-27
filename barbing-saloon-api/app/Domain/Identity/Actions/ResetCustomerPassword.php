@@ -6,14 +6,17 @@ namespace App\Domain\Identity\Actions;
 
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
-use App\Events\PasswordChanged;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 
 class ResetCustomerPassword
 {
     use HasAuditLog;
+
+    public function __construct(
+        protected SetUserPassword $setUserPassword
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -22,25 +25,24 @@ class ResetCustomerPassword
     {
         Gate::authorize('manage-customers');
 
-        /** @var User $customer */
-        $customer = User::where('role', UserRole::customer)->findOrFail($id);
+        return DB::transaction(function () use ($id, $newPassword) {
+            /** @var User $customer */
+            $customer = User::where('role', UserRole::customer)->lockForUpdate()->findOrFail($id);
 
-        $customer->update([
-            'password' => Hash::make($newPassword),
-        ]);
+            $this->setUserPassword->execute($customer, $newPassword);
 
-        $customer->tokens()->delete();
-        PasswordChanged::dispatch($customer);
+            $this->logAction('customer.password_reset', $customer, [], [
+                'email' => $customer->email,
+                'admin_override' => true,
+                'is_email_verified' => $customer->hasVerifiedEmail(),
+            ]);
 
-        $this->logAction('customer.password_reset', $customer, [], [
-            'email' => $customer->email,
-        ]);
-
-        return [
-            'id' => $customer->id,
-            'name' => $customer->name,
-            'email' => $customer->email,
-        ];
+            return [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'is_email_verified' => $customer->hasVerifiedEmail(),
+            ];
+        });
     }
 }
-

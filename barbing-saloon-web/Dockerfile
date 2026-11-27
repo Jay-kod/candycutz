@@ -1,16 +1,7 @@
-FROM node:22-alpine
+FROM nginx:1.27-alpine
 
-WORKDIR /app
-
-# Copy package files first for layer caching
-COPY package.json package-lock.json ./
-
-RUN npm install
-
-# Copy application source
-COPY . .
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY dist /usr/share/nginx/html
 
 EXPOSE 5173
-
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 

@@ -1,18 +1,30 @@
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onUnmounted } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { compressImageFile } from '@/shared/utils/compressImage';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useAdminGallery() {
   const toast = useToast();
   const { confirm } = useConfirm();
+  const publicStore = usePublicContentStore();
 
   const loading = ref(true);
   const saving = ref(false);
   const isRefreshing = ref(false);
   const gallery = ref([]);
   const barbers = ref([]);
+  const galleryCategories = ref([]);
+  let optimizeRefreshTimer = null;
+
+  onUnmounted(() => {
+    if (optimizeRefreshTimer) {
+      window.clearTimeout(optimizeRefreshTimer);
+      optimizeRefreshTimer = null;
+    }
+  });
 
   // Filters & Search
   const search = ref('');
@@ -44,17 +56,47 @@ export function useAdminGallery() {
   const categories = computed(() => {
     const counts = {};
     gallery.value.forEach(item => {
-      const cat = item.category || 'General';
+      const cat = (item.category || 'general').toLowerCase();
       counts[cat] = (counts[cat] || 0) + 1;
     });
 
+    if (galleryCategories.value.length > 0) {
+      const items = galleryCategories.value.map(c => ({
+        name: c.name,
+        key: c.slug,
+        icon: c.icon,
+        count: counts[c.slug.toLowerCase()] || counts[c.name.toLowerCase()] || 0
+      }));
+
+      // Include any legacy/orphaned categories that exist on gallery items so none become unfilterable
+      const knownKeys = new Set(
+        galleryCategories.value.flatMap(c => [c.slug.toLowerCase(), c.name.toLowerCase()])
+      );
+      const extraItems = Object.keys(counts)
+        .filter(k => !knownKeys.has(k))
+        .sort()
+        .map(k => ({
+          name: k.replace(/_/g, ' '),
+          key: k,
+          icon: 'tag',
+          count: counts[k]
+        }));
+
+      return [
+        { name: 'All Works', key: 'all', count: gallery.value.length, icon: 'sparkles' },
+        ...items,
+        ...extraItems
+      ];
+    }
+
     const list = Object.keys(counts).sort().map(name => ({
-      name,
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      key: name,
       count: counts[name]
     }));
 
     return [
-      { name: 'All Works', key: 'all', count: gallery.value.length },
+      { name: 'All Works', key: 'all', count: gallery.value.length, icon: 'sparkles' },
       ...list.map(c => ({ name: c.name, key: c.name, count: c.count }))
     ];
   });
@@ -69,11 +111,14 @@ export function useAdminGallery() {
     // Stylists with works
     const distinctBarbers = new Set(list.filter(i => i.barber_id).map(i => i.barber_id)).size;
 
-    // Shop ambiance photos (category === 'Shop' or no barber)
-    const shopPhotosCount = list.filter(i => i.category === 'Shop' || !i.barber_id).length;
+    // Shop ambiance photos (category === 'shop' or no barber)
+    const shopPhotosCount = list.filter(i => (i.category || '').toLowerCase() === 'shop' || !i.barber_id).length;
 
     // Haircuts & beard styles
-    const hairAndBeardCount = list.filter(i => i.category === 'Haircut' || i.category === 'Beard').length;
+    const hairAndBeardCount = list.filter(i => {
+      const c = (i.category || '').toLowerCase();
+      return c === 'haircut' || c === 'beard';
+    }).length;
 
     return {
       totalCount,
@@ -89,12 +134,13 @@ export function useAdminGallery() {
 
     // 1. Category Filter
     if (activeCategory.value !== 'all') {
-      list = list.filter(item => (item.category || 'General') === activeCategory.value);
+      const target = activeCategory.value.toLowerCase();
+      list = list.filter(item => (item.category || '').toLowerCase() === target);
     }
 
     // 2. Barber / Contributor Filter
     if (barberFilter.value === 'shop') {
-      list = list.filter(item => !item.barber_id || item.category === 'Shop');
+      list = list.filter(item => !item.barber_id || (item.category || '').toLowerCase() === 'shop');
     } else if (barberFilter.value !== 'all') {
       list = list.filter(item => String(item.barber_id) === String(barberFilter.value));
     }
@@ -125,6 +171,15 @@ export function useAdminGallery() {
     return list;
   });
 
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/v1/gallery-categories');
+      galleryCategories.value = res.data?.data || [];
+    } catch (err) {
+      console.warn('Failed to load gallery categories', err);
+    }
+  };
+
   const fetchGallery = async (silent = false) => {
     if (silent) {
       isRefreshing.value = true;
@@ -133,8 +188,11 @@ export function useAdminGallery() {
     }
 
     try {
-      const res = await api.get('/gallery');
-      gallery.value = res.data?.data || res.data || [];
+      const [resGallery] = await Promise.all([
+        api.get('/gallery'),
+        fetchCategories()
+      ]);
+      gallery.value = resGallery.data?.data || resGallery.data || [];
     } catch (err) {
       toast.error('Failed to load gallery portfolio');
     } finally {
@@ -169,7 +227,7 @@ export function useAdminGallery() {
     editingId.value = null;
     uploadForm.image_url = '';
     uploadForm.title = '';
-    uploadForm.category = 'Haircut';
+    uploadForm.category = galleryCategories.value[0]?.slug || 'haircut';
     uploadForm.description = '';
     uploadForm.barber_id = '';
     selectedFile.value = null;
@@ -182,7 +240,11 @@ export function useAdminGallery() {
     editingId.value = item.id;
     uploadForm.image_url = item.image_path || item.image_url || '';
     uploadForm.title = item.title;
-    uploadForm.category = item.category || 'Haircut';
+    const rawCat = String(item.category || '').trim().toLowerCase();
+    const matched = galleryCategories.value.find(
+      c => c.slug.toLowerCase() === rawCat || c.name.toLowerCase() === rawCat
+    );
+    uploadForm.category = matched ? matched.slug : (item.category || galleryCategories.value[0]?.slug || 'haircut');
     uploadForm.description = item.description || '';
     uploadForm.barber_id = item.barber_id || '';
     selectedFile.value = null;
@@ -204,20 +266,44 @@ export function useAdminGallery() {
       formData.append('image_url', uploadForm.image_url);
     }
     if (selectedFile.value) {
-      formData.append('image', selectedFile.value);
+      const prepared = await compressImageFile(selectedFile.value, { maxDimension: 1920, quality: 0.85 });
+      formData.append('image', prepared);
     }
 
     try {
+      let savedItem = null;
       if (editingId.value) {
         formData.append('_method', 'PUT');
-        await api.post(`/gallery/${editingId.value}`, formData);
-        toast.success('Masterpiece updated successfully');
+        const res = await api.post(`/gallery/${editingId.value}`, formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Uploaded — backend engine is optimizing to WebP.'
+            : 'Masterpiece updated & WebP ready!'
+        );
       } else {
-        await api.post('/gallery', formData);
-        toast.success('Masterpiece added to global gallery');
+        const res = await api.post('/gallery', formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Added to gallery — backend engine is optimizing to WebP.'
+            : 'Masterpiece added & WebP ready!'
+        );
       }
+      publicStore.invalidate('gallery');
       showUploadForm.value = false;
       await fetchGallery(true);
+
+      if (savedItem?.is_optimizing && typeof window !== 'undefined') {
+        if (optimizeRefreshTimer) {
+          window.clearTimeout(optimizeRefreshTimer);
+        }
+        optimizeRefreshTimer = window.setTimeout(async () => {
+          optimizeRefreshTimer = null;
+          await fetchGallery(true);
+          publicStore.invalidate('gallery');
+        }, 2500);
+      }
       return true;
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.response?.data?.message || (editingId.value ? 'Failed to update image' : 'Failed to upload image');
@@ -241,6 +327,8 @@ export function useAdminGallery() {
     try {
       await api.delete(`/gallery/${id}`);
       gallery.value = gallery.value.filter(g => g.id !== id);
+      publicStore.invalidate('gallery');
+      fetchCategories();
       toast.success('Image removed from gallery');
       return true;
     } catch (err) {
@@ -272,11 +360,13 @@ export function useAdminGallery() {
     selectedFileName,
     uploadForm,
     categories,
+    galleryCategories,
     stats,
     filteredGallery,
     getImageUrl,
     fetchGallery,
     fetchBarbers,
+    fetchCategories,
     onFileSelected,
     openUploadForm,
     openEditForm,

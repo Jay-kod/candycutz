@@ -5,6 +5,13 @@
 
     RewriteEngine On
 
+    # Block access to hidden files and directories (except .well-known)
+    RewriteRule "(^|/)\.(?!well-known)" - [F,L]
+
+    # Block direct access to sensitive configuration and backup files
+    RewriteCond %{REQUEST_URI} \.(env|bak|config|sql|ini|log|sh|inc|swp|dist|yml|yaml|lock)$ [NC]
+    RewriteRule ^ - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -19,4 +26,15 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Deny direct access to sensitive files
+<FilesMatch "(?i)\.(env|bak|config|sql|ini|log|sh|inc|swp|dist|yml|yaml|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
 

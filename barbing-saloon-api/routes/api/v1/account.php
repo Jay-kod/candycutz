@@ -1,18 +1,21 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountApiController;
+use App\Http\Controllers\Api\V1\AddressApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
 use App\Http\Controllers\Api\V1\AppointmentApiController;
 use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
+use App\Http\Controllers\Api\V1\ConsentApiController;
 use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\NoShowApiController;
+use App\Http\Controllers\Api\V1\NotificationApiController;
 use App\Http\Controllers\Api\V1\PaymentApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use App\Http\Controllers\Api\V1\UserMediaController;
 use App\Http\Controllers\Api\V1\WishlistApiController;
-use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController::class, 'show'])
@@ -23,6 +26,9 @@ Route::get('/private-media/users/{user}/{type}/{filename}', [UserMediaController
     ->name('user-media.show');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/account/consents/status', [ConsentApiController::class, 'status']);
+    Route::post('/account/consents/accept', [ConsentApiController::class, 'accept']);
+
     // -------------------------------------------------------------------------
     // Customer Portal Routes (/api/v1/customer/* and /api/v1/account/*)
     // -------------------------------------------------------------------------
@@ -46,13 +52,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/account/my-codes', [AccountApiController::class, 'myCodes']);
     Route::get('/customer/my-codes', [AccountApiController::class, 'myCodes']);
 
+    // Customer Saved Addresses
+    Route::get('/customer/addresses', [AddressApiController::class, 'index']);
+    Route::post('/customer/addresses', [AddressApiController::class, 'store']);
+    Route::put('/customer/addresses/{id}', [AddressApiController::class, 'update'])->whereNumber('id');
+    Route::patch('/customer/addresses/{id}/default', [AddressApiController::class, 'setDefault'])->whereNumber('id');
+    Route::delete('/customer/addresses/{id}', [AddressApiController::class, 'destroy'])->whereNumber('id');
+    Route::get('/account/addresses', [AddressApiController::class, 'index']);
+    Route::post('/account/addresses', [AddressApiController::class, 'store']);
+
     // Customer Bookings
+    Route::get('/customer/drafts', [AppointmentApiController::class, 'drafts']);
+    Route::get('/customer/bookings/drafts', [AppointmentApiController::class, 'drafts']);
+    Route::post('/customer/bookings/draft', [AppointmentApiController::class, 'storeDraft']);
+    Route::post('/customer/drafts/{id}/resume', [AppointmentApiController::class, 'resumeDraft'])->whereNumber('id');
+    Route::post('/customer/bookings/{id}/resume', [AppointmentApiController::class, 'resumeDraft'])->whereNumber('id');
+    Route::delete('/customer/drafts/{id}', [AppointmentApiController::class, 'discardDraft'])->whereNumber('id');
+    Route::delete('/customer/bookings/{id}/draft', [AppointmentApiController::class, 'discardDraft'])->whereNumber('id');
     Route::get('/customer/bookings', [AppointmentApiController::class, 'index']);
     Route::post('/customer/bookings', [AppointmentApiController::class, 'store']);
     Route::get('/customer/appointments', [AppointmentApiController::class, 'index']);
     Route::get('/customer/bookings/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
     Route::patch('/customer/bookings/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::patch('/customer/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
+    Route::post('/customer/bookings/{id}/grace-extension', [NoShowApiController::class, 'extendGrace'])->whereNumber('id');
     Route::delete('/customer/bookings/{id}', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
 
     // Customer Reviews / Testimonials
@@ -79,8 +102,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/customer/blog/{id}/react', [BlogApiController::class, 'removeReaction'])->whereNumber('id');
 
     // Customer Notifications
-    Route::get('/customer/notifications', [NotificationController::class, 'index']);
-    Route::post('/customer/notification-settings', [NotificationController::class, 'updateNotificationSettings']);
+    Route::get('/customer/notifications', [NotificationApiController::class, 'index']);
+    Route::post('/customer/notification-settings', [NotificationApiController::class, 'updateNotificationSettings']);
 
     // -------------------------------------------------------------------------
     // Barber Portal Routes (/api/v1/barber/* and /api/v1/barbers/*)
@@ -120,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/barber/bookings', [AppointmentApiController::class, 'index']);
     Route::patch('/barber/appointments/{id}/complete', [AppointmentApiController::class, 'complete'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
+    Route::post('/barber/appointments/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitDeposit'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/barber/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::middleware('check.role:barber,admin,super_admin')
@@ -127,8 +151,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/barber/bookings/{id}/verify-payment', [PaymentApiController::class, 'verifyPayment'])->whereNumber('id');
 
     // Barber Notifications
-    Route::get('/barber/notifications', [NotificationController::class, 'index']);
-    Route::post('/barber/notifications', [NotificationController::class, 'store']);
+    Route::get('/barber/notifications', [NotificationApiController::class, 'index']);
+    Route::post('/barber/notifications', [NotificationApiController::class, 'store']);
 
     // Barber Reviews / Testimonials
     Route::get('/barber/reviews', [TestimonialApiController::class, 'barberReviews']);
@@ -157,14 +181,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // -------------------------------------------------------------------------
     // General Notifications
     // -------------------------------------------------------------------------
-    Route::get('/notifications', [NotificationController::class, 'index']);
-    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
-    Route::post('/notifications', [NotificationController::class, 'store']);
-    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
-    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->whereNumber('id');
-    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->whereNumber('id');
-    Route::get('/notification-settings', [NotificationController::class, 'getNotificationSettings']);
-    Route::post('/notification-settings', [NotificationController::class, 'updateNotificationSettings']);
-    Route::post('/notifications/device-token', [NotificationController::class, 'registerDeviceToken']);
-    Route::delete('/notifications/device-token', [NotificationController::class, 'deleteDeviceToken']);
+    Route::get('/notifications', [NotificationApiController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationApiController::class, 'unreadCount']);
+    Route::get('/notifications/stream', [NotificationApiController::class, 'stream']);
+    Route::post('/notifications', [NotificationApiController::class, 'store']);
+    Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllRead']);
+    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead'])->whereNumber('id');
+    Route::delete('/notifications', [NotificationApiController::class, 'clearAll']);
+    Route::delete('/notifications/{id}', [NotificationApiController::class, 'destroy'])->whereNumber('id');
+    Route::get('/notification-settings', [NotificationApiController::class, 'getNotificationSettings']);
+    Route::post('/notification-settings', [NotificationApiController::class, 'updateNotificationSettings']);
+    Route::get('/notification-preferences', [NotificationApiController::class, 'getNotificationPreferences']);
+    Route::match(['put', 'post'], '/notification-preferences', [NotificationApiController::class, 'updateNotificationPreferences']);
+    Route::post('/notifications/device-token', [NotificationApiController::class, 'registerDeviceToken']);
+    Route::delete('/notifications/device-token', [NotificationApiController::class, 'deleteDeviceToken']);
 });

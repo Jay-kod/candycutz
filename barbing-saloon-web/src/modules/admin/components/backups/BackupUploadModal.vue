@@ -6,7 +6,7 @@ import {
   DocumentIcon,
 } from '@heroicons/vue/24/outline'
 
-const props = defineProps({
+defineProps({
   show: {
     type: Boolean,
     default: false,

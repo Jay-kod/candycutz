@@ -29,7 +29,7 @@ flowchart LR
     DB[(MySQL 8)]
     Redis[(Redis 7)]
     Worker[Queue worker + scheduler]
-    External[Stripe, Brevo, Expo Push,\nGoogle, Apple]
+    External[Stripe, Resend, Expo Push,\nGoogle, Apple]
 
     Web --> API
     Mobile --> API
@@ -136,7 +136,7 @@ Login issues client-scoped tokens; standard login must not delete all of a user'
 | Client state | TanStack Query for server state, Zustand for lightweight client state |
 | Data | MySQL 8.0, Redis 7.2, InnoDB transactions |
 | Payments | Stripe PaymentIntents and signed webhooks |
-| Notifications | Brevo transactional email, Expo Push Notifications |
+| Notifications | Resend transactional email, Expo Push Notifications |
 | Authentication integrations | Laravel Sanctum, Google OAuth/JWKS, Apple identity keys |
 | Infrastructure | Nginx, PHP-FPM, Docker Compose, queue worker, scheduler |
 
@@ -250,6 +250,19 @@ The root convenience command also starts the local API and web client in separat
 npm run dev
 ```
 
+### Demo Accounts
+
+The local database seeders (`LoginDemoUserSeeder`, `UserSeeder`, `WebUserSeeder`) provision ready-to-use accounts for evaluating each portal. In local and testing environments, demo accounts can be authenticated with standard demo passwords:
+
+| Role | Name | Email | Password | Primary Portal |
+| --- | --- | --- | --- | --- |
+| Customer | Demo Customer | `kefas@customer.com` | `customer123` | `/login` |
+| Barber | Demo Barber | `mark@barber.com` | `barber123` | `/barber/login` |
+| Administrator | Demo Administrator | `webadmin@candycutz.com` | `admin123` | `/admin/login` |
+| Super Admin | Demo Super Admin | `superadmin@candycutz.com` | `superadmin123` | `/admin/login` or `/superadmin/login` |
+
+All login pages feature interactive demo role tabs and a one-click **Fill Demo** button to quickly populate credentials for testing.
+
 ### Option 2: Docker Compose
 
 The Compose topology is the closest representation of the intended deployment architecture. Build the web bundle first because Nginx serves the generated `barbing-saloon-web/dist` directory:
@@ -313,7 +326,7 @@ Never commit real credentials. Use environment variables for:
 - MySQL and Redis connection details
 - Sanctum stateful domains and CORS origins
 - Stripe publishable key, secret, and webhook secret
-- Brevo SMTP/API credentials
+- Resend API key and sending domain addresses (`MAIL_MAILER=resend`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`)
 - Expo push credentials
 - Google and Apple identity-provider settings
 - Production media storage credentials

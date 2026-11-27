@@ -5,7 +5,7 @@
       <div class="space-y-3 flex-1">
         <div class="h-4 w-36 bg-theme-border rounded-md"></div>
         <div class="h-8 w-64 bg-theme-border rounded-xl"></div>
-        <div class="h-3 w-96 bg-theme-surface-subtle rounded"></div>
+        <div class="h-3 w-full max-w-sm sm:w-96 bg-theme-surface-subtle rounded"></div>
       </div>
       <div class="flex flex-col sm:flex-row items-center gap-3">
         <div class="h-10 w-full sm:w-64 bg-theme-surface-subtle rounded-xl"></div>

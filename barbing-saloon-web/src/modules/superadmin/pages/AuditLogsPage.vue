@@ -2,7 +2,7 @@
   <SuperAdminLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Command Banner -->
-      <div :class="['rounded-2xl border p-8', bannerClass]">
+      <div :class="['rounded-2xl border p-4 xs:p-6 sm:p-8', bannerClass]">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p :class="['text-sm uppercase tracking-[0.3em] font-semibold', mutedText]">System Compliance & Security</p>
@@ -56,7 +56,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!filteredLogs.length" :class="['rounded-2xl border p-12 text-center', cardClass]">
+      <div v-else-if="!filteredLogs.length" :class="['rounded-2xl border p-6 sm:p-12 text-center', cardClass]">
         <ClipboardDocumentListIcon :class="['mx-auto h-12 w-12 opacity-30', mutedText]" />
         <h3 :class="['mt-4 font-display text-xl font-bold', headingText]">No Audit Logs Match</h3>
         <p :class="['mt-1 text-sm', mutedText]">Try clearing your search query or selecting "all" modules.</p>
@@ -80,7 +80,8 @@
               <tr
                 v-for="log in filteredLogs"
                 :key="log.id"
-                :class="['border-b transition-colors', tableRowClass]"
+                @click="openDetail(log)"
+                :class="['border-b transition-colors cursor-pointer', tableRowClass]"
               >
                 <!-- User Column -->
                 <td class="py-3.5 px-5">
@@ -131,13 +132,125 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Bar -->
+        <div :class="['px-5 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3', tableHeaderClass]">
+          <p :class="['text-xs font-medium', mutedText]">
+            Showing <span :class="valueText">{{ pagination.from || 1 }}</span> to <span :class="valueText">{{ pagination.to || filteredLogs.length }}</span> of <span :class="valueText">{{ pagination.total || filteredLogs.length }}</span> events
+          </p>
+          <div class="flex items-center gap-2">
+            <button
+              @click="changePage(pagination.current_page - 1)"
+              :disabled="pagination.current_page <= 1 || loading"
+              :class="['px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed', refreshBtnClass]"
+            >
+              Previous
+            </button>
+            <span :class="['text-xs px-2', mutedText]">
+              Page {{ pagination.current_page || 1 }} of {{ pagination.last_page || 1 }}
+            </span>
+            <button
+              @click="changePage(pagination.current_page + 1)"
+              :disabled="pagination.current_page >= pagination.last_page || loading"
+              :class="['px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed', refreshBtnClass]"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Event Detail Modal -->
+      <div
+        v-if="selectedLog"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+        @click.self="selectedLog = null"
+      >
+        <div :class="['w-full max-w-2xl rounded-2xl border p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto', cardClass]">
+          <!-- Modal Header -->
+          <div class="flex items-start justify-between gap-4 border-b pb-4" :class="isDark ? 'border-red-500/20' : 'border-emerald-500/20'">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <span :class="['inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border', getActionPillClass(selectedLog.action)]">
+                  {{ selectedLog.action }}
+                </span>
+                <span :class="['text-xs font-mono px-2 py-0.5 rounded-md border capitalize', moduleBadgeClass]">
+                  {{ selectedLog.module || 'Core' }}
+                </span>
+                <span :class="['text-xs font-mono', mutedText]">
+                  ID #{{ selectedLog.id }}
+                </span>
+              </div>
+              <h3 :class="['mt-2 text-lg font-bold', headingText]">Administrative Action Forensic Detail</h3>
+            </div>
+            <button
+              @click="selectedLog = null"
+              :class="['rounded-lg p-1.5 text-white/50 hover:text-white hover:bg-white/10 transition-colors']"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Actor & Forensic Card -->
+          <div :class="['grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border', isDark ? 'bg-black/40 border-red-500/10' : 'bg-slate-50 border-emerald-100']">
+            <div>
+              <p :class="['text-[11px] uppercase tracking-wider font-semibold', mutedText]">Actor Staff</p>
+              <p :class="['text-sm font-bold mt-0.5', valueText]">{{ selectedLog.user?.name || 'System Service' }}</p>
+              <p :class="['text-xs', mutedText]">{{ selectedLog.user?.email || 'automated-task@candycutz.internal' }}</p>
+              <p :class="['text-[11px] font-mono mt-1 capitalize', isDark ? 'text-red-400' : 'text-emerald-700']">
+                Role: {{ selectedLog.user_role || selectedLog.user?.role || 'system' }}
+              </p>
+            </div>
+            <div>
+              <p :class="['text-[11px] uppercase tracking-wider font-semibold', mutedText]">Network & Timestamp</p>
+              <p :class="['text-xs font-mono mt-0.5', valueText]">IP: {{ selectedLog.ip_address || '127.0.0.1' }}</p>
+              <p :class="['text-xs mt-0.5', mutedText]">{{ formatDate(selectedLog.created_at) }} {{ formatTime(selectedLog.created_at) }}</p>
+              <p v-if="selectedLog.target_type" :class="['text-xs font-mono mt-1', valueText]">
+                Target: {{ selectedLog.target_type }} <span :class="isDark ? 'text-red-400' : 'text-emerald-600'">#{{ selectedLog.target_id || selectedLog.entity_id || '—' }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- User Agent -->
+          <div v-if="selectedLog.user_agent" :class="['p-3 rounded-xl border', isDark ? 'bg-black/40 border-red-500/10' : 'bg-slate-50 border-emerald-100']">
+            <p :class="['text-[11px] uppercase tracking-wider font-semibold', mutedText]">Client User-Agent</p>
+            <p :class="['text-xs font-mono mt-0.5 break-all', mutedText]">{{ selectedLog.user_agent }}</p>
+          </div>
+
+          <!-- State Changes (Before & After) -->
+          <div class="space-y-3">
+            <p :class="['text-xs uppercase tracking-wider font-bold', headingText]">State Delta (Audit Payload)</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Old Value -->
+              <div :class="['rounded-xl border p-3 flex flex-col', isDark ? 'bg-black/60 border-red-500/15' : 'bg-white border-slate-200']">
+                <span :class="['text-[11px] uppercase font-semibold text-rose-500 mb-1.5']">Before (Old Value)</span>
+                <pre :class="['text-[11px] font-mono overflow-x-auto p-2 rounded-lg bg-black/40 flex-1 whitespace-pre-wrap break-all', mutedText]">{{ formatJson(selectedLog.old_value) }}</pre>
+              </div>
+              <!-- New Value -->
+              <div :class="['rounded-xl border p-3 flex flex-col', isDark ? 'bg-black/60 border-emerald-500/20' : 'bg-white border-emerald-200']">
+                <span :class="['text-[11px] uppercase font-semibold text-emerald-500 mb-1.5']">After (New Value)</span>
+                <pre :class="['text-[11px] font-mono overflow-x-auto p-2 rounded-lg bg-black/40 flex-1 whitespace-pre-wrap break-all', isDark ? 'text-emerald-300' : 'text-emerald-800']">{{ formatJson(selectedLog.new_value) }}</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="flex justify-end pt-2 border-t" :class="isDark ? 'border-red-500/20' : 'border-emerald-500/20'">
+            <button
+              @click="selectedLog = null"
+              :class="['px-5 py-2 rounded-xl text-xs font-semibold border transition-all', refreshBtnClass]"
+            >
+              Close Inspector
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   </SuperAdminLayout>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useTheme } from '@/core/composables/useTheme';
 import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue';
 import { superadminApi } from '@/shared/api/old_superadminApi';
@@ -156,6 +269,15 @@ const logs = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const selectedModule = ref('all');
+const selectedLog = ref(null);
+
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+});
 
 const logList = computed(() => {
   const data = logs.value;
@@ -190,6 +312,10 @@ const filteredLogs = computed(() => {
   return list;
 });
 
+const openDetail = (log) => {
+  selectedLog.value = log;
+};
+
 const getInitials = (name) => {
   if (!name) return 'S';
   return name
@@ -218,11 +344,49 @@ const formatTime = (dateStr) => {
   });
 };
 
-async function loadLogs() {
+const formatJson = (val) => {
+  if (!val) return '—';
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      return val;
+    }
+  }
+  return JSON.stringify(val, null, 2);
+};
+
+async function loadLogs(page = 1) {
   loading.value = true;
   try {
-    const response = await superadminApi.auditLogs();
+    const params = { page };
+    if (selectedModule.value !== 'all') {
+      params.module = selectedModule.value;
+    }
+    if (searchQuery.value.trim()) {
+      params.search = searchQuery.value.trim();
+    }
+
+    const response = await superadminApi.auditLogs(params);
     logs.value = response.data?.data || response.data || [];
+    if (response.data?.meta) {
+      pagination.value = {
+        current_page: response.data.meta.current_page || page,
+        last_page: response.data.meta.last_page || 1,
+        total: response.data.meta.total || logs.value.length,
+        from: response.data.meta.from || 1,
+        to: response.data.meta.to || logs.value.length,
+      };
+    } else {
+      pagination.value = {
+        current_page: page,
+        last_page: 1,
+        total: logs.value.length,
+        from: 1,
+        to: logs.value.length,
+      };
+    }
   } catch (err) {
     console.error('Failed to load audit logs:', err);
     toast.error('Failed to load audit logs');
@@ -231,7 +395,24 @@ async function loadLogs() {
   }
 }
 
-onMounted(loadLogs);
+const changePage = (newPage) => {
+  if (newPage < 1 || newPage > pagination.value.last_page) return;
+  loadLogs(newPage);
+};
+
+let debounceTimer = null;
+watch(searchQuery, () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    loadLogs(1);
+  }, 350);
+});
+
+watch(selectedModule, () => {
+  loadLogs(1);
+});
+
+onMounted(() => loadLogs(1));
 
 // ─── Theme-Aware Computed Classes (Red/Black Night vs Green/White Light) ───
 const bannerClass = computed(() =>

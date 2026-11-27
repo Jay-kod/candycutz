@@ -14,6 +14,7 @@ vi.mock('@/shared/api/old_publicApi', () => ({
 
 describe('publicContent.store', () => {
   beforeEach(() => {
+    window.sessionStorage.clear();
     setActivePinia(createPinia());
     vi.clearAllMocks();
   });

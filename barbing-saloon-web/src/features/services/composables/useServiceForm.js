@@ -53,12 +53,12 @@ export function useServiceForm() {
   function handleFileChange(event, num) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     if (!file.type.match('image.*')) {
       toast.error('Please upload an image file (JPG, PNG)');
       return;
     }
-    
+
     images.value[`file${num}`] = file;
     images.value[`url${num}`] = URL.createObjectURL(file);
     images.value[`remove${num}`] = false;
@@ -96,10 +96,15 @@ export function useServiceForm() {
             category_id: service.category_id || null,
             is_available: service.is_active !== undefined ? Boolean(service.is_active) : true
           };
-          
+
+          if (Array.isArray(service.images) && service.images.length > 0) {
+            if (service.images[0]) images.value.url1 = getStorageUrl(service.images[0]);
+            if (service.images[1]) images.value.url2 = getStorageUrl(service.images[1]);
+            if (service.images[2]) images.value.url3 = getStorageUrl(service.images[2]);
+          }
           if (service.image || service.image_url) images.value.url1 = getStorageUrl(service.image_url || service.image);
-          if (service.image2) images.value.url2 = getStorageUrl(service.image2);
-          if (service.image3) images.value.url3 = getStorageUrl(service.image3);
+          if (service.image2 || service.image2_url) images.value.url2 = getStorageUrl(service.image2_url || service.image2);
+          if (service.image3 || service.image3_url) images.value.url3 = getStorageUrl(service.image3_url || service.image3);
         } else {
           toast.error('Service not found');
           router.push(`/${portal.value}/services`);
@@ -127,18 +132,18 @@ export function useServiceForm() {
       payload.append('description', form.value.description || '');
       payload.append('price', form.value.price);
       payload.append('duration_minutes', form.value.duration_minutes || 30);
-      
+
       if (form.value.category_id) {
         payload.append('category_id', form.value.category_id);
       }
-      
+
       payload.append('is_active', form.value.is_available ? 1 : 0);
-      
+
       if (images.value.file1) payload.append('image', images.value.file1);
       if (images.value.file1) payload.append('image1', images.value.file1);
       if (images.value.file2) payload.append('image2', images.value.file2);
       if (images.value.file3) payload.append('image3', images.value.file3);
-      
+
       if (images.value.remove1) payload.append('remove_image1', 'true');
       if (images.value.remove2) payload.append('remove_image2', 'true');
       if (images.value.remove3) payload.append('remove_image3', 'true');

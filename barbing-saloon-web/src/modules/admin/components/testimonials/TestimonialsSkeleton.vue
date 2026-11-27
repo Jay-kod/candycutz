@@ -5,7 +5,7 @@
       <div class="space-y-3 flex-1">
         <div class="h-4 w-36 bg-theme-border/60 rounded-md"></div>
         <div class="h-8 w-64 bg-theme-border rounded-xl"></div>
-        <div class="h-3 w-96 bg-theme-border/40 rounded"></div>
+        <div class="h-3 w-full max-w-sm sm:w-96 bg-theme-border/40 rounded"></div>
       </div>
       <div class="flex flex-col sm:flex-row items-center gap-3">
         <div class="h-10 w-full sm:w-64 bg-theme-border/40 rounded-xl"></div>
@@ -28,7 +28,7 @@
     <!-- Flow Settings Card Skeleton -->
     <div class="rounded-3xl border border-theme-border bg-theme-surface p-6 md:p-8 space-y-4">
       <div class="h-5 w-44 bg-theme-border/60 rounded"></div>
-      <div class="h-3 w-80 bg-theme-border/40 rounded"></div>
+      <div class="h-3 w-full max-w-xs sm:w-80 bg-theme-border/40 rounded"></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
         <div class="h-28 bg-theme-surface-subtle border border-theme-border/50 rounded-2xl"></div>
         <div class="h-28 bg-theme-surface-subtle border border-theme-border/50 rounded-2xl"></div>
@@ -37,7 +37,7 @@
 
     <!-- Filter Bar Skeleton -->
     <div class="flex flex-col sm:flex-row justify-between gap-4">
-      <div class="h-10 w-80 bg-theme-surface border border-theme-border rounded-xl"></div>
+      <div class="h-10 w-full max-w-xs sm:w-80 bg-theme-surface border border-theme-border rounded-xl"></div>
       <div class="h-10 w-48 bg-theme-surface border border-theme-border rounded-xl"></div>
     </div>
 

@@ -23,6 +23,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,7 +103,7 @@ class BarberApiController
         $data = $request->validate([
             'name' => 'sometimes|string',
             'email' => 'sometimes|string|email|max:255|unique:users,email,'.$request->user()->id,
-            'phone' => 'sometimes|string',
+            'phone' => 'sometimes|nullable|string',
             'bio' => 'sometimes|string|nullable',
             'specialties' => 'sometimes|array',
             'specialties.*' => 'string|max:50',
@@ -117,21 +118,54 @@ class BarberApiController
             'account_number' => 'sometimes|string|nullable|max:30',
         ]);
 
+        $rawAvatar = null;
+        $rawCover = null;
         if ($request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true') {
             $data['avatar'] = null;
         } elseif ($request->hasFile('avatar')) {
-            $data['avatar'] = $imageUpload->execute($request->file('avatar'), 'user-media/'.$user->id.'/avatar', 'local');
+            $rawAvatar = $imageUpload->storeFast($request->file('avatar'), 'user-media/'.$user->id.'/avatar', 'local');
+            $data['avatar'] = $rawAvatar;
+        } else {
+            unset($data['avatar']);
         }
 
         if ($request->boolean('remove_cover_image') || $request->input('remove_cover_image') === '1' || $request->input('remove_cover_image') === 'true') {
             $data['cover_image'] = null;
         } elseif ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $imageUpload->execute($request->file('cover_image'), 'user-media/'.$user->id.'/cover', 'local');
+            $rawCover = $imageUpload->storeFast($request->file('cover_image'), 'user-media/'.$user->id.'/cover', 'local');
+            $data['cover_image'] = $rawCover;
+        } else {
+            unset($data['cover_image']);
         }
 
         unset($data['remove_avatar'], $data['remove_cover_image']);
 
         $action->execute($user, $data);
+
+        if ($rawAvatar !== null) {
+            $imageUpload->dispatchOptimization(
+                rawPath: $rawAvatar,
+                disk: 'local',
+                modelClass: User::class,
+                modelKey: $user->id,
+                attribute: 'avatar',
+                prefixStorage: false,
+                actorUserId: $user->id,
+                cacheEntity: 'barbers',
+            );
+        }
+        if ($rawCover !== null) {
+            $imageUpload->dispatchOptimization(
+                rawPath: $rawCover,
+                disk: 'local',
+                modelClass: User::class,
+                modelKey: $user->id,
+                attribute: 'cover_image',
+                prefixStorage: false,
+                actorUserId: $user->id,
+                cacheEntity: 'barbers',
+            );
+        }
 
         return ApiResponse::success([
             'user' => new AuthUserResource($user->refresh()),

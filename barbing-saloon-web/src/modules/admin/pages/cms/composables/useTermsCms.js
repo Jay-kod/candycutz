@@ -13,6 +13,7 @@ export function useTermsCms() {
   const lastSaved = ref(null);
   const initialSnapshot = ref(null);
   const activeTab = ref('all');
+  const termsVersion = ref('');
 
   const content = ref({ ...DEFAULT_TERMS_CONTENT });
   const sections = ref(JSON.parse(JSON.stringify(DEFAULT_TERMS_SECTIONS)));
@@ -69,7 +70,8 @@ export function useTermsCms() {
     const current = JSON.stringify({
       content: content.value,
       sections: sections.value,
-      heroOpacity: heroOpacity.value
+      heroOpacity: heroOpacity.value,
+      termsVersion: termsVersion.value
     });
     return initialSnapshot.value !== current;
   });
@@ -134,6 +136,7 @@ export function useTermsCms() {
       if (data) {
         if (data.terms_title) content.value.terms_title = String(data.terms_title);
         if (data.terms_subtitle) content.value.terms_subtitle = String(data.terms_subtitle);
+        termsVersion.value = data.terms_version ? String(data.terms_version) : new Date().toISOString().slice(0, 10);
 
         if (data.terms_sections) {
           try {
@@ -154,7 +157,8 @@ export function useTermsCms() {
         initialSnapshot.value = JSON.stringify({
           content: content.value,
           sections: sections.value,
-          heroOpacity: heroOpacity.value
+          heroOpacity: heroOpacity.value,
+          termsVersion: termsVersion.value
         });
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
@@ -177,6 +181,7 @@ export function useTermsCms() {
       formData.append('settings[terms_title]', content.value.terms_title);
       formData.append('settings[terms_subtitle]', content.value.terms_subtitle || '');
       formData.append('settings[terms_sections]', JSON.stringify(sections.value));
+      formData.append('settings[terms_version]', termsVersion.value);
       formData.append('settings[page_hero_terms_overlay_opacity]', String(heroOpacity.value));
       formData.append('page_hero_page', 'terms');
 
@@ -207,7 +212,8 @@ export function useTermsCms() {
       initialSnapshot.value = JSON.stringify({
         content: content.value,
         sections: sections.value,
-        heroOpacity: heroOpacity.value
+        heroOpacity: heroOpacity.value,
+        termsVersion: termsVersion.value
       });
       lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
@@ -225,6 +231,7 @@ export function useTermsCms() {
     lastSaved,
     isDirty,
     activeTab,
+    termsVersion,
     heroImage,
     heroOpacity,
     selectedHeroImage,

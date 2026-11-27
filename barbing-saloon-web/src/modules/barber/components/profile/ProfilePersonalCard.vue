@@ -144,9 +144,26 @@
         </div>
 
         <div>
-          <label class="block text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold ml-1 mb-2">
-            Email Address <span class="text-gold">*</span>
-          </label>
+          <div class="flex items-center justify-between ml-1 mb-2">
+            <label class="block text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold">
+              Email Address <span class="text-gold">*</span>
+            </label>
+            <span
+              v-if="isEmailVerified"
+              class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"
+            >
+              <CheckCircleIcon class="w-3 h-3" />
+              <span>Verified &amp; Protected</span>
+            </span>
+            <router-link
+              v-else
+              to="/barber/verify-email"
+              class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+            >
+              <ClockIcon class="w-3 h-3" />
+              <span>Unverified — Verify</span>
+            </router-link>
+          </div>
           <input
             v-model="form.email"
             type="email"
@@ -233,17 +250,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { UserIcon, CameraIcon, PhotoIcon, EyeIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { ref, computed } from 'vue';
+import { getActivePinia } from 'pinia';
+import { UserIcon, CameraIcon, PhotoIcon, EyeIcon, XMarkIcon, CheckCircleIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { useAuthStore } from '@/modules/auth/store/auth.store';
 
-defineProps({
+const props = defineProps({
   form: {
     type: Object,
     required: true,
   },
+  isVerified: {
+    type: Boolean,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['avatar-selected', 'cover-selected']);
+
+const authStore = getActivePinia() ? useAuthStore() : null;
+const isEmailVerified = computed(() => {
+  if (props.isVerified !== null) {
+    return props.isVerified;
+  }
+  return !!authStore?.user?.is_email_verified || !!authStore?.user?.email_verified_at;
+});
 
 const fileInput = ref(null);
 const coverInput = ref(null);

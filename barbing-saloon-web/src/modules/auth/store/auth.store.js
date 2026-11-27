@@ -40,6 +40,14 @@ export const useAuthStore = defineStore('auth', {
             name: user.name,
             role: user.role,
             email: user.email,
+            email_verified_at: user.email_verified_at || null,
+            is_email_verified: !!user.is_email_verified || !!user.email_verified_at,
+            avatar: user.avatar_url || user.avatar || null,
+            avatar_url: user.avatar_url || user.avatar || null,
+            no_show_count: Number(user.no_show_count || 0),
+            requires_deposit: Boolean(user.requires_deposit),
+            consent_required: Boolean(user.consent_required),
+            consent: user.consent || null,
           };
           localStorage.setItem('candycutz_cached_user', JSON.stringify(minimal));
         } catch {

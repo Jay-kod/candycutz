@@ -49,6 +49,7 @@
             ref="heroFormRef"
             :content="content"
             v-model:hero-opacity="heroOpacity"
+            v-model:terms-version="termsVersion"
             :preview-hero-image="previewHeroImage"
             @image-selected="selectHeroImage"
             @clear-image="handleClearImage"
@@ -113,6 +114,7 @@ const {
   lastSaved,
   isDirty,
   activeTab,
+  termsVersion,
   heroOpacity,
   previewHeroImage,
   totalWords,

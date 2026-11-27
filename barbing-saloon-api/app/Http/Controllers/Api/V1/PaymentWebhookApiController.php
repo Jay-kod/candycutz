@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Domain\Payment\Contracts\PaymentGateway;
+use App\Domain\Payment\Gateways\PaystackGateway;
 use App\Domain\Payment\Services\PaymentConfirmer;
 use App\Domain\Payment\Services\PaymentService;
 use App\Models\WebhookEvent;
@@ -14,11 +14,15 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentWebhookApiController
 {
+    protected PaystackGateway $paystackGateway;
+
     public function __construct(
         protected PaymentService $paymentService,
         protected PaymentConfirmer $paymentConfirmer,
-        protected PaymentGateway $gateway
-    ) {}
+        ?PaystackGateway $paystackGateway = null
+    ) {
+        $this->paystackGateway = $paystackGateway ?? app(PaystackGateway::class);
+    }
 
     public function handle(Request $request): JsonResponse
     {
@@ -27,7 +31,7 @@ class PaymentWebhookApiController
 
         // 1. Signature Verification via gateway
         try {
-            $event = $this->gateway->handleWebhook($rawPayload, $headers);
+            $event = $this->paystackGateway->handleWebhook($rawPayload, $headers);
         } catch (\Throwable $e) {
             Log::warning('Webhook Verification Failed: '.$e->getMessage());
 

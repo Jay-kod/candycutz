@@ -31,7 +31,9 @@ export function useAdminDashboard() {
             },
             timestamp: hData.timestamp
           };
-        } catch (_) {}
+        } catch {
+          // Optional fallback health probe failed; keep primary dashboard payload
+        }
       }
       
       dashboard.value = data;

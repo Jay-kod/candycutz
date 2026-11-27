@@ -1,9 +1,10 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { getActivePinia } from 'pinia';
 import { useToast } from '@/core/composables/useToast';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
 import { usePublicContentStore } from '@/core/stores/publicContent.store';
+import { extractGoogleMapsCoordinates, extractGoogleMapsLocation } from '@/features/directions/utils/googleMaps';
 import { DEFAULT_CONTACT_CONTENT, PLATFORMS_LIST } from './contactConstants';
 
 export function useContactCms() {
@@ -13,6 +14,7 @@ export function useContactCms() {
   const lastSaved = ref(null);
   const initialSnapshot = ref(null);
   const activeTab = ref('all');
+  const resolvedShop = ref(null);
 
   const content = ref({ ...DEFAULT_CONTACT_CONTENT });
   const platformsList = PLATFORMS_LIST;
@@ -96,21 +98,50 @@ export function useContactCms() {
   });
   const activeContactPreviewCount = computed(() => activeContactPreviewList.value.length);
 
+  const isTrustedGoogleEmbedUrl = (url) => {
+    if (!url || !url.startsWith('https://')) return false;
+    return (
+      url.startsWith('https://www.google.com/maps/embed') ||
+      (url.startsWith('https://maps.google.com/maps') &&
+        (url.includes('output=embed') || url.includes('pb=')))
+    );
+  };
+
+  const extractCoordinatesFromMapInput = (rawInput) => extractGoogleMapsCoordinates(rawInput);
+
   const extractedMapSrc = computed(() => {
     const raw = (content.value.contact_map_iframe || '').trim();
     if (!raw) return '';
-    if (raw.startsWith('https://www.google.com/maps/embed')) {
+    if (isTrustedGoogleEmbedUrl(raw)) {
       return raw;
     }
     const match = raw.match(/src\s*=\s*["']([^"']+)["']/i);
     if (match) {
-      const extracted = match[1].replace(/&amp;/g, '&');
-      if (extracted.startsWith('https://www.google.com/maps/embed')) {
+      const extracted = match[1].replace(/&amp;/g, '&').trim();
+      if (isTrustedGoogleEmbedUrl(extracted)) {
         return extracted;
       }
     }
     return '';
   });
+
+  watch(
+    () => [content.value.contact_map_iframe, content.value.contact_map_link],
+    ([iframeVal, linkVal], [prevIframe, prevLink]) => {
+      if (loading.value) return;
+      const linkLoc = extractGoogleMapsLocation(linkVal);
+      const iframeLoc = extractGoogleMapsLocation(iframeVal);
+      const preferred = (linkLoc?.precise ? linkLoc : null) || (iframeLoc?.precise ? iframeLoc : null) || linkLoc || iframeLoc;
+      if (!preferred) return;
+
+      const hasCoords = Boolean(String(content.value.latitude || '').trim() && String(content.value.longitude || '').trim());
+      const mapChanged = iframeVal !== prevIframe || linkVal !== prevLink;
+      if (!hasCoords || preferred.precise || (mapChanged && !resolvedShop.value?.location_lock?.verified)) {
+        content.value.latitude = preferred.latitude;
+        content.value.longitude = preferred.longitude;
+      }
+    }
+  );
 
   const clearPreviewUrl = () => {
     if (localPreviewUrl.value) {
@@ -141,6 +172,35 @@ export function useContactCms() {
     clearPreviewUrl();
   };
 
+  const refreshResolvedShop = async () => {
+    try {
+      const shopRes = await api.get('/v1/shop/location');
+      const shopData = shopRes?.data?.data || shopRes?.data || null;
+      if (shopData?.latitude && shopData?.longitude) {
+        resolvedShop.value = shopData;
+        if (!isDirty.value) {
+          content.value.latitude = String(shopData.latitude);
+          content.value.longitude = String(shopData.longitude);
+        }
+      }
+    } catch {
+      // Safe fallback when shop/location endpoint is unavailable in isolated unit tests
+    }
+  };
+
+  const syncResolvedSnapshot = async () => {
+    initialSnapshot.value = JSON.stringify({
+      content: content.value,
+      heroOpacity: heroOpacity.value,
+    });
+    await refreshResolvedShop();
+    initialSnapshot.value = JSON.stringify({
+      content: content.value,
+      heroOpacity: heroOpacity.value,
+    });
+    lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
   const fetchContent = async () => {
     loading.value = true;
     try {
@@ -153,6 +213,22 @@ export function useContactCms() {
             content.value[key] = String(data[key]);
           }
         });
+        if (!data.contact_address && data.address) {
+          content.value.contact_address = String(data.address);
+        }
+        if (!data.contact_map_iframe && data.map_iframe) {
+          content.value.contact_map_iframe = String(data.map_iframe);
+        }
+        if (!data.contact_map_link && data.map_link) {
+          content.value.contact_map_link = String(data.map_link);
+        }
+        if ((!content.value.latitude || !content.value.longitude) && (content.value.contact_map_iframe || content.value.contact_map_link)) {
+          const coords = extractCoordinatesFromMapInput(content.value.contact_map_iframe || content.value.contact_map_link);
+          if (coords) {
+            content.value.latitude = coords.latitude;
+            content.value.longitude = coords.longitude;
+          }
+        }
         const legacyMap = {
           social_instagram: 'instagram',
           social_facebook: 'facebook',
@@ -170,11 +246,7 @@ export function useContactCms() {
         heroImage.value = data.page_hero_contact_image || '';
         heroOpacity.value = Number(data.page_hero_contact_overlay_opacity ?? 76);
 
-        initialSnapshot.value = JSON.stringify({
-          content: content.value,
-          heroOpacity: heroOpacity.value
-        });
-        lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        await syncResolvedSnapshot();
       }
     } catch (error) {
       console.error('Failed to load contact CMS content:', error);
@@ -188,6 +260,10 @@ export function useContactCms() {
     try {
       const formData = new FormData();
       Object.entries(content.value).forEach(([key, value]) => {
+        if (key === 'contact_map_iframe' && extractedMapSrc.value) {
+          formData.append('settings[contact_map_iframe]', extractedMapSrc.value);
+          return;
+        }
         formData.append(`settings[${key}]`, value ?? '');
       });
       // Save legacy keys for backwards compatibility
@@ -204,8 +280,8 @@ export function useContactCms() {
         formData.append('settings[page_hero_contact_image]', '');
       }
 
+      const hadRawIframe = Boolean((content.value.contact_map_iframe || '').trim());
       const response = await api.post('/v1/admin/settings', formData);
-      toast.success('Social links and contact content updated successfully!');
 
       if (getActivePinia()) {
         usePublicContentStore().clearSettingsCache();
@@ -214,6 +290,21 @@ export function useContactCms() {
       const data = response.data?.data;
       if (data) {
         heroImage.value = data.page_hero_contact_image || '';
+        if (data.contact_map_iframe !== undefined && data.contact_map_iframe !== null) {
+          content.value.contact_map_iframe = String(data.contact_map_iframe);
+        }
+        if (data.latitude !== undefined && data.latitude !== null) {
+          content.value.latitude = String(data.latitude);
+        }
+        if (data.longitude !== undefined && data.longitude !== null) {
+          content.value.longitude = String(data.longitude);
+        }
+      }
+
+      if (hadRawIframe && !extractedMapSrc.value) {
+        toast.error('Map embed URL was invalid and could not be saved. Please paste a valid Google Maps embed snippet or URL.');
+      } else {
+        toast.success('Contact settings and shop location updated successfully!');
       }
       selectedFile.value = null;
       removeImage.value = false;
@@ -222,11 +313,7 @@ export function useContactCms() {
       }
       clearPreviewUrl();
 
-      initialSnapshot.value = JSON.stringify({
-        content: content.value,
-        heroOpacity: heroOpacity.value
-      });
-      lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      await syncResolvedSnapshot();
     } catch (error) {
       toast.error('Failed to save changes. Please try again.');
     } finally {
@@ -258,6 +345,7 @@ export function useContactCms() {
     activeContactPreviewList,
     activeContactPreviewCount,
     extractedMapSrc,
+    resolvedShop,
     clearPreviewUrl,
     selectImage,
     clearImage,

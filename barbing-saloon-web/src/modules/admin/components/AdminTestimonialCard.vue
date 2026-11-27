@@ -17,8 +17,8 @@
       <div class="flex-1">
         <div class="flex items-center gap-4 mb-3">
           <img
-            v-if="item.avatar_url"
-            :src="item.avatar_url"
+            v-if="item.avatar_url || item.avatar"
+            :src="getStorageUrl(item.avatar_url || item.avatar)"
             :alt="`${item.client_name || item.customer_name || 'Customer'} profile`"
             class="h-12 w-12 shrink-0 rounded-full border border-admin/30 object-cover shadow-sm"
             loading="lazy"
@@ -111,6 +111,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { 
   ChatBubbleBottomCenterTextIcon, 
   CheckCircleIcon, 

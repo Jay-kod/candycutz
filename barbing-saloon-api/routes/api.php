@@ -20,6 +20,7 @@ Route::prefix('v1')
         Route::post('/system/client-errors', [ClientErrorApiController::class, 'store'])->middleware('throttle:30,1');
 
         require base_path('routes/api/v1/auth.php');
+        require base_path('routes/api/v1/consent.php');
         require base_path('routes/api/v1/catalogue.php');
         require base_path('routes/api/v1/booking.php');
         require base_path('routes/api/v1/payments.php');

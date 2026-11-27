@@ -55,8 +55,12 @@ export function useAdminHealthChecker() {
 
   const overview = ref(null)
   const healthDetail = ref(null)
+  const failedJobs = ref([])
   const overviewLoading = ref(true)
   const detailLoading = ref(true)
+  const failedJobsLoading = ref(false)
+  const retryingJobId = ref(null)
+  const dismissingJobId = ref(null)
   const selfTestRunning = ref(false)
   const selfTestResults = ref(null)
   const autoRefresh = ref(false)
@@ -90,6 +94,62 @@ export function useAdminHealthChecker() {
     }
   }
 
+  const fetchFailedJobs = async () => {
+    failedJobsLoading.value = true
+    try {
+      const res = await client.get('/admin/system/failed-jobs')
+      failedJobs.value = res.data?.data || []
+      return true
+    } catch (err) {
+      console.error('Failed jobs fetch failed:', err)
+      return false
+    } finally {
+      failedJobsLoading.value = false
+    }
+  }
+
+  const retryJob = async (id) => {
+    retryingJobId.value = id
+    try {
+      const res = await client.post(`/admin/system/failed-jobs/${id}/retry`)
+      toast.success(res.data?.message || `Task #${id} queued for safe retry`)
+      await Promise.all([fetchFailedJobs(), fetchHealthDetail()])
+      return true
+    } catch (err) {
+      toast.error(err.response?.data?.message || `Failed to retry task #${id}`)
+      return false
+    } finally {
+      retryingJobId.value = null
+    }
+  }
+
+  const dismissJob = async (id) => {
+    dismissingJobId.value = id
+    try {
+      const res = await client.delete(`/admin/system/failed-jobs/${id}`)
+      toast.success(res.data?.message || `Task #${id} dismissed from vault`)
+      await Promise.all([fetchFailedJobs(), fetchHealthDetail()])
+      return true
+    } catch (err) {
+      toast.error(err.response?.data?.message || `Failed to dismiss task #${id}`)
+      return false
+    } finally {
+      dismissingJobId.value = null
+    }
+  }
+
+  const resetBreaker = async (service) => {
+    try {
+      const res = await client.post(`/admin/system/circuit-breakers/${service}/reset`)
+      toast.success(res.data?.message || `Circuit breaker for ${service} reset to closed`)
+      await fetchHealthDetail()
+      return true
+    } catch (err) {
+      toast.error(err.response?.data?.message || `Failed to reset circuit breaker for ${service}`)
+      return false
+    }
+  }
+
   const refreshAll = async (silent = false, includeProbes = true) => {
     if (refreshInProgress.value) return false
 
@@ -100,6 +160,7 @@ export function useAdminHealthChecker() {
       const results = await Promise.all([
         fetchOverview(),
         fetchHealthDetail(),
+        fetchFailedJobs(),
         includeProbes ? runDiagnostic('all', true) : Promise.resolve(true),
       ])
       const allSucceeded = results.every(Boolean)
@@ -226,6 +287,32 @@ export function useAdminHealthChecker() {
         ],
       })
     }
+    if (c.sweeper) {
+      cards.push({
+        title: 'Draft Sweeper Daemon',
+        icon: markRaw(ClockIcon),
+        status: c.sweeper.status,
+        items: [
+          { label: 'Daemon Status', value: c.sweeper.status || 'unknown' },
+          { label: 'Last Run Heartbeat', value: c.sweeper.last_heartbeat ? formatTime(c.sweeper.last_heartbeat) : 'Never executed' },
+          { label: 'Last Execution Duration', value: `${c.sweeper.last_duration_ms ?? 0}ms` },
+          { label: 'Recent Slots Released', value: c.sweeper.recent_cancelled_count ?? 0 },
+        ],
+      })
+    }
+    if (c.circuit_breakers) {
+      const allClosed = Object.values(c.circuit_breakers).every(b => b.state === 'closed')
+      cards.push({
+        title: 'Circuit Breaker Matrix',
+        icon: markRaw(ShieldCheckIcon),
+        status: allClosed ? 'optimal' : 'warning',
+        items: Object.entries(c.circuit_breakers).map(([key, val]) => ({
+          label: `${key.toUpperCase()} Status`,
+          value: `${val.state.toUpperCase()} (${val.failures_count} errs)`,
+          warn: val.state !== 'closed',
+        })),
+      })
+    }
     if (c.mail) {
       cards.push({
         title: 'Mail Subsystem',
@@ -291,14 +378,22 @@ export function useAdminHealthChecker() {
   return {
     overview,
     healthDetail,
+    failedJobs,
+    failedJobsLoading,
     overviewLoading,
     detailLoading,
+    retryingJobId,
+    dismissingJobId,
     selfTestRunning,
     selfTestResults,
     autoRefresh,
     lastRefreshed,
     fetchOverview,
     fetchHealthDetail,
+    fetchFailedJobs,
+    retryJob,
+    dismissJob,
+    resetBreaker,
     refreshAll,
     runDiagnostic,
     toggleAutoRefresh,

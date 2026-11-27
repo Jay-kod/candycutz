@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
             AppointmentSeeder::class,
             SampleTestimonialsSeeder::class,
             BlogSeeder::class,
+            LoginDemoUserSeeder::class,
+            DemoCatalogSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }

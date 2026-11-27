@@ -37,7 +37,7 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
         <div
           v-for="n in 6"
           :key="n"
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Services Grid -->
-      <div v-else-if="filteredServices.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div v-else-if="filteredServices.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
         <article
           v-for="service in filteredServices"
           :key="service.id"
@@ -66,11 +66,12 @@
           class="group relative isolate aspect-auto xs:aspect-[0.68] min-h-[380px] xs:min-h-[440px] sm:min-h-[460px] w-full max-w-full overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-accent)] hover:shadow-2xl hover:shadow-[var(--color-shadow)]"
         >
           <img
-            v-if="service.image || service.image_url"
-            :src="getImageUrl(service.image || service.image_url)"
+            v-if="resolveServiceSrc(service)"
+            :src="resolveServiceSrc(service)"
             :alt="service.name"
             loading="lazy"
             decoding="async"
+            @error="onServiceImgError(service)"
             class="absolute inset-0 -z-20 h-full w-full object-cover object-[center_60%] transition-transform duration-700 group-hover:scale-105"
           />
           <div v-else class="absolute inset-0 -z-20 flex items-center justify-center bg-[var(--color-bg-tertiary)]">
@@ -86,7 +87,8 @@
             <div class="flex items-start justify-between gap-2.5">
               <div>
                 <p class="text-[8px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]/80">CandyCutz Service</p>
-                <span class="mt-1.5 inline-flex rounded-full border border-[var(--color-accent)]/40 bg-[var(--color-bg-primary)]/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-[var(--color-accent)] backdrop-blur">
+                <span class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)]/40 bg-[var(--color-bg-primary)]/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-[var(--color-accent)] backdrop-blur">
+                  <CategoryIcon v-if="service.category?.icon" :name="service.category.icon" custom-class="size-2.5" />
                   {{ service.category?.name || service.category || 'Barbering' }}
                 </span>
               </div>
@@ -150,10 +152,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { RouterLink } from 'vue-router';
 import PublicLayout from '../../../core/layouts/PublicLayout.vue';
 import PageHero from '@/shared/ui/PageHero.vue';
+import CategoryIcon from '@/shared/ui/CategoryIcon.vue';
 import { usePublicContentStore } from '@/core/stores/publicContent.store';
 import { useScrollReveal } from '../../../core/composables/useScrollReveal';
 import { formatNairaAmount } from '../../../core/utils';
@@ -162,9 +165,25 @@ import { getStorageUrl as getImageUrl } from '@/core/utils/url';
 const { init: initScrollReveal } = useScrollReveal();
 const publicStore = usePublicContentStore();
 
-const services = ref(publicStore.services || []);
+const services = computed(() => publicStore.services || []);
+const failedThumbs = ref({});
 const selectedCategory = ref('All');
 const isLoading = ref(publicStore.services.length === 0);
+
+const resolveServiceSrc = (service) => {
+  const thumb = service?.thumbnail_url;
+  const full = service?.image || service?.image_url;
+  if (thumb && !failedThumbs.value[service.id] && thumb !== full) {
+    return getImageUrl(thumb);
+  }
+  return full ? getImageUrl(full) : '';
+};
+
+const onServiceImgError = (service) => {
+  if (service?.id && service?.thumbnail_url && !failedThumbs.value[service.id]) {
+    failedThumbs.value = { ...failedThumbs.value, [service.id]: true };
+  }
+};
 
 const categories = computed(() => {
   const cats = services.value
@@ -183,8 +202,7 @@ const filteredServices = computed(() => {
 
 const fetchContent = async () => {
   try {
-    const data = await publicStore.getServices();
-    if (data) services.value = data;
+    await publicStore.getServices();
   } catch (error) {
     console.error('Failed to load services page data:', error);
   } finally {
@@ -196,6 +214,10 @@ const fetchContent = async () => {
 };
 
 onMounted(() => {
+  fetchContent();
+});
+
+onActivated(() => {
   fetchContent();
 });
 </script>

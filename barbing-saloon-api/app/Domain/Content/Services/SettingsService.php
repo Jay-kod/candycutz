@@ -53,6 +53,25 @@ class SettingsService
 
             $merged = array_merge($flat, $grouped);
 
+            $merged['terms_version'] = $flat['terms_version'] ?? (string) config('consent.terms_version');
+            $merged['privacy_version'] = $flat['privacy_version'] ?? (string) config('consent.privacy_version');
+            $merged['cookie_policy_version'] = $flat['cookie_policy_version'] ?? (string) config('consent.cookie_policy_version');
+
+            $googleEnabled = filter_var(
+                $merged['google_auth_enabled'] ?? true,
+                FILTER_VALIDATE_BOOLEAN
+            );
+            $merged['google_auth_enabled'] = $googleEnabled ? 'true' : 'false';
+            if (! $googleEnabled) {
+                unset($merged['google_client_id'], $merged['google_client_ids']);
+                if (isset($merged['social']) && is_array($merged['social'])) {
+                    unset(
+                        $merged['social']['google_client_id'],
+                        $merged['social']['google_client_ids']
+                    );
+                }
+            }
+
             /** @var AnimationSettingsService $animationService */
             $animationService = app(AnimationSettingsService::class);
             $merged['animation_resolved'] = $animationService->getResolvedSettings();
@@ -96,6 +115,10 @@ class SettingsService
 
             $merged = array_merge($flat, $grouped);
 
+            $merged['terms_version'] = $flat['terms_version'] ?? (string) config('consent.terms_version');
+            $merged['privacy_version'] = $flat['privacy_version'] ?? (string) config('consent.privacy_version');
+            $merged['cookie_policy_version'] = $flat['cookie_policy_version'] ?? (string) config('consent.cookie_policy_version');
+
             /** @var AnimationSettingsService $animationService */
             $animationService = app(AnimationSettingsService::class);
             $merged['animation_resolved'] = $animationService->getResolvedSettings();
@@ -112,6 +135,9 @@ class SettingsService
         Cache::forget('settings.all');
         Cache::forget('settings.public');
         Cache::forget('system_settings');
+        Cache::forget('policies.no_show');
+        Cache::forget('policies.refund');
+        Cache::forget('catalogue.shop_location');
 
         foreach (self::PUBLIC_GROUPS as $group) {
             Cache::forget("settings.group.{$group}");

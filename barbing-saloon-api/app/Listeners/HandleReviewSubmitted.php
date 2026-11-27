@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Domain\Notification\NotificationDispatcher;
 use App\Domain\Shared\Services\CatalogueCache;
 use App\Events\ReviewSubmitted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reacts to review submissions — notifies the barber
+ * Reacts to review submissions — notifies the barber and admins
  * about the new review.
  */
 class HandleReviewSubmitted implements ShouldQueue
@@ -29,7 +30,6 @@ class HandleReviewSubmitted implements ShouldQueue
 
         CatalogueCache::bust('testimonials');
 
-        // Future: Notify the barber about their new review
-        // Future: If rating is low, alert admin for follow-up
+        NotificationDispatcher::reviewSubmitted($testimonial);
     }
 }

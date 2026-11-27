@@ -40,7 +40,7 @@
         <div
           v-for="(stat, index) in statItems"
           :key="stat.id"
-          class="stat-card group relative flex flex-col items-center gap-3 rounded-2xl p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 bg-[var(--color-bg-secondary)] backdrop-blur-xl shadow-md shadow-[var(--color-shadow)] hover:shadow-xl"
+          class="stat-card group relative flex flex-col items-center gap-3 rounded-2xl p-4 xs:p-6 sm:p-7 lg:p-8 text-center transition-all duration-300 hover:-translate-y-1 cursor-default overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 bg-[var(--color-bg-secondary)] backdrop-blur-xl shadow-md shadow-[var(--color-shadow)] hover:shadow-xl"
           :style="{ '--reveal-delay': `${index * 0.15}s` }"
         >
           <!-- Corner Decor Crosshairs -->

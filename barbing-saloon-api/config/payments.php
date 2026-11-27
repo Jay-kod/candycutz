@@ -22,7 +22,7 @@ return [
             'public_key' => env('PAYSTACK_PUBLIC_KEY', ''),
             'secret_key' => env('PAYSTACK_SECRET_KEY', ''),
             'base_url' => 'https://api.paystack.co',
-            'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/api/v1/payments/webhook'),
+            'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL', 'http://localhost:8000').'/api/v1/payments/return'),
         ],
         'manual_transfer' => [
             'default_bank_name' => env('MANUAL_TRANSFER_BANK'),

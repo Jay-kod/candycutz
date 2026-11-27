@@ -25,7 +25,7 @@ class Gallery extends Model
 
     protected $fillable = ['title', 'description', 'image_path', 'category', 'barber_id', 'is_featured', 'display_order'];
 
-    protected $casts = ['category' => GalleryCategory::class, 'is_featured' => 'boolean'];
+    protected $casts = ['is_featured' => 'boolean'];
 
     /**
      * @return BelongsTo<Barber, $this>

@@ -50,6 +50,7 @@
           :preview-image="previewImage"
           :selected-file-name="selectedFileName"
           :barbers="barbers"
+          :gallery-categories="galleryCategories"
           role="admin"
           color-theme="admin"
           @close="showUploadForm = false"
@@ -88,6 +89,7 @@ const {
   selectedFileName,
   uploadForm,
   categories,
+  galleryCategories,
   stats,
   filteredGallery,
   getImageUrl,

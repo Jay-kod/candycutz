@@ -45,21 +45,47 @@ class PaymentService
         $provider = $paymentMethod === 'manual_transfer' ? 'manual_transfer' : 'paystack';
         $reference = 'CC-'.strtoupper(Str::random(12));
 
-        $payment = Payment::create([
-            'appointment_id' => $appointment->id,
-            'customer_id' => $appointment->customer_id ?? 1,
-            'amount' => $amount,
-            'amount_minor' => $amount,
-            'currency' => $currency,
-            'status' => $initialStatus,
-            'provider' => $provider,
-            'payment_method' => $paymentMethod,
-            'reference' => $reference,
-            'transaction_ref' => $reference,
-            'client' => $client,
-            'customer_email' => $appointment->customer->email ?? $appointment->client_email,
-            'expires_at' => now()->addMinutes(30),
-        ]);
+        $payment = DB::transaction(function () use ($appointment, $amount, $currency, $initialStatus, $provider, $paymentMethod, $client, $reference) {
+            // Pessimistically lock appointment row to serialize concurrent initialization requests
+            Appointment::where('id', $appointment->id)->lockForUpdate()->first();
+
+            $existing = Payment::where('appointment_id', $appointment->id)
+                ->whereIn('status', ['pending', 'awaiting_transfer'])
+                ->lockForUpdate()
+                ->latest('id')
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'amount' => $amount,
+                    'amount_minor' => $amount,
+                    'currency' => $currency,
+                    'payment_method' => $paymentMethod,
+                    'provider' => $provider,
+                    'client' => $client,
+                    'customer_email' => $appointment->customer->email ?? $appointment->client_email,
+                    'expires_at' => now()->addMinutes(30),
+                ]);
+
+                return $existing;
+            }
+
+            return Payment::create([
+                'appointment_id' => $appointment->id,
+                'customer_id' => $appointment->customer_id ?? 1,
+                'amount' => $amount,
+                'amount_minor' => $amount,
+                'currency' => $currency,
+                'status' => $initialStatus,
+                'provider' => $provider,
+                'payment_method' => $paymentMethod,
+                'reference' => $reference,
+                'transaction_ref' => $reference,
+                'client' => $client,
+                'customer_email' => $appointment->customer->email ?? $appointment->client_email,
+                'expires_at' => now()->addMinutes(30),
+            ]);
+        });
 
         $gateway = $this->resolveGateway($paymentMethod);
         $checkout = $gateway->initiate($payment);

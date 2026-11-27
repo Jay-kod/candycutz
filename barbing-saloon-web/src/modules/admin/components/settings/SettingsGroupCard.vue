@@ -9,7 +9,6 @@ import {
   GlobeAltIcon,
   SparklesIcon,
   AdjustmentsVerticalIcon,
-  InformationCircleIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -47,10 +46,6 @@ const getCategoryIcon = (id) => {
     default: return AdjustmentsVerticalIcon
   }
 }
-
-const activeCategoryMeta = computed(() => {
-  return props.categories.find(c => c.id === props.activeTab) || { id: props.activeTab, label: 'Configuration' }
-})
 
 const displayedCategories = computed(() => {
   if (props.searchQuery.trim()) {

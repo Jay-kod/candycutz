@@ -2,6 +2,57 @@ import { ref, computed } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 
+// Helper to extract clean category name
+export function getCategoryName(service) {
+  if (!service) return 'General';
+  if (service.category_name) return service.category_name;
+  if (typeof service.category === 'string') return service.category;
+  if (service.category?.name) return service.category.name;
+  return 'General';
+}
+
+/**
+ * Intelligent fuzzy & tokenized service search:
+ * - Direct substring and space-insensitive matching ("hair cut" matches "haircut")
+ * - Morphological stemming (plural to singular: "haircuts" -> "haircut", "treatments" -> "treatment", "trims" -> "trim")
+ * - Matches across title, description, category, and barber name
+ */
+export function matchesService(service, query) {
+  if (!query || !query.trim()) return true;
+
+  const q = query.toLowerCase().trim();
+  const qNoSpaces = q.replace(/[\s\-_]+/g, '');
+
+  const name = (service.name || '').toLowerCase();
+  const desc = (service.description || '').toLowerCase();
+  const cat = getCategoryName(service).toLowerCase();
+  const barber = (service.barber?.name || service.barber?.user?.name || '').toLowerCase();
+
+  const combined = `${name} ${desc} ${cat} ${barber}`;
+  const combinedNoSpaces = combined.replace(/[\s\-_]+/g, '');
+
+  // 1. Direct or spaceless match
+  if (combined.includes(q) || (qNoSpaces.length > 2 && combinedNoSpaces.includes(qNoSpaces))) {
+    return true;
+  }
+
+  // 2. Tokenized search with light stemming
+  const tokens = q.split(/\s+/).filter(t => t.length > 0);
+  const stem = (word) => {
+    if (word.length <= 3) return word;
+    if (word.endsWith('ies')) return word.slice(0, -3) + 'y';
+    if (word.endsWith('es')) return word.slice(0, -2);
+    if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+    if (word.endsWith('ing')) return word.slice(0, -3);
+    return word;
+  };
+
+  return tokens.every(token => {
+    const tokenStem = stem(token);
+    return combined.includes(token) || combined.includes(tokenStem);
+  });
+}
+
 export function useCustomerBrowseServices() {
   const toast = useToast();
 
@@ -15,15 +66,6 @@ export function useCustomerBrowseServices() {
   const sortOrder = ref('featured');
   const isLoading = ref(true);
   const isTogglingWishlist = ref(null);
-
-  // Helper to extract clean category name
-  function getCategoryName(service) {
-    if (!service) return 'General';
-    if (service.category_name) return service.category_name;
-    if (typeof service.category === 'string') return service.category;
-    if (service.category?.name) return service.category.name;
-    return 'General';
-  }
 
   // Dynamic available categories list with counts
   const availableCategories = computed(() => {
@@ -48,23 +90,24 @@ export function useCustomerBrowseServices() {
   const filteredServices = computed(() => {
     let list = [...services.value];
 
-    // 1. Category filter
-    if (activeCategory.value !== 'All') {
+    // 1. Search query filter
+    if (searchQuery.value.trim()) {
+      const q = searchQuery.value.trim();
+      const matchingServices = list.filter(s => matchesService(s, q));
+
+      if (activeCategory.value !== 'All') {
+        const categoryMatches = matchingServices.filter(s => getCategoryName(s) === activeCategory.value);
+        // If results match within selected category, show them;
+        // otherwise gracefully fallback to all matching services across categories
+        list = categoryMatches.length > 0 ? categoryMatches : matchingServices;
+      } else {
+        list = matchingServices;
+      }
+    } else if (activeCategory.value !== 'All') {
       list = list.filter(s => getCategoryName(s) === activeCategory.value);
     }
 
-    // 2. Search query filter
-    if (searchQuery.value.trim()) {
-      const q = searchQuery.value.toLowerCase().trim();
-      list = list.filter(s => {
-        const nameMatch = s.name?.toLowerCase().includes(q);
-        const descMatch = s.description?.toLowerCase().includes(q);
-        const catMatch = getCategoryName(s).toLowerCase().includes(q);
-        return nameMatch || descMatch || catMatch;
-      });
-    }
-
-    // 3. Sorting
+    // 2. Sorting
     if (sortOrder.value === 'price-low') {
       list.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     } else if (sortOrder.value === 'price-high') {
@@ -114,6 +157,21 @@ export function useCustomerBrowseServices() {
     activeCategory.value = categoryName;
   }
 
+  function executeSearch(query) {
+    if (typeof query === 'string') {
+      searchQuery.value = query;
+    }
+    // If searching while in a category that has 0 matches, auto-switch to All for visibility
+    if (searchQuery.value.trim() && activeCategory.value !== 'All') {
+      const categoryMatches = services.value.filter(
+        s => getCategoryName(s) === activeCategory.value && matchesService(s, searchQuery.value)
+      );
+      if (categoryMatches.length === 0) {
+        activeCategory.value = 'All';
+      }
+    }
+  }
+
   function resetFilters() {
     activeCategory.value = 'All';
     searchQuery.value = '';
@@ -152,7 +210,7 @@ export function useCustomerBrowseServices() {
         toast.success(`"${serviceName}" added to your wishlist`);
       } catch (err) {
         // Revert on failure
-        wishlist.value = wishlist.value.filter(itemId => itemId !== id);
+        wishlist.value.filter(itemId => itemId !== id);
         toast.error('Failed to add to wishlist');
       } finally {
         isTogglingWishlist.value = null;
@@ -175,8 +233,8 @@ export function useCustomerBrowseServices() {
     filteredServices,
     loadData,
     changeCategory,
+    executeSearch,
     resetFilters,
     toggleWishlist
   };
 }
-

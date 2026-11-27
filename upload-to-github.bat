@@ -22,6 +22,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo [CandyCutz] Running pre-upload responsiveness audit...
+call npm run audit:responsive
+if errorlevel 1 (
+    echo ========================================================
+    echo [ERROR] Responsiveness audit failed!
+    echo Upload blocked to prevent responsive regressions.
+    echo ========================================================
+    exit /b 1
+)
+
 git add -A
 
 git diff --cached --quiet

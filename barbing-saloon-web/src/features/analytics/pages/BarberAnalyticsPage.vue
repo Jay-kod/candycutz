@@ -117,7 +117,7 @@
           <!-- Top Services Table -->
           <article class="rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm">
             <h2 class="font-display text-2xl text-theme-text mb-6">Top <span class="text-gold">Services</span></h2>
-            <div class="overflow-hidden rounded-xl border border-theme-border bg-theme-bg/50">
+            <div class="overflow-x-auto custom-scrollbar rounded-xl border border-theme-border bg-theme-bg/50">
               <table class="w-full text-left text-sm">
                 <thead class="bg-theme-surface text-theme-text-muted border-b border-theme-border text-xs uppercase tracking-wider">
                   <tr>

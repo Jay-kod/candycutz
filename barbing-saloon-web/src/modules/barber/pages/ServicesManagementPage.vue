@@ -4,6 +4,11 @@
       <ServicesSkeleton v-if="loading" />
 
       <template v-else>
+        <div class="flex justify-end">
+          <router-link to="/barber/service-categories" class="rounded-xl border border-theme-border px-4 py-2 text-sm font-bold text-theme-text transition hover:bg-theme-surface">
+            Request a category
+          </router-link>
+        </div>
         <ServicesHeader
           :loading="loading"
           :total-count="services.length"

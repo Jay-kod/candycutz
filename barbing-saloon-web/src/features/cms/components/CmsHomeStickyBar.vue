@@ -1,7 +1,7 @@
 <template>
   <div 
     v-if="isDirty || saving" 
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl animate-bounce-subtle"
+    class="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl animate-bounce-subtle pb-safe"
   >
     <div class="rounded-2xl border border-white/10 bg-[#12161C]/95 backdrop-blur-xl px-5 py-3.5 shadow-[0_10px_35px_rgba(0,0,0,0.6)] flex items-center justify-between gap-4">
       <div class="flex items-center gap-2.5 min-w-0">

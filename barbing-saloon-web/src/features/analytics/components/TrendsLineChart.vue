@@ -40,7 +40,8 @@
       </div>
 
       <!-- X-axis labels -->
-      <div v-for="(p, idx) in graphPoints" :key="'label-'+idx"
+      <div v-for="(p, idx) in axisLabels" :key="'label-'+idx"
+           data-testid="trend-axis-label"
            class="absolute -bottom-8 w-16 -ml-8 flex justify-center"
            :style="{ left: `${p.x}%` }">
         <span class="text-[10px] text-theme-muted uppercase tracking-wider font-bold">{{ p.label }}</span>
@@ -114,6 +115,18 @@ const graphPoints = computed(() => {
     const y = 100 - t.percentage;
     return { x, y, value: t.value, label: t.label };
   });
+});
+
+const axisLabels = computed(() => {
+  const points = graphPoints.value;
+  const maxLabels = 5;
+
+  if (points.length <= maxLabels) return points;
+
+  const lastIndex = points.length - 1;
+  return Array.from({ length: maxLabels }, (_, index) => (
+    points[Math.round((index * lastIndex) / (maxLabels - 1))]
+  ));
 });
 
 const linePath = computed(() => {

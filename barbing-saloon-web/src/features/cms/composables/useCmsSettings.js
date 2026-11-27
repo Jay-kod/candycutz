@@ -173,6 +173,21 @@ export function useCmsSettings() {
     return false;
   };
 
+  const clearFileInput = (input) => {
+    if (!input) return;
+    try {
+      if (typeof input === 'object') {
+        if ('value' in input && typeof input.value === 'string') {
+          input.value = '';
+        } else if (input.value && typeof input.value === 'object' && 'value' in input.value) {
+          input.value.value = '';
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const saveSettings = async (fileInputRef, aboutFileInputRef) => {
     // Validate required fields
     const p1 = (settings.value.cta_title_part_one || '').trim();
@@ -189,10 +204,13 @@ export function useCmsSettings() {
     try {
       // Reconcile and synchronize headline
       if (p1 && p2) {
-        settings.value.cta_title = `${p1} ${p2}`;
+        settings.value.cta_title = `${p1} ${p2}`.trim();
+        settings.value.hero_title = settings.value.cta_title;
+      } else if (p1 || p2) {
+        settings.value.cta_title = (p1 || p2).trim();
         settings.value.hero_title = settings.value.cta_title;
       } else if (settings.value.hero_title) {
-        settings.value.cta_title = settings.value.hero_title;
+        settings.value.cta_title = settings.value.hero_title.trim();
       }
       settings.value.hero_subtitle = sub;
       settings.value.cta_subtitle = sub;
@@ -201,25 +219,26 @@ export function useCmsSettings() {
 
       const formData = new FormData();
       Object.keys(settings.value).forEach(key => {
-        formData.append(`settings[${key}]`, settings.value[key]);
+        const val = settings.value[key];
+        formData.append(`settings[${key}]`, val !== null && val !== undefined ? val : '');
       });
 
       // Explicit synchronization to satisfy both cta_* and hero_* consumers
-      formData.append('settings[cta_title]', settings.value.cta_title);
-      formData.append('settings[cta_title_part_one]', settings.value.cta_title_part_one);
-      formData.append('settings[cta_title_part_two]', settings.value.cta_title_part_two);
+      formData.append('settings[cta_title]', settings.value.cta_title || '');
+      formData.append('settings[cta_title_part_one]', settings.value.cta_title_part_one || '');
+      formData.append('settings[cta_title_part_two]', settings.value.cta_title_part_two || '');
       formData.append('settings[cta_title_color_order]', settings.value.cta_title_color_order || 'first-white');
-      formData.append('settings[cta_subtitle]', settings.value.cta_subtitle);
+      formData.append('settings[cta_subtitle]', settings.value.cta_subtitle || '');
       formData.append('settings[cta_caption]', settings.value.cta_caption || '');
-      formData.append('settings[cta_primary_text]', settings.value.cta_primary_text);
-      formData.append('settings[hero_title]', settings.value.hero_title);
-      formData.append('settings[hero_subtitle]', settings.value.hero_subtitle);
-      formData.append('settings[hero_btn1_text]', settings.value.hero_btn1_text);
+      formData.append('settings[cta_primary_text]', settings.value.cta_primary_text || '');
+      formData.append('settings[hero_title]', settings.value.hero_title || '');
+      formData.append('settings[hero_subtitle]', settings.value.hero_subtitle || '');
+      formData.append('settings[hero_btn1_text]', settings.value.hero_btn1_text || '');
       formData.append('settings[hero_btn2_text]', settings.value.hero_btn2_text || 'About Us');
 
-      formData.append('settings[hero_opacity]', settings.value.hero_image_opacity);
-      formData.append('settings[hero_overlay_opacity]', settings.value.hero_overlay_opacity);
-      formData.append('settings[page_hero_home_overlay_opacity]', settings.value.hero_overlay_opacity);
+      formData.append('settings[hero_opacity]', settings.value.hero_image_opacity ?? 22);
+      formData.append('settings[hero_overlay_opacity]', settings.value.hero_overlay_opacity ?? 45);
+      formData.append('settings[page_hero_home_overlay_opacity]', settings.value.hero_overlay_opacity ?? 45);
       formData.append('settings[hero_overlay_color]', settings.value.hero_overlay_color || '#D4AF37');
       formData.append('settings[page_hero_home_overlay_color]', settings.value.hero_overlay_color || '#D4AF37');
       
@@ -247,18 +266,22 @@ export function useCmsSettings() {
       if (updatedData) {
         currentHeroImage.value = updatedData.hero_image || currentHeroImage.value;
         heroImageFile.value = null; 
-        if (fileInputRef) fileInputRef.value = '';
+        clearFileInput(fileInputRef);
         
         currentAboutImage.value = updatedData.about_teaser_image || currentAboutImage.value;
         aboutImageFile.value = null;
-        if (aboutFileInputRef) aboutFileInputRef.value = '';
+        clearFileInput(aboutFileInputRef);
 
         initialSnapshot.value = JSON.stringify(settings.value);
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Failed to save settings');
+      const message = error.response?.data?.message 
+        || (error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') : null)
+        || error.message 
+        || 'Failed to save settings';
+      toast.error(message);
     } finally {
       saving.value = false;
     }

@@ -15,6 +15,11 @@ describe('ProfilePersonalCard.vue', () => {
 
     const wrapper = mount(ProfilePersonalCard, {
       props: { form },
+      global: {
+        stubs: {
+          'router-link': true,
+        },
+      },
     });
 
     const nameInput = wrapper.find('[data-test="input-name"]');
@@ -24,6 +29,24 @@ describe('ProfilePersonalCard.vue', () => {
     const emailInput = wrapper.find('[data-test="input-email"]');
     expect(emailInput.exists()).toBe(true);
     expect(emailInput.element.value).toBe('obo@candycutz.com');
+  });
+
+  it('renders verified email badge when isVerified is true', () => {
+    const form = {
+      name: 'Obo Master Barber',
+      email: 'obo@candycutz.com',
+    };
+
+    const wrapper = mount(ProfilePersonalCard, {
+      props: { form, isVerified: true },
+      global: {
+        stubs: {
+          'router-link': true,
+        },
+      },
+    });
+
+    expect(wrapper.text()).toContain('Verified');
   });
 
   it('renders cover image and view preview buttons when images are provided', async () => {
@@ -36,6 +59,11 @@ describe('ProfilePersonalCard.vue', () => {
 
     const wrapper = mount(ProfilePersonalCard, {
       props: { form },
+      global: {
+        stubs: {
+          'router-link': true,
+        },
+      },
     });
 
     const coverImg = wrapper.find('[data-test="cover-image-preview"]');
@@ -67,6 +95,11 @@ describe('ProfilePersonalCard.vue', () => {
 
     const wrapper = mount(ProfilePersonalCard, {
       props: { form },
+      global: {
+        stubs: {
+          'router-link': true,
+        },
+      },
     });
 
     const fileInput = wrapper.find('[data-test="input-cover-file"]');

@@ -31,6 +31,39 @@
         </RouterLink>
       </div>
     </div>
+
+    <!-- Seamless Luxury Wave Divider -->
+    <div v-if="!compact" class="barber-cta__bottom-wave" aria-hidden="true">
+      <svg class="barber-cta__wave-svg" viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none">
+        <!-- Subtle luxury gold razor-line along the wave edge -->
+        <path
+          d="M0,50 C360,95 720,15 1080,65 C1260,85 1380,55 1440,50"
+          fill="none"
+          stroke="var(--color-accent)"
+          stroke-width="1.5"
+          stroke-opacity="0.35"
+        />
+        <!-- Solid smooth wave body filled seamlessly with the next section's background -->
+        <path
+          d="M0,50 C360,95 720,15 1080,65 C1260,85 1380,55 1440,50 L1440,100 L0,100 Z"
+          fill="var(--color-bg-primary)"
+        />
+      </svg>
+    </div>
+
+    <!-- Scroll Down Indicator (Desktop & Tablet) -->
+    <a
+      v-if="!compact"
+      href="#features"
+      class="barber-cta__scroll-indicator"
+      aria-label="Scroll to explore features"
+      @click.prevent="scrollToFeatures"
+    >
+      <span class="barber-cta__scroll-mouse" aria-hidden="true">
+        <span class="barber-cta__scroll-dot"></span>
+      </span>
+      <span class="barber-cta__scroll-label">Scroll to explore</span>
+    </a>
   </section>
 </template>
 
@@ -100,6 +133,13 @@ const resolvedOverlayOpacity = computed(() => {
 });
 
 const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor));
+
+const scrollToFeatures = () => {
+  const el = document.getElementById('features');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
 </script>
 
 <style scoped>
@@ -107,13 +147,15 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
   position: relative;
   isolation: isolate;
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
-  min-height: 100svh;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 101vh;
+  min-height: 101vh;
+  max-height: 101vh;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: clamp(6.5rem, 14vh, 9.5rem) 1.25rem clamp(4rem, 8vh, 6rem);
+  padding: clamp(5rem, 10vh, 7.5rem) 1.5rem clamp(5rem, 9vh, 7rem);
   background:
     radial-gradient(ellipse at 50% 48%, rgba(255, 153, 0, 0.08), transparent 58%),
     var(--color-bg-primary);
@@ -123,16 +165,31 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 
 .barber-cta--has-image {
   background:
-    radial-gradient(ellipse at 50% 40%, rgba(255, 153, 0, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 50%, rgba(14, 11, 8, 0.40) 0%, rgba(14, 11, 8, 0.85) 100%),
     #0E0B08;
 }
 
 .barber-cta--has-image .barber-cta__title {
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75);
+}
+
+.barber-cta--has-image .barber-cta__title-white {
+  color: #FFFFFF !important;
+}
+
+.barber-cta--has-image .barber-cta__title-gold {
+  color: var(--color-accent) !important;
+  text-shadow: 0 2px 18px rgba(255, 153, 0, 0.45);
 }
 
 .barber-cta--has-image .barber-cta__subtitle {
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.94) !important;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
+}
+
+.barber-cta--has-image .barber-cta__caption {
+  color: rgba(255, 255, 255, 0.80) !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
 }
 
 .barber-cta__photo,
@@ -175,14 +232,16 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
   z-index: -3;
   background-position: center;
   background-size: cover;
-  opacity: 0.35;
+  opacity: 0.32;
+  mask-image: linear-gradient(to bottom, black 65%, transparent 95%);
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 95%);
 }
 
 .barber-cta__shade {
   z-index: -2;
   background:
-    radial-gradient(ellipse at 50% 40%, rgba(250, 190, 60, 0.20) 0%, rgba(212, 143, 24, 0.26) 38%, rgba(138, 86, 11, 0.45) 72%, rgba(20, 14, 6, 0.82) 100%),
-    linear-gradient(180deg, rgba(230, 168, 23, 0.10) 0%, rgba(14, 10, 4, 0.68) 100%);
+    radial-gradient(ellipse at 50% 40%, rgba(250, 190, 60, 0.20) 0%, rgba(212, 143, 24, 0.26) 38%, rgba(138, 86, 11, 0.45) 72%, rgba(20, 14, 6, 0.85) 100%),
+    linear-gradient(180deg, rgba(230, 168, 23, 0.10) 0%, rgba(14, 10, 4, 0.75) 75%, #0E0B08 100%);
   transition: opacity 300ms ease;
 }
 
@@ -191,10 +250,103 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 }
 
 .barber-cta__content {
-  width: min(100%, 820px);
-  padding: 0 1rem;
+  position: relative;
+  z-index: 10;
+  width: min(100%, 960px);
+  padding: 0 1.5rem;
   margin: 0 auto;
   text-align: center;
+}
+
+/* ============================================================
+   Seamless Luxury Wave Divider
+   ============================================================ */
+.barber-cta__bottom-wave {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: clamp(48px, 8vw, 95px);
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.barber-cta__wave-svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 -8px 24px rgba(0, 0, 0, 0.18));
+}
+
+/* ============================================================
+   Scroll Down Indicator (Desktop & Tablet)
+   ============================================================ */
+.barber-cta__scroll-indicator {
+  position: absolute;
+  bottom: clamp(48px, 8vh, 85px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 550;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  transition: color 180ms ease, transform 180ms ease;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.barber-cta__scroll-indicator:hover {
+  color: var(--color-accent);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.barber-cta__scroll-mouse {
+  width: 20px;
+  height: 30px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.barber-cta__scroll-dot {
+  width: 3px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 2px;
+  animation: barber-scroll-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes barber-scroll-bob {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 0.3;
+  }
+}
+
+@media (max-height: 680px), (max-width: 640px) {
+  .barber-cta__scroll-indicator {
+    display: none;
+  }
 }
 
 .barber-cta__announcement {
@@ -230,10 +382,10 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 .barber-cta__title {
   margin: 0;
   max-width: 100%;
-  font-size: clamp(1.25rem, 6vw, 4.15rem);
+  font-size: clamp(2rem, 5.2vw, 4.65rem);
   font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 1.06;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
   overflow-wrap: break-word;
   text-wrap: balance;
 }
@@ -251,10 +403,10 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 }
 
 .barber-cta__subtitle {
-  max-width: 38rem;
-  margin: 1rem auto 0;
+  max-width: 44rem;
+  margin: 1.25rem auto 0;
   color: var(--color-text-secondary);
-  font-size: clamp(0.9rem, 1.7vw, 1rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
   letter-spacing: 0.025em;
   line-height: 1.6;
   text-align: center;
@@ -262,10 +414,10 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 }
 
 .barber-cta__caption {
-  max-width: 34rem;
-  margin: 0.5rem auto 0;
+  max-width: 38rem;
+  margin: 0.65rem auto 0;
   color: var(--color-text-muted);
-  font-size: clamp(0.75rem, 1.4vw, 0.875rem);
+  font-size: clamp(0.875rem, 1.2vw, 1.05rem);
   line-height: 1.6;
   text-align: center;
   text-wrap: balance;
@@ -275,20 +427,20 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.65rem;
-  margin-top: 1.8rem;
+  gap: 1.15rem;
+  margin-top: 2.25rem;
 }
 
 .barber-cta__button {
   display: inline-flex;
-  min-height: 46px;
+  min-height: 52px;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border-radius: 10px;
-  padding: 0.68rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  gap: 0.65rem;
+  border-radius: 12px;
+  padding: 0.85rem 1.85rem;
+  font-size: 1rem;
+  font-weight: 650;
   text-decoration: none;
   transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
@@ -301,20 +453,20 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
   border: 1px solid var(--color-accent);
   background: var(--color-accent);
   color: var(--color-accent-foreground);
-  box-shadow: 0 4px 14px rgba(255, 153, 0, 0.25);
+  box-shadow: 0 6px 20px rgba(255, 153, 0, 0.3);
 }
 
 .barber-cta__button--primary:hover {
   border-color: var(--color-accent-hover);
   background: var(--color-accent-hover);
-  box-shadow: 0 6px 20px rgba(255, 153, 0, 0.35);
+  box-shadow: 0 8px 26px rgba(255, 153, 0, 0.42);
 }
 
 .barber-cta__button--secondary {
   border: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   color: var(--color-accent);
-  box-shadow: 0 2px 8px var(--color-shadow);
+  box-shadow: 0 3px 12px var(--color-shadow);
 }
 
 .barber-cta__button--secondary:hover {
@@ -324,15 +476,71 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
 }
 
 .barber-cta--preview {
-  min-height: 430px;
+  height: auto !important;
+  min-height: 430px !important;
+  max-height: none !important;
   border-radius: 12px;
   padding: 2.5rem 1.25rem;
 }
 
+/* ============================================================
+   Tablet Responsive Optimization (641px - 1023px)
+   ============================================================ */
+@media (max-width: 1023px) and (min-width: 641px) {
+  .barber-cta {
+    padding: clamp(5rem, 9vh, 7rem) 1.25rem clamp(4.5rem, 8vh, 6.5rem);
+  }
+
+  .barber-cta__content {
+    width: min(100%, 780px);
+    padding: 0 1.25rem;
+  }
+
+  .barber-cta__title {
+    font-size: clamp(1.85rem, 5.5vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .barber-cta__subtitle {
+    max-width: 34rem;
+    font-size: clamp(0.975rem, 2vw, 1.15rem);
+    margin-top: 1rem;
+  }
+
+  .barber-cta__caption {
+    max-width: 30rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  .barber-cta__actions {
+    gap: 0.85rem;
+    margin-top: 1.75rem;
+  }
+
+  .barber-cta__button {
+    min-height: 48px;
+    padding: 0.75rem 1.45rem;
+    font-size: 0.925rem;
+    border-radius: 11px;
+  }
+}
+
+/* ============================================================
+   Mobile Responsive Optimization (<= 640px)
+   ============================================================ */
 @media (max-width: 640px) {
   .barber-cta {
-    min-height: 100svh;
-    padding: 6.5rem 1rem 2.5rem;
+    height: 101vh;
+    min-height: 101vh;
+    max-height: 101vh;
+    padding-top: max(5.75rem, calc(4.75rem + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom, 0px)));
+    padding-inline: 1rem;
+  }
+
+  .barber-cta__bottom-wave {
+    height: clamp(38px, 8vw, 60px);
   }
 
   .barber-cta__announcement {
@@ -342,14 +550,21 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
   }
 
   .barber-cta__title {
-    font-size: clamp(1.45rem, 8vw, 3.5rem);
-    line-height: 1.1;
+    font-size: clamp(1.45rem, 8vw, 3.25rem);
+    line-height: 1.12;
+    white-space: normal;
   }
 
   .barber-cta__subtitle {
     max-width: 25rem;
     margin-top: 0.85rem;
     font-size: 0.95rem;
+  }
+
+  .barber-cta__caption {
+    max-width: 22rem;
+    margin-top: 0.45rem;
+    font-size: 0.8rem;
   }
 
   .barber-cta__actions {
@@ -361,17 +576,50 @@ const overlayBackground = computed(() => buildOverlayGradient(props.overlayColor
     min-height: 44px;
     padding-inline: 0.8rem;
     font-size: 0.8rem;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .barber-cta__actions {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      max-width: 380px;
+      margin-inline: auto;
+    }
+    .barber-cta__button {
+      flex: 1 1 0;
+      min-width: 0;
+      width: auto;
+      padding-inline: 0.65rem;
+      font-size: clamp(0.75rem, 3.2vw, 0.85rem);
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 340px) {
+    .barber-cta__actions {
+      flex-direction: column;
+      max-width: 260px;
+    }
+    .barber-cta__button {
+      width: 100%;
+    }
   }
 
   .barber-cta--preview {
-    min-height: 390px;
+    height: auto !important;
+    min-height: 390px !important;
+    max-height: none !important;
     padding: 2rem 1rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .barber-cta__button {
+  .barber-cta__button,
+  .barber-cta__scroll-dot {
     transition: none;
+    animation: none;
   }
 }
 </style>

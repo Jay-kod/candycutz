@@ -5,7 +5,7 @@
       <div class="space-y-3 flex-1">
         <div class="h-4 w-36 bg-slate-200 dark:bg-theme-border rounded-md"></div>
         <div class="h-8 w-64 bg-slate-200 dark:bg-theme-border rounded-xl"></div>
-        <div class="h-3 w-96 bg-slate-100 dark:bg-theme-surface-subtle rounded"></div>
+        <div class="h-3 w-full max-w-sm sm:w-96 bg-slate-100 dark:bg-theme-surface-subtle rounded"></div>
       </div>
       <div class="flex flex-col sm:flex-row items-center gap-3">
         <div class="h-10 w-full sm:w-64 bg-slate-100 dark:bg-theme-surface-subtle rounded-xl"></div>
@@ -27,7 +27,7 @@
 
     <!-- Filter Bar Skeleton -->
     <div class="flex flex-col sm:flex-row justify-between gap-4">
-      <div class="h-11 w-96 bg-theme-surface border border-theme-border rounded-2xl"></div>
+      <div class="h-11 w-full max-w-sm sm:w-96 bg-theme-surface border border-theme-border rounded-2xl"></div>
       <div class="h-11 w-44 bg-theme-surface border border-theme-border rounded-xl"></div>
     </div>
 

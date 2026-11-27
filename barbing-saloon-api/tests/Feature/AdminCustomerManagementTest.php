@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Shared\Enums\UserRole;
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
 
 it('allows admin to list customers with is_active and status', function () {
@@ -145,5 +146,18 @@ it('forbids regular customers from customer management endpoints', function () {
 
     $this->actingAs($customer)->getJson('/api/v1/admin/customers')->assertForbidden();
     $this->actingAs($customer)->deleteJson("/api/v1/admin/customers/{$targetCustomer->id}")->assertForbidden();
+});
+
+it('returns a structured validation response when Paystack is not configured', function () {
+    $admin = User::factory()->create(['role' => UserRole::admin]);
+
+    Setting::query()->where('key', 'paystack_secret_key')->delete();
+    config()->set('services.paystack.secret_key', null);
+
+    $response = $this->actingAs($admin)->postJson('/api/v1/admin/paystack/test-connection');
+
+    $response->assertStatus(422);
+    $response->assertJsonPath('success', false);
+    $response->assertJsonPath('message', 'Paystack Secret Key is not configured. Please enter or save your secret key first.');
 });
 

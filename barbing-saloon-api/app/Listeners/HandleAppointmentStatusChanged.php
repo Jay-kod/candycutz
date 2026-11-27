@@ -7,15 +7,16 @@ namespace App\Listeners;
 use App\Domain\Notification\NotificationDispatcher;
 use App\Events\AppointmentStatusChanged;
 use App\Jobs\SendBookingCancellation;
+use App\Jobs\SendBookingThankYou;
+use App\Models\NotificationDelivery;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Reacts to appointment status transitions by dispatching
- * in-app notifications, push notifications, and emails across
+ * in-app notifications, push notifications, and luxury emails across
  * the core triad: Barber, Customer, and Admin.
- *
- * This listener decouples BookingService from notification concerns.
  */
 class HandleAppointmentStatusChanged implements ShouldQueue
 {
@@ -28,6 +29,7 @@ class HandleAppointmentStatusChanged implements ShouldQueue
         $appointment = $event->appointment;
         $newStatus = $event->newStatus;
         $actor = $event->actor;
+        $customerNotification = null;
 
         // 1. Status-specific in-app + push notifications across Customer, Barber & Admin
         try {
@@ -36,7 +38,7 @@ class HandleAppointmentStatusChanged implements ShouldQueue
             match ($newStatus) {
                 'confirmed' => $dispatcher->bookingApproved($appointment, $actor),
                 'cancelled' => $dispatcher->bookingCancelled($appointment, $actor),
-                'completed' => $dispatcher->bookingCompleted($appointment, $actor),
+                'completed' => $customerNotification = $dispatcher->bookingCompleted($appointment, $actor),
                 'no_show' => $dispatcher->bookingNoShow($appointment, $actor),
                 'checked_in' => $dispatcher->bookingCheckedIn($appointment, $actor),
                 'in_progress' => $dispatcher->bookingInProgress($appointment, $actor),
@@ -46,8 +48,33 @@ class HandleAppointmentStatusChanged implements ShouldQueue
             Log::warning("HandleAppointmentStatusChanged: notification dispatch failed for appointment {$appointment->id}: ".$e->getMessage());
         }
 
-        // 2. Cancellation email
-        if ($newStatus === 'cancelled' && $appointment->customer) {
+        // 2. Session completion summary & thank-you email
+        if ($newStatus === 'completed') {
+            $cacheKey = "completion_email_dispatched:{$appointment->id}";
+            $cacheClaimed = false;
+
+            try {
+                $customerNotificationId = $customerNotification?->id;
+                $alreadyTracked = $customerNotificationId !== null && NotificationDelivery::query()
+                    ->where('notification_id', $customerNotificationId)
+                    ->where('channel', 'email')
+                    ->whereIn('status', ['pending', 'processing', 'delivered'])
+                    ->exists();
+
+                if (! $alreadyTracked && Cache::add($cacheKey, true, now()->addDays(7))) {
+                    $cacheClaimed = true;
+                    SendBookingThankYou::dispatch($appointment, $customerNotificationId);
+                }
+            } catch (\Throwable $e) {
+                if ($cacheClaimed) {
+                    Cache::forget($cacheKey);
+                }
+                Log::warning("HandleAppointmentStatusChanged: completion email failed for appointment {$appointment->id}: ".$e->getMessage());
+            }
+        }
+
+        // 3. Cancellation email
+        if ($newStatus === 'cancelled') {
             try {
                 SendBookingCancellation::dispatch($appointment);
             } catch (\Throwable $e) {

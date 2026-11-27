@@ -53,6 +53,109 @@
                 ]
             }
         },
+        "/api/v1/account/avatar": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "POST Account/avatar (uploadAvatar)",
+                "description": "Handles POST request to `/api/v1/account/avatar` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@uploadAvatar`.",
+                "operationId": "post_api_v1_account_avatar",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "DELETE Account/avatar (deleteAvatar)",
+                "description": "Handles DELETE request to `/api/v1/account/avatar` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@deleteAvatar`.",
+                "operationId": "delete_api_v1_account_avatar",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/account/dashboard": {
             "get": {
                 "tags": [
@@ -228,6 +331,98 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "PUT Account/profile (updateProfile)",
+                "description": "Handles PUT request to `/api/v1/account/profile` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@updateProfile`.",
+                "operationId": "put_api_v1_account_profile",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "PATCH Account/profile (updateProfile)",
+                "description": "Handles PATCH request to `/api/v1/account/profile` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@updateProfile`.",
+                "operationId": "patch_api_v1_account_profile",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/admin/analytics": {
@@ -275,6 +470,207 @@
                         "BearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/v1/admin/animations": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "GET Admin/animations (index)",
+                "description": "Handles GET request to `/api/v1/admin/animations` via `App\\Http\\Controllers\\Api\\V1\\Admin\\AnimationApiController@index`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "get_api_v1_admin_animations",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/animations (update)",
+                "description": "Handles POST request to `/api/v1/admin/animations` via `App\\Http\\Controllers\\Api\\V1\\Admin\\AnimationApiController@update`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_animations",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/animations/reset": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/animations/reset (reset)",
+                "description": "Handles POST request to `/api/v1/admin/animations/reset` via `App\\Http\\Controllers\\Api\\V1\\Admin\\AnimationApiController@reset`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_animations_reset",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/admin/app/crashes": {
@@ -1546,6 +1942,129 @@
                 }
             }
         },
+        "/api/v1/admin/bank-details": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "GET Admin/bank Details (bankDetails)",
+                "description": "Handles GET request to `/api/v1/admin/bank-details` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@bankDetails`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "get_api_v1_admin_bank_details",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/bank Details (updateBankDetails)",
+                "description": "Handles POST request to `/api/v1/admin/bank-details` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@updateBankDetails`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_bank_details",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/barbers": {
             "get": {
                 "tags": [
@@ -2298,6 +2817,82 @@
                         "BearerAuth": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/customers (storeCustomer)",
+                "description": "Handles POST request to `/api/v1/admin/customers` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@storeCustomer`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_customers",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/admin/customers/{id}": {
@@ -2356,6 +2951,353 @@
                         "BearerAuth": []
                     }
                 ]
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "PUT Admin/customers/{id} (updateCustomer)",
+                "description": "Handles PUT request to `/api/v1/admin/customers/{id}` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@updateCustomer`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "put_api_v1_admin_customers__id_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "PATCH Admin/customers/{id} (updateCustomer)",
+                "description": "Handles PATCH request to `/api/v1/admin/customers/{id}` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@updateCustomer`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "patch_api_v1_admin_customers__id_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "DELETE Admin/customers/{id} (deleteCustomer)",
+                "description": "Handles DELETE request to `/api/v1/admin/customers/{id}` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@deleteCustomer`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "delete_api_v1_admin_customers__id_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/reset-password": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/customers/{id}/reset Password (resetCustomerPassword)",
+                "description": "Handles POST request to `/api/v1/admin/customers/{id}/reset-password` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@resetCustomerPassword`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_customers__id__reset_password",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/customers/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "PATCH Admin/customers/{id}/status (updateCustomerStatus)",
+                "description": "Handles PATCH request to `/api/v1/admin/customers/{id}/status` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@updateCustomerStatus`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "patch_api_v1_admin_customers__id__status",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateStatusRequest"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/admin/dashboard": {
@@ -2702,6 +3644,122 @@
                             "type": "integer"
                         },
                         "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/feedback": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "GET Admin/feedback (index)",
+                "description": "Handles GET request to `/api/v1/admin/feedback` via `App\\Http\\Controllers\\Api\\V1\\FeedbackSubmissionApiController@index`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "get_api_v1_admin_feedback",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/feedback/{submission}": {
+            "patch": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "PATCH Admin/feedback/{submission} (update)",
+                "description": "Handles PATCH request to `/api/v1/admin/feedback/{submission}` via `App\\Http\\Controllers\\Api\\V1\\FeedbackSubmissionApiController@update`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "patch_api_v1_admin_feedback__submission_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "submission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Identifier for submission"
                     }
                 ],
                 "security": [
@@ -3696,6 +4754,95 @@
                 ]
             }
         },
+        "/api/v1/admin/payments/{id}/reassign-barber": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/payments/{id}/reassign Barber (reassignBarber)",
+                "description": "Handles POST request to `/api/v1/admin/payments/{id}/reassign-barber` via `App\\Http\\Controllers\\Api\\V1\\AdminPaymentApiController@reassignBarber`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_payments__id__reassign_barber",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/payments/{id}/refund": {
             "post": {
                 "tags": [
@@ -3704,6 +4851,95 @@
                 "summary": "POST Admin/payments/{id}/refund (refund)",
                 "description": "Handles POST request to `/api/v1/admin/payments/{id}/refund` via `App\\Http\\Controllers\\Api\\V1\\AdminPaymentApiController@refund`.\n\n**Authorized Roles:** `admin`, `super_admin`",
                 "operationId": "post_api_v1_admin_payments__id__refund",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/payments/{id}/reject": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/payments/{id}/reject (rejectPayment)",
+                "description": "Handles POST request to `/api/v1/admin/payments/{id}/reject` via `App\\Http\\Controllers\\Api\\V1\\AdminPaymentApiController@rejectPayment`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_payments__id__reject",
                 "responses": {
                     "200": {
                         "description": "Operation completed successfully.",
@@ -3874,6 +5110,296 @@
                 }
             }
         },
+        "/api/v1/admin/payments/{id}/verify": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/payments/{id}/verify (verifyPayment)",
+                "description": "Handles POST request to `/api/v1/admin/payments/{id}/verify` via `App\\Http\\Controllers\\Api\\V1\\AdminPaymentApiController@verifyPayment`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_payments__id__verify",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Identifier for id"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/paystack/settings": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "GET Admin/paystack/settings (getPaystackSettings)",
+                "description": "Handles GET request to `/api/v1/admin/paystack/settings` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@getPaystackSettings`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "get_api_v1_admin_paystack_settings",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/paystack/settings (updatePaystackSettings)",
+                "description": "Handles POST request to `/api/v1/admin/paystack/settings` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@updatePaystackSettings`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_paystack_settings",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/paystack/test-connection": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/paystack/test Connection (testPaystackConnection)",
+                "description": "Handles POST request to `/api/v1/admin/paystack/test-connection` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@testPaystackConnection`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_paystack_test_connection",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/reports": {
             "get": {
                 "tags": [
@@ -3919,6 +5445,131 @@
                         "BearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/v1/admin/reports/history": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "GET Admin/reports/history (reportHistory)",
+                "description": "Handles GET request to `/api/v1/admin/reports/history` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@reportHistory`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "get_api_v1_admin_reports_history",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/reports/log": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "POST Admin/reports/log (logReportExport)",
+                "description": "Handles POST request to `/api/v1/admin/reports/log` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@logReportExport`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "post_api_v1_admin_reports_log",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/admin/settings": {
@@ -4924,8 +6575,8 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "GET Admin/testimonials (index)",
-                "description": "Handles GET request to `/api/v1/admin/testimonials` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@index`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "summary": "GET Admin/testimonials (adminIndex)",
+                "description": "Handles GET request to `/api/v1/admin/testimonials` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@adminIndex`.\n\n**Authorized Roles:** `admin`, `super_admin`",
                 "operationId": "get_api_v1_admin_testimonials",
                 "responses": {
                     "200": {
@@ -5999,6 +7650,28 @@
                 ]
             }
         },
+        "/api/v1/animations": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Animations (animations)",
+                "description": "Handles GET request to `/api/v1/animations` via `App\\Http\\Controllers\\Api\\V1\\PublicApiController@animations`.",
+                "operationId": "get_api_v1_animations",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app/crashes": {
             "post": {
                 "tags": [
@@ -6160,7 +7833,7 @@
                     "Booking"
                 ],
                 "summary": "POST Appointments/walk In (storeWalkIn)",
-                "description": "Handles POST request to `/api/v1/appointments/walk-in` via `App\\Http\\Controllers\\Api\\V1\\AppointmentApiController@storeWalkIn`.",
+                "description": "Handles POST request to `/api/v1/appointments/walk-in` via `\\App\\Http\\Controllers\\Api\\V1\\AppointmentApiController@storeWalkIn`.\n\n**Authorized Roles:** `barber`, `admin`, `super_admin`",
                 "operationId": "post_api_v1_appointments_walk_in",
                 "responses": {
                     "200": {
@@ -6195,6 +7868,16 @@
                     },
                     "401": {
                         "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7355,6 +9038,72 @@
                     }
                 ]
             },
+            "post": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "POST Barber/account (updateAccount)",
+                "description": "Handles POST request to `/api/v1/barber/account` via `App\\Http\\Controllers\\Api\\V1\\BarberApiController@updateAccount`.",
+                "operationId": "post_api_v1_barber_account",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
             "patch": {
                 "tags": [
                     "Catalogue"
@@ -7528,7 +9277,7 @@
                     "Catalogue"
                 ],
                 "summary": "POST Barber/appointments/walk In (storeWalkIn)",
-                "description": "Handles POST request to `/api/v1/barber/appointments/walk-in` via `App\\Http\\Controllers\\Api\\V1\\AppointmentApiController@storeWalkIn`.",
+                "description": "Handles POST request to `/api/v1/barber/appointments/walk-in` via `\\App\\Http\\Controllers\\Api\\V1\\AppointmentApiController@storeWalkIn`.\n\n**Authorized Roles:** `barber`, `admin`, `super_admin`",
                 "operationId": "post_api_v1_barber_appointments_walk_in",
                 "responses": {
                     "200": {
@@ -7563,6 +9312,16 @@
                     },
                     "401": {
                         "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7900,6 +9659,43 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/v1/barber/bank-details": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barber/bank Details (bankDetails)",
+                "description": "Handles GET request to `/api/v1/barber/bank-details` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@bankDetails`.",
+                "operationId": "get_api_v1_barber_bank_details",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/barber/blog": {
@@ -8741,6 +10537,43 @@
                 }
             }
         },
+        "/api/v1/barber/reviews": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barber/reviews (barberReviews)",
+                "description": "Handles GET request to `/api/v1/barber/reviews` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@barberReviews`.",
+                "operationId": "get_api_v1_barber_reviews",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/barber/schedule": {
             "get": {
                 "tags": [
@@ -9023,6 +10856,43 @@
                         "description": "Identifier for id"
                     }
                 ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/barber/testimonials": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barber/testimonials (barberReviews)",
+                "description": "Handles GET request to `/api/v1/barber/testimonials` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@barberReviews`.",
+                "operationId": "get_api_v1_barber_testimonials",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "BearerAuth": []
@@ -9408,6 +11278,43 @@
                 ]
             }
         },
+        "/api/v1/barbers/bank-details": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barbers/bank Details (bankDetails)",
+                "description": "Handles GET request to `/api/v1/barbers/bank-details` via `App\\Http\\Controllers\\Api\\V1\\AdminApiController@bankDetails`.",
+                "operationId": "get_api_v1_barbers_bank_details",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/barbers/blocked-periods": {
             "get": {
                 "tags": [
@@ -9644,6 +11551,43 @@
                 ]
             }
         },
+        "/api/v1/barbers/reviews": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barbers/reviews (barberReviews)",
+                "description": "Handles GET request to `/api/v1/barbers/reviews` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@barberReviews`.",
+                "operationId": "get_api_v1_barbers_reviews",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/barbers/schedule": {
             "get": {
                 "tags": [
@@ -9724,6 +11668,43 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/v1/barbers/testimonials": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Barbers/testimonials (barberReviews)",
+                "description": "Handles GET request to `/api/v1/barbers/testimonials` via `App\\Http\\Controllers\\Api\\V1\\TestimonialApiController@barberReviews`.",
+                "operationId": "get_api_v1_barbers_testimonials",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/barbers/{id}": {
@@ -10516,6 +12497,109 @@
                 }
             }
         },
+        "/api/v1/customer/avatar": {
+            "post": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "POST Customer/avatar (uploadAvatar)",
+                "description": "Handles POST request to `/api/v1/customer/avatar` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@uploadAvatar`.",
+                "operationId": "post_api_v1_customer_avatar",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "DELETE Customer/avatar (deleteAvatar)",
+                "description": "Handles DELETE request to `/api/v1/customer/avatar` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@deleteAvatar`.",
+                "operationId": "delete_api_v1_customer_avatar",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/customer/blog/{id}/react": {
             "post": {
                 "tags": [
@@ -11127,6 +13211,84 @@
                 ]
             }
         },
+        "/api/v1/customer/feedback": {
+            "post": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "POST Customer/feedback (store)",
+                "description": "Handles POST request to `/api/v1/customer/feedback` via `\\App\\Http\\Controllers\\Api\\V1\\FeedbackSubmissionApiController@store`.\n\n**Authorized Roles:** `customer`",
+                "operationId": "post_api_v1_customer_feedback",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/customer/my-codes": {
             "get": {
                 "tags": [
@@ -11386,6 +13548,98 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "PUT Customer/profile (updateProfile)",
+                "description": "Handles PUT request to `/api/v1/customer/profile` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@updateProfile`.",
+                "operationId": "put_api_v1_customer_profile",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "PATCH Customer/profile (updateProfile)",
+                "description": "Handles PATCH request to `/api/v1/customer/profile` via `App\\Http\\Controllers\\Api\\V1\\AccountApiController@updateProfile`.",
+                "operationId": "patch_api_v1_customer_profile",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
                                 }
                             }
                         }
@@ -12857,6 +15111,81 @@
                 }
             }
         },
+        "/api/v1/payments/checkout-data": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "GET Payments/checkout Data (checkoutData)",
+                "description": "Handles GET request to `/api/v1/payments/checkout-data` via `App\\Http\\Controllers\\Api\\V1\\PaymentApiController@checkoutData`.",
+                "operationId": "get_api_v1_payments_checkout_data",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/confirm-transfer": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "POST Payments/confirm Transfer (confirmTransfer)",
+                "description": "Handles POST request to `/api/v1/payments/confirm-transfer` via `App\\Http\\Controllers\\Api\\V1\\PaymentApiController@confirmTransfer`.",
+                "operationId": "post_api_v1_payments_confirm_transfer",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/payments/return": {
             "get": {
                 "tags": [
@@ -12981,6 +15310,28 @@
                         "description": "Identifier for filename"
                     }
                 ]
+            }
+        },
+        "/api/v1/public/animations": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Public/animations (animations)",
+                "description": "Handles GET request to `/api/v1/public/animations` via `App\\Http\\Controllers\\Api\\V1\\PublicApiController@animations`.",
+                "operationId": "get_api_v1_public_animations",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/public/available-slots": {
@@ -13545,14 +15896,262 @@
                 }
             }
         },
-        "/api/v1/service-categories/{id}": {
+        "/api/v1/service-categories/{serviceCategory}": {
             "put": {
                 "tags": [
                     "Catalogue"
                 ],
-                "summary": "PUT Service Categories/{id} (updateCategory)",
-                "description": "Handles PUT request to `/api/v1/service-categories/{id}` via `App\\Http\\Controllers\\Api\\V1\\ServiceApiController@updateCategory`.\n\n**Authorized Roles:** `admin`, `super_admin`",
-                "operationId": "put_api_v1_service_categories__id_",
+                "summary": "PUT Service Categories/{serviceCategory} (updateCategory)",
+                "description": "Handles PUT request to `/api/v1/service-categories/{serviceCategory}` via `App\\Http\\Controllers\\Api\\V1\\ServiceApiController@updateCategory`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "put_api_v1_service_categories__serviceCategory_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "serviceCategory",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Identifier for serviceCategory"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "DELETE Service Categories/{serviceCategory} (destroyCategory)",
+                "description": "Handles DELETE request to `/api/v1/service-categories/{serviceCategory}` via `App\\Http\\Controllers\\Api\\V1\\ServiceApiController@destroyCategory`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "delete_api_v1_service_categories__serviceCategory_",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "serviceCategory",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Identifier for serviceCategory"
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/service-category-requests": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "GET Service Category Requests (index)",
+                "description": "Handles GET request to `/api/v1/service-category-requests` via `App\\Http\\Controllers\\Api\\V1\\ServiceCategoryRequestApiController@index`.\n\n**Authorized Roles:** `barber`, `admin`, `super_admin`",
+                "operationId": "get_api_v1_service_category_requests",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "POST Service Category Requests (store)",
+                "description": "Handles POST request to `/api/v1/service-category-requests` via `App\\Http\\Controllers\\Api\\V1\\ServiceCategoryRequestApiController@store`.\n\n**Authorized Roles:** `barber`",
+                "operationId": "post_api_v1_service_category_requests",
+                "responses": {
+                    "200": {
+                        "description": "Operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Resource created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated (token missing, invalid, or expired).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (caller role not authorized for this resource).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/service-category-requests/{id}/approve": {
+            "patch": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "PATCH Service Category Requests/{id}/approve (approve)",
+                "description": "Handles PATCH request to `/api/v1/service-category-requests/{id}/approve` via `App\\Http\\Controllers\\Api\\V1\\ServiceCategoryRequestApiController@approve`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "patch_api_v1_service_category_requests__id__approve",
                 "responses": {
                     "200": {
                         "description": "Operation completed successfully.",
@@ -13612,14 +16211,16 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/v1/service-category-requests/{id}/reject": {
+            "patch": {
                 "tags": [
                     "Catalogue"
                 ],
-                "summary": "DELETE Service Categories/{id} (destroyCategory)",
-                "description": "Handles DELETE request to `/api/v1/service-categories/{id}` via `App\\Http\\Controllers\\Api\\V1\\ServiceApiController@destroyCategory`.\n\n**Authorized Roles:** `admin`, `super_admin`",
-                "operationId": "delete_api_v1_service_categories__id_",
+                "summary": "PATCH Service Category Requests/{id}/reject (reject)",
+                "description": "Handles PATCH request to `/api/v1/service-category-requests/{id}/reject` via `App\\Http\\Controllers\\Api\\V1\\ServiceCategoryRequestApiController@reject`.\n\n**Authorized Roles:** `admin`, `super_admin`",
+                "operationId": "patch_api_v1_service_category_requests__id__reject",
                 "responses": {
                     "200": {
                         "description": "Operation completed successfully.",
@@ -13667,7 +16268,18 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "Dynamic payload parameters"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/service-zones": {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Booking\Services;
 
+use App\Domain\Booking\Actions\MarkNoShow;
 use App\Domain\Booking\AppointmentStateMachine;
 use App\Domain\Booking\DataObjects\BookingData;
 use App\Domain\Shared\Enums\AppointmentSource;
@@ -18,6 +19,7 @@ use App\Models\AppointmentStatusHistory;
 use App\Models\Barber;
 use App\Models\BlockedPeriod;
 use App\Models\Branch;
+use App\Models\Business;
 use App\Models\Service;
 use App\Models\ServiceZone;
 use App\Models\User;
@@ -139,10 +141,41 @@ class BookingService
             }
 
             // 4. PESSIMISTIC ROW-LEVEL COLLISION LOCK (SELECT FOR UPDATE)
+            // Cancel any prior uncompleted drafts for this customer
+            Appointment::where('customer_id', $customer->id)
+                ->where('status', AppointmentStatus::draft->value)
+                ->update([
+                    'status' => AppointmentStatus::cancelled->value,
+                    'cancellation_reason' => 'Superseded by booking confirmation.',
+                    'draft_expires_at' => null,
+                ]);
+
+            // Clean up any stale expired drafts for this barber and date before checking collisions or inserting
+            Appointment::where('barber_id', $barber->id)
+                ->where('appointment_date', $date)
+                ->where('status', AppointmentStatus::draft->value)
+                ->whereNotNull('draft_expires_at')
+                ->where('draft_expires_at', '<=', now())
+                ->update([
+                    'status' => AppointmentStatus::cancelled->value,
+                    'cancellation_reason' => 'Draft slot hold expired without payment.',
+                    'draft_expires_at' => null,
+                ]);
+
             // Checks for any overlapping appointment interval
             $conflict = Appointment::where('barber_id', $barber->id)
                 ->where('appointment_date', $date)
-                ->whereNotIn('status', ['cancelled'])
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
+                ->where(function ($q) {
+                    $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
+                        ->orWhere(function ($draftQuery) {
+                            $draftQuery->whereIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                ->where(function ($tq) {
+                                    $tq->whereNull('draft_expires_at')
+                                        ->orWhere('draft_expires_at', '>', now());
+                                });
+                        });
+                })
                 ->where(function ($query) use ($startTime, $endTime) {
                     $query->where('appointment_time', '<', $endTime)
                         ->where(function ($q) use ($startTime) {
@@ -214,7 +247,7 @@ class BookingService
             BookingCreated::dispatch($appointment, $customer);
 
             return $appointment->load(['service.category', 'barber.user', 'serviceZone']);
-        });
+        }, 3);
     }
 
     /**
@@ -234,8 +267,18 @@ class BookingService
 
             // Pessimistic check
             $conflict = Appointment::where('barber_id', $barber->id)
-                ->where('appointment_date', $date)
-                ->whereNotIn('status', ['cancelled'])
+                ->whereDate('appointment_date', $date)
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
+                ->where(function ($q) {
+                    $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
+                        ->orWhere(function ($draftQuery) {
+                            $draftQuery->whereIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                ->where(function ($tq) {
+                                    $tq->whereNull('draft_expires_at')
+                                        ->orWhere('draft_expires_at', '>', now());
+                                });
+                        });
+                })
                 ->where(function ($query) use ($startTime, $endTime) {
                     $query->where('appointment_time', '<', $endTime)
                         ->where(function ($q) use ($startTime) {
@@ -299,19 +342,249 @@ class BookingService
             BookingCreated::dispatch($appointment, $actor);
 
             return $appointment->load(['service.category', 'barber.user']);
-        });
+        }, 3);
     }
 
     private function resolveBranchId(Barber $barber): int
     {
-        $branchId = $barber->branch_id
-            ?? Branch::query()->where('is_active', true)->value('id');
-
-        if (! $branchId) {
-            throw BookingException::failed('No active branch is configured for this booking.');
+        // 1. Direct branch on the barber record
+        if ($barber->branch_id && Branch::whereKey($barber->branch_id)->exists()) {
+            return (int) $barber->branch_id;
         }
 
-        return (int) $branchId;
+        // 2. Any active branch in the system
+        $branchId = Branch::query()->where('is_active', true)->value('id');
+        if ($branchId) {
+            $barber->updateQuietly(['branch_id' => $branchId]);
+
+            return (int) $branchId;
+        }
+
+        // 3. Any branch in the system (reactivate if marked inactive)
+        $firstBranch = Branch::query()->first();
+        if ($firstBranch) {
+            if (! $firstBranch->is_active) {
+                $firstBranch->updateQuietly(['is_active' => true]);
+            }
+            $barber->updateQuietly(['branch_id' => $firstBranch->id]);
+
+            return (int) $firstBranch->id;
+        }
+
+        // 4. Auto-heal: Ensure business and flagship Keffi Main Hub branch exist
+        $business = Business::query()->first();
+        if (! $business) {
+            $business = Business::create([
+                'name' => 'CandyCutz Grooming Lounge',
+                'legal_name' => 'CandyCutz Grooming Ltd.',
+                'phone' => '+234 810 000 0000',
+                'email' => 'concierge@candycutz.com',
+                'logo' => '/images/logo.png',
+            ]);
+        }
+
+        $branch = Branch::firstOrCreate(
+            ['slug' => 'keffi-central'],
+            [
+                'business_id' => $business->id,
+                'name' => 'Keffi Main Hub',
+                'address' => 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',
+                'latitude' => 8.8486,
+                'longitude' => 7.8736,
+                'phone' => '+234 810 000 0000',
+                'email' => 'keffi@candycutz.com',
+                'is_active' => true,
+            ]
+        );
+
+        $barber->updateQuietly(['branch_id' => $branch->id]);
+
+        return (int) $branch->id;
+    }
+
+    /**
+     * Create customer draft reservation with 15-minute slot hold.
+     */
+    public function createDraftBooking(User $customer, BookingData $data, AppointmentSource $source = AppointmentSource::web): Appointment
+    {
+        return DB::transaction(function () use ($customer, $data, $source) {
+            $barber = Barber::with('user')
+                ->whereKey($data->barberId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (! $barber->user->is_active) {
+                throw BookingException::failed('Selected barber profile is currently inactive.');
+            }
+
+            // Supersede any existing uncompleted draft by this customer so they hold at most 1 slot at a time
+            Appointment::where('customer_id', $customer->id)
+                ->where('status', AppointmentStatus::draft->value)
+                ->lockForUpdate()
+                ->update([
+                    'status' => AppointmentStatus::cancelled->value,
+                    'cancellation_reason' => 'Superseded by new draft booking',
+                    'draft_expires_at' => null,
+                ]);
+
+            $service = Service::findOrFail($data->serviceId);
+            $services = collect([$service]);
+            $date = Carbon::parse($data->appointmentDate)->toDateString();
+            $startTime = substr(trim((string) $data->appointmentTime), 0, 5);
+            $totalDurationMinutes = (int) $services->sum(fn ($s) => $s->duration_minutes ?: 30);
+            $endTime = Carbon::parse("{$date} {$startTime}")->addMinutes($totalDurationMinutes)->format('H:i');
+
+            // 1. Working Hours Check
+            $dayOfWeek = (int) Carbon::parse($date)->dayOfWeekIso % 7;
+            $workingHour = $barber->workingHours()->where('day_of_week', $dayOfWeek)->first();
+
+            if ($workingHour) {
+                if ($workingHour->is_closed) {
+                    throw new BookingSlotUnavailableException(
+                        'The barber is not working on this day.',
+                        "{$date} {$startTime}"
+                    );
+                }
+                $openTime = substr($workingHour->open_time, 0, 5);
+                $closeTime = substr($workingHour->close_time, 0, 5);
+                if ($startTime < $openTime || $endTime > $closeTime) {
+                    throw new BookingSlotUnavailableException(
+                        "Appointment must be between {$openTime} and {$closeTime}.",
+                        "{$date} {$startTime}"
+                    );
+                }
+            }
+
+            // 2. Blackout / Break Check
+            $startDateTime = "{$date} {$startTime}:00";
+            $endDateTime = "{$date} {$endTime}:00";
+
+            $hasBlackout = BlockedPeriod::where('barber_id', $barber->id)
+                ->whereDate('start_datetime', $date)
+                ->where(function ($query) use ($startDateTime, $endDateTime) {
+                    $query->where('start_datetime', '<', $endDateTime)
+                        ->where('end_datetime', '>', $startDateTime);
+                })
+                ->exists();
+
+            if ($hasBlackout) {
+                throw new BookingSlotUnavailableException(
+                    'The barber is unavailable during this time period due to a scheduled break or leave.',
+                    "{$date} {$startTime}"
+                );
+            }
+
+            // Clean up any stale expired drafts for this barber and date before checking collisions or inserting
+            Appointment::where('barber_id', $barber->id)
+                ->where('appointment_date', $date)
+                ->where('status', AppointmentStatus::draft->value)
+                ->whereNotNull('draft_expires_at')
+                ->where('draft_expires_at', '<=', now())
+                ->update([
+                    'status' => AppointmentStatus::cancelled->value,
+                    'cancellation_reason' => 'Draft slot hold expired without payment.',
+                    'draft_expires_at' => null,
+                ]);
+
+            // 3. Pessimistic Row-Level Collision Lock (direct index on appointment_date)
+            $conflict = Appointment::where('barber_id', $barber->id)
+                ->where('appointment_date', $date)
+                ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
+                ->where(function ($q) {
+                    $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
+                        ->orWhere(function ($draftQuery) {
+                            $draftQuery->whereIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                ->where(function ($tq) {
+                                    $tq->whereNull('draft_expires_at')
+                                        ->orWhere('draft_expires_at', '>', now());
+                                });
+                        });
+                })
+                ->where(function ($query) use ($startTime, $endTime) {
+                    $query->where('appointment_time', '<', $endTime)
+                        ->where(function ($q) use ($startTime) {
+                            $q->where('end_time', '>', $startTime)
+                                ->orWhereNull('end_time');
+                        });
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if ($conflict) {
+                throw new BookingSlotUnavailableException(
+                    'This appointment slot has just been reserved by another customer. Please select another time slot.',
+                    "{$date} {$startTime}"
+                );
+            }
+
+            // 4. Calculate Financials
+            $totalAmount = (int) $services->sum('price');
+            $type = $data->appointmentType ?? 'in_shop';
+            $zoneId = null;
+            $travelFee = 0;
+
+            if ($type === 'home_service') {
+                $zoneId = $data->destinationAddress['service_zone_id'] ?? null;
+                $zone = $zoneId ? ServiceZone::find($zoneId) : ServiceZone::where('is_active', true)->first();
+                $zoneId = $zone?->id;
+                $travelFee = (int) ($zone->base_travel_fee ?? 1500);
+            }
+
+            $grandTotal = $totalAmount + $travelFee;
+            $branchId = $this->resolveBranchId($barber);
+            $bookingReference = 'CC-'.strtoupper(Str::random(6));
+
+            $appointment = Appointment::create([
+                'booking_reference' => $bookingReference,
+                'branch_id' => $branchId,
+                'customer_id' => $customer->id,
+                'client_name' => $data->clientName ?? ($customer->real_name ?: $customer->name),
+                'client_phone' => $data->clientPhone ?? ($customer->phone ?: ''),
+                'client_email' => $customer->email,
+                'barber_id' => $barber->id,
+                'service_id' => $service->id,
+                'service_zone_id' => $zoneId,
+                'appointment_type' => $type,
+                'appointment_date' => $date,
+                'appointment_time' => $startTime,
+                'end_time' => $endTime,
+                'total_duration_minutes' => $totalDurationMinutes,
+                'total_price' => $totalAmount,
+                'total_amount' => $totalAmount,
+                'travel_fee' => $travelFee,
+                'grand_total' => $grandTotal,
+                'status' => AppointmentStatus::draft->value,
+                'draft_expires_at' => now()->addMinutes(15),
+                'draft_step' => 'payment',
+                'notes' => $data->notes,
+                'deposit_paid' => false,
+                'deposit_amount' => 0.0,
+                'source' => $source->value,
+            ]);
+
+            // Record items
+            foreach ($services as $srv) {
+                AppointmentItem::create([
+                    'appointment_id' => $appointment->id,
+                    'service_id' => $srv->id,
+                    'price' => $srv->price,
+                    'duration_minutes' => $srv->duration_minutes,
+                    'created_at' => now(),
+                ]);
+            }
+
+            // Status history
+            AppointmentStatusHistory::create([
+                'appointment_id' => $appointment->id,
+                'previous_status' => null,
+                'new_status' => AppointmentStatus::draft->value,
+                'changed_by_user_id' => $customer->id,
+                'reason' => 'Online customer draft reservation created (15-min hold)',
+                'created_at' => now(),
+            ]);
+
+            return $appointment->load(['service.category', 'barber.user', 'serviceZone']);
+        }, 3);
     }
 
     /**
@@ -319,6 +592,12 @@ class BookingService
      */
     public function transitionStatus(Appointment $appointment, string $newStatus, User $actor, ?string $reason = null): Appointment
     {
+        if ($newStatus === AppointmentStatus::no_show->value) {
+            app(MarkNoShow::class)->execute($appointment, $actor, $reason, false);
+
+            return $appointment->fresh();
+        }
+
         $previousStatus = $appointment->status instanceof AppointmentStatus
             ? $appointment->status->value
             : (string) $appointment->status;

@@ -18,9 +18,9 @@ describe('IntegrationsStats.vue', () => {
     });
 
     expect(wrapper.text()).toContain('3/3');
-    expect(wrapper.text()).toContain('100% ready');
-    expect(wrapper.text()).toContain('Connected');
-    expect(wrapper.text()).toContain('Transactional delivery active');
+    expect(wrapper.text()).toContain('100% configured');
+    expect(wrapper.text()).toContain('Provider test required');
+    expect(wrapper.text()).not.toContain('Transactional delivery active');
     expect(wrapper.text()).toContain('Google Sign-In');
     expect(wrapper.text()).toContain('Apple Sign-In');
   });
@@ -40,8 +40,8 @@ describe('IntegrationsStats.vue', () => {
     });
 
     expect(wrapper.text()).toContain('1/3');
-    expect(wrapper.text()).toContain('33% ready');
-    expect(wrapper.text()).toContain('Missing');
-    expect(wrapper.text()).toContain('Credentials required');
+    expect(wrapper.text()).toContain('33% configured');
+    expect(wrapper.text()).toContain('Not detected');
+    expect(wrapper.text()).toContain('No saved key and sender detected');
   });
 });

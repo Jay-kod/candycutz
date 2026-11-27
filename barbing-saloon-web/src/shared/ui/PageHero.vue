@@ -112,8 +112,9 @@ onMounted(async () => {
   position: relative;
   isolation: isolate;
   display: flex;
-  min-height: 40vh;
-  min-height: 40svh;
+  min-height: 101vh;
+  min-height: 101svh;
+  min-height: 101dvh;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -206,8 +207,11 @@ onMounted(async () => {
 
 @media (max-width: 640px) {
   .page-hero {
-    padding-top: 5rem;
-    padding-bottom: 1rem;
+    min-height: 101vh;
+    min-height: 101svh;
+    min-height: 101dvh;
+    padding-top: max(5.5rem, calc(4.25rem + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
   }
 }
 </style>

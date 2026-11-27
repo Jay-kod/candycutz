@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Admin\AnimationApiController;
 use App\Http\Controllers\Api\V1\Admin\AppManagementApiController;
+use App\Http\Controllers\Api\V1\Admin\ConsentAdminApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemBackupApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemHealthApiController;
 use App\Http\Controllers\Api\V1\AdminApiController;
@@ -13,6 +14,9 @@ use App\Http\Controllers\Api\V1\FeatureFlagApiController;
 use App\Http\Controllers\Api\V1\FeedbackSubmissionApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
 use App\Http\Controllers\Api\V1\GateApiController;
+use App\Http\Controllers\Api\V1\NoShowApiController;
+use App\Http\Controllers\Api\V1\NotificationApiController;
+use App\Http\Controllers\Api\V1\RefundApiController;
 use App\Http\Controllers\Api\V1\SuperAdminApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +28,8 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/gate/flush', [GateApiController::class, 'flush']);
     Route::get('/admin/settings', [AdminApiController::class, 'settings']);
     Route::post('/admin/settings', [AdminApiController::class, 'updateSettings']);
+    Route::post('/admin/google-auth/test', [AdminApiController::class, 'testGoogleAuthConnection']);
+    Route::post('/admin/google-auth/users/{id}/unlink', [AdminApiController::class, 'unlinkGoogleAccount']);
     Route::get('/admin/bank-details', [AdminApiController::class, 'bankDetails']);
     Route::post('/admin/bank-details', [AdminApiController::class, 'updateBankDetails']);
     Route::get('/admin/paystack/settings', [AdminApiController::class, 'getPaystackSettings']);
@@ -32,6 +38,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/animations', [AnimationApiController::class, 'index']);
     Route::post('/admin/animations', [AnimationApiController::class, 'update']);
     Route::post('/admin/animations/reset', [AnimationApiController::class, 'reset']);
+    Route::post('/admin/resend/test-connection', [AdminApiController::class, 'testResendConnection']);
     Route::post('/admin/test-email', [AdminApiController::class, 'testEmail']);
     Route::get('/admin/logs', [AdminApiController::class, 'logs']);
     Route::get('/admin/verifications/stats', [AdminApiController::class, 'verificationStats']);
@@ -44,6 +51,8 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::patch('/admin/feedback/{submission}', [FeedbackSubmissionApiController::class, 'update'])->whereNumber('submission');
     Route::get('/admin/analytics', [AdminApiController::class, 'analytics']);
     Route::get('/admin/customers', [AdminApiController::class, 'customers']);
+    Route::get('/admin/consents', [ConsentAdminApiController::class, 'index']);
+    Route::get('/admin/consents/export', [ConsentAdminApiController::class, 'export']);
     Route::post('/admin/customers', [AdminApiController::class, 'storeCustomer']);
     Route::get('/admin/customers/{id}', [AdminApiController::class, 'customerProfile'])->whereNumber('id');
     Route::match(['put', 'patch'], '/admin/customers/{id}', [AdminApiController::class, 'updateCustomer'])->whereNumber('id');
@@ -67,8 +76,27 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/appointments/{id}', [AppointmentApiController::class, 'show'])->whereNumber('id');
     Route::match(['post', 'patch'], '/admin/appointments/{id}/cancel', [AppointmentApiController::class, 'cancel'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/status', [AppointmentApiController::class, 'updateStatus'])->whereNumber('id');
+    Route::patch('/admin/appointments/{id}/no-show', [AppointmentApiController::class, 'noShow'])->whereNumber('id');
+    Route::post('/admin/appointments/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitDeposit'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/approve', [AppointmentApiController::class, 'approve'])->whereNumber('id');
     Route::patch('/admin/appointments/{id}/force-approve', [AppointmentApiController::class, 'forceApprove'])->whereNumber('id');
+
+    // Admin No-Show Policy, Records, Appeals & Refund Initiation
+    Route::get('/admin/no-shows', [NoShowApiController::class, 'index']);
+    Route::get('/admin/no-shows/policy', [NoShowApiController::class, 'policy']);
+    Route::post('/admin/no-shows/policy', [NoShowApiController::class, 'updatePolicy']);
+    Route::post('/admin/no-shows/{id}/forfeit-deposit', [NoShowApiController::class, 'forfeitRecordDeposit'])->whereNumber('id');
+    Route::patch('/admin/no-shows/{id}/appeal', [NoShowApiController::class, 'resolveAppeal'])->whereNumber('id');
+    Route::post('/admin/no-shows/{id}/initiate-refund', [NoShowApiController::class, 'initiateRefund'])->whereNumber('id');
+    Route::get('/admin/customers/{customerId}/no-shows', [NoShowApiController::class, 'customerHistory'])->whereNumber('customerId');
+    Route::post('/admin/customers/{customerId}/reset-no-show-flag', [NoShowApiController::class, 'resetCustomerFlag'])->whereNumber('customerId');
+
+    // Admin Refunds & Refund Policy Management
+    Route::get('/admin/refunds', [RefundApiController::class, 'index']);
+    Route::get('/admin/refunds/policy', [RefundApiController::class, 'policy']);
+    Route::post('/admin/refunds/policy', [RefundApiController::class, 'updatePolicy']);
+    Route::post('/admin/refunds/{id}/decide', [RefundApiController::class, 'decide'])->whereNumber('id');
+    Route::post('/admin/refunds/{id}/complete-manual', [RefundApiController::class, 'completeManual'])->whereNumber('id');
 
     // Admin Barber Management
     Route::get('/admin/barbers', [BarberApiController::class, 'index']);
@@ -125,6 +153,10 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::get('/admin/system/errors/{id}', [SystemHealthApiController::class, 'showError'])->whereNumber('id');
     Route::patch('/admin/system/errors/{id}', [SystemHealthApiController::class, 'updateError'])->whereNumber('id');
     Route::get('/admin/system/trace/{requestId}', [SystemHealthApiController::class, 'trace']);
+    Route::get('/admin/system/failed-jobs', [SystemHealthApiController::class, 'failedJobs']);
+    Route::post('/admin/system/failed-jobs/{id}/retry', [SystemHealthApiController::class, 'retryFailedJob'])->whereNumber('id');
+    Route::delete('/admin/system/failed-jobs/{id}', [SystemHealthApiController::class, 'forgetFailedJob'])->whereNumber('id');
+    Route::post('/admin/system/circuit-breakers/{service}/reset', [SystemHealthApiController::class, 'resetCircuitBreaker']);
 
     // System Backups & Recovery
     Route::get('/admin/system/backups', [SystemBackupApiController::class, 'index']);
@@ -144,6 +176,13 @@ Route::middleware(['auth:sanctum', 'check.role:admin,super_admin'])->group(funct
     Route::post('/admin/payments/{id}/refund', [AdminPaymentApiController::class, 'refund'])->whereNumber('id');
     Route::get('/admin/webhook-events', [AdminPaymentApiController::class, 'webhookEvents']);
     Route::post('/admin/webhook-events/{id}/replay', [AdminPaymentApiController::class, 'replayWebhookEvent'])->whereNumber('id');
+
+    // Admin Notifications & Delivery Tracking
+    Route::get('/admin/notifications/deliveries', [NotificationApiController::class, 'adminDeliveries']);
+    Route::get('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminBroadcasts']);
+    Route::post('/admin/notifications/broadcasts', [NotificationApiController::class, 'adminStoreBroadcast']);
+    Route::get('/admin/notifications/analytics', [NotificationApiController::class, 'adminAnalytics']);
+    Route::delete('/admin/notifications/clear-all', [NotificationApiController::class, 'adminClearAll']);
 });
 
 Route::middleware(['auth:sanctum', 'check.role:super_admin'])->group(function () {

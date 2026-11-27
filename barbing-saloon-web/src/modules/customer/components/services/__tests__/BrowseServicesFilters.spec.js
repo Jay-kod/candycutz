@@ -66,5 +66,42 @@ describe('BrowseServicesFilters.vue', () => {
     expect(wrapper.emitted('update:searchQuery')).toBeTruthy();
     expect(wrapper.emitted('update:searchQuery')[0]).toEqual(['Fade']);
   });
-});
 
+  it('emits search event when search form is submitted or Search button is clicked', async () => {
+    const wrapper = mount(BrowseServicesFilters, {
+      props: {
+        categories,
+        activeCategory: 'All',
+        searchQuery: 'Beard Trim',
+        sortOrder: 'featured'
+      }
+    });
+
+    const searchBtn = wrapper.findAll('button').find(b => b.text() === 'Search');
+    expect(searchBtn).toBeDefined();
+
+    await searchBtn.trigger('click');
+    expect(wrapper.emitted('search')).toBeTruthy();
+    expect(wrapper.emitted('search')[0]).toEqual(['Beard Trim']);
+  });
+
+  it('clears search query and emits search with empty string when clear button is clicked', async () => {
+    const wrapper = mount(BrowseServicesFilters, {
+      props: {
+        categories,
+        activeCategory: 'All',
+        searchQuery: 'Fade',
+        sortOrder: 'featured'
+      }
+    });
+
+    const clearBtn = wrapper.find('button[title="Clear search"]');
+    expect(clearBtn.exists()).toBe(true);
+
+    await clearBtn.trigger('click');
+    expect(wrapper.emitted('update:searchQuery')).toBeTruthy();
+    expect(wrapper.emitted('update:searchQuery')[0]).toEqual(['']);
+    expect(wrapper.emitted('search')).toBeTruthy();
+    expect(wrapper.emitted('search')[0]).toEqual(['']);
+  });
+});

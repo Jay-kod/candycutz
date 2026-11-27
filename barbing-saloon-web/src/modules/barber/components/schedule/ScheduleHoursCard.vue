@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-3xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#12161C] overflow-hidden shadow-sm dark:shadow-2xl relative">
-    <div class="flex items-center justify-between border-b border-slate-200 dark:border-white/[0.08] px-6 py-5 bg-slate-50 dark:bg-[#0B0F13]/40">
+    <div class="flex items-center justify-between border-b border-slate-200 dark:border-white/[0.08] px-4 xs:px-6 py-4 xs:py-5 bg-slate-50 dark:bg-[#0B0F13]/40">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gold/10 border border-gold/20">
           <ClockIcon class="h-4 w-4 text-gold" />
@@ -10,17 +10,17 @@
           <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold">Standard shift availability</p>
         </div>
       </div>
-      <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+      <p class="text-xs text-slate-500 dark:text-slate-400 hidden xs:flex items-center gap-1.5">
         <PencilSquareIcon class="h-3.5 w-3.5 text-gold" />
         Toggle switch to close chair
       </p>
     </div>
 
-    <div class="p-6 space-y-3">
+    <div class="p-3 xs:p-4 sm:p-6 space-y-3">
       <div
         v-for="hour in workingHours"
         :key="hour.day_of_week"
-        class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-4 transition-all duration-300"
+        class="group relative flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-3 xs:p-4 transition-all duration-300"
         :class="
           hour.is_closed
             ? 'border-red-500/15 bg-gradient-to-r from-red-500/[0.04] to-transparent'
@@ -65,29 +65,29 @@
         </div>
 
         <!-- Shift Times -->
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2 xs:gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
           <template v-if="!hour.is_closed">
-            <div class="relative flex items-center">
-              <div class="absolute left-3 pointer-events-none">
+            <div class="relative flex items-center flex-1 sm:flex-initial">
+              <div class="absolute left-2.5 sm:left-3 pointer-events-none">
                 <div class="h-2 w-2 rounded-full bg-gold shadow-[0_0_6px_rgba(255,153,0,0.6)]"></div>
               </div>
               <input
                 v-model="hour.open_time"
                 type="time"
-                class="w-[120px] rounded-xl border border-slate-300 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0B0F13] pl-7 pr-3 py-2 text-xs text-slate-900 dark:text-white font-medium outline-none transition-all focus:border-gold/50"
+                class="w-full sm:w-[120px] rounded-xl border border-slate-300 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0B0F13] pl-6.5 sm:pl-7 pr-2 sm:pr-3 py-2 text-xs text-slate-900 dark:text-white font-medium outline-none transition-all focus:border-gold/50"
               />
             </div>
 
-            <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-1">to</span>
+            <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 sm:px-1 shrink-0">to</span>
 
-            <div class="relative flex items-center">
-              <div class="absolute left-3 pointer-events-none">
+            <div class="relative flex items-center flex-1 sm:flex-initial">
+              <div class="absolute left-2.5 sm:left-3 pointer-events-none">
                 <div class="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]"></div>
               </div>
               <input
                 v-model="hour.close_time"
                 type="time"
-                class="w-[120px] rounded-xl border border-slate-300 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0B0F13] pl-7 pr-3 py-2 text-xs text-slate-900 dark:text-white font-medium outline-none transition-all focus:border-gold/50"
+                class="w-full sm:w-[120px] rounded-xl border border-slate-300 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0B0F13] pl-6.5 sm:pl-7 pr-2 sm:pr-3 py-2 text-xs text-slate-900 dark:text-white font-medium outline-none transition-all focus:border-gold/50"
               />
             </div>
           </template>

@@ -34,4 +34,8 @@ return [
         'callback_url' => env('PAYSTACK_CALLBACK_URL'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
 ];

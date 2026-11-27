@@ -1,5 +1,5 @@
 <template>
-  <section class="features-section relative py-16 md:py-24 overflow-hidden bg-[var(--color-bg-primary)] border-y border-[var(--color-border-subtle)] transition-colors duration-300">
+  <section class="features-section relative py-16 md:py-24 overflow-hidden bg-[var(--color-bg-primary)] border-b border-[var(--color-border-subtle)] transition-colors duration-300">
     <!-- Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.06),transparent_70%)]"></div>
 
@@ -126,7 +126,6 @@ const props = defineProps({
   },
 });
 
-const displayBadge = computed(() => props.badge || 'WHY CHOOSE CANDYCUTZ');
 const displayTitle = computed(() => props.title || 'Engineered for Perfection');
 const displaySubtitle = computed(
   () => props.subtitle || 'Every detail of the CandyCutz experience is calibrated to deliver the pinnacle of men’s grooming.'

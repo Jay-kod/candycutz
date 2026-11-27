@@ -18,6 +18,9 @@
             </div>
             <h3 class="text-sm font-bold uppercase tracking-widest text-[var(--color-accent)] mb-2">Location</h3>
             <p class="text-sm text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{{ contactAddress }}</p>
+            <RouterLink to="/directions" class="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-accent)] hover:underline">
+              Open Live Map &amp; Directions →
+            </RouterLink>
           </div>
 
           <!-- Hours Card -->
@@ -68,7 +71,7 @@
             <!-- 9-Disc Honeycomb Constellation -->
             <div class="relative mt-8 sm:mt-10 mb-4 flex items-center justify-center overflow-hidden sm:overflow-visible w-full max-w-full">
               <div class="relative mx-auto h-[130px] min-[400px]:h-[150px] sm:h-[160px] w-full max-w-[280px] xs:max-w-[340px] sm:max-w-[470px] flex items-center justify-center overflow-hidden sm:overflow-visible">
-                <div class="relative h-[160px] w-[470px] shrink-0 scale-[0.6] xs:scale-[0.72] sm:scale-100 origin-center transition-transform">
+                <div class="relative h-[160px] w-full max-w-[470px] sm:w-[470px] shrink-0 scale-[0.6] xs:scale-[0.72] sm:scale-100 origin-center transition-transform">
                   <template v-for="disc in allConstellationDiscs" :key="disc.id">
                   <!-- Empty / Future Addition Slot Disc -->
                   <div
@@ -232,7 +235,7 @@ const formPlaceholders = reactive({
   message: 'How can we help?',
 });
 
-const contactAddress = ref('123 Grooming Street\nLagos, Nigeria');
+const contactAddress = ref('Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria');
 const contactHours = ref('Mon - Sat: 9:00 AM - 8:00 PM\nSun: Closed');
 const contactPhone = ref('+234 800 000 0000');
 const contactEmail = ref('info@candycutz.com');
@@ -362,22 +365,26 @@ const allConstellationDiscs = computed(() => {
   ];
 });
 
+const isValidGoogleEmbed = (url) =>
+  url.startsWith('https://www.google.com/maps/embed') ||
+  (url.startsWith('https://maps.google.com/maps') && (url.includes('output=embed') || url.includes('pb=')));
+
 const mapEmbedSrc = computed(() => {
   const raw = (contactMapIframe.value || '').trim();
   if (!raw) return '';
-  
-  if (raw.startsWith('https://www.google.com/maps/embed')) {
+
+  if (isValidGoogleEmbed(raw)) {
     return raw;
   }
-  
+
   const match = raw.match(/src\s*=\s*["']([^"']+)["']/i);
   if (match) {
-    const extracted = match[1].replace(/&amp;/g, '&');
-    if (extracted.startsWith('https://www.google.com/maps/embed')) {
+    const extracted = match[1].replace(/&amp;/g, '&').trim();
+    if (isValidGoogleEmbed(extracted)) {
       return extracted;
     }
   }
-  
+
   return '';
 });
 

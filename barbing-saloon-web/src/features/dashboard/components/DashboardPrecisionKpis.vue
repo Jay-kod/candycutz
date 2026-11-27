@@ -112,7 +112,7 @@ const cards = computed(() => {
   // Booking trend equalizer
   const bookTrendData = props.bookingTrend || [];
   const maxBook = Math.max(...bookTrendData.map(d => Number(d.count || 0)), 1);
-  const bookEqualizer = bookTrendData.slice(-6).map((d, i) => {
+  const bookEqualizer = bookTrendData.slice(-6).map((d) => {
     const val = Number(d.count || 0);
     const height = Math.max(Math.round((val / maxBook) * 100), 25);
     return { height, highlight: val > 0 };

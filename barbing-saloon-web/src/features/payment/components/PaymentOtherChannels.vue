@@ -104,44 +104,36 @@
       </div>
     </template>
 
-    <!-- Channel 4: Card -->
+    <!-- Channel 4: Card / Paystack -->
     <template v-else-if="selectedChannel === 'card'">
       <div class="flex items-center justify-between">
         <h3 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wide">
-          <span class="flex h-4 w-4 items-center justify-center rounded bg-amber-500/10 text-amber-400 text-[10px]">💳</span>
-          Pay with Debit / Credit Card
+          <span class="flex h-4 w-4 items-center justify-center rounded bg-emerald-500/10 text-emerald-400 text-[10px]">💳</span>
+          Pay with Card or Bank (Paystack)
         </h3>
         <span class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-          Secured
+          PCI-DSS Level 1
         </span>
       </div>
-      <div class="rounded-lg bg-white p-3 text-gray-900 space-y-2 shadow-md">
-        <div class="space-y-0.5">
-          <label class="text-[9px] font-bold text-gray-700 uppercase tracking-wider">Card Number</label>
-          <input
-            type="text"
-            placeholder="5399 •••• •••• ••••"
-            class="w-full px-2.5 py-1.5 rounded border border-gray-300 text-xs text-gray-900 outline-none focus:border-amber-500 font-mono"
-          />
+      <div class="rounded-xl bg-white/5 border border-white/10 p-4 text-white space-y-3 shadow-md">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            Instant Verification
+          </span>
+          <span class="text-[11px] text-white/60">Debit Card • Bank Transfer • USSD • Apple Pay</span>
         </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="space-y-0.5">
-            <label class="text-[9px] font-bold text-gray-700 uppercase tracking-wider">Expiry</label>
-            <input
-              type="text"
-              placeholder="MM/YY"
-              class="w-full px-2.5 py-1.5 rounded border border-gray-300 text-xs text-gray-900 outline-none focus:border-amber-500 font-mono"
-            />
+        <p class="text-xs text-white/80 leading-relaxed">
+          Click below to open the secure Paystack checkout. Supports Mastercard, Visa, Verve, automated virtual accounts, and USSD. Your booking is confirmed instantly.
+        </p>
+        <div class="flex items-center gap-3 pt-1 text-[11px] text-white/50">
+          <div class="flex items-center gap-1">
+            <svg class="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+            </svg>
+            <span>256-Bit SSL Encryption</span>
           </div>
-          <div class="space-y-0.5">
-            <label class="text-[9px] font-bold text-gray-700 uppercase tracking-wider">CVV</label>
-            <input
-              type="password"
-              maxlength="3"
-              placeholder="123"
-              class="w-full px-2.5 py-1.5 rounded border border-gray-300 text-xs text-gray-900 outline-none focus:border-amber-500 font-mono"
-            />
-          </div>
+          <span>•</span>
+          <span>Zero Extra Fees</span>
         </div>
       </div>
     </template>
@@ -164,7 +156,7 @@
       class="w-full rounded-lg bg-[#FDB913] hover:bg-[#F2AC07] active:scale-[0.99] py-2.5 px-4 font-bold text-slate-950 text-xs sm:text-sm transition-all shadow-md shadow-[#FDB913]/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
     >
       <span v-if="submitting" class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"></span>
-      <span>{{ submitting ? 'Processing Payment...' : 'I Have Paid' }}</span>
+      <span>{{ submitting ? 'Processing Payment...' : (selectedChannel === 'card' ? 'Pay Now with Paystack' : 'I Have Paid') }}</span>
     </button>
 
     <!-- Cancel Transaction Link -->

@@ -62,7 +62,7 @@ class CatalogueCache
      */
     public static function bustAll(): void
     {
-        foreach (['services', 'categories', 'barbers', 'gallery', 'testimonials', 'blog', 'service_zones', 'working_hours', 'settings'] as $entity) {
+        foreach (['services', 'categories', 'barbers', 'gallery', 'gallery_categories', 'testimonials', 'blog', 'service_zones', 'working_hours', 'settings'] as $entity) {
             static::bust($entity);
         }
     }

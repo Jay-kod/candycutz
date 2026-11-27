@@ -58,12 +58,30 @@
                 <label class="text-xs font-bold uppercase tracking-[0.2em]" :class="colorTheme === 'gold' ? 'text-gold/70' : 'text-admin/70'">Category</label>
                 <div class="relative">
                   <select v-model="uploadForm.category" class="w-full appearance-none rounded-2xl border border-theme-border bg-theme-bg px-5 py-4 text-theme-text outline-none transition-all focus:bg-theme-surface focus:ring-1" :class="colorTheme === 'gold' ? 'focus:border-gold/50 focus:ring-gold/50' : 'focus:border-admin/50 focus:ring-admin/50'">
-                    <option value="Haircut" class="bg-theme-surface text-theme-text">Haircut</option>
-                    <option value="Beard" class="bg-theme-surface text-theme-text">Beard</option>
-                    <option value="Design" class="bg-theme-surface text-theme-text">Design</option>
-                    <option value="Color" class="bg-theme-surface text-theme-text">Color</option>
-                    <option value="Style" class="bg-theme-surface text-theme-text">Style</option>
-                    <option v-if="role === 'admin'" value="Shop" class="bg-theme-surface text-theme-text">Shop</option>
+                    <template v-if="galleryCategories && galleryCategories.length > 0">
+                      <option
+                        v-for="cat in galleryCategories"
+                        :key="cat.id"
+                        :value="cat.slug"
+                        class="bg-theme-surface text-theme-text"
+                      >
+                        {{ cat.name }}
+                      </option>
+                      <option
+                        v-if="hasUnlistedCategory"
+                        :value="uploadForm.category"
+                        class="bg-theme-surface text-theme-text"
+                      >
+                        {{ uploadForm.category }}
+                      </option>
+                    </template>
+                    <template v-else>
+                      <option value="haircut" class="bg-theme-surface text-theme-text">Haircut</option>
+                      <option value="beard" class="bg-theme-surface text-theme-text">Beard</option>
+                      <option value="combo" class="bg-theme-surface text-theme-text">Combo</option>
+                      <option value="before_after" class="bg-theme-surface text-theme-text">Before & After</option>
+                      <option v-if="role === 'admin'" value="shop" class="bg-theme-surface text-theme-text">Shop</option>
+                    </template>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5" :class="colorTheme === 'gold' ? 'text-gold/50' : 'text-admin/50'">
                     <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -108,9 +126,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { PhotoIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
 
-defineProps({
+const props = defineProps({
   show: Boolean,
   saving: Boolean,
   editingId: [String, Number],
@@ -118,6 +137,10 @@ defineProps({
   previewImage: String,
   selectedFileName: String,
   barbers: Array,
+  galleryCategories: {
+    type: Array,
+    default: () => []
+  },
   role: {
     type: String,
     default: 'admin'
@@ -129,6 +152,14 @@ defineProps({
 });
 
 const emit = defineEmits(['close', 'save', 'file-selected']);
+
+const hasUnlistedCategory = computed(() => {
+  const current = String(props.uploadForm?.category || '').trim().toLowerCase();
+  if (!current || !props.galleryCategories?.length) return false;
+  return !props.galleryCategories.some(
+    c => String(c.slug || '').toLowerCase() === current
+  );
+});
 
 const handleImageError = (e) => {
   e.target.style.display = 'none';

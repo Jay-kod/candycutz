@@ -6,10 +6,16 @@ import { useConnectionStatus } from '../../composables/useConnectionStatus';
 
 vi.mock('axios');
 
+const authStoreState = vi.hoisted(() => ({ store: { isAdmin: true, isSuperAdmin: false } }));
+vi.mock('@/modules/auth/store/auth.store', () => ({
+  useAuthStore: () => authStoreState.store,
+}));
+
 describe('SystemConnectionBanner Component', () => {
   let wrapper = null;
 
   beforeEach(() => {
+    authStoreState.store = { isAdmin: true, isSuperAdmin: false };
     vi.clearAllMocks();
     useConnectionStatus().resetState();
   });
@@ -73,6 +79,24 @@ describe('SystemConnectionBanner Component', () => {
     expect(wrapper.text()).toContain('API gateway offline');
   });
 
+  it.each(['customer', 'barber'])('hides technical diagnostics from %s users', (role) => {
+    authStoreState.store = { isAdmin: false, isSuperAdmin: false, role };
+    useConnectionStatus().markDisconnected('server', 'API gateway offline');
+
+    wrapper = mount(SystemConnectionBanner, {
+      global: {
+        stubs: {
+          teleport: true,
+          transition: false,
+        },
+      },
+    });
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('API gateway offline');
+    expect(wrapper.text()).not.toContain('SERVER OFFLINE');
+  });
+
   it('triggers retry probe when retry button is clicked', async () => {
     const { markDisconnected } = useConnectionStatus();
     markDisconnected('database');
@@ -124,6 +148,26 @@ describe('SystemConnectionBanner Component', () => {
     const minimizedPill = wrapper.find('button[title*="Database is offline"]');
     expect(minimizedPill.exists()).toBe(true);
     expect(minimizedPill.text()).toContain('DB Inactive');
+  });
+
+  it('labels a minimized server failure separately from a database outage', () => {
+    const { markDisconnected, minimize } = useConnectionStatus();
+    markDisconnected('server', 'API gateway offline');
+    minimize();
+
+    wrapper = mount(SystemConnectionBanner, {
+      global: {
+        stubs: {
+          teleport: true,
+          transition: false,
+        },
+      },
+    });
+
+    const minimizedPill = wrapper.find('button[title*="Backend server is unreachable"]');
+    expect(minimizedPill.exists()).toBe(true);
+    expect(minimizedPill.text()).toContain('Server Offline');
+    expect(minimizedPill.text()).not.toContain('DB Inactive');
   });
 
   it('renders active recovery banner when markConnected is called after disconnection', () => {

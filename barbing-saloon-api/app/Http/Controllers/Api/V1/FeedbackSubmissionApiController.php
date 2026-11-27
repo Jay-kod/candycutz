@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Domain\Content\Actions\GetFeedbackSubmissions;
 use App\Domain\Content\Actions\SubmitFeedbackSubmission;
 use App\Domain\Content\Actions\UpdateFeedbackSubmission;
+use App\Domain\Notification\NotificationDispatcher;
 use App\Http\Requests\Api\V1\Admin\UpdateFeedbackSubmissionRequest;
 use App\Http\Requests\Api\V1\StoreFeedbackSubmissionRequest;
 use App\Http\Resources\FeedbackSubmissionResource;
@@ -18,6 +19,8 @@ class FeedbackSubmissionApiController
     public function store(StoreFeedbackSubmissionRequest $request, SubmitFeedbackSubmission $action): JsonResponse
     {
         $submission = $action->execute($request->user(), $request->validated());
+
+        NotificationDispatcher::feedbackSubmitted($submission);
 
         return ApiResponse::success(new FeedbackSubmissionResource($submission), 'Feedback submitted successfully', 201);
     }

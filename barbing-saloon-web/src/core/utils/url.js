@@ -12,10 +12,6 @@ function resolveApiRoot() {
   }
 
   if (typeof window !== 'undefined') {
-    // If running under Apache subfolder environment (e.g. /1/candycutz/barbing-saloon-web/...)
-    if (window.location.pathname.includes('/1/candycutz/')) {
-      return `${window.location.origin}/1/candycutz/barbing-saloon-api/public`;
-    }
     return window.location.origin;
   }
 
@@ -23,12 +19,7 @@ function resolveApiRoot() {
 }
 
 function resolveStaticAssetUrl(path) {
-  const clean = path.startsWith('/') ? path : `/${path}`;
-  if (typeof window !== 'undefined' && window.location.pathname.includes('/1/candycutz/')) {
-    const distPrefix = '/1/candycutz/barbing-saloon-web/dist';
-    return `${distPrefix}${clean}`;
-  }
-  return clean;
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 // Extract host origin root

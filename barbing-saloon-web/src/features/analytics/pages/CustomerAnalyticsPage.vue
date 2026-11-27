@@ -2,11 +2,11 @@
   <CustomerLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Page Header -->
-      <div class="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-8 shadow-2xl">
+      <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-gold/20 bg-gradient-to-br from-obsidian via-charcoal to-steel p-5 sm:p-8 shadow-2xl">
         <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
         <div class="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-gold/5 blur-3xl pointer-events-none"></div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
+          <div class="min-w-0">
             <p class="text-xs uppercase tracking-[0.3em] text-gold/70 font-bold">Customer Dashboard</p>
             <h1 class="mt-2 font-display text-3xl lg:text-4xl text-white">
               Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-white">Analytics</span>
@@ -17,11 +17,11 @@
           </div>
           
           <!-- Time Range Selector -->
-          <div class="flex items-center gap-1.5 bg-theme-bg p-1.5 rounded-2xl border border-theme-border shadow-inner w-max">
+          <div class="flex w-full sm:w-max items-center justify-between gap-1.5 bg-theme-bg p-1.5 rounded-2xl border border-theme-border shadow-inner">
             <button v-for="r in ranges" :key="r.value"
                     @click="setRange(r.value)"
                     :class="[
-                      'px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300',
+                      'flex-1 sm:flex-none px-2 sm:px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300',
                       range === r.value 
                         ? 'bg-gradient-to-r from-gold to-gold-dark text-obsidian shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
                         : 'text-theme-muted hover:text-theme-text hover:bg-white/5'
@@ -43,7 +43,7 @@
         </div>
       </div>
       
-      <div v-else-if="error" class="rounded-2xl border border-red-500/20 bg-red-500/5 p-12 text-center">
+      <div v-else-if="error" class="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 sm:p-12 text-center">
         <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
           <ExclamationTriangleIcon class="w-8 h-8 text-red-400" />
         </div>
@@ -57,7 +57,7 @@
         <!-- Stats Grid -->
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="(stat, idx) in statCards" :key="stat.label" 
-               class="group relative overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]"
+               class="group relative min-w-0 overflow-hidden rounded-2xl border border-theme-border bg-theme-surface/80 p-5 sm:p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.15)]"
                :class="stat.hoverBorder"
                :style="{ animationDelay: `${idx * 100}ms` }">
             <!-- Large watermark icon top-right -->
@@ -69,7 +69,7 @@
             
             <div class="relative z-10">
               <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted">{{ stat.label }}</p>
-              <p class="mt-3 font-display text-4xl lg:text-5xl text-theme-text group-hover:text-gold transition-colors duration-300 leading-none">{{ stat.value }}</p>
+              <p class="mt-3 break-words font-display text-3xl sm:text-4xl lg:text-5xl tabular-nums text-theme-text group-hover:text-gold transition-colors duration-300 leading-tight">{{ stat.value }}</p>
             </div>
           </div>
         </div>
@@ -78,18 +78,18 @@
         <div class="grid gap-6 lg:grid-cols-3">
           <!-- Booking Trends Chart -->
           <article class="lg:col-span-2 rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden">
-            <div class="p-6 border-b border-theme-border/30 flex items-center justify-between">
+            <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 border-b border-theme-border/30">
               <div>
                 <h2 class="font-display text-xl text-theme-text">Booking <span class="text-gold">Trends</span></h2>
-                <p class="text-xs text-theme-muted mt-1">Your appointment frequency over the last 6 months</p>
+                <p class="text-xs text-theme-muted mt-1">Your appointment frequency in the selected range</p>
               </div>
-              <div class="flex items-center gap-2 text-xs text-theme-muted">
+              <div class="flex shrink-0 items-center gap-2 text-xs text-theme-muted">
                 <div class="w-3 h-3 rounded-sm bg-gold/80"></div>
                 Appointments
               </div>
             </div>
             
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
               <TrendsLineChart 
                 :trends="analytics.booking_trends || []" 
                 valueKey="count" 
@@ -102,12 +102,12 @@
 
           <!-- Status Breakdown Donut Chart -->
           <article class="rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-sm overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-theme-border/30">
+            <div class="p-4 sm:p-6 border-b border-theme-border/30">
               <h2 class="font-display text-xl text-theme-text">Status <span class="text-gold">Breakdown</span></h2>
               <p class="text-xs text-theme-muted mt-1">Distribution of your appointment outcomes</p>
             </div>
             
-            <div class="flex-1 p-6 flex flex-col items-center justify-center">
+            <div class="flex-1 p-4 sm:p-6 flex flex-col items-center justify-center">
               <div v-if="totalDonutCount === 0" class="flex flex-col items-center justify-center text-center py-6">
                 <div class="w-32 h-32 rounded-full border-4 border-dashed border-theme-border flex items-center justify-center mb-4">
                   <ChartPieIcon class="w-10 h-10 text-theme-muted/40" />
@@ -125,7 +125,7 @@
 
                 <div class="w-full space-y-2.5 mt-4">
                   <div v-for="legend in legendItems" :key="legend.label" 
-                       class="flex items-center justify-between text-sm px-3 py-2 rounded-xl hover:bg-theme-bg transition-colors group/legend cursor-default">
+                       class="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-xl hover:bg-theme-bg transition-colors group/legend cursor-default">
                     <div class="flex items-center gap-2.5">
                       <div class="w-3 h-3 rounded-full shadow-sm ring-2 ring-black/20" :class="legend.bgClass"></div>
                       <span class="text-theme-muted capitalize group-hover/legend:text-theme-text transition-colors text-xs font-medium">{{ legend.label.replace('_', ' ') }}</span>
@@ -144,7 +144,7 @@
         <!-- Bottom Row: Insights -->
         <div class="grid gap-6 lg:grid-cols-3">
           <!-- Most Booked Service -->
-          <article class="group rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all hover:border-gold/20 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.1)]">
+          <article class="group min-w-0 rounded-2xl border border-theme-border bg-theme-surface/80 p-5 sm:p-6 backdrop-blur-sm transition-all hover:border-gold/20 hover:shadow-[0_10px_40px_-10px_rgba(212,175,55,0.1)]">
             <div class="flex items-start gap-4">
               <SparklesIcon class="w-9 h-9 text-gold shrink-0 mt-0.5 transition-colors duration-300" />
               <div class="min-w-0">
@@ -156,19 +156,19 @@
           </article>
 
           <!-- Total Bookings -->
-          <article class="group rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all hover:border-blue-400/20 hover:shadow-[0_10px_40px_-10px_rgba(96,165,250,0.1)]">
+          <article class="group min-w-0 rounded-2xl border border-theme-border bg-theme-surface/80 p-5 sm:p-6 backdrop-blur-sm transition-all hover:border-blue-400/20 hover:shadow-[0_10px_40px_-10px_rgba(96,165,250,0.1)]">
             <div class="flex items-start gap-4">
               <CalendarDaysIcon class="w-9 h-9 text-blue-400 shrink-0 mt-0.5 transition-colors duration-300" />
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted">Total Appointments</p>
                 <h3 class="font-display text-2xl text-theme-text mt-1 group-hover:text-blue-400 transition-colors">{{ totalDonutCount }}</h3>
-                <p class="text-xs text-theme-muted mt-1">All-time booking count in this period</p>
+                <p class="text-xs text-theme-muted mt-1">Bookings in the selected range</p>
               </div>
             </div>
           </article>
 
           <!-- Completion Rate -->
-          <article class="group rounded-2xl border border-theme-border bg-theme-surface/80 p-6 backdrop-blur-sm transition-all hover:border-emerald-400/20 hover:shadow-[0_10px_40px_-10px_rgba(52,211,153,0.1)]">
+          <article class="group min-w-0 rounded-2xl border border-theme-border bg-theme-surface/80 p-5 sm:p-6 backdrop-blur-sm transition-all hover:border-emerald-400/20 hover:shadow-[0_10px_40px_-10px_rgba(52,211,153,0.1)]">
             <div class="flex items-start gap-4">
               <CheckBadgeIcon class="w-9 h-9 text-emerald-400 shrink-0 mt-0.5 transition-colors duration-300" />
               <div class="flex-1">

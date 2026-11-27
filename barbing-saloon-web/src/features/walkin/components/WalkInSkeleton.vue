@@ -3,8 +3,8 @@
     <!-- Header Skeleton -->
     <div class="h-36 rounded-2xl bg-theme-surface border border-theme-border p-8 flex flex-col justify-between">
       <div class="w-48 h-5 rounded-full bg-slate-200 dark:bg-theme-bg"></div>
-      <div class="w-80 h-10 rounded-xl bg-slate-200 dark:bg-theme-bg"></div>
-      <div class="w-96 h-4 rounded bg-slate-200 dark:bg-theme-bg"></div>
+      <div class="w-full max-w-xs sm:w-80 h-10 rounded-xl bg-slate-200 dark:bg-theme-bg"></div>
+      <div class="w-full max-w-sm sm:w-96 h-4 rounded bg-slate-200 dark:bg-theme-bg"></div>
     </div>
 
     <!-- Main Grid Skeleton -->

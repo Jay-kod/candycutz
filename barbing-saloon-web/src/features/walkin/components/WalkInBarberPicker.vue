@@ -89,7 +89,7 @@
 <script setup>
 import { UserGroupIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   modelValue: { type: [Number, String], default: '' },
   barbers: { type: Array, default: () => [] }
 });

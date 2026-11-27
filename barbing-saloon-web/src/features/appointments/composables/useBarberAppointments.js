@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import api from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
+import { extractVerificationError } from '@/features/appointments/utils/verificationCode';
 
 export function useBarberAppointments() {
   const toast = useToast();
@@ -55,18 +56,32 @@ export function useBarberAppointments() {
       await loadAppointments();
       toast.success('Booking verified and marked as completed!');
     } catch (err) {
-      toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to verify booking');
+      toast.error(extractVerificationError(err));
       throw err;
     }
   };
 
   const markNoShow = async (id) => {
-    try {
-      await api.patch(`/barber/appointments/${id}/no-show`);
-      await loadAppointments();
-      toast.success('Booking marked as no-show');
-    } catch {
-      toast.error('Failed to mark as no-show');
+    if (await confirm('Mark No-Show', 'Mark this client as a no-show? Their slot will be opened for other bookings.')) {
+      try {
+        await api.patch(`/barber/appointments/${id}/no-show`, { reason: 'Marked no-show by barber' });
+        await loadAppointments();
+        toast.success('Booking marked as no-show');
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to mark as no-show');
+      }
+    }
+  };
+
+  const forfeitDeposit = async (id) => {
+    if (await confirm('Forfeit Customer Deposit', 'Mark the customer\'s paid deposit as forfeited for this no-show?')) {
+      try {
+        await api.post(`/barber/appointments/${id}/forfeit-deposit`, { reason: 'Deposit forfeited by barber' });
+        await loadAppointments();
+        toast.success('Deposit marked as forfeited');
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to forfeit deposit');
+      }
     }
   };
 
@@ -78,5 +93,6 @@ export function useBarberAppointments() {
     cancel,
     complete,
     markNoShow,
+    forfeitDeposit,
   };
 }

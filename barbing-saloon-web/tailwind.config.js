@@ -2,6 +2,7 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
   theme: {
     screens: {
+      'xxs': '320px',
       'xs': '375px',
       'sm': '640px',
       'md': '768px',
@@ -14,7 +15,8 @@ export default {
     container: {
       center: true,
       padding: {
-        DEFAULT: '1rem',
+        DEFAULT: '0.75rem',
+        xxs: '0.75rem',
         xs: '1rem',
         sm: '1.5rem',
         lg: '2rem',

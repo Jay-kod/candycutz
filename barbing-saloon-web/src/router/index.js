@@ -13,6 +13,8 @@ const routes = [
   ...adminRoutes,
   ...superadminRoutes,
   ...authRoutes,
+  // Catch-all 404 — strictly last across all portals
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../modules/public/pages/NotFoundPage.vue'), meta: { public: true } },
 ];
 
 const router = createRouter({

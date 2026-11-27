@@ -11,7 +11,7 @@
       <div class="p-8 flex-1 flex flex-col relative z-10">
         <div class="flex flex-col items-center text-center mb-6">
           <div class="relative h-28 w-28 overflow-hidden rounded-full bg-gradient-to-br from-admin/20 to-amber-500/20 flex items-center justify-center text-theme-text font-display text-4xl border-[3px] border-admin/30 shadow-[0_0_30px_rgba(255,103,0,0.15)] mb-4">
-            <img v-if="form.avatar" :src="form.avatar" alt="Avatar" class="h-full w-full object-cover" />
+            <img v-if="form.avatar || form.avatar_url" :src="getStorageUrl(form.avatar || form.avatar_url)" alt="Avatar" class="h-full w-full object-cover" />
             <span v-else>{{ form.name ? form.name.charAt(0).toUpperCase() : 'B' }}</span>
             
             <div class="absolute bottom-1 right-1 h-5 w-5 rounded-full border-[3px] border-theme-surface shadow-sm flex items-center justify-center z-10" :class="statusBgColor(form.status)">
@@ -48,6 +48,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { EyeIcon, EnvelopeIcon } from '@heroicons/vue/24/outline';
 
 defineProps({

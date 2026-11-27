@@ -1,3 +1,4 @@
+<!-- audit-ignore-file: responsiveness (PDF 794px fixed print layout) -->
 <template>
   <div class="report-page relative border-t border-gray-200">
     <div class="report-watermark"></div>

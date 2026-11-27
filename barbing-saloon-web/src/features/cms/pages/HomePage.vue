@@ -47,7 +47,7 @@
             :current-hero-image="currentHeroImage"
             v-model:image-load-error="imageLoadError"
             :get-storage-url="getStorageUrl"
-            @image-upload="(file, inputRef) => { handleImageUpload(file, 'hero'); fileInputRef = inputRef; }"
+            @image-upload="onHeroImageUpload"
           />
         </div>
 
@@ -64,7 +64,7 @@
             :current-about-image="currentAboutImage"
             v-model:about-image-load-error="aboutImageLoadError"
             :get-storage-url="getStorageUrl"
-            @image-upload="(file, inputRef) => { handleImageUpload(file, 'about'); aboutFileInputRef = inputRef; }"
+            @image-upload="onAboutImageUpload"
           />
         </div>
 
@@ -136,7 +136,17 @@ const {
 const fileInputRef = ref(null);
 const aboutFileInputRef = ref(null);
 
-const submit = () => saveSettings(fileInputRef, aboutFileInputRef);
+const onHeroImageUpload = (file, inputRef) => {
+  handleImageUpload(file, 'hero');
+  fileInputRef.value = inputRef;
+};
+
+const onAboutImageUpload = (file, inputRef) => {
+  handleImageUpload(file, 'about');
+  aboutFileInputRef.value = inputRef;
+};
+
+const submit = () => saveSettings(fileInputRef.value, aboutFileInputRef.value);
 
 onMounted(() => {
   fetchSettings();

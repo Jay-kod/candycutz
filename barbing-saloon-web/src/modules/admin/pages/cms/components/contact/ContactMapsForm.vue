@@ -8,7 +8,7 @@
         </div>
         <div>
           <h2 class="font-display text-xl text-white tracking-tight">Google Maps Integration & Location</h2>
-          <p class="text-xs text-white/50 mt-0.5">Embed your physical studio map so customers can locate your premises and get turn-by-turn directions.</p>
+          <p class="text-xs text-white/50 mt-0.5">Embed your studio map and keep the customer directions pin synced to your exact shop coordinates.</p>
         </div>
       </div>
       <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] text-white/40">
@@ -20,7 +20,7 @@
     <div class="space-y-5">
       <div class="space-y-2">
         <label class="block text-xs font-bold uppercase tracking-wider text-white/70">
-          Google Maps Iframe Embed Code
+          Google Maps Iframe Embed Code or URL
         </label>
         <textarea 
           v-model="content.contact_map_iframe" 
@@ -29,7 +29,7 @@
           class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-xs font-mono text-white placeholder-white/20 focus:border-admin/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 transition-all outline-none resize-none leading-relaxed"
         ></textarea>
         <p class="text-[11px] text-white/40">
-          Open Google Maps → Find your salon location → Click "Share" → Click "Embed a map" → Copy the HTML iframe snippet and paste it directly above.
+          Open Google Maps → Find your salon location → Click "Share" → "Embed a map" → Paste either the HTML iframe snippet or the <span class="font-mono text-white/60">https://www.google.com/maps/embed...</span> URL directly.
         </p>
       </div>
 
@@ -47,8 +47,72 @@
           <ArrowTopRightOnSquareIcon class="h-4 w-4 text-white/30 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         <p class="text-[11px] text-white/40">
-          Paste your short Google Maps share link. Customers can tap the "Open in Google Maps" button to launch navigation directly in their GPS app.
+          Paste your Google Maps share link. Customers can tap "Open in Google Maps" on the public Contact page.
         </p>
+      </div>
+
+      <!-- Exact Shop Coordinates for Customer Directions Map -->
+      <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white/80">
+              Shop Coordinates (Customer Directions Map Pin)
+            </h3>
+            <p class="text-[11px] text-white/45 mt-0.5">
+              Auto-extracted from Google Maps links when present, or set directly from your device GPS while at the salon.
+            </p>
+          </div>
+          <button
+            type="button"
+            :disabled="locatingShop"
+            class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-60 transition cursor-pointer"
+            @click="captureShopGps"
+          >
+            {{ locatingShop ? 'Detecting GPS...' : 'Use Current Shop GPS' }}
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-white/60 mb-1">Latitude</label>
+            <input
+              v-model="content.latitude"
+              type="text"
+              inputmode="decimal"
+              placeholder="e.g. 8.848600"
+              class="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-mono text-white placeholder-white/20 focus:border-admin/60 outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-white/60 mb-1">Longitude</label>
+            <input
+              v-model="content.longitude"
+              type="text"
+              inputmode="decimal"
+              placeholder="e.g. 7.873600"
+              class="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-mono text-white placeholder-white/20 focus:border-admin/60 outline-none"
+            />
+          </div>
+        </div>
+
+        <p v-if="gpsError" class="text-[11px] text-rose-400">{{ gpsError }}</p>
+        <p v-else-if="lockDiagnostic.status === 'locked'" class="text-[11px] text-emerald-400 font-mono">
+          ✓ {{ lockDiagnostic.message }}
+        </p>
+        <div
+          v-else
+          class="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 flex flex-wrap items-center justify-between gap-2"
+        >
+          <p class="text-[11px] text-amber-200">{{ lockDiagnostic.message }}</p>
+          <button
+            v-if="embedCoords"
+            type="button"
+            class="rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-black hover:bg-amber-400 cursor-pointer"
+            @click="syncCoordsFromEmbed"
+          >
+            Lock Coords to Google Map
+          </button>
+        </div>
       </div>
     </div>
 
@@ -81,7 +145,7 @@
       <div v-else-if="content.contact_map_iframe" class="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 flex items-start gap-3">
         <span class="text-rose-400 font-bold">⚠</span>
         <p class="text-xs text-rose-300">
-          Could not extract a valid map URL from the pasted code. Make sure you copied the full iframe embed code snippet from Google Maps.
+          Could not extract a valid Google Maps embed URL from the pasted code. Make sure you copied the full iframe embed code snippet or <span class="font-mono">https://www.google.com/maps/embed...</span> URL from Google Maps.
         </p>
       </div>
 
@@ -93,13 +157,15 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 import { 
   MapPinIcon, 
   ArrowTopRightOnSquareIcon, 
   MapIcon 
 } from '@heroicons/vue/24/outline';
+import { extractGoogleMapsLocation, haversineDistanceMeters } from '@/features/directions/utils/googleMaps';
 
-defineProps({
+const props = defineProps({
   content: {
     type: Object,
     required: true
@@ -107,7 +173,103 @@ defineProps({
   extractedMapSrc: {
     type: String,
     default: ''
+  },
+  resolvedShop: {
+    type: Object,
+    default: null
   }
 });
-</script>
 
+const locatingShop = ref(false);
+const gpsError = ref('');
+
+const embedCoords = computed(() =>
+  extractGoogleMapsLocation(props.content.contact_map_link) ||
+  extractGoogleMapsLocation(props.content.contact_map_iframe)
+);
+
+const hasValidCoords = computed(() => {
+  const lat = Number(props.content.latitude);
+  const lng = Number(props.content.longitude);
+  return (
+    String(props.content.latitude ?? '').trim() !== '' &&
+    String(props.content.longitude ?? '').trim() !== '' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+});
+
+const lockDiagnostic = computed(() => {
+  if (!hasValidCoords.value) {
+    return {
+      status: 'coords_missing',
+      message: 'Shop coordinates are missing. Paste a Google Maps embed URL or click "Use Current Shop GPS".',
+    };
+  }
+  if (!props.extractedMapSrc) {
+    return {
+      status: 'embed_missing',
+      message: 'Google Maps embed URL is missing or invalid. Customer Directions will fall back to saved coordinates only.',
+    };
+  }
+  if (props.resolvedShop?.location_lock?.status === 'locked' && props.resolvedShop?.location_lock?.verified) {
+    const shopLabel = props.resolvedShop.name || 'CandyCutz Studio';
+    return {
+      status: 'locked',
+      message: `${shopLabel} & Customer Directions pin locked to ${props.resolvedShop.latitude}, ${props.resolvedShop.longitude}.`,
+    };
+  }
+  if (embedCoords.value) {
+    const maxAllowedDrift = embedCoords.value.precise ? 150 : 500;
+    const drift = haversineDistanceMeters(
+      Number(props.content.latitude),
+      Number(props.content.longitude),
+      Number(embedCoords.value.latitude),
+      Number(embedCoords.value.longitude)
+    );
+    if (drift > maxAllowedDrift) {
+      return {
+        status: 'sync_mismatch',
+        message: `Problem detected: Saved coords (${props.content.latitude}, ${props.content.longitude}) differ by ${drift}m from Google Map pin (${embedCoords.value.latitude}, ${embedCoords.value.longitude}).`,
+      };
+    }
+  }
+  return {
+    status: 'locked',
+    message: `Main shop location & Customer Directions pin locked to ${props.content.latitude}, ${props.content.longitude}.`,
+  };
+});
+
+const syncCoordsFromEmbed = () => {
+  if (!embedCoords.value) return;
+  props.content.latitude = embedCoords.value.latitude;
+  props.content.longitude = embedCoords.value.longitude;
+  gpsError.value = '';
+};
+
+const captureShopGps = () => {
+  gpsError.value = '';
+  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    gpsError.value = 'Device GPS is unavailable in this browser.';
+    return;
+  }
+
+  locatingShop.value = true;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      props.content.latitude = String(Number(pos.coords.latitude.toFixed(6)));
+      props.content.longitude = String(Number(pos.coords.longitude.toFixed(6)));
+      locatingShop.value = false;
+    },
+    (err) => {
+      gpsError.value = err?.message || 'Unable to read current GPS location.';
+      locatingShop.value = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+};
+</script>

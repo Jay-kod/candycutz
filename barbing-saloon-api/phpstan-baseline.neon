@@ -1,886 +1,1039 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\Gallery\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			message: '#^Method App\\Console\\Commands\\DatabaseBackupCommand\:\:resolveExecutable\(\) has parameter \$candidates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/Domain/Content/Services/ContentService.php
+			path: app/Console/Commands/DatabaseBackupCommand.php
 
 		-
-			message: "#^Return type of call to method Illuminate\\\\Support\\\\Collection\\<int,array\\<string, mixed\\>\\>\\:\\:all\\(\\) contains unresolvable type\\.$#"
+			message: '#^Method App\\Console\\Commands\\DatabaseRestoreCommand\:\:resolveExecutable\(\) has parameter \$candidates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/Domain/Content/Services/ContentService.php
+			path: app/Console/Commands/DatabaseRestoreCommand.php
 
 		-
-			message: "#^Property App\\\\Models\\\\User\\:\\:\\$role \\(App\\\\Domain\\\\Shared\\\\Enums\\\\UserRole\\) does not accept string\\.$#"
-			count: 1
-			path: app/Domain/Identity/Actions/CreateBarber.php
-
-		-
-			message: "#^Using nullsafe property access on non\\-nullable type Laravel\\\\Sanctum\\\\PersonalAccessToken\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Domain/Identity/Actions/ManageUserTokens.php
-
-		-
-			message: "#^Method App\\\\Domain\\\\Notification\\\\NotificationDispatcher\\:\\:queuePush\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Models\\Testimonial\:\:\$comment\.$#'
+			identifier: property.notFound
 			count: 1
 			path: app/Domain/Notification/NotificationDispatcher.php
 
 		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$to$#"
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Domain/Notification/Services/BrevoApiClient.php
+			path: app/Domain/Notification/NotificationDispatcher.php
 
 		-
-			message: "#^Access to an undefined property Stripe\\\\StripeObject\\:\\:\\$object\\.$#"
+			message: '#^Method App\\Domain\\Notification\\NotificationDispatcher\:\:createAndPush\(\) has parameter \$channels with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/Domain/Payment/Gateways/StripeGateway.php
+			path: app/Domain/Notification/NotificationDispatcher.php
 
 		-
-			message: "#^Instantiated class Intervention\\\\Image\\\\Drivers\\\\Gd\\\\Driver not found\\.$#"
+			message: '#^Method App\\Domain\\Notification\\NotificationDispatcher\:\:createAndPush\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Domain/Notification/NotificationDispatcher.php
+
+		-
+			message: '#^Method App\\Domain\\Notification\\NotificationDispatcher\:\:targetedBroadcast\(\) has parameter \$channels with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Domain/Notification/NotificationDispatcher.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Domain/Notification/NotificationDispatcher.php
+
+		-
+			message: '#^Variable \$img in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
 			count: 1
 			path: app/Domain/Shared/Actions/SecureImageUpload.php
 
 		-
-			message: "#^Method App\\\\Domain\\\\Shared\\\\Enums\\\\AppointmentStatus\\:\\:activeStatuses\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
 			count: 1
-			path: app/Domain/Shared/Enums/AppointmentStatus.php
+			path: app/Http/Controllers/Api/V1/Admin/SystemBackupApiController.php
 
 		-
-			message: "#^Method App\\\\Domain\\\\Shared\\\\Enums\\\\AppointmentStatus\\:\\:terminalStatuses\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Domain/Shared/Enums/AppointmentStatus.php
+			message: '#^Result of \|\| is always true\.$#'
+			identifier: booleanOr.alwaysTrue
+			count: 2
+			path: app/Http/Controllers/Api/V1/Admin/SystemBackupApiController.php
 
 		-
-			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
-			path: app/Domain/System/Actions/GetDashboardStats.php
+			path: app/Http/Controllers/Api/V1/Admin/SystemBackupApiController.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$is_active\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Http/Middleware/EnsureUserActive.php
+			path: app/Http/Controllers/Api/V1/AdminApiController.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Middleware/EnsureUserActive.php
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/Api/V1/AdminPaymentApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$avatar\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>role" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			path: app/Http/Controllers/Api/V1/BlogApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$created_at\\.$#"
-			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/Api/V1/NotificationApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$email\\.$#"
-			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$recipient_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Api/V1/NotificationApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$id\\.$#"
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\NotificationApiController\:\:getScopedQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
 			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			path: app/Http/Controllers/Api/V1/NotificationApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$is_active\\.$#"
+			message: '#^Offset ''locked_channels'' on array\{in_app\: bool, push\: bool, email\: bool, locked_channels\: array\{\}\|array\{''in_app'', ''email''\}\|bool\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			path: app/Http/Controllers/Api/V1/NotificationApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$name\\.$#"
-			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			message: '#^Cannot cast App\\Domain\\Payment\\Enums\\AppointmentPaymentStatus to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: app/Http/Controllers/Api/V1/PaymentApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$phone\\.$#"
-			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			message: '#^Cannot cast App\\Domain\\Shared\\Enums\\AppointmentStatus to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: app/Http/Controllers/Api/V1/PaymentApiController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:\\$role\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>branch_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			path: app/Http/Controllers/Api/V1/PaymentApiController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\Api\\\\V1\\\\UserResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Http/Resources/Api/V1/UserResource.php
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/Api/V1/PaymentApiController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\AppointmentResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>payment_method" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/AppointmentResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$id\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>transaction_ref" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/AppointmentResource.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/AppointmentResource.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$instagram_url\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>is_active" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$is_available\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$specialties\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$user\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>real_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\BarberResource\\:\\:\\$user_id\\.$#"
+			message: '#^Using nullsafe property access "\?\-\>username" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Http\\\\Resources\\\\BarberResource\\:\\:testimonials\\(\\)\\.$#"
-			count: 1
+			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
 			path: app/Http/Resources/BarberResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\BarberResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$created_at\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Resources/BarberResource.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\BlogPostResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$icon\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Resources/BlogPostResource.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\GalleryResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$id\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Resources/GalleryResource.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$name\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Resources/ServiceResource.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:paginated\\(\\) has parameter \\$data with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator but does not specify its types\\: TItem$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$requester\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Responses/ApiResponse.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:paginated\\(\\) has parameter \\$headers with no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$review_note\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Responses/ApiResponse.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Responses\\\\ApiResponse\\:\\:success\\(\\) has parameter \\$headers with no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$reviewed_at\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Responses/ApiResponse.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Http\\\\Request\\. Use \\-\\> instead\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$reviewer\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Responses/ApiResponse.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Jobs\\\\SendExpoPush\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$serviceCategory\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Jobs/SendExpoPush.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Mail\\\\AdminNotification\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$slug\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Mail/AdminNotification.php
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
 
 		-
-			message: "#^Method App\\\\Mail\\\\BookingCancellation\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Access to an undefined property App\\Http\\Resources\\ServiceCategoryRequestResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ServiceCategoryRequestResource.php
+
+		-
+			message: '#^Method App\\Mail\\BookingCancellation\:\:attachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Mail/BookingCancellation.php
 
 		-
-			message: "#^Method App\\\\Mail\\\\BookingConfirmation\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Mail\\BookingConfirmation\:\:attachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Mail/BookingConfirmation.php
 
 		-
-			message: "#^Method App\\\\Mail\\\\BookingReminder\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Mail\\BookingReminder\:\:attachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Mail/BookingReminder.php
 
 		-
-			message: "#^Method App\\\\Mail\\\\BookingThankYou\\:\\:attachments\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Mail\\BookingThankYou\:\:attachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Mail/BookingThankYou.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Address uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Address uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Address.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Address\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Address\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Address.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ApiRequestLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ApiRequestLog\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ApiRequestLog.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AppCrash uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\AppCrash uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeResolved\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\AppCrash\:\:scopeResolved\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeResolved\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: '#^Method App\\Models\\AppCrash\:\:scopeResolved\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeUnresolved\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\AppCrash\:\:scopeUnresolved\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:scopeUnresolved\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: '#^Method App\\Models\\AppCrash\:\:scopeUnresolved\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppCrash\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\AppCrash\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppCrash.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AppVersion uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\AppVersion uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeForPlatform\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeForPlatform\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeForPlatform\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeForPlatform\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeLatestVersion\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeLatestVersion\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeLatestVersion\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeLatestVersion\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeMinimum\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeMinimum\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppVersion\\:\\:scopeMinimum\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: '#^Method App\\Models\\AppVersion\:\:scopeMinimum\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/Models/AppVersion.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Appointment uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Appointment uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Appointment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
 			count: 1
 			path: app/Models/Appointment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:customerAddress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:items\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:payment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:serviceZone\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Appointment\\:\\:statusHistory\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function str_pad expects string, int given\\.$#"
-			count: 1
-			path: app/Models/Appointment.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AppointmentItem uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\AppointmentItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppointmentItem.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppointmentItem\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\AppointmentItem\:\:appointment\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppointmentItem.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppointmentItem\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\AppointmentItem\:\:service\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppointmentItem.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AppointmentStatusHistory uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\AppointmentStatusHistory uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppointmentStatusHistory.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppointmentStatusHistory\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\AppointmentStatusHistory\:\:changedByUser\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AppointmentStatusHistory.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AppointmentStatusHistory\\:\\:changedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AppointmentStatusHistory.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AuditLog uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\AuditLog uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/AuditLog.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AuditLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AuditLog.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Barber uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Barber uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Barber\:\:barberServices\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:barberServices\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Barber\:\:blockedPeriods\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:blockedPeriods\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Barber\:\:branch\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Barber\:\:galleries\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:galleries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Barber\:\:testimonials\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Barber.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Barber.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Barber.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Barber\\:\\:workingHours\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Barber.php
-
-		-
-			message: "#^Class App\\\\Models\\\\BarberService uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\BarberService uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BarberService.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BarberService\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BarberService\:\:barber\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BarberService.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BarberService\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BarberService\:\:service\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BarberService.php
 
 		-
-			message: "#^Class App\\\\Models\\\\BlockedPeriod uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\BlockedPeriod uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlockedPeriod.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlockedPeriod\:\:barber\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlockedPeriod.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlockedPeriod\:\:branch\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlockedPeriod.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlockedPeriod\\:\\:createdByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlockedPeriod\:\:createdByUser\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlockedPeriod.php
 
 		-
-			message: "#^Class App\\\\Models\\\\BlogPost uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\BlogPost uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlogPost.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlogPost\\:\\:author\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlogPost\:\:reactions\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlogPost.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlogPost\\:\\:reactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BlogPost.php
-
-		-
-			message: "#^Class App\\\\Models\\\\BlogReaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\BlogReaction uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlogReaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlogReaction\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlogReaction\:\:customer\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlogReaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\BlogReaction\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\BlogReaction\:\:post\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/BlogReaction.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Branch uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Branch uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Branch\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Branch\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Branch\\:\\:barbers\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Branch\:\:barbers\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Branch\\:\\:business\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Branch\:\:business\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Branch\\:\\:serviceZones\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Branch\:\:serviceZones\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Branch\\:\\:services\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Branch\:\:services\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Branch.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Business uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Business uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Business.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Business\\:\\:branches\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Business\:\:branches\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Business.php
 
 		-
-			message: "#^Class App\\\\Models\\\\DeviceToken uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\DeviceToken uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/DeviceToken.php
 
 		-
-			message: "#^Method App\\\\Models\\\\DeviceToken\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\DeviceToken\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/DeviceToken.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ErrorEvent\\:\\:group\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ErrorEvent\:\:group\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ErrorEvent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ErrorEvent\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ErrorEvent\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ErrorEvent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:assignee\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ErrorGroup\:\:assignee\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ErrorGroup.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:events\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ErrorGroup\:\:events\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ErrorGroup.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ErrorGroup\\:\\:resolvedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ErrorGroup\:\:resolvedByUser\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ErrorGroup.php
 
 		-
-			message: "#^Class App\\\\Models\\\\FeatureFlag uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\FeatureFlag uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/FeatureFlag.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Gallery uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Gallery uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Gallery.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Gallery\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Gallery.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Holiday uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Holiday uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Holiday.php
 
 		-
-			message: "#^Class App\\\\Models\\\\IdempotencyKey uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\IdempotencyKey uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/IdempotencyKey.php
 
 		-
-			message: "#^Method App\\\\Models\\\\IdempotencyKey\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\IdempotencyKey\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/IdempotencyKey.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Notification uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Notification uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Notification.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:recipient\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\Notification\:\:deliveries\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Notification.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:sender\\(\\) has no return type specified\\.$#"
+			message: '#^Method App\\Models\\Notification\:\:reads\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Notification.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Payment uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Method App\\Models\\Notification\:\:recipient\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Notification.php
+
+		-
+			message: '#^Method App\\Models\\Notification\:\:sender\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Notification.php
+
+		-
+			message: '#^Class App\\Models\\NotificationBroadcast uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationBroadcast.php
+
+		-
+			message: '#^Method App\\Models\\NotificationBroadcast\:\:creator\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationBroadcast.php
+
+		-
+			message: '#^Class App\\Models\\NotificationDelivery uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationDelivery.php
+
+		-
+			message: '#^Method App\\Models\\NotificationDelivery\:\:notification\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationDelivery.php
+
+		-
+			message: '#^Class App\\Models\\NotificationRead uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationRead.php
+
+		-
+			message: '#^Method App\\Models\\NotificationRead\:\:notification\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationRead.php
+
+		-
+			message: '#^Method App\\Models\\NotificationRead\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/NotificationRead.php
+
+		-
+			message: '#^Class App\\Models\\Payment uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:appointment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Payment\:\:transactions\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:transactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Class App\\\\Models\\\\PaymentTransaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\PaymentTransaction uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/PaymentTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\PaymentTransaction\\:\\:payment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/PaymentTransaction.php
-
-		-
-			message: "#^Class App\\\\Models\\\\PushDeliveryStat uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\PushDeliveryStat uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/PushDeliveryStat.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Service uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Service uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:appointmentItems\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:appointmentItems\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:approvedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:approvedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:barberServices\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:barberServices\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:branch\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\Service\:\:testimonials\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Service.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:category\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Service.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Service\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Service.php
-
-		-
-			message: "#^Class App\\\\Models\\\\ServiceCategory uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\ServiceCategory uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ServiceCategory.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ServiceCategory\\:\\:services\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ServiceCategory\:\:services\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ServiceCategory.php
 
 		-
-			message: "#^Class App\\\\Models\\\\ServiceZone uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\ServiceCategoryRequest uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ServiceCategoryRequest.php
+
+		-
+			message: '#^Method App\\Models\\ServiceCategoryRequest\:\:requester\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ServiceCategoryRequest.php
+
+		-
+			message: '#^Method App\\Models\\ServiceCategoryRequest\:\:reviewer\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ServiceCategoryRequest.php
+
+		-
+			message: '#^Method App\\Models\\ServiceCategoryRequest\:\:serviceCategory\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ServiceCategoryRequest.php
+
+		-
+			message: '#^Class App\\Models\\ServiceZone uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ServiceZone.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ServiceZone\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ServiceZone\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ServiceZone.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ServiceZone\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ServiceZone\:\:branch\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ServiceZone.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Setting uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Setting uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Setting.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Setting\\:\\:\\$attributes type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Setting.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Testimonial uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\Testimonial uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/Testimonial.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Testimonial.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:customer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Testimonial.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Testimonial\\:\\:service\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Testimonial.php
-
-		-
-			message: "#^Class App\\\\Models\\\\ThemeSetting uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\ThemeSetting uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeSetting.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ThemeSetting\\:\\:branch\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ThemeSetting\:\:branch\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeSetting.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ThemeSetting\\:\\:versions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ThemeSetting\:\:versions\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeSetting.php
 
 		-
-			message: "#^Class App\\\\Models\\\\ThemeVersion uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\ThemeVersion uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ThemeVersion\\:\\:publishedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ThemeVersion\:\:publishedByUser\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeVersion.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ThemeVersion\\:\\:themeSetting\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\ThemeVersion\:\:themeSetting\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/ThemeVersion.php
 
 		-
-			message: "#^Class App\\\\Models\\\\User uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Class App\\Models\\User uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:addresses\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:addresses\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:appointments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:auditLogs\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:auditLogs\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:blogPosts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:blogPosts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:broadcastsCreated\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:deviceTokens\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:channelPreferences\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:testimonials\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			message: '#^Method App\\Models\\User\:\:deviceTokens\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Class App\\\\Models\\\\WorkingHour uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			message: '#^Method App\\Models\\User\:\:notificationReads\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:notifications\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:testimonials\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Class App\\Models\\UserNotificationPreference uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/UserNotificationPreference.php
+
+		-
+			message: '#^Method App\\Models\\UserNotificationPreference\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/UserNotificationPreference.php
+
+		-
+			message: '#^Class App\\Models\\WorkingHour uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/Models/WorkingHour.php
 
 		-
-			message: "#^Method App\\\\Models\\\\WorkingHour\\:\\:barber\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/WorkingHour.php
-
-		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\AuthException\\:\\:socialVerificationFailed\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\AuthException\:\:socialVerificationFailed\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/AuthException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:failed\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\BookingException\:\:failed\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/BookingException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:invalidTransition\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\BookingException\:\:invalidTransition\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/BookingException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\BookingException\\:\\:slotTaken\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\BookingException\:\:slotTaken\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/BookingException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\ErrorReporter\\:\\:redactData\\(\\) should return array\\<string, mixed\\> but returns mixed\\.$#"
+			message: '#^Method App\\Support\\Errors\\ErrorReporter\:\:redactData\(\) should return array\<string, mixed\> but returns mixed\.$#'
+			identifier: return.type
 			count: 1
 			path: app/Support/Errors/ErrorReporter.php
 
 		-
-			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Http\\\\Request\\. Use \\-\\> instead\\.$#"
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 7
 			path: app/Support/Errors/ErrorReporter.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\ExternalServiceException\\:\\:serviceError\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\ExternalServiceException\:\:serviceError\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/ExternalServiceException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\PaymentException\\:\\:providerError\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\PaymentException\:\:providerError\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/PaymentException.php
 
 		-
-			message: "#^Method App\\\\Support\\\\Errors\\\\UploadException\\:\\:invalidFile\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
+			message: '#^Method App\\Support\\Errors\\UploadException\:\:invalidFile\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/Support/Errors/UploadException.php

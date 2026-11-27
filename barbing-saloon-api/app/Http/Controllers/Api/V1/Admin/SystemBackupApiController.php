@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Domain\Shared\Services\AuditLogger;
+use App\Domain\Shared\Services\BackupEncryptionService;
 use App\Http\Responses\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +20,12 @@ use Throwable;
 
 class SystemBackupApiController
 {
+    public function __construct(
+        protected ?BackupEncryptionService $encryptionService = null
+    ) {
+        $this->encryptionService = $this->encryptionService ?? app(BackupEncryptionService::class);
+    }
+
     private function getBackupDirectory(): string
     {
         $dir = storage_path('app/backups');
@@ -43,6 +51,7 @@ class SystemBackupApiController
 
             $bytes = $file->getSize();
             $ext = strtolower($file->getExtension());
+            $isEnc = $this->encryptionService->isEncrypted($file->getPathname()) || str_ends_with($filename, '.enc');
 
             $backups[] = [
                 'filename' => $filename,
@@ -50,7 +59,8 @@ class SystemBackupApiController
                 'size_formatted' => $this->formatBytes($bytes),
                 'created_at' => Carbon::createFromTimestamp($file->getMTime())->toIso8601String(),
                 'extension' => $ext,
-                'is_valid' => in_array($ext, ['sql', 'sqlite', 'gz'], true),
+                'is_valid' => in_array($ext, ['sql', 'sqlite', 'gz', 'enc'], true),
+                'is_encrypted' => $isEnc,
             ];
         }
 
@@ -68,6 +78,7 @@ class SystemBackupApiController
     {
         $validated = $request->validate([
             'filename' => 'nullable|string|max:120',
+            'encrypt' => 'nullable|boolean',
         ]);
 
         $dir = $this->getBackupDirectory();
@@ -82,16 +93,17 @@ class SystemBackupApiController
             return ApiResponse::error("Database driver [{$driver}] is not supported for backups.", [], 422, 'BACKUP_UNSUPPORTED_DRIVER');
         }
 
+        $encrypt = $request->boolean('encrypt');
         $customName = trim((string) ($validated['filename'] ?? ''));
         if ($customName !== '') {
-            $stem = pathinfo($customName, PATHINFO_FILENAME);
-            $sanitisedStem = trim((string) preg_replace('/[^a-zA-Z0-9_-]+/', '_', $stem), '_-');
+            $cleanName = (string) preg_replace('/\.(sql|sqlite|enc)$/i', '', $customName);
+            $sanitisedStem = trim((string) preg_replace('/[^a-zA-Z0-9_-]+/', '_', $cleanName), '_-');
             if ($sanitisedStem === '') {
                 return ApiResponse::error('Enter a filename containing letters or numbers.', [], 422, 'VALIDATION_FAILED');
             }
-            $filename = $sanitisedStem.'.'.$extension;
+            $filename = $sanitisedStem.'.'.$extension.($encrypt ? '.enc' : '');
         } else {
-            $filename = 'candycutz_backup_'.now()->format('Y-m-d_His_u').'.'.$extension;
+            $filename = 'candycutz_backup_'.now()->format('Y-m-d_His_u').'.'.$extension.($encrypt ? '.enc' : '');
         }
 
         $destination = $dir.DIRECTORY_SEPARATOR.$filename;
@@ -100,10 +112,15 @@ class SystemBackupApiController
         }
 
         try {
-            $exitCode = Artisan::call('db:backup', [
+            $artisanParams = [
                 '--filename' => $filename,
                 '--directory' => $dir,
-            ]);
+            ];
+            if ($encrypt) {
+                $artisanParams['--encrypt'] = true;
+            }
+
+            $exitCode = Artisan::call('db:backup', $artisanParams);
             $output = Artisan::output();
 
             if ($exitCode !== 0 || ! File::exists($destination) || File::size($destination) === 0) {
@@ -117,11 +134,19 @@ class SystemBackupApiController
                 return ApiResponse::error('Database backup failed: '.$message, [], 500, 'BACKUP_FAILED');
             }
 
+            $isEncrypted = $this->encryptionService->isEncrypted($destination);
+            AuditLogger::log('backup_created', 'SystemBackup', null, [], [
+                'filename' => $filename,
+                'is_encrypted' => $isEncrypted,
+                'size_bytes' => File::size($destination),
+            ]);
+
             return ApiResponse::success([
                 'filename' => $filename,
                 'size_bytes' => File::size($destination),
                 'size_formatted' => $this->formatBytes(File::size($destination)),
                 'created_at' => Carbon::createFromTimestamp(File::lastModified($destination))->toIso8601String(),
+                'is_encrypted' => $isEncrypted,
                 'output' => trim($output),
             ], 'Database snapshot generated successfully');
         } catch (Throwable $e) {
@@ -199,7 +224,7 @@ class SystemBackupApiController
         ], 'Backup file uploaded and registered successfully');
     }
 
-    public function download(string $filename): StreamedResponse|BinaryFileResponse|JsonResponse
+    public function download(string $filename, Request $request): StreamedResponse|BinaryFileResponse|JsonResponse
     {
         $safeFilename = basename($filename);
         $dir = $this->getBackupDirectory();
@@ -207,6 +232,42 @@ class SystemBackupApiController
 
         if (! File::exists($filePath)) {
             return ApiResponse::error("Backup file not found: {$safeFilename}", [], 404, 'RESOURCE_NOT_FOUND');
+        }
+
+        $isEncrypted = $this->encryptionService->isEncrypted($filePath);
+        $wantsDecrypted = $request->boolean('decrypt');
+
+        AuditLogger::log('backup_downloaded', 'SystemBackup', null, [], [
+            'filename' => $safeFilename,
+            'decrypted' => (bool) ($isEncrypted && $wantsDecrypted),
+        ]);
+
+        if ($isEncrypted && $wantsDecrypted) {
+            $decryptedFilename = preg_replace('/\.enc$/i', '', $safeFilename);
+            $tempDecrypted = $dir.DIRECTORY_SEPARATOR.'tmp_dec_'.uniqid().'_'.$decryptedFilename;
+
+            try {
+                $this->encryptionService->decryptFile($filePath, $tempDecrypted);
+
+                return response()->streamDownload(function () use ($tempDecrypted) {
+                    $stream = fopen($tempDecrypted, 'rb');
+                    if ($stream !== false) {
+                        fpassthru($stream);
+                        fclose($stream);
+                    }
+                    @unlink($tempDecrypted);
+                }, $decryptedFilename, [
+                    'Content-Type' => 'application/octet-stream',
+                    'Content-Length' => (string) File::size($tempDecrypted),
+                    'X-Backup-Encrypted' => '0',
+                ]);
+            } catch (Throwable $e) {
+                if (file_exists($tempDecrypted)) {
+                    @unlink($tempDecrypted);
+                }
+
+                return ApiResponse::error('Failed decrypting backup for download: '.$e->getMessage(), [], 500, 'DECRYPT_FAILED');
+            }
         }
 
         return response()->streamDownload(function () use ($filePath) {
@@ -218,6 +279,7 @@ class SystemBackupApiController
         }, $safeFilename, [
             'Content-Type' => 'application/octet-stream',
             'Content-Length' => (string) File::size($filePath),
+            'X-Backup-Encrypted' => $isEncrypted ? '1' : '0',
         ]);
     }
 
@@ -232,6 +294,7 @@ class SystemBackupApiController
         }
 
         File::delete($filePath);
+        AuditLogger::log('backup_deleted', 'SystemBackup', null, [], ['filename' => $safeFilename]);
 
         return ApiResponse::success([
             'deleted_file' => $safeFilename,

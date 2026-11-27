@@ -6,6 +6,8 @@ import { registerRouteGuards } from './core/guards/routeGuards';
 import { syncThemeForRoute } from './core/composables/useTheme';
 import { useAuthStore } from './modules/auth/store/auth.store';
 import { recordClientError, addBreadcrumb } from './core/api/errorReporter';
+import { useNavigationProgress } from './core/composables/useNavigationProgress';
+import { initClickFeedback } from './core/utils/clickFeedback';
 import './assets/css/main.css';
 
 const app = createApp(App);
@@ -14,6 +16,18 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 registerRouteGuards(router);
+
+// Initialize instant click & tap feedback
+initClickFeedback();
+
+const { start: startNavProgress, finish: finishNavProgress, fail: failNavProgress } = useNavigationProgress();
+
+router.beforeEach((to, from, next) => {
+  if (to.fullPath !== from.fullPath) {
+    startNavProgress();
+  }
+  next();
+});
 
 // Global Error Handlers (Workstream E4)
 app.config.errorHandler = (err, instance, info) => {
@@ -58,6 +72,7 @@ if (typeof window !== 'undefined') {
 }
 
 router.onError((error) => {
+  failNavProgress();
   console.error('[Router Error]', error);
   recordClientError(error, {
     level: 'error',
@@ -76,6 +91,7 @@ router.onError((error) => {
 });
 
 router.afterEach((to) => {
+  finishNavProgress();
   syncThemeForRoute(to);
   addBreadcrumb({
     type: 'navigation',
@@ -87,6 +103,13 @@ router.afterEach((to) => {
 
 // Mount the app immediately so public marketing and catalogue routes render with zero delay
 app.mount('#app');
+
+// Register service worker for instant Back/Refresh media and catalogue caching
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && !import.meta.env.VITEST) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 
 // Boot auth asynchronously in the background
 const auth = useAuthStore();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Payment\Services;
 
+use App\Domain\Payment\Enums\AppointmentPaymentStatus;
 use App\Domain\Payment\Enums\ManualTransferState;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Events\PaymentConfirmed;
@@ -120,6 +121,7 @@ class ManualTransferStateMachine
                 if ($appointment) {
                     $appointment->update([
                         'status' => AppointmentStatus::confirmed->value,
+                        'payment_status' => AppointmentPaymentStatus::paid,
                         'deposit_paid' => true,
                     ]);
 

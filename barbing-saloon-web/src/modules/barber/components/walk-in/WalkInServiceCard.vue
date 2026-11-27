@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-[#12161C] rounded-3xl border border-slate-200 dark:border-white/[0.08] p-6 sm:p-8 relative overflow-hidden group hover:border-gold/30 transition-all duration-300 shadow-xl">
+  <div class="bg-white dark:bg-[#12161C] rounded-3xl border border-slate-200 dark:border-white/[0.08] p-4 xs:p-6 sm:p-8 relative overflow-hidden group hover:border-gold/30 transition-all duration-300 shadow-xl">
     <div class="flex items-center gap-4 mb-6 relative z-10">
       <div class="h-11 w-11 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-gold group-hover:bg-gold/10 group-hover:border-gold/20 transition-all duration-300">
         <ScissorsIcon class="h-5 w-5" />

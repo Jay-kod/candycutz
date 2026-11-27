@@ -4,7 +4,7 @@
 
 **Version:** `1.0.0`  
 **Base URL:** `/api/v1`  
-**Generated At:** `2026-10-23 13:01:36 UTC`  
+**Generated At:** `2026-11-20 23:20:45 UTC`  
 **Authority:** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2 & §10
 
 ---
@@ -25,10 +25,14 @@
 | Method | Endpoint | Tag | Summary | Auth |
 |---|---|---|---|---|
 | `GET` | `/api/v1/account/analytics` | **Account** | GET Account/analytics (analytics) | 🔒 Bearer |
+| `POST` | `/api/v1/account/avatar` | **Account** | POST Account/avatar (uploadAvatar) | 🔒 Bearer |
+| `DELETE` | `/api/v1/account/avatar` | **Account** | DELETE Account/avatar (deleteAvatar) | 🔒 Bearer |
 | `GET` | `/api/v1/account/dashboard` | **Account** | GET Account/dashboard (dashboard) | 🔒 Bearer |
 | `GET` | `/api/v1/account/my-codes` | **Account** | GET Account/my Codes (myCodes) | 🔒 Bearer |
 | `GET` | `/api/v1/account/profile` | **Account** | GET Account/profile (profile) | 🔒 Bearer |
 | `POST` | `/api/v1/account/profile` | **Account** | POST Account/profile (updateProfile) | 🔒 Bearer |
+| `PUT` | `/api/v1/account/profile` | **Account** | PUT Account/profile (updateProfile) | 🔒 Bearer |
+| `PATCH` | `/api/v1/account/profile` | **Account** | PATCH Account/profile (updateProfile) | 🔒 Bearer |
 | `GET` | `/api/v1/notifications` | **Account** | GET Notifications (index) | 🔒 Bearer |
 | `POST` | `/api/v1/notifications` | **Account** | POST Notifications (store) | 🔒 Bearer |
 | `POST` | `/api/v1/notifications/device-token` | **Account** | POST Notifications/device Token (registerDeviceToken) | 🔒 Bearer |
@@ -42,6 +46,9 @@
 | `DELETE` | `/api/v1/wishlist/remove` | **Account** | DELETE Wishlist/remove (destroyByType) | 🔒 Bearer |
 | `DELETE` | `/api/v1/wishlist/{id}` | **Account** | DELETE Wishlist/{id} (destroy) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/analytics` | **Admin** | GET Admin/analytics (analytics) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/animations` | **Admin** | GET Admin/animations (index) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/animations` | **Admin** | POST Admin/animations (update) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/animations/reset` | **Admin** | POST Admin/animations/reset (reset) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/app/crashes` | **Admin** | GET Admin/app/crashes (crashes) | 🔒 Bearer |
 | `PATCH` | `/api/v1/admin/app/crashes/{id}/resolve` | **Admin** | PATCH Admin/app/crashes/{id}/resolve (resolveCrash) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/app/maintenance` | **Admin** | POST Admin/app/maintenance (toggleMaintenance) | 🔒 Bearer |
@@ -62,6 +69,8 @@
 | `PATCH` | `/api/v1/admin/appointments/{id}/cancel` | **Admin** | PATCH Admin/appointments/{id}/cancel (cancel) | 🔒 Bearer |
 | `PATCH` | `/api/v1/admin/appointments/{id}/force-approve` | **Admin** | PATCH Admin/appointments/{id}/force Approve (forceApprove) | 🔒 Bearer |
 | `PATCH` | `/api/v1/admin/appointments/{id}/status` | **Admin** | PATCH Admin/appointments/{id}/status (updateStatus) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/bank-details` | **Admin** | GET Admin/bank Details (bankDetails) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/bank-details` | **Admin** | POST Admin/bank Details (updateBankDetails) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/barbers` | **Admin** | GET Admin/barbers (index) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/barbers` | **Admin** | POST Admin/barbers (store) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/barbers/{id}` | **Admin** | GET Admin/barbers/{id} (show) | 🔒 Bearer |
@@ -74,13 +83,21 @@
 | `PUT` | `/api/v1/admin/blog/{id}` | **Admin** | PUT Admin/blog/{id} (update) | 🔒 Bearer |
 | `DELETE` | `/api/v1/admin/blog/{id}` | **Admin** | DELETE Admin/blog/{id} (destroy) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/customers` | **Admin** | GET Admin/customers (customers) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/customers` | **Admin** | POST Admin/customers (storeCustomer) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/customers/{id}` | **Admin** | GET Admin/customers/{id} (customerProfile) | 🔒 Bearer |
+| `PUT` | `/api/v1/admin/customers/{id}` | **Admin** | PUT Admin/customers/{id} (updateCustomer) | 🔒 Bearer |
+| `PATCH` | `/api/v1/admin/customers/{id}` | **Admin** | PATCH Admin/customers/{id} (updateCustomer) | 🔒 Bearer |
+| `DELETE` | `/api/v1/admin/customers/{id}` | **Admin** | DELETE Admin/customers/{id} (deleteCustomer) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/customers/{id}/reset-password` | **Admin** | POST Admin/customers/{id}/reset Password (resetCustomerPassword) | 🔒 Bearer |
+| `PATCH` | `/api/v1/admin/customers/{id}/status` | **Admin** | PATCH Admin/customers/{id}/status (updateCustomerStatus) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/dashboard` | **Admin** | GET Admin/dashboard (dashboard) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/feature-flags` | **Admin** | GET Admin/feature Flags (index) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/feature-flags` | **Admin** | POST Admin/feature Flags (store) | 🔒 Bearer |
 | `PUT` | `/api/v1/admin/feature-flags/{id}` | **Admin** | PUT Admin/feature Flags/{id} (update) | 🔒 Bearer |
 | `DELETE` | `/api/v1/admin/feature-flags/{id}` | **Admin** | DELETE Admin/feature Flags/{id} (destroy) | 🔒 Bearer |
 | `PATCH` | `/api/v1/admin/feature-flags/{id}/toggle` | **Admin** | PATCH Admin/feature Flags/{id}/toggle (toggle) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/feedback` | **Admin** | GET Admin/feedback (index) | 🔒 Bearer |
+| `PATCH` | `/api/v1/admin/feedback/{submission}` | **Admin** | PATCH Admin/feedback/{submission} (update) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/gallery` | **Admin** | GET Admin/gallery (index) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/gallery` | **Admin** | POST Admin/gallery (store) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/gallery/{id}` | **Admin** | POST Admin/gallery/{id} (update) | 🔒 Bearer |
@@ -97,9 +114,17 @@
 | `GET` | `/api/v1/admin/logs` | **Admin** | GET Admin/logs (logs) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/payments` | **Admin** | GET Admin/payments (index) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/payments/{id}` | **Admin** | GET Admin/payments/{id} (show) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/payments/{id}/reassign-barber` | **Admin** | POST Admin/payments/{id}/reassign Barber (reassignBarber) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/payments/{id}/refund` | **Admin** | POST Admin/payments/{id}/refund (refund) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/payments/{id}/reject` | **Admin** | POST Admin/payments/{id}/reject (rejectPayment) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/payments/{id}/reverify` | **Admin** | POST Admin/payments/{id}/reverify (reverify) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/payments/{id}/verify` | **Admin** | POST Admin/payments/{id}/verify (verifyPayment) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/paystack/settings` | **Admin** | GET Admin/paystack/settings (getPaystackSettings) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/paystack/settings` | **Admin** | POST Admin/paystack/settings (updatePaystackSettings) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/paystack/test-connection` | **Admin** | POST Admin/paystack/test Connection (testPaystackConnection) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/reports` | **Admin** | GET Admin/reports (reports) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/reports/history` | **Admin** | GET Admin/reports/history (reportHistory) | 🔒 Bearer |
+| `POST` | `/api/v1/admin/reports/log` | **Admin** | POST Admin/reports/log (logReportExport) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/settings` | **Admin** | GET Admin/settings (settings) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/settings` | **Admin** | POST Admin/settings (updateSettings) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/system/backups` | **Admin** | GET Admin/system/backups (index) | 🔒 Bearer |
@@ -116,7 +141,7 @@
 | `GET` | `/api/v1/admin/system/overview` | **Admin** | GET Admin/system/overview (overview) | 🔒 Bearer |
 | `GET` | `/api/v1/admin/system/trace/{requestId}` | **Admin** | GET Admin/system/trace/{requestId} (trace) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/test-email` | **Admin** | POST Admin/test Email (testEmail) | 🔒 Bearer |
-| `GET` | `/api/v1/admin/testimonials` | **Admin** | GET Admin/testimonials (index) | 🔒 Bearer |
+| `GET` | `/api/v1/admin/testimonials` | **Admin** | GET Admin/testimonials (adminIndex) | 🔒 Bearer |
 | `POST` | `/api/v1/admin/testimonials/{id}` | **Admin** | POST Admin/testimonials/{id} (update) | 🔒 Bearer |
 | `PUT` | `/api/v1/admin/testimonials/{id}` | **Admin** | PUT Admin/testimonials/{id} (update) | 🔒 Bearer |
 | `DELETE` | `/api/v1/admin/testimonials/{id}` | **Admin** | DELETE Admin/testimonials/{id} (destroy) | 🔒 Bearer |
@@ -133,9 +158,11 @@
 | `PUT` | `/api/v1/admin/working-hours/{workingHour}` | **Admin** | PUT Admin/working Hours/{workingHour} (updateWorkingHour) | 🔒 Bearer |
 | `PATCH` | `/api/v1/admin/working-hours/{workingHour}` | **Admin** | PATCH Admin/working Hours/{workingHour} (updateWorkingHour) | 🔒 Bearer |
 | `DELETE` | `/api/v1/admin/working-hours/{workingHour}` | **Admin** | DELETE Admin/working Hours/{workingHour} (deleteWorkingHour) | 🔒 Bearer |
+| `GET` | `/api/v1/animations` | **Catalogue** | GET Animations (animations) | 🌐 Public |
 | `POST` | `/api/v1/app/crashes` | **Catalogue** | POST App/crashes (reportCrash) | 🌐 Public |
 | `GET` | `/api/v1/available-slots` | **Catalogue** | GET Available Slots (availableSlots) | 🌐 Public |
 | `GET` | `/api/v1/barber/account` | **Catalogue** | GET Barber/account (account) | 🔒 Bearer |
+| `POST` | `/api/v1/barber/account` | **Catalogue** | POST Barber/account (updateAccount) | 🔒 Bearer |
 | `PATCH` | `/api/v1/barber/account` | **Catalogue** | PATCH Barber/account (updateAccount) | 🔒 Bearer |
 | `PUT` | `/api/v1/barber/account` | **Catalogue** | PUT Barber/account (updateAccount) | 🔒 Bearer |
 | `GET` | `/api/v1/barber/analytics` | **Catalogue** | GET Barber/analytics (analytics) | 🔒 Bearer |
@@ -146,6 +173,7 @@
 | `POST` | `/api/v1/barber/appointments/{id}/collect-payment` | **Catalogue** | POST Barber/appointments/{id}/collect Payment (collectPaymentAtVenue) | 🔒 Bearer |
 | `PATCH` | `/api/v1/barber/appointments/{id}/complete` | **Catalogue** | PATCH Barber/appointments/{id}/complete (complete) | 🔒 Bearer |
 | `PATCH` | `/api/v1/barber/appointments/{id}/no-show` | **Catalogue** | PATCH Barber/appointments/{id}/no Show (noShow) | 🔒 Bearer |
+| `GET` | `/api/v1/barber/bank-details` | **Catalogue** | GET Barber/bank Details (bankDetails) | 🔒 Bearer |
 | `GET` | `/api/v1/barber/blog` | **Catalogue** | GET Barber/blog (index) | 🔒 Bearer |
 | `POST` | `/api/v1/barber/blog` | **Catalogue** | POST Barber/blog (store) | 🔒 Bearer |
 | `POST` | `/api/v1/barber/blog/{id}` | **Catalogue** | POST Barber/blog/{id} (update) | 🔒 Bearer |
@@ -161,12 +189,14 @@
 | `PATCH` | `/api/v1/barber/my-status` | **Catalogue** | PATCH Barber/my Status (updateMyStatus) | 🔒 Bearer |
 | `GET` | `/api/v1/barber/notifications` | **Catalogue** | GET Barber/notifications (index) | 🔒 Bearer |
 | `POST` | `/api/v1/barber/notifications` | **Catalogue** | POST Barber/notifications (store) | 🔒 Bearer |
+| `GET` | `/api/v1/barber/reviews` | **Catalogue** | GET Barber/reviews (barberReviews) | 🔒 Bearer |
 | `GET` | `/api/v1/barber/schedule` | **Catalogue** | GET Barber/schedule (schedule) | 🔒 Bearer |
 | `PUT` | `/api/v1/barber/schedule` | **Catalogue** | PUT Barber/schedule (updateSchedule) | 🔒 Bearer |
 | `GET` | `/api/v1/barber/services` | **Catalogue** | GET Barber/services (index) | 🔒 Bearer |
 | `POST` | `/api/v1/barber/services` | **Catalogue** | POST Barber/services (store) | 🔒 Bearer |
 | `PUT` | `/api/v1/barber/services/{id}` | **Catalogue** | PUT Barber/services/{id} (update) | 🔒 Bearer |
 | `DELETE` | `/api/v1/barber/services/{id}` | **Catalogue** | DELETE Barber/services/{id} (destroy) | 🔒 Bearer |
+| `GET` | `/api/v1/barber/testimonials` | **Catalogue** | GET Barber/testimonials (barberReviews) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers` | **Catalogue** | GET Barbers (index) | 🌐 Public |
 | `POST` | `/api/v1/barbers` | **Catalogue** | POST Barbers (store) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/account` | **Catalogue** | GET Barbers/account (account) | 🔒 Bearer |
@@ -175,13 +205,16 @@
 | `PATCH` | `/api/v1/barbers/account` | **Catalogue** | PATCH Barbers/account (updateAccount) | 🔒 Bearer |
 | `PATCH` | `/api/v1/barbers/account/username` | **Catalogue** | PATCH Barbers/account/username (updateUsername) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/analytics` | **Catalogue** | GET Barbers/analytics (analytics) | 🔒 Bearer |
+| `GET` | `/api/v1/barbers/bank-details` | **Catalogue** | GET Barbers/bank Details (bankDetails) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/blocked-periods` | **Catalogue** | GET Barbers/blocked Periods (blockedPeriods) | 🔒 Bearer |
 | `POST` | `/api/v1/barbers/blocked-periods` | **Catalogue** | POST Barbers/blocked Periods (storeBlockedPeriod) | 🔒 Bearer |
 | `DELETE` | `/api/v1/barbers/blocked-periods/{id}` | **Catalogue** | DELETE Barbers/blocked Periods/{id} (deleteBlockedPeriod) | 🔒 Bearer |
 | `PATCH` | `/api/v1/barbers/chair-status` | **Catalogue** | PATCH Barbers/chair Status (updateChairStatus) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/dashboard` | **Catalogue** | GET Barbers/dashboard (dashboard) | 🔒 Bearer |
+| `GET` | `/api/v1/barbers/reviews` | **Catalogue** | GET Barbers/reviews (barberReviews) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/schedule` | **Catalogue** | GET Barbers/schedule (schedule) | 🔒 Bearer |
 | `PUT` | `/api/v1/barbers/schedule` | **Catalogue** | PUT Barbers/schedule (updateSchedule) | 🔒 Bearer |
+| `GET` | `/api/v1/barbers/testimonials` | **Catalogue** | GET Barbers/testimonials (barberReviews) | 🔒 Bearer |
 | `GET` | `/api/v1/barbers/{id}` | **Catalogue** | GET Barbers/{id} (show) | 🌐 Public |
 | `PUT` | `/api/v1/barbers/{id}` | **Catalogue** | PUT Barbers/{id} (update) | 🔒 Bearer |
 | `DELETE` | `/api/v1/barbers/{id}` | **Catalogue** | DELETE Barbers/{id} (destroy) | 🔒 Bearer |
@@ -197,6 +230,8 @@
 | `GET` | `/api/v1/customer/analytics` | **Catalogue** | GET Customer/analytics (analytics) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/appointments` | **Catalogue** | GET Customer/appointments (index) | 🔒 Bearer |
 | `PATCH` | `/api/v1/customer/appointments/{id}/cancel` | **Catalogue** | PATCH Customer/appointments/{id}/cancel (cancel) | 🔒 Bearer |
+| `POST` | `/api/v1/customer/avatar` | **Catalogue** | POST Customer/avatar (uploadAvatar) | 🔒 Bearer |
+| `DELETE` | `/api/v1/customer/avatar` | **Catalogue** | DELETE Customer/avatar (deleteAvatar) | 🔒 Bearer |
 | `POST` | `/api/v1/customer/blog/{id}/react` | **Catalogue** | POST Customer/blog/{id}/react (react) | 🔒 Bearer |
 | `DELETE` | `/api/v1/customer/blog/{id}/react` | **Catalogue** | DELETE Customer/blog/{id}/react (removeReaction) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/bookings` | **Catalogue** | GET Customer/bookings (index) | 🔒 Bearer |
@@ -208,12 +243,15 @@
 | `GET` | `/api/v1/customer/checkout/{id}/payment-details` | **Catalogue** | GET Customer/checkout/{id}/payment Details (paymentDetails) | 🔒 Bearer |
 | `POST` | `/api/v1/customer/checkout/{id}/receipt` | **Catalogue** | POST Customer/checkout/{id}/receipt (uploadReceipt) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/dashboard` | **Catalogue** | GET Customer/dashboard (dashboard) | 🔒 Bearer |
+| `POST` | `/api/v1/customer/feedback` | **Catalogue** | POST Customer/feedback (store) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/my-codes` | **Catalogue** | GET Customer/my Codes (myCodes) | 🔒 Bearer |
 | `POST` | `/api/v1/customer/notification-settings` | **Catalogue** | POST Customer/notification Settings (updateNotificationSettings) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/notifications` | **Catalogue** | GET Customer/notifications (index) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/payments/{reference}` | **Catalogue** | GET Customer/payments/{reference} (customerPaymentStatus) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/profile` | **Catalogue** | GET Customer/profile (profile) | 🔒 Bearer |
 | `POST` | `/api/v1/customer/profile` | **Catalogue** | POST Customer/profile (updateProfile) | 🔒 Bearer |
+| `PUT` | `/api/v1/customer/profile` | **Catalogue** | PUT Customer/profile (updateProfile) | 🔒 Bearer |
+| `PATCH` | `/api/v1/customer/profile` | **Catalogue** | PATCH Customer/profile (updateProfile) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/reviews` | **Catalogue** | GET Customer/reviews (customerReviews) | 🔒 Bearer |
 | `POST` | `/api/v1/customer/testimonials` | **Catalogue** | POST Customer/testimonials (store) | 🔒 Bearer |
 | `GET` | `/api/v1/customer/wishlist` | **Catalogue** | GET Customer/wishlist (index) | 🔒 Bearer |
@@ -230,6 +268,7 @@
 | `GET` | `/api/v1/notification-settings` | **Catalogue** | GET Notification Settings (getNotificationSettings) | 🔒 Bearer |
 | `POST` | `/api/v1/notification-settings` | **Catalogue** | POST Notification Settings (updateNotificationSettings) | 🔒 Bearer |
 | `GET` | `/api/v1/private-media/users/{user}/{type}/{filename}` | **Catalogue** | GET Private Media/users/{user}/{type}/{filename} (show) | 🌐 Public |
+| `GET` | `/api/v1/public/animations` | **Catalogue** | GET Public/animations (animations) | 🌐 Public |
 | `GET` | `/api/v1/public/available-slots` | **Catalogue** | GET Public/available Slots (availableSlots) | 🌐 Public |
 | `GET` | `/api/v1/public/barbers` | **Catalogue** | GET Public/barbers (index) | 🌐 Public |
 | `GET` | `/api/v1/public/barbers/{id}` | **Catalogue** | GET Public/barbers/{id} (show) | 🌐 Public |
@@ -249,8 +288,12 @@
 | `GET` | `/api/v1/reviews/me` | **Catalogue** | GET Reviews/me (customerReviews) | 🔒 Bearer |
 | `GET` | `/api/v1/service-categories` | **Catalogue** | GET Service Categories (categories) | 🌐 Public |
 | `POST` | `/api/v1/service-categories` | **Catalogue** | POST Service Categories (storeCategory) | 🔒 Bearer |
-| `PUT` | `/api/v1/service-categories/{id}` | **Catalogue** | PUT Service Categories/{id} (updateCategory) | 🔒 Bearer |
-| `DELETE` | `/api/v1/service-categories/{id}` | **Catalogue** | DELETE Service Categories/{id} (destroyCategory) | 🔒 Bearer |
+| `PUT` | `/api/v1/service-categories/{serviceCategory}` | **Catalogue** | PUT Service Categories/{serviceCategory} (updateCategory) | 🔒 Bearer |
+| `DELETE` | `/api/v1/service-categories/{serviceCategory}` | **Catalogue** | DELETE Service Categories/{serviceCategory} (destroyCategory) | 🔒 Bearer |
+| `GET` | `/api/v1/service-category-requests` | **Catalogue** | GET Service Category Requests (index) | 🔒 Bearer |
+| `POST` | `/api/v1/service-category-requests` | **Catalogue** | POST Service Category Requests (store) | 🔒 Bearer |
+| `PATCH` | `/api/v1/service-category-requests/{id}/approve` | **Catalogue** | PATCH Service Category Requests/{id}/approve (approve) | 🔒 Bearer |
+| `PATCH` | `/api/v1/service-category-requests/{id}/reject` | **Catalogue** | PATCH Service Category Requests/{id}/reject (reject) | 🔒 Bearer |
 | `GET` | `/api/v1/service-zones` | **Catalogue** | GET Service Zones (index) | 🌐 Public |
 | `GET` | `/api/v1/services` | **Catalogue** | GET Services (index) | 🌐 Public |
 | `POST` | `/api/v1/services` | **Catalogue** | POST Services (store) | 🔒 Bearer |
@@ -309,6 +352,8 @@
 | `POST` | `/api/v1/payments/appointments/{appointmentId}/receipt` | **Payments** | POST Payments/appointments/{appointmentId}/receipt (uploadReceipt) | 🔒 Bearer |
 | `GET` | `/api/v1/payments/appointments/{appointmentId}/receipt` | **Payments** | GET Payments/appointments/{appointmentId}/receipt (show) | 🔒 Bearer |
 | `POST` | `/api/v1/payments/checkout` | **Payments** | POST Payments/checkout (checkout) | 🔒 Bearer |
+| `GET` | `/api/v1/payments/checkout-data` | **Payments** | GET Payments/checkout Data (checkoutData) | 🌐 Public |
+| `POST` | `/api/v1/payments/confirm-transfer` | **Payments** | POST Payments/confirm Transfer (confirmTransfer) | 🌐 Public |
 | `GET` | `/api/v1/payments/return` | **Payments** | GET Payments/return (returnUrl) | 🌐 Public |
 | `POST` | `/api/v1/payments/webhook` | **Payments** | POST Payments/webhook (handle) | 🌐 Public |
 | `GET` | `/api/v1/super-admin/audit-logs` | **SuperAdmin** | GET Super Admin/audit Logs (auditLogs) | 🔒 Bearer |
@@ -334,6 +379,40 @@
 **Summary:** GET Account/analytics (analytics)
 
 **Description:** Handles GET request to `/api/v1/account/analytics` via `App\Http\Controllers\Api\V1\AccountApiController@analytics`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `POST` `/api/v1/account/avatar`
+
+**Summary:** POST Account/avatar (uploadAvatar)
+
+**Description:** Handles POST request to `/api/v1/account/avatar` via `App\Http\Controllers\Api\V1\AccountApiController@uploadAvatar`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `DELETE` `/api/v1/account/avatar`
+
+**Summary:** DELETE Account/avatar (deleteAvatar)
+
+**Description:** Handles DELETE request to `/api/v1/account/avatar` via `App\Http\Controllers\Api\V1\AccountApiController@deleteAvatar`.
 
 **Authentication:** Required (`Authorization: Bearer <token>`)
 
@@ -404,6 +483,40 @@
 - **`200`**: Operation completed successfully.
 - **`201`**: Resource created successfully.
 - **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `PUT` `/api/v1/account/profile`
+
+**Summary:** PUT Account/profile (updateProfile)
+
+**Description:** Handles PUT request to `/api/v1/account/profile` via `App\Http\Controllers\Api\V1\AccountApiController@updateProfile`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `PATCH` `/api/v1/account/profile`
+
+**Summary:** PATCH Account/profile (updateProfile)
+
+**Description:** Handles PATCH request to `/api/v1/account/profile` via `App\Http\Controllers\Api\V1\AccountApiController@updateProfile`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
 
 ---
@@ -637,6 +750,68 @@
 **Expected Responses:**
 
 - **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `GET` `/api/v1/admin/animations`
+
+**Summary:** GET Admin/animations (index)
+
+**Description:** Handles GET request to `/api/v1/admin/animations` via `App\Http\Controllers\Api\V1\Admin\AnimationApiController@index`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/animations`
+
+**Summary:** POST Admin/animations (update)
+
+**Description:** Handles POST request to `/api/v1/admin/animations` via `App\Http\Controllers\Api\V1\Admin\AnimationApiController@update`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/animations/reset`
+
+**Summary:** POST Admin/animations/reset (reset)
+
+**Description:** Handles POST request to `/api/v1/admin/animations/reset` via `App\Http\Controllers\Api\V1\Admin\AnimationApiController@reset`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
 - **`403`**: Forbidden (caller role not authorized for this resource).
 
@@ -1090,6 +1265,46 @@
 
 ---
 
+#### `GET` `/api/v1/admin/bank-details`
+
+**Summary:** GET Admin/bank Details (bankDetails)
+
+**Description:** Handles GET request to `/api/v1/admin/bank-details` via `App\Http\Controllers\Api\V1\AdminApiController@bankDetails`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/bank-details`
+
+**Summary:** POST Admin/bank Details (updateBankDetails)
+
+**Description:** Handles POST request to `/api/v1/admin/bank-details` via `App\Http\Controllers\Api\V1\AdminApiController@updateBankDetails`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
 #### `GET` `/api/v1/admin/barbers`
 
 **Summary:** GET Admin/barbers (index)
@@ -1366,6 +1581,28 @@
 
 ---
 
+#### `POST` `/api/v1/admin/customers`
+
+**Summary:** POST Admin/customers (storeCustomer)
+
+**Description:** Handles POST request to `/api/v1/admin/customers` via `App\Http\Controllers\Api\V1\AdminApiController@storeCustomer`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
 #### `GET` `/api/v1/admin/customers/{id}`
 
 **Summary:** GET Admin/customers/{id} (customerProfile)
@@ -1381,6 +1618,136 @@
 | Name | In | Required | Type | Description |
 |---|---|---|---|---|
 | `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `PUT` `/api/v1/admin/customers/{id}`
+
+**Summary:** PUT Admin/customers/{id} (updateCustomer)
+
+**Description:** Handles PUT request to `/api/v1/admin/customers/{id}` via `App\Http\Controllers\Api\V1\AdminApiController@updateCustomer`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `PATCH` `/api/v1/admin/customers/{id}`
+
+**Summary:** PATCH Admin/customers/{id} (updateCustomer)
+
+**Description:** Handles PATCH request to `/api/v1/admin/customers/{id}` via `App\Http\Controllers\Api\V1\AdminApiController@updateCustomer`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `DELETE` `/api/v1/admin/customers/{id}`
+
+**Summary:** DELETE Admin/customers/{id} (deleteCustomer)
+
+**Description:** Handles DELETE request to `/api/v1/admin/customers/{id}` via `App\Http\Controllers\Api\V1\AdminApiController@deleteCustomer`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/customers/{id}/reset-password`
+
+**Summary:** POST Admin/customers/{id}/reset Password (resetCustomerPassword)
+
+**Description:** Handles POST request to `/api/v1/admin/customers/{id}/reset-password` via `App\Http\Controllers\Api\V1\AdminApiController@resetCustomerPassword`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `PATCH` `/api/v1/admin/customers/{id}/status`
+
+**Summary:** PATCH Admin/customers/{id}/status (updateCustomerStatus)
+
+**Description:** Handles PATCH request to `/api/v1/admin/customers/{id}/status` via `App\Http\Controllers\Api\V1\AdminApiController@updateCustomerStatus`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** [`UpdateStatusRequest`](#componentschemasupdatestatusrequest)
 
 **Expected Responses:**
 
@@ -1513,6 +1880,50 @@
 | Name | In | Required | Type | Description |
 |---|---|---|---|---|
 | `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `GET` `/api/v1/admin/feedback`
+
+**Summary:** GET Admin/feedback (index)
+
+**Description:** Handles GET request to `/api/v1/admin/feedback` via `App\Http\Controllers\Api\V1\FeedbackSubmissionApiController@index`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `PATCH` `/api/v1/admin/feedback/{submission}`
+
+**Summary:** PATCH Admin/feedback/{submission} (update)
+
+**Description:** Handles PATCH request to `/api/v1/admin/feedback/{submission}` via `App\Http\Controllers\Api\V1\FeedbackSubmissionApiController@update`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `submission` | `path` | Yes | `string` | Identifier for submission |
 
 **Request Body:** `application/json`
 
@@ -1876,11 +2287,67 @@
 
 ---
 
+#### `POST` `/api/v1/admin/payments/{id}/reassign-barber`
+
+**Summary:** POST Admin/payments/{id}/reassign Barber (reassignBarber)
+
+**Description:** Handles POST request to `/api/v1/admin/payments/{id}/reassign-barber` via `App\Http\Controllers\Api\V1\AdminPaymentApiController@reassignBarber`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
 #### `POST` `/api/v1/admin/payments/{id}/refund`
 
 **Summary:** POST Admin/payments/{id}/refund (refund)
 
 **Description:** Handles POST request to `/api/v1/admin/payments/{id}/refund` via `App\Http\Controllers\Api\V1\AdminPaymentApiController@refund`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/payments/{id}/reject`
+
+**Summary:** POST Admin/payments/{id}/reject (rejectPayment)
+
+**Description:** Handles POST request to `/api/v1/admin/payments/{id}/reject` via `App\Http\Controllers\Api\V1\AdminPaymentApiController@rejectPayment`.
 
 **Authorized Roles:** `admin`, `super_admin`
 
@@ -1932,6 +2399,96 @@
 
 ---
 
+#### `POST` `/api/v1/admin/payments/{id}/verify`
+
+**Summary:** POST Admin/payments/{id}/verify (verifyPayment)
+
+**Description:** Handles POST request to `/api/v1/admin/payments/{id}/verify` via `App\Http\Controllers\Api\V1\AdminPaymentApiController@verifyPayment`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `GET` `/api/v1/admin/paystack/settings`
+
+**Summary:** GET Admin/paystack/settings (getPaystackSettings)
+
+**Description:** Handles GET request to `/api/v1/admin/paystack/settings` via `App\Http\Controllers\Api\V1\AdminApiController@getPaystackSettings`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/paystack/settings`
+
+**Summary:** POST Admin/paystack/settings (updatePaystackSettings)
+
+**Description:** Handles POST request to `/api/v1/admin/paystack/settings` via `App\Http\Controllers\Api\V1\AdminApiController@updatePaystackSettings`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/paystack/test-connection`
+
+**Summary:** POST Admin/paystack/test Connection (testPaystackConnection)
+
+**Description:** Handles POST request to `/api/v1/admin/paystack/test-connection` via `App\Http\Controllers\Api\V1\AdminApiController@testPaystackConnection`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
 #### `GET` `/api/v1/admin/reports`
 
 **Summary:** GET Admin/reports (reports)
@@ -1945,6 +2502,46 @@
 **Expected Responses:**
 
 - **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `GET` `/api/v1/admin/reports/history`
+
+**Summary:** GET Admin/reports/history (reportHistory)
+
+**Description:** Handles GET request to `/api/v1/admin/reports/history` via `App\Http\Controllers\Api\V1\AdminApiController@reportHistory`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/admin/reports/log`
+
+**Summary:** POST Admin/reports/log (logReportExport)
+
+**Description:** Handles POST request to `/api/v1/admin/reports/log` via `App\Http\Controllers\Api\V1\AdminApiController@logReportExport`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
 - **`403`**: Forbidden (caller role not authorized for this resource).
 
@@ -2296,9 +2893,9 @@
 
 #### `GET` `/api/v1/admin/testimonials`
 
-**Summary:** GET Admin/testimonials (index)
+**Summary:** GET Admin/testimonials (adminIndex)
 
-**Description:** Handles GET request to `/api/v1/admin/testimonials` via `App\Http\Controllers\Api\V1\TestimonialApiController@index`.
+**Description:** Handles GET request to `/api/v1/admin/testimonials` via `App\Http\Controllers\Api\V1\TestimonialApiController@adminIndex`.
 
 **Authorized Roles:** `admin`, `super_admin`
 
@@ -2694,6 +3291,18 @@
 
 ### Tag: Catalogue
 
+#### `GET` `/api/v1/animations`
+
+**Summary:** GET Animations (animations)
+
+**Description:** Handles GET request to `/api/v1/animations` via `App\Http\Controllers\Api\V1\PublicApiController@animations`.
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+
+---
+
 #### `POST` `/api/v1/app/crashes`
 
 **Summary:** POST App/crashes (reportCrash)
@@ -2733,6 +3342,25 @@
 **Expected Responses:**
 
 - **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `POST` `/api/v1/barber/account`
+
+**Summary:** POST Barber/account (updateAccount)
+
+**Description:** Handles POST request to `/api/v1/barber/account` via `App\Http\Controllers\Api\V1\BarberApiController@updateAccount`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
 
 ---
@@ -2805,7 +3433,9 @@
 
 **Summary:** POST Barber/appointments/walk In (storeWalkIn)
 
-**Description:** Handles POST request to `/api/v1/barber/appointments/walk-in` via `App\Http\Controllers\Api\V1\AppointmentApiController@storeWalkIn`.
+**Description:** Handles POST request to `/api/v1/barber/appointments/walk-in` via `\App\Http\Controllers\Api\V1\AppointmentApiController@storeWalkIn`.
+
+**Authorized Roles:** `barber`, `admin`, `super_admin`
 
 **Authentication:** Required (`Authorization: Bearer <token>`)
 
@@ -2817,6 +3447,7 @@
 - **`201`**: Resource created successfully.
 - **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
 
 ---
 
@@ -2929,6 +3560,21 @@
 | `id` | `path` | Yes | `integer` | Identifier for id |
 
 **Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `GET` `/api/v1/barber/bank-details`
+
+**Summary:** GET Barber/bank Details (bankDetails)
+
+**Description:** Handles GET request to `/api/v1/barber/bank-details` via `App\Http\Controllers\Api\V1\AdminApiController@bankDetails`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Expected Responses:**
 
@@ -3228,6 +3874,21 @@
 
 ---
 
+#### `GET` `/api/v1/barber/reviews`
+
+**Summary:** GET Barber/reviews (barberReviews)
+
+**Description:** Handles GET request to `/api/v1/barber/reviews` via `App\Http\Controllers\Api\V1\TestimonialApiController@barberReviews`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
 #### `GET` `/api/v1/barber/schedule`
 
 **Summary:** GET Barber/schedule (schedule)
@@ -3330,6 +3991,21 @@
 | Name | In | Required | Type | Description |
 |---|---|---|---|---|
 | `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `GET` `/api/v1/barber/testimonials`
+
+**Summary:** GET Barber/testimonials (barberReviews)
+
+**Description:** Handles GET request to `/api/v1/barber/testimonials` via `App\Http\Controllers\Api\V1\TestimonialApiController@barberReviews`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Expected Responses:**
 
@@ -3472,6 +4148,21 @@
 
 ---
 
+#### `GET` `/api/v1/barbers/bank-details`
+
+**Summary:** GET Barbers/bank Details (bankDetails)
+
+**Description:** Handles GET request to `/api/v1/barbers/bank-details` via `App\Http\Controllers\Api\V1\AdminApiController@bankDetails`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
 #### `GET` `/api/v1/barbers/blocked-periods`
 
 **Summary:** GET Barbers/blocked Periods (blockedPeriods)
@@ -3559,6 +4250,21 @@
 
 ---
 
+#### `GET` `/api/v1/barbers/reviews`
+
+**Summary:** GET Barbers/reviews (barberReviews)
+
+**Description:** Handles GET request to `/api/v1/barbers/reviews` via `App\Http\Controllers\Api\V1\TestimonialApiController@barberReviews`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
 #### `GET` `/api/v1/barbers/schedule`
 
 **Summary:** GET Barbers/schedule (schedule)
@@ -3583,6 +4289,21 @@
 **Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Request Body:** [`UpdateScheduleRequest`](#componentschemasupdateschedulerequest)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `GET` `/api/v1/barbers/testimonials`
+
+**Summary:** GET Barbers/testimonials (barberReviews)
+
+**Description:** Handles GET request to `/api/v1/barbers/testimonials` via `App\Http\Controllers\Api\V1\TestimonialApiController@barberReviews`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
 
 **Expected Responses:**
 
@@ -3902,6 +4623,40 @@
 
 ---
 
+#### `POST` `/api/v1/customer/avatar`
+
+**Summary:** POST Customer/avatar (uploadAvatar)
+
+**Description:** Handles POST request to `/api/v1/customer/avatar` via `App\Http\Controllers\Api\V1\AccountApiController@uploadAvatar`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `DELETE` `/api/v1/customer/avatar`
+
+**Summary:** DELETE Customer/avatar (deleteAvatar)
+
+**Description:** Handles DELETE request to `/api/v1/customer/avatar` via `App\Http\Controllers\Api\V1\AccountApiController@deleteAvatar`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
 #### `POST` `/api/v1/customer/blog/{id}/react`
 
 **Summary:** POST Customer/blog/{id}/react (react)
@@ -4127,6 +4882,28 @@
 
 ---
 
+#### `POST` `/api/v1/customer/feedback`
+
+**Summary:** POST Customer/feedback (store)
+
+**Description:** Handles POST request to `/api/v1/customer/feedback` via `\App\Http\Controllers\Api\V1\FeedbackSubmissionApiController@store`.
+
+**Authorized Roles:** `customer`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
 #### `GET` `/api/v1/customer/my-codes`
 
 **Summary:** GET Customer/my Codes (myCodes)
@@ -4227,6 +5004,40 @@
 - **`200`**: Operation completed successfully.
 - **`201`**: Resource created successfully.
 - **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `PUT` `/api/v1/customer/profile`
+
+**Summary:** PUT Customer/profile (updateProfile)
+
+**Description:** Handles PUT request to `/api/v1/customer/profile` via `App\Http\Controllers\Api\V1\AccountApiController@updateProfile`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `PATCH` `/api/v1/customer/profile`
+
+**Summary:** PATCH Customer/profile (updateProfile)
+
+**Description:** Handles PATCH request to `/api/v1/customer/profile` via `App\Http\Controllers\Api\V1\AccountApiController@updateProfile`.
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
 
 ---
@@ -4531,6 +5342,18 @@
 
 ---
 
+#### `GET` `/api/v1/public/animations`
+
+**Summary:** GET Public/animations (animations)
+
+**Description:** Handles GET request to `/api/v1/public/animations` via `App\Http\Controllers\Api\V1\PublicApiController@animations`.
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+
+---
+
 #### `GET` `/api/v1/public/available-slots`
 
 **Summary:** GET Public/available Slots (availableSlots)
@@ -4800,11 +5623,101 @@
 
 ---
 
-#### `PUT` `/api/v1/service-categories/{id}`
+#### `PUT` `/api/v1/service-categories/{serviceCategory}`
 
-**Summary:** PUT Service Categories/{id} (updateCategory)
+**Summary:** PUT Service Categories/{serviceCategory} (updateCategory)
 
-**Description:** Handles PUT request to `/api/v1/service-categories/{id}` via `App\Http\Controllers\Api\V1\ServiceApiController@updateCategory`.
+**Description:** Handles PUT request to `/api/v1/service-categories/{serviceCategory}` via `App\Http\Controllers\Api\V1\ServiceApiController@updateCategory`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `serviceCategory` | `path` | Yes | `string` | Identifier for serviceCategory |
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `DELETE` `/api/v1/service-categories/{serviceCategory}`
+
+**Summary:** DELETE Service Categories/{serviceCategory} (destroyCategory)
+
+**Description:** Handles DELETE request to `/api/v1/service-categories/{serviceCategory}` via `App\Http\Controllers\Api\V1\ServiceApiController@destroyCategory`.
+
+**Authorized Roles:** `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Parameters:**
+
+| Name | In | Required | Type | Description |
+|---|---|---|---|---|
+| `serviceCategory` | `path` | Yes | `string` | Identifier for serviceCategory |
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `GET` `/api/v1/service-category-requests`
+
+**Summary:** GET Service Category Requests (index)
+
+**Description:** Handles GET request to `/api/v1/service-category-requests` via `App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController@index`.
+
+**Authorized Roles:** `barber`, `admin`, `super_admin`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `POST` `/api/v1/service-category-requests`
+
+**Summary:** POST Service Category Requests (store)
+
+**Description:** Handles POST request to `/api/v1/service-category-requests` via `App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController@store`.
+
+**Authorized Roles:** `barber`
+
+**Authentication:** Required (`Authorization: Bearer <token>`)
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
+- **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
+
+---
+
+#### `PATCH` `/api/v1/service-category-requests/{id}/approve`
+
+**Summary:** PATCH Service Category Requests/{id}/approve (approve)
+
+**Description:** Handles PATCH request to `/api/v1/service-category-requests/{id}/approve` via `App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController@approve`.
 
 **Authorized Roles:** `admin`, `super_admin`
 
@@ -4826,11 +5739,11 @@
 
 ---
 
-#### `DELETE` `/api/v1/service-categories/{id}`
+#### `PATCH` `/api/v1/service-category-requests/{id}/reject`
 
-**Summary:** DELETE Service Categories/{id} (destroyCategory)
+**Summary:** PATCH Service Category Requests/{id}/reject (reject)
 
-**Description:** Handles DELETE request to `/api/v1/service-categories/{id}` via `App\Http\Controllers\Api\V1\ServiceApiController@destroyCategory`.
+**Description:** Handles PATCH request to `/api/v1/service-category-requests/{id}/reject` via `App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController@reject`.
 
 **Authorized Roles:** `admin`, `super_admin`
 
@@ -4841,6 +5754,8 @@
 | Name | In | Required | Type | Description |
 |---|---|---|---|---|
 | `id` | `path` | Yes | `integer` | Identifier for id |
+
+**Request Body:** `application/json`
 
 **Expected Responses:**
 
@@ -5503,7 +6418,9 @@
 
 **Summary:** POST Appointments/walk In (storeWalkIn)
 
-**Description:** Handles POST request to `/api/v1/appointments/walk-in` via `App\Http\Controllers\Api\V1\AppointmentApiController@storeWalkIn`.
+**Description:** Handles POST request to `/api/v1/appointments/walk-in` via `\App\Http\Controllers\Api\V1\AppointmentApiController@storeWalkIn`.
+
+**Authorized Roles:** `barber`, `admin`, `super_admin`
 
 **Authentication:** Required (`Authorization: Bearer <token>`)
 
@@ -5515,6 +6432,7 @@
 - **`201`**: Resource created successfully.
 - **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
+- **`403`**: Forbidden (caller role not authorized for this resource).
 
 ---
 
@@ -6007,6 +6925,34 @@
 - **`201`**: Resource created successfully.
 - **`422`**: Validation error.
 - **`401`**: Unauthenticated (token missing, invalid, or expired).
+
+---
+
+#### `GET` `/api/v1/payments/checkout-data`
+
+**Summary:** GET Payments/checkout Data (checkoutData)
+
+**Description:** Handles GET request to `/api/v1/payments/checkout-data` via `App\Http\Controllers\Api\V1\PaymentApiController@checkoutData`.
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+
+---
+
+#### `POST` `/api/v1/payments/confirm-transfer`
+
+**Summary:** POST Payments/confirm Transfer (confirmTransfer)
+
+**Description:** Handles POST request to `/api/v1/payments/confirm-transfer` via `App\Http\Controllers\Api\V1\PaymentApiController@confirmTransfer`.
+
+**Request Body:** `application/json`
+
+**Expected Responses:**
+
+- **`200`**: Operation completed successfully.
+- **`201`**: Resource created successfully.
+- **`422`**: Validation error.
 
 ---
 

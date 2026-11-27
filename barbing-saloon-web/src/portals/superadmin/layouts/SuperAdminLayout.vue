@@ -37,6 +37,9 @@ import {
   ArchiveBoxIcon,
   BuildingStorefrontIcon,
   BuildingLibraryIcon,
+  EnvelopeIcon,
+  ExclamationTriangleIcon,
+  ReceiptRefundIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
@@ -47,6 +50,8 @@ const navItems = [
 
   // Platform Operations
   { name: 'Appointments', to: '/superadmin/appointments', icon: CalendarDaysIcon },
+  { name: 'No-Shows', to: '/superadmin/no-shows', icon: ExclamationTriangleIcon },
+  { name: 'Refunds & Policy', to: '/superadmin/refunds', icon: ReceiptRefundIcon },
   { name: 'Walk-In Queue', to: '/superadmin/walk-in', icon: UserPlusIcon },
   { name: 'Customers', to: '/superadmin/customers', icon: UsersIcon },
   { name: 'Barbers', to: '/superadmin/barbers', icon: ScissorsIcon },
@@ -64,6 +69,7 @@ const navItems = [
   { name: 'Feature Flags', to: '/superadmin/feature-flags', icon: FlagIcon },
   { name: 'Working Hours', to: '/superadmin/working-hours', icon: ClockIcon },
   { name: 'Integrations', to: '/superadmin/integrations', icon: KeyIcon },
+  { name: 'Resend Email Setup', to: '/superadmin/resend', icon: EnvelopeIcon, badge: 'API' },
   { name: 'API Directory', to: '/superadmin/api', icon: CodeBracketIcon },
   { name: 'System Logs', to: '/superadmin/system-logs', icon: ClipboardDocumentListIcon },
   { name: 'Verifications', to: '/superadmin/verifications', icon: ShieldCheckIcon },

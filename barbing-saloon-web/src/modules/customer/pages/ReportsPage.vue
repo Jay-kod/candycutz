@@ -75,7 +75,7 @@
           </div>
 
           <div v-if="bookings.length > 0" class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[650px]">
+            <table class="w-full text-sm sm:min-w-[650px]">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-white/[0.06] text-[10px] uppercase tracking-wider text-slate-500 dark:text-[var(--color-text-muted)] font-bold bg-slate-50/50 dark:bg-white/[0.02]">
                   <th class="text-left px-6 py-3.5">Service</th>

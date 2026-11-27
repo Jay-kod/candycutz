@@ -12,28 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // For existing data (convert Decimal to Kobo, which is * 100)
-        // Since we want this to be seamless, we run a query to update first.
-        DB::table('services')->update(['price' => DB::raw('price * 100')]);
-        DB::table('service_zones')->update([
-            'base_travel_fee' => DB::raw('base_travel_fee * 100'),
-            'per_km_fee' => DB::raw('per_km_fee * 100'),
-        ]);
-        DB::table('barber_services')->whereNotNull('custom_price')->update(['custom_price' => DB::raw('custom_price * 100')]);
-        DB::table('appointments')->update([
-            'total_amount' => DB::raw('total_amount * 100'),
-            'travel_fee' => DB::raw('travel_fee * 100'),
-            'tip_amount' => DB::raw('tip_amount * 100'),
-            'discount_amount' => DB::raw('discount_amount * 100'),
-            'grand_total' => DB::raw('grand_total * 100'),
-            'total_price' => DB::raw('total_price * 100'),
-            'deposit_amount' => DB::raw('deposit_amount * 100'),
-        ]);
-        DB::table('appointment_items')->update(['price' => DB::raw('price * 100')]);
-        DB::table('payments')->update(['amount' => DB::raw('amount * 100')]);
-        DB::table('payment_transactions')->update(['amount' => DB::raw('amount * 100')]);
-
-        // Change column types to bigInteger
+        // 1. Change column types to bigInteger first so values do not exceed decimal range
         Schema::table('services', function (Blueprint $table) {
             $table->bigInteger('price')->change();
         });
@@ -68,6 +47,26 @@ return new class extends Migration
         Schema::table('payment_transactions', function (Blueprint $table) {
             $table->bigInteger('amount')->change();
         });
+
+        // 2. For existing data, convert values now safely within BIGINT
+        DB::table('services')->update(['price' => DB::raw('price * 100')]);
+        DB::table('service_zones')->update([
+            'base_travel_fee' => DB::raw('base_travel_fee * 100'),
+            'per_km_fee' => DB::raw('per_km_fee * 100'),
+        ]);
+        DB::table('barber_services')->whereNotNull('custom_price')->update(['custom_price' => DB::raw('custom_price * 100')]);
+        DB::table('appointments')->update([
+            'total_amount' => DB::raw('total_amount * 100'),
+            'travel_fee' => DB::raw('travel_fee * 100'),
+            'tip_amount' => DB::raw('tip_amount * 100'),
+            'discount_amount' => DB::raw('discount_amount * 100'),
+            'grand_total' => DB::raw('grand_total * 100'),
+            'total_price' => DB::raw('total_price * 100'),
+            'deposit_amount' => DB::raw('deposit_amount * 100'),
+        ]);
+        DB::table('appointment_items')->update(['price' => DB::raw('price * 100')]);
+        DB::table('payments')->update(['amount' => DB::raw('amount * 100')]);
+        DB::table('payment_transactions')->update(['amount' => DB::raw('amount * 100')]);
     }
 
     /**

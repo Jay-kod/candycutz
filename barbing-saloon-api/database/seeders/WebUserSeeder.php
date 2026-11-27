@@ -57,7 +57,7 @@ class WebUserSeeder extends Seeder
                 'username' => 'mark',
                 'password' => Hash::make('barber123'),
                 'role' => UserRole::barber->value,
-                'phone' => '08032223333',
+                'phone' => '08032223334',
                 'is_active' => true,
                 'status' => 'active',
             ]
@@ -65,6 +65,37 @@ class WebUserSeeder extends Seeder
 
         Barber::updateOrCreate(
             ['user_id' => $markUser->id],
+            [
+                'bio' => 'Master barber specializing in precision fades, executive beard styling, and modern grooming.',
+                'specialties' => ['fade', 'beard', 'line-up', 'scissor cut'],
+                'years_experience' => 7,
+                'experience_years' => 7,
+                'is_available' => true,
+                'is_home_service_ready' => true,
+                'chair_status' => 'free',
+                'rating' => 5.00,
+                'total_reviews' => 24,
+                'is_featured' => true,
+            ]
+        );
+
+        // Barber: obo@barber.com / barber123 (with linked active Barber profile)
+        $oboUser = $this->updateOrCreateUser(
+            ['email' => 'obo@barber.com'],
+            [
+                'name' => 'Obo Barber',
+                'real_name' => 'Obo Barber',
+                'username' => 'obo',
+                'password' => Hash::make('barber123'),
+                'role' => UserRole::barber->value,
+                'phone' => '08032223333',
+                'is_active' => true,
+                'status' => 'active',
+            ]
+        );
+
+        Barber::updateOrCreate(
+            ['user_id' => $oboUser->id],
             [
                 'bio' => 'Master barber specializing in precision fades, executive beard styling, and modern grooming.',
                 'specialties' => ['fade', 'beard', 'line-up', 'scissor cut'],
@@ -197,7 +228,7 @@ class WebUserSeeder extends Seeder
             [
                 'name' => 'O.B.O Barber',
                 'real_name' => 'O.B.O Barber',
-                'username' => 'obo',
+                'username' => 'obo-candycutz',
                 'password' => Hash::make('barber123'),
                 'role' => UserRole::barber->value,
                 'phone' => '08030000003',

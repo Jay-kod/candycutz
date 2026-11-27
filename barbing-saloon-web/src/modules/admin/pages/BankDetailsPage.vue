@@ -31,16 +31,17 @@
         </div>
       </div>
 
-      <!-- Tab 2: Payment Page & Gateway Controls -->
-      <div v-else-if="currentTab === 'gateway'" class="space-y-6">
+      <!-- Tab 2: Customer checkout controls -->
+      <div v-else-if="currentTab === 'gateway' || currentTab === 'paystack'" class="space-y-6">
         <PaymentGatewayControlsForm
           :form="form"
           :saving="saving"
+          :section="currentTab === 'paystack' ? 'paystack' : 'checkout'"
           @save="saveBankDetails"
         />
       </div>
 
-      <!-- Tab 3: Live Transactions & Barber Assignment Management -->
+      <!-- Tab 4: Live Transactions & Barber Assignment Management -->
       <div v-else-if="currentTab === 'transactions'">
         <PaymentTransactionsManager />
       </div>
@@ -70,7 +71,7 @@ const layoutComponent = computed(() => {
   return route.path.startsWith('/superadmin') ? SuperAdminLayout : AdminLayout;
 });
 
-const currentTab = ref('account');
+const currentTab = ref(route.query.tab || 'account');
 const loading = ref(false);
 const saving = ref(false);
 

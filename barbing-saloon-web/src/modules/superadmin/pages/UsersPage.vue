@@ -2,7 +2,7 @@
   <SuperAdminLayout>
     <section class="space-y-8 animate-fade-in">
       <!-- Command Banner -->
-      <div :class="['rounded-2xl border p-8', bannerClass]">
+      <div :class="['rounded-2xl border p-4 xs:p-6 sm:p-8', bannerClass]">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p :class="['text-sm uppercase tracking-[0.3em] font-semibold', mutedText]">Super Admin Governance</p>
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!filteredUsers.length" :class="['rounded-2xl border p-12 text-center', cardClass]">
+      <div v-else-if="!filteredUsers.length" :class="['rounded-2xl border p-6 sm:p-12 text-center', cardClass]">
         <UsersIcon :class="['mx-auto h-12 w-12 opacity-30', mutedText]" />
         <h3 :class="['mt-4 font-display text-xl font-bold', headingText]">No Users Found</h3>
         <p :class="['mt-1 text-sm', mutedText]">Try adjusting your search query or selected role filter.</p>
@@ -85,8 +85,9 @@
                 <!-- User Column -->
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
-                    <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display font-bold text-sm border', avatarClass]">
-                      {{ getInitials(user.name) }}
+                    <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display font-bold text-sm border overflow-hidden', avatarClass]">
+                      <img v-if="user.avatar || user.avatar_url" :src="getStorageUrl(user.avatar || user.avatar_url)" :alt="user.name" class="h-full w-full object-cover" />
+                      <span v-else>{{ getInitials(user.name) }}</span>
                     </div>
                     <div class="min-w-0">
                       <div :class="['font-display font-bold leading-tight', valueText]">{{ user.name }}</div>
@@ -198,6 +199,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useTheme } from '@/core/composables/useTheme';
+import { getStorageUrl } from '@/core/utils/url';
 import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import { useToast } from '@/core/composables/useToast';

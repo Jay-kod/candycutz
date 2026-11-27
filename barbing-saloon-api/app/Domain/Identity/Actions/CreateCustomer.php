@@ -8,6 +8,7 @@ use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Domain\Shared\Traits\HasAuditLog;
+use App\Events\UserRegistered;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +54,8 @@ class CreateCustomer
             'username' => $customer->username,
             'role' => 'customer',
         ]);
+
+        UserRegistered::dispatch($customer, 'admin');
 
         return [
             'id' => $customer->id,

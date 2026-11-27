@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Shared\Enums\AppointmentSource;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Barber;
@@ -19,17 +20,20 @@ class GetBarberDashboard
 
         $todayAppointments = Appointment::with(['service', 'customer'])
             ->where('barber_id', $barber->id)
-            ->where('appointment_date', $today)
+            ->whereDate('appointment_date', $today)
             ->orderBy('appointment_time')
             ->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
+                'booking_reference' => $a->booking_reference,
+                'booking_type' => ($a->customer_id === null || $a->source === AppointmentSource::walk_in || str_contains((string) $a->client_name, 'Walk-In')) ? 'walk_in' : 'online',
                 'client_name' => $a->customer->name ?? $a->client_name ?? 'Client',
                 'customer_name' => $a->customer->name ?? $a->client_name ?? 'Client',
                 'appointment_time' => substr((string) $a->appointment_time, 0, 5),
-                'appointment_date' => $a->appointment_date,
+                'appointment_date' => $a->appointment_date?->toDateString() ?? $a->appointment_date,
                 'status' => $a->status->value ?? $a->status,
                 'verification_code' => $a->verification_code,
+                'service_name' => $a->service->name ?? 'General Service',
                 'service' => [
                     'id' => $a->service?->id,
                     'name' => $a->service->name ?? 'General Service',
@@ -39,16 +43,16 @@ class GetBarberDashboard
             ]);
 
         $todayBookingsCount = Appointment::where('barber_id', $barber->id)
-            ->where('appointment_date', $today)
+            ->whereDate('appointment_date', $today)
             ->count();
 
         $upcomingCount = Appointment::where('barber_id', $barber->id)
-            ->where('appointment_date', '>=', $today)
+            ->whereDate('appointment_date', '>=', $today)
             ->whereIn('status', [AppointmentStatus::pending->value, AppointmentStatus::confirmed->value])
             ->count();
 
         $completedToday = Appointment::where('barber_id', $barber->id)
-            ->where('appointment_date', $today)
+            ->whereDate('appointment_date', $today)
             ->where('status', AppointmentStatus::completed->value)
             ->count();
 

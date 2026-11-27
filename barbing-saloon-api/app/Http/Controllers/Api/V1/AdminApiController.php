@@ -24,8 +24,9 @@ use App\Domain\Identity\Actions\UpdateCustomer;
 use App\Domain\Identity\Actions\UpdateCustomerStatus;
 use App\Domain\Identity\Actions\UpdateHoliday;
 use App\Domain\Identity\Actions\UpdateWorkingHour;
-use App\Domain\Notification\Services\BrevoApiClient;
+use App\Domain\Notification\Services\ResendMailConfigurator;
 use App\Domain\Shared\Actions\SecureImageUpload;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\System\Actions\GetDashboardStats;
 use App\Domain\System\Actions\GetReportHistory;
 use App\Domain\System\Actions\GetReports;
@@ -38,11 +39,19 @@ use App\Http\Requests\Api\V1\Admin\UpdateWorkingHourRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Holiday;
+use App\Models\Notification;
+use App\Models\NotificationDelivery;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\WorkingHour;
+use App\Support\Errors\ErrorReporter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AdminApiController
 {
@@ -98,89 +107,75 @@ class AdminApiController
             }
         }
 
-        if ($request->hasFile('hero_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('hero_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'hero_image',
-                'value' => '/storage/'.$path,
-                'group' => 'hero',
-            ];
+        $uploader = new SecureImageUpload;
+        $deferredSettings = [];
+
+        $imageFieldMap = [
+            'hero_image' => ['key' => 'hero_image', 'group' => 'hero'],
+            'about_teaser_image' => ['key' => 'about_teaser_image', 'group' => 'about'],
+            'about_shop_image' => ['key' => 'about_shop_image', 'group' => 'about'],
+            'splash_image' => ['key' => 'splash_background_image', 'group' => 'mobile'],
+            'onboarding_image' => ['key' => 'onboarding_background_image', 'group' => 'mobile'],
+            'login_image' => ['key' => 'login_background_image', 'group' => 'mobile'],
+            'logo' => ['key' => 'logo', 'group' => 'general'],
+            'favicon' => ['key' => 'favicon', 'group' => 'general'],
+        ];
+
+        foreach ($imageFieldMap as $field => $meta) {
+            if ($request->hasFile($field)) {
+                $rawPath = $uploader->storeFast($request->file($field), 'uploads/settings');
+                $settings[] = [
+                    'key' => $meta['key'],
+                    'value' => '/storage/'.$rawPath,
+                    'group' => $meta['group'],
+                ];
+                $deferredSettings[$meta['key']] = $rawPath;
+            }
         }
 
         if ($request->hasFile('page_hero_image')) {
             $page = $request->validated('page_hero_page');
-            $path = (new SecureImageUpload)->execute($request->file('page_hero_image'), 'uploads/settings');
+            $rawPath = $uploader->storeFast($request->file('page_hero_image'), 'uploads/settings');
+            $settingKey = $page === 'home' ? 'hero_image' : "page_hero_{$page}_image";
             $settings[] = [
-                'key' => $page === 'home' ? 'hero_image' : "page_hero_{$page}_image",
-                'value' => '/storage/'.$path,
+                'key' => $settingKey,
+                'value' => '/storage/'.$rawPath,
                 'group' => 'hero',
             ];
-        }
-
-        if ($request->hasFile('about_teaser_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('about_teaser_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'about_teaser_image',
-                'value' => '/storage/'.$path,
-                'group' => 'about',
-            ];
-        }
-
-        if ($request->hasFile('about_shop_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('about_shop_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'about_shop_image',
-                'value' => '/storage/'.$path,
-                'group' => 'about',
-            ];
-        }
-
-        if ($request->hasFile('splash_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('splash_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'splash_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('onboarding_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('onboarding_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'onboarding_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('login_image')) {
-            $path = (new SecureImageUpload)->execute($request->file('login_image'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'login_background_image',
-                'value' => '/storage/'.$path,
-                'group' => 'mobile',
-            ];
-        }
-
-        if ($request->hasFile('logo')) {
-            $path = (new SecureImageUpload)->execute($request->file('logo'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'logo',
-                'value' => '/storage/'.$path,
-                'group' => 'general',
-            ];
-        }
-
-        if ($request->hasFile('favicon')) {
-            $path = (new SecureImageUpload)->execute($request->file('favicon'), 'uploads/settings');
-            $settings[] = [
-                'key' => 'favicon',
-                'value' => '/storage/'.$path,
-                'group' => 'general',
-            ];
+            $deferredSettings[$settingKey] = $rawPath;
         }
 
         $action->execute(['settings' => $settings]);
+
+        foreach ($deferredSettings as $settingKey => $rawPath) {
+            $uploader->dispatchOptimization(
+                rawPath: $rawPath,
+                disk: 'public',
+                modelClass: Setting::class,
+                modelKey: 0,
+                attribute: 'value',
+                prefixStorage: true,
+                actorUserId: $request->user()?->id,
+                cacheEntity: 'settings',
+                settingKey: $settingKey,
+            );
+        }
+
+        if (is_array($settings)) {
+            $googleSettingKeys = array_values(array_filter(
+                array_keys($settings),
+                fn ($key): bool => is_string($key) && str_starts_with($key, 'google_')
+            ));
+            if ($googleSettingKeys !== []) {
+                AuditLogger::log(
+                    'google_auth_settings_updated',
+                    'GoogleAuthentication',
+                    null,
+                    [],
+                    ['keys' => $googleSettingKeys]
+                );
+            }
+        }
 
         return ApiResponse::success($getSettings->execute(), 'Settings updated');
     }
@@ -276,7 +271,10 @@ class AdminApiController
             'status' => ['sometimes', 'string', 'in:active,suspended,deactivated'],
         ]);
 
-        return ApiResponse::success($action->execute($id, $validated), 'Customer status updated successfully');
+        $result = $action->execute($id, $validated);
+        AuditLogger::log('customer_status_updated', 'CustomerManagement', null, [], $validated, 'User', $id);
+
+        return ApiResponse::success($result, 'Customer status updated successfully');
     }
 
     public function resetCustomerPassword(Request $request, int $id, ResetCustomerPassword $action): JsonResponse
@@ -285,12 +283,16 @@ class AdminApiController
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        return ApiResponse::success($action->execute($id, $validated['password']), 'Customer password reset successfully');
+        $result = $action->execute($id, $validated['password']);
+        AuditLogger::log('customer_password_reset', 'CustomerManagement', null, [], [], 'User', $id);
+
+        return ApiResponse::success($result, 'Customer password reset successfully');
     }
 
     public function deleteCustomer(int $id, DeleteCustomer $action): JsonResponse
     {
         $action->execute($id);
+        AuditLogger::log('customer_deleted', 'CustomerManagement', null, [], [], 'User', $id);
 
         return ApiResponse::success(null, 'Customer deleted successfully');
     }
@@ -310,9 +312,9 @@ class AdminApiController
         return ApiResponse::success($action->execute(), 'Verification stats loaded');
     }
 
-    public function verifyAppointment(int $id, VerifyAppointment $action): JsonResponse
+    public function verifyAppointment(int $id, VerifyAppointment $action, Request $request): JsonResponse
     {
-        return ApiResponse::success(new AppointmentResource($action->execute($id)), 'Appointment verified');
+        return ApiResponse::success(new AppointmentResource($action->execute($id, $request->user())), 'Appointment verified');
     }
 
     public function analytics(Request $request, GetReports $action): JsonResponse
@@ -320,17 +322,228 @@ class AdminApiController
         return ApiResponse::success($action->execute($request->query('range', '7d')), 'Analytics loaded');
     }
 
-    public function testEmail(Request $request, BrevoApiClient $brevo): JsonResponse
+    public function testResendConnection(Request $request): JsonResponse
+    {
+        $throttleKey = 'admin-resend-connection-test:'.($request->user()?->id ?? $request->ip());
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Resend connection test rate limit reached. Please wait {$seconds} seconds before testing again.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        ResendMailConfigurator::hydrate();
+        $resendKey = trim((string) (config('mail.mailers.resend.key') ?: config('services.resend.key')));
+        if ($resendKey === '') {
+            return ApiResponse::error(
+                'No Resend API key is configured. Save a key before testing the connection.',
+                [],
+                422,
+                'RESEND_NOT_CONFIGURED'
+            );
+        }
+
+        try {
+            $response = Http::withToken($resendKey)
+                ->acceptJson()
+                ->timeout(10)
+                ->get('https://api.resend.com/domains');
+        } catch (\Throwable $exception) {
+            Log::warning('Resend API connection test could not reach Resend', [
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return ApiResponse::error(
+                'Could not reach the Resend API. Check the backend outbound connection and try again.',
+                [],
+                422,
+                'RESEND_CONNECTION_FAILED'
+            );
+        }
+
+        if (! $response->successful()) {
+            $providerMessage = $response->json('message');
+            $providerMessage = is_string($providerMessage) && trim($providerMessage) !== ''
+                ? trim($providerMessage)
+                : 'Resend rejected the API key or the key lacks permission to list domains.';
+
+            return ApiResponse::error(
+                'Resend API connection failed: '.$providerMessage,
+                ['provider_status' => $response->status()],
+                422,
+                'RESEND_CONNECTION_FAILED'
+            );
+        }
+
+        $domains = $response->json('data', []);
+        $domains = is_array($domains) ? $domains : [];
+        $domainSummaries = [];
+        foreach ($domains as $domain) {
+            if (! is_array($domain)) {
+                continue;
+            }
+
+            $domainSummaries[] = [
+                'name' => (string) ($domain['name'] ?? ''),
+                'status' => (string) ($domain['status'] ?? 'unknown'),
+            ];
+        }
+
+        $verifiedDomainCount = count(array_filter(
+            $domainSummaries,
+            static fn (array $domain): bool => strtolower($domain['status']) === 'verified'
+        ));
+
+        return ApiResponse::success([
+            'connected' => true,
+            'domain_count' => count($domainSummaries),
+            'verified_domain_count' => $verifiedDomainCount,
+            'domains' => $domainSummaries,
+        ], 'Resend API connection successful. No email was sent.');
+    }
+
+    public function testEmail(Request $request): JsonResponse
     {
         $to = (string) $request->validate(['to' => ['required', 'email']])['to'];
 
-        try {
-            $brevo->send($to, 'CandyCutz Brevo connection test', '<p>Your CandyCutz Brevo connection is working.</p>');
-        } catch (\Throwable $exception) {
-            return ApiResponse::error($exception->getMessage(), [], 422, 'BREVO_EMAIL_FAILED');
+        // Guard against rapid duplicate test dispatches (respect Resend rate limits)
+        $throttleKey = 'admin-test-email:'.($request->user()?->id ?? $request->ip());
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Email test rate limit reached. Please wait {$seconds} seconds before testing again.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        $admin = $request->user();
+        $notification = null;
+        if ($admin) {
+            $notification = Notification::create([
+                'recipient_id' => $admin->id,
+                'recipient_type' => 'user',
+                'type' => 'resend_connection_test',
+                'category' => 'account',
+                'title' => 'Resend Connection Test',
+                'message' => "Test email dispatched to {$to}",
+                'data' => ['test_recipient' => $to],
+                'is_read' => true,
+            ]);
         }
 
-        return ApiResponse::success(['sent_to' => $to], 'Test email sent successfully');
+        $delivery = null;
+        if ($notification) {
+            $delivery = NotificationDelivery::create([
+                'notification_id' => $notification->id,
+                'channel' => 'email',
+                'recipient_email' => $to,
+                'status' => 'pending',
+                'attempts' => 1,
+                'last_attempt_at' => now(),
+            ]);
+        }
+
+        // Dynamically ensure Resend credentials from settings take effect for this dispatch
+        ResendMailConfigurator::hydrate(true);
+
+        $activeMailer = (string) config('mail.default');
+        $resendKey = trim((string) (config('mail.mailers.resend.key') ?: config('services.resend.key')));
+        if ($resendKey === '' || $activeMailer !== 'resend' || config('mail.mailers.resend.transport') !== 'resend') {
+            $failureReason = 'Resend is not configured as the active mail transport. Check the saved API key and server mail configuration.';
+            if ($delivery) {
+                $delivery->update([
+                    'status' => 'failed',
+                    'failure_code' => 'RESEND_NOT_CONFIGURED',
+                    'failure_reason' => $failureReason,
+                ]);
+            }
+            if ($notification) {
+                $notification->update(['message' => "Test email dispatch failed: {$failureReason}"]);
+            }
+
+            Log::error('Resend test email rejected because Resend is not the active mail transport', [
+                'active_mailer' => $activeMailer,
+            ]);
+
+            return ApiResponse::error($failureReason, [], 503, 'RESEND_NOT_CONFIGURED');
+        }
+
+        $fromAddress = (string) (config('mail.from.address') ?: 'onboarding@resend.dev');
+        $fromName = (string) (config('mail.from.name') ?: 'CandyCutz Luxury Grooming');
+        if (in_array(strtolower($fromName), ['candycutz', 'candycutz project', 'laravel'], true)) {
+            $fromName = 'CandyCutz Luxury Grooming';
+        }
+
+        $viewData = [
+            'recipient' => $to,
+            'fromAddress' => $fromAddress,
+            'fromName' => $fromName,
+            'dispatchedAt' => now()->format('M d, Y • g:i A T'),
+            'environment' => app()->environment(),
+            'adminUrl' => rtrim((string) config('app.frontend_url', config('app.url', 'http://localhost:5173')), '/').'/admin/integrations/resend',
+        ];
+
+        try {
+            Mail::send('mail.connection-test', $viewData, function ($message) use ($to, $fromAddress, $fromName) {
+                $message->to($to)
+                    ->from($fromAddress, $fromName)
+                    ->subject('CandyCutz — Resend Connection Test');
+            });
+
+            if ($delivery) {
+                $delivery->update([
+                    'status' => 'delivered',
+                    'delivered_at' => now(),
+                    'provider_reference' => 'resend-test-'.uniqid(),
+                ]);
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Resend test email failed', [
+                'recipient' => $to,
+                'error' => $exception->getMessage(),
+            ]);
+
+            try {
+                app(ErrorReporter::class)->report($exception);
+            } catch (\Throwable) {
+                // Safeguard against error reporter failures
+            }
+
+            if ($delivery) {
+                $delivery->update([
+                    'status' => 'failed',
+                    'failure_code' => 'EMAIL_FAILED',
+                    'failure_reason' => $exception->getMessage(),
+                ]);
+            }
+
+            $rawMsg = $exception->getMessage();
+            $userMessage = $rawMsg ?: 'Unable to send test email. Please check your Resend API key and verified sending domain in your Resend dashboard.';
+            if ($notification) {
+                $notification->update(['message' => "Test email dispatch failed: {$userMessage}"]);
+            }
+
+            return ApiResponse::error(
+                $userMessage,
+                ['error_details' => $rawMsg],
+                422,
+                'EMAIL_FAILED'
+            );
+        }
+
+        return ApiResponse::success([
+            'sent_to' => $to,
+            'delivery_id' => $delivery?->id,
+        ], 'Test email sent successfully');
     }
 
     public function bankDetails(): JsonResponse
@@ -453,20 +666,24 @@ class AdminApiController
         $secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value') ?? config('services.paystack.secret_key', '');
 
         $maskedSecret = '';
-        if (!empty($secretKey)) {
+        if (! empty($secretKey)) {
             $len = strlen($secretKey);
-            $maskedSecret = $len > 10 ? substr($secretKey, 0, 7) . '...' . substr($secretKey, -4) : '********';
+            $maskedSecret = $len > 10 ? substr($secretKey, 0, 7).'...'.substr($secretKey, -4) : '********';
         }
 
         $appUrl = rtrim(config('app.url') ?? 'http://localhost:8000', '/');
-        $webhookUrl = $appUrl . '/api/v1/payments/webhook';
+        $webhookUrl = $appUrl.'/api/v1/payments/webhook';
+
+        $defaultGateway = Setting::query()->where('key', 'payment_default_gateway')->value('value')
+            ?: config('payments.default', 'paystack');
 
         return ApiResponse::success([
             'public_key' => $publicKey,
-            'is_secret_set' => !empty($secretKey),
+            'is_secret_set' => ! empty($secretKey),
             'masked_secret_key' => $maskedSecret,
             'webhook_url' => $webhookUrl,
             'is_live' => str_starts_with((string) $publicKey, 'pk_live_'),
+            'default_gateway' => $defaultGateway,
         ], 'Paystack settings retrieved');
     }
 
@@ -475,6 +692,7 @@ class AdminApiController
         $validated = $request->validate([
             'public_key' => ['nullable', 'string', 'max:255'],
             'secret_key' => ['nullable', 'string', 'max:255'],
+            'default_gateway' => ['nullable', 'string', 'in:paystack,manual_transfer'],
         ]);
 
         if (array_key_exists('public_key', $validated) && $validated['public_key'] !== null) {
@@ -484,14 +702,131 @@ class AdminApiController
             );
         }
 
-        if (!empty($validated['secret_key'])) {
+        if (! empty($validated['secret_key'])) {
             Setting::updateOrCreate(
                 ['key' => 'paystack_secret_key'],
                 ['value' => trim($validated['secret_key']), 'group' => 'payment']
             );
         }
 
+        if (! empty($validated['default_gateway'])) {
+            Setting::updateOrCreate(
+                ['key' => 'payment_default_gateway'],
+                ['value' => trim($validated['default_gateway']), 'group' => 'payment']
+            );
+        }
+
+        Cache::forget('paystack_gateway_credentials');
+
         return ApiResponse::success(null, 'Paystack settings updated successfully');
+    }
+
+    public function unlinkGoogleAccount(int $id): JsonResponse
+    {
+        $user = User::query()->find($id);
+        if (! $user) {
+            return ApiResponse::error('Customer account not found.', [], 404);
+        }
+        if (strtolower((string) $user->auth_provider) !== 'google') {
+            return ApiResponse::error('This customer is not linked to Google.', [], 422);
+        }
+
+        $oldProvider = $user->auth_provider;
+        $user->update([
+            'auth_provider' => 'local',
+            'provider_id' => null,
+        ]);
+
+        AuditLogger::log(
+            'google_account_unlinked',
+            'GoogleAuthentication',
+            $user,
+            ['auth_provider' => $oldProvider, 'provider_id' => 'present'],
+            ['auth_provider' => 'local', 'provider_id' => null]
+        );
+
+        return ApiResponse::success([
+            'id' => $user->id,
+            'auth_provider' => 'local',
+        ], 'Google account link removed. Reset the local password before password login.');
+    }
+
+    public function testGoogleAuthConnection(Request $request): JsonResponse
+    {
+        $enabled = filter_var(
+            Setting::query()->where('key', 'google_auth_enabled')->value('value') ?? true,
+            FILTER_VALIDATE_BOOLEAN
+        );
+        if (! $enabled) {
+            return ApiResponse::error(
+                'Google sign-in is disabled. Enable it before testing the connection.',
+                ['enabled' => false],
+                422
+            );
+        }
+
+        $clientId = trim((string) ($request->input('client_id')
+            ?: Setting::query()->where('key', 'google_client_id')->value('value')
+            ?: config('services.google.client_id', '')));
+
+        if ($clientId === '') {
+            return ApiResponse::error(
+                'Google Client ID is not configured. Save the Web Client ID before testing.',
+                [],
+                422
+            );
+        }
+
+        if (! str_ends_with($clientId, '.apps.googleusercontent.com')) {
+            return ApiResponse::error(
+                'The saved value is not a valid Google OAuth Web Client ID.',
+                [],
+                422
+            );
+        }
+
+        try {
+            $response = Http::timeout(10)->get(
+                'https://accounts.google.com/.well-known/openid-configuration'
+            );
+
+            if (! $response->successful()) {
+                return ApiResponse::error(
+                    'Google could not be reached for the connection test.',
+                    ['http_status' => $response->status()],
+                    502
+                );
+            }
+
+            $discovery = $response->json();
+            if (! is_array($discovery)
+                || ($discovery['issuer'] ?? null) !== 'https://accounts.google.com'
+                || empty($discovery['jwks_uri'])
+                || empty($discovery['authorization_endpoint'])
+                || empty($discovery['token_endpoint'])
+            ) {
+                return ApiResponse::error(
+                    'Google returned an incomplete OAuth discovery configuration.',
+                    [],
+                    502
+                );
+            }
+
+            return ApiResponse::success([
+                'connected' => true,
+                'client_id' => $clientId,
+                'issuer' => $discovery['issuer'],
+                'authorization_endpoint' => $discovery['authorization_endpoint'],
+                'token_endpoint' => $discovery['token_endpoint'],
+                'message' => 'Google OAuth configuration and Google service reachability verified.',
+            ], 'Google connection successful');
+        } catch (\Throwable $e) {
+            return ApiResponse::error(
+                'Failed to reach Google OAuth services: '.$e->getMessage(),
+                [],
+                500
+            );
+        }
     }
 
     public function testPaystackConnection(Request $request): JsonResponse
@@ -502,7 +837,7 @@ class AdminApiController
         }
 
         if (empty($secretKey)) {
-            return ApiResponse::error('Paystack Secret Key is not configured. Please enter or save your secret key first.', 422);
+            return ApiResponse::error('Paystack Secret Key is not configured. Please enter or save your secret key first.', [], 422);
         }
 
         try {
@@ -513,18 +848,32 @@ class AdminApiController
             if ($response->successful()) {
                 $data = $response->json();
                 $isLive = str_starts_with($secretKey, 'sk_live_');
+
+                // Try to get balance info if available
+                $balanceInfo = null;
+                try {
+                    $balRes = Http::withToken($secretKey)->timeout(5)->get('https://api.paystack.co/balance');
+                    if ($balRes->successful()) {
+                        $balanceInfo = $balRes->json('data');
+                    }
+                } catch (\Throwable) {
+                    // Non-critical if balance read fails
+                }
+
                 return ApiResponse::success([
                     'connected' => true,
                     'mode' => $isLive ? 'live' : 'test',
-                    'message' => 'Paystack connection verified successfully in ' . ($isLive ? 'LIVE' : 'TEST') . ' mode.',
+                    'message' => 'Paystack connection verified successfully in '.($isLive ? 'LIVE' : 'TEST').' mode.',
                     'details' => $data['data'] ?? null,
+                    'balance' => $balanceInfo,
                 ], 'Paystack connection successful');
             }
 
             $errorMessage = $response->json('message') ?? 'Invalid API key or unauthorized';
-            return ApiResponse::error('Paystack connection failed: ' . $errorMessage, 400);
+
+            return ApiResponse::error('Paystack connection failed: '.$errorMessage, [], 400);
         } catch (\Throwable $e) {
-            return ApiResponse::error('Failed to reach Paystack API: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Failed to reach Paystack API: '.$e->getMessage(), [], 500);
         }
     }
 }

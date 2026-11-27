@@ -13,9 +13,10 @@ export function useAdminIntegrations() {
   const showSmtpPassword = ref(false);
 
   const form = reactive({
-    mail_host: 'smtp-relay.brevo.com',
+    resend_api_key: '',
+    mail_host: 'smtp.resend.com',
     mail_port: '587',
-    mail_username: '',
+    mail_username: 'resend',
     mail_password: '',
     mail_from: '',
     mail_from_name: 'CandyCutz',
@@ -27,13 +28,9 @@ export function useAdminIntegrations() {
   });
 
   const mailConfigured = computed(() => {
-    return Boolean(
-      form.mail_host?.trim() &&
-      form.mail_port?.toString().trim() &&
-      form.mail_username?.trim() &&
-      form.mail_password?.trim() &&
-      form.mail_from?.trim()
-    );
+    const key = form.resend_api_key?.trim() || '';
+    const hasResendKey = (key.startsWith('re_') && key.length > 3) || key.startsWith('••••••••');
+    return hasResendKey && Boolean(form.mail_from?.trim());
   });
 
   const googleConfigured = computed(() => {
@@ -65,9 +62,10 @@ export function useAdminIntegrations() {
 
   const applySettings = (all) => {
     const s = all || {};
-    form.mail_host = s.mail_host || 'smtp-relay.brevo.com';
+    form.resend_api_key = s.resend_api_key || '';
+    form.mail_host = s.mail_host || 'smtp.resend.com';
     form.mail_port = s.mail_port || '587';
-    form.mail_username = s.mail_username || '';
+    form.mail_username = s.mail_username || 'resend';
     form.mail_password = s.mail_password || '';
     form.mail_from = s.mail_from || '';
     form.mail_from_name = s.mail_from_name || 'CandyCutz';

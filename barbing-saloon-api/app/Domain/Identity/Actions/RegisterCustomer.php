@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Domain\Identity\Actions;
 
 use App\Domain\Identity\Services\ApiTokenIssuer;
+use App\Domain\Identity\Services\ConsentService;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Enums\UserRole;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Events\UserRegistered;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
 
@@ -39,19 +41,51 @@ class RegisterCustomer
             $username = $this->usernameService->generateUniqueUsername($name);
         }
 
-        $user = new User([
-            'name' => $name,
-            'real_name' => $name,
-            'username' => $username,
-            'email' => strtolower(trim($data['email'])),
-            'phone' => trim($data['phone']),
-            'password' => Hash::make($data['password']),
-            'last_username_change_at' => now(),
-        ]);
-        $user->role = UserRole::customer;
-        $user->is_active = true;
-        $user->status = 'active';
-        $user->save();
+        $consentService = app(ConsentService::class);
+        $recordConsent = app(RecordConsent::class);
+        $termsVersion = $data['terms_version'] ?? $consentService->currentTermsVersion();
+
+        $user = DB::transaction(function () use ($data, $name, $username, $termsVersion, $consentService, $recordConsent): User {
+            $user = new User([
+                'name' => $name,
+                'real_name' => $name,
+                'username' => $username,
+                'email' => strtolower(trim($data['email'])),
+                'phone' => trim($data['phone']),
+                'password' => Hash::make($data['password']),
+                'last_username_change_at' => now(),
+            ]);
+            $user->role = UserRole::customer;
+            $user->is_active = true;
+            $user->status = 'active';
+            $user->save();
+
+            $recordConsent->execute(
+                $user,
+                'terms',
+                $termsVersion,
+                'register',
+                [
+                    'documents' => ['terms', 'privacy'],
+                    'privacy_version' => $consentService->currentPrivacyVersion(),
+                    'checkbox' => 'I agree to the Terms of Service and Privacy Policy',
+                ]
+            );
+
+            $recordConsent->execute(
+                $user,
+                'privacy',
+                $consentService->currentPrivacyVersion(),
+                'register',
+                [
+                    'document' => 'privacy',
+                    'bundled_with' => 'terms',
+                ]
+            );
+
+            return $user;
+        });
+
         $user->sendEmailVerificationNotification();
 
         $tokenName = $data['device_name'] ?? 'web-client';

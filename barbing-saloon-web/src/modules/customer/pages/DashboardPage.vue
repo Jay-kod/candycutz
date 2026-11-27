@@ -4,9 +4,12 @@
       <!-- Welcome Header -->
       <CustomerWelcomeHeader />
 
+      <!-- Active Draft Reservation Banner -->
+      <DraftBookingBanner @discarded="loadDashboard" @resumed="loadDashboard" />
+
       <!-- Skeleton Loading State -->
       <div v-if="loading" class="space-y-6">
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <div v-for="i in 4" :key="i" class="h-28 rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] animate-pulse"></div>
         </div>
         <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -17,11 +20,12 @@
 
       <template v-else>
         <!-- Customer KPI Stats Grid -->
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard
             v-for="item in statsCards"
             :key="item.label"
             :title="item.label"
+            :mobile-title="item.mobileLabel"
             :value="item.value"
             :icon="item.icon"
             variant="customer"
@@ -43,6 +47,8 @@
           <!-- Recent Notifications & Alerts -->
           <CustomerRecentNotifications
             :notifications="notifications"
+            :appointments="dashboard.recent_appointments || []"
+            :account-activities="dashboard.account_activities || []"
           />
         </div>
       </template>
@@ -59,6 +65,7 @@ import CustomerWelcomeHeader from '../components/dashboard/CustomerWelcomeHeader
 import CustomerUpcomingBookings from '../components/dashboard/CustomerUpcomingBookings.vue';
 import CustomerQuickLinks from '../components/dashboard/CustomerQuickLinks.vue';
 import CustomerRecentNotifications from '../components/dashboard/CustomerRecentNotifications.vue';
+import DraftBookingBanner from '../components/booking/DraftBookingBanner.vue';
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -82,10 +89,10 @@ const salonFallbackBank = ref({
 const formatNumber = (val) => new Intl.NumberFormat('en-NG').format(Number(val || 0));
 
 const statsCards = computed(() => [
-  { label: 'Total Bookings', value: formatNumber(dashboard.value.stats?.total_bookings), icon: CalendarIcon },
+  { label: 'Total Bookings', mobileLabel: 'Bookings', value: formatNumber(dashboard.value.stats?.total_bookings), icon: CalendarIcon },
   { label: 'Upcoming', value: formatNumber(dashboard.value.stats?.upcoming_bookings), icon: ClockIcon },
   { label: 'Completed', value: formatNumber(dashboard.value.stats?.completed_bookings), icon: CheckCircleIcon },
-  { label: 'Reviews Given', value: formatNumber(dashboard.value.stats?.reviews_count), icon: StarIcon },
+  { label: 'Reviews Given', mobileLabel: 'Reviews', value: formatNumber(dashboard.value.stats?.reviews_count), icon: StarIcon },
 ]);
 
 async function loadData(silent = false) {
@@ -96,7 +103,12 @@ async function loadData(silent = false) {
       client.get('/customer/notifications').catch(() => ({ data: { data: [] } })),
     ]);
     dashboard.value = dashRes.data?.data || dashRes.data || { stats: {}, upcoming_appointments: [] };
-    notifications.value = notifRes.data?.data || notifRes.data || [];
+    const notificationData = notifRes.data?.data;
+    notifications.value = Array.isArray(notificationData)
+      ? notificationData
+      : Array.isArray(notificationData?.data)
+        ? notificationData.data
+        : [];
   } catch (err) {
     console.error('Error loading customer dashboard data:', err);
   } finally {

@@ -23,7 +23,7 @@ defineProps({
 </script>
 
 <template>
-  <div v-if="loading" class="grid gap-4 grid-cols-2 lg:grid-cols-4">
+  <div v-if="loading" class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
     <div
       v-for="i in 4"
       :key="i"
@@ -37,7 +37,7 @@ defineProps({
     </div>
   </div>
 
-  <div v-else class="grid gap-4 grid-cols-2 lg:grid-cols-4">
+  <div v-else class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
     <!-- Total Snapshots -->
     <div class="rounded-2xl p-4 bg-[#12161C] border border-white/[0.08] hover:border-white/[0.18] transition-all relative overflow-hidden group shadow-lg">
       <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-transparent opacity-60 group-hover:opacity-100 transition-opacity"></div>

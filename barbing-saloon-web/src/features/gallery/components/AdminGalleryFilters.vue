@@ -56,6 +56,7 @@
           ? 'bg-admin/20 text-admin border-admin/40 shadow-sm'
           : 'bg-theme-surface-subtle text-theme-text-muted border-theme-border hover:bg-theme-border/20 hover:text-theme-text'"
       >
+        <CategoryIcon v-if="cat.icon" :name="cat.icon" custom-class="size-3.5" />
         <span>{{ cat.name }}</span>
         <span 
           class="text-[10px] px-1.5 py-0.2 rounded-full"
@@ -70,6 +71,7 @@
 
 <script setup>
 import { ChevronDownIcon } from '@heroicons/vue/24/outline';
+import CategoryIcon from '@/shared/ui/CategoryIcon.vue';
 
 defineProps({
   activeCategory: {

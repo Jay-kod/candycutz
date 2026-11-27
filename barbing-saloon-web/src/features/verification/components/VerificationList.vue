@@ -31,7 +31,7 @@
               class="h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-white/10 flex items-center justify-center shadow-lg"
               :class="item.customer_avatar ? '' : 'bg-gradient-to-br from-[#FF6700]/20 to-amber-500/20'"
             >
-              <img v-if="item.customer_avatar" :src="item.customer_avatar" class="h-full w-full object-cover" />
+              <img v-if="item.customer_avatar || item.customer_avatar_url" :src="getStorageUrl(item.customer_avatar || item.customer_avatar_url)" class="h-full w-full object-cover" />
               <span v-else class="text-[#FF6700] font-bold text-xs">{{ initials(item.customer_name) }}</span>
             </div>
             <div class="min-w-0">
@@ -125,6 +125,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import {
   CalendarIcon,
   CheckBadgeIcon,

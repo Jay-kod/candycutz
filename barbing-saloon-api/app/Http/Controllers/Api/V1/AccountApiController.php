@@ -7,14 +7,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Domain\Identity\Services\CustomerService;
 use App\Domain\Identity\Services\UsernameIdentityService;
 use App\Domain\Shared\Actions\SecureImageUpload;
-use App\Domain\Shared\Enums\AppointmentStatus;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Http\Resources\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AccountApiController
@@ -51,19 +51,35 @@ class AccountApiController
         ]);
 
         $removeAvatar = $request->boolean('remove_avatar') || $request->input('remove_avatar') === '1' || $request->input('remove_avatar') === 'true';
+        $rawAvatarPath = null;
+        $changedFields = [];
+        foreach (['name', 'email', 'phone', 'bio'] as $field) {
+            if (array_key_exists($field, $validated) && (string) $user->{$field} !== (string) $validated[$field]) {
+                $changedFields[] = $field;
+            }
+        }
+
         if ($removeAvatar) {
             $validated['avatar'] = null;
+            if ($user->avatar !== null) {
+                $changedFields[] = 'avatar';
+            }
         } elseif ($request->hasFile('avatar')) {
-            $validated['avatar'] = (new SecureImageUpload)->execute(
+            $rawAvatarPath = (new SecureImageUpload)->storeFast(
                 $request->file('avatar'),
                 'user-media/'.$user->id.'/avatar',
                 'local'
             );
+            $validated['avatar'] = $rawAvatarPath;
+            $changedFields[] = 'avatar';
+        } else {
+            unset($validated['avatar']);
         }
         unset($validated['remove_avatar']);
 
         // Handle username update through domain service with cooldown enforcement
         if (! empty($validated['username']) && strtolower(trim($validated['username'])) !== strtolower((string) $user->username)) {
+            $changedFields[] = 'username';
             try {
                 $usernameService->updateUsername($user, $validated['username']);
             } catch (\Exception $e) {
@@ -78,34 +94,37 @@ class AccountApiController
 
         $user->update($validated);
 
-        return ApiResponse::success(new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
+        if ($changedFields !== []) {
+            AuditLogger::log('profile.updated', 'Account', $user, [], [
+                'changed_fields' => array_values(array_unique($changedFields)),
+            ]);
+        }
+
+        if ($rawAvatarPath !== null) {
+            (new SecureImageUpload)->dispatchOptimization(
+                rawPath: $rawAvatarPath,
+                disk: 'local',
+                modelClass: User::class,
+                modelKey: $user->id,
+                attribute: 'avatar',
+                prefixStorage: false,
+                actorUserId: $user->id,
+            );
+        }
+
+        return ApiResponse::success(new UserProfileResource($user->refresh()->loadCount(['appointments', 'testimonials'])), 'Profile updated');
     }
 
     public function analytics(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $totalSpent = Appointment::query()
-            ->where('customer_id', $user->id)
-            ->where('status', AppointmentStatus::completed->value)
-            ->sum('total_price');
+        $validated = $request->validate([
+            'range' => ['sometimes', 'string', 'in:7d,30d,month,all'],
+        ]);
 
-        $monthExpr = match (DB::getDriverName()) {
-            'pgsql' => "TRIM(TO_CHAR(appointment_date, 'Month'))",
-            'sqlite' => "strftime('%m', appointment_date)",
-            default => 'MONTHNAME(appointment_date)',
-        };
-
-        $monthlyBookings = Appointment::query()
-            ->where('customer_id', $user->id)
-            ->where('appointment_date', '>=', now()->subMonths(6)->startOfMonth())
-            ->selectRaw("{$monthExpr} as month, COUNT(*) as bookings, SUM(total_price) as spent")
-            ->groupBy(DB::raw($monthExpr))
-            ->get();
-
-        return ApiResponse::success([
-            'total_spent' => (float) $totalSpent,
-            'monthly' => $monthlyBookings,
-        ], 'Analytics loaded');
+        return ApiResponse::success(
+            $this->customerService->analytics($request->user(), $validated['range'] ?? '7d'),
+            'Analytics loaded'
+        );
     }
 
     public function myCodes(Request $request): JsonResponse
@@ -139,7 +158,7 @@ class AccountApiController
         ]);
 
         $user = $request->user();
-        $path = $imageUpload->execute(
+        $path = $imageUpload->storeFast(
             $request->file('avatar'),
             'user-media/'.$user->id.'/avatar',
             'local'
@@ -147,8 +166,18 @@ class AccountApiController
 
         $user->update(['avatar' => $path]);
 
+        $imageUpload->dispatchOptimization(
+            rawPath: $path,
+            disk: 'local',
+            modelClass: User::class,
+            modelKey: $user->id,
+            attribute: 'avatar',
+            prefixStorage: false,
+            actorUserId: $user->id,
+        );
+
         return ApiResponse::success(
-            new UserProfileResource($user->fresh()->loadCount(['appointments', 'testimonials'])),
+            new UserProfileResource($user->refresh()->loadCount(['appointments', 'testimonials'])),
             'Avatar uploaded successfully'
         );
     }

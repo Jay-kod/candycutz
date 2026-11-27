@@ -12,6 +12,7 @@ return [
         'api/v1/health',
         'api/v1/health/ready',
         'api/v1/system/client-errors',
+        'api/v1/consents/cookies',
 
         // Authentication Entrypoints
         'api/v1/auth/login',
@@ -44,6 +45,11 @@ return [
         'api/v1/animations',
         'api/v1/contact',
         'api/v1/feature-flags',
+        'api/v1/shop/location',
+        'api/v1/shop/directions',
+        'api/v1/shop/geocode',
+        'api/v1/shop/reverse-geocode',
+        'api/v1/branches/{id}/location',
         'api/v1/app/crashes',
 
         // Public Namespaced Aliases (/api/v1/public/*)
@@ -57,6 +63,7 @@ return [
         'api/v1/public/service-zones',
         'api/v1/public/gallery',
         'api/v1/public/gallery/{id}',
+        'api/v1/public/gallery-categories',
         'api/v1/public/testimonials',
         'api/v1/public/blog',
         'api/v1/public/blog/{slug}',
@@ -70,6 +77,7 @@ return [
         'api/v1/payments/return',
         'api/v1/payments/checkout-data',
         'api/v1/payments/confirm-transfer',
+        'api/v1/payments/receipts/signed/{appointmentId}',
         'pay/return',
 
         // Infrastructure & Web root

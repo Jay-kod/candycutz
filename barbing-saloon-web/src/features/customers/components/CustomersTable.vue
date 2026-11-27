@@ -2,7 +2,7 @@
   <div class="hidden md:block rounded-2xl border border-theme-border bg-theme-surface shadow-2xl overflow-hidden min-h-[380px]">
     <!-- Data Table -->
     <div v-if="customers.length > 0" class="overflow-x-auto">
-      <table class="w-full text-left border-collapse min-w-[840px]">
+      <table class="w-full text-left border-collapse md:min-w-[840px]">
         <thead>
           <tr class="divide-x divide-theme-border/50 border-b border-theme-border bg-theme-border/10 text-[10px] uppercase tracking-[0.2em] text-theme-text-muted font-bold">
             <th class="px-5 py-3.5">Customer</th>
@@ -22,7 +22,7 @@
             <td class="px-5 py-4 align-middle">
               <div class="flex items-center gap-3.5">
                 <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-admin/25 to-admin/10 border border-admin/30 text-admin font-bold text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] group-hover:scale-105 transition-transform duration-300 overflow-hidden">
-                  <img v-if="customer.avatar" :src="customer.avatar" :alt="customer.name" class="h-full w-full object-cover" />
+                  <img v-if="customer.avatar || customer.avatar_url" :src="getStorageUrl(customer.avatar || customer.avatar_url)" :alt="customer.name" class="h-full w-full object-cover" />
                   <span v-else>{{ initials(customer.name) }}</span>
                   <div v-if="isNewClient(customer)" class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-admin border-2 border-theme-surface" title="New Client"></div>
                 </div>
@@ -66,6 +66,16 @@
                 >
                   <EnvelopeIcon class="h-3.5 w-3.5 text-theme-text-muted/60 shrink-0" />
                   <span class="truncate">{{ customer.email }}</span>
+                  <span
+                    v-if="customer.email_verified_at || customer.is_email_verified"
+                    class="text-[10px] text-emerald-500 font-bold"
+                    title="Verified Email"
+                  >✓</span>
+                  <span
+                    v-else
+                    class="text-[10px] text-amber-500 font-bold"
+                    title="Unverified Email (Admin Override Available)"
+                  >⚠️</span>
                 </a>
                 <span v-else class="text-xs text-theme-text-muted/60 flex items-center gap-1.5">
                   <EnvelopeIcon class="h-3.5 w-3.5 text-theme-text-muted/40 shrink-0" />
@@ -193,6 +203,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { 
   UserGroupIcon, 
   CalendarDaysIcon, 

@@ -142,7 +142,7 @@ const formatCurrency = (val) => {
   return new Intl.NumberFormat('en-NG', { maximumFractionDigits: 0 }).format(Number(val || 0));
 };
 
-const getActionItems = (item) => [
+const getActionItems = () => [
   {
     label: 'View Appointments',
     action: () => router.push('/admin/appointments'),

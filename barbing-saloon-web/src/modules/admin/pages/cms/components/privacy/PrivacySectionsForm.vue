@@ -155,7 +155,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['add-section', 'remove-section', 'move-section']);
+defineEmits(['add-section', 'remove-section', 'move-section']);
 
 const addComplianceClause = () => {
   const nextNum = props.sections.length + 1;

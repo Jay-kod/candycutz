@@ -6,6 +6,11 @@
 
       <!-- Interactive Services Content -->
       <div v-else class="space-y-6 animate-fade-in pb-10">
+        <div class="flex justify-end">
+          <router-link to="/admin/service-categories" class="rounded-xl border border-theme-border px-4 py-2 text-sm font-bold text-theme-text transition hover:bg-theme-surface">
+            Manage service categories
+          </router-link>
+        </div>
         <!-- 1. Luxury Control Header & Live Clock -->
         <ServicesHeader
           v-model="search"

@@ -1,15 +1,18 @@
 <?php
 
 use App\Http\Middleware\ApiGateMiddleware;
+use App\Http\Middleware\BlockMaliciousIngress;
 use App\Http\Middleware\CheckAppVersion;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ClientGateMiddleware;
+use App\Http\Middleware\EnsureConsentAccepted;
 use App\Http\Middleware\EnsureUserActive;
 use App\Http\Middleware\FeatureGateMiddleware;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\LogApiRequest;
 use App\Http\Middleware\RequestContextMiddleware;
+use App\Http\Middleware\SanitizeInputStrings;
 use App\Http\Middleware\SecurityHeaders;
 use App\Support\Errors\ApiExceptionRenderer;
 use App\Support\Errors\ErrorReporter;
@@ -29,6 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->prepend(BlockMaliciousIngress::class);
+        $middleware->redirectGuestsTo(function (Request $request) {
+            return $request->is('api/*') ? '/api/v1/auth/login' : '/login';
+        });
 
         $middleware->alias([
             'check.role' => CheckRole::class,
@@ -42,16 +49,20 @@ return Application::configure(basePath: dirname(__DIR__))
             'idempotent' => IdempotencyMiddleware::class,
             'client.gate' => ClientGateMiddleware::class,
             'feature' => FeatureGateMiddleware::class,
+            'ingress.shield' => BlockMaliciousIngress::class,
+            'sanitize.strings' => SanitizeInputStrings::class,
         ]);
 
         $middleware->api(prepend: [
             RequestContextMiddleware::class,
             ClientGateMiddleware::class,
+            SanitizeInputStrings::class,
         ]);
 
         $middleware->api(append: [
             CheckAppVersion::class,
             EnsureUserActive::class,
+            EnsureConsentAccepted::class,
             IdempotencyMiddleware::class,
         ]);
     })

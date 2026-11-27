@@ -125,9 +125,9 @@
             </span>
             <span
               v-else-if="day.isSunday"
-              class="text-[7.5px] font-bold uppercase tracking-wider px-0.5 mb-0.5 text-[var(--color-text-muted)] leading-none"
+              class="text-[7px] font-bold uppercase tracking-wider px-0.5 mb-0.5 text-rose-500/80 leading-none"
             >
-              Sun
+              Closed
             </span>
             <span
               v-else
@@ -191,7 +191,7 @@
         </div>
 
         <!-- Time Period Filter Tabs (Compact & Sleek) -->
-        <div v-if="slots.length > 0" class="inline-flex rounded-md bg-[var(--color-bg-tertiary)]/60 p-0.5 border border-[var(--color-border)] text-[10px]">
+        <div v-if="slots.length > 0" class="inline-flex max-w-full overflow-x-auto no-scrollbar rounded-md bg-[var(--color-bg-tertiary)]/60 p-0.5 border border-[var(--color-border)] text-[10px]">
           <button
             type="button"
             @click="selectedPeriod = 'all'"
@@ -246,7 +246,7 @@
       </div>
 
       <!-- Loading Skeletons -->
-      <div v-if="loadingSlots" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 py-1">
+      <div v-if="loadingSlots" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 py-1">
         <div
           v-for="i in 10"
           :key="i"
@@ -257,13 +257,13 @@
       </div>
 
       <!-- Slots Grid (Compact, Readable Precision Buttons) -->
-      <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5">
+      <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5">
         <button
           v-for="slot in filteredSlots"
           :key="slot"
           type="button"
-          @click="$emit('update:appointmentTime', slot)"
-          class="group relative flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition-all duration-150 cursor-pointer"
+          @click="selectSlot(slot)"
+          class="group relative flex items-center justify-between px-2.5 py-2 min-h-[38px] sm:min-h-[36px] rounded-lg border text-[11px] font-medium transition-all duration-150 cursor-pointer"
           :class="appointmentTime === slot
             ? 'bg-[var(--color-accent)] text-[var(--color-accent-foreground)] border-[var(--color-accent)] shadow-xs ring-1 ring-[var(--color-accent)]/40 font-semibold z-10'
             : 'bg-[var(--color-bg-tertiary)]/35 hover:bg-[var(--color-bg-tertiary)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-accent)]/50'"
@@ -315,15 +315,16 @@
           No Available Slots on This Date
         </h4>
         <p class="text-[10px] text-[var(--color-text-secondary)] max-w-xs mx-auto">
-          All appointment times for this day may have been booked, or the barber is off-duty.
+          {{ selectedDayMeta?.isSunday ? 'CandyCutz is closed on Sundays so our master barbers can recharge. Please select any Monday through Saturday.' : 'All appointment times for this day may have been booked, or the barber is off-duty.' }}
         </p>
         <div class="pt-1 flex items-center justify-center">
           <button
             type="button"
-            @click="selectRelativeDay(1)"
-            class="inline-flex items-center gap-1 rounded bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-accent-foreground)] shadow-xs hover:bg-[var(--color-accent-hover)] transition-all cursor-pointer"
+            @click="selectNextAvailableDay"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-accent)] px-3.5 py-2 text-xs font-bold text-[var(--color-accent-foreground)] shadow-xs hover:bg-[var(--color-accent-hover)] active:scale-95 transition-all cursor-pointer"
           >
-            <SparklesIcon class="w-3 h-3" /> Check Tomorrow
+            <SparklesIcon class="w-3.5 h-3.5" />
+            <span>Check Next Open Day ({{ nextAvailableDay?.weekdayShort || 'Next Day' }})</span>
           </button>
         </div>
       </div>
@@ -430,10 +431,25 @@ const isWeekendSelected = computed(() => {
   return found && (found.isSunday || found.weekdayShort === 'Sat')
 })
 
+const nextAvailableDay = computed(() => {
+  const currentIndex = daysList.value.findIndex((d) => d.dateStr === props.appointmentDate)
+  const remaining = daysList.value.slice(currentIndex >= 0 ? currentIndex + 1 : 1)
+  return remaining.find((d) => !d.isSunday) || remaining[0] || null
+})
+
+function selectNextAvailableDay() {
+  if (nextAvailableDay.value) {
+    selectDate(nextAvailableDay.value.dateStr)
+  }
+}
+
+function selectSlot(slot) {
+  emit('update:appointmentTime', slot)
+}
+
 function selectDate(dateStr) {
-  if (props.appointmentDate === dateStr) return
   emit('update:appointmentDate', dateStr)
-  emit('dateChange')
+  emit('dateChange', dateStr)
 }
 
 function selectRelativeDay(offsetDays) {

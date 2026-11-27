@@ -12,16 +12,21 @@ use App\Domain\Identity\Actions\RequestPasswordReset;
 use App\Domain\Identity\Actions\ResetPassword;
 use App\Domain\Identity\Actions\SocialLogin;
 use App\Domain\Shared\Enums\UserRole;
+use App\Domain\Shared\Services\AuditLogger;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
 use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\AuthUserResource;
 use App\Http\Resources\BarberResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
 
 class AuthApiController
@@ -90,7 +95,31 @@ class AuthApiController
             'email' => ['required', 'email'],
         ]);
 
-        $action->execute((string) $request->input('email'));
+        $email = (string) $request->input('email');
+        $throttleKey = 'forgot-password:'.strtolower($email).'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Too many password reset attempts. Please try again in {$seconds} seconds.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        try {
+            $action->execute($email);
+        } catch (RuntimeException $e) {
+            return ApiResponse::error(
+                $e->getMessage(),
+                ['email' => $email, 'email_verified' => false],
+                422,
+                'EMAIL_NOT_VERIFIED'
+            );
+        }
 
         return ApiResponse::success(
             null,
@@ -102,9 +131,16 @@ class AuthApiController
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
-            'token' => ['required', 'string'],
+            'token' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+
+        $tokenOrCode = trim((string) ($validated['token'] ?? $validated['code'] ?? ''));
+        if ($tokenOrCode === '') {
+            return ApiResponse::error('A password reset token or 6-digit OTP code is required.', [], 422, 'TOKEN_REQUIRED');
+        }
+        $validated['token'] = $tokenOrCode;
 
         try {
             $payload = $action->execute($validated);
@@ -118,11 +154,17 @@ class AuthApiController
         }
     }
 
-    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse
+    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse|RedirectResponse
     {
         $user = User::findOrFail($id);
         if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
-            return ApiResponse::error('Invalid email verification link.', [], 403, 'EMAIL_VERIFICATION_INVALID');
+            if ($request->wantsJson()) {
+                return ApiResponse::error('Invalid email verification link.', [], 403, 'EMAIL_VERIFICATION_INVALID');
+            }
+
+            $frontendUrl = (string) config('app.frontend_url', 'http://localhost:5173');
+
+            return redirect()->away(rtrim($frontendUrl, '/').'/verify-email?status=invalid');
         }
 
         if (! $user->hasVerifiedEmail()) {
@@ -130,19 +172,125 @@ class AuthApiController
             event(new Verified($user));
         }
 
-        return ApiResponse::success(null, 'Email address verified successfully.');
+        if ($request->wantsJson()) {
+            return ApiResponse::success([
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address verified successfully.');
+        }
+
+        $frontendUrl = (string) config('app.frontend_url', 'http://localhost:5173');
+
+        return redirect()->away(rtrim($frontendUrl, '/').'/verify-email?status=success&email='.urlencode($user->email));
     }
 
     public function sendVerificationNotification(Request $request): JsonResponse
     {
         $user = $request->user();
         if ($user->hasVerifiedEmail()) {
-            return ApiResponse::success(null, 'Email address is already verified.');
+            return ApiResponse::success([
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address is already verified.');
         }
+
+        $throttleKey = "email-verification-notification:{$user->id}";
+        if (RateLimiter::tooManyAttempts($throttleKey, 1)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return ApiResponse::error(
+                "Please wait {$seconds} seconds before requesting another verification code.",
+                ['retry_after' => $seconds],
+                429,
+                'TOO_MANY_REQUESTS'
+            );
+        }
+        RateLimiter::hit($throttleKey, 60);
+
+        // Pre-generate and store OTP in cache so it is immediately available
+        $cacheKey = "email_verification_otp:{$user->id}";
+        $otp = sprintf('%06d', random_int(100000, 999999));
+        Cache::put($cacheKey, [
+            'code' => $otp,
+            'email' => $user->email,
+        ], now()->addMinutes(15));
 
         $user->sendEmailVerificationNotification();
 
-        return ApiResponse::success(null, 'Email verification link sent.');
+        return ApiResponse::success([
+            'email' => $user->email,
+            'is_email_verified' => false,
+            'expires_in' => 900,
+            'cooldown' => 60,
+        ], 'Email verification link and 6-digit code sent successfully.');
+    }
+
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            return ApiResponse::success([
+                'user' => new AuthUserResource($user),
+                'is_email_verified' => true,
+                'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
+                    ? $user->email_verified_at->toIso8601String()
+                    : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+            ], 'Email address is already verified.');
+        }
+
+        $cacheKey = "email_verification_otp:{$user->id}";
+        $cachedData = Cache::get($cacheKey);
+
+        $cachedCode = is_array($cachedData) ? ($cachedData['code'] ?? null) : $cachedData;
+        $cachedEmail = is_array($cachedData) ? ($cachedData['email'] ?? null) : null;
+
+        if (
+            ! $cachedCode
+            || ! hash_equals((string) $cachedCode, trim((string) $validated['code']))
+            || ($cachedEmail !== null && strtolower((string) $cachedEmail) !== strtolower((string) $user->email))
+        ) {
+            return ApiResponse::error(
+                'Invalid or expired verification code. Please check your code or request a new one.',
+                [],
+                422,
+                'INVALID_VERIFICATION_CODE'
+            );
+        }
+
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+        Cache::forget($cacheKey);
+
+        $fresh = $user->fresh();
+
+        return ApiResponse::success([
+            'user' => new AuthUserResource($fresh),
+            'is_email_verified' => true,
+            'email_verified_at' => $fresh->email_verified_at instanceof CarbonInterface
+                ? $fresh->email_verified_at->toIso8601String()
+                : ($fresh->email_verified_at ? (string) $fresh->email_verified_at : null),
+        ], 'Email address verified successfully. Your account is secured and verified.');
+    }
+
+    public function emailStatus(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return ApiResponse::success([
+            'email' => $user->email,
+            'is_email_verified' => $user->hasVerifiedEmail(),
+            'email_verified_at' => $user->email_verified_at instanceof CarbonInterface
+                ? $user->email_verified_at->toIso8601String()
+                : ($user->email_verified_at ? (string) $user->email_verified_at : null),
+        ], 'Email verification status retrieved');
     }
 
     public function changePassword(Request $request, ChangePassword $action): JsonResponse
@@ -185,8 +333,20 @@ class AuthApiController
     public function revokeSession(Request $request, int|string $id, ManageUserTokens $action): JsonResponse
     {
         $action->revokeSession($request->user(), $id);
+        AuditLogger::log('session_revoked', 'Auth', $request->user(), [], ['token_id' => $id]);
 
         return ApiResponse::success(null, 'Session revoked successfully');
+    }
+
+    public function revokeOtherSessions(Request $request, ManageUserTokens $action): JsonResponse
+    {
+        $user = $request->user();
+        $count = $action->revokeOtherSessions($user);
+        AuditLogger::log('sessions_revoked_others', 'Auth', $user, [], ['revoked_count' => $count]);
+
+        return ApiResponse::success([
+            'revoked_count' => $count,
+        ], 'All other active sessions have been revoked successfully');
     }
 
     public function me(Request $request): JsonResponse

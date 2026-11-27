@@ -6,11 +6,19 @@
     <!-- Media Cover / Image Section -->
     <div class="relative w-full aspect-square bg-theme-surface-subtle overflow-hidden">
       <img
-        :src="getImageUrl(item.image_path || item.image_url)"
+        :src="resolvedSrc"
         :alt="item.title"
+        loading="lazy"
+        decoding="async"
         class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         @error="handleImageError"
       />
+      <span
+        v-if="item.is_optimizing"
+        class="absolute bottom-2 right-2 z-20 rounded-full bg-amber-600/90 px-2 py-0.5 text-[10px] font-bold text-white shadow"
+      >
+        Optimizing WebP...
+      </span>
 
       <!-- Fallback Placeholder if Image Error -->
       <div v-if="imageError" class="absolute inset-0 flex flex-col items-center justify-center bg-theme-surface-subtle p-4 text-center">
@@ -77,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { 
   TagIcon, 
   SparklesIcon, 
@@ -87,7 +95,7 @@ import {
   PhotoIcon 
 } from '@heroicons/vue/24/outline';
 
-defineProps({
+const props = defineProps({
   item: {
     type: Object,
     required: true
@@ -101,8 +109,31 @@ defineProps({
 defineEmits(['edit', 'delete']);
 
 const imageError = ref(false);
+const thumbFailed = ref(false);
+
+const resolvedSrc = computed(() => {
+  const thumb = props.item?.thumbnail_url;
+  const full = props.item?.image_url || props.item?.image_path;
+  if (thumb && !thumbFailed.value && thumb !== full) {
+    return props.getImageUrl(thumb);
+  }
+  return full ? props.getImageUrl(full) : '';
+});
+
+watch(
+  () => [props.item?.thumbnail_url, props.item?.image_url, props.item?.image_path],
+  () => {
+    thumbFailed.value = false;
+    imageError.value = false;
+  }
+);
 
 function handleImageError() {
+  const full = props.item?.image_url || props.item?.image_path;
+  if (!thumbFailed.value && props.item?.thumbnail_url && full && props.item.thumbnail_url !== full) {
+    thumbFailed.value = true;
+    return;
+  }
   imageError.value = true;
 }
 </script>

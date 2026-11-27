@@ -91,7 +91,7 @@ import { RouterLink } from 'vue-router';
 import { 
   BoltIcon, ClockIcon, UserPlusIcon, CalendarDaysIcon, 
   DocumentChartBarIcon, Cog6ToothIcon, CheckCircleIcon, 
-  ArrowTrendingUpIcon, ShieldCheckIcon, UserCircleIcon, 
+  ShieldCheckIcon, UserCircleIcon, 
   ArrowRightOnRectangleIcon
 } from '@heroicons/vue/24/outline';
 

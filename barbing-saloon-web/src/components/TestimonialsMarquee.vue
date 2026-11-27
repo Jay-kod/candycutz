@@ -42,7 +42,7 @@
         <article
           v-for="(testimonial, idx) in visibleTestimonials"
           :key="`${loopIndex}-${testimonial.id || idx}`"
-          class="testimonial-card group/card flex w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 transition-colors duration-200 hover:bg-[var(--color-bg-tertiary)] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
+          class="testimonial-card group/card flex w-[280px] xs:w-[320px] flex-1 shrink-0 flex-col justify-between border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 xs:p-6 transition-colors duration-200 hover:bg-[var(--color-bg-tertiary)] sm:w-[380px] sm:p-7 md:w-[420px] md:p-8"
         >
           <!-- Card Header: Quote Icon + Customer Rating -->
           <div class="flex items-center justify-between gap-4">
@@ -72,7 +72,7 @@
           </p>
 
           <!-- Bottom: Author Avatar, Name & Role -->
-          <div class="testimonial-author truncate text-sm sm:text-base font-semibold text-[var(--color-text-primary)] tracking-tight">
+          <div class="flex items-center gap-3 mt-auto pt-2">
             <img
               v-if="testimonial.client_avatar && !failedAvatars.has(testimonial.id)"
               :src="getStorageUrl(testimonial.client_avatar)"
@@ -89,7 +89,7 @@
               {{ getInitials(testimonial.client_name) }}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-neutral-900 dark:text-white tracking-tight">
+              <p class="testimonial-author truncate text-sm sm:text-base font-semibold text-[var(--color-text-primary)] tracking-tight">
                 {{ testimonial.client_name || 'CandyCutz client' }}
               </p>
               <p class="testimonial-role truncate text-xs text-[var(--color-text-muted)] mt-0.5">

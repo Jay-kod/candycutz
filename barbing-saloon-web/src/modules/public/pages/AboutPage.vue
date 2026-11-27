@@ -11,9 +11,9 @@
       <div data-reveal class="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
           <p class="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">{{ shopTitle }}</p>
-          <h2 class="mt-3 font-display text-4xl sm:text-5xl text-[var(--color-accent)] md:text-6xl">{{ shopSubtitle }}</h2>
-          <p class="mt-6 text-lg text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">{{ shopText1 }}</p>
-          <p class="mt-4 text-lg text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">{{ shopText2 }}</p>
+          <h2 class="mt-3 font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--color-accent)]">{{ shopSubtitle }}</h2>
+          <p class="mt-6 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">{{ shopText1 }}</p>
+          <p class="mt-4 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">{{ shopText2 }}</p>
         </div>
         <div class="relative overflow-hidden rounded-3xl aspect-[4/3] bg-[var(--color-bg-secondary)] border border-[var(--color-border)]">
           <img :src="shopImage || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'" alt="CandyCutz Shop Interior" class="w-full h-full object-cover" />
@@ -21,7 +21,7 @@
       </div>
 
       <!-- Barbers Section -->
-      <div data-reveal class="mt-32">
+      <div data-reveal class="mt-16 sm:mt-24 lg:mt-32">
         <h2 class="font-display text-3xl sm:text-4xl text-[var(--color-accent)] text-center">{{ teamTitle }}</h2>
         <p class="mt-4 text-center text-[var(--color-text-secondary)] max-w-2xl mx-auto whitespace-pre-wrap">{{ teamSubtitle }}</p>
         

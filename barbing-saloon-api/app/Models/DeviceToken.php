@@ -14,11 +14,17 @@ class DeviceToken extends Model
         'user_id',
         'token',
         'platform',
+        'app_version',
         'last_seen_at',
+        'is_revoked',
+        'revoked_at',
+        'revoked_by_user_id',
     ];
 
     protected $casts = [
         'last_seen_at' => 'datetime',
+        'revoked_at' => 'datetime',
+        'is_revoked' => 'boolean',
     ];
 
     public function user(): BelongsTo

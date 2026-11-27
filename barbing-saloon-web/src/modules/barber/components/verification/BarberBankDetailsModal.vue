@@ -152,7 +152,7 @@ import {
   LockClosedIcon,
 } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   show: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
   form: { type: Object, required: true },

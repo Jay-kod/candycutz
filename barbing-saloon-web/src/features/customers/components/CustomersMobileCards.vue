@@ -9,7 +9,7 @@
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <div class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-admin/25 to-admin/10 border border-admin/30 text-admin font-bold text-xs shadow-inner overflow-hidden">
-            <img v-if="customer.avatar" :src="customer.avatar" :alt="customer.name" class="h-full w-full object-cover" />
+            <img v-if="customer.avatar || customer.avatar_url" :src="getStorageUrl(customer.avatar || customer.avatar_url)" :alt="customer.name" class="h-full w-full object-cover" />
             <span v-else>{{ initials(customer.name) }}</span>
             <div v-if="isNewClient(customer)" class="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-admin border-2 border-theme-surface" title="New Client"></div>
           </div>
@@ -129,6 +129,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 import { 
   EnvelopeIcon, 
   PhoneIcon, 

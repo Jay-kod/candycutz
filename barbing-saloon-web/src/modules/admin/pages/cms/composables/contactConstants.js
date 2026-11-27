@@ -8,7 +8,7 @@ export const DEFAULT_CONTACT_CONTENT = {
   contact_phone: '+234 800 000 0000',
   contact_email: 'info@candycutz.com',
   contact_receiver_email: '',
-  contact_address: '123 Grooming Street\nLagos, Nigeria',
+  contact_address: 'Angwan Kare, BCG, Beside Angwan Kare BCG Gas Station, beside Wealths Khort Apartments, BCG, Keffi 961101, Nasarawa, Nigeria',
   contact_hours: 'Mon - Sat: 9:00 AM - 8:00 PM\nSun: Closed',
   // Social profile links
   social_whatsapp: '',
@@ -34,9 +34,11 @@ export const DEFAULT_CONTACT_CONTENT = {
   social_show_contact_tiktok: 'true',
   social_show_contact_youtube: 'true',
   social_show_contact_linkedin: 'true',
-  // Google Maps
+  // Google Maps & Shop Coordinates
   contact_map_iframe: '',
   contact_map_link: '',
+  latitude: '',
+  longitude: '',
 };
 
 export const PLATFORMS_LIST = [

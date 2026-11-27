@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div class="overflow-x-auto custom-scrollbar rounded-lg border border-gray-200 bg-white">
       <table class="w-full text-left text-xs font-mono">
         <thead>
           <tr class="border-b border-gray-200 bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-600">

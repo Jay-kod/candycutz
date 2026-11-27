@@ -81,6 +81,7 @@
           <ContactMapsForm 
             :content="content"
             :extracted-map-src="extractedMapSrc"
+            :resolved-shop="resolvedShop"
           />
         </div>
 
@@ -145,6 +146,7 @@ const {
   activeContactPreviewList,
   activeContactPreviewCount,
   extractedMapSrc,
+  resolvedShop,
   selectImage,
   clearImage,
   fetchContent,

@@ -24,7 +24,7 @@ defineProps({
 </script>
 
 <template>
-  <div v-if="loading" class="grid gap-4 grid-cols-2 lg:grid-cols-4">
+  <div v-if="loading" class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
     <div
       v-for="i in 8"
       :key="i"
@@ -41,7 +41,7 @@ defineProps({
     </div>
   </div>
 
-  <div v-else class="grid gap-4 grid-cols-2 lg:grid-cols-4">
+  <div v-else class="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
     <div
       v-for="card in cards"
       :key="card.label"

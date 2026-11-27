@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -27,18 +28,34 @@ class Setting extends Model
 
         static::saved(function (self $setting) {
             if (! empty($setting->group)) {
-                \Illuminate\Support\Facades\Cache::forget("settings.group.{$setting->group}");
+                Cache::forget("settings.group.{$setting->group}");
             }
-            \Illuminate\Support\Facades\Cache::forget('settings.public');
-            \Illuminate\Support\Facades\Cache::forget('settings.all');
+            Cache::forget('settings.public');
+            Cache::forget('settings.all');
+            Cache::forget('paystack_gateway_credentials');
+            Cache::forget('salon_clock:shop_timezone');
+            Cache::forget('mail:resend_runtime_config');
+            Cache::forget('appointment_resource:bank_settings');
+            Cache::forget('policies.no_show');
+            Cache::forget('policies.refund');
+            Cache::forget('catalogue.shop_location');
+            Cache::forget("setting.{$setting->key}");
         });
 
         static::deleted(function (self $setting) {
             if (! empty($setting->group)) {
-                \Illuminate\Support\Facades\Cache::forget("settings.group.{$setting->group}");
+                Cache::forget("settings.group.{$setting->group}");
             }
-            \Illuminate\Support\Facades\Cache::forget('settings.public');
-            \Illuminate\Support\Facades\Cache::forget('settings.all');
+            Cache::forget('settings.public');
+            Cache::forget('settings.all');
+            Cache::forget('paystack_gateway_credentials');
+            Cache::forget('salon_clock:shop_timezone');
+            Cache::forget('mail:resend_runtime_config');
+            Cache::forget('appointment_resource:bank_settings');
+            Cache::forget('policies.no_show');
+            Cache::forget('policies.refund');
+            Cache::forget('catalogue.shop_location');
+            Cache::forget("setting.{$setting->key}");
         });
     }
 
@@ -64,11 +81,11 @@ class Setting extends Model
             return 'contact';
         }
 
-        if (str_starts_with($key, 'bank_') || str_starts_with($key, 'manual_transfer_') || in_array($key, ['bank_name', 'account_name', 'account_number'], true)) {
+        if (str_starts_with($key, 'bank_') || str_starts_with($key, 'manual_transfer_') || str_starts_with($key, 'paystack_') || str_starts_with($key, 'payment_') || in_array($key, ['bank_name', 'account_name', 'account_number'], true)) {
             return 'payment';
         }
 
-        if (str_starts_with($key, 'booking_') || in_array($key, ['deposit_amount', 'min_notice_hours', 'max_days_ahead', 'slot_interval_minutes'], true)) {
+        if (str_starts_with($key, 'booking_') || str_starts_with($key, 'no_show_') || str_starts_with($key, 'grace_') || str_starts_with($key, 'refund_') || in_array($key, ['deposit_amount', 'min_notice_hours', 'max_days_ahead', 'slot_interval_minutes', 'cancellation_cutoff_hours'], true)) {
             return 'booking';
         }
 
@@ -76,11 +93,15 @@ class Setting extends Model
             return 'social';
         }
 
+        if (in_array($key, ['google_auth_enabled', 'google_client_id', 'google_client_ids', 'apple_client_id'], true)) {
+            return 'social';
+        }
+
         if (str_starts_with($key, 'meta_') || str_starts_with($key, 'seo_')) {
             return 'seo';
         }
 
-        if ($key === 'brevo_api_key' || str_starts_with($key, 'mail_')) {
+        if ($key === 'brevo_api_key' || $key === 'resend_api_key' || str_starts_with($key, 'mail_')) {
             return 'notifications';
         }
 

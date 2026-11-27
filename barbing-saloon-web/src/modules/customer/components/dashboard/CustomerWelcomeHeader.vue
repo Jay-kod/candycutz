@@ -1,5 +1,5 @@
 <template>
-  <div class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-amber-500/10 via-[var(--color-bg-secondary)] to-[var(--color-bg-secondary)] p-6 sm:p-8 shadow-sm">
+  <div class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-amber-500/10 via-[var(--color-bg-secondary)] to-[var(--color-bg-secondary)] p-4 xs:p-6 sm:p-8 shadow-sm">
     <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/10 blur-3xl pointer-events-none"></div>
     <div class="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
 

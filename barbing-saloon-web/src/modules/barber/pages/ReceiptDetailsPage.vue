@@ -22,10 +22,10 @@
         {{ error }}
       </div>
 
-      <div v-else-if="booking" class="bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div v-else-if="booking" class="bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] rounded-3xl p-4 xs:p-6 sm:p-8 shadow-sm dark:shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         <!-- Left Column: Receipt Document Preview -->
-        <div class="flex flex-col h-full min-h-[420px]">
-          <div class="flex-1 overflow-hidden bg-slate-100 dark:bg-[#0B0F13] rounded-2xl border border-slate-200 dark:border-white/[0.08] flex items-center justify-center p-4">
+        <div class="flex flex-col h-full min-h-[260px] sm:min-h-[380px] md:min-h-[420px]">
+          <div class="flex-1 overflow-hidden bg-slate-100 dark:bg-[#0B0F13] rounded-2xl border border-slate-200 dark:border-white/[0.08] flex items-center justify-center p-3 sm:p-4">
             <template v-if="!receiptSrc">
               <div class="text-center p-8">
                 <DocumentTextIcon class="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-2" />

@@ -117,6 +117,7 @@ class ServiceApiController
                 'name' => $cat->name,
                 'slug' => $cat->slug ?? Str::slug($cat->name),
                 'icon' => $cat->icon,
+                'display_order' => $cat->display_order,
                 'services_count' => $cat->services_count ?? 0,
             ])->all();
         });
@@ -142,14 +143,50 @@ class ServiceApiController
             $data['is_active'] = $request->boolean('is_active', true);
         }
 
+        $data['description'] = $data['description'] ?? '';
         $data['slug'] = Str::slug($data['name']).'-'.time();
 
         $service = Service::create($data);
 
-        $imageFile = $request->file('image') ?? $request->file('image1');
-        if ($imageFile) {
-            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/services');
-            $service->update(['image' => '/storage/'.$path]);
+        $uploader = new SecureImageUpload;
+        $imageUpdates = [];
+        $deferred = [];
+
+        $imageFile1 = $request->file('image') ?? $request->file('image1');
+        if ($imageFile1) {
+            $path1 = $uploader->storeFast($imageFile1, 'uploads/services');
+            $imageUpdates['image'] = '/storage/'.$path1;
+            $deferred['image'] = $path1;
+        }
+
+        $imageFile2 = $request->file('image2');
+        if ($imageFile2) {
+            $path2 = $uploader->storeFast($imageFile2, 'uploads/services');
+            $imageUpdates['image2'] = '/storage/'.$path2;
+            $deferred['image2'] = $path2;
+        }
+
+        $imageFile3 = $request->file('image3');
+        if ($imageFile3) {
+            $path3 = $uploader->storeFast($imageFile3, 'uploads/services');
+            $imageUpdates['image3'] = '/storage/'.$path3;
+            $deferred['image3'] = $path3;
+        }
+
+        if (! empty($imageUpdates)) {
+            $service->update($imageUpdates);
+            foreach ($deferred as $attr => $rawPath) {
+                $uploader->dispatchOptimization(
+                    rawPath: $rawPath,
+                    disk: 'public',
+                    modelClass: Service::class,
+                    modelKey: $service->id,
+                    attribute: $attr,
+                    prefixStorage: true,
+                    actorUserId: $user->id,
+                    cacheEntity: 'services',
+                );
+            }
         }
 
         $message = $isBarber
@@ -158,7 +195,7 @@ class ServiceApiController
 
         CatalogueCache::bust('services');
 
-        return ApiResponse::success(new ServiceResource($service->load(['category', 'barber.user'])), $message, 201);
+        return ApiResponse::success(new ServiceResource($service->refresh()->load(['category', 'barber.user'])), $message, 201);
     }
 
     public function update(UpdateServiceRequest $request, int $id): JsonResponse
@@ -170,12 +207,63 @@ class ServiceApiController
             $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
         }
 
+        unset(
+            $validated['image'],
+            $validated['image1'],
+            $validated['image2'],
+            $validated['image3'],
+            $validated['remove_image1'],
+            $validated['remove_image2'],
+            $validated['remove_image3']
+        );
+
         $service->update($validated);
 
-        $imageFile = $request->file('image') ?? $request->file('image1');
-        if ($imageFile) {
-            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/services');
-            $service->update(['image' => '/storage/'.$path]);
+        $uploader = new SecureImageUpload;
+        $imageUpdates = [];
+        $deferred = [];
+
+        $imageFile1 = $request->file('image') ?? $request->file('image1');
+        if ($imageFile1) {
+            $path1 = $uploader->storeFast($imageFile1, 'uploads/services');
+            $imageUpdates['image'] = '/storage/'.$path1;
+            $deferred['image'] = $path1;
+        } elseif ($request->boolean('remove_image1')) {
+            $imageUpdates['image'] = null;
+        }
+
+        $imageFile2 = $request->file('image2');
+        if ($imageFile2) {
+            $path2 = $uploader->storeFast($imageFile2, 'uploads/services');
+            $imageUpdates['image2'] = '/storage/'.$path2;
+            $deferred['image2'] = $path2;
+        } elseif ($request->boolean('remove_image2')) {
+            $imageUpdates['image2'] = null;
+        }
+
+        $imageFile3 = $request->file('image3');
+        if ($imageFile3) {
+            $path3 = $uploader->storeFast($imageFile3, 'uploads/services');
+            $imageUpdates['image3'] = '/storage/'.$path3;
+            $deferred['image3'] = $path3;
+        } elseif ($request->boolean('remove_image3')) {
+            $imageUpdates['image3'] = null;
+        }
+
+        if (! empty($imageUpdates)) {
+            $service->update($imageUpdates);
+            foreach ($deferred as $attr => $rawPath) {
+                $uploader->dispatchOptimization(
+                    rawPath: $rawPath,
+                    disk: 'public',
+                    modelClass: Service::class,
+                    modelKey: $service->id,
+                    attribute: $attr,
+                    prefixStorage: true,
+                    actorUserId: $request->user()?->id,
+                    cacheEntity: 'services',
+                );
+            }
         }
 
         CatalogueCache::bust('services');
@@ -200,26 +288,41 @@ class ServiceApiController
 
         $category = $action->execute($request->validated());
         CatalogueCache::bust('categories');
+        CatalogueCache::bust('services');
 
         return ApiResponse::success($category, 'Service category created', 201);
     }
 
-    public function updateCategory(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory, UpdateServiceCategory $action): JsonResponse
+    public function updateCategory(UpdateServiceCategoryRequest $request, int $id, UpdateServiceCategory $action): JsonResponse
     {
+        $serviceCategory = ServiceCategory::findOrFail($id);
         $this->authorize('update', $serviceCategory);
 
         $category = $action->execute($serviceCategory, $request->validated());
         CatalogueCache::bust('categories');
+        CatalogueCache::bust('services');
 
         return ApiResponse::success($category, 'Service category updated');
     }
 
-    public function destroyCategory(ServiceCategory $serviceCategory, DeleteServiceCategory $action): JsonResponse
+    public function destroyCategory(int $id, DeleteServiceCategory $action): JsonResponse
     {
+        $serviceCategory = ServiceCategory::findOrFail($id);
         $this->authorize('delete', $serviceCategory);
+
+        if ($serviceCategory->services()->exists()) {
+            return ApiResponse::error(
+                'Cannot delete a category that still has services assigned. Reassign or remove its services first.',
+                [],
+                422,
+                'CATEGORY_IN_USE'
+            );
+        }
+
         $action->execute($serviceCategory);
 
         CatalogueCache::bust('categories');
+        CatalogueCache::bust('services');
 
         return ApiResponse::success(null, 'Service category deleted');
     }

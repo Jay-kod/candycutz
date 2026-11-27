@@ -3,7 +3,7 @@
     type="button"
     @click="handleClick"
     :disabled="isProbing"
-    class="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border text-xs font-mono font-medium transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-60"
+    class="inline-flex h-11 w-11 sm:h-auto sm:w-auto items-center justify-center gap-1.5 px-0 sm:px-3 sm:py-1.5 rounded-full border text-xs font-mono font-medium transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-60"
     :class="statusClasses"
     :title="tooltipText"
     aria-label="Database connection status"
@@ -21,10 +21,10 @@
     </span>
 
     <!-- Database Icon -->
-    <CircleStackIcon class="h-3.5 w-3.5 shrink-0" :class="iconClass" />
+    <CircleStackIcon class="hidden sm:block h-3.5 w-3.5 shrink-0" :class="iconClass" />
 
     <!-- Status Text -->
-    <span class="font-semibold tracking-tight">
+    <span class="hidden sm:inline font-semibold tracking-tight">
       {{ statusLabel }}
     </span>
 

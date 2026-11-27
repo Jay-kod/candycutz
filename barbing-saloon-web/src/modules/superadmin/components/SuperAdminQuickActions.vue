@@ -8,7 +8,7 @@
         v-for="action in quickActions"
         :key="action.label"
         :to="action.to"
-        class="group flex items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3.5 transition-all duration-200 hover:border-rose-500/30 hover:bg-rose-500/[0.04] shadow-sm"
+        class="group flex items-center gap-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3.5 transition-colors duration-200 hover:border-rose-500/30 hover:bg-rose-500/[0.04]"
       >
         <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border', action.iconWrap]">
           <component :is="action.icon" class="h-5 w-5" :class="action.iconColor" />
@@ -34,10 +34,7 @@ import {
   ClipboardDocumentListIcon,
   FlagIcon,
   HeartIcon,
-  BugAntIcon,
   ArchiveBoxIcon,
-  ShieldCheckIcon,
-  PresentationChartLineIcon,
   Cog6ToothIcon,
   ChevronRightIcon,
 } from '@heroicons/vue/24/outline';

@@ -154,6 +154,18 @@ export function useBarberProfile() {
         form.cover_image = updatedCover.startsWith('http') ? updatedCover : getStorageUrl(updatedCover);
       }
 
+      if (updatedUser && Object.keys(updatedUser).length > 0) {
+        authStore.setUser({
+          ...authStore.user,
+          ...updatedUser,
+          avatar: updatedAvatar || authStore.user?.avatar,
+          avatar_url: updatedAvatar || authStore.user?.avatar_url,
+        });
+      }
+
+      avatarFile.value = null;
+      coverFile.value = null;
+
       if (typeof authStore.fetchUser === 'function') {
         await authStore.fetchUser();
       }

@@ -1,10 +1,10 @@
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
 
 export function useVerification() {
   const toast = useToast();
-  
+
   const loading = ref(true);
   const isVerifying = ref(false);
   const verifications = ref([]);
@@ -13,7 +13,7 @@ export function useVerification() {
   const search = ref('');
   const quickCode = ref('');
   const lastRefreshed = ref(null);
-  
+
   let searchTimeout = null;
 
   const updateTimestamp = () => {

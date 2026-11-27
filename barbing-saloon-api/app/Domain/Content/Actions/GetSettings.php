@@ -14,7 +14,7 @@ class GetSettings
         return Setting::query()
             ->get()
             ->mapWithKeys(fn (Setting $setting) => [
-                $setting->key => in_array($setting->key, ['brevo_api_key', 'mail_password'], true) && $setting->value
+                $setting->key => in_array($setting->key, ['resend_api_key', 'brevo_api_key', 'mail_password'], true) && $setting->value
                     ? '••••••••'.substr((string) $setting->value, -4)
                     : $setting->value,
             ])

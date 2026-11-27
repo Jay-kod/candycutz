@@ -38,6 +38,8 @@
           v-for="item in group.items"
           :key="item.name"
           :to="item.to"
+          :data-active="isActiveRoute(item.to) ? 'true' : undefined"
+          :aria-current="isActiveRoute(item.to) ? 'page' : undefined"
           :class="[
             'group relative flex items-center rounded-xl transition-all duration-200',
             isCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2',
@@ -104,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -114,8 +116,14 @@ const props = defineProps({
   isActiveRoute: { type: Function, required: true },
 });
 
+const emit = defineEmits(['group-toggled']);
+
 // Groups that can be collapsed to prevent vertical overcrowding
 const collapsibleGroups = new Set([
+  'Catalogue & Content',
+  'Website CMS',
+  'Integrations & Comms',
+  'Governance & System',
   'The Website',
   'Content Management',
   'System Governance',
@@ -128,28 +136,47 @@ const collapsibleGroups = new Set([
 
 const isCollapsible = (label) => collapsibleGroups.has(label);
 
-// State for open groups: default Operations and Overview to open, collapsible groups open if an active item is inside
-const openGroups = ref(new Set(['Overview & Operations', 'Operations', 'Overview', 'Financials & Revenue', 'Menu']));
+// State for open groups: default core operational groups to open; collapsible groups open automatically when an active route is inside
+const openGroups = ref(new Set([
+  'Operations',
+  'Financials & Revenue',
+  'Catalogue & Content',
+  'Overview & Operations',
+  'Overview',
+  'Menu',
+]));
+
+const activeGroupLabel = computed(() => {
+  const activeGroup = props.groups.find((group) =>
+    group.items?.some((item) => props.isActiveRoute(item.to))
+  );
+  return activeGroup?.label ?? null;
+});
+
+watch(
+  activeGroupLabel,
+  (label) => {
+    if (label && isCollapsible(label)) {
+      openGroups.value.add(label);
+    }
+  },
+  { immediate: true }
+);
 
 const isGroupOpen = (label) => {
   if (!isCollapsible(label)) return true;
-  if (openGroups.value.has(label)) return true;
-  // If group contains the currently active route, keep it open automatically
-  const targetGroup = props.groups.find((g) => g.label === label);
-  if (targetGroup?.items?.some((item) => props.isActiveRoute(item.to))) {
-    openGroups.value.add(label);
-    return true;
-  }
-  return false;
+  if (label === activeGroupLabel.value) return true;
+  return openGroups.value.has(label);
 };
 
 const toggleGroup = (label) => {
-  if (!isCollapsible(label)) return;
+  if (!isCollapsible(label) || label === activeGroupLabel.value) return;
   if (openGroups.value.has(label)) {
     openGroups.value.delete(label);
   } else {
     openGroups.value.add(label);
   }
+  emit('group-toggled', label);
 };
 </script>
 

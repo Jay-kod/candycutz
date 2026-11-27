@@ -89,7 +89,7 @@
         </div>
 
         <!-- 3 KPI metric tiles -->
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 xs:grid-cols-3 gap-2.5 xs:gap-3">
           <div class="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-black/40 p-3.5 space-y-1 shadow-sm">
             <span class="text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 block">Total Revenue</span>
             <p class="font-mono text-base sm:text-lg font-bold text-amber-700 dark:text-gold truncate">
@@ -134,7 +134,7 @@ import {
   LockClosedIcon,
 } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   bankDetails: {
     type: Object,
     required: true,

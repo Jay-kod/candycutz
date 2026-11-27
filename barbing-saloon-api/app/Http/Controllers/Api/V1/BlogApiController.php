@@ -139,13 +139,24 @@ class BlogApiController
 
         $imageFile = $request->file('featured_image') ?? $request->file('image');
         if ($imageFile) {
-            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/blog');
+            $uploader = new SecureImageUpload;
+            $path = $uploader->storeFast($imageFile, 'uploads/blog');
             $post->update(['featured_image' => '/storage/'.$path]);
+            $uploader->dispatchOptimization(
+                rawPath: $path,
+                disk: 'public',
+                modelClass: BlogPost::class,
+                modelKey: $post->id,
+                attribute: 'featured_image',
+                prefixStorage: true,
+                actorUserId: $request->user()?->id,
+                cacheEntity: 'blog',
+            );
         }
 
         CatalogueCache::bust('blog');
 
-        return ApiResponse::success(new BlogPostResource($post), 'Blog post created', 201);
+        return ApiResponse::success(new BlogPostResource($post->refresh()), 'Blog post created', 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -198,12 +209,26 @@ class BlogApiController
         }
 
         $imageFile = $request->file('featured_image') ?? $request->file('image');
+        $rawBlogPath = null;
         if ($imageFile) {
-            $path = (new SecureImageUpload)->execute($imageFile, 'uploads/blog');
-            $post->featured_image = '/storage/'.$path;
+            $rawBlogPath = (new SecureImageUpload)->storeFast($imageFile, 'uploads/blog');
+            $post->featured_image = '/storage/'.$rawBlogPath;
         }
 
         $post->save();
+
+        if ($rawBlogPath !== null) {
+            (new SecureImageUpload)->dispatchOptimization(
+                rawPath: $rawBlogPath,
+                disk: 'public',
+                modelClass: BlogPost::class,
+                modelKey: $post->id,
+                attribute: 'featured_image',
+                prefixStorage: true,
+                actorUserId: $request->user()?->id,
+                cacheEntity: 'blog',
+            );
+        }
 
         CatalogueCache::bust('blog');
 

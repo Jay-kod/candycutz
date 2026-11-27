@@ -81,7 +81,7 @@
     </div>
 
     <!-- Data Table -->
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto custom-scrollbar">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="border-b border-white/[0.06] bg-[#0B0F13]/40">

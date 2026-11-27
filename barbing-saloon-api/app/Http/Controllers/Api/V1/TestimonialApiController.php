@@ -8,6 +8,7 @@ use App\Domain\Content\Actions\ApproveTestimonial;
 use App\Domain\Content\Actions\DeleteTestimonial;
 use App\Domain\Content\Actions\FeatureTestimonial;
 use App\Domain\Content\Actions\GetBarberReviews;
+use App\Domain\Notification\NotificationDispatcher;
 use App\Domain\Shared\Services\CatalogueCache;
 use App\Events\ReviewSubmitted;
 use App\Http\Resources\TestimonialResource;
@@ -140,6 +141,10 @@ class TestimonialApiController
 
         $result = $action->execute($testimonial, $validated['is_approved']);
         CatalogueCache::bust('testimonials');
+
+        if ($result->is_approved) {
+            NotificationDispatcher::reviewApproved($result);
+        }
 
         $message = $result->is_approved ? 'Testimonial approved' : 'Testimonial unapproved';
 

@@ -1,5 +1,7 @@
 import { ref } from 'vue';
 import { publicApi } from '@/shared/api/old_publicApi';
+import { getActivePinia } from 'pinia';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 const brandName = ref('CandyCutz');
 const brandNameFirst = ref('Candy');
@@ -51,12 +53,17 @@ export const useBrandIdentity = () => {
   const loadBrandIdentity = async () => {
     if (loaded) return;
     if (!loadingPromise) {
-      loadingPromise = publicApi.settings()
-        .then((response) => {
+      loadingPromise = (async () => {
+        if (getActivePinia()) {
+          const settings = await usePublicContentStore().getSettings();
+          applyBrandSettings(settings || {});
+          loaded = true;
+        } else {
+          const response = await publicApi.settings();
           applyBrandSettings(response.data?.data || {});
           loaded = true;
-        })
-        .catch((error) => {
+        }
+      })().catch((error) => {
           console.error('Failed to load brand identity:', error);
         })
         .finally(() => {

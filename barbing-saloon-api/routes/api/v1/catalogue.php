@@ -5,9 +5,12 @@ use App\Http\Controllers\Api\V1\BarberApiController;
 use App\Http\Controllers\Api\V1\BlogApiController;
 use App\Http\Controllers\Api\V1\FeatureFlagApiController;
 use App\Http\Controllers\Api\V1\GalleryApiController;
+use App\Http\Controllers\Api\V1\GalleryCategoryApiController;
 use App\Http\Controllers\Api\V1\PublicApiController;
 use App\Http\Controllers\Api\V1\ServiceApiController;
+use App\Http\Controllers\Api\V1\ServiceCategoryRequestApiController;
 use App\Http\Controllers\Api\V1\ServiceZoneApiController;
+use App\Http\Controllers\Api\V1\ShopLocationApiController;
 use App\Http\Controllers\Api\V1\TestimonialApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +24,7 @@ Route::get('/barbers', [BarberApiController::class, 'index']);
 Route::get('/barbers/{id}', [BarberApiController::class, 'show'])->whereNumber('id');
 Route::get('/service-zones', [ServiceZoneApiController::class, 'index']);
 Route::get('/gallery', [GalleryApiController::class, 'index']);
+Route::get('/gallery-categories', [GalleryCategoryApiController::class, 'index']);
 Route::get('/gallery/{id}', [GalleryApiController::class, 'show'])->whereNumber('id');
 Route::get('/testimonials', [TestimonialApiController::class, 'index']);
 Route::get('/blog', [BlogApiController::class, 'index']);
@@ -30,6 +34,11 @@ Route::get('/available-slots', [PublicApiController::class, 'availableSlots']);
 Route::post('/contact', [PublicApiController::class, 'contact']);
 Route::get('/feature-flags', [FeatureFlagApiController::class, 'publicIndex']);
 Route::post('/app/crashes', [AppTelemetryApiController::class, 'reportCrash']);
+Route::get('/shop/location', [ShopLocationApiController::class, 'show']);
+Route::get('/shop/directions', [ShopLocationApiController::class, 'directions']);
+Route::get('/shop/geocode', [ShopLocationApiController::class, 'geocode']);
+Route::get('/shop/reverse-geocode', [ShopLocationApiController::class, 'reverseGeocode']);
+Route::get('/branches/{id}/location', [ShopLocationApiController::class, 'show']);
 
 // Public Aliases (/api/v1/public/*) for seamless backward compatibility
 Route::prefix('public')->group(function () {
@@ -42,6 +51,7 @@ Route::prefix('public')->group(function () {
     Route::get('/barbers/{id}', [BarberApiController::class, 'show'])->whereNumber('id');
     Route::get('/service-zones', [ServiceZoneApiController::class, 'index']);
     Route::get('/gallery', [GalleryApiController::class, 'index']);
+    Route::get('/gallery-categories', [GalleryCategoryApiController::class, 'index']);
     Route::get('/gallery/{id}', [GalleryApiController::class, 'show'])->whereNumber('id');
     Route::get('/testimonials', [TestimonialApiController::class, 'index']);
     Route::get('/blog', [BlogApiController::class, 'index']);
@@ -68,6 +78,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/blog', [BlogApiController::class, 'store']);
         Route::put('/blog/{id}', [BlogApiController::class, 'update'])->whereNumber('id');
         Route::delete('/blog/{id}', [BlogApiController::class, 'destroy'])->whereNumber('id');
+
+        // Service Category Requests (barbers request, admins view)
+        Route::get('/service-category-requests', [ServiceCategoryRequestApiController::class, 'index']);
+        Route::post('/service-category-requests', [ServiceCategoryRequestApiController::class, 'store']);
     });
 
     // Customer review / testimonial submission (any authenticated customer)
@@ -87,6 +101,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/service-categories', [ServiceApiController::class, 'storeCategory']);
         Route::put('/service-categories/{id}', [ServiceApiController::class, 'updateCategory'])->whereNumber('id');
         Route::delete('/service-categories/{id}', [ServiceApiController::class, 'destroyCategory'])->whereNumber('id');
+
+        // Service Category Requests Review
+        Route::patch('/service-category-requests/{id}/approve', [ServiceCategoryRequestApiController::class, 'approve'])->whereNumber('id');
+        Route::patch('/service-category-requests/{id}/reject', [ServiceCategoryRequestApiController::class, 'reject'])->whereNumber('id');
+
+        // Gallery Categories CRUD
+        Route::post('/gallery-categories', [GalleryCategoryApiController::class, 'store']);
+        Route::put('/gallery-categories/{id}', [GalleryCategoryApiController::class, 'update'])->whereNumber('id');
+        Route::delete('/gallery-categories/{id}', [GalleryCategoryApiController::class, 'destroy'])->whereNumber('id');
 
         // Testimonials CRUD
         Route::put('/testimonials/{id}', [TestimonialApiController::class, 'update'])->whereNumber('id');

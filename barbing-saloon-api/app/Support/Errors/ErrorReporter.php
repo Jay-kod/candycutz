@@ -46,6 +46,7 @@ class ErrorReporter
         } catch (Throwable $fallbackEx) {
             $date = Carbon::now()->format('Y-m-d');
             $filePath = storage_path("logs/error-fallback-{$date}.log");
+            File::ensureDirectoryExists(dirname($filePath));
             File::append($filePath, json_encode([
                 'timestamp' => Carbon::now()->toIso8601String(),
                 'fallback_reason' => 'client_report_fallback: '.$fallbackEx->getMessage(),
@@ -484,19 +485,89 @@ class ErrorReporter
     {
         $date = Carbon::now()->format('Y-m-d');
         $filePath = storage_path("logs/error-fallback-{$date}.log");
+        $jsonIndexPath = storage_path("logs/db-disconnects.json");
+
+        $sql = null;
+        $sqlState = null;
+        if ($e instanceof QueryException) {
+            $sql = $e->getSql();
+            $sqlState = (string) $e->getCode();
+        }
+
+        $isConnectionFailure = str_contains($cause, 'server has gone away')
+            || str_contains($cause, 'Lost connection')
+            || str_contains($cause, 'Connection refused')
+            || str_contains($cause, 'access a socket in a way forbidden')
+            || in_array($sqlState, ['2002', '2006', 'HY000'], true);
 
         $payload = [
             'timestamp' => Carbon::now()->toIso8601String(),
             'fallback_reason' => $cause,
-            'error_code' => $errorCode->value ?? ($e instanceof AppException ? $e->getErrorCode()->value : 'SERVER_ERROR'),
+            'error_code' => $errorCode->value ?? ($e instanceof AppException ? $e->getErrorCode()->value : ($isConnectionFailure ? 'DB_UNAVAILABLE' : 'SERVER_ERROR')),
             'exception_class' => get_class($e),
             'message' => $e->getMessage(),
+            'sql' => $sql,
+            'sql_state' => $sqlState,
+            'is_connection_failure' => $isConnectionFailure,
             'file' => $this->normalisePath($e->getFile()),
             'line' => $e->getLine(),
             'request_id' => app()->bound(RequestContext::class) ? app(RequestContext::class)->requestId() : RequestContext::generateRequestId(),
             'route_uri' => $request?->route()?->uri() ?? $request?->path() ?? 'console',
         ];
 
+        File::ensureDirectoryExists(dirname($filePath));
         File::append($filePath, json_encode($payload)."\n");
+
+        // Maintain atomic rotating in-memory index for quick admin retrieval
+        try {
+            $existing = [];
+            if (File::exists($jsonIndexPath)) {
+                $raw = @file_get_contents($jsonIndexPath);
+                $existing = $raw ? (json_decode($raw, true) ?: []) : [];
+            }
+            array_unshift($existing, $payload);
+            $trimmed = array_slice($existing, 0, 50);
+            File::put($jsonIndexPath, json_encode($trimmed, JSON_PRETTY_PRINT));
+        } catch (Throwable) {
+            // Fail-safe: disk log already persisted
+        }
+    }
+
+    /**
+     * Retrieve recent fallback & database disconnect incidents for health diagnostics.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getRecentFallbackIncidents(int $limit = 20): array
+    {
+        $jsonIndexPath = storage_path('logs/db-disconnects.json');
+        if (File::exists($jsonIndexPath)) {
+            $raw = @file_get_contents($jsonIndexPath);
+            $data = $raw ? (json_decode($raw, true) ?: []) : [];
+            if (! empty($data)) {
+                return array_slice($data, 0, $limit);
+            }
+        }
+
+        // Fallback: read today's error fallback log file
+        $date = Carbon::now()->format('Y-m-d');
+        $filePath = storage_path("logs/error-fallback-{$date}.log");
+        if (! File::exists($filePath)) {
+            return [];
+        }
+
+        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        $results = [];
+        foreach (array_reverse($lines) as $line) {
+            $decoded = json_decode($line, true);
+            if ($decoded) {
+                $results[] = $decoded;
+            }
+            if (count($results) >= $limit) {
+                break;
+            }
+        }
+
+        return $results;
     }
 }

@@ -8,6 +8,7 @@ use App\Support\Errors\AuthException;
 use App\Support\Errors\BookingException;
 use App\Support\Errors\ErrorCode;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -40,6 +41,18 @@ beforeEach(function () {
 
         Route::get('/api/v1/_test/unhandled-500', function () {
             throw new RuntimeException('Secret database connection string in error');
+        });
+
+        Route::get('/api/v1/_test/schema-drift', function () {
+            $previous = new PDOException('Unknown column approval_status', 0);
+            $previous->errorInfo = ['42S22', 1054, 'Unknown column approval_status'];
+
+            throw new QueryException(
+                'mysql',
+                'select * from services where approval_status = ?',
+                ['approved'],
+                $previous
+            );
         });
 
         Route::post('/api/v1/_test/sensitive-input', function (Request $request) {
@@ -130,6 +143,25 @@ it('masks unhandled 500 error messages in production mode while storing trace in
 
     // Restore environment
     app()->detectEnvironment(fn () => $originalEnv);
+});
+
+it('masks unhandled 500 messages outside production', function () {
+    $response = $this->getJson('/api/v1/_test/unhandled-500');
+
+    $response->assertStatus(500);
+    $response->assertJsonPath('error.code', ErrorCode::SERVER_ERROR->value);
+    expect($response->getContent())->not->toContain('Secret database connection string');
+});
+
+it('does not expose SQL details for schema errors', function () {
+    $response = $this->getJson('/api/v1/_test/schema-drift');
+
+    $response->assertStatus(500);
+    $response->assertJsonPath('error.code', ErrorCode::SCHEMA_DRIFT->value);
+    expect($response->getContent())
+        ->not->toContain('approval_status')
+        ->not->toContain('SELECT')
+        ->not->toContain('SQLSTATE');
 });
 
 it('redacts sensitive credentials such as password, token, and receipts from stored error events', function () {

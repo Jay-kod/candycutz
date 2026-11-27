@@ -1,7 +1,7 @@
 <template>
   <component :is="layout">
     <section class="space-y-8 pb-16 animate-fade-in">
-      <header :class="['relative overflow-hidden rounded-3xl border p-8 lg:p-12 shadow-2xl', bannerBgClass]">
+      <header :class="['relative overflow-hidden rounded-3xl border p-4 xs:p-6 sm:p-8 lg:p-12 shadow-2xl', bannerBgClass]">
         <div :class="['absolute -right-16 -top-16 h-64 w-64 rounded-full blur-3xl', bannerOrbClass]"></div>
         <div :class="['absolute -left-16 -bottom-16 h-48 w-48 rounded-full blur-3xl', bannerOrbClass]"></div>
 
@@ -33,7 +33,7 @@
       </div>
 
       <div v-else class="space-y-8 animate-slide-up">
-        <div class="rounded-3xl border border-theme-border bg-theme-surface p-8 shadow-xl">
+        <div class="rounded-3xl border border-theme-border bg-theme-surface p-4 xs:p-6 sm:p-8 shadow-xl">
           <div class="flex items-center justify-between pb-6 border-b border-theme-border mb-6">
             <div>
               <p class="text-xs uppercase tracking-[0.3em] text-theme-muted font-bold">General &amp; Business</p>
@@ -61,6 +61,9 @@
             </article>
           </div>
         </div>
+
+        <!-- SuperAdmin Personal Device Privacy & Cookie Preferences -->
+        <UserProfileCookiePreferencesCard />
       </div>
     </section>
   </component>
@@ -76,6 +79,7 @@ import SuperAdminLayout from '@/portals/superadmin/layouts/SuperAdminLayout.vue'
 import { adminApi } from '@/shared/api/old_adminApi';
 import { superadminApi } from '@/shared/api/old_superadminApi';
 import { useToast } from '@/core/composables/useToast';
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue';
 
 const route = useRoute();
 const toast = useToast();

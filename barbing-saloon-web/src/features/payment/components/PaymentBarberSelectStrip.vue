@@ -6,8 +6,8 @@
         <!-- Avatar / Initials with Green Status -->
         <div class="relative h-7 w-7 shrink-0 rounded-full overflow-hidden border border-amber-500/40 bg-[#0E1217] shadow-sm">
           <img
-            v-if="selectedBarber?.avatar"
-            :src="selectedBarber.avatar"
+            v-if="selectedBarber?.avatar || selectedBarber?.avatar_url"
+            :src="getStorageUrl(selectedBarber.avatar || selectedBarber.avatar_url)"
             :alt="selectedBarber.name"
             class="h-full w-full object-cover"
           />
@@ -75,6 +75,7 @@
 </template>
 
 <script setup>
+import { getStorageUrl } from '@/core/utils/url';
 defineProps({
   barbers: {
     type: Array,

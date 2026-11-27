@@ -109,20 +109,37 @@
             </template>
 
             <template v-else-if="appointment.status === 'confirmed'">
-              <button 
-                v-if="appointment.receipt_image" 
-                @click="$emit('view-receipt', appointment)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-theme-bg border border-theme-border text-theme-text-muted hover:text-theme-text transition-colors" 
+              <button
+                v-if="appointment.receipt_image"
+                @click="$emit('view-receipt', appointment)"
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-theme-bg border border-theme-border text-theme-text-muted hover:text-theme-text transition-colors"
                 title="Receipt"
               >
                 <DocumentTextIcon class="h-4 w-4" />
               </button>
-              <button 
-                @click="$emit('cancel', appointment.id)" 
-                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors" 
+              <button
+                @click="$emit('mark-no-show', appointment.id)"
+                class="min-h-[38px] px-2.5 flex items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-500 text-[11px] font-bold"
+                title="Mark No-Show"
+              >
+                No-Show
+              </button>
+              <button
+                @click="$emit('cancel', appointment.id)"
+                class="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
                 title="Cancel"
               >
                 <XMarkIcon class="h-4 w-4" />
+              </button>
+            </template>
+
+            <template v-else-if="appointment.status === 'no_show'">
+              <button
+                v-if="appointment.deposit_paid && !appointment.deposit_forfeited"
+                @click="$emit('forfeit-deposit', appointment.id)"
+                class="min-h-[38px] px-2.5 flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-bold"
+              >
+                Forfeit
               </button>
             </template>
           </div>
@@ -169,7 +186,7 @@ defineProps({
   }
 });
 
-defineEmits(['details', 'approve', 'cancel', 'view-receipt', 'reset-filters']);
+defineEmits(['details', 'approve', 'cancel', 'mark-no-show', 'forfeit-deposit', 'view-receipt', 'reset-filters']);
 
 function initials(name) {
   return (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

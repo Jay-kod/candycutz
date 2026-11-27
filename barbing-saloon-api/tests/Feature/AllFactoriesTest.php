@@ -13,6 +13,7 @@ use App\Models\Branch;
 use App\Models\Business;
 use App\Models\DeviceToken;
 use App\Models\Gallery;
+use App\Models\GalleryCategory;
 use App\Models\Holiday;
 use App\Models\Notification;
 use App\Models\Payment;
@@ -42,6 +43,7 @@ it('can persist all models via factories', function () {
         Business::class,
         DeviceToken::class,
         Gallery::class,
+        GalleryCategory::class,
         Holiday::class,
         Notification::class,
         Payment::class,

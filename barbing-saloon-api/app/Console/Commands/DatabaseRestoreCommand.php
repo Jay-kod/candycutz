@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 class DatabaseRestoreCommand extends Command
@@ -95,25 +96,35 @@ class DatabaseRestoreCommand extends Command
                 $username = config('database.connections.mysql.username');
                 $password = config('database.connections.mysql.password');
 
-                $restoreCmd = sprintf(
-                    'mysql --host=%s --port=%s --user=%s %s %s < %s',
-                    escapeshellarg((string) $host),
-                    escapeshellarg((string) $port),
-                    escapeshellarg((string) $username),
-                    $password ? '--password='.escapeshellarg((string) $password) : '',
-                    escapeshellarg((string) $database),
-                    escapeshellarg($filePath)
-                );
+                $restoreExecutable = $this->resolveExecutable([
+                    'mysql',
+                    'C:\\xampp\\mysql\\bin\\mysql.exe',
+                ]);
 
-                $result = null;
-                $output = [];
-                exec($restoreCmd, $output, $result);
+                if (! $restoreExecutable) {
+                    throw new \RuntimeException('The MySQL/MariaDB restore client is not available on this server.');
+                }
 
-                if ($result !== 0) {
-                    $sql = file_get_contents($filePath);
-                    if ($sql) {
-                        DB::unprepared($sql);
-                    }
+                $sql = file_get_contents($filePath);
+                if ($sql === false) {
+                    throw new \RuntimeException('Unable to read the selected backup file.');
+                }
+
+                $process = new Process([
+                    $restoreExecutable,
+                    '--host='.(string) $host,
+                    '--port='.(string) $port,
+                    '--user='.(string) $username,
+                    '--default-character-set=utf8mb4',
+                    (string) $database,
+                ]);
+                $process->setTimeout(null);
+                $process->setInput($sql);
+                $process->run(null, ['MYSQL_PWD' => (string) $password]);
+
+                if (! $process->isSuccessful()) {
+                    $error = trim($process->getErrorOutput() ?: $process->getOutput());
+                    throw new \RuntimeException($error !== '' ? $error : 'MySQL restore exited unsuccessfully.');
                 }
             } else {
                 $sql = file_get_contents($filePath);
@@ -148,6 +159,27 @@ class DatabaseRestoreCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    private function resolveExecutable(array $candidates): ?string
+    {
+        foreach ($candidates as $candidate) {
+            if (str_contains($candidate, DIRECTORY_SEPARATOR) && is_file($candidate)) {
+                return $candidate;
+            }
+
+            $probe = @shell_exec(defined('PHP_OS_FAMILY') && PHP_OS_FAMILY === 'Windows'
+                ? 'where '.$candidate.' 2>NUL'
+                : 'command -v '.$candidate.' 2>/dev/null');
+            if (is_string($probe) && trim($probe) !== '') {
+                $firstLine = trim(strtok($probe, "\r\n"));
+                if ($firstLine !== '') {
+                    return $firstLine;
+                }
+            }
+        }
+
+        return null;
     }
 
     private function importSqliteDatabase(\PDO $source, \PDO $target): void

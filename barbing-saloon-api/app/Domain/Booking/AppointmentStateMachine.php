@@ -12,8 +12,8 @@ use App\Domain\Shared\Enums\AppointmentStatus;
  *
  * Transition rules:
  *   pending    → confirmed | cancelled
- *   confirmed  → checked_in | no_show | cancelled
- *   checked_in → in_progress | cancelled
+ *   confirmed  → checked_in | in_progress | completed | no_show | cancelled
+ *   checked_in → in_progress | completed | cancelled
  *   in_progress→ completed
  *   completed  → (terminal)
  *   cancelled  → (terminal)
@@ -27,9 +27,10 @@ class AppointmentStateMachine
      * @var array<string, string[]>
      */
     private const TRANSITIONS = [
+        'draft' => ['confirmed', 'pending', 'cancelled'],
         'pending' => ['confirmed', 'cancelled'],
-        'confirmed' => ['checked_in', 'no_show', 'cancelled'],
-        'checked_in' => ['in_progress', 'cancelled'],
+        'confirmed' => ['checked_in', 'in_progress', 'completed', 'no_show', 'cancelled'],
+        'checked_in' => ['in_progress', 'completed', 'cancelled'],
         'in_progress' => ['completed'],
         'completed' => [],
         'cancelled' => [],
@@ -43,13 +44,20 @@ class AppointmentStateMachine
      * @var array<string, string[]>
      */
     private const ROLE_PERMISSIONS = [
+        // draft transitions
+        'draft→confirmed' => ['customer', 'barber', 'admin', 'super_admin'],
+        'draft→pending' => ['customer', 'barber', 'admin', 'super_admin'],
+        'draft→cancelled' => ['customer', 'barber', 'admin', 'super_admin'],
         // customer can only cancel their own pending/confirmed bookings
         'pending→cancelled' => ['customer', 'barber', 'admin', 'super_admin'],
         'pending→confirmed' => ['barber', 'admin', 'super_admin'],
         'confirmed→cancelled' => ['customer', 'barber', 'admin', 'super_admin'],
         'confirmed→checked_in' => ['barber', 'admin', 'super_admin'],
+        'confirmed→in_progress' => ['barber', 'admin', 'super_admin'],
+        'confirmed→completed' => ['barber', 'admin', 'super_admin'],
         'confirmed→no_show' => ['barber', 'admin', 'super_admin'],
         'checked_in→in_progress' => ['barber', 'admin', 'super_admin'],
+        'checked_in→completed' => ['barber', 'admin', 'super_admin'],
         'checked_in→cancelled' => ['barber', 'admin', 'super_admin'],
         'in_progress→completed' => ['barber', 'admin', 'super_admin'],
     ];

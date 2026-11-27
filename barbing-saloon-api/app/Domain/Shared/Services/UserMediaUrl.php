@@ -31,7 +31,7 @@ class UserMediaUrl
             if (count($parts) === 2 && in_array($parts[0], ['avatar', 'cover'], true)) {
                 $relativeSigned = URL::temporarySignedRoute(
                     'user-media.show',
-                    now()->addDays(7),
+                    now()->addDays(7)->endOfDay(),
                     ['user' => $user->id, 'type' => $parts[0], 'filename' => basename($parts[1])],
                     absolute: false
                 );
@@ -41,5 +41,23 @@ class UserMediaUrl
         }
 
         return url('storage/'.$normalizedPath);
+    }
+
+    public function thumbnailFor(?User $user, ?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (! str_ends_with(strtolower($path), '.webp') || preg_match('/^https?:\/\//i', $path)) {
+            return $this->for($user, $path);
+        }
+
+        $dir = dirname($path);
+        $base = basename($path);
+        $thumbBase = str_starts_with($base, 'thumb_') ? $base : 'thumb_'.$base;
+        $thumbPath = ($dir !== '.' && $dir !== '') ? $dir.'/'.$thumbBase : $thumbBase;
+
+        return $this->for($user, $thumbPath);
     }
 }

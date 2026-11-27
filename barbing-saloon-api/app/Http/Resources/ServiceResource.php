@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Domain\Shared\Services\UserMediaUrl;
-use App\Models\Barber;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,21 +21,10 @@ class ServiceResource extends JsonResource
             $barberAvatar = app(UserMediaUrl::class)->for($this->barber->user, $this->barber->user->avatar);
         }
 
-        $imageUrl = null;
-        if ($this->image) {
-            if (str_starts_with($this->image, 'http') || str_starts_with($this->image, 'data:')) {
-                $imageUrl = $this->image;
-            } else {
-                $normalized = ltrim($this->image, '/');
-                if (str_starts_with($normalized, 'storage/')) {
-                    $imageUrl = url($normalized);
-                } elseif (str_starts_with($normalized, 'images/')) {
-                    $imageUrl = url($normalized);
-                } else {
-                    $imageUrl = url('storage/'.$normalized);
-                }
-            }
-        }
+        $imageUrl = $this->formatImageUrl($this->image);
+        $image2Url = $this->formatImageUrl($this->image2);
+        $image3Url = $this->formatImageUrl($this->image3);
+        $images = array_values(array_filter([$imageUrl, $image2Url, $image3Url]));
 
         return [
             'id' => $this->id,
@@ -50,15 +38,24 @@ class ServiceResource extends JsonResource
                 'id' => $this->category->id,
                 'name' => $this->category->name,
                 'slug' => $this->category->slug ?? Str::slug($this->category->name),
+                'icon' => $this->category->icon,
             ] : [
                 'id' => $this->category_id ?? 0,
                 'name' => 'General Grooming',
                 'slug' => 'general-grooming',
+                'icon' => null,
             ],
             'category_id' => $this->category_id,
             'category_name' => $this->category->name ?? 'General Grooming',
             'image' => $imageUrl,
             'image_url' => $imageUrl,
+            'thumbnail_url' => $this->formatThumbnailUrl($this->image) ?? $imageUrl,
+            'is_optimizing' => $this->image && str_contains((string) $this->image, 'uploads/') && ! str_ends_with(strtolower((string) $this->image), '.webp'),
+            'image2' => $image2Url,
+            'image2_url' => $image2Url,
+            'image3' => $image3Url,
+            'image3_url' => $image3Url,
+            'images' => $images,
             'is_active' => (bool) $this->is_active,
             'approval_status' => $this->approval_status ?? 'approved',
             'barber_id' => $this->barber_id,
@@ -69,5 +66,47 @@ class ServiceResource extends JsonResource
             ] : null,
             'is_home_service_eligible' => (bool) $this->home_service_allowed,
         ];
+    }
+
+    private function formatImageUrl(?string $image): ?string
+    {
+        if (! $image) {
+            return null;
+        }
+
+        if (str_starts_with($image, 'http') || str_starts_with($image, 'data:')) {
+            return $image;
+        }
+
+        $normalized = ltrim($image, '/');
+        if (str_starts_with($normalized, 'storage/')) {
+            return url($normalized);
+        } elseif (str_starts_with($normalized, 'images/')) {
+            return url($normalized);
+        }
+
+        return url('storage/'.$normalized);
+    }
+
+    private function formatThumbnailUrl(?string $image): ?string
+    {
+        if (! $image || ! str_ends_with(strtolower($image), '.webp') || str_starts_with($image, 'http') || str_starts_with($image, 'data:')) {
+            return null;
+        }
+
+        $normalized = ltrim($image, '/');
+        if (str_starts_with($normalized, 'images/')) {
+            return url($normalized);
+        }
+
+        $rel = str_starts_with($normalized, 'storage/') ? $normalized : 'storage/'.$normalized;
+        if (! str_contains($rel, 'uploads/')) {
+            return url($rel);
+        }
+
+        $base = basename($rel);
+        $thumbBase = str_starts_with($base, 'thumb_') ? $base : 'thumb_'.$base;
+
+        return url(dirname($rel).'/'.$thumbBase);
     }
 }

@@ -9,8 +9,10 @@ use App\Domain\Payment\DataObjects\GatewayCheckout;
 use App\Domain\Payment\DataObjects\GatewayResult;
 use App\Domain\Payment\DataObjects\WebhookEvent;
 use App\Domain\Payment\Exceptions\PaymentException;
+use App\Domain\Shared\Services\CircuitBreakerService;
 use App\Models\Payment;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -23,23 +25,39 @@ class PaystackGateway implements PaymentGateway
 
     protected string $baseUrl;
 
-    public function __construct()
+    protected CircuitBreakerService $circuitBreaker;
+
+    public function __construct(?CircuitBreakerService $circuitBreaker = null)
     {
-        $this->secretKey = Setting::query()->where('key', 'paystack_secret_key')->value('value')
-            ?: config('services.paystack.secret_key')
-            ?: config('payments.gateways.paystack.secret_key', '');
-        $this->publicKey = Setting::query()->where('key', 'paystack_public_key')->value('value')
-            ?: config('services.paystack.public_key')
-            ?: config('payments.gateways.paystack.public_key', '');
+        $this->circuitBreaker = $circuitBreaker ?? app(CircuitBreakerService::class);
+
+        $cachedCreds = Cache::remember('paystack_gateway_credentials', 1800, function () {
+            return Setting::query()
+                ->whereIn('key', ['paystack_secret_key', 'paystack_public_key'])
+                ->pluck('value', 'key')
+                ->toArray();
+        });
+
+        $this->secretKey = (! empty($cachedCreds['paystack_secret_key']))
+            ? (string) $cachedCreds['paystack_secret_key']
+            : (config('services.paystack.secret_key') ?: config('payments.gateways.paystack.secret_key', ''));
+        $this->publicKey = (! empty($cachedCreds['paystack_public_key']))
+            ? (string) $cachedCreds['paystack_public_key']
+            : (config('services.paystack.public_key') ?: config('payments.gateways.paystack.public_key', ''));
         $this->baseUrl = config('services.paystack.base_url') ?: config('payments.gateways.paystack.base_url', 'https://api.paystack.co');
     }
 
     public function initiate(Payment $payment): GatewayCheckout
     {
-        // Paystack uses kobo
-        $amountKobo = (int) $payment->amount;
-        $email = $payment->customer->email ?? 'customer@candycutz.com';
-        $reference = $payment->transaction_ref ?? 'TXN_'.strtoupper(uniqid());
+        if (! $this->circuitBreaker->isAvailable('paystack')) {
+            throw PaymentException::providerUnavailable('Paystack payment service is temporarily paused by circuit breaker due to upstream connection failures.');
+        }
+
+        // Paystack uses kobo (convert Naira to kobo if under 100,000 threshold)
+        $rawAmount = (float) ($payment->amount_minor ?: $payment->amount);
+        $amountKobo = ($rawAmount > 0 && $rawAmount < 100000) ? (int) round($rawAmount * 100) : (int) $rawAmount;
+        $email = $payment->customer->email ?? $payment->customer_email ?? 'customer@candycutz.com';
+        $reference = $payment->transaction_ref ?? $payment->reference ?? 'TXN_'.strtoupper(uniqid());
 
         $isFakeAllowed = app()->environment('local', 'testing') && config('payments.fake', false);
 
@@ -58,29 +76,43 @@ class PaystackGateway implements PaymentGateway
         }
 
         $callbackUrl = config('payments.gateways.paystack.callback_url')
-            ?: url('/api/v1/payments/callback');
+            ?: url('/api/v1/payments/return');
 
-        $response = Http::withToken($this->secretKey)
-            ->acceptJson()
-            ->timeout(15)
-            ->post("{$this->baseUrl}/transaction/initialize", [
-                'amount' => $amountKobo,
-                'email' => $email,
-                'reference' => $reference,
-                'callback_url' => $callbackUrl,
-                'metadata' => [
-                    'appointment_id' => $payment->appointment_id,
-                    'customer_id' => $payment->customer_id,
-                ],
-            ]);
+        if (str_contains($callbackUrl, '/payments/webhook')) {
+            $callbackUrl = str_replace('/payments/webhook', '/payments/return', $callbackUrl);
+        }
+
+        try {
+            $response = Http::withToken($this->secretKey)
+                ->acceptJson()
+                ->timeout(15)
+                ->post("{$this->baseUrl}/transaction/initialize", [
+                    'amount' => $amountKobo,
+                    'email' => $email,
+                    'reference' => $reference,
+                    'callback_url' => $callbackUrl,
+                    'metadata' => [
+                        'appointment_id' => $payment->appointment_id,
+                        'customer_id' => $payment->customer_id,
+                        'barber_id' => $payment->appointment?->barber_id,
+                        'service_id' => $payment->appointment?->service_id,
+                    ],
+                ]);
+        } catch (\Throwable $e) {
+            $this->circuitBreaker->recordFailure('paystack', 'Paystack network timeout: '.$e->getMessage());
+            throw PaymentException::providerUnavailable('Could not connect to Paystack: '.$e->getMessage());
+        }
 
         if ($response->failed() || ! ($response->json('status') ?? false)) {
             Log::error('Paystack initialize failed: '.$response->body());
             if ($response->serverError()) {
+                $this->circuitBreaker->recordFailure('paystack', 'Paystack server error: '.$response->body());
                 throw PaymentException::providerUnavailable('Could not initialize Paystack transaction.');
             }
             throw PaymentException::providerRejected('Could not initialize Paystack transaction: '.$response->json('message', 'Unknown error'));
         }
+
+        $this->circuitBreaker->recordSuccess('paystack');
 
         $data = $response->json('data');
 
@@ -95,6 +127,10 @@ class PaystackGateway implements PaymentGateway
 
     public function verify(string $reference): GatewayResult
     {
+        if (! $this->circuitBreaker->isAvailable('paystack')) {
+            throw PaymentException::providerUnavailable('Paystack verification service is temporarily paused by circuit breaker due to upstream outages.');
+        }
+
         $isFakeAllowed = app()->environment('local', 'testing') && config('payments.fake', false);
 
         if (empty($this->secretKey)) {
@@ -110,19 +146,27 @@ class PaystackGateway implements PaymentGateway
             throw PaymentException::notConfigured('Paystack secret key is not configured.');
         }
 
-        $response = Http::withToken($this->secretKey)
-            ->acceptJson()
-            ->timeout(15)
-            ->retry(2, 100, throw: false)
-            ->get("{$this->baseUrl}/transaction/verify/".rawurlencode($reference));
+        try {
+            $response = Http::withToken($this->secretKey)
+                ->acceptJson()
+                ->timeout(15)
+                ->retry(2, 100, throw: false)
+                ->get("{$this->baseUrl}/transaction/verify/".rawurlencode($reference));
+        } catch (\Throwable $e) {
+            $this->circuitBreaker->recordFailure('paystack', 'Paystack verify timeout: '.$e->getMessage());
+            throw PaymentException::providerUnavailable('Could not connect to Paystack for verification: '.$e->getMessage());
+        }
 
         if ($response->failed() || ! ($response->json('status') ?? false)) {
             Log::error('Paystack verify failed: '.$response->body());
             if ($response->serverError()) {
+                $this->circuitBreaker->recordFailure('paystack', 'Paystack verify server error: '.$response->body());
                 throw PaymentException::providerUnavailable('Could not verify Paystack transaction.');
             }
             throw PaymentException::providerRejected('Could not verify Paystack transaction: '.$response->json('message', 'Unknown error'));
         }
+
+        $this->circuitBreaker->recordSuccess('paystack');
 
         $data = $response->json('data');
         $status = match ($data['status'] ?? 'pending') {
@@ -144,6 +188,10 @@ class PaystackGateway implements PaymentGateway
 
     public function refund(Payment $payment, int $amountMinor, string $reason = 'Customer refund requested by admin'): GatewayResult
     {
+        if (! $this->circuitBreaker->isAvailable('paystack')) {
+            throw PaymentException::providerUnavailable('Paystack refund service is temporarily paused by circuit breaker.');
+        }
+
         $reference = $payment->transaction_ref ?: $payment->reference ?: $payment->gateway_reference;
         $isFakeAllowed = app()->environment('local', 'testing');
 
@@ -161,19 +209,27 @@ class PaystackGateway implements PaymentGateway
             throw PaymentException::notConfigured('Paystack secret key is not configured.');
         }
 
-        $response = Http::withToken($this->secretKey)
-            ->acceptJson()
-            ->timeout(15)
-            ->retry(2, 100, throw: false)
-            ->post("{$this->baseUrl}/refund", [
-                'transaction' => $reference,
-                'amount' => $amountMinor,
-                'currency' => $payment->currency ?: 'NGN',
-                'reason' => $reason,
-            ]);
+        try {
+            $response = Http::withToken($this->secretKey)
+                ->acceptJson()
+                ->timeout(15)
+                ->retry(2, 100, throw: false)
+                ->post("{$this->baseUrl}/refund", [
+                    'transaction' => $reference,
+                    'amount' => $amountMinor,
+                    'currency' => $payment->currency ?: 'NGN',
+                    'reason' => $reason,
+                ]);
+        } catch (\Throwable $e) {
+            $this->circuitBreaker->recordFailure('paystack', 'Paystack refund timeout: '.$e->getMessage());
+            throw PaymentException::providerUnavailable('Could not connect to Paystack for refund: '.$e->getMessage());
+        }
 
         if ($response->failed() || ! ($response->json('status') ?? false)) {
             Log::error('Paystack refund failed: '.$response->body());
+            if ($response->serverError()) {
+                $this->circuitBreaker->recordFailure('paystack', 'Paystack refund server error: '.$response->body());
+            }
 
             return new GatewayResult(
                 reference: $reference,
@@ -186,6 +242,8 @@ class PaystackGateway implements PaymentGateway
                 ],
             );
         }
+
+        $this->circuitBreaker->recordSuccess('paystack');
 
         $data = $response->json('data') ?? [];
 
@@ -204,7 +262,10 @@ class PaystackGateway implements PaymentGateway
      */
     public function handleWebhook(string $rawPayload, array $headers): WebhookEvent
     {
-        $signatureHeader = $headers['x-paystack-signature'] ?? null;
+        $signatureHeader = $headers['x-paystack-signature']
+            ?? $headers['X-Paystack-Signature']
+            ?? $headers['HTTP_X_PAYSTACK_SIGNATURE']
+            ?? null;
 
         if (is_array($signatureHeader)) {
             $signatureHeader = $signatureHeader[0] ?? '';

@@ -30,6 +30,11 @@ class UpdateServiceRequest extends FormRequest
             'category_id' => 'sometimes|integer|exists:service_categories,id',
             'image' => 'nullable|image|max:5120',
             'image1' => 'nullable|image|max:5120',
+            'image2' => 'nullable|image|max:5120',
+            'image3' => 'nullable|image|max:5120',
+            'remove_image1' => 'nullable',
+            'remove_image2' => 'nullable',
+            'remove_image3' => 'nullable',
             'is_active' => 'nullable|boolean',
         ];
     }

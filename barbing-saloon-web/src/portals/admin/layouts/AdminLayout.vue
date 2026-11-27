@@ -42,18 +42,37 @@ import {
   RectangleStackIcon,
   BuildingStorefrontIcon,
   BuildingLibraryIcon,
+  TagIcon,
+  IdentificationIcon,
+  ExclamationTriangleIcon,
+  ReceiptRefundIcon,
 } from '@heroicons/vue/24/outline';
 
 const navItems = [
-  // Overview & Operations
+  // Operations
   { name: 'Dashboard', to: '/admin/dashboard', icon: HomeIcon },
   { name: 'Walk-In', to: '/admin/walk-in', icon: UserPlusIcon },
   { name: 'Appointments', to: '/admin/appointments', icon: CalendarDaysIcon },
-  { name: 'Bank & Payments', to: '/admin/bank-details', icon: BuildingLibraryIcon },
+  { name: 'No-Shows', to: '/admin/no-shows', icon: ExclamationTriangleIcon },
   { name: 'Customers', to: '/admin/customers', icon: UserGroupIcon },
   { name: 'Barbers', to: '/admin/barbers', icon: UsersIcon },
 
-  // The Website (All Website CMS Pages)
+  // Financials & Revenue
+  { name: 'Bank & Payments', to: '/admin/bank-details', icon: BuildingLibraryIcon },
+  { name: 'Refunds & Policy', to: '/admin/refunds', icon: ReceiptRefundIcon },
+  { name: 'Analytics', to: '/admin/analytics', icon: PresentationChartLineIcon },
+  { name: 'Reports', to: '/admin/reports', icon: ChartBarIcon },
+
+  // Catalogue & Content
+  { name: 'Services', to: '/admin/services', icon: SparklesIcon },
+  { name: 'Service Categories', to: '/admin/service-categories', icon: TagIcon },
+  { name: 'Gallery', to: '/admin/gallery', icon: PhotoIcon },
+  { name: 'Gallery Categories', to: '/admin/gallery-categories', icon: RectangleStackIcon },
+  { name: 'Testimonials', to: '/admin/testimonials', icon: ChatBubbleLeftRightIcon },
+  { name: 'Feedback Inbox', to: '/admin/feedback', icon: ChatBubbleLeftRightIcon },
+  { name: 'Blog', to: '/admin/blog', icon: DocumentTextIcon },
+
+  // Website CMS
   { name: 'Website Overview', to: '/admin/websites', icon: GlobeAltIcon, badge: 'CMS' },
   { name: 'Brand Identity', to: '/admin/brand-identity', icon: BuildingStorefrontIcon },
   { name: 'Home Page', to: '/admin/websites/home', icon: HomeIcon },
@@ -70,25 +89,21 @@ const navItems = [
   { name: 'Manage Cookies Page', to: '/admin/websites/cookies', icon: Cog6ToothIcon },
   { name: 'Account Deletion Page', to: '/admin/websites/account-deletion', icon: TrashIcon },
 
-  // Content & Catalog
-  { name: 'Services', to: '/admin/services', icon: SparklesIcon },
-  { name: 'Gallery', to: '/admin/gallery', icon: PhotoIcon },
-  { name: 'Testimonials', to: '/admin/testimonials', icon: ChatBubbleLeftRightIcon },
-  { name: 'Feedback Inbox', to: '/admin/feedback', icon: ChatBubbleLeftRightIcon },
-  { name: 'Blog', to: '/admin/blog', icon: DocumentTextIcon },
-
-  // Management & Security
-  { name: 'Feature Flags', to: '/admin/feature-flags', icon: FlagIcon },
-  { name: 'Working Hours', to: '/admin/working-hours', icon: ClockIcon },
+  // Integrations & Comms
+  { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
   { name: 'Integrations', to: '/admin/integrations', icon: KeyIcon },
+  { name: 'Google Authentication', to: '/admin/google-auth', icon: IdentificationIcon },
+  { name: 'Resend Email Setup', to: '/admin/resend', icon: EnvelopeIcon, badge: 'API' },
   { name: 'API Directory', to: '/admin/api', icon: CodeBracketIcon },
-  { name: 'Analytics', to: '/admin/analytics', icon: PresentationChartLineIcon },
-  { name: 'Reports', to: '/admin/reports', icon: ChartBarIcon },
+
+  // Governance & System
+  { name: 'Working Hours', to: '/admin/working-hours', icon: ClockIcon },
+  { name: 'Feature Flags', to: '/admin/feature-flags', icon: FlagIcon },
   { name: 'Verifications', to: '/admin/verifications', icon: ShieldCheckIcon },
+  { name: 'Consent Log', to: '/admin/consents', icon: ShieldCheckIcon },
   { name: 'System Logs', to: '/admin/system-logs', icon: ClipboardDocumentListIcon },
   { name: 'Health Checker', to: '/admin/health', icon: HeartIcon },
   { name: 'System Errors', to: '/admin/system-errors', icon: BugAntIcon },
   { name: 'Backup & Restore', to: '/admin/backups', icon: ArchiveBoxIcon },
-  { name: 'Notifications', to: '/admin/notifications', icon: BellAlertIcon },
 ];
 </script>

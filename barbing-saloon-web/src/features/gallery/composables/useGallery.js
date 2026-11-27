@@ -1,22 +1,45 @@
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import { useToast } from '@/core/composables/useToast';
 import { useConfirm } from '@/core/composables/useConfirm';
 import api from '@/shared/api/client';
 import { getStorageUrl } from '@/core/utils/url';
+import { usePublicContentStore } from '@/core/stores/publicContent.store';
 
 export function useGallery(role = 'admin') {
   const toast = useToast();
   const { confirm } = useConfirm();
+  const publicStore = usePublicContentStore();
   
   const loading = ref(true);
   const saving = ref(false);
   const gallery = ref([]);
   const barbers = ref([]);
-  
+  const galleryCategories = ref([]);
+  let optimizeRefreshTimer = null;
+
+  onUnmounted(() => {
+    if (optimizeRefreshTimer) {
+      window.clearTimeout(optimizeRefreshTimer);
+      optimizeRefreshTimer = null;
+    }
+  });
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/v1/gallery-categories');
+      galleryCategories.value = res.data?.data || [];
+    } catch (err) {
+      console.warn('Failed to load gallery categories', err);
+    }
+  };
+
   const fetchGallery = async () => {
     try {
       loading.value = true;
-      const res = await api.get('/gallery');
+      const [res] = await Promise.all([
+        api.get('/gallery'),
+        fetchCategories()
+      ]);
       gallery.value = res.data.data || [];
     } catch (err) {
       toast.error('Failed to load gallery');
@@ -38,17 +61,40 @@ export function useGallery(role = 'admin') {
   const saveImage = async (formData, editingId) => {
     saving.value = true;
     try {
+      let savedItem = null;
       if (editingId) {
         if (formData instanceof FormData) {
           formData.append('_method', 'PUT');
         }
-        await api.post(`/gallery/${editingId}`, formData);
-        toast.success('Image updated successfully');
+        const res = await api.post(`/gallery/${editingId}`, formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Uploaded — optimizing to WebP in background.'
+            : 'Image updated & WebP ready!'
+        );
       } else {
-        await api.post('/gallery', formData);
-        toast.success('Image added to gallery');
+        const res = await api.post('/gallery', formData);
+        savedItem = res.data?.data;
+        toast.success(
+          savedItem?.is_optimizing
+            ? 'Done! Added to gallery — optimizing to WebP in background.'
+            : 'Image added & WebP ready!'
+        );
       }
+      publicStore.invalidate('gallery');
       await fetchGallery();
+
+      if (savedItem?.is_optimizing && typeof window !== 'undefined') {
+        if (optimizeRefreshTimer) {
+          window.clearTimeout(optimizeRefreshTimer);
+        }
+        optimizeRefreshTimer = window.setTimeout(async () => {
+          optimizeRefreshTimer = null;
+          await fetchGallery();
+          publicStore.invalidate('gallery');
+        }, 2500);
+      }
       return true;
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.response?.data?.message || (editingId ? 'Failed to update image' : 'Failed to upload image');
@@ -71,6 +117,8 @@ export function useGallery(role = 'admin') {
     try {
       await api.delete(`/gallery/${id}`);
       gallery.value = gallery.value.filter(g => g.id !== id);
+      publicStore.invalidate('gallery');
+      fetchCategories();
       toast.success('Image deleted');
       return true;
     } catch (err) {
@@ -88,8 +136,10 @@ export function useGallery(role = 'admin') {
     saving,
     gallery,
     barbers,
+    galleryCategories,
     fetchGallery,
     fetchBarbers,
+    fetchCategories,
     saveImage,
     deleteImage,
     getImageUrl

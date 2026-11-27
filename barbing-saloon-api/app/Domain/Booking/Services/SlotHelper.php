@@ -21,22 +21,43 @@ class SlotHelper
             return [];
         }
 
-        $workingHour = $barber->workingHours()->where('day_of_week', $date->dayOfWeekIso % 7)->first();
+        $dayOfWeek = (int) $date->dayOfWeekIso % 7;
+        $workingHour = $barber->workingHours()->where('day_of_week', $dayOfWeek)->first();
 
-        if (! $workingHour || $workingHour->is_closed) {
-            return [];
+        if ($workingHour) {
+            if ($workingHour->is_closed) {
+                return [];
+            }
+            $openTime = $workingHour->open_time;
+            $closeTime = $workingHour->close_time;
+        } else {
+            // Sunday closed by default; otherwise standard 08:00 to 19:00
+            if ($dayOfWeek === 0) {
+                return [];
+            }
+            $openTime = '08:00:00';
+            $closeTime = '19:00:00';
         }
 
         $intervalMinutes = (int) $this->setting('slot_interval_minutes', 30);
         $minNoticeHours = (int) $this->setting('min_notice_hours', 2);
 
-        $start = Carbon::parse($date->toDateString().' '.$workingHour->open_time);
-        $end = Carbon::parse($date->toDateString().' '.$workingHour->close_time);
+        $start = Carbon::parse($date->toDateString().' '.$openTime);
+        $end = Carbon::parse($date->toDateString().' '.$closeTime);
         $period = CarbonPeriod::create($start, "{$intervalMinutes} minutes", $end->copy()->subMinutes($service->duration_minutes));
 
         $confirmedAppointments = $barber->appointments()
-            ->whereDate('appointment_date', $date->toDateString())
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('appointment_date', $date->toDateString())
+            ->where(function ($q) {
+                $q->whereIn('status', ['pending', 'confirmed', 'checked_in', 'in_progress'])
+                    ->orWhere(function ($draftQ) {
+                        $draftQ->where('status', 'draft')
+                            ->where(function ($tq) {
+                                $tq->whereNull('draft_expires_at')
+                                    ->orWhere('draft_expires_at', '>', now());
+                            });
+                    });
+            })
             ->with('service')
             ->get();
 
@@ -93,6 +114,8 @@ class SlotHelper
 
     protected function setting(string $key, mixed $default = null): mixed
     {
-        return Setting::query()->where('key', $key)->value('value') ?? $default;
+        return \Illuminate\Support\Facades\Cache::remember("setting.{$key}", 3600, function () use ($key, $default) {
+            return Setting::query()->where('key', $key)->value('value') ?? $default;
+        });
     }
 }

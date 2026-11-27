@@ -8,6 +8,7 @@ use App\Domain\Identity\Services\ApiTokenIssuer;
 use App\Domain\Shared\Traits\HasAuditLog;
 use App\Models\User;
 use App\Support\Errors\AuthException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticateUser
@@ -36,12 +37,21 @@ class AuthenticateUser
             $phoneAlternatives[] = '+234'.substr($identifier, 1);
         }
 
-        $user = User::whereRaw('LOWER(email) = ?', [strtolower($identifier)])
-            ->orWhereRaw('LOWER(username) = ?', [$cleanUsername])
-            ->orWhereIn('phone', $phoneAlternatives)
+        $user = User::query()
+            ->where(function (Builder $query) use ($identifier, $cleanUsername, $phoneAlternatives): void {
+                $query->whereRaw('LOWER(email) = ?', [strtolower($identifier)]);
+
+                if ($cleanUsername !== '') {
+                    $query->orWhereRaw('LOWER(username) = ?', [$cleanUsername]);
+                }
+
+                $query->orWhereIn('phone', $phoneAlternatives);
+            })
             ->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        $isValidPassword = $user && Hash::check($password, $user->password);
+
+        if (! $user || ! $isValidPassword) {
             $this->logFailure($identifier);
             throw AuthException::invalidCredentials(
                 'Invalid credentials. Please check your username, email, or password.'

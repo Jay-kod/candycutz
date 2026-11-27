@@ -3,7 +3,7 @@
     <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold via-amber-400 to-amber-500"></div>
     <div class="absolute top-0 right-0 p-32 bg-gold/10 blur-[80px] pointer-events-none rounded-full"></div>
 
-    <div class="p-6 sm:p-8 pb-10 relative z-10">
+    <div class="p-4 xs:p-6 sm:p-8 pb-8 sm:pb-10 relative z-10">
       <div class="text-center mb-6">
         <div class="w-14 h-14 mx-auto bg-slate-100 dark:bg-white/[0.03] rounded-2xl border border-slate-200 dark:border-white/[0.08] flex items-center justify-center mb-3">
           <TicketIcon class="h-7 w-7 text-gold opacity-90" />
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Actions Area -->
-    <div class="p-6 pt-2 space-y-3 bg-slate-50/50 dark:bg-[#0B0F13]/40">
+    <div class="p-4 xs:p-6 pt-2 space-y-3 bg-slate-50/50 dark:bg-[#0B0F13]/40">
       <div class="flex gap-3">
         <button
           @click="$emit('reset')"

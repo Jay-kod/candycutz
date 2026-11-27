@@ -25,8 +25,8 @@
         <!-- Client Info & Service Badge -->
         <div class="flex items-center gap-3.5 mb-3">
           <img
-            v-if="review.avatar_url"
-            :src="review.avatar_url"
+            v-if="review.avatar_url || review.avatar"
+            :src="getStorageUrl(review.avatar_url || review.avatar)"
             :alt="`${customerName} avatar`"
             class="h-11 w-11 shrink-0 rounded-full border border-[var(--color-accent)]/30 object-cover shadow-sm"
             loading="lazy"
@@ -124,6 +124,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { getStorageUrl } from '@/core/utils/url';
 import { ClockIcon, ScissorsIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({

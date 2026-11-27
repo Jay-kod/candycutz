@@ -9,7 +9,7 @@
             <div class="h-5 w-24 rounded-full bg-white/[0.05]"></div>
           </div>
           <div class="h-10 w-64 rounded-xl bg-white/[0.08]"></div>
-          <div class="h-4 w-96 rounded-md bg-white/[0.04]"></div>
+          <div class="h-4 w-full max-w-sm sm:w-96 rounded-md bg-white/[0.04]"></div>
         </div>
         <div class="flex items-center gap-2.5">
           <div class="h-10 w-28 rounded-xl bg-white/[0.06]"></div>

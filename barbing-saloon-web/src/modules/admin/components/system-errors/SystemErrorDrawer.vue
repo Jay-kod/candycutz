@@ -4,7 +4,6 @@ import {
   XMarkIcon,
   ArrowPathIcon,
   LightBulbIcon,
-  InformationCircleIcon,
   CodeBracketIcon,
   GlobeAltIcon,
   FingerPrintIcon,

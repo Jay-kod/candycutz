@@ -38,27 +38,43 @@ export default defineConfig(({ mode }) => {
         '@': '/src',
       },
     },
-    esbuild: {
-      drop: ['console', 'debugger'],
-    },
     build: {
       cssMinify: true,
       target: 'es2020',
       chunkSizeWarningLimit: 1000,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('vue') || id.includes('pinia')) {
-                return 'vendor-vue';
-              }
-              if (id.includes('@heroicons') || id.includes('lucide-vue-next')) {
-                return 'vendor-icons';
-              }
-              if (id.includes('axios') || id.includes('dayjs') || id.includes('dompurify')) {
-                return 'vendor-utils';
-              }
-            }
+          minify: {
+            compress: {
+              dropConsole: true,
+              dropDebugger: true,
+            },
+            mangle: true,
+            codegen: true,
+          },
+          codeSplitting: {
+            groups: [
+              {
+                name: 'vendor-vue',
+                test: /[\\/]node_modules[\\/](?:vue|@vue|vue-router|pinia)[\\/]/,
+              },
+              {
+                name: 'vendor-icons',
+                test: /[\\/]node_modules[\\/](?:@heroicons|lucide-vue-next)[\\/]/,
+              },
+              {
+                name: 'vendor-utils',
+                test: /[\\/]node_modules[\\/](?:axios|dayjs|dompurify|yup|vee-validate|clsx|tailwind-merge)[\\/]/,
+              },
+              {
+                name: 'vendor-pdf',
+                test: /[\\/]node_modules[\\/](?:html2pdf\.js|jspdf|html2canvas)[\\/]/,
+              },
+              {
+                name: 'vendor-maps',
+                test: /[\\/]node_modules[\\/]leaflet[\\/]/,
+              },
+            ],
           },
         },
       },

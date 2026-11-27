@@ -111,84 +111,84 @@ const cards = [
   {
     name: 'scissors',
     icon: ScissorsIcon,
-    top: '26%',
-    left: '10%',
+    top: '24%',
+    left: '5%',
     rotate: '-8deg',
-    className: 'hidden sm:flex'
+    className: 'hidden md:flex'
   },
   {
     name: 'hair-brush',
     icon: BrushIcon,
-    top: '22%',
-    left: '23%',
+    top: '18%',
+    left: '18%',
     rotate: '-16deg',
-    className: 'hidden md:flex'
+    className: 'hidden xl:flex'
   },
   {
     name: 'grooming-brush',
     icon: BrushCleaningIcon,
-    top: '47%',
-    left: '12%',
+    top: '48%',
+    left: '6%',
     rotate: '12deg',
-    className: 'flex'
+    className: 'hidden lg:flex'
   },
   {
     name: 'hair-texture',
     icon: WavesIcon,
-    top: '52%',
-    left: '23%',
+    top: '54%',
+    left: '18%',
     rotate: '-8deg',
-    className: 'hidden lg:flex'
+    className: 'hidden 2xl:flex'
   },
   {
     name: 'scissor-cut',
     icon: ScissorsLineDashedIcon,
-    top: '68%',
-    left: '26%',
+    top: '72%',
+    left: '10%',
     rotate: '8deg',
-    className: 'hidden sm:flex'
+    className: 'hidden xl:flex'
   },
 
   // --- Right Side Arc ---
   {
     name: 'hair-dryer',
     icon: WindIcon,
-    top: '22%',
-    left: '77%',
+    top: '18%',
+    left: '82%',
     rotate: '8deg',
-    className: 'hidden md:flex'
+    className: 'hidden xl:flex'
   },
   {
     name: 'styling-spray',
     icon: SprayCanIcon,
-    top: '28%',
-    left: '88%',
+    top: '26%',
+    left: '92%',
     rotate: '-12deg',
-    className: 'hidden sm:flex'
+    className: 'hidden md:flex'
   },
   {
     name: 'hair-care',
     icon: SparklesIcon,
-    top: '47%',
-    left: '84%',
+    top: '48%',
+    left: '91%',
     rotate: '14deg',
-    className: 'flex'
+    className: 'hidden lg:flex'
   },
   {
     name: 'shampoo',
     icon: DropletsIcon,
-    top: '59%',
-    left: '78%',
+    top: '60%',
+    left: '82%',
     rotate: '-6deg',
-    className: 'hidden lg:flex'
+    className: 'hidden 2xl:flex'
   },
   {
     name: 'barber-scissors',
     icon: SquareScissorsIcon,
-    top: '67%',
-    left: '89%',
+    top: '72%',
+    left: '88%',
     rotate: '12deg',
-    className: 'hidden sm:flex'
+    className: 'hidden xl:flex'
   }
 ];
 </script>

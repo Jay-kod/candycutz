@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 shadow-sm">
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 xs:p-6">
     <div class="flex items-center justify-between">
       <h2 class="font-display text-lg font-bold text-[var(--color-text-primary)]">
         User Role Distribution
@@ -53,19 +53,19 @@ const roleBars = computed(() => {
       label: 'Admins & Super Admins',
       value: formatNumber(s.total_admins),
       percent: Math.round((Number(s.total_admins || 0) / total) * 100),
-      barColor: 'bg-gradient-to-r from-rose-500 to-rose-600',
+      barColor: 'bg-rose-500',
     },
     {
       label: 'Barbers & Stylists',
       value: formatNumber(s.barbers),
       percent: Math.round((Number(s.barbers || 0) / total) * 100),
-      barColor: 'bg-gradient-to-r from-amber-500 to-amber-600',
+      barColor: 'bg-amber-500',
     },
     {
       label: 'Clients & Customers',
       value: formatNumber(s.customers),
       percent: Math.round((Number(s.customers || 0) / total) * 100),
-      barColor: 'bg-gradient-to-r from-sky-500 to-sky-600',
+      barColor: 'bg-sky-500',
     },
   ];
 });

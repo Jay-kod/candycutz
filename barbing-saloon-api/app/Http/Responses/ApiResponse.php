@@ -92,8 +92,8 @@ class ApiResponse
         $resolvedAction = $action ?? ($codeEnum ? $codeEnum->action() : ($status >= 500 ? 'contact_support' : 'fix_input'));
         $resolvedRetryable = $retryable ?? ($codeEnum ? $codeEnum->retryable() : false);
 
-        // In production, never leak raw exception messages or SQL details on 5xx errors
-        if ($status >= 500 && app()->environment('production')) {
+        // Never leak raw exception messages or SQL details on 5xx errors.
+        if ($status >= 500) {
             $message = 'An unexpected server error occurred. Please contact support with reference: '.$requestId;
         }
 
@@ -126,7 +126,7 @@ class ApiResponse
 
     /**
      * @param  LengthAwarePaginator<int, mixed>  $data
-     * @param  array<string, string>             $headers
+     * @param  array<string, string>  $headers
      */
     public static function paginated(LengthAwarePaginator $data, string $message = 'Success', int $status = 200, array $headers = []): JsonResponse
     {

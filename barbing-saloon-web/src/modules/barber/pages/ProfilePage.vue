@@ -16,13 +16,17 @@
             @cover-selected="onCoverSelected"
           />
 
-          <div class="lg:sticky lg:top-8">
+          <div class="lg:sticky lg:top-8 space-y-6">
+            <EmailVerificationCard :email="form.email" />
+
             <BarberSpecialtiesCard
               :specialties="form.specialties"
               :all-styles="allStyles"
               @toggle="toggleSpecialty"
               @add="addSpecialty"
             />
+
+            <UserProfileCookiePreferencesCard />
           </div>
         </form>
       </template>
@@ -32,6 +36,8 @@
 
 <script setup>
 import BarberLayout from '@/portals/barber/layouts/BarberLayout.vue';
+import EmailVerificationCard from '@/shared/components/EmailVerificationCard.vue';
+import UserProfileCookiePreferencesCard from '@/shared/components/UserProfileCookiePreferencesCard.vue';
 import { useBarberProfile } from '../composables/useBarberProfile';
 import ProfileHeader from '../components/profile/ProfileHeader.vue';
 import ProfilePersonalCard from '../components/profile/ProfilePersonalCard.vue';

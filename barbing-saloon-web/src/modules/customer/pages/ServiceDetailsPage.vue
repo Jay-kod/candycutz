@@ -74,16 +74,54 @@
         </div>
       </div>
 
-      <!-- Not Found State -->
-      <div v-else class="flex flex-col items-center justify-center py-24 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-[var(--color-text-muted)] mb-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <h3 class="text-xl font-display text-[var(--color-text-primary)] mb-2">Service Not Found</h3>
-        <p class="text-[var(--color-text-secondary)] text-sm mb-6">The service you are looking for might have been removed or is currently unavailable.</p>
-        <button @click="$router.push('/customer/dashboard/services')" class="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-6 py-2.5 text-sm font-semibold hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-colors">
-          Browse All Services
-        </button>
+      <!-- Friendly Upgrades / Not Found State -->
+      <div v-else class="flex flex-col items-center justify-center py-20 px-4 text-center max-w-lg mx-auto animate-fade-in">
+        <div class="relative mb-6">
+          <div class="h-20 w-20 rounded-3xl bg-gradient-to-br from-[var(--color-accent)]/20 via-[var(--color-accent)]/10 to-transparent border border-[var(--color-accent)]/25 flex items-center justify-center text-[var(--color-accent)] shadow-xl shadow-[var(--color-accent)]/15">
+            <SparklesIcon class="w-10 h-10 animate-pulse" />
+          </div>
+          <div class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-accent)] shadow-sm">
+            <ScissorsIcon class="w-3.5 h-3.5" />
+          </div>
+        </div>
+
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 text-[var(--color-accent)] text-xs font-bold uppercase tracking-wider mb-3">
+          <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)] animate-ping"></span>
+          <span>Enhancements Underway</span>
+        </div>
+
+        <h3 class="text-2xl sm:text-3xl font-display font-bold text-[var(--color-text-primary)] mb-3 text-center !text-center">
+          Upgrades on the Way!
+        </h3>
+        <p class="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed mb-8 max-w-md mx-auto text-center !text-center">
+          We’re giving this service a fresh polish to make your experience even better. Give it just a moment to refresh, or feel free to explore our other cuts and styles in the meantime!
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            @click="$router.push('/customer/dashboard/services')"
+            class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[var(--color-accent)]/20 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <SparklesIcon class="w-4 h-4" />
+            <span>Explore All Services</span>
+          </button>
+          <button
+            type="button"
+            @click="refreshService"
+            class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-5 py-3 text-sm font-semibold hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-colors cursor-pointer"
+          >
+            <ArrowPathIcon class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
+            <span>Give It a Moment</span>
+          </button>
+          <button
+            type="button"
+            @click="$router.push('/customer/dashboard')"
+            class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-5 py-3 text-sm font-semibold hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-colors cursor-pointer"
+          >
+            <ArrowLeftIcon class="w-4 h-4" />
+            <span>Dashboard</span>
+          </button>
+        </div>
       </div>
     </section>
   </CustomerLayout>
@@ -92,6 +130,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ScissorsIcon, SparklesIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import CustomerLayout from '@/portals/customer/layouts/CustomerLayout.vue'
 import client from '@/shared/api/client'
 import ServiceGallerySection from '../components/services/ServiceGallerySection.vue'
@@ -104,6 +143,7 @@ const route = useRoute()
 const serviceId = route.params.id
 const service = ref(null)
 const loading = ref(true)
+const isRefreshing = ref(false)
 const activeImage = ref(0)
 
 const reviews = ref([])
@@ -111,10 +151,13 @@ const reviewsLoading = ref(true)
 
 const images = computed(() => {
   if (!service.value) return []
+  if (Array.isArray(service.value.images) && service.value.images.length > 0) {
+    return service.value.images.map(img => getFullImageUrl(img))
+  }
   const imgs = []
-  if (service.value.image) imgs.push(service.value.image)
-  if (service.value.image2) imgs.push(service.value.image2)
-  if (service.value.image3) imgs.push(service.value.image3)
+  if (service.value.image || service.value.image_url) imgs.push(getFullImageUrl(service.value.image_url || service.value.image))
+  if (service.value.image2 || service.value.image2_url) imgs.push(getFullImageUrl(service.value.image2_url || service.value.image2))
+  if (service.value.image3 || service.value.image3_url) imgs.push(getFullImageUrl(service.value.image3_url || service.value.image3))
   return imgs
 })
 
@@ -146,7 +189,7 @@ function prevImage() {
   activeImage.value = (activeImage.value - 1 + images.value.length) % images.value.length
 }
 
-onMounted(async () => {
+async function fetchServiceData() {
   loading.value = true
   reviewsLoading.value = true
   try {
@@ -167,6 +210,18 @@ onMounted(async () => {
     loading.value = false
     reviewsLoading.value = false
   }
+}
+
+async function refreshService() {
+  isRefreshing.value = true
+  await fetchServiceData()
+  setTimeout(() => {
+    isRefreshing.value = false
+  }, 400)
+}
+
+onMounted(() => {
+  fetchServiceData()
 })
 </script>
 

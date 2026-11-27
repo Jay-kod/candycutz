@@ -66,6 +66,30 @@ export function useAppointments() {
     }
   };
 
+  const markNoShow = async (id) => {
+    if (await confirm('Mark as No-Show', 'Mark this confirmed appointment as a no-show and free the barber slot?')) {
+      try {
+        await adminApi.markNoShowAppointment(id, { reason: 'Marked no-show by admin' });
+        await loadAppointments(true);
+        toast.success('Appointment marked as no-show');
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to mark no-show');
+      }
+    }
+  };
+
+  const forfeitDeposit = async (id) => {
+    if (await confirm('Forfeit Deposit', 'Mark this customer\'s paid deposit as forfeited due to no-show?')) {
+      try {
+        await adminApi.forfeitAppointmentDeposit(id, 'Deposit forfeited by admin');
+        await loadAppointments(true);
+        toast.success('Deposit marked as forfeited');
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to forfeit deposit');
+      }
+    }
+  };
+
   return {
     appointments,
     loading,
@@ -73,6 +97,8 @@ export function useAppointments() {
     loadAppointments,
     approve,
     forceApprove,
-    cancel
+    cancel,
+    markNoShow,
+    forfeitDeposit,
   };
 }

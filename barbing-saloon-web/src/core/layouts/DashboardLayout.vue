@@ -32,6 +32,7 @@
         :user-avatar-url="userAvatarUrl"
         :user-initials="userInitials"
         :user-name="authStore.user?.name || 'User'"
+        :profile-route="profileRoute"
         @toggle-mobile="isMobileSidebarOpen = true"
         @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
@@ -43,10 +44,16 @@
         class="flex-1 min-h-0 overflow-y-auto p-3 xs:p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain focus:outline-none transition-colors duration-300"
         :class="mainBgClass"
       >
-        <div class="mx-auto max-w-7xl min-h-full pb-20">
+        <div class="mx-auto max-w-7xl min-h-full pb-28 sm:pb-20">
+          <ConnectionActionNotice
+            v-if="isEndUserPortal && hasActionFailure"
+          />
           <slot />
         </div>
       </main>
+
+      <!-- Mobile iOS Bottom Tab Bar -->
+      <IosTabBar :tabs="resolvedMobileTabs" :user-avatar-url="userAvatarUrl" />
     </div>
   </div>
 </template>
@@ -58,8 +65,11 @@ import { useTheme } from '@/core/composables/useTheme';
 import { useAuthStore } from '../../modules/auth/store/auth.store';
 import { useToast } from '../../core/composables/useToast';
 import { useConfirm } from '../composables/useConfirm';
+import { useConnectionStatus } from '@/core/composables/useConnectionStatus';
 import DashboardSidebar from './components/DashboardSidebar.vue';
 import DashboardHeader from './components/DashboardHeader.vue';
+import ConnectionActionNotice from '@/core/components/ConnectionActionNotice.vue';
+import IosTabBar from '@/shared/ui/ios/IosTabBar.vue';
 import { getStorageUrl } from '@/core/utils/url';
 import { getPortalThemeConfig } from './components/sidebar/portalTheme';
 
@@ -67,6 +77,7 @@ const props = defineProps({
   portalName: { type: String, default: 'Portal' },
   homeRoute: { type: String, required: true },
   navItems: { type: Array, required: true },
+  mobileTabs: { type: Array, default: null },
   theme: { type: String, default: 'gold' },
   profileRoute: { type: String, default: '' },
 });
@@ -76,9 +87,19 @@ const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 const { confirm } = useConfirm();
+const { hasActionFailure } = useConnectionStatus();
+const isEndUserPortal = computed(() => authStore.isCustomer || authStore.isBarber);
 
 const isMobileSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
+
+const resolvedMobileTabs = computed(() => {
+  if (props.mobileTabs && props.mobileTabs.length > 0) {
+    return props.mobileTabs;
+  }
+  if (!props.navItems || props.navItems.length === 0) return [];
+  return props.navItems.slice(0, 4);
+});
 
 const { isDark } = useTheme();
 
@@ -114,21 +135,22 @@ const groupedNavItems = computed(() => {
   if (!items || items.length === 0) return [];
 
   const customerSections = {
-    'Menu': ['Dashboard', 'Browse Services', 'My Bookings', 'My Codes'],
-    'Discover': ['Wishlist', 'Reviews', 'Feedback & Suggestions', 'Gallery', 'Blog'],
+    'Menu': ['Dashboard', 'Browse Services', 'My Bookings', 'My Refunds', 'My Codes'],
+    'Discover': ['Our Barbers', 'Direct Me to Shop', 'Wishlist', 'Reviews', 'Feedback & Suggestions', 'Gallery', 'Blog'],
     'Activity': ['Notifications', 'Notification Settings', 'Analytics', 'Reports'],
   };
 
   const barberSections = {
     'Operations': ['Dashboard', 'Appointments', 'Walk-In', 'Schedule'],
-    'Services & Portfolio': ['Services', 'Gallery', 'Payments', 'Bank & Payments', 'Blog'],
+    'Services & Portfolio': ['Services', 'Service Categories', 'Gallery', 'Reviews', 'Payments', 'Bank Details', 'Bank & Payments', 'Blog'],
     'Activity & Insights': ['Notifications', 'Analytics', 'Reports'],
   };
 
   const adminSections = {
-    'Operations': ['Dashboard', 'Walk-In', 'Appointments', 'Customers', 'Barbers'],
-    'Financials & Revenue': ['Bank & Payments', 'Payments', 'Analytics', 'Reports'],
-    'The Website': [
+    'Operations': ['Dashboard', 'Walk-In', 'Appointments', 'No-Shows', 'Customers', 'Barbers'],
+    'Financials & Revenue': ['Bank & Payments', 'Payments', 'Refunds & Policy', 'Analytics', 'Reports'],
+    'Catalogue & Content': ['Services', 'Service Categories', 'Gallery', 'Gallery Categories', 'Testimonials', 'Feedback Inbox', 'Blog'],
+    'Website CMS': [
       'Website Overview',
       'Brand Identity',
       'Home Page',
@@ -145,17 +167,17 @@ const groupedNavItems = computed(() => {
       'Manage Cookies Page',
       'Account Deletion Page'
     ],
-    'Content & Catalog': ['Services', 'Gallery', 'Testimonials', 'Feedback Inbox', 'Blog'],
-    'Management & Security': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'Verifications', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore', 'Notifications'],
+    'Integrations & Comms': ['Notifications', 'Integrations', 'Google Authentication', 'Resend Email Setup', 'API Directory'],
+    'Governance & System': ['Working Hours', 'Feature Flags', 'Verifications', 'Consent Log', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore'],
   };
 
   const superAdminSections = {
     'Overview': ['Dashboard', 'Users', 'Audit Logs'],
-    'Platform Operations': ['Appointments', 'Walk-In Queue', 'Customers', 'Barbers', 'Services'],
+    'Platform Operations': ['Appointments', 'No-Shows', 'Refunds & Policy', 'Walk-In Queue', 'Customers', 'Barbers', 'Services'],
     'Content Management': ['Gallery', 'Testimonials', 'Blog'],
-    'System Governance': ['Feature Flags', 'Working Hours', 'Integrations', 'API Directory', 'System Logs', 'Verifications'],
+    'System Governance': ['Feature Flags', 'Working Hours', 'Integrations', 'Resend Email Setup', 'API Directory', 'Verifications', 'System Logs', 'Health Checker', 'System Errors', 'Backup & Restore'],
     'Analytics & Reports': ['Analytics', 'Reports'],
-    'Configuration': ['Settings'],
+    'Configuration': ['Settings', 'Bank Details', 'Brand Identity'],
   };
 
   const sections = props.theme === 'superadmin' ? superAdminSections :
@@ -196,7 +218,7 @@ const userInitials = computed(() => {
 });
 
 const userAvatarUrl = computed(() => {
-  const avatar = authStore.user?.avatar;
+  const avatar = authStore.user?.avatar_url || authStore.user?.avatar;
   if (!avatar) return null;
   return getStorageUrl(avatar);
 });

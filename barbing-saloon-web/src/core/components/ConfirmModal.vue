@@ -19,9 +19,12 @@
         <Transition name="scale">
           <div
             v-if="isOpen"
-            class="relative w-full max-w-[390px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#141418] p-6 text-center shadow-2xl shadow-slate-900/10 dark:shadow-black/80 transition-all"
+            class="relative w-full max-w-[390px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#141418] p-6 text-center shadow-2xl shadow-slate-900/10 dark:shadow-black/80 transition-all max-sm:fixed max-sm:bottom-0 max-sm:inset-x-0 max-sm:rounded-b-none max-sm:rounded-t-[28px] max-sm:pb-safe"
             @click.stop
           >
+            <!-- iOS Mobile Grabber Handle -->
+            <div class="sm:hidden w-9 h-1 bg-theme-muted/30 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
+
             <!-- Top luminous accent rim -->
             <div
               class="absolute top-0 left-1/4 right-1/4 h-[2px] rounded-full blur-[0.5px] transition-all duration-300"

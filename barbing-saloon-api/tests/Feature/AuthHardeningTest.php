@@ -49,6 +49,7 @@ it('keeps registration privileges server controlled when extra privilege fields 
         'role' => UserRole::super_admin->value,
         'status' => 'suspended',
         'is_active' => false,
+        'terms_accepted' => true,
     ]);
 
     $response->assertCreated();
@@ -67,6 +68,7 @@ it('issues a scoped expiring web token during registration', function () {
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
         'device_name' => 'Chrome',
+        'terms_accepted' => true,
     ]);
 
     $response->assertCreated();

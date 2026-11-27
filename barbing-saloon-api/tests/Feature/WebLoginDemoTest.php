@@ -19,6 +19,7 @@ it('allows all demo accounts to login via /api/v1/auth/login', function () {
         ['email' => 'customer@candycutz.com', 'password' => 'customer123', 'role' => 'customer'],
         ['email' => 'jay@candycutz.com', 'password' => 'customer123', 'role' => 'customer'],
         ['email' => 'mark@barber.com', 'password' => 'barber123', 'role' => 'barber'],
+        ['email' => 'obo@barber.com', 'password' => 'barber123', 'role' => 'barber'],
         ['email' => 'marcus@candycutz.com', 'password' => 'barber123', 'role' => 'barber'],
         ['email' => 'obo@candycutz.com', 'password' => 'barber123', 'role' => 'barber'],
         ['email' => 'webadmin@candycutz.com', 'password' => 'admin123', 'role' => 'admin'],

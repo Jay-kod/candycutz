@@ -38,11 +38,11 @@
         :disabled="isSubmitting"
         class="group w-full relative flex items-center justify-center gap-3 rounded-2xl bg-[var(--color-accent)] p-1 shadow-lg shadow-[var(--color-shadow)] transition-all duration-300 hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <div class="w-full bg-[var(--color-bg-primary)] rounded-xl px-8 py-4 transition-all duration-300 group-hover:bg-transparent flex items-center justify-center">
-          <div class="flex items-center justify-center gap-3 text-[var(--color-accent)] group-hover:text-[var(--color-accent-foreground)] transition-colors font-display text-xl font-bold">
+        <div class="w-full bg-[var(--color-bg-primary)] rounded-xl px-4 xs:px-8 py-3 xs:py-4 transition-all duration-300 group-hover:bg-transparent flex items-center justify-center">
+          <div class="flex items-center justify-center gap-2 xs:gap-3 text-[var(--color-accent)] group-hover:text-[var(--color-accent-foreground)] transition-colors font-display text-base xs:text-xl font-bold">
             <ArrowPathIcon v-if="isSubmitting" class="w-5 h-5 animate-spin" />
             <span>{{ isSubmitting ? 'Confirming...' : 'Confirm Booking' }}</span>
-            <svg v-if="!isSubmitting" class="h-5 w-5 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg v-if="!isSubmitting" class="h-5 w-5 transition-transform group-hover:translate-x-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </div>
         </div>
       </button>

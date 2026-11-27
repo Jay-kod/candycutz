@@ -53,6 +53,25 @@
           ></textarea>
         </div>
 
+        <!-- Policy version gate -->
+        <div class="space-y-2 rounded-xl border border-admin/20 bg-admin/[0.04] p-4">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold uppercase tracking-wider text-white/70">
+              Policy Version
+            </label>
+            <span class="text-[10px] font-mono text-admin/80">consent gate</span>
+          </div>
+          <input
+            v-model="modelTermsVersion"
+            type="text"
+            placeholder="e.g. 2026-11-26"
+            class="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-mono text-white placeholder-white/20 focus:border-admin/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-admin/15 transition-all outline-none"
+          />
+          <p class="text-[11px] leading-relaxed text-white/40">
+            Customers must accept this exact version. Change it only when the legal text changes — every customer is then asked to re-accept on their next sign-in.
+          </p>
+        </div>
+
         <!-- Cover Photo Upload & Overlay Controls -->
         <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-4">
           <div class="space-y-2">
@@ -171,15 +190,24 @@ const props = defineProps({
     type: Number,
     default: 76
   },
+  termsVersion: {
+    type: String,
+    default: ''
+  },
   previewHeroImage: {
     type: String,
     default: ''
   }
 });
 
-const emit = defineEmits(['update:heroOpacity', 'image-selected', 'clear-image']);
+const emit = defineEmits(['update:heroOpacity', 'update:termsVersion', 'image-selected', 'clear-image']);
 
 const imageInput = ref(null);
+
+const modelTermsVersion = computed({
+  get: () => props.termsVersion,
+  set: (val) => emit('update:termsVersion', val)
+});
 
 const modelHeroOpacity = computed({
   get: () => props.heroOpacity,

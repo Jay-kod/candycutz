@@ -5,7 +5,7 @@
       <div class="space-y-2">
         <div class="h-6 w-32 rounded-xl bg-slate-300 dark:bg-white/[0.05]"></div>
         <div class="h-8 w-64 rounded-xl bg-slate-300 dark:bg-white/[0.05]"></div>
-        <div class="h-4 w-96 rounded-lg bg-slate-300/80 dark:bg-white/[0.03]"></div>
+        <div class="h-4 w-full max-w-sm sm:w-96 rounded-lg bg-slate-300/80 dark:bg-white/[0.03]"></div>
       </div>
     </div>
 

@@ -126,7 +126,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const props = defineProps({
+defineProps({
   columns: {
     type: Array,
     required: true,

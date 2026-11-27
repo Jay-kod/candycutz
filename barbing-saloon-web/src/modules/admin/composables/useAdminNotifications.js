@@ -1,17 +1,37 @@
-import { ref, computed, onMounted } from 'vue';
-import client from '@/shared/api/client';
+import { ref, computed, onMounted, getCurrentInstance } from 'vue';
+import { useNotifications } from '@/core/composables/useNotifications';
 import { useToast } from '@/core/composables/useToast';
+import { client } from '@/shared/api/client';
 
 export function useAdminNotifications() {
   const toast = useToast();
+  const {
+    notifications,
+    unreadCount,
+    isLoading: loading,
+    fetchNotifications: baseFetchNotifications,
+    markAsRead: baseMarkAsRead,
+    markAllRead: baseMarkAllRead,
+    deleteNotification: baseDeleteNotification,
+  } = useNotifications();
 
-  const notifications = ref([]);
-  const loading = ref(true);
   const error = ref(null);
+  const activeTab = ref('stream'); // 'stream' | 'deliveries' | 'broadcast' | 'analytics'
   const activeTimeFilter = ref('all');
   const activeTypeFilter = ref('all');
   const search = ref('');
   const lastRefreshed = ref(null);
+
+  const deliveries = ref([]);
+  const deliveriesPagination = ref({ current_page: 1, last_page: 1, total: 0 });
+  const loadingDeliveries = ref(false);
+  const deliveryFilter = ref({ channel: 'all', status: 'all', search: '' });
+
+  const broadcasts = ref([]);
+  const loadingBroadcasts = ref(false);
+
+  const analytics = ref(null);
+  const loadingAnalytics = ref(false);
 
   const updateTimestamp = () => {
     const now = new Date();
@@ -19,24 +39,16 @@ export function useAdminNotifications() {
   };
 
   const fetchNotifications = async () => {
-    loading.value = true;
     error.value = null;
     try {
-      const res = await client.get('/notifications');
-      notifications.value = res.data?.data || res.data || [];
+      await baseFetchNotifications();
       updateTimestamp();
     } catch (err) {
       console.error('Failed to load notifications:', err);
       error.value = 'Failed to load notifications from gateway';
       toast.error('Network error loading notifications');
-    } finally {
-      loading.value = false;
     }
   };
-
-  const unreadCount = computed(() => {
-    return notifications.value.filter(n => !n.is_read).length;
-  });
 
   const stats = computed(() => {
     const total = notifications.value.length;
@@ -159,9 +171,7 @@ export function useAdminNotifications() {
 
   const markAsRead = async (id) => {
     try {
-      await client.patch(`/notifications/${id}/read`);
-      const n = notifications.value.find(item => item.id === id);
-      if (n) n.is_read = true;
+      await baseMarkAsRead(id);
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
       toast.error('Failed to update notification');
@@ -170,8 +180,7 @@ export function useAdminNotifications() {
 
   const markAllRead = async () => {
     try {
-      await client.patch('/notifications/read-all');
-      notifications.value.forEach(n => { n.is_read = true; });
+      await baseMarkAllRead();
       toast.success('All notifications marked as read');
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
@@ -181,8 +190,7 @@ export function useAdminNotifications() {
 
   const deleteNotification = async (id) => {
     try {
-      await client.delete(`/notifications/${id}`);
-      notifications.value = notifications.value.filter(n => n.id !== id);
+      await baseDeleteNotification(id);
       toast.success('Notification removed');
     } catch (err) {
       console.error('Failed to delete notification:', err);
@@ -196,14 +204,88 @@ export function useAdminNotifications() {
     search.value = '';
   };
 
-  onMounted(() => {
-    fetchNotifications();
-  });
+  const fetchDeliveries = async (page = 1) => {
+    loadingDeliveries.value = true;
+    try {
+      const res = await client.get('/admin/notifications/deliveries', {
+        params: {
+          page,
+          channel: deliveryFilter.value.channel !== 'all' ? deliveryFilter.value.channel : undefined,
+          status: deliveryFilter.value.status !== 'all' ? deliveryFilter.value.status : undefined,
+          search: deliveryFilter.value.search ? deliveryFilter.value.search : undefined,
+        }
+      });
+      if (res.data?.success && res.data?.data) {
+        deliveries.value = res.data.data.data || [];
+        deliveriesPagination.value = {
+          current_page: res.data.data.current_page || 1,
+          last_page: res.data.data.last_page || 1,
+          total: res.data.data.total || 0,
+        };
+      }
+    } catch (err) {
+      console.error('Failed to load deliveries:', err);
+      toast.error('Failed to load delivery logs');
+    } finally {
+      loadingDeliveries.value = false;
+    }
+  };
+
+  const fetchBroadcasts = async () => {
+    loadingBroadcasts.value = true;
+    try {
+      const res = await client.get('/admin/notifications/broadcasts');
+      if (res.data?.success && res.data?.data) {
+        broadcasts.value = res.data.data;
+      }
+    } catch (err) {
+      console.error('Failed to load broadcasts:', err);
+    } finally {
+      loadingBroadcasts.value = false;
+    }
+  };
+
+  const sendBroadcast = async (payload) => {
+    try {
+      const res = await client.post('/admin/notifications/broadcasts', payload);
+      if (res.data?.success) {
+        toast.success('Broadcast campaign dispatched successfully');
+        await fetchBroadcasts();
+        await fetchNotifications();
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to send broadcast:', err);
+      toast.error(err.response?.data?.message || 'Failed to dispatch broadcast');
+      return false;
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    loadingAnalytics.value = true;
+    try {
+      const res = await client.get('/admin/notifications/analytics');
+      if (res.data?.success && res.data?.data) {
+        analytics.value = res.data.data;
+      }
+    } catch (err) {
+      console.error('Failed to load notification analytics:', err);
+    } finally {
+      loadingAnalytics.value = false;
+    }
+  };
+
+  if (getCurrentInstance()) {
+    onMounted(() => {
+      fetchNotifications();
+    });
+  }
 
   return {
     notifications,
     loading,
     error,
+    activeTab,
     activeTimeFilter,
     activeTypeFilter,
     search,
@@ -216,7 +298,19 @@ export function useAdminNotifications() {
     markAsRead,
     markAllRead,
     deleteNotification,
-    clearFilters
+    clearFilters,
+    deliveries,
+    deliveriesPagination,
+    loadingDeliveries,
+    deliveryFilter,
+    fetchDeliveries,
+    broadcasts,
+    loadingBroadcasts,
+    fetchBroadcasts,
+    sendBroadcast,
+    analytics,
+    loadingAnalytics,
+    fetchAnalytics,
   };
 }
 

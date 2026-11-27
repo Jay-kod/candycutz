@@ -8,5 +8,5 @@ export const superadminApi = {
   resetPassword: (id, password, password_confirmation) => client.post(`/super-admin/users/${id}/reset-password`, { password, password_confirmation }),
   settings: () => client.get('/super-admin/settings'),
   updateSettings: (data) => client.post('/super-admin/settings', data),
-  auditLogs: () => client.get('/super-admin/audit-logs'),
+  auditLogs: (params = {}) => client.get('/super-admin/audit-logs', { params }),
 };

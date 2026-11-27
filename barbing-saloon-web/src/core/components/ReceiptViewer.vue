@@ -90,7 +90,7 @@ const verifyPayment = async (action) => {
     <div class="fixed inset-0 bg-[#050505] transition-opacity" @click="emit('close')"></div>
     
     <!-- Modal (Page-like Full Screen) -->
-    <div class="bg-[#111111] relative w-full max-w-none h-screen flex flex-col md:flex-row overflow-hidden animate-slide-up z-10">
+    <div class="bg-[#111111] relative w-full max-w-none h-[100dvh] flex flex-col md:flex-row overflow-hidden animate-slide-up z-10">
       
       <!-- Close Button (Absolute to Modal) -->
       <button @click="emit('close')" class="absolute top-6 right-6 z-20 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full p-2.5 transition-all border border-white/5">

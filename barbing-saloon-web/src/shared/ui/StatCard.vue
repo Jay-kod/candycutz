@@ -1,7 +1,8 @@
 <template>
   <div
     :class="[
-      'group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300',
+      'group relative overflow-hidden rounded-2xl border transition-all duration-300',
+      variant === 'customer' ? 'p-3 sm:p-5' : 'p-5',
       'bg-[var(--color-bg-secondary)] dark:bg-[#121824]',
       'border-[var(--color-border-subtle)] dark:border-white/[0.08]',
       'hover:border-amber-400/40 dark:hover:border-white/20 hover:shadow-xl hover:-translate-y-0.5',
@@ -26,13 +27,24 @@
 
     <!-- Live Card Content -->
     <template v-else>
-      <div class="flex items-start justify-between gap-3">
+      <div class="flex items-start justify-between gap-2 sm:gap-3">
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] truncate">
-            {{ title }}
+          <p
+            :class="[
+              'font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] truncate',
+              variant === 'customer' ? 'text-[10px] sm:text-xs' : 'text-xs'
+            ]"
+          >
+            <span class="sm:hidden">{{ mobileTitle || title }}</span>
+            <span class="hidden sm:inline">{{ title }}</span>
           </p>
           <div class="mt-2 flex items-baseline gap-2">
-            <span class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-primary)] tabular-nums">
+            <span
+              :class="[
+                'font-display font-bold tracking-tight text-[var(--color-text-primary)] tabular-nums',
+                variant === 'customer' ? 'text-xl sm:text-3xl' : 'text-2xl sm:text-3xl'
+              ]"
+            >
               {{ value }}
             </span>
             <slot name="value-suffix" />
@@ -43,11 +55,18 @@
         <div
           v-if="icon"
           :class="[
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-transform duration-300 group-hover:scale-105',
+            'flex shrink-0 items-center justify-center rounded-xl border transition-transform duration-300 group-hover:scale-105',
+            variant === 'customer' ? 'h-8 w-8 sm:h-11 sm:w-11' : 'h-11 w-11',
             iconWrapClasses
           ]"
         >
-          <component :is="icon" class="h-5 w-5" :class="iconColorClasses" />
+          <component
+            :is="icon"
+            :class="[
+              iconColorClasses,
+              variant === 'customer' ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5'
+            ]"
+          />
         </div>
       </div>
 
@@ -80,6 +99,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  mobileTitle: {
+    type: String,
+    default: '',
+  },
   value: {
     type: [String, Number],
     required: true,
@@ -108,7 +131,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'gold',
-    validator: (v) => ['gold', 'emerald', 'sky', 'rose', 'slate'].includes(v),
+    validator: (v) => ['customer', 'gold', 'emerald', 'sky', 'rose', 'slate'].includes(v),
   },
   loading: {
     type: Boolean,

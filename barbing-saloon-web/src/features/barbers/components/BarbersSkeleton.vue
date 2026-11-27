@@ -5,7 +5,7 @@
       <div class="space-y-3">
         <div class="h-5 w-40 rounded-full bg-slate-200 dark:bg-theme-border"></div>
         <div class="h-10 w-64 rounded-xl bg-slate-200 dark:bg-theme-border/80"></div>
-        <div class="h-4 w-96 rounded bg-slate-200 dark:bg-theme-border/50"></div>
+        <div class="h-4 w-full max-w-sm sm:w-96 rounded bg-slate-200 dark:bg-theme-border/50"></div>
       </div>
       <div class="flex flex-col items-end gap-3 shrink-0 w-full md:w-auto">
         <div class="h-11 w-full sm:w-80 rounded-2xl bg-slate-200 dark:bg-theme-border"></div>

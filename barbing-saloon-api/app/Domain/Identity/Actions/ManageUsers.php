@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Actions;
 
-use App\Events\PasswordChanged;
 use App\Events\UserSuspended;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 
 class ManageUsers
 {
+    public function __construct(
+        protected SetUserPassword $setUserPassword
+    ) {}
+
     /**
      * @return LengthAwarePaginator<int, User>
      */
@@ -102,15 +105,13 @@ class ManageUsers
     {
         Gate::authorize('manage-users');
 
-        $user->update([
-            'password' => Hash::make($newPassword),
-        ]);
+        return DB::transaction(function () use ($user, $newPassword): User {
+            /** @var User $lockedUser */
+            $lockedUser = User::query()->lockForUpdate()->findOrFail($user->id);
+            $this->setUserPassword->execute($lockedUser, $newPassword);
 
-        // Invalidate existing tokens so they are forced to log in again
-        $user->tokens()->delete();
-        PasswordChanged::dispatch($user);
-
-        return $user->refresh();
+            return $lockedUser->refresh();
+        });
     }
 
     public function deleteUser(User $user): void

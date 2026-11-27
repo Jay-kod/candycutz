@@ -27,6 +27,16 @@
   --color-warning: #D97706;
   --color-shadow: rgba(0, 0, 0, 0.08);
 
+  /* iOS Design Tokens (Light Mode) */
+  --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", 'Inter', sans-serif;
+  --ios-material-ultra-thin: rgba(255, 255, 255, 0.82);
+  --ios-blur-filter: blur(24px) saturate(190%);
+  --ios-separator: rgba(60, 60, 67, 0.14);
+  --ios-grouped-bg: #F2F2F7;
+  --ios-grouped-card: #FFFFFF;
+  --ios-spring-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ios-spring-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+
   /* Existing token compatibility */
   --color-bg: #FAF9F6;
   --color-surface: #FFFFFF;
@@ -90,6 +100,12 @@
   --color-warning: #F59E0B;
   --color-shadow: rgba(0, 0, 0, 0.65);
 
+  /* iOS Design Tokens (Dark Mode) */
+  --ios-material-ultra-thin: rgba(18, 18, 22, 0.84);
+  --ios-separator: rgba(235, 235, 245, 0.14);
+  --ios-grouped-bg: #000000;
+  --ios-grouped-card: #1C1C1E;
+
   /* Existing token compatibility */
   --color-bg: #0D0D0D;
   --color-surface: #141418;
@@ -115,53 +131,104 @@ body {
   margin: 0;
   background: var(--color-bg-primary, var(--color-bg));
   color: var(--color-text-primary, var(--color-text));
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
 }
 
 /* ============================================================
-   Paragraph Justification & Optical Typography
-   - Justifies text to eliminate left-hanging / ragged edges.
-   - Uses inter-word justification and hyphenation for natural spacing.
-   - Uses modern text-wrap: pretty to prevent single trailing orphan words.
-   - Preserves intentional alignment on badges, buttons, centered titles.
+   Paragraph & Long Text Justification (Website & Dashboards)
+   - Enforces clean, symmetrical edge-to-edge justification for all
+     editorial content, articles, blog posts, legal policies, service
+     descriptions, modal guidance, and dashboard information.
+   - Enforces inter-word justification and hyphenation to eliminate ragged edges.
+   - Sets text-align-last: left so the final line of multi-line text
+     always terminates naturally on the left edge without awkward word stretching.
+   - Uses text-wrap: pretty to prevent single trailing word orphans.
+   - Protects buttons, badges, chips, code, tables, and centered headings.
    ============================================================ */
-p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption):not(.badge):not(.nav-link) {
+
+/* 1. Universal Paragraphs: All body text and paragraphs across website & dashboards */
+p:not(.text-center):not(.text-right):not(.truncate):not(.caption):not(.badge):not(.nav-link):not(.btn):not([role="button"]):not(.font-mono):not(.stat-label):not(.tag):not(.chip):not(th):not(td) {
   text-align: justify;
   text-justify: inter-word;
+  text-align-last: left;
   hyphens: auto;
   -webkit-hyphens: auto;
   text-wrap: pretty;
 }
 
-/* Explicit container alignment overrides */
-.text-center p,
-[class*="text-center"] p,
-.text-center {
-  text-align: center !important;
-}
-
-.text-left p,
-[class*="text-left"] p,
-.text-left {
-  text-align: left !important;
-}
-
-.text-right p,
-[class*="text-right"] p,
-.text-right {
-  text-align: right !important;
-}
-
+/* 2. Editorial, Prose, Blog Content, and CMS Previews */
+.prose,
+.prose p,
+.prose div,
+.blog-content,
+.blog-content p,
+.blog-content div,
+.article-body,
+.article-body p,
+.article-content,
+.article-content p,
+.legal-content p,
+.terms-content p,
+.privacy-content p,
+.whitespace-pre-wrap:not(pre):not(code):not(.font-mono),
+.paragraph-justified,
 .text-justify,
-.paragraph-justified {
+.text-long,
+.text-body-long {
   text-align: justify !important;
   text-justify: inter-word !important;
+  text-align-last: left !important;
   hyphens: auto !important;
   -webkit-hyphens: auto !important;
   text-wrap: pretty !important;
 }
+
+/* 3. Dashboard Explanations, Reviews, Bio, Modal & Service Descriptions */
+.service-description,
+.testimonial-text,
+.review-comment,
+.review-text,
+.bio-text,
+.modal-body p,
+.dashboard-overview p,
+.card-description {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  text-align-last: left !important;
+  hyphens: auto !important;
+  -webkit-hyphens: auto !important;
+  text-wrap: pretty !important;
+}
+
+/* Explicit single-paragraph alignment overrides (only when applied directly) */
+p.text-center,
+p.text-center-forced,
+div.text-center > p.text-center,
+.text-center-forced {
+  text-align: center !important;
+  text-align-last: center !important;
+}
+
+p.text-right,
+p.text-right-forced,
+.text-right-forced {
+  text-align: right !important;
+  text-align-last: right !important;
+}
+
+p.text-left-forced,
+.text-left-forced {
+  text-align: left !important;
+  text-align-last: left !important;
+}
+
+/* Container-level utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
 /* Fluid Heading Utilities */
 .text-fluid-hero { font-size: var(--font-hero); line-height: 1.1; }
@@ -176,6 +243,111 @@ p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+/* ============================================================
+   Instant Interactive Click & Tap Feedback (Micro-Physics)
+   - Provides immediate tactile depression on buttons, pills, cards.
+   - 0-40ms attack on :active so user sees impact before handler executes.
+   - Clean bounce-back on release.
+   - Disabled elements are strictly protected.
+   ============================================================ */
+
+/* Mobile touch highlight normalization */
+html, body, button, a, [role="button"], input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Base button and interactive element transition */
+button:not(:disabled):not([aria-disabled="true"]):not(.pointer-events-none),
+[role="button"]:not([aria-disabled="true"]):not(.pointer-events-none),
+.btn:not(.disabled):not(.pointer-events-none),
+.card-clickable,
+.tab-button {
+  transition-property: color, background-color, border-color, box-shadow, transform, filter, opacity;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 150ms;
+  will-change: transform;
+}
+
+/* Instant depression on :active (attack: 40ms) */
+button:not(:disabled):not([aria-disabled="true"]):not(.pointer-events-none):active,
+[role="button"]:not([aria-disabled="true"]):not(.pointer-events-none):active,
+.btn:not(.disabled):not(.pointer-events-none):active,
+.card-clickable:active,
+.tab-button:active {
+  transform: scale(0.978) translateY(1px);
+  filter: brightness(0.94);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+  transition-duration: 40ms !important;
+}
+
+/* Links and inline navigational anchors */
+a:not(.btn):not([role="button"]):active,
+.nav-link:active {
+  opacity: 0.72 !important;
+  transform: scale(0.99) translateY(0.5px);
+  transition-duration: 40ms !important;
+}
+
+/* Strict safeguard for disabled elements */
+:disabled,
+[disabled],
+[aria-disabled="true"],
+.disabled,
+.pointer-events-none {
+  transform: none !important;
+  filter: none !important;
+  cursor: not-allowed !important;
+}
+
+:disabled:active,
+[disabled]:active,
+[aria-disabled="true"]:active,
+.disabled:active,
+.pointer-events-none:active {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Click Impact Micro-Ripple */
+.ripple-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.click-impact-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-accent, #FF9900) 35%, transparent) 0%, color-mix(in srgb, var(--color-accent, #FF9900) 10%, transparent) 70%, transparent 100%);
+  animation: ripple-grow 360ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  z-index: 50;
+}
+
+@keyframes ripple-grow {
+  to {
+    transform: translate(-50%, -50%) scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  [role="button"]:active,
+  .btn:active,
+  .card-clickable:active,
+  a:active {
+    transform: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  .click-impact-ripple {
+    display: none !important;
+  }
 }
 
 /* Enforce 16px font-size floor on mobile inputs to stop iOS Safari auto-zoom */
@@ -197,15 +369,51 @@ p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption
 }
 
 /* Safe Area Inset Helpers */
-.safe-pt {
+.safe-pt,
+.pt-safe {
   padding-top: max(env(safe-area-inset-top, 0px), 1rem);
 }
-.safe-pb {
+.safe-pb,
+.pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
 }
-.safe-px {
+.safe-px,
+.px-safe {
   padding-left: max(env(safe-area-inset-left, 0px), 1rem);
   padding-right: max(env(safe-area-inset-right, 0px), 1rem);
+}
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* iOS Continuous Squircle Corners */
+.ios-squircle {
+  border-radius: 20px;
+}
+.ios-squircle-lg {
+  border-radius: 24px;
+}
+.ios-squircle-sm {
+  border-radius: 12px;
+}
+
+/* iOS Frosted Glass Bar (Thin Material) */
+.ios-glass-bar {
+  background: var(--ios-material-ultra-thin);
+  backdrop-filter: var(--ios-blur-filter);
+  -webkit-backdrop-filter: var(--ios-blur-filter);
+  border-color: var(--ios-separator);
+}
+
+/* iOS Grouped Inset Card */
+.ios-grouped-card {
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--ios-separator);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* ============================================================
@@ -255,44 +463,6 @@ p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption
   [data-reveal].revealed {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* ============================================================
-   Scroll Progress Bar (2026 trend) — thin gold bar pinned to the
-   top that fills as the page scrolls. Mounted in App.vue.
-   ============================================================ */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  height: 3px;
-  width: 100%;
-  transform-origin: 0 50%;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
-  box-shadow: 0 0 12px 0 color-mix(in srgb, var(--color-accent) 60%, transparent);
-}
-
-@supports (animation-timeline: scroll()) {
-  .scroll-progress {
-    animation: progress-grow linear both;
-    animation-timeline: scroll(root block);
-  }
-  @keyframes progress-grow {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-progress {
-      display: none;
-    }
-  }
-}
-@supports not (animation-timeline: scroll()) {
-  .scroll-progress {
-    display: none;
   }
 }
 
@@ -415,10 +585,58 @@ p:not(.text-left):not(.text-center):not(.text-right):not(.truncate):not(.caption
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    overflow-x: hidden;
+    overflow-x: clip;
+    max-width: 100vw;
+    width: 100%;
+  }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
   }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    max-width: 100%;
+  }
+  p, h1, h2, h3, h4, h5, h6, span, a, label {
+    overflow-wrap: break-word;
+  }
+}
+
+/* iOS Safari auto-zoom prevention on small devices */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Responsiveness & Touch Utilities */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+}
+
+.tap-target-min {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
 }

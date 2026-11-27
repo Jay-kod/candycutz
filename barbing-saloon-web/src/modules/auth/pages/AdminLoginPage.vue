@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-[100dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text overflow-y-auto">
+  <div class="login-page min-h-[99vh] min-h-[99dvh] lg:h-[99vh] lg:h-[99dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text overflow-y-auto lg:overflow-hidden">
     
     <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
-    <div class="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
+    <div class="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-12 xl:p-16 overflow-hidden text-center h-full">
       <!-- Background Effects -->
       <div class="absolute inset-0 bg-theme-bg z-0"></div>
       <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent z-0"></div>
@@ -15,7 +15,7 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -38,47 +38,63 @@
     </div>
 
     <!-- Right Section: Login Form -->
-    <div class="w-full lg:w-1/2 flex min-h-[100dvh] flex-col items-center justify-center p-4 xs:p-6 sm:p-10 lg:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border py-10 lg:py-16">
+    <div class="login-panel w-full lg:w-1/2 flex min-h-[99vh] min-h-[99dvh] lg:h-full flex-col items-center justify-center p-4 xs:p-6 sm:p-10 lg:p-12 xl:p-16 relative z-10 bg-theme-surface lg:bg-transparent shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:shadow-none border-l border-theme-border py-6 lg:py-10 overflow-y-auto">
       
       <!-- Mobile Logo -->
-      <div class="mb-6 lg:hidden flex justify-center w-full">
+      <div class="mb-4 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
 
       <div class="w-full max-w-sm">
-        <div class="mb-8">
+        <div class="mb-4 sm:mb-6">
           <div class="text-center">
-            <h1 class="font-display font-bold text-3xl sm:text-4xl text-admin mb-4">{{ isSuperAdminPortal ? 'Super Admin Portal' : 'Admin Portal' }}</h1>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-admin mb-2">{{ isSuperAdminPortal ? 'Super Admin Portal' : 'Admin Portal' }}</h1>
           </div>
-          <p class="text-theme-muted text-xs sm:text-sm mb-4">{{ isSuperAdminPortal ? 'Please enter your credentials to access the super admin dashboard.' : 'Please enter your credentials to access the admin dashboard.' }}</p>
+          <p class="text-theme-muted text-xs sm:text-sm mb-3">{{ isSuperAdminPortal ? 'Please enter your credentials to access the super admin dashboard.' : 'Please enter your credentials to access the admin dashboard.' }}</p>
           
           <div class="bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
-            <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center justify-between mb-2">
               <span class="text-theme-text font-semibold flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-admin inline-block"></span>
-                Official Credentials
+                Demo Accounts
               </span>
-              <div class="flex items-center gap-2">
-                <button 
-                  type="button" 
-                  @click="quickFillAdmin" 
-                  class="text-[11px] font-bold text-admin hover:underline flex items-center gap-1 cursor-pointer">
-                  🛡 Admin
-                </button>
-                <button 
-                  type="button" 
-                  @click="quickFillSuperAdmin" 
-                  class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
-                  👑 Super Admin
-                </button>
-              </div>
+              <button 
+                type="button" 
+                @click="fillActiveDemo" 
+                class="text-[11px] font-bold text-admin hover:underline flex items-center gap-1 cursor-pointer">
+                Fill Demo
+              </button>
             </div>
-            <div class="space-y-1">
-              <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Admin:</span> webadmin@candycutz.com / admin123</p>
-              <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Super Admin:</span> websuperadmin@candycutz.com / superadmin123</p>
+
+            <div class="grid grid-cols-4 gap-1 p-1 bg-theme-bg/60 rounded border border-theme-border/50 mb-2.5">
+              <button 
+                v-for="item in demoAccountList" 
+                :key="item.role"
+                type="button"
+                @click="selectDemoRole(item.role)"
+                :class="[
+                  'px-1.5 py-1 text-[11px] font-medium rounded transition-colors text-center truncate cursor-pointer',
+                  activeDemoRole === item.role 
+                    ? 'bg-admin text-obsidian font-bold shadow-sm' 
+                    : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
+                ]">
+                {{ item.label }}
+              </button>
+            </div>
+
+            <div class="space-y-0.5 font-mono text-[11px]">
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Email:</span> {{ currentDemo.email }}</p>
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Password:</span> {{ currentDemo.password }}</p>
+            </div>
+
+            <div v-if="currentDemo.role === 'customer' || currentDemo.role === 'barber'" class="mt-2 pt-1.5 border-t border-theme-border/40 text-[10px] text-theme-muted flex items-center justify-between">
+              <span>Dedicated portal:</span>
+              <RouterLink :to="currentDemo.portalPath" class="text-admin hover:underline font-semibold">
+                Go to {{ currentDemo.portalName }} &rarr;
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -115,11 +131,14 @@
                 class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-admin focus:ring-1 focus:ring-admin transition-all duration-300 outline-none" 
                 :type="showPassword ? 'text' : 'password'" 
                 placeholder="Enter your password" 
+                autocomplete="current-password"
               />
               <button 
                 type="button" 
                 @click="showPassword = !showPassword" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral hover:text-admin transition-colors p-1">
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-muted hover:text-admin focus:text-admin active:text-admin transition-colors p-2.5 rounded-md flex items-center justify-center touch-manipulation focus:outline-none">
                 <!-- Eye Open -->
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -164,22 +183,6 @@
               </span>
             </button>
 
-            <div class="grid grid-cols-2 gap-2">
-              <button 
-                type="button"
-                @click="demoAdminLogin"
-                :disabled="loading" 
-                class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-2 py-2.5 text-xs font-bold text-theme-text transition-all duration-300 hover:border-admin hover:text-admin disabled:opacity-70 flex items-center justify-center gap-1.5">
-                🛡 Admin Demo
-              </button>
-              <button 
-                type="button"
-                @click="demoSuperAdminLogin"
-                :disabled="loading" 
-                class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-2 py-2.5 text-xs font-bold text-theme-text transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-70 flex items-center justify-center gap-1.5">
-                👑 Super Admin
-              </button>
-            </div>
           </div>
         </form>
 
@@ -212,8 +215,8 @@ const { login, redirectAfterLogin, user, logout } = useAuth();
 
 const isSuperAdminPortal = computed(() => route?.path?.includes('superadmin') || false);
 
-const email = ref(isSuperAdminPortal.value ? 'websuperadmin@candycutz.com' : 'webadmin@candycutz.com');
-const password = ref(isSuperAdminPortal.value ? 'superadmin123' : 'admin123');
+const email = ref('');
+const password = ref('');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -228,32 +231,57 @@ const schema = object({
   password: string().required('Password is required'),
 });
 
-const quickFillAdmin = () => {
-  email.value = 'webadmin@candycutz.com';
-  password.value = 'admin123';
+const demoAccounts = {
+  customer: {
+    role: 'customer',
+    label: 'Customer',
+    email: 'kefas@customer.com',
+    password: 'customer123',
+    portalPath: '/login',
+    portalName: 'Customer Portal',
+  },
+  barber: {
+    role: 'barber',
+    label: 'Barber',
+    email: 'obo@barber.com',
+    password: 'barber123',
+    portalPath: '/barber/login',
+    portalName: 'Barber Portal',
+  },
+  admin: {
+    role: 'admin',
+    label: 'Admin',
+    email: 'webadmin@candycutz.com',
+    password: 'admin123',
+    portalPath: '/admin/login',
+    portalName: 'Admin Portal',
+  },
+  superadmin: {
+    role: 'superadmin',
+    label: 'Super Admin',
+    email: 'superadmin@candycutz.com',
+    password: 'superadmin123',
+    portalPath: '/admin/login',
+    portalName: 'Super Admin Portal',
+  },
+};
+
+const demoAccountList = Object.values(demoAccounts);
+const activeDemoRole = ref(isSuperAdminPortal.value ? 'superadmin' : 'admin');
+const currentDemo = computed(() => demoAccounts[activeDemoRole.value] || (isSuperAdminPortal.value ? demoAccounts.superadmin : demoAccounts.admin));
+
+const fillActiveDemo = () => {
+  const account = demoAccounts[activeDemoRole.value] || demoAccounts.admin;
+  email.value = account.email;
+  password.value = account.password;
   generalError.value = '';
   errors.email = '';
   errors.password = '';
 };
 
-const quickFillSuperAdmin = () => {
-  email.value = 'websuperadmin@candycutz.com';
-  password.value = 'superadmin123';
-  generalError.value = '';
-  errors.email = '';
-  errors.password = '';
-};
-
-const demoAdminLogin = async () => {
-  quickFillAdmin();
-  rememberMe.value = true;
-  await submitForm();
-};
-
-const demoSuperAdminLogin = async () => {
-  quickFillSuperAdmin();
-  rememberMe.value = true;
-  await submitForm();
+const selectDemoRole = (role) => {
+  activeDemoRole.value = role;
+  fillActiveDemo();
 };
 
 async function submitForm() {
@@ -300,3 +328,34 @@ async function submitForm() {
   }
 }
 </script>
+
+<style scoped>
+.login-page {
+  height: 99vh;
+  height: 99dvh;
+  min-height: 99vh;
+  min-height: 99dvh;
+}
+
+.login-panel {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+@media (max-height: 760px) {
+  .login-page {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow-y: auto;
+  }
+
+  .login-panel {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow: visible;
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      v-if="isBannerVisible"
+      v-if="isDiagnosticVisible && isBannerVisible"
       class="fixed top-0 left-0 right-0 z-[9990] pointer-events-none select-none"
     >
       <!-- Expanded Top Alert Banner -->
@@ -51,6 +51,12 @@
                   class="hidden md:inline ml-2 text-[11px] opacity-75 font-mono"
                 >
                   (Start MySQL in XAMPP Control Panel)
+                </span>
+                <span
+                  v-else-if="isDisconnected && disconnectType === 'server'"
+                  class="hidden md:inline ml-2 text-[11px] opacity-75 font-mono"
+                >
+                  (Start API backend: npm run dev:api on port 8000)
                 </span>
               </div>
             </div>
@@ -112,13 +118,19 @@
             @click="expand"
             class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-xl backdrop-blur-md border transition-all active:scale-95 cursor-pointer"
             :class="minimizedPillClasses"
-            title="Database is offline — Click to view details and retry"
+            :title="disconnectType === 'database' ? 'Database is offline — Click to view details and retry' : 'Backend server is unreachable — Click to view details and retry'"
           >
             <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-rose-400"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                :class="disconnectType === 'database' ? 'bg-rose-400' : 'bg-amber-400'"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-2 w-2"
+                :class="disconnectType === 'database' ? 'bg-rose-500' : 'bg-amber-500'"
+              ></span>
             </span>
-            <span>{{ disconnectType === 'database' ? 'DB Inactive' : 'Offline' }}</span>
+            <span>{{ disconnectType === 'database' ? 'DB Inactive' : 'Server Offline' }}</span>
             <ChevronDownIcon class="h-3.5 w-3.5 opacity-80" />
           </button>
         </div>
@@ -130,6 +142,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useConnectionStatus } from '../composables/useConnectionStatus';
+import { useAuthStore } from '@/modules/auth/store/auth.store';
 import {
   CircleStackIcon,
   ServerStackIcon,
@@ -138,6 +151,9 @@ import {
   ChevronDownIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
+
+const authStore = useAuthStore();
+const isDiagnosticVisible = computed(() => authStore.isAdmin || authStore.isSuperAdmin);
 
 const {
   isBannerVisible,

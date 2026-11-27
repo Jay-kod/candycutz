@@ -4,18 +4,18 @@
     <div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12161C] p-5 shadow-lg group hover:border-admin/40 transition-all duration-300">
       <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-admin/5 blur-2xl group-hover:bg-admin/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
-        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Gateways Ready</span>
+        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Gateways Configured</span>
         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-admin/15 text-admin border border-admin/30">
           <CheckBadgeIcon class="h-4 w-4" />
         </span>
       </div>
       <div class="mt-3 flex items-baseline gap-2 relative z-10">
         <span class="font-display text-3xl font-bold text-white tracking-tight">{{ stats.configuredCount }}/{{ stats.totalServices }}</span>
-        <span class="text-xs text-white/40">connected</span>
+        <span class="text-xs text-white/40">configured</span>
       </div>
       <div class="mt-3 flex items-center justify-between text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
-        <span>Operational health</span>
-        <span class="font-medium text-admin font-mono">{{ stats.percentageConfigured }}% ready</span>
+        <span>Configuration completeness</span>
+        <span class="font-medium text-admin font-mono">{{ stats.percentageConfigured }}% configured</span>
       </div>
     </div>
 
@@ -46,16 +46,16 @@
           class="font-display text-3xl font-bold tracking-tight"
           :class="stats.mailConfigured ? 'text-emerald-400' : 'text-amber-400'"
         >
-          {{ stats.mailConfigured ? 'Connected' : 'Missing' }}
+          {{ stats.mailConfigured ? 'Configured' : 'Not detected' }}
         </span>
-        <span class="text-xs text-white/40">Brevo SMTP</span>
+        <span class="text-xs text-white/40">Resend API</span>
       </div>
       <div class="mt-3 flex items-center gap-2 text-[11px] text-white/50 relative z-10 pt-2 border-t border-white/[0.04]">
         <span 
           class="h-1.5 w-1.5 rounded-full" 
           :class="stats.mailConfigured ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"
         ></span>
-        <span>{{ stats.mailConfigured ? 'Transactional delivery active' : 'Credentials required' }}</span>
+        <span>{{ stats.mailConfigured ? 'Provider test required' : 'No saved key and sender detected' }}</span>
       </div>
     </div>
 

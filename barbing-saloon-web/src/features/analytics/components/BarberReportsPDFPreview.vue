@@ -3,37 +3,38 @@
     <Transition name="modal">
       <div v-if="show" class="fixed inset-0 z-[100] flex flex-col bg-black/80 backdrop-blur-md">
         <!-- Preview Header -->
-        <div class="flex items-center justify-between border-b border-theme-border bg-theme-surface/90 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-theme-border bg-theme-surface/90 px-4 xs:px-6 py-3 xs:py-4 gap-2">
           <div>
-            <h2 class="text-xl font-bold text-theme-text">Report Preview</h2>
-            <p class="text-sm text-theme-text-muted">CandyCutz {{ activeRangeLabel }} Analytics</p>
+            <h2 class="text-base xs:text-xl font-bold text-theme-text">Report Preview</h2>
+            <p class="text-xs xs:text-sm text-theme-text-muted truncate max-w-[180px] xs:max-w-xs">CandyCutz {{ activeRangeLabel }} Analytics</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 xs:gap-4 shrink-0">
             <button 
               @click="$emit('close')"
-              class="rounded-full p-2 text-theme-text-muted transition-colors hover:bg-theme-surface hover:text-theme-text"
+              class="h-11 w-11 flex items-center justify-center rounded-full text-theme-text-muted transition-colors hover:bg-theme-surface hover:text-theme-text"
+              aria-label="Close Preview"
             >
               <XMarkIcon class="h-6 w-6" />
             </button>
             <button 
               @click="downloadPdf"
               :disabled="isGeneratingPdf"
-              class="flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 font-bold text-obsidian shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all hover:bg-gold-light hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] disabled:opacity-50"
+              class="flex items-center gap-1.5 xs:gap-2 rounded-xl bg-gold px-3.5 xs:px-6 py-2.5 min-h-[44px] text-xs xs:text-sm font-bold text-obsidian shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all hover:bg-gold-light hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] disabled:opacity-50"
             >
               <template v-if="isGeneratingPdf">
-                <div class="h-5 w-5 animate-spin rounded-full border-2 border-obsidian/30 border-t-obsidian"></div>
+                <div class="h-4 w-4 xs:h-5 xs:w-5 animate-spin rounded-full border-2 border-obsidian/30 border-t-obsidian"></div>
                 Generating...
               </template>
               <template v-else>
-                <ArrowDownTrayIcon class="h-5 w-5" />
-                Download PDF
+                <ArrowDownTrayIcon class="h-4 w-4 xs:h-5 xs:w-5" />
+                <span class="hidden xs:inline">Download</span> PDF
               </template>
             </button>
           </div>
         </div>
 
         <!-- Preview Scroll Area -->
-        <div class="flex-1 overflow-y-auto p-8">
+        <div class="flex-1 overflow-y-auto overflow-x-auto p-2 xs:p-4 sm:p-8 custom-scrollbar">
           <div class="mx-auto max-w-[794px] bg-white shadow-2xl">
             <!-- Actual PDF content to be captured -->
             <div ref="reportRef" class="report-document bg-white text-gray-900">

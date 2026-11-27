@@ -12,17 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Add soft deletes to payments, payment_transactions, and appointment_items
-        Schema::table('payments', function (Blueprint $table) {
-            $table->softDeletes();
-        });
+        if (Schema::hasTable('payments') && ! Schema::hasColumn('payments', 'deleted_at')) {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
 
-        Schema::table('payment_transactions', function (Blueprint $table) {
-            $table->softDeletes();
-        });
+        if (Schema::hasTable('payment_transactions') && ! Schema::hasColumn('payment_transactions', 'deleted_at')) {
+            Schema::table('payment_transactions', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
 
-        Schema::table('appointment_items', function (Blueprint $table) {
-            $table->softDeletes();
-        });
+        if (Schema::hasTable('appointment_items') && ! Schema::hasColumn('appointment_items', 'deleted_at')) {
+            Schema::table('appointment_items', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
 
         // 2. Add composite indexes on appointments
         Schema::table('appointments', function (Blueprint $table) {

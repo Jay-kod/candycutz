@@ -9,14 +9,11 @@
 
         <nav class="public-nav-links" aria-label="Main navigation">
           <RouterLink to="/" exact-active-class="public-nav-link--active" class="public-nav-link">Home</RouterLink>
-          <RouterLink to="/about" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
-          <RouterLink to="/services" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
-          <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
-          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
           <RouterLink to="/about" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">About</RouterLink>
           <RouterLink to="/services" @mouseenter="prefetchServices" @focus="prefetchServices" active-class="public-nav-link--active" class="public-nav-link">Services</RouterLink>
           <RouterLink to="/gallery" @mouseenter="prefetchGallery" @focus="prefetchGallery" active-class="public-nav-link--active" class="public-nav-link">Gallery</RouterLink>
-          <RouterLink to="/contact" @mouseenter="prefetchAbout" @focus="prefetchAbout" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
+          <RouterLink to="/directions" active-class="public-nav-link--active" class="public-nav-link">Directions</RouterLink>
+          <RouterLink to="/contact" active-class="public-nav-link--active" class="public-nav-link">Contact</RouterLink>
         </nav>
 
         <div class="public-nav-actions flex items-center">
@@ -63,6 +60,7 @@
           <RouterLink to="/about" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">About</RouterLink>
           <RouterLink to="/services" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Services</RouterLink>
           <RouterLink to="/gallery" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Gallery</RouterLink>
+          <RouterLink to="/directions" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Directions</RouterLink>
           <RouterLink to="/contact" active-class="public-nav-link--active" class="public-mobile-link" @click="mobileMenuOpen = false">Contact</RouterLink>
           <div class="py-2 px-3 flex items-center justify-between border-y border-[var(--color-border-subtle)] my-1">
             <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Theme</span>
@@ -79,9 +77,9 @@
     <footer class="public-footer border-t border-[var(--color-border)] bg-[var(--color-bg-primary)] pt-16 pb-12 text-[var(--color-text-secondary)] transition-colors duration-300">
       <div class="mx-auto max-w-7xl px-4 md:px-6">
         <!-- Top Section: 3 Spaced Columns (Brand Identity, Explore, Legal & Policies) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.9fr)] gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
+        <div class="grid grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.7fr)_minmax(0,0.9fr)] gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start text-left">
           <!-- Section 1: Brand & Shop Identity -->
-          <div class="md:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
+          <div class="col-span-2 lg:col-span-1 space-y-4 flex flex-col items-start">
             <RouterLink to="/" class="public-footer__brand inline-flex items-center justify-start gap-2.5 text-2xl font-bold tracking-tight text-[var(--color-text-primary)] font-display group">
               <img :src="logoUrl" :alt="`${brandName} logo`" class="h-8 w-8 object-contain rounded-full shadow-[0_0_12px_rgba(255,153,0,0.3)] transition-transform duration-300 group-hover:scale-105" />
               <BrandWordmark class="tracking-tight" :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
@@ -110,6 +108,7 @@
               <li><RouterLink to="/services" class="hover:text-[var(--color-accent)] transition-colors">Services</RouterLink></li>
               <li><RouterLink to="/gallery" class="hover:text-[var(--color-accent)] transition-colors">Gallery</RouterLink></li>
               <li><RouterLink to="/about" class="hover:text-[var(--color-accent)] transition-colors">About Us</RouterLink></li>
+              <li><RouterLink to="/directions" class="hover:text-[var(--color-accent)] transition-colors">Direct Me to Shop</RouterLink></li>
               <li><RouterLink to="/contact" class="hover:text-[var(--color-accent)] transition-colors">Contact Shop</RouterLink></li>
             </ul>
           </div>
@@ -154,7 +153,7 @@
           <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
           <RouterLink to="/security" class="hover:text-[var(--color-accent)] transition-colors">Security</RouterLink>
           <span class="public-footer__pipe text-[var(--color-border)] select-none">|</span>
-          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors">Manage Cookies</RouterLink>
+          <RouterLink to="/cookies" class="hover:text-[var(--color-accent)] transition-colors" @click.prevent="openCookieModal">Manage Cookies</RouterLink>
         </div>
 
         <!-- Copyright Line -->
@@ -172,11 +171,11 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useWindowScroll } from '@vueuse/core';
-import { publicApi } from '@/shared/api/old_publicApi';
 import ThemeToggleSwitch from '@/components/ThemeToggleSwitch.vue';
 import SocialIcon from '@/components/SocialIcon.vue';
 import { MapPinIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import { useBrandIdentity, applyBrandSettings } from '@/shared/composables/useBrandIdentity';
+import { useCookieConsent } from '@/shared/composables/useCookieConsent';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { getStorageUrl } from '@/core/utils/url';
 import { usePublicContentStore } from '@/core/stores/publicContent.store';
@@ -211,6 +210,9 @@ const route = useRoute();
 const { y } = useWindowScroll();
 
 const mobileMenuOpen = ref(false);
+watch(mobileMenuOpen, (isOpen) => {
+  document.documentElement.classList.toggle('public-mobile-menu-open', isOpen);
+});
 watch(() => route.fullPath, () => {
   mobileMenuOpen.value = false;
 });
@@ -222,6 +224,7 @@ const onKeydown = (e) => {
 };
 
 const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGoldPart, brandTagline } = useBrandIdentity();
+const { openModal: openCookieModal } = useCookieConsent();
 const logoUrl = ref('/images/logo-icon.png');
 const shopAddress = ref('Angwan Kare, BCG, Keffi, Nasarawa State');
 const shopPhone = ref('+234 812 345 6789');
@@ -288,8 +291,8 @@ const activeFooterSocials = computed(() => {
 
 const fetchSettings = async () => {
   try {
-    const response = await publicApi.settings();
-    const settings = response.data?.data || {};
+    const store = getStore();
+    const settings = store ? await store.getSettings() : {};
 
     applyBrandSettings({
       ...settings,
@@ -298,17 +301,17 @@ const fetchSettings = async () => {
     if (settings.logo) {
       logoUrl.value = getStorageUrl(settings.logo, '/images/logo-icon.png');
     }
-    if (settings.address || settings.contact_address) {
-      shopAddress.value = settings.address || settings.contact_address;
+    if (settings.contact_address || settings.address) {
+      shopAddress.value = settings.contact_address || settings.address;
     }
     if (settings.contact_hours !== undefined && settings.contact_hours !== null) {
       contactHours.value = settings.contact_hours;
     }
-    if (settings.phone || settings.contact_phone) {
-      shopPhone.value = settings.phone || settings.contact_phone;
+    if (settings.contact_phone || settings.phone) {
+      shopPhone.value = settings.contact_phone || settings.phone;
     }
-    if (settings.email || settings.contact_email) {
-      shopEmail.value = settings.email || settings.contact_email;
+    if (settings.contact_email || settings.email) {
+      shopEmail.value = settings.contact_email || settings.email;
     }
 
     const platforms = ['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
@@ -334,6 +337,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown);
+  document.documentElement.classList.remove('public-mobile-menu-open');
 });
 </script>
 
@@ -344,7 +348,10 @@ onUnmounted(() => {
   top: 0;
   right: 0;
   left: 0;
-  padding: 0.5rem 1rem;
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 0.5rem;
   pointer-events: none;
 }
 
@@ -529,13 +536,20 @@ onUnmounted(() => {
   scroll-margin-top: 5rem;
 }
 
+:global(html.public-mobile-menu-open) {
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .public-header {
-    padding: 0.55rem 0.65rem;
+    padding-top: max(0.55rem, env(safe-area-inset-top, 0px));
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+    padding-bottom: 0.55rem;
   }
 
   .public-nav-shell {
-    margin: 0.75rem auto 0;
+    margin: 0.5rem auto 0;
     min-height: 48px;
     grid-template-columns: 1fr auto;
     gap: 0.4rem;
@@ -593,7 +607,7 @@ onUnmounted(() => {
     z-index: 20;
     top: 0;
     right: 0;
-    width: min(88vw, 340px);
+    width: min(82vw, 320px);
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -601,13 +615,22 @@ onUnmounted(() => {
     border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
     border-right: 0;
     border-radius: 16px 0 0 16px;
-    padding: 1rem 0.75rem 1.25rem;
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
     background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent);
     backdrop-filter: blur(28px) saturate(135%);
     -webkit-backdrop-filter: blur(28px) saturate(135%);
     box-shadow: 0 16px 36px var(--color-shadow), 0 0 20px rgba(255, 153, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.08);
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     animation: public-mobile-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .public-mobile-menu::-webkit-scrollbar {
+    display: none;
   }
 
   .public-mobile-menu__header {

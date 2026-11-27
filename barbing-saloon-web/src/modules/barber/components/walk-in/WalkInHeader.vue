@@ -1,5 +1,5 @@
 <template>
-  <div class="relative rounded-3xl p-6 sm:p-8 md:p-10 mb-8 bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] overflow-hidden shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 group">
+  <div class="relative rounded-3xl p-4 xs:p-6 sm:p-8 md:p-10 mb-6 sm:mb-8 bg-white dark:bg-[#12161C] border border-slate-200 dark:border-white/[0.08] overflow-hidden shadow-2xl flex flex-col md:flex-row md:items-end justify-between gap-6 group">
     <div class="absolute -top-36 -right-36 w-80 h-80 bg-gold/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-gold/15 transition-colors duration-700"></div>
     <div class="absolute -bottom-36 -left-36 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-700"></div>
 

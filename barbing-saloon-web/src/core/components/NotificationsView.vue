@@ -1,165 +1,132 @@
 <template>
-  <div class="space-y-6 animate-fade-in relative max-w-5xl mx-auto">
-    <!-- Header Banner -->
-    <div class="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--color-accent)]/5 blur-3xl pointer-events-none"></div>
-      
-      <div class="relative z-10">
-        <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] font-bold">Activity Stream</p>
-        <h1 class="mt-2 font-display text-4xl text-[var(--color-text-primary)] drop-shadow-lg flex items-center gap-3">
-          Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-text-primary)]">Notifications</span>
-          <span v-if="unreadCount > 0" class="flex items-center justify-center h-8 w-8 rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] text-sm font-bold shadow-[0_0_15px_rgba(255,103,0,0.4)]">
-            {{ unreadCount }}
-          </span>
-        </h1>
-        <p class="mt-2 text-sm text-[var(--color-text-secondary)]">Stay updated on recent events and alerts in real-time.</p>
-      </div>
-      
-      <div class="relative z-10 flex items-center gap-3 flex-wrap">
-        <!-- Quick Refresh Button -->
-        <button 
-          @click="refresh"
-          :disabled="isLoading || isRefreshing"
-          class="flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-4 py-3 text-sm font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/30 transition-all shrink-0 active:scale-95 disabled:opacity-50"
-          title="Refresh notifications"
-        >
-          <ArrowPathIcon class="w-5 h-5" :class="{ 'animate-spin': isLoading || isRefreshing }" />
-          <span class="hidden sm:inline">Refresh</span>
-        </button>
+  <div class="space-y-4 sm:space-y-5 animate-fade-in relative max-w-4xl mx-auto">
+    <!-- Header & Balanced Controls -->
+    <NotificationsHeader
+      :total-count="notifications.length"
+      :unread-count="unreadCount"
+      :is-loading="isLoading"
+      :is-refreshing="isRefreshing"
+      :is-clearing="isClearing"
+      :show-filters="showFilters"
+      :show-settings="authStore.isCustomer"
+      :has-active-filters="hasActiveFilters"
+      :active-filter-count="activeFilterCount"
+      :read-filter="readFilter"
+      @update:read-filter="readFilter = $event"
+      @refresh="refresh"
+      @open-settings="router.push('/customer/dashboard/notification-settings')"
+      @toggle-filters="showFilters = !showFilters"
+      @mark-all-read="handleMarkAllRead"
+      @clear-all="handleClearAll"
+    />
 
-        <!-- Filters Toggle -->
-        <button 
-          @click="showFilters = !showFilters"
-          class="flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-all shrink-0"
-          :class="hasActiveFilters ? 'border-[var(--color-accent)]/40 bg-[var(--color-accent)]/10 text-[var(--color-accent)]' : 'bg-[var(--color-bg-tertiary)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/30'"
-        >
-          <FunnelIcon class="w-5 h-5" />
-          Filters
-          <span v-if="hasActiveFilters" class="flex items-center justify-center h-5 w-5 rounded-full bg-[var(--color-accent)] text-[var(--color-accent-foreground)] text-[10px] font-bold">
-            {{ (activeTimeFilter !== 'all' ? 1 : 0) + (activeTypeFilter !== 'all' ? 1 : 0) }}
-          </span>
-        </button>
-
-        <!-- Customer Settings -->
-        <button 
-          v-if="authStore.isCustomer"
-          @click="router.push('/customer/dashboard/notification-settings')" 
-          class="flex items-center justify-center gap-2 rounded-xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:text-[var(--color-accent)] px-5 py-3 text-sm font-bold transition-all hover:border-[var(--color-accent)]/30 shrink-0"
-        >
-          <Cog6ToothIcon class="w-5 h-5" />
-          Settings
-        </button>
-
-        <!-- Mark All Read -->
-        <button 
-          v-if="unreadCount > 0" 
-          @click="markAllRead" 
-          class="flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)] px-5 py-3 text-sm font-bold hover:brightness-110 transition-all active:scale-[0.98] shrink-0"
-        >
-          <CheckCircleIcon class="w-5 h-5" />
-          Mark all read
-        </button>
-      </div>
-    </div>
-
-    <!-- Decomposed Filter Bar -->
+    <!-- Expandable Search & Facet Filter Panel -->
     <NotificationFilterBar
       :show-filters="showFilters"
       :time-filters="timeFilters"
       :type-filters="typeFilters"
       :active-time-filter="activeTimeFilter"
       :active-type-filter="activeTypeFilter"
+      :search-query="searchQuery"
+      :type-counts="typeCounts"
+      :hide-staff-filters="authStore.isCustomer"
       :has-active-filters="hasActiveFilters"
       :filtered-count="filteredNotifications.length"
       :total-count="notifications.length"
       @update:active-time-filter="activeTimeFilter = $event"
       @update:active-type-filter="activeTypeFilter = $event"
+      @update:search-query="searchQuery = $event"
       @clear-filters="clearFilters"
     />
 
-    <!-- Notification List -->
-    <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl overflow-hidden flex flex-col min-h-[500px]">
-      <!-- Initial Loading Skeleton (only displayed when list is completely empty) -->
-      <div v-if="isLoading && notifications.length === 0" class="p-24 flex flex-col items-center justify-center gap-4 text-center">
-        <div class="h-12 w-12 rounded-full border-4 border-[var(--color-accent)]/20 border-t-[var(--color-accent)] animate-spin"></div>
-        <p class="text-[var(--color-text-secondary)] font-medium">Loading activity stream...</p>
-      </div>
-      
-      <!-- Empty state: No notifications in inbox -->
-      <div v-else-if="notifications.length === 0" class="p-24 flex flex-col items-center justify-center text-center">
-        <div class="h-24 w-24 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-full flex items-center justify-center mb-6 shadow-inner relative">
-          <BellIcon class="w-10 h-10 text-[var(--color-text-muted)]/50" />
-          <div class="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-bg-secondary)] rounded-full flex items-center justify-center">
-            <div class="w-2.5 h-2.5 bg-[var(--color-accent)] rounded-full"></div>
-          </div>
-        </div>
-        <h2 class="font-display text-2xl text-[var(--color-text-primary)] mb-2">You're all caught up!</h2>
-        <p class="text-[var(--color-text-secondary)] max-w-sm">When new bookings, status updates, or payment notifications arrive, they will appear here in real-time.</p>
-      </div>
+    <!-- Loading or Empty States -->
+    <NotificationFeedStates
+      v-if="feedStateMode"
+      :mode="feedStateMode"
+      :is-customer="authStore.isCustomer"
+      @browse-services="router.push('/customer/dashboard/services')"
+      @refresh="refresh"
+      @show-all="readFilter = 'all'"
+      @reset-filters="clearAllFilters"
+    />
 
-      <!-- Filtered empty state: No results for current filter combination -->
-      <div v-else-if="filteredNotifications.length === 0" class="p-24 flex flex-col items-center justify-center text-center">
-        <div class="h-24 w-24 bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] rounded-full flex items-center justify-center mb-6 shadow-inner">
-          <FunnelIcon class="w-10 h-10 text-[var(--color-text-muted)]/50" />
+    <!-- Grouped Notification Cards -->
+    <div v-else class="space-y-5">
+      <section v-for="group in groupedNotifications" :key="group.label" class="space-y-2.5 sm:space-y-3">
+        <!-- Group Header -->
+        <div class="flex items-center gap-2.5 px-1">
+          <span class="h-2 w-2 rounded-full bg-[var(--color-accent)]/70 shrink-0" aria-hidden="true"></span>
+          <h2 class="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+            {{ group.label }}
+          </h2>
+          <div class="flex-1 h-px bg-[var(--color-border)]"></div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] tabular-nums">
+            {{ group.items.length }} {{ group.items.length === 1 ? 'notification' : 'notifications' }}
+          </span>
         </div>
-        <h2 class="font-display text-2xl text-[var(--color-text-primary)] mb-2">No matching notifications</h2>
-        <p class="text-[var(--color-text-secondary)] max-w-sm mb-6">Try adjusting or clearing your filters to see more activity.</p>
-        <button @click="clearFilters" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 text-[var(--color-accent)] text-sm font-bold hover:bg-[var(--color-accent)]/20 transition-colors">
-          <XMarkIcon class="h-4 w-4" />
-          Clear Filters
+
+        <!-- Individual Notification Cards -->
+        <div class="space-y-2.5 sm:space-y-3">
+          <NotificationRow
+            v-for="notif in group.items"
+            :key="notif.id"
+            :notif="notif"
+            @read="handleMarkAsRead"
+            @delete="handleDeleteNotification"
+            @select="handleSelectNotification"
+            @copy="handleCopy"
+          />
+        </div>
+      </section>
+
+      <!-- Progressive Load More -->
+      <div v-if="remainingCount > 0" class="pt-1 flex justify-center">
+        <button
+          type="button"
+          @click="visibleLimit += 20"
+          class="min-h-[42px] px-5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-xs font-semibold text-[var(--color-text-primary)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-colors tabular-nums"
+        >
+          Show older notifications ({{ remainingCount }} remaining)
         </button>
       </div>
-      
-      <!-- Grouped Notification List -->
-      <div v-else>
-        <div v-for="(group, gi) in groupedNotifications" :key="group.label">
-          <!-- Date Group Header -->
-          <div class="sticky top-0 z-10 px-6 md:px-8 py-3 bg-[var(--color-bg-primary)]/90 backdrop-blur-md border-b border-[var(--color-border)]" :class="gi > 0 ? 'border-t border-[var(--color-border)]' : ''">
-            <div class="flex items-center gap-3">
-              <div class="h-2 w-2 rounded-full bg-[var(--color-accent)]/50"></div>
-              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent)]">{{ group.label }}</span>
-              <div class="flex-1 h-px bg-gradient-to-r from-[var(--color-border)] to-transparent"></div>
-              <span class="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">{{ group.items.length }} {{ group.items.length === 1 ? 'notification' : 'notifications' }}</span>
-            </div>
-          </div>
-
-          <div class="divide-y divide-[var(--color-border)]">
-            <!-- Decomposed Notification Row with instant optimistic actions -->
-            <NotificationRow
-              v-for="notif in group.items"
-              :key="notif.id"
-              :notif="notif"
-              @read="markAsRead"
-              @delete="deleteNotification"
-            />
-          </div>
-        </div>
-      </div>
     </div>
+
+    <!-- Interactive Detail Bottom Sheet / Modal -->
+    <NotificationDetailSheet
+      :notif="selectedNotification"
+      @close="selectedNotification = null"
+      @delete="handleDeleteNotification"
+      @copy="handleCopy"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { 
-  BellIcon, 
-  CheckCircleIcon, 
-  Cog6ToothIcon,
-  FunnelIcon,
-  XMarkIcon,
-  ArrowPathIcon
-} from '@heroicons/vue/24/outline'
-import { useAuthStore } from '../../modules/auth/store/auth.store'
-import { useNotifications } from '@/core/composables/useNotifications'
-import NotificationFilterBar from './notifications/NotificationFilterBar.vue'
-import NotificationRow from './notifications/NotificationRow.vue'
-import { timeFilters, typeFilters } from './notifications/notificationUtils'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../modules/auth/store/auth.store';
+import { useNotifications } from '@/core/composables/useNotifications';
+import { useConfirm } from '@/core/composables/useConfirm';
+import { useToast } from '@/core/composables/useToast';
+import NotificationsHeader from './notifications/NotificationsHeader.vue';
+import NotificationFilterBar from './notifications/NotificationFilterBar.vue';
+import NotificationFeedStates from './notifications/NotificationFeedStates.vue';
+import NotificationRow from './notifications/NotificationRow.vue';
+import NotificationDetailSheet from './notifications/NotificationDetailSheet.vue';
+import {
+  groupNotificationsByDate,
+  matchesSearchQuery,
+  matchesTimeFilter,
+  matchesTypeFilter,
+  timeFilters,
+  typeFilters,
+} from './notifications/notificationUtils';
 
-const authStore = useAuthStore()
-const router = useRouter()
+const authStore = useAuthStore();
+const router = useRouter();
+const toast = useToast();
+const { confirm } = useConfirm();
 
-// Consume centralized notification state and reactive methods
 const {
   notifications,
   unreadCount,
@@ -169,107 +136,150 @@ const {
   markAsRead,
   markAllRead,
   deleteNotification,
+  clearAll,
   startPolling,
   stopPolling,
-} = useNotifications()
+} = useNotifications();
 
-const activeTimeFilter = ref('all')
-const activeTypeFilter = ref('all')
-const showFilters = ref(false)
+const isClearing = ref(false);
+const readFilter = ref('all');
+const activeTimeFilter = ref('all');
+const activeTypeFilter = ref('all');
+const searchQuery = ref('');
+const showFilters = ref(false);
+const visibleLimit = ref(20);
+const selectedNotification = ref(null);
 
-const hasActiveFilters = computed(() => activeTimeFilter.value !== 'all' || activeTypeFilter.value !== 'all')
+const activeFilterCount = computed(() => {
+  return (
+    (activeTimeFilter.value !== 'all' ? 1 : 0) +
+    (activeTypeFilter.value !== 'all' ? 1 : 0) +
+    (searchQuery.value.trim() ? 1 : 0)
+  );
+});
+
+const hasActiveFilters = computed(() => activeFilterCount.value > 0);
+
+const baseScopedNotifications = computed(() => {
+  return notifications.value.filter((n) => {
+    if (readFilter.value === 'unread' && n.is_read) return false;
+    if (!matchesTimeFilter(n, activeTimeFilter.value)) return false;
+    if (!matchesSearchQuery(n, searchQuery.value)) return false;
+    return true;
+  });
+});
+
+const typeCounts = computed(() => {
+  const counts = {};
+  for (const f of typeFilters) {
+    counts[f.value] = baseScopedNotifications.value.filter((n) =>
+      matchesTypeFilter(n, f.value)
+    ).length;
+  }
+  return counts;
+});
 
 const filteredNotifications = computed(() => {
-  let result = notifications.value
+  return baseScopedNotifications.value.filter((n) =>
+    matchesTypeFilter(n, activeTypeFilter.value)
+  );
+});
 
-  if (activeTimeFilter.value !== 'all') {
-    const now = new Date()
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const startOfYesterday = new Date(startOfToday)
-    startOfYesterday.setDate(startOfYesterday.getDate() - 1)
-
-    result = result.filter(n => {
-      const d = new Date(n.created_at)
-      switch (activeTimeFilter.value) {
-        case 'today': return d >= startOfToday
-        case 'yesterday': return d >= startOfYesterday && d < startOfToday
-        case 'week': {
-          const startOfWeek = new Date(startOfToday)
-          startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
-          return d >= startOfWeek
-        }
-        case 'month': {
-          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-          return d >= startOfMonth
-        }
-        default: return true
-      }
-    })
+const feedStateMode = computed(() => {
+  if (isLoading.value && notifications.value.length === 0) return 'loading';
+  if (notifications.value.length === 0) return 'empty';
+  if (readFilter.value === 'unread' && filteredNotifications.value.length === 0 && !hasActiveFilters.value) {
+    return 'empty-unread';
   }
+  if (filteredNotifications.value.length === 0) return 'empty-filtered';
+  return '';
+});
 
-  if (activeTypeFilter.value !== 'all') {
-    result = result.filter(n => {
-      const t = (n.type || '').toLowerCase()
-      if (activeTypeFilter.value === 'booking') {
-        return t === 'booking' || t.startsWith('booking_')
-      }
-      if (activeTypeFilter.value === 'payment') {
-        return t === 'payment' || t.startsWith('payment_')
-      }
-      return t === activeTypeFilter.value
-    })
-  }
+const remainingCount = computed(() => Math.max(0, filteredNotifications.value.length - visibleLimit.value));
+const groupedNotifications = computed(() =>
+  groupNotificationsByDate(filteredNotifications.value.slice(0, visibleLimit.value))
+);
 
-  return result
-})
-
-const groupedNotifications = computed(() => {
-  const groups = []
-  let currentLabel = ''
-  const now = new Date()
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const startOfYesterday = new Date(startOfToday)
-  startOfYesterday.setDate(startOfYesterday.getDate() - 1)
-  const startOfWeek = new Date(startOfToday)
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
-
-  for (const n of filteredNotifications.value) {
-    const d = new Date(n.created_at)
-    let label
-    if (d >= startOfToday) {
-      label = 'Today'
-    } else if (d >= startOfYesterday) {
-      label = 'Yesterday'
-    } else if (d >= startOfWeek) {
-      label = 'Earlier This Week'
-    } else {
-      label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    }
-
-    if (label !== currentLabel) {
-      currentLabel = label
-      groups.push({ label, items: [] })
-    }
-    groups[groups.length - 1].items.push(n)
-  }
-  return groups
-})
+watch([readFilter, activeTimeFilter, activeTypeFilter, searchQuery], () => {
+  visibleLimit.value = 20;
+});
 
 function clearFilters() {
-  activeTimeFilter.value = 'all'
-  activeTypeFilter.value = 'all'
+  activeTimeFilter.value = 'all';
+  activeTypeFilter.value = 'all';
+  searchQuery.value = '';
+}
+
+function clearAllFilters() {
+  clearFilters();
+  readFilter.value = 'all';
 }
 
 const refresh = async () => {
-  await fetchNotifications({ silent: notifications.value.length > 0 })
+  await fetchNotifications({ silent: notifications.value.length > 0 });
+};
+
+async function handleMarkAsRead(id) {
+  if (!(await markAsRead(id))) toast.error('Could not mark notification as read');
+}
+
+async function handleMarkAllRead() {
+  if (await markAllRead()) toast.success('All notifications marked as read');
+  else toast.error('Could not mark all notifications as read');
+}
+
+async function handleDeleteNotification(id) {
+  if (await deleteNotification(id)) {
+    if (selectedNotification.value?.id === id) selectedNotification.value = null;
+    toast.success('Notification removed');
+  } else {
+    toast.error('Could not remove notification');
+  }
+}
+
+async function handleClearAll() {
+  const ok = await confirm({
+    title: 'Clear All Notifications',
+    message: 'All notifications will be removed from your inbox. This cannot be undone.',
+    confirmText: 'Clear All',
+    cancelText: 'Keep',
+    variant: 'danger',
+    resolutionType: 'deleted',
+    resolutionTitle: 'Inbox Cleared',
+    resolutionMessage: 'All notifications have been removed.',
+    resolutionBadgeText: 'CLEARED',
+  });
+  if (!ok) return;
+
+  isClearing.value = true;
+  try {
+    if (!(await clearAll())) toast.error('Failed to clear notifications');
+  } finally {
+    isClearing.value = false;
+  }
+}
+
+function handleSelectNotification(notif) {
+  selectedNotification.value = notif;
+  if (notif && !notif.is_read) handleMarkAsRead(notif.id);
+}
+
+async function handleCopy({ value, label }) {
+  if (!value) return;
+  try {
+    await navigator.clipboard.writeText(String(value));
+    toast.success(`${label || 'Value'} copied to clipboard`);
+  } catch {
+    toast.error('Could not copy to clipboard');
+  }
 }
 
 onMounted(() => {
-  fetchNotifications()
-  startPolling(15000)
-})
+  fetchNotifications();
+  startPolling(15000);
+});
 
 onUnmounted(() => {
-  stopPolling()
-})
+  stopPolling();
+});
 </script>

@@ -51,6 +51,7 @@
         :previewImage="previewImage" 
         :selectedFileName="selectedFileName" 
         :barbers="barbers" 
+        :gallery-categories="galleryCategories"
         role="barber" 
         colorTheme="gold" 
         @close="showUploadForm = false" 
@@ -74,6 +75,7 @@ const {
   saving,
   gallery,
   barbers,
+  galleryCategories,
   fetchGallery,
   saveImage,
   deleteImage,
@@ -89,7 +91,7 @@ const selectedFile = ref(null);
 const uploadForm = reactive({
   image_url: '',
   title: '',
-  category: 'Haircut',
+  category: 'haircut',
   description: '',
 });
 
@@ -110,7 +112,7 @@ const openUploadForm = () => {
   editingId.value = null;
   uploadForm.image_url = '';
   uploadForm.title = '';
-  uploadForm.category = 'Haircut';
+  uploadForm.category = galleryCategories.value[0]?.slug || 'haircut';
   uploadForm.description = '';
   selectedFile.value = null;
   selectedFileName.value = '';
@@ -122,7 +124,11 @@ const openEditForm = (item) => {
   editingId.value = item.id;
   uploadForm.image_url = item.image_path || item.image_url || '';
   uploadForm.title = item.title;
-  uploadForm.category = item.category;
+  const rawCat = String(item.category || '').trim().toLowerCase();
+  const matched = galleryCategories.value.find(
+    c => c.slug.toLowerCase() === rawCat || c.name.toLowerCase() === rawCat
+  );
+  uploadForm.category = matched ? matched.slug : (item.category || galleryCategories.value[0]?.slug || 'haircut');
   uploadForm.description = item.description || '';
   selectedFile.value = null;
   selectedFileName.value = '';

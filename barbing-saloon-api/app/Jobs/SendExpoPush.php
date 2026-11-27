@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\DeviceToken;
+use App\Models\NotificationDelivery;
 use App\Models\PushDeliveryStat;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,12 +43,21 @@ class SendExpoPush implements ShouldQueue
         public string $title,
         public string $body,
         public array $data = [],
+        public ?int $deliveryId = null,
     ) {}
 
     public function handle(): void
     {
         if (empty($this->tokens)) {
             return;
+        }
+
+        if ($this->deliveryId) {
+            NotificationDelivery::where('id', $this->deliveryId)->update([
+                'status' => 'processing',
+                'attempts' => \Illuminate\Support\Facades\DB::raw('attempts + 1'),
+                'last_attempt_at' => now(),
+            ]);
         }
 
         // Build messages — one per token, batched to Expo API
@@ -73,6 +83,14 @@ class SendExpoPush implements ShouldQueue
 
         if (empty($messages)) {
             Log::debug('SendExpoPush: No valid Expo tokens to send to.');
+
+            if ($this->deliveryId) {
+                NotificationDelivery::where('id', $this->deliveryId)->update([
+                    'status' => 'failed',
+                    'failure_code' => 'NO_VALID_EXPO_TOKENS',
+                    'failure_reason' => 'None of the provided device tokens were recognized Expo push tokens',
+                ]);
+            }
 
             return;
         }
@@ -137,6 +155,22 @@ class SendExpoPush implements ShouldQueue
                 $failureReasons['ExceptionThrown'] = ($failureReasons['ExceptionThrown'] ?? 0) + count($chunk);
                 Log::error('Expo Push API request failed: '.$e->getMessage());
                 throw $e; // Let the queue retry
+            }
+        }
+
+        if ($this->deliveryId) {
+            if ($totalDelivered > 0) {
+                NotificationDelivery::where('id', $this->deliveryId)->update([
+                    'status' => 'delivered',
+                    'delivered_at' => now(),
+                    'provider_reference' => 'expo-'.now()->timestamp,
+                ]);
+            } elseif ($totalFailed > 0) {
+                NotificationDelivery::where('id', $this->deliveryId)->update([
+                    'status' => 'failed',
+                    'failure_code' => array_key_first($failureReasons) ?? 'PUSH_ERROR',
+                    'failure_reason' => json_encode($failureReasons),
+                ]);
             }
         }
 

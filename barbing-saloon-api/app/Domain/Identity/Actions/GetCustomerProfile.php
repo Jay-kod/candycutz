@@ -2,6 +2,7 @@
 
 namespace App\Domain\Identity\Actions;
 
+use App\Domain\Identity\Services\ConsentService;
 use App\Domain\Shared\Enums\AppointmentStatus;
 use App\Domain\Shared\Services\UserMediaUrl;
 use App\Models\Appointment;
@@ -40,17 +41,33 @@ class GetCustomerProfile
                 'id' => $customer->id,
                 'name' => $customer->name,
                 'email' => $customer->email,
+                'is_email_verified' => $customer->hasVerifiedEmail(),
+                'email_verified_at' => $customer->email_verified_at?->toIso8601String(),
                 'phone' => $customer->phone ?? 'N/A',
                 'is_active' => (bool) $customer->is_active,
                 'status' => $customer->status ?? ($customer->is_active ? 'active' : 'suspended'),
                 'auth_provider' => $customer->auth_provider ?: 'local',
                 'registered_via' => $customer->auth_provider && $customer->auth_provider !== 'local' ? ucfirst($customer->auth_provider) : 'Registration form',
                 'avatar' => app(UserMediaUrl::class)->for($customer, $customer->avatar),
+                'no_show_count' => (int) ($customer->no_show_count ?? 0),
+                'last_no_show_at' => $customer->last_no_show_at?->toIso8601String(),
+                'requires_deposit' => (bool) ($customer->requires_deposit ?? false),
                 'created_at' => $customer->created_at?->toIso8601String(),
             ],
             'total_bookings' => $appointments->count(),
             'total_spent' => $totalSpent,
             'appointments' => $appointments,
+            'consents' => $customer->consents()
+                ->orderByDesc('accepted_at')
+                ->get()
+                ->map(fn ($consent) => [
+                    'type' => $consent->type,
+                    'version' => $consent->version,
+                    'accepted_at' => $consent->accepted_at?->toIso8601String(),
+                    'source' => $consent->source,
+                ])
+                ->values(),
+            'consent_status' => app(ConsentService::class)->statusFor($customer),
         ];
     }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useNotifications } from '../useNotifications'
+import { resetNotifications, useNotifications } from '../useNotifications'
 import { getLabelForType, getIconColorForType, getBgColorForType } from '../../components/notifications/notificationUtils'
 import api from '@/shared/api/client'
 
@@ -99,6 +99,23 @@ describe('useNotifications composable', () => {
     expect(api.delete).toHaveBeenCalledWith('/v1/notifications/401')
   })
 
+  it('optimistically clears all notifications and calls DELETE /v1/notifications', async () => {
+    api.delete.mockResolvedValueOnce({ data: { success: true } })
+
+    const { notifications, unreadCount, clearAll } = useNotifications()
+    notifications.value = [
+      { id: 451, title: 'Test 1', is_read: false },
+      { id: 452, title: 'Test 2', is_read: true },
+    ]
+    unreadCount.value = 1
+
+    await clearAll()
+
+    expect(notifications.value).toHaveLength(0)
+    expect(unreadCount.value).toBe(0)
+    expect(api.delete).toHaveBeenCalledWith('/v1/notifications')
+  })
+
   it('resets notifications state upon resetNotifications call', () => {
     const { notifications, unreadCount, resetNotifications } = useNotifications()
     notifications.value = [
@@ -110,6 +127,48 @@ describe('useNotifications composable', () => {
 
     expect(notifications.value).toHaveLength(0)
     expect(unreadCount.value).toBe(0)
+  })
+
+  it('continues short-polling with an explicit zero SSE cursor', async () => {
+    vi.useFakeTimers()
+    api.get.mockResolvedValue({ data: { data: { count: 0 } } })
+
+    const makeStreamResponse = () => {
+      const chunks = [
+        { value: new TextEncoder().encode('id: 0\n: ping\n\n'), done: false },
+        { value: undefined, done: true },
+      ]
+
+      return {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockImplementation(() => Promise.resolve(chunks.shift())),
+          }),
+        },
+      }
+    }
+
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(makeStreamResponse()))
+    vi.stubGlobal('fetch', fetchMock)
+    const { startPolling, stopPolling } = useNotifications()
+
+    try {
+      startPolling()
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(fetchMock.mock.calls[1][0]).toContain('/notifications/stream?last_event_id=0')
+      expect(fetchMock.mock.calls[1][1].headers['Last-Event-ID']).toBe('0')
+    } finally {
+      stopPolling()
+      resetNotifications()
+      vi.unstubAllGlobals()
+      vi.useRealTimers()
+    }
   })
 })
 

@@ -505,7 +505,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { buildOverlayGradient, parseOverlayPresets, DEFAULT_OVERLAY_COLOR } from '@/core/utils/heroOverlay';
+import { buildOverlayGradient, parseOverlayPresets } from '@/core/utils/heroOverlay';
 import OverlayPresetsManager from './OverlayPresetsManager.vue';
 import { 
   WindowIcon,

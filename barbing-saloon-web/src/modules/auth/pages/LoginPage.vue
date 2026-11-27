@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page flex flex-col lg:flex-row bg-theme-bg relative text-theme-text">
+  <div class="login-page min-h-[99vh] min-h-[99dvh] lg:h-[99vh] lg:h-[99dvh] flex flex-col lg:flex-row bg-theme-bg relative text-theme-text">
     
     <!-- Left Section: Cinematic Branding (Hidden on mobile) -->
     <div class="login-brand-panel hidden lg:flex lg:w-1/2 relative flex-col items-center justify-between p-16 overflow-hidden text-center">
@@ -15,7 +15,7 @@
       <!-- Content -->
       <div class="relative z-10">
         <a href="/" class="text-2xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-2">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-36 w-36 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -43,7 +43,7 @@
       <!-- Mobile Logo -->
       <div class="login-mobile-logo mb-4 lg:hidden flex justify-center w-full">
         <a href="/" class="text-xl font-display font-bold text-theme-text tracking-widest uppercase flex flex-col items-center gap-1 w-fit">
-          <img src="/images/logo-icon.png" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
+          <img :src="'/images/logo-icon.png'" :alt="`${brandName} logo`" class="h-10 w-10 object-contain rounded-full" />
           <BrandWordmark :first="brandNameFirst" :second="brandNameSecond" :gold-first="brandGoldPart === 'first'" :space-between="brandNameSeparator === 'space'" />
         </a>
       </div>
@@ -56,24 +56,46 @@
           <p class="text-theme-muted text-xs sm:text-sm mb-3">Please enter your credentials to access your dashboard.</p>
           
           <div class="login-demo-credentials bg-theme-surface border border-theme-border rounded-lg p-3 text-xs mb-4">
-            <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center justify-between mb-2">
               <span class="text-theme-text font-semibold flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
-                Official Demo Credentials
+                Demo Accounts
               </span>
               <button 
                 type="button" 
-                @click="quickFillCustomer" 
+                @click="fillActiveDemo" 
                 class="text-[11px] font-bold text-gold hover:underline flex items-center gap-1 cursor-pointer">
-                ⚡ Quick Fill
+                Fill Demo
               </button>
             </div>
-            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Email:</span> kefas@customer.com</p>
-            <p class="text-theme-text font-mono"><span class="text-theme-muted font-sans">Password:</span> customer123</p>
-          </div>
 
-          <div class="login-social mb-4">
-            <SocialAuthButtons />
+            <div class="grid grid-cols-4 gap-1 p-1 bg-theme-bg/60 rounded border border-theme-border/50 mb-2.5">
+              <button 
+                v-for="item in demoAccountList" 
+                :key="item.role"
+                type="button"
+                @click="selectDemoRole(item.role)"
+                :class="[
+                  'px-1.5 py-1 text-[11px] font-medium rounded transition-colors text-center truncate cursor-pointer',
+                  activeDemoRole === item.role 
+                    ? 'bg-gold text-obsidian font-bold shadow-sm' 
+                    : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
+                ]">
+                {{ item.label }}
+              </button>
+            </div>
+
+            <div class="space-y-0.5 font-mono text-[11px]">
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Email:</span> {{ currentDemo.email }}</p>
+              <p class="text-theme-text"><span class="text-theme-muted font-sans font-normal">Password:</span> {{ currentDemo.password }}</p>
+            </div>
+
+            <div v-if="currentDemo.portalPath !== '/login'" class="mt-2 pt-1.5 border-t border-theme-border/40 text-[10px] text-theme-muted flex items-center justify-between">
+              <span>Dedicated portal:</span>
+              <RouterLink :to="currentDemo.portalPath" class="text-gold hover:underline font-semibold">
+                Go to {{ currentDemo.portalName }} &rarr;
+              </RouterLink>
+            </div>
           </div>
         </div>
 
@@ -109,11 +131,14 @@
                 class="w-full bg-theme-surface border border-graphite rounded-lg px-4 py-3 pr-12 text-theme-text text-sm font-medium placeholder-theme-muted focus:border-gold focus:ring-1 focus:ring-gold transition-all duration-300 outline-none" 
                 :type="showPassword ? 'text' : 'password'" 
                 placeholder="Enter your password" 
+                autocomplete="current-password"
               />
               <button 
                 type="button" 
                 @click="showPassword = !showPassword" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral hover:text-gold transition-colors p-1">
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-muted hover:text-gold focus:text-gold active:text-gold transition-colors p-2.5 rounded-md flex items-center justify-center touch-manipulation focus:outline-none">
                 <!-- Eye Open -->
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -158,17 +183,13 @@
               </span>
             </button>
 
-            <button
-              type="button"
-              @click="demoCustomerLogin"
-              :disabled="loading"
-              class="login-demo-button w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-2.5 text-sm font-bold text-theme-text transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-70 flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
-              Use Customer Demo
-            </button>
           </div>
         </form>
+
+        <!-- Social Auth -->
+        <div class="login-social w-full">
+          <SocialAuthButtons label="or continue with" button-text="Sign in with Google" />
+        </div>
 
         <!-- Register Link -->
         <div class="login-register-link mt-5 text-center text-sm text-theme-muted">
@@ -191,7 +212,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useBrandIdentity } from '@/shared/composables/useBrandIdentity';
 import BrandWordmark from '@/shared/ui/BrandWordmark.vue';
 import { useRouter } from 'vue-router';
@@ -204,8 +225,8 @@ const { brandName, brandNameFirst, brandNameSecond, brandNameSeparator, brandGol
 const router = useRouter();
 const { login, redirectAfterLogin } = useAuth();
 
-const email = ref('kefas@customer.com');
-const password = ref('customer123');
+const email = ref('');
+const password = ref('');
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
@@ -220,18 +241,57 @@ const schema = object({
   password: string().required('Password is required'),
 });
 
-const quickFillCustomer = () => {
-  email.value = 'kefas@customer.com';
-  password.value = 'customer123';
+const demoAccounts = {
+  customer: {
+    role: 'customer',
+    label: 'Customer',
+    email: 'kefas@customer.com',
+    password: 'customer123',
+    portalPath: '/login',
+    portalName: 'Customer Portal',
+  },
+  barber: {
+    role: 'barber',
+    label: 'Barber',
+    email: 'obo@barber.com',
+    password: 'barber123',
+    portalPath: '/barber/login',
+    portalName: 'Barber Portal',
+  },
+  admin: {
+    role: 'admin',
+    label: 'Admin',
+    email: 'webadmin@candycutz.com',
+    password: 'admin123',
+    portalPath: '/admin/login',
+    portalName: 'Admin Portal',
+  },
+  superadmin: {
+    role: 'superadmin',
+    label: 'Super Admin',
+    email: 'superadmin@candycutz.com',
+    password: 'superadmin123',
+    portalPath: '/admin/login',
+    portalName: 'Super Admin Portal',
+  },
+};
+
+const demoAccountList = Object.values(demoAccounts);
+const activeDemoRole = ref('customer');
+const currentDemo = computed(() => demoAccounts[activeDemoRole.value] || demoAccounts.customer);
+
+const fillActiveDemo = () => {
+  const account = demoAccounts[activeDemoRole.value] || demoAccounts.customer;
+  email.value = account.email;
+  password.value = account.password;
   generalError.value = '';
   errors.email = '';
   errors.password = '';
 };
 
-const demoCustomerLogin = async () => {
-  quickFillCustomer();
-  rememberMe.value = true;
-  await submitForm();
+const selectDemoRole = (role) => {
+  activeDemoRole.value = role;
+  fillActiveDemo();
 };
 
 async function submitForm() {
@@ -273,8 +333,10 @@ async function submitForm() {
 
 <style scoped>
 .login-page {
-  height: 100vh;
-  height: 100dvh;
+  height: 99vh;
+  height: 99dvh;
+  min-height: 99vh;
+  min-height: 99dvh;
   overflow: hidden;
 }
 
@@ -286,7 +348,18 @@ async function submitForm() {
 }
 
 @media (max-height: 760px) {
+  .login-page {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow-y: auto;
+  }
+
   .login-panel {
+    height: auto;
+    min-height: 99vh;
+    min-height: 99dvh;
+    overflow: visible;
     padding: 0.75rem 1rem;
   }
 
@@ -316,9 +389,6 @@ async function submitForm() {
     margin-bottom: 0;
   }
 
-  .login-demo-credentials,
-  .login-social,
-  .login-demo-button,
   .login-staff-links {
     display: none;
   }

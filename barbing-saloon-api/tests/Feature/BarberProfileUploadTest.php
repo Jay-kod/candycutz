@@ -15,6 +15,7 @@ it('stores a barber avatar privately through the account endpoint', function () 
     $response = $this->actingAs($barber->user)->post('/api/v1/barber/account', [
         'name' => $barber->user->name,
         'email' => $barber->user->email,
+        'phone' => '',
         'avatar' => $avatar,
         'cover_image' => $cover,
     ]);

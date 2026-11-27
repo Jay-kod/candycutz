@@ -15,8 +15,9 @@ export function useDashboardAnalytics(role = 'admin') {
   ];
 
   const fetchAnalytics = async (silent = false) => {
+    const shouldUseCache = role !== 'customer';
     const cacheKey = `${role}_analytics_${range.value}`;
-    const cachedData = localStorage.getItem(cacheKey);
+    const cachedData = shouldUseCache ? localStorage.getItem(cacheKey) : null;
     
     if (cachedData) {
       try {
@@ -32,7 +33,9 @@ export function useDashboardAnalytics(role = 'admin') {
     try {
       const res = await client.get(`/${role}/analytics`, { params: { range: range.value } });
       analytics.value = res.data.data;
-      localStorage.setItem(cacheKey, JSON.stringify(res.data.data));
+      if (shouldUseCache) {
+        localStorage.setItem(cacheKey, JSON.stringify(res.data.data));
+      }
     } catch (err) {
       console.error(err);
       if (!silent && !cachedData) error.value = true;
@@ -53,6 +56,8 @@ export function useDashboardAnalytics(role = 'admin') {
       { label: 'completed', count: breakdown.completed || 0, bgClass: 'bg-emerald-400', hex: '#34d399' },
       { label: 'pending', count: breakdown.pending || 0, bgClass: 'bg-amber-400', hex: '#fbbf24' },
       { label: 'confirmed', count: breakdown.confirmed || 0, bgClass: 'bg-blue-400', hex: '#60a5fa' },
+      { label: 'checked_in', count: breakdown.checked_in || 0, bgClass: 'bg-cyan-400', hex: '#22d3ee' },
+      { label: 'in_progress', count: breakdown.in_progress || 0, bgClass: 'bg-indigo-400', hex: '#818cf8' },
       { label: 'cancelled', count: breakdown.cancelled || 0, bgClass: 'bg-red-400', hex: '#f87171' },
       { label: 'no_show', count: breakdown.no_show || 0, bgClass: 'bg-purple-400', hex: '#c084fc' }
     ].filter(item => item.count > 0);

@@ -13,6 +13,7 @@ export function usePrivacyCms() {
   const lastSaved = ref(null);
   const initialSnapshot = ref(null);
   const activeTab = ref('all');
+  const privacyVersion = ref('');
 
   const content = ref({ ...DEFAULT_PRIVACY_CONTENT });
   const sections = ref(JSON.parse(JSON.stringify(DEFAULT_PRIVACY_SECTIONS)));
@@ -60,7 +61,8 @@ export function usePrivacyCms() {
     const current = JSON.stringify({
       content: content.value,
       sections: sections.value,
-      heroOpacity: heroOpacity.value
+      heroOpacity: heroOpacity.value,
+      privacyVersion: privacyVersion.value
     });
     return initialSnapshot.value !== current;
   });
@@ -125,6 +127,7 @@ export function usePrivacyCms() {
       if (data) {
         if (data.privacy_title) content.value.privacy_title = String(data.privacy_title);
         if (data.privacy_subtitle) content.value.privacy_subtitle = String(data.privacy_subtitle);
+        privacyVersion.value = data.privacy_version ? String(data.privacy_version) : new Date().toISOString().slice(0, 10);
 
         if (data.privacy_sections) {
           try {
@@ -145,7 +148,8 @@ export function usePrivacyCms() {
         initialSnapshot.value = JSON.stringify({
           content: content.value,
           sections: sections.value,
-          heroOpacity: heroOpacity.value
+          heroOpacity: heroOpacity.value,
+          privacyVersion: privacyVersion.value
         });
         lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
       }
@@ -168,6 +172,7 @@ export function usePrivacyCms() {
       formData.append('settings[privacy_title]', content.value.privacy_title);
       formData.append('settings[privacy_subtitle]', content.value.privacy_subtitle || '');
       formData.append('settings[privacy_sections]', JSON.stringify(sections.value));
+      formData.append('settings[privacy_version]', privacyVersion.value);
       formData.append('settings[page_hero_privacy_overlay_opacity]', String(heroOpacity.value));
       formData.append('page_hero_page', 'privacy');
 
@@ -198,7 +203,8 @@ export function usePrivacyCms() {
       initialSnapshot.value = JSON.stringify({
         content: content.value,
         sections: sections.value,
-        heroOpacity: heroOpacity.value
+        heroOpacity: heroOpacity.value,
+        privacyVersion: privacyVersion.value
       });
       lastSaved.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
@@ -216,6 +222,7 @@ export function usePrivacyCms() {
     lastSaved,
     isDirty,
     activeTab,
+    privacyVersion,
     heroImage,
     heroOpacity,
     selectedHeroImage,

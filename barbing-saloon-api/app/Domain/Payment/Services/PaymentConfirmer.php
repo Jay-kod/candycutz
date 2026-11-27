@@ -13,6 +13,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -34,11 +35,14 @@ class PaymentConfirmer
     public function confirm(string $reference, string $source, array $payload = []): Payment
     {
         try {
-            return DB::transaction(function () use ($reference, $source, $payload) {
+            /** @var array{payment: Payment, appointment: Appointment|null, should_dispatch: bool} $txResult */
+            $txResult = DB::transaction(function () use ($reference, $source, $payload) {
                 /** @var Payment|null $payment */
-                $payment = Payment::where('reference', $reference)
-                    ->orWhere('transaction_ref', $reference)
-                    ->orWhere('gateway_reference', $reference)
+                $payment = Payment::where(function ($q) use ($reference) {
+                    $q->where('reference', $reference)
+                        ->orWhere('transaction_ref', $reference)
+                        ->orWhere('gateway_reference', $reference);
+                })
                     ->lockForUpdate()
                     ->first();
 
@@ -55,10 +59,14 @@ class PaymentConfirmer
                 if ($currentStatus->isSuccess()) {
                     Log::info("PaymentConfirmer: Payment [{$reference}] already in success state [{$currentStatus->value}]. Skipping duplicate confirmation.");
 
-                    return $payment;
+                    return [
+                        'payment' => $payment,
+                        'appointment' => null,
+                        'should_dispatch' => false,
+                    ];
                 }
 
-                $appointment = $payment->appointment;
+                $appointment = Appointment::whereKey($payment->appointment_id)->lockForUpdate()->first();
                 if (! $appointment) {
                     Log::error("PaymentConfirmer: Appointment missing for payment [{$reference}]");
                     throw PaymentException::invalidState("Appointment missing for payment [{$reference}]");
@@ -67,6 +75,14 @@ class PaymentConfirmer
                 // Verify amount & currency
                 $expectedKobo = $this->pricingService->amountDue($appointment);
                 $actualKobo = $payment->amount_minor ?: (int) $payment->amount;
+
+                // Normalize to kobo if stored in Naira (< 100,000 threshold)
+                if ($expectedKobo > 0 && $expectedKobo < 100000) {
+                    $expectedKobo = (int) round($expectedKobo * 100);
+                }
+                if ($actualKobo > 0 && $actualKobo < 100000) {
+                    $actualKobo = (int) round($actualKobo * 100);
+                }
 
                 // In payload from Paystack, amount might also be present in kobo
                 $payloadKobo = isset($payload['amount']) ? (int) $payload['amount'] : null;
@@ -103,22 +119,74 @@ class PaymentConfirmer
 
                 // Update Appointment
                 $oldAppointmentStatus = $appointment->status;
+                $oldStatusValue = $oldAppointmentStatus instanceof AppointmentStatus
+                    ? $oldAppointmentStatus->value
+                    : (string) $oldAppointmentStatus;
+
                 $appointmentUpdate = [
                     'payment_status' => AppointmentPaymentStatus::paid,
                     'deposit_paid' => true,
                 ];
 
-                if ($oldAppointmentStatus === AppointmentStatus::pending) {
+                $shouldSendConfirmationEmail = false;
+
+                if (in_array($oldStatusValue, ['pending', 'draft'], true)) {
                     $appointmentUpdate['status'] = AppointmentStatus::confirmed;
+                    $appointmentUpdate['draft_expires_at'] = null;
+                    $shouldSendConfirmationEmail = true;
+                } elseif ($oldStatusValue === 'cancelled' && str_contains(strtolower((string) $appointment->cancellation_reason), 'expire')) {
+                    // Late payment arrived after draft hold expired. Check if slot is still free.
+                    $barberId = $appointment->barber_id;
+                    $date = Carbon::parse($appointment->appointment_date)->toDateString();
+                    $startTime = substr(trim((string) $appointment->appointment_time), 0, 5);
+                    $endTime = $appointment->end_time
+                        ? substr(trim((string) $appointment->end_time), 0, 5)
+                        : Carbon::parse("{$date} {$startTime}")->addMinutes($appointment->total_duration_minutes ?: 30)->format('H:i');
+
+                    $slotTaken = false;
+                    if ($barberId) {
+                        $slotTaken = Appointment::where('barber_id', $barberId)
+                            ->where('id', '!=', $appointment->id)
+                            ->where('appointment_date', $date)
+                            ->whereNotIn('status', [AppointmentStatus::cancelled->value, AppointmentStatus::no_show->value, 'cancelled', 'no_show'])
+                            ->where(function ($q) {
+                                $q->whereNotIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                    ->orWhere(function ($draftQuery) {
+                                        $draftQuery->whereIn('status', [AppointmentStatus::draft->value, 'draft'])
+                                            ->where(function ($tq) {
+                                                $tq->whereNull('draft_expires_at')
+                                                    ->orWhere('draft_expires_at', '>', now());
+                                            });
+                                    });
+                            })
+                            ->where(function ($query) use ($startTime, $endTime) {
+                                $query->where('appointment_time', '<', $endTime)
+                                    ->where(function ($q) use ($startTime) {
+                                        $q->where('end_time', '>', $startTime)
+                                            ->orWhereNull('end_time');
+                                    });
+                            })
+                            ->exists();
+                    }
+
+                    if (! $slotTaken) {
+                        $appointmentUpdate['status'] = AppointmentStatus::confirmed;
+                        $appointmentUpdate['draft_expires_at'] = null;
+                        $appointmentUpdate['cancellation_reason'] = null;
+                        $shouldSendConfirmationEmail = true;
+                    } else {
+                        $appointmentUpdate['notes'] = trim(($appointment->notes ?? '')."\n[CRITICAL: Payment received after draft hold expired, but slot was re-booked. Staff must re-assign.]");
+                        Log::alert("PaymentConfirmer: Payment received for expired draft appointment #{$appointment->id}, but slot ({$date} {$startTime}) was already taken.");
+                    }
                 }
 
                 $appointment->update($appointmentUpdate);
 
-                if ($oldAppointmentStatus === AppointmentStatus::pending) {
+                if ($shouldSendConfirmationEmail) {
                     try {
                         AppointmentStatusHistory::create([
                             'appointment_id' => $appointment->id,
-                            'previous_status' => AppointmentStatus::pending->value,
+                            'previous_status' => $oldStatusValue,
                             'new_status' => AppointmentStatus::confirmed->value,
                             'changed_by_user_id' => $payment->customer_id,
                             'reason' => "Payment confirmed via {$source} ({$payment->provider})",
@@ -151,13 +219,24 @@ class PaymentConfirmer
                     ]);
                 }
 
-                // Dispatch domain event
-                PaymentConfirmed::dispatch($payment->fresh(), $appointment->fresh());
+                $confirmedPayment = $payment->fresh();
+                $confirmedAppointment = $appointment->fresh();
 
                 Log::info("PaymentConfirmer: Payment [{$reference}] confirmed successfully via [{$source}].");
 
-                return $payment->fresh();
+                return [
+                    'payment' => $confirmedPayment,
+                    'appointment' => $confirmedAppointment,
+                    'should_dispatch' => true,
+                ];
             });
+
+            // Dispatch after DB transaction commits so workers always read committed payment & appointment state
+            if ($txResult['should_dispatch'] && $txResult['appointment']) {
+                PaymentConfirmed::dispatch($txResult['payment'], $txResult['appointment']);
+            }
+
+            return $txResult['payment'];
         } catch (PaymentException $e) {
             if ($e->getErrorCode() === 'PAYMENT_AMOUNT_MISMATCH') {
                 Payment::where('reference', $reference)

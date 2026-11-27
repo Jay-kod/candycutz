@@ -1,8 +1,10 @@
 import { ref, computed } from 'vue';
 import client from '@/shared/api/client';
 import { useToast } from '@/core/composables/useToast';
+import { extractVerificationError } from '@/features/appointments/utils/verificationCode';
 
 export function useBarberDashboard() {
+  const toast = useToast();
   const dashboard = ref({ stats: {}, today_appointments: [], pending_payments: [] });
   const loading = ref(true);
 
@@ -30,9 +32,14 @@ export function useBarberDashboard() {
         stats = d.stats || stats;
         todayAppointments = (d.today_appointments || []).map(a => ({
           id: a.id,
+          booking_reference: a.booking_reference,
+          booking_type: a.booking_type || 'online',
           client_name: a.client_name || a.customer?.name || 'Client',
+          customer_name: a.customer_name || a.client_name || a.customer?.name || 'Client',
+          appointment_date: a.appointment_date,
           appointment_time: a.appointment_time,
           status: a.status,
+          service_name: a.service_name || a.service?.name || 'General',
           service: a.service || { name: 'General' }
         }));
       }
@@ -47,9 +54,14 @@ export function useBarberDashboard() {
           if (todayBookings.length) {
             todayAppointments = todayBookings.map(b => ({
               id: b.id,
+              booking_reference: b.booking_reference,
+              booking_type: b.booking_type || 'online',
               client_name: b.customer_name || b.client_name || 'Client',
+              customer_name: b.customer_name || b.client_name || 'Client',
+              appointment_date: b.appointment_date,
               appointment_time: b.appointment_time,
               status: b.status,
+              service_name: b.service_name || b.service?.name || 'General',
               service: { name: b.service_name }
             }));
           }
@@ -68,12 +80,16 @@ export function useBarberDashboard() {
     }
   }
 
-  async function completeAppointment(id) {
+  async function completeAppointment(id, verificationCode = '') {
     try {
-      await client.patch(`/barber/appointments/${id}/complete`);
+      await client.patch(`/barber/appointments/${id}/complete`, {
+        verification_code: verificationCode
+      });
       await loadDashboard();
+      toast.success('Booking verified and marked as completed!');
     } catch (e) {
-      console.error('Error completing appointment:', e);
+      toast.error(extractVerificationError(e));
+      throw e;
     }
   }
 

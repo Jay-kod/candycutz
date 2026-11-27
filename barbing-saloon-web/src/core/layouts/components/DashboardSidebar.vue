@@ -34,12 +34,16 @@
       />
 
       <!-- 2. Scrollable Accordion Navigation -->
-      <div class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain">
+      <div
+        ref="navScrollContainer"
+        class="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain"
+      >
         <SidebarNavAccordion
           :groups="groupedNavItems"
           :portal-config="portalTheme"
           :is-collapsed="isSidebarCollapsed"
           :is-active-route="isActiveRoute"
+          @group-toggled="ensureActiveItemVisible"
         />
       </div>
 
@@ -59,7 +63,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useTheme } from '@/core/composables/useTheme';
 import { getPortalThemeConfig } from './sidebar/portalTheme';
 import SidebarBrand from './sidebar/SidebarBrand.vue';
@@ -88,6 +92,66 @@ const { isDark } = useTheme();
 const portalTheme = computed(() => {
   return getPortalThemeConfig(props.portalName, isDark.value);
 });
+
+const navScrollContainer = ref(null);
+
+const activeItemKey = computed(() => {
+  for (const group of props.groupedNavItems) {
+    const activeItem = group.items?.find((item) => props.isActiveRoute(item.to));
+    if (activeItem) return `${group.label ?? ''}::${activeItem.to}`;
+  }
+  return null;
+});
+
+const ensureActiveItemVisible = async () => {
+  await nextTick();
+  const container = navScrollContainer.value;
+  if (!container) return;
+
+  const activeEl = container.querySelector('[data-active="true"]');
+  if (!activeEl) return;
+
+  const containerRect = container.getBoundingClientRect();
+  const itemRect = activeEl.getBoundingClientRect();
+  const padding = 12;
+
+  if (containerRect.height > 0 && itemRect.height > 0) {
+    const isOutOfView =
+      itemRect.top < containerRect.top + padding ||
+      itemRect.bottom > containerRect.bottom - padding;
+
+    if (isOutOfView) {
+      const itemOffsetInsideContainer = itemRect.top - containerRect.top;
+      const targetTop =
+        container.scrollTop +
+        itemOffsetInsideContainer -
+        (containerRect.height - itemRect.height) / 2;
+      const maxScroll =
+        container.scrollHeight > container.clientHeight
+          ? container.scrollHeight - container.clientHeight
+          : Infinity;
+      container.scrollTop = Math.min(maxScroll, Math.max(0, targetTop));
+    }
+    return;
+  }
+
+  if (typeof activeEl.scrollIntoView === 'function') {
+    activeEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+};
+
+onMounted(ensureActiveItemVisible);
+
+watch(activeItemKey, ensureActiveItemVisible);
+
+watch(() => props.isSidebarCollapsed, ensureActiveItemVisible);
+
+watch(
+  () => props.isMobileSidebarOpen,
+  (isOpen) => {
+    if (isOpen) ensureActiveItemVisible();
+  }
+);
 </script>
 
 <style scoped>

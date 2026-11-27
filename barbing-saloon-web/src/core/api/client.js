@@ -25,6 +25,22 @@ function getRequestPath(url) {
   }
 }
 
+const END_USER_FAILURE_MESSAGE = "We couldn't confirm that request. Please review the page before trying again.";
+
+export function isCustomerOrBarberPortal(pathname = typeof window === 'undefined' ? '' : window.location.pathname) {
+  return /^\/(customer|barber)(\/|$)/.test(pathname);
+}
+
+export function sanitizeApiErrorForPortal(apiError, pathname) {
+  if (
+    isCustomerOrBarberPortal(pathname) &&
+    (apiError.status >= 500 || apiError.isNetwork || apiError.isTimeout)
+  ) {
+    apiError.message = END_USER_FAILURE_MESSAGE;
+  }
+  return apiError;
+}
+
 export function setupApiClient() {
   const api = axios.create({
     baseURL: API_BASE_URL,
@@ -251,20 +267,36 @@ export function setupApiClient() {
         });
       }
 
+      // The API refuses customer endpoints until the current terms are accepted.
+      // Let the route layer open the blocking consent screen without a reload.
+      if (apiError.code === 'CONSENT_REQUIRED' && typeof window !== 'undefined') {
+        try {
+          window.dispatchEvent(new CustomEvent('candycutz:consent-required', {
+            detail: { context: apiError.details?.context || {} },
+          }));
+        } catch {
+          // ignore environments without CustomEvent support
+        }
+      }
+
       // Check for DB or Network disconnection
       if (!config.__skipConnectionTracking && !isCanceled) {
         try {
-          const { markDisconnected, reportNetworkFailure } = useConnectionStatus();
+          const { markDisconnected, reportNetworkFailure, recordActionFailure } = useConnectionStatus();
           const dbDisconnected =
             (response?.status === 503 && response?.data?.data?.services?.database === 'disconnected') ||
             (apiError.code === 'DB_UNAVAILABLE' && response?.status === 503) ||
             (typeof apiError.message === 'string' &&
               /(?:SQLSTATE\[HY000\]\s*\[2002\]|SQLSTATE\[HY000\]:\s*General error:\s*2006|ECONNREFUSED|actively refused|No connection could be made)/i.test(apiError.message));
 
+          if (isCustomerOrBarberPortal() && (apiError.status >= 500 || apiError.isNetwork || apiError.isTimeout)) {
+            recordActionFailure();
+          }
+
           if (dbDisconnected) {
             markDisconnected('database', apiError.message || 'Database connection is inactive.');
           } else if (apiError.isNetwork) {
-            reportNetworkFailure(apiError.message);
+            reportNetworkFailure();
           }
         } catch {
           // ignore connection status evaluation failures
@@ -298,7 +330,7 @@ export function setupApiClient() {
         });
       }
 
-      return Promise.reject(apiError);
+      return Promise.reject(sanitizeApiErrorForPortal(apiError));
     }
   );
 
