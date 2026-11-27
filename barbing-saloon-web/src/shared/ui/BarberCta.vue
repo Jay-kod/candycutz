@@ -149,9 +149,15 @@ const scrollToFeatures = () => {
   display: flex;
   flex-shrink: 0;
   box-sizing: border-box;
-  height: 101vh;
-  min-height: 101vh;
-  max-height: 101vh;
+  height: 110vh;
+  height: 110svh;
+  height: 110dvh;
+  min-height: 110vh;
+  min-height: 110svh;
+  min-height: 110dvh;
+  max-height: 110vh;
+  max-height: 110svh;
+  max-height: 110dvh;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -531,9 +537,6 @@ const scrollToFeatures = () => {
    ============================================================ */
 @media (max-width: 640px) {
   .barber-cta {
-    height: 101vh;
-    min-height: 101vh;
-    max-height: 101vh;
     padding-top: max(5.75rem, calc(4.75rem + env(safe-area-inset-top, 0px)));
     padding-bottom: max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom, 0px)));
     padding-inline: 1rem;

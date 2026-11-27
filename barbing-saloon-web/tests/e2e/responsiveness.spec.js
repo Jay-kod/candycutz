@@ -151,6 +151,21 @@ test.describe('CandyCutz Multi-Viewport Responsiveness & Overflow Test Suite', (
           await page.goto(route.path, { waitUntil: 'domcontentloaded' });
           await page.waitForTimeout(300); // Allow responsive hydration
 
+          const heroSelector = route.path === '/' ? '.barber-cta' : '.page-hero';
+          const hero = page.locator(heroSelector).first();
+          if (await hero.count()) {
+            const heroHeight = await hero.evaluate((element) => (
+              element.getBoundingClientRect().height
+            ));
+            const viewportHeight = await page.evaluate(() => window.innerHeight);
+
+            const expectedHeroHeight = viewportHeight * (route.path === '/' ? 1.1 : 1);
+            expect(
+              Math.abs(heroHeight - expectedHeroHeight),
+              `${route.name} hero should be ${expectedHeroHeight}px tall (measured ${heroHeight}px)`
+            ).toBeLessThanOrEqual(1.5);
+          }
+
           // Check for horizontal overflow
           const overflowReport = await page.evaluate(() => {
             const docWidth = Math.max(
